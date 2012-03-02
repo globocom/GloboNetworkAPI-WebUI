@@ -1,0 +1,38 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Login]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$("button").button({ icons: {primary: "ui-icon-locked"} });
+})
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div id="login">
+	<form action="login" method="post"> {% csrf_token %}
+	
+		{% for field in form %}
+			<p>
+				<label>{{ field.label_tag }}</label>
+				{{ field }}
+				<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+				</p>
+			</p>
+		{% endfor %}
+		
+		<p style="text-align: right;"><button>Entrar</button></p>
+		
+	</form>
+</div>
+{% endblock %}

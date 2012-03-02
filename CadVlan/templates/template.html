@@ -1,0 +1,186 @@
+{% load util %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Globo.com - CadVlan {% block title %}{% endblock %}</title>
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/globo/jquery-ui-1.8.17.custom.css" />
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-ui.custom.min.js"></script>	
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/hoverIntent.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dropdown.js"></script>
+		{% block header %}{% endblock %}
+	</head>
+
+	<body>
+		<div id="header">
+			<div id="logo"></div>
+			<div id="top">
+			{% if request|is_authenticated %}
+				<div id="user">
+					<div id="name"><img id="img" src="{{ MEDIA_URL }}/img/user_left.png" width="45" height="46" /><div id="text">{% user_name request %}</div><img src="{{ MEDIA_URL }}/img/user_right.png" width="19" height="46" /></div>
+					<div id="btn"><div id="text" onclick="window.location='/logout'">Logout</div></div>
+					
+					{% has_perm administracao_usuarios True None %}
+					{% if has_perm %}
+						<div id="btn"><div id="text">Admin</div></div>
+					{% endif %}
+					
+					{% block btns %}{% endblock %}
+				</div>
+			{% endif %}
+			</div>
+			<div id="menu">
+				{% if request|is_authenticated %}
+				<ul class="dropdown">
+				
+					{% has_perm_menu  None True %} 
+					{% if has_perm %}
+						<li>
+						
+							<a href="#" class="list">Listar</a>
+							<ul class="sub_menu">
+	
+								{% has_perm cadastro_de_vlans None True %} 
+								{% if has_perm %}
+									<li><a href="#">Vlans</a></li>
+								{% endif %}
+	
+								{% has_perm cadastro_de_equipamentos None True %}
+								{% if has_perm %}
+									<li><a href="#">Equipamentos</a></li>
+								{% endif %}
+	
+								{% has_perm cadastro_de_ambiente None True %}
+								{% if has_perm %}
+									<li><a href="#">Ambientes</a></li>
+								{% endif %}
+	
+								<li><a href="#">Interfaces</a></li>
+	
+								<li class="separator"></li>
+	
+								{% has_perm requisicao_vips None True %}
+								{% if has_perm %}
+									<li><a href="#">Requisições de VIP</a></li>
+								{% endif %}
+	
+								<li class="separator"></li>
+	
+								{% has_perm cadastro_de_tipo_acesso None True %}
+								{% if has_perm %}
+									<li><a href="#">Acessos</a></li>
+								{% endif %}
+	
+								{% has_perm cadastro_de_roteiro None True %}
+								{% if has_perm %}
+									<li><a href="#">Roteiro</a></li>
+								{% endif %}
+	
+								<li><a href="#">Tipo de Roteiro</a></li>
+								
+							</ul>
+						</li>
+					{% endif %}
+
+					{% has_perm_menu  True None %} 
+					{% if has_perm %}
+						<li>
+							<a href="#" class="cad">Cadastrar</a>
+							<ul class="sub_menu">
+	
+								{% has_perm cadastro_de_vlans True None %} 
+								{% if has_perm %}
+									<li><a href="#">Vlan</a></li>
+								{% endif %}
+	
+								{% has_perm cadastro_de_equipamentos True None %}
+								{% if has_perm %}
+									<li><a href="#">Equipamento</a></li>
+								{% endif %}
+	
+								{% has_perm cadastro_de_ambiente True None %}
+								{% if has_perm %}
+									<li><a href="#">Ambiente</a></li>
+								{% endif %}
+	
+								<li class="separator"></li>
+	
+								{% has_perm cadastro_de_tipo_acesso True None %}
+								{% if has_perm %}
+									<li><a href="#">Acessos</a></li>
+								{% endif %}
+	
+								{% has_perm cadastro_de_roteiro True None %}
+								{% if has_perm %}
+									<li><a href="#">Roteiro</a></li>
+								{% endif %}
+	
+								<li><a href="#">Tipo de Roteiro</a></li>
+	
+							</ul>
+						</li>
+					{% endif %}
+
+					<li>
+						<a href="#" class="rot">Roteiros</a>
+						<ul class="sub_menu">
+							<li><a href="#">Roteiros do Equipamento</a></li>
+						</ul>
+					</li>
+					{% has_perm administracao_usuarios True None %}
+					{% if has_perm %}
+					<li>
+						<a href="#" class="ldap">LDAP</a>
+						<ul class="sub_menu">
+							<li><a href="#">Usuários Internos</a></li>
+							<li><a href="#">Usuários Externos</a></li>
+							<li><a href="#">Grupos</a></li>
+							<li><a href="#">Sudoers</a></li>
+						</ul>
+					</li>
+					{% endif %}
+				</ul>
+				{% endif %}
+			</div>
+			<div id="bar"></div>
+		</div>
+
+		<div id="messages">
+		{% if messages %}
+			<!-- <ul class="messages">  -->
+				{% for message in messages %}
+					<div class='ui-widget'>
+						<p>
+						{% if message.tags  == 'info'%}
+						<div class='ui-state-highlight ui-corner-all' id="messagesError">
+							<span class='ui-icon ui-icon-info'></span>
+						{% endif %}
+
+						{% if message.tags  == 'error'%}
+						<div class='ui-state-error  ui-corner-all' id="messagesError">
+							<span class='ui-icon ui-icon-alert'></span>
+						{% endif %}
+
+						{% if message.tags  == 'warning'%}
+						<div class='ui-state-highlight ui-corner-all'id="messagesError">
+							<span class='ui-icon ui-icon-alert'></span>
+						{% endif %}
+
+						{{ message }}
+						</div>
+						</p>
+					</div>
+				{% endfor %}
+			<!--</ul>  -->
+		{% endif %}
+		</div>
+
+		<div id="content">
+		{% block content %}{% endblock %}
+		</div>
+
+	</body>
+</html>

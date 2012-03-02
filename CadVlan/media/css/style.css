@@ -1,0 +1,194 @@
+@charset "utf-8";
+
+body {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 68%;
+	margin: 0px;
+}
+
+#header {
+	width: 100%;
+	min-width: 980px;
+}
+
+#logo {
+	background: url(/media/img/logo.png) no-repeat;
+	height: 75px;
+	width: 124px;
+	float: left;
+}
+
+#top {
+	background: url(/media/img/top_bg.png) repeat-x;
+	height: 47px;
+}
+
+#menu {
+	background: url(/media/img/menu_bg.png) repeat-x;
+	height: 29px;
+}
+
+#bar {
+	background: url(/media/img/bar_bg.png) repeat-x;
+	height: 5px;
+	clear: left;
+}
+
+#user {
+	float: right;
+}
+
+#user #name {
+	background: url(/media/img/user_bg.png) repeat-x;
+	float: left;
+	height: 46px;
+	line-height: 46px;
+	vertical-align: middle;
+}
+
+#user #name #img {
+	float: left;
+}
+
+#user #name #text {
+	float: left;
+}
+
+#btn {
+	border: 1px solid #D3D3D3;
+	float: left;
+}
+
+#btn #text {
+	background: url(/media/img/top_btn_bg.png) repeat-x;
+	border: 1px solid #FFF;
+	line-height: 42px;
+	text-align: center;
+	height: 42px;
+	width: 40px;
+	padding-right: 6px;
+	padding-left: 6px;
+	cursor: pointer;
+}
+
+#btn #text:hover {
+	background: url(/media/img/top_btn_bg_over.png) repeat-x;
+}
+
+#content {
+	font-size: 12px;
+	padding: 5px;
+	z-index: 0;
+	min-width: 970px;
+}
+
+#messagesError {
+	padding: 4px;
+	margin-left: 20px; 
+	margin-right: 20px;
+}
+
+#messagesError span {
+	float: left;
+	margin-right: 5px;
+}
+
+.page_tab_icon {
+	float: left;
+	margin: 5px 0 0 6px;
+}
+
+#login {
+	position:absolute;
+	left:40%;
+	top: 40%;
+	width:260px;
+}
+
+#login form {
+	border-radius: 4px;
+	box-shadow: 0px 0px 2px #333;
+	-moz-border-radius: 4px;
+	-moz-box-shadow: 0 0 2px #333;
+	-webkit-border-radius: 4px;
+	-webkit-box-shadow: 0 0 3px #333;
+	border:3px solid white;
+	padding:20px;
+}
+
+#login form p {
+	margin:0;
+	text-align:left;
+}
+
+#login label {
+	color:#7C6767;
+	font-size:14px;
+}
+
+#login form #error {
+	color:red;
+	font-size:14px;
+	margin: 0 0 15px;
+}
+
+#login input[type="text"], #login input[type="password"] {
+	border-color:#EEEEEE #CCCCCC #CCCCCC #EEEEEE;
+	border-right:1px solid #CCCCCC;
+	border-style:solid;
+	border-width:1px;
+	font-size:15px;
+	margin:0 0 0px;
+	padding:5px;
+	width:200px;
+}
+
+#login input[type="text"]:focus, #login input[type="password"]:focus {
+	border-color: royalBlue;
+}
+
+/*
+ * --- MENU ---
+ */
+
+#menu ul { list-style: none; margin-top: -11px; z-index: 1; }
+#menu a  { text-decoration: none; }
+
+#menu ul.dropdown { position: relative; }
+#menu ul.dropdown li { float: left; zoom: 1; border-right: 1px solid #FFFFFF; }
+#menu ul.dropdown li a { display: block; border-right: 1px solid #BBBBBB; color: #222; text-align: center; line-height: 24px; margin-left: 12px; padding-left: 24px; padding-right: 14px; padding-top: 5px; }
+#menu ul.dropdown li a:hover { color: royalblue }
+#menu ul.dropdown li.hover, #menu ul.dropdown li:hover { color: black; position: relative; }
+
+#menu ul.dropdown ul { width: 150px; visibility: hidden; position: absolute; top: 140%; left: -41px; }
+#menu ul.dropdown ul li { font-weight: normal; color: #000; float: none; background-color: #FAFAFA; border-bottom: 1px solid #CCCCCC; border-left: 1px solid #CCCCCC; border-right: 1px solid #CCCCCC; }
+#menu ul.dropdown ul li:hover { background-color: #FFFFFF; }
+#menu ul.dropdown ul li a { border-right: none; width: 100%; display: inline-block; margin: 0; padding: 0; width: 100%; } 
+
+#menu ul.dropdown ul ul { left: 100%; top: 0; }
+#menu ul.dropdown li:hover > ul { visibility: visible; }
+
+.list { background: url(/media/img/ico_list.png) no-repeat left 9px; }
+.cad { background: url(/media/img/ico_cad.png) no-repeat left 9px; }
+.rot { background: url(/media/img/ico_rot.png) no-repeat left 9px; }
+.ldap { background: url(/media/img/ico_ldap.png) no-repeat left 9px; }
+
+.separator { height: 2px; background-color: #F0F0F0 !important; border-bottom: 1px solid #ECECEC !important; }
+
+/* --- --- --- */
+
+
+/*
+ * --- Utilities ---
+ */
+ 
+.text_center {
+	text-align: center;
+}
+
+.buttons {
+	padding: 5px 0px;
+	text-align: right;
+}
+
+/* --- --- --- */

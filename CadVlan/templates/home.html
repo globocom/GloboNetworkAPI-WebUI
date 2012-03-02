@@ -1,0 +1,25 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Home]{% endblock %}
+
+{% block btns %}
+
+{% endblock %}
+
+{% block messages %}
+<h1 align="center">CadVlan</h1>
+{% if messages %}
+	<ul class="messages">
+    	{% for message in messages %}
+    		<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    	{% endfor %}
+	</ul>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+
+{% endblock %}
