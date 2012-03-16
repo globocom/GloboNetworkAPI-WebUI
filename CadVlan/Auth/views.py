@@ -13,14 +13,14 @@ from django.views.decorators.cache import cache_page
 
 from CadVlan.settings import NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD, URL_HOME, URL_LOGIN, SESSION_EXPIRY_AGE, CACHE_TIMEOUT
 from CadVlan import templates
-from CadVlan.Auth.Decorators import login_required, has_perm, log
+from CadVlan.Auth.Decorators import login_required, log
 from CadVlan.messages import auth_messages
 from CadVlan.Auth.models import User
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Auth.forms import LoginForm
 
 from networkapiclient.ClientFactory import ClientFactory
-from networkapiclient.exception import InvalidParameterError, UserNotAuthorizedError, UserNotAuthenticatedError,DataBaseError, XMLError
+from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError
 
 import logging
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ def login(request):
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, auth_messages.get("user_invalid"))
 
-                except ( UserNotAuthenticatedError, UserNotAuthorizedError, DataBaseError, XMLError), e:
+                except NetworkAPIClientError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e )
 
@@ -95,6 +95,17 @@ def handler404(request):
     auth = AuthSession(request.session)
 
     messages.add_message(request, messages.ERROR, auth_messages.get("404") % request.path)
+
+    if auth.is_authenticated():
+        return HttpResponseRedirect(URL_HOME)
+
+    return HttpResponseRedirect(URL_LOGIN);
+
+@log
+def handler500(request):
+    auth = AuthSession(request.session)
+
+    messages.add_message(request, messages.ERROR, auth_messages.get("500"))
 
     if auth.is_authenticated():
         return HttpResponseRedirect(URL_HOME)

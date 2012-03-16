@@ -212,11 +212,27 @@ table.display tr.even.gradeU {
 }
 
 tr.odd {
-	background-color: #E2E4FF;
+	background-color: #f5f5f5;
 }
 
 tr.even {
 	background-color: white;
+}
+
+tr.odd:hover {
+	background-color: #E2E4FF;
+}
+
+tr.even:hover {
+	background-color: #E2E4FF;
+}
+
+tr.odd:hover td.sorting_1 {
+	background-color: #E2E4FF;
+}
+
+tr.even:hover td.sorting_1 {
+	background-color: #E2E4FF;
 }
 
 /*
@@ -307,7 +323,7 @@ table.display tr.odd.row_selected td {
  */
 /* For the standard odd/even */
 tr.odd td.sorting_1 {
-	background-color: #D3D6FF;
+	background-color: #eeeeee;
 }
 
 tr.odd td.sorting_2 {
@@ -319,7 +335,7 @@ tr.odd td.sorting_3 {
 }
 
 tr.even td.sorting_1 {
-	background-color: #EAEBFF;
+	background-color: #f5f5f5;
 }
 
 tr.even td.sorting_2 {

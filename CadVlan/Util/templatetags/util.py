@@ -8,11 +8,12 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 from django import template
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.models import Set, Permission, PermissionMenu
+from CadVlan.settings import MAX_RESULT_DEFAULT
 
 register = template.Library()
 
 # Constants
-MAX_SUBSTRING = 30;
+MAX_SUBSTRING = 50;
 
 
 @register.simple_tag
@@ -21,7 +22,7 @@ def bold(value):
 
 @register.filter
 def substring(value):
-    if value > MAX_SUBSTRING :
+    if len(value) > MAX_SUBSTRING :
         return value[0:MAX_SUBSTRING] + "..."
     else:
         return value
@@ -68,4 +69,7 @@ def set(parser, token):
     if len(parts) < 4:
         raise template.TemplateSyntaxError("'set' tag must be of the form:  {% set <var_name>  = <var_value> %}")
     return Set(parts[1], parts[3])
- 
+
+@register.simple_tag
+def max_results():
+    return MAX_RESULT_DEFAULT

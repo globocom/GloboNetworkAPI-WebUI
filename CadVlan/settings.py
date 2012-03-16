@@ -10,7 +10,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 import os
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -132,6 +132,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'CadVlan.Auth',
     'CadVlan.Util',
+    'CadVlan.Script',
+    'CadVlan.ScriptType',
+    'CadVlan.EquipAccess',
 )
 
 SESSION_ENGINE = (
@@ -157,6 +160,8 @@ URL_HOME = '/home'
 NETWORK_API_URL = 'http://localhost/'
 NETWORK_API_USERNAME = 'CadVlan'
 NETWORK_API_PASSWORD = 'CadVlan'
+
+MAX_RESULT_DEFAULT = 25 # Options-> 10, 25, 50, 100
 
 LOG_FILE = PROJECT_ROOT_PATH + '/log.log'
 
@@ -205,6 +210,15 @@ LOGGING = {
             'level': 'INFO',
         },
         'CadVlan.Auth.views': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.Script.views': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.ScriptType.views': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.EquipAccess.views': {
             'handlers': ['handlers-view'],
         },
     }

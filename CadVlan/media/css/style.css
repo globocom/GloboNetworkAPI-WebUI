@@ -1,5 +1,9 @@
 @charset "utf-8";
 
+/*
+ * --- INTERFACE ---
+ */
+
 body {
 	font-family: Helvetica, Arial, sans-serif;
 	font-size: 68%;
@@ -99,9 +103,7 @@ body {
 }
 
 #login {
-	position:absolute;
-	left:40%;
-	top: 40%;
+	margin: 6% auto 0;
 	width:260px;
 }
 
@@ -116,23 +118,33 @@ body {
 	padding:20px;
 }
 
-#login form p {
+/* --- --- --- */
+
+/*
+ * --- FORMS ---
+ */
+
+#fields {
+	padding: 10px;
+}
+
+form p {
 	margin:0;
 	text-align:left;
 }
 
-#login label {
+label {
 	color:#7C6767;
 	font-size:14px;
 }
 
-#login form #error {
+form #error {
 	color:red;
 	font-size:14px;
 	margin: 0 0 15px;
 }
 
-#login input[type="text"], #login input[type="password"] {
+input[type="text"], input[type="password"], textarea {
 	border-color:#EEEEEE #CCCCCC #CCCCCC #EEEEEE;
 	border-right:1px solid #CCCCCC;
 	border-style:solid;
@@ -140,12 +152,13 @@ body {
 	font-size:15px;
 	margin:0 0 0px;
 	padding:5px;
-	width:200px;
 }
 
-#login input[type="text"]:focus, #login input[type="password"]:focus {
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 	border-color: royalBlue;
 }
+
+/* --- --- --- */
 
 /*
  * --- MENU ---
@@ -184,11 +197,25 @@ body {
  
 .text_center {
 	text-align: center;
+	margin: 0 auto;
 }
 
 .buttons {
 	padding: 5px 0px;
 	text-align: right;
+}
+
+.buttons-l {
+	padding: 5px;
+	text-align: left;
+}
+
+.spacer {
+	margin: 4px 0px;
+}
+
+.ids {
+	min-width: 32px !important;
 }
 
 /* --- --- --- */

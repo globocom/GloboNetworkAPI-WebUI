@@ -1,0 +1,104 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Tipo de Roteiros - Listagem]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	oTable = $("#script_type_list").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }],
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$(":checkbox").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	$("#page_tab").tabs();
+	
+	$("#tool").buttonset();
+	
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url script.type.form %}";
+	});
+	
+	{% has_perm SCRIPT_MANAGEMENT True None %}
+	{% if has_perm %}
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		var data = getSelectionData(oTable);
+		$("#id_ids").val(data).parent().submit();
+	});
+	{% endif %}
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Tipos de Roteiros</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div class="buttons">
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span id="tool">
+			<button id="btn_new">Novo Registro</button>
+			{% has_perm SCRIPT_MANAGEMENT True None %}
+			{% if has_perm %}
+			<button id="btn_del">Excluir</button>
+			{% endif %}
+			</span>
+		</div>
+		{% has_perm SCRIPT_MANAGEMENT True None %}
+		{% if has_perm %}
+		<form id="delete_form" method="post" action="{% url script.type.delete %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		<table id="script_type_list">
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th class="ids">ID</th>
+					<th>Tipo de Roteiro</th>
+					<th>Descrição</th>					
+				</tr>
+			</thead>
+			<tbody>
+				{% for st in tipo_roteiro %}
+				<tr>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ st.id }}" /></td>
+					<td class="text_center">{{ st.id }}</td>
+					<td>{{ st.tipo }}</td>
+					<td>{{ st.descricao }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

@@ -21,13 +21,13 @@ $(document).ready(function() {
 			<p>
 				<label>{{ field.label_tag }}</label>
 				{{ field }}
-				<p id="error">
-					{% if field.errors %} 
-						{% for error in field.errors %}
-							{{ error|escape }}
-						{% endfor %}
-					{% endif %}
-				</p>
+			</p>
+			<p id="error">
+				{% if field.errors %} 
+					{% for error in field.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
 			</p>
 		{% endfor %}
 		

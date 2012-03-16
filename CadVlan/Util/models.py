@@ -7,6 +7,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 
 from django import template
 from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.permissions import PERMISSIONS
 
 class Set(template.Node):
     ''' Creates and sets the variable in view
@@ -43,7 +44,7 @@ class Permission(template.Node):
         if self.read == "None":
             self.read = None
 
-        if user.has_perm(self.permission, self.write, self.read):
+        if user.has_perm(PERMISSIONS.get(self.permission), self.write, self.read):
             context["has_perm"] = True
         else:    
             context["has_perm"] = False
