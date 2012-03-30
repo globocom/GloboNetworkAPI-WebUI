@@ -2,13 +2,13 @@
 
 {% load util %}
 
-{% block title %}[Tipo de Roteiros - Listagem]{% endblock %}
+{% block title %}[Ambiente - Listagem]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	oTable = $("#script_type_list").dataTable({
+	oTable = $("#environment_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
@@ -35,13 +35,13 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url script.type.form %}";
+		location.href = "{% url script.form %}";
 	});
 	
-	{% has_perm SCRIPT_MANAGEMENT True None %}
+	{% has_perm ENVIRONMENT_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Tipo(s) de Roteiro(s) selecionado(s)?')){ 
+		if (confirm('Deseja realmente excluir o(s) Ambiente(s) selecionado(s)?')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
@@ -59,44 +59,48 @@ $(document).ready(function() {
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Tipos de Roteiros</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Ambientes</a></li>
 	</ul>
 	<div id="tabs-1">
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
 			<button id="btn_new">Novo Registro</button>
-			{% has_perm SCRIPT_MANAGEMENT True None %}
+			{% has_perm ENVIRONMENT_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm SCRIPT_MANAGEMENT True None %}
+		{% has_perm ENVIRONMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url script.type.delete %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in form %}
 				{{ field }}
 			{% endfor %}
 		</form>
 		{% endif %}
-		<table id="script_type_list">
+		<table id="environment_list">
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th class="ids">ID</th>
-					<th>Tipo de Roteiro</th>
-					<th>Descrição</th>					
+					<th>Divisão DC</th>					
+					<th>Ambiente Lógico</th>
+					<th>Grupo Layer3</th>
+					<th>Wiki</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for st in tipo_roteiro %}
+				{% for ambiente in environment %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ st.id }}" /></td>
-					<td class="text_center">{{ st.id }}</td>
-					<td>{{ st.tipo }}</td>
-					<td>{{ st.descricao }}</td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ ambiente.id }}" /></td>
+					<td class="text_center">{{ ambiente.id }}</td>
+					<td>{{ ambiente.nome_divisao }}</td>
+					<td>{{ ambiente.nome_ambiente_logico }}</td>
+					<td>{{ ambiente.nome_grupo_l3 }}</td>
+					<td><a href="{{ ambiente.link}}">wiki</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

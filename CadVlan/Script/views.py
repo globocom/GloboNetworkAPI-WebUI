@@ -6,7 +6,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 import logging
-from CadVlan.Auth.Decorators import log, login_required, has_perm
+from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.templates import SCRIPT_LIST, SCRIPT_FORM
 from CadVlan.settings import CACHE_TIMEOUT
 from django.shortcuts import render_to_response, redirect
@@ -44,7 +44,7 @@ def list_all(request):
         script_type_list = client.create_tipo_roteiro().listar()
         
         # Business
-        lists['roteiro'] = replace_id_to_name(script_list["roteiro"], script_type_list["tipo_roteiro"], "id_tipo_roteiro", "id", "tipo")
+        lists['scripts'] = replace_id_to_name(script_list["roteiro"], script_type_list["tipo_roteiro"], "id_tipo_roteiro", "id", "tipo")
         lists['form'] = DeleteForm()
         
     except NetworkAPIClientError, e:
@@ -112,6 +112,9 @@ def delete_all(request):
             # If all has ben removed
             elif have_errors == False:
                 messages.add_message(request, messages.SUCCESS, script_messages.get("success_remove"))
+                
+            else:
+                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
         
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
@@ -127,12 +130,12 @@ def add_form(request):
     
     try:
         
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
         # If form was submited
         if request.method == 'POST':
-            
-            # Get user
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
             
             # Get all script_types from NetworkAPI
             script_type_list = client.create_tipo_roteiro().listar()
@@ -155,10 +158,6 @@ def add_form(request):
                     messages.add_message(request, messages.ERROR, script_messages.get("error_equal_name") % name)
                     
         else:
-            
-            # Get user
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
             
             # Get all script_types from NetworkAPI
             script_type_list = client.create_tipo_roteiro().listar()

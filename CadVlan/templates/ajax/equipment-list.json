@@ -1,0 +1,4 @@
+{
+  "errors": [{% if messages %}{% for message in messages %}"{{ message }}", {% endfor %}""{% endif %}],
+  "list": [{% for equip in equipamentos %}"{{ equip }}", {% endfor %}""]
+}

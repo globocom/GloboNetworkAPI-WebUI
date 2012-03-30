@@ -10,15 +10,13 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib import messages
 from django.views.decorators.cache import cache_page
-
 from CadVlan.settings import NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD, URL_HOME, URL_LOGIN, SESSION_EXPIRY_AGE, CACHE_TIMEOUT
 from CadVlan import templates
-from CadVlan.Auth.Decorators import login_required, log
+from CadVlan.Util.Decorators import login_required, log
 from CadVlan.messages import auth_messages
 from CadVlan.Auth.models import User
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Auth.forms import LoginForm
-
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError
 
@@ -112,10 +110,8 @@ def handler500(request):
 
     return HttpResponseRedirect(URL_LOGIN);
 
-@login_required
-#@has_perm("cadastro_de_tipo_rede",  True, True)
-@cache_page(CACHE_TIMEOUT)
 @log
+@login_required
+@cache_page(CACHE_TIMEOUT)
 def home(request):
-    opa = "opaaaaaaaaaaa"
-    return render_to_response(templates.HOME, {'opa': opa }, context_instance=RequestContext(request))
+    return render_to_response(templates.HOME, context_instance=RequestContext(request))

@@ -118,6 +118,14 @@ body {
 	padding:20px;
 }
 
+#loading-autocomplete {
+	border: none;
+	margin-left: -32px;
+	margin-top: 10px;
+	position: absolute;
+	z-index: 1;
+}
+
 /* --- --- --- */
 
 /*
@@ -190,6 +198,22 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 
 /* --- --- --- */
 
+/*
+ * --- Autocomplete ---
+ */
+
+.ui-autocomplete {
+	max-height: 150px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding-right: 20px;
+}
+/* IE 6 doesn't support max-height */
+* html .ui-autocomplete {
+	height: 150px;
+}
+
+/* --- --- --- */
 
 /*
  * --- Utilities ---
@@ -216,6 +240,25 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 
 .ids {
 	min-width: 32px !important;
+}
+
+.loading {
+	background-color: #f0f0f0;
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	filter: alpha(opacity=75);
+	opacity: 0.75;
+	width: 150px;
+	height: 90px;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	margin-left:-75px;
+	margin-top:-45px;
+	z-index: 999999;
+	display: none;
 }
 
 /* --- --- --- */

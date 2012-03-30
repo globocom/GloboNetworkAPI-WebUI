@@ -2,19 +2,18 @@
 
 {% load util %}
 
-{% block title %}[Acesso aos Equipamentos - Listagem]{% endblock %}
+{% block title %}[Interfaces do Equipamento - Listagem]{% endblock %}
 
 {% block header %}
-
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	oTable = $("#equip_access_list").dataTable({
+	oTable = $("#equip_interface_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 5 ] }],
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 6 ] }],
 	});
 	
 	$("#checkAll").click( function() {
@@ -40,13 +39,17 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url equip.access.form %}";
+		alert("Implementar")
+	});
+	
+	$("#btn_add_several").button({ icons: {primary: "ui-icon-copy"} }).click(function(){
+		alert("Implementar")
 	});
 	
 	{% has_perm EQUIPMENT_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Acesso(s) de Equipamento selecionado(s)?')){ 
+		if (confirm('Deseja realmente excluir a(s) Interface(s) selecionada(s)?')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
@@ -62,6 +65,11 @@ $(document).ready(function() {
 	
 	autocompleteEquip("{% url equipment.list.ajax %}");
 	
+	$(".btn_equip").live("click", function() {
+		$("#id_equip_name").val($(this).html());
+		$("#search_form").submit();
+	});
+	
 })
 </script>
 {% endblock %}
@@ -69,20 +77,20 @@ $(document).ready(function() {
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Acesso aos Equipamentos</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem das Interfaces do Equipamento</a></li>
 	</ul>
 	<div id="tabs-1">
 		<div id="accordion">
 			<h3><a href="#">Equipamento</a></h3>
 			<div>
-				<form id="search_form" method="get" action="{% url equip.access.search.list %}">
+				<form id="search_form" method="get" action="{% url equip.interface.search.list %}">
 				{% csrf_token %}
-				{% for field in form %}
+				{% for field in search_form %}
 					{{ field }}
 				{% endfor %}
 					<img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
 					<button id="btn_search" type="submit">Pesquisar</button>
-					{% for field in form %}
+					{% for field in search_form %}
 					{% if field.errors %}
 					<p id="error">
 						{% for error in field.errors %}
@@ -98,41 +106,46 @@ $(document).ready(function() {
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
 			<button id="btn_new">Novo Registro</button>
+			<button id="btn_add_several">Adicionar Vários</button>
 			{% has_perm EQUIPMENT_MANAGEMENT True None %}
 			{% if has_perm %}
-			<button id="btn_del" >Excluir</button>
+			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
 		{% has_perm EQUIPMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url equip.access.delete %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url equip.interface.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in delete_form %}
+			{% for field in del_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
 		{% endif %}
-		<table id="equip_access_list">
+		<table id="equip_interface_list">
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th class="ids">ID</th>
-					<th>Protocolo</th>
-					<th>Host</th>
-					<th>User</th>
-					<th></th>					
+					<th>Interface</th>					
+					<th>Ligação de Front</th>
+					{% ifequal pp "1" %}<th>Ligação de Back</th>{% endifequal %}
+					<th>Protegida</th>
+					<th>Descrição</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for acesso in equip_access_list %}
+				{% for interface in equip_interface %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{acesso.id}}" /></td>
-					<td class="text_center">{{ acesso.id }}</td>
-					<td class="text_center">{{ acesso.tipo_acesso }}</td>
-					<td>{{ acesso.fqdn }}</td>
-					<td>{{ acesso.user }}</td>
-					<td class="text_center"><a href="{% url equip.access.edit acesso.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ interface.id }}" /></td>
+					<td class="text_center">{{ interface.id }}</td>
+					<td>{{ interface.interface }}</td>
+					<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_front }}</a> {{ interface.nome_ligacao_front }}</td>
+					{% ifequal pp "1" %}<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_back }}</a> {{ interface.nome_ligacao_back }}</td>{% endifequal %}
+					<td>{% ifequal interface.protegida "True" %}Sim{% else %}Não{% endifequal %}</td>
+					<td>{% ifequal interface.descricao None %}{% else %}{{ interface.descricao }}{% endifequal %}</td>
+					<td class="text_center"><a href="#" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

@@ -6,7 +6,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 import logging
-from CadVlan.Auth.Decorators import log, login_required, has_perm
+from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.templates import SCRIPTTYPE_LIST, SCRIPTTYPE_FORM
 from CadVlan.settings import CACHE_TIMEOUT
 from django.shortcuts import render_to_response, redirect
@@ -107,6 +107,9 @@ def delete_all(request):
             # If all has ben removed
             elif have_errors == False:
                 messages.add_message(request, messages.SUCCESS, script_type_messages.get("success_remove"))
+                
+            else:
+                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
 
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))

@@ -41,8 +41,10 @@ $(document).ready(function() {
 	{% has_perm SCRIPT_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		var data = getSelectionData(oTable);
-		$("#id_ids").val(data).parent().submit();
+		if (confirm('Deseja realmente excluir o(s) Roteiro(s) selecionado(s)?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+		}
 	});
 	{% endif %}
 	
@@ -90,7 +92,7 @@ $(document).ready(function() {
 				</tr>
 			</thead>
 			<tbody>
-				{% for script in roteiro %}
+				{% for script in scripts %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ script.id }}" /></td>
 					<td class="text_center">{{ script.id }}</td>

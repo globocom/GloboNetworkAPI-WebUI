@@ -2,19 +2,18 @@
 
 {% load util %}
 
-{% block title %}[Acesso aos Equipamentos - Listagem]{% endblock %}
+{% block title %}[Roteiros nos Equipamentos - Listagem]{% endblock %}
 
 {% block header %}
-
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	oTable = $("#equip_access_list").dataTable({
+	oTable = $("#equip_script_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 5 ] }],
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }],
 	});
 	
 	$("#checkAll").click( function() {
@@ -40,13 +39,13 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url equip.access.form %}";
+		$("#dialog-form").dialog("open");
 	});
 	
 	{% has_perm EQUIPMENT_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Acesso(s) de Equipamento selecionado(s)?')){ 
+		if (confirm('Deseja realmente excluir o(s) Roteiro(s) do Equipamento selecionado(s)?')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
@@ -57,8 +56,39 @@ $(document).ready(function() {
 		location.reload();
 	});
 	
-	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
-	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$("#dialog-form").dialog({
+		height: 200,
+		width: 500,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: false,
+		buttons: {
+			"Associar": function() {
+				$.ajax({
+					url: $("#add_form").attr("action"),
+					data: $("#add_form").serialize(),
+					type: "POST",
+					complete: function(xhr, status) {
+						if (xhr.status == "500") {
+							$("#dialog-form").dialog("close");
+							location.reload();
+						} else if (xhr.status == "278") {
+							$("#dialog-form").dialog("close");
+							window.location = xhr.getResponseHeader('Location');
+						} else if (xhr.status == "200") {
+							$("#dialog-form").html(xhr.responseText);
+						} else {
+							$("#dialog-form").dialog("close");
+						}
+					}
+				});
+			},
+			"Cancelar": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
 	
 	autocompleteEquip("{% url equipment.list.ajax %}");
 	
@@ -69,20 +99,23 @@ $(document).ready(function() {
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Acesso aos Equipamentos</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastra Roteiros nos Equipamentos</a></li>
 	</ul>
 	<div id="tabs-1">
 		<div id="accordion">
 			<h3><a href="#">Equipamento</a></h3>
 			<div>
-				<form id="search_form" method="get" action="{% url equip.access.search.list %}">
+				<div id="dialog-form" title="Associar Roteiro ao Equipamento">
+					{% include "ajax/equip-script-form.html" %}
+				</div>
+				<form id="search_form" method="get" action="{% url equip.script.search.list %}">
 				{% csrf_token %}
-				{% for field in form %}
+				{% for field in search_form %}
 					{{ field }}
 				{% endfor %}
 					<img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
 					<button id="btn_search" type="submit">Pesquisar</button>
-					{% for field in form %}
+					{% for field in search_form %}
 					{% if field.errors %}
 					<p id="error">
 						{% for error in field.errors %}
@@ -100,39 +133,39 @@ $(document).ready(function() {
 			<button id="btn_new">Novo Registro</button>
 			{% has_perm EQUIPMENT_MANAGEMENT True None %}
 			{% if has_perm %}
-			<button id="btn_del" >Excluir</button>
+			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
 		{% has_perm EQUIPMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url equip.access.delete %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url equip.script.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in delete_form %}
+			{% for field in del_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
 		{% endif %}
-		<table id="equip_access_list">
+		<table id="equip_script_list">
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th class="ids">ID</th>
-					<th>Protocolo</th>
-					<th>Host</th>
-					<th>User</th>
-					<th></th>					
+					<th>Roteiro</th>					
+					<th>Descrição</th>
+					<th>Tipo de Roteiro</th>
+					<th>Descrição</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for acesso in equip_access_list %}
+				{% for script in equip_script %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{acesso.id}}" /></td>
-					<td class="text_center">{{ acesso.id }}</td>
-					<td class="text_center">{{ acesso.tipo_acesso }}</td>
-					<td>{{ acesso.fqdn }}</td>
-					<td>{{ acesso.user }}</td>
-					<td class="text_center"><a href="{% url equip.access.edit acesso.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ script.roteiro_id }}" /></td>
+					<td class="text_center">{{ script.id }}</td>
+					<td>{{ script.roteiro_name }}</td>
+					<td>{{ script.roteiro_desc }}</td>
+					<td>{{ script.tipo_roteiro_name }}</td>
+					<td>{{ script.tipo_roteiro_desc }}</td>
 				</tr>
 				{% endfor %}
 			</tbody>

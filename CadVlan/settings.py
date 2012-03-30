@@ -10,7 +10,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 import os
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -142,26 +142,26 @@ SESSION_ENGINE = (
 )
 
 SESSION_EXPIRY_AGE = 300
-
 SESSION_COOKIE_NAME = 'cadvlan.globo.com'
-
 SESSION_COOKIE_AGE = 300
-
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 
-CACHE_TIMEOUT = 60
+# Values in seconds
+CACHE_TIMEOUT = 10
+CACHE_EQUIPMENTS_TIMEOUT = 900
 
 URL_LOGIN = '/login'
-
 URL_HOME = '/home'
 
 NETWORK_API_URL = 'http://localhost/'
-NETWORK_API_USERNAME = 'CadVlan'
-NETWORK_API_PASSWORD = 'CadVlan'
+NETWORK_API_USERNAME = 'HENRIQUE'
+NETWORK_API_PASSWORD = '12345678'
 
 MAX_RESULT_DEFAULT = 25 # Options-> 10, 25, 50, 100
+
+PATCH_PANEL_ID = 8
 
 LOG_FILE = PROJECT_ROOT_PATH + '/log.log'
 
@@ -205,7 +205,7 @@ LOGGING = {
             'propagate': True,
             'level': 'ERROR',
         },
-        'CadVlan.Auth.Decorators': {
+        'CadVlan.Util.Decorators': {
             'handlers': ['handlers-request'],
             'level': 'INFO',
         },
@@ -223,4 +223,3 @@ LOGGING = {
         },
     }
 }
-

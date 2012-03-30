@@ -17,3 +17,32 @@ function getSelectionData(oTable) {
 	data = replaceAll(data, '&', ';');
 	return data;
 }
+
+function autocompleteEquip(url) {
+	$.ajax({
+		url: url,
+		dataType: "json",
+		success: function(data) {
+			if (data.errors.length > 0) {
+				alert(data.errors)
+			} else {
+				$("#id_equip_name").autocomplete({
+					source: data.list,
+					minLength: 1,
+					select: function(event, ui) {
+						$("#id_equip_name").val(ui.item.label);
+						$("#search_form").submit()
+					}
+				});
+			}
+		},
+		beforeSend: function() {
+			$(".loading").attr("style", "visibility: hidden;")
+			$("#loading-autocomplete").show();
+		},
+		complete: function() {
+			$("#loading-autocomplete").hide();
+			$(".loading").removeAttr("style")
+		}
+	});
+}

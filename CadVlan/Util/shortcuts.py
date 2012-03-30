@@ -16,7 +16,7 @@ def render_to_response_ajax(*args, **kwargs):
     """
     Returns a HttpResponse whose content is filled with the result of calling ajax
     
-    return render_to_response_ajax(templates.LOGIN, {'form': form }, context_instance=RequestContext(request), json ='aaa')
+    return render_to_response_ajax(templates.LOGIN, {'form': form }, context_instance=RequestContext(request))
     
     ou
     
@@ -25,7 +25,7 @@ def render_to_response_ajax(*args, **kwargs):
     """
     
     if  kwargs.get(JSON) is None:
-        return HttpResponse(json.dumps(Json(loader.render_to_string(*args, **kwargs)).__dict__))
+        return HttpResponse(loader.render_to_string(*args, **kwargs))
     
     else:
         return HttpResponse(json.dumps(kwargs.get(JSON).__dict__))

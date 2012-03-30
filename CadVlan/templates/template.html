@@ -17,7 +17,15 @@
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(".error-messages").each(function() {
-					$(this).delay(15000).fadeOut(1000);
+					$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+				});
+				
+				$(".loading").ajaxStart(function() {
+					$(this).show();
+				});
+				
+				$(".loading").ajaxStop(function() {
+					$(this).hide();
 				});
 			})
 		</script>
@@ -45,97 +53,109 @@
 			<div id="menu">
 				{% if request|is_authenticated %}
 				<ul class="dropdown">
-				
+					
 					{% has_perm_menu  None True %}
 					{% if has_perm %}
-						<li>
-						
-							<a href="#" class="list">Listar</a>
-							<ul class="sub_menu">
-	
-								{% has_perm VLAN_MANAGEMENT None True %}
-								{% if has_perm %}
-								<li><a href="#">Vlans</a></li>
-								{% endif %}
-	
-								{% has_perm EQUIPMENT_MANAGEMENT None True %}
-								{% if has_perm %}
-								<li><a href="#">Equipamentos</a></li>
-								{% endif %}
-	
-								{% has_perm ENVIRONMENT_MANAGEMENT None True %}
-								{% if has_perm %}
-								<li><a href="#">Ambientes</a></li>
-								{% endif %}
-	
-								<li><a href="#">Interfaces</a></li>
-	
-								<li class="separator"></li>
-	
-								{% has_perm VIPS_REQUEST None True %}
-								{% if has_perm %}
-								<li><a href="#">Requisições de VIP</a></li>
-								{% endif %}
-	
-								<li class="separator"></li>
-	
-								<li><a href="{% url script.type.search.list %}">Acessos</a></li>
-	
-								{% has_perm SCRIPT_MANAGEMENT None True %}
-								{% if has_perm %}
-								<li><a href="{% url script.list %}">Roteiro</a></li>
-								{% endif %}
-								{% has_perm SCRIPT_MANAGEMENT None True %}
-								{% if has_perm %}
-								<li><a href="{% url script.type.list %}">Tipo de Roteiro</a></li>
-								{% endif %}
-							</ul>
-						</li>
+					<li>
+						<a href="#" class="list">Listar</a>
+						<ul class="sub_menu">
+							{% has_perm VLAN_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="#">Vlans</a></li>
+							{% endif %}
+							
+							{% has_perm EQUIPMENT_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="#">Equipamentos</a></li>
+							{% endif %}
+							
+							{% has_perm ENVIRONMENT_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="{% url environment.list %}">Ambientes</a></li>
+							{% endif %}
+							
+							{% has_perm EQUIPMENT_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="{% url equip.interface.search.list %}">Interfaces</a></li>
+							{% endif %}
+							
+							<li class="separator"></li>
+							
+							{% has_perm VIPS_REQUEST None True %}
+							{% if has_perm %}
+							<li><a href="#">Requisições de VIP</a></li>
+							{% endif %}
+							
+							<li class="separator"></li>
+							
+							{% has_perm EQUIPMENT_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="{% url equip.access.search.list %}">Acessos</a></li>
+							{% endif %}
+							
+							{% has_perm SCRIPT_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="{% url script.list %}">Roteiro</a></li>
+							{% endif %}
+							
+							{% has_perm SCRIPT_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="{% url script.type.list %}">Tipo de Roteiro</a></li>
+							{% endif %}
+						</ul>
+					</li>
 					{% endif %}
-
+					
 					{% has_perm_menu  True None %}
 					{% if has_perm %}
-						<li>
-							<a href="#" class="cad">Cadastrar</a>
-							<ul class="sub_menu">
-	
-								{% has_perm VLAN_MANAGEMENT True None %}
-								{% if has_perm %}
-								<li><a href="#">Vlan</a></li>
-								{% endif %}
-	
-								{% has_perm EQUIPMENT_MANAGEMENT True None %}
-								{% if has_perm %}
-								<li><a href="#">Equipamento</a></li>
-								{% endif %}
-	
-								{% has_perm ENVIRONMENT_MANAGEMENT True None %}
-								{% if has_perm %}
-								<li><a href="#">Ambiente</a></li>
-								{% endif %}
-	
-								<li class="separator"></li>
-	
-								<li><a href="#">Acessos</a></li>
-	
-								{% has_perm SCRIPT_MANAGEMENT True True %}
-								{% if has_perm %}
-								<li><a href="{% url script.form %}">Roteiro</a></li>
-								{% endif %}
-								
-								{% has_perm SCRIPT_MANAGEMENT True None %}
-								{% if has_perm %}
-								<li><a href="{% url script.type.form %}">Tipo de Roteiro</a></li>
-								{% endif %}
-							</ul>
-						</li>
+					<li>
+						<a href="#" class="cad">Cadastrar</a>
+						<ul class="sub_menu">
+							{% has_perm VLAN_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="#">Vlan</a></li>
+							{% endif %}
+							
+							{% has_perm EQUIPMENT_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="#">Equipamento</a></li>
+							{% endif %}
+							
+							{% has_perm ENVIRONMENT_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="#">Ambiente</a></li>
+							{% endif %}
+							
+							<li class="separator"></li>
+							
+							{% has_perm EQUIPMENT_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="{% url equip.access.form %}">Acessos</a></li>
+							{% endif %}
+							
+							{% has_perm SCRIPT_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="{% url script.form %}">Roteiro</a></li>
+							{% endif %}
+							
+							{% has_perm SCRIPT_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="{% url script.type.form %}">Tipo de Roteiro</a></li>
+							{% endif %}
+						</ul>
+					</li>
 					{% endif %}
+					
+					{% has_perm EQUIPMENT_MANAGEMENT True None %}
+					{% if has_perm %}
 					<li>
 						<a href="#" class="rot">Roteiros</a>
 						<ul class="sub_menu">
-							<li><a href="#">Roteiros do Equipamento</a></li>
+							<li><a href="{% url equip.script.search.list %}">Roteiros do Equipamento</a></li>
 						</ul>
 					</li>
+					{% endif %}
+					
 					{% has_perm USER_ADMINISTRATION True None %}
 					{% if has_perm %}
 					<li>
@@ -193,5 +213,9 @@
 		{% block content %}{% endblock %}
 		</div>
 
+		<div class="loading">
+			<p style="text-align: center;"><img src="{{ MEDIA_URL }}/img/ajax-loading.gif" width="32" height="32" /></p>
+			<p style="text-align: center; font-size: 14px;"><b>Aguarde</b></p>
+		</div>
 	</body>
 </html>

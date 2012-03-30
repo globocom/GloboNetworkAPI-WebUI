@@ -1,0 +1,12 @@
+<p>Selecione o roteiro que deseja associar:</p>
+<form id="add_form" method="post" action="{% url equip.script.add.ajax %}">
+{% csrf_token %}
+{% for field in add_form %}
+	{{ field }}
+	<p id="error">
+		{% for error in field.errors %}
+			{{ error|escape }}
+		{% endfor %}
+	</p>
+{% endfor %}
+</form>

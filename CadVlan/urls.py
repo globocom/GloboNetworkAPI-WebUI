@@ -13,7 +13,7 @@ handler500 = 'CadVlan.Auth.views.handler500'
 
 urlpatterns = patterns('',
     # CSS - JS
-    (r'^media/(.*)$', 'django.views.static.serve',{'document_root': settings.MEDIA_ROOT})
+    (r'^media/(.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT})
 )
 
 # URL's Auth
@@ -38,7 +38,34 @@ urlpatterns += patterns('CadVlan.ScriptType.views',
     url('^script-type/form$', 'show_form', name='script.type.form',)
 )
 
-# URL's ScriptType
+# URL's EquipAccess
 urlpatterns += patterns('CadVlan.EquipAccess.views',
-    url('^equip-access/search-list$', 'search_list', name='script.type.search.list',),
+    url('^equip-access/search-list$', 'search_list', name='equip.access.search.list',),
+    url('^equip-access/search-list/(?P<id_equip>\d+)/$', 'search_list_param', name='equip.access.search.list.param',),
+    url('^equip-access/form$','add_form', name='equip.access.form',),
+    url('^equip-access/form/(?P<id_access>\d+)/$','edit', name='equip.access.edit',),
+    url('^equip-access/delete/$','delete', name='equip.access.delete',),
+)
+
+# URL's Equipment Script
+urlpatterns += patterns('CadVlan.EquipScript.views',
+    url('^equip-script/list$', 'search_list', name='equip.script.search.list',),
+    url('^equip-script/delete$','delete_all', name='equip.script.delete',),
+    url('^equip-script/add$', 'ajax_add_form', name='equip.script.add.ajax',),
+)
+
+# URL's Equipment Interface
+urlpatterns += patterns('CadVlan.EquipInterface.views',
+    url('^equip-interface/list$', 'search_list', name='equip.interface.search.list',),
+    url('^equip-interface/delete$','delete_all', name='equip.interface.delete',),
+)
+
+# URL's Equipment
+urlpatterns += patterns('CadVlan.Equipment.views',
+    url('^equipment/list$', 'ajax_list_equips', name='equipment.list.ajax',),
+)
+
+# URL's Environment
+urlpatterns += patterns('CadVlan.Environment.views',
+    url('^environment/list$','list_all', name='environment.list',),
 )
