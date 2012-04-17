@@ -5,6 +5,7 @@ Author: avanzolin / S2it
 Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
+
 def split_to_array(string, sep = ";"):
     """
     Returns an array of strings separated by regex

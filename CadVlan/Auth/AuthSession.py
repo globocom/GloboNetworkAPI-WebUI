@@ -6,7 +6,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 from networkapiclient.ClientFactory import ClientFactory
-from CadVlan.settings import NETWORK_API_URL
+from CadVlan.settings import NETWORK_API_URL, SESSION_EXPIRY_AGE
 
 class AuthSession:
 
@@ -30,6 +30,7 @@ class AuthSession:
         '''Validates that the user is authenticated
         '''
         if self.session.has_key(self.KEY) and self.session[self.KEY] != None:
+            self.session.set_expiry(SESSION_EXPIRY_AGE)
             return True
         else:
             return False

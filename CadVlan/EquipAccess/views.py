@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, write = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def search_list(request):
     
     try:
@@ -79,7 +79,7 @@ def search_list(request):
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, write = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def search_list_param(request,id_equip):
     
     lists = dict();
@@ -121,7 +121,7 @@ def search_list_param(request,id_equip):
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, write = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def add_form(request):
     lists = dict()
     try :
@@ -197,7 +197,7 @@ def add_form(request):
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, write = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def edit(request, id_access):
     try:
         lists = dict()
@@ -277,7 +277,7 @@ def edit(request, id_access):
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, write = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def delete(request):
     
     try:

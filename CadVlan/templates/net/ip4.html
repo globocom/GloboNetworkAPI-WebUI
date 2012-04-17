@@ -1,8 +1,4 @@
-{% extends "template.html" %}
-
 {% load util %}
-
-{% block title %}[Roteiros - Listagem]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
@@ -13,7 +9,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }],
 	});
 	
 	$("#checkAll").click( function() {
@@ -30,26 +26,26 @@ $(document).ready(function() {
 		$("#checkAll").attr("checked", false);
 	});
 	
-	$("#page_tab").tabs();
-	
+	$("#page_tab_2").tabs();	
+
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url script.form %}";
+		//location.href = "{% url script.form %}";
 	});
 	
-	{% has_perm SCRIPT_MANAGEMENT True None %}
+	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Roteiro(s) selecionado(s)?')){ 
-			var data = getSelectionData(oTable);
-			$("#id_ids").val(data).parent().submit();
+		if (confirm('Deseja realmente excluir a(s) Rede(s) da Vlan selecionada(s)?')){ 
+			//var data = getSelectionData(oTable);
+			//$("#id_ids").val(data).parent().submit();
 		}
 	});
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		location.reload();
+		//location.reload();
 	});
 	
 })
@@ -57,24 +53,24 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block content %}
-<div id="page_tab">
+<div id="page_tab_2">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Roteiros</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">IPs da Rede</a></li>
 	</ul>
-	<div id="tabs-1">
+	<div id="tabs-2">
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
 			<button id="btn_new">Novo Registro</button>
-			{% has_perm SCRIPT_MANAGEMENT True None %}
+			{% has_perm EQUIPMENT_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm SCRIPT_MANAGEMENT True None %}
+		{% has_perm EQUIPMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url script.delete %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in form %}
 				{{ field }}
@@ -86,19 +82,25 @@ $(document).ready(function() {
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th class="ids">ID</th>
-					<th>Roteiro</th>					
-					<th>Descrição</th>
-					<th>Tipo de Roteiro</th>
+					<th>IP</th>					
+					<th>Nome do Equipamento</th>
+					<th>Descrição do IP</th>
+					<th>Editar</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for script in scripts %}
+				{% for ip in ips %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ script.id }}" /></td>
-					<td class="text_center">{{ script.id }}</td>
-					<td>{{ script.nome }}</td>
-					<td>{{ script.descricao }}</td>
-					<td class="text_center">{{ script.id_tipo_roteiro }}</td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ ip.id }}" /></td>
+					<td class="text_center">{{ip.id}}</td>
+					<td>{{ip.oct1}}.{{ip.oct2}}.{{ip.oct3}}.{{ip.oct4}}</td>
+					<td>
+					{% for equip_name in ip.equipamento %}
+						{{ equip_name }}<br/>
+					{% endfor %}
+					</td>
+					<td>{{ ip.descricao }}</td>
+					<td><a href="#">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

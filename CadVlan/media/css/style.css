@@ -5,8 +5,8 @@
  */
 
 body {
-	font-family: Helvetica, Arial, sans-serif;
-	font-size: 68%;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
 	margin: 0px;
 }
 
@@ -24,7 +24,7 @@ body {
 
 #top {
 	background: url(/media/img/top_bg.png) repeat-x;
-	height: 47px;
+	height: 46px;
 }
 
 #menu {
@@ -88,8 +88,7 @@ body {
 
 #messagesError {
 	padding: 4px;
-	margin-left: 20px; 
-	margin-right: 20px;
+	margin: 10px 20px 5px 20px;
 }
 
 #messagesError span {
@@ -126,6 +125,39 @@ body {
 	z-index: 1;
 }
 
+.success { background-color: #DEEDF7 !important; background-image: none !important; }
+.success span { background-position: -208px -192px; }
+
+.warning { background-color: #F5F5B5 !important; background-image: none !important; }
+.warning span { background-position: 0 -144px; }
+
+.info {}
+.info span {background-position: -16px -144px;}
+
+.error {}
+.error span { background-position: -32px -192px; }
+
+#search_form table li {
+	list-style: none;
+	display: inline;
+	*display: inline-block;
+}
+
+.ip_input {
+	width: 32px;
+}
+
+.expandable {
+	max-height: 52px;
+	overflow: hidden;
+}
+
+.expand {
+	height: 10px;
+	cursor: default;
+	background: url(/media/img/max.png) transparent bottom center no-repeat;
+}
+
 /* --- --- --- */
 
 /*
@@ -143,12 +175,12 @@ form p {
 
 label {
 	color:#7C6767;
-	font-size:14px;
+	font-size:12px;
 }
 
 form #error {
 	color:red;
-	font-size:14px;
+	font-size:12px;
 	margin: 0 0 15px;
 }
 
@@ -157,7 +189,7 @@ input[type="text"], input[type="password"], textarea {
 	border-right:1px solid #CCCCCC;
 	border-style:solid;
 	border-width:1px;
-	font-size:15px;
+	font-size:12px;
 	margin:0 0 0px;
 	padding:5px;
 }
@@ -172,7 +204,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
  * --- MENU ---
  */
 
-#menu ul { list-style: none; margin-top: -11px; z-index: 1; }
+#menu ul { list-style: none; z-index: 1; }
 #menu a  { text-decoration: none; }
 
 #menu ul.dropdown { position: relative; }
@@ -181,7 +213,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 #menu ul.dropdown li a:hover { color: royalblue }
 #menu ul.dropdown li.hover, #menu ul.dropdown li:hover { color: black; position: relative; }
 
-#menu ul.dropdown ul { width: 150px; visibility: hidden; position: absolute; top: 140%; left: -41px; }
+#menu ul.dropdown ul { width: 150px; visibility: hidden; position: absolute; }
 #menu ul.dropdown ul li { font-weight: normal; color: #000; float: none; background-color: #FAFAFA; border-bottom: 1px solid #CCCCCC; border-left: 1px solid #CCCCCC; border-right: 1px solid #CCCCCC; }
 #menu ul.dropdown ul li:hover { background-color: #FFFFFF; }
 #menu ul.dropdown ul li a { border-right: none; width: 100%; display: inline-block; margin: 0; padding: 0; width: 100%; } 
@@ -218,7 +250,11 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 /*
  * --- Utilities ---
  */
- 
+
+.text_red {
+	color: red;
+}
+
 .text_center {
 	text-align: center;
 	margin: 0 auto;

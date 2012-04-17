@@ -1,14 +1,10 @@
-{% extends "template.html" %}
-
 {% load util %}
-
-{% block title %}[Ambiente - Listagem]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	oTable = $("#environment_list").dataTable({
+	oTable = $("#network_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
@@ -30,49 +26,60 @@ $(document).ready(function() {
 		$("#checkAll").attr("checked", false);
 	});
 	
-	$("#page_tab").tabs();
+	$("#page_tab_2").tabs();
 	
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url script.form %}";
+		//location.href = "{% url script.form %}";
 	});
 	
-	{% has_perm ENVIRONMENT_MANAGEMENT True None %}
+	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Ambiente(s) selecionado(s)?')){ 
-			var data = getSelectionData(oTable);
-			$("#id_ids").val(data).parent().submit();
+		if (confirm('Deseja realmente excluir a(s) Rede(s) da Vlan selecionada(s)?')){ 
+			//var data = getSelectionData(oTable);
+			//$("#id_ids").val(data).parent().submit();
 		}
 	});
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		location.reload();
+		//location.reload();
+	});
+	
+	$("#network_list tbody tr").live("click", function(e) {
+		if (e.target.nodeName != 'A' && e.target.nodeName != 'INPUT') {
+			location.href = $(this).find(".table_id").attr("lang");
+		}
 	});
 	
 })
 </script>
+<style>
+#network_list tbody tr {
+	cursor: pointer;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<div id="page_tab">
-	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Ambientes</a></li>
-	</ul>
-	<div id="tabs-1">
+<div id="page_tab_2">
+		<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Redes da Vlan</a></li>
+		</ul>
+	<div id="tabs-2">
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
 			<button id="btn_new">Novo Registro</button>
-			{% has_perm ENVIRONMENT_MANAGEMENT True None %}
+			{% has_perm VLAN_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm ENVIRONMENT_MANAGEMENT True None %}
+		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
 		<form id="delete_form" method="post" action="" style="visibility: hidden;">
 			{% csrf_token %}
@@ -81,26 +88,31 @@ $(document).ready(function() {
 			{% endfor %}
 		</form>
 		{% endif %}
-		<table id="environment_list">
+		<table id="network_list">
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th class="ids">ID</th>
-					<th>Divisão DC</th>					
-					<th>Ambiente Lógico</th>
-					<th>Grupo Layer3</th>
-					<th>Wiki</th>
+					<th>Rede</th>					
+					<th>Máscara</th>
+					<th>Tipo de Rede</th>
+					<th>Editar</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for ambiente in environment %}
+				{% for net_vlan in net_vlans %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ ambiente.id }}" /></td>
-					<td class="text_center">{{ ambiente.id }}</td>
-					<td>{{ ambiente.nome_divisao }}</td>
-					<td>{{ ambiente.nome_ambiente_logico }}</td>
-					<td>{{ ambiente.nome_grupo_l3 }}</td>
-					<td><a href="{{ ambiente.link}}">wiki</a></td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ net_vlan.id }}" /></td>
+					<td class="text_center">{{ net_vlan.id }}</td>
+					{% if net_vlan.ip4 %}
+						<td lang="{% url network.ip4.list.by.id net_vlan.id %}" class="table_id">{{ net_vlan.net_ip_final }}</td>
+					{% else %}
+					 	<td lang="{% url network.ip6.list.by.id net_vlan.id %}" class="table_id">{{ net_vlan.net_ip_final }}</td>
+					{% endif %}
+					<td>{{ net_vlan.mask_ip_final }}</td>
+					<td class="text_center">{{ net_vlan.network_type }}</td>
+				
+					<td><a href="#">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

@@ -50,7 +50,7 @@ def login_required(view_func):
 
     return _decorated
 
-def has_perm(permission, write = None, read = None):
+def has_perm(permission):
     '''
     Validates that the user has access permission
     
@@ -68,12 +68,14 @@ def has_perm(permission, write = None, read = None):
 
                 user = auth.get_user()
 
-                if user.has_perm(permission, write, read):
-                    return view_func(request,*args, **kwargs);
+                for perm in permission:
+                    write = perm['write'] if perm.has_key("write") else None
+                    read = perm['read'] if perm.has_key("read") else None
+                    if not user.has_perm(perm['permission'], write, read):
+                        messages.add_message(request, messages.ERROR, auth_messages.get('user_not_authorized'))
+                        return HttpResponseRedirect(URL_HOME)
 
-                else:
-                    messages.add_message(request, messages.ERROR, auth_messages.get('user_not_authorized'))
-                    return HttpResponseRedirect(URL_HOME)
+                return view_func(request,*args, **kwargs);
 
             else:
                 return HttpResponseRedirect(URL_LOGIN)

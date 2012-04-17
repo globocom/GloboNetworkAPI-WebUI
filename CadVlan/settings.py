@@ -135,15 +135,16 @@ INSTALLED_APPS = (
     'CadVlan.Script',
     'CadVlan.ScriptType',
     'CadVlan.EquipAccess',
+    'CadVlan.Vlan',
 )
 
 SESSION_ENGINE = (
     'django.contrib.sessions.backends.file'
 )
 
-SESSION_EXPIRY_AGE = 300
 SESSION_COOKIE_NAME = 'cadvlan.globo.com'
 SESSION_COOKIE_AGE = 300
+SESSION_EXPIRY_AGE = 300
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
@@ -158,6 +159,14 @@ URL_HOME = '/home'
 NETWORK_API_URL = 'http://localhost/'
 NETWORK_API_USERNAME = 'HENRIQUE'
 NETWORK_API_PASSWORD = '12345678'
+
+# Configurações de Email
+EMAIL_FROM = 'globo@s2it.com.br'
+EMAIL_HOST = 'smtp.mail.microsoftonline.com'
+EMAIL_PORT = '587'
+EMAIL_HOST_USER = 'globo@s2it.com.br'
+EMAIL_HOST_PASSWORD = 's2it@2012'
+EMAIL_USE_TLS = True
 
 MAX_RESULT_DEFAULT = 25 # Options-> 10, 25, 50, 100
 

@@ -1,0 +1,59 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("textarea").maxlength();
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Rede</a></li>
+	</ul>
+	<div id="tabs-1">
+		<form id="add_form" method="post" action="">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			<table>
+			
+			{% for n in net %}
+					<tr>
+						<td style="width: 100px"><label for="nome_ambiente">Nome da Vlan</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;" >{{n.vlan}}</label></td>
+					</tr>
+					<tr>
+						<td><label for="nome_vlan">Tipo de Rede</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{n.network_type}}</label></td>
+					</tr>
+					<tr>
+						<td><label for="num_vlan">IP de rede</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{n.block1}}:{{n.block2}}:{{n.block3}}:{{n.block4}}:{{n.block5}}:{{n.block6}}:{{n.block7}}:{{n.block8}}</label></td>
+					</tr>
+					<tr>
+					
+						<td><label for="sit_vlan">Máscara</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{n.mask1}}:{{n.mask2}}:{{n.mask3}}:{{n.mask4}}.{{n.mask5}}:{{n.mask6}}:{{n.mask7}}:{{n.mask8}}</label></td>
+					</tr>
+			{% endfor %}
+			
+			</table>
+			</div>
+			
+			<div class="separator spacer"></div>
+			<div id="list_ip6">
+				{% include "net/ip6.html" %}
+			</div>
+		
+		</form>
+	</div>
+</div>
+{% endblock %}

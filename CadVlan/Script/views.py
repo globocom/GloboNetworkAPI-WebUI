@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(SCRIPT_MANAGEMENT, read = True)
+@has_perm([{"permission": SCRIPT_MANAGEMENT, "read": True}])
 def list_all(request):
     
     try:
@@ -56,7 +56,7 @@ def list_all(request):
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(SCRIPT_MANAGEMENT, write = True)
+@has_perm([{"permission": SCRIPT_MANAGEMENT, "write": True}])
 def delete_all(request):
     
     if request.method == 'POST':
@@ -125,7 +125,7 @@ def delete_all(request):
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(SCRIPT_MANAGEMENT, write = True, read = True)
+@has_perm([{"permission": SCRIPT_MANAGEMENT, "read": True, "write": True}])
 def add_form(request):
     
     try:

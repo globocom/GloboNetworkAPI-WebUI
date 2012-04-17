@@ -21,7 +21,8 @@ urlpatterns += patterns('CadVlan.Auth.views',
     url('^$', 'login', name='',),
     url('^login$', 'login', name='login',),
     url('^logout$', 'logout', name='logout',),
-    url('^home$', 'home', name='home',)
+    url('^home$', 'home', name='home',),
+    url('^lost-pass','lost_pass',name="home.lost.pass")
 )
 
 # URL's Script
@@ -68,4 +69,20 @@ urlpatterns += patterns('CadVlan.Equipment.views',
 # URL's Environment
 urlpatterns += patterns('CadVlan.Environment.views',
     url('^environment/list$','list_all', name='environment.list',),
+)
+
+# URL's Vlans
+urlpatterns += patterns('CadVlan.Vlan.views',
+    url('^vlan/get/(?P<id_vlan>\d+)/$', 'list_by_id', name='vlan.list.by.id',), 
+    url('^vlan/list$','search_list', name='vlan.search.list',),
+    url('^vlan/find$','ajax_list_vlans', name='vlan.list.ajax',),
+    
+)
+
+
+# URL's Network
+urlpatterns += patterns('CadVlan.Net.views',
+    url('^network/get/ip4/(?P<id_net>\d+)/$', 'list_netip4_by_id', name='network.ip4.list.by.id',),
+    url('^network/get/ip6/(?P<id_net>\d+)/$', 'list_netip6_by_id', name='network.ip6.list.by.id',),
+    #url('^environment/list$','list_all', name='environment.list',),   
 )

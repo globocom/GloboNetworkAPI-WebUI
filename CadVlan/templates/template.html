@@ -5,13 +5,14 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>Globo.com - CadVlan {% block title %}{% endblock %}</title>
 		<link rel="shortcut icon" href="{{ MEDIA_URL }}/img/favicon.png" type="image/ico" />
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/reset.css" />
 		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
 		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/globo/jquery-ui-1.8.17.custom.css" />
 		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/dataTable.css" />
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-ui.custom.min.js"></script>	
-		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dataTables.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/hoverIntent.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dropdown.js"></script>
 		<script type="text/javascript">
@@ -31,7 +32,7 @@
 		</script>
 		{% block header %}{% endblock %}
 	</head>
-
+{% autoescape on %}
 	<body>
 		<div id="header">
 			<div id="logo"></div>
@@ -61,7 +62,7 @@
 						<ul class="sub_menu">
 							{% has_perm VLAN_MANAGEMENT None True %}
 							{% if has_perm %}
-							<li><a href="#">Vlans</a></li>
+							<li><a href="{% url vlan.search.list %}">Vlans</a></li>
 							{% endif %}
 							
 							{% has_perm EQUIPMENT_MANAGEMENT None True %}
@@ -179,30 +180,12 @@
 			<!-- <ul class="messages">  -->
 				{% for message in messages %}
 					<div class='ui-widget error-messages'>
-						<p>
-						{% if message.tags  == 'info'%}
-						<div class='ui-state-highlight ui-corner-all' id="messagesError">
-							<span class='ui-icon ui-icon-info'></span>
-						{% endif %}
-
-						{% if message.tags  == 'error'%}
-						<div class='ui-state-error ui-corner-all' id="messagesError">
-							<span class='ui-icon ui-icon-circle-close'></span>
-						{% endif %}
-
-						{% if message.tags  == 'warning'%}
-						<div class='ui-state-highlight ui-corner-all' style="background-color: #F5F5B5; background-image: none;" id="messagesError">
-							<span class='ui-icon ui-icon-alert'></span>
-						{% endif %}
-						
-						{% if message.tags  == 'success'%}
-						<div class='ui-state-highlight ui-corner-all' style="background-color: #DEEDF7; background-image: none;" id="messagesError">
-							<span class='ui-icon ui-icon-circle-check'></span>
-						{% endif %}
-
-						{{ message }}
+						<p></p>
+						<div id="messagesError" class="{% if message.tags == 'error'%}ui-state-error{% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
+							<span class="ui-icon"></span>
+							{{ message }}
 						</div>
-						</p>
+						<p></p>
 					</div>
 				{% endfor %}
 			<!--</ul>  -->
@@ -214,8 +197,10 @@
 		</div>
 
 		<div class="loading">
+			<br />
 			<p style="text-align: center;"><img src="{{ MEDIA_URL }}/img/ajax-loading.gif" width="32" height="32" /></p>
 			<p style="text-align: center; font-size: 14px;"><b>Aguarde</b></p>
 		</div>
 	</body>
+{% endautoescape %}
 </html>

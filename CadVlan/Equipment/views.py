@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, read = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
 def ajax_list_equips(request):
     try:
         

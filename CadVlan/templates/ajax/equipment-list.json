@@ -1,4 +1,4 @@
 {
-  "errors": [{% if messages %}{% for message in messages %}"{{ message }}", {% endfor %}""{% endif %}],
-  "list": [{% for equip in equipamentos %}"{{ equip }}", {% endfor %}""]
+  "errors": [{% if messages %}{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}],
+  "list": [{% for equip in equipamentos %}"{{ equip|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}]
 }

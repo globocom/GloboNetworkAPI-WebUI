@@ -8,7 +8,30 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	$("button").button({ icons: {primary: "ui-icon-locked"} });
+
+	$("#new_pass").click(function(){
+		$("#dialog-form").dialog("open");
+	});
+
+	$("#dialog-form").dialog({
+		height: 260,
+		width: 500,
+		modal: true,
+		autoOpen: {{modal}},
+		draggable: false,
+		resizable: false,
+		buttons: {
+			"Enviar": function() {
+				$("#lost_pass_form").submit();
+			},
+			"Cancelar": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
 })
+
 </script>
 {% endblock %}
 
@@ -31,8 +54,16 @@ $(document).ready(function() {
 			</p>
 		{% endfor %}
 		
+		<a id="new_pass" href="#" style="float: left;">Esqueci minha senha</a>
 		<p style="text-align: right;"><button>Entrar</button></p>
 		
 	</form>
+	
+	<br/>
+	
+	<div id="dialog-form" title="Solicitar Nova Senha">
+		{% include 'mail/lost-pass.html' %}
+	</div>
+	
 </div>
 {% endblock %}

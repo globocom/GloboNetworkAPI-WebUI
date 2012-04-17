@@ -22,6 +22,8 @@ auth_messages = {
     'user_invalid':         u'Usuário e/ou senha incorretos.',
     '404':                  u'Página não encontrada: [URL: %s]',
     '500':                  u'Ocorreu um erro ao executar sua ação, contate o Administrador do sistema.',
+    'user_email_invalid':   u'Usuário e/ou email incorretos.',
+    'email_success':        u'Nova senha enviada com sucesso.'
 }
 
 script_messages = {

@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, read = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
 def search_list(request):
     
     try:
@@ -87,7 +87,7 @@ def search_list(request):
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, write = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def delete_all(request):
     
     equip_nam = request.POST['equip_name']
@@ -142,7 +142,7 @@ def delete_all(request):
 @log
 @login_required
 @cache_page(CACHE_TIMEOUT)
-@has_perm(EQUIPMENT_MANAGEMENT, write = True)
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def ajax_add_form(request):
     try:
         

@@ -10,6 +10,10 @@
 /*
  * --- Custom ---
  */
+ 
+#vlan_list_length {
+	margin-top: 2px;
+}
 
 .DataTables_sort_wrapper span {
 	float: right;

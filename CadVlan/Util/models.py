@@ -9,21 +9,19 @@ from django import template
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.permissions import PERMISSIONS
 
-class Set(template.Node):
-    ''' Creates and sets the variable in view
-    '''
- 
-    def __init__(self, name, value):
-        self.name = name
+
+class SetVariable(template.Node):
+    def __init__(self,varname,value):
+        self.varname = varname
         self.value = value
- 
-    def render(self, context):
-        try:
-            value = template.Variable(self.value).resolve(context)
-        except template.VariableDoesNotExist:
-            value = ""
-        context[self.name] = value
-        return u""
+    
+    def render(self,context):
+        var = template.resolve_variable(self.value,context)
+        if var:
+            context[self.varname] = var
+        else:
+            context[self.varname] = context[self.value]
+        return ''
 
 class Permission(template.Node):
     '''Validates that the user has access permission in view
