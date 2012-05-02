@@ -29,8 +29,9 @@ class SearchVlanForm(forms.Form):
     iexact = forms.BooleanField(label="Buscar nomes exatos", required=False, error_messages=error_messages)
     environment = forms.ChoiceField(label="Ambiente", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     net_type = forms.ChoiceField(label="Tipo", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 180px"}))
-    networkv4 = forms.CharField(label="Rede IPv4", required=False, min_length=1, max_length=18, error_messages=error_messages, widget=forms.HiddenInput())
-    networkv6 = forms.CharField(label="Rede IPv6", required=False, min_length=1, max_length=43, error_messages=error_messages, widget=forms.HiddenInput())
+    ip_version = forms.IntegerField(label="Versão", required=True, error_messages=error_messages)
+    networkv4 = forms.CharField(label="Rede IPv4", required=False, min_length=1, max_length=15, error_messages=error_messages, widget=forms.HiddenInput())
+    networkv6 = forms.CharField(label="Rede IPv6", required=False, min_length=1, max_length=39, error_messages=error_messages, widget=forms.HiddenInput())
     subnet = forms.ChoiceField(label="Exato-Sub/Super Redes", required=False, choices=NETWORK_IP_CHOICES, error_messages=error_messages, widget=forms.RadioSelect, initial=0)
     acl = forms.BooleanField(label="Apenas Acls não validadas", required=False, error_messages=error_messages)
     

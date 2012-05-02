@@ -7,24 +7,29 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from django.views.decorators.cache import cache_page
-from CadVlan.settings import CACHE_TIMEOUT
-from CadVlan.permissions import EQUIPMENT_MANAGEMENT
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT
 from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Equipment.business import cache_list_equipment
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.templates import AJAX_EQUIPMENT_LIST
+from CadVlan.templates import AJAX_EQUIPMENT_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS,\
+    AJAX_EQUIP_LIST
 from django.template.context import RequestContext
+from CadVlan.forms import DeleteForm
+from CadVlan.Equipment.forms import SearchEquipmentForm
+from CadVlan.Util.utility import DataTablePaginator
+from networkapiclient.Pagination import Pagination
+from django.http import HttpResponseServerError, HttpResponse
+from django.shortcuts import render_to_response
+from django.template import loader
 
 logger = logging.getLogger(__name__)
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
-def ajax_list_equips(request):
+def ajax_autocomplete_equips(request):
     try:
         
         equip_list = dict()
@@ -44,3 +49,118 @@ def ajax_list_equips(request):
         messages.add_message(request, messages.ERROR, e)
     
     return render_to_response_ajax(AJAX_EQUIPMENT_LIST, equip_list, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+def ajax_list_equips(request):
+    
+    try:
+        
+        # If form was submited
+        if request.method == "GET":
+            
+            # Get user auth
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+            
+            # Get all environments from NetworkAPI
+            env_list = client.create_ambiente().list_all()
+            # Get all equipment types from NetworkAPI
+            type_equip_list = client.create_tipo_equipamento().listar()
+            # Get all groups from NetworkAPI
+            group_list = client.create_grupo_equipamento().listar()
+            
+            search_form = SearchEquipmentForm(env_list, type_equip_list, group_list, request.GET)
+            
+            if search_form.is_valid():
+                
+                name = search_form.cleaned_data["name"]
+                iexact = search_form.cleaned_data["iexact"]
+                environment = search_form.cleaned_data["environment"]
+                equip_type = search_form.cleaned_data["type_equip"]
+                group = search_form.cleaned_data["group"]
+                ipv4 = search_form.cleaned_data["ipv4"]
+                ipv6 = search_form.cleaned_data["ipv6"]
+                
+                if environment == "0":
+                    environment = None
+                if equip_type == "0":
+                    equip_type = None
+                if group == "0":
+                    group = None
+                
+                if len(ipv4) > 0:
+                    ip = ipv4
+                elif len(ipv6) > 0:
+                    ip = ipv6
+                else:
+                    ip = None
+                    
+                # Pagination
+                columnIndexNameMap = { 0: '', 1: 'nome', 2 : 'tipo_equipamento', 3: 'grupos', 4: 'ip', 5: 'vlan', 6: 'ambiente', 7: '' }
+                dtp = DataTablePaginator(request, columnIndexNameMap)
+                
+                # Make params
+                dtp.build_server_side_list()
+                
+                # Set params in simple Pagination class
+                pag = Pagination(dtp.start_record, dtp.end_record, dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
+                
+                # Call API passing all params
+                equips = client.create_equipamento().find_equips(name, iexact, environment, equip_type, group, ip, pag)
+                
+                if not equips.has_key("equipamento"):
+                    equips["equipamento"] = []
+                    
+                # Returns JSON
+                return dtp.build_response(equips["equipamento"], equips["total"], AJAX_EQUIP_LIST, request)
+            
+            else:
+                # Remake search form
+                lists = dict()
+                lists["search_form"] = search_form
+                
+                # Returns HTML
+                response = HttpResponse(loader.render_to_string(SEARCH_FORM_ERRORS, lists, context_instance=RequestContext(request)))
+                # Send response status with error
+                response.status_code = 412
+                return response
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        return HttpResponseServerError(e, mimetype='application/javascript')
+    except BaseException, e:
+        logger.error(e)
+        return HttpResponseServerError(e, mimetype='application/javascript')
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+def search_list(request):
+    
+    try:
+        
+        lists = dict()
+        lists["delete_form"] = DeleteForm()
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        # Get all environments from NetworkAPI
+        env_list = client.create_ambiente().list_all()
+        # Get all equipment types from NetworkAPI
+        type_equip_list = client.create_tipo_equipamento().listar()
+        # Get all groups from NetworkAPI
+        group_list = client.create_grupo_equipamento().listar()
+        
+        search_form = SearchEquipmentForm(env_list, type_equip_list, group_list)
+        
+        lists["search_form"] = search_form
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return render_to_response(EQUIPMENT_SEARCH_LIST, lists, context_instance=RequestContext(request))

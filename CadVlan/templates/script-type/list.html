@@ -85,7 +85,6 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th class="ids">ID</th>
 					<th>Tipo de Roteiro</th>
 					<th>Descrição</th>					
 				</tr>
@@ -94,7 +93,6 @@ $(document).ready(function() {
 				{% for st in tipo_roteiro %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ st.id }}" /></td>
-					<td class="text_center">{{ st.id }}</td>
 					<td>{{ st.tipo }}</td>
 					<td>{{ st.descricao }}</td>
 				</tr>

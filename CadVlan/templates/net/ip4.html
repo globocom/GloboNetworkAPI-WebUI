@@ -4,12 +4,12 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	oTable = $("#script_list").dataTable({
+	oTable = $("#ips_table").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }],
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }],
 	});
 	
 	$("#checkAll").click( function() {
@@ -27,26 +27,30 @@ $(document).ready(function() {
 	});
 	
 	$("#page_tab_2").tabs();	
-
+	
 	$("#tool").buttonset();
 	
-	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		//location.href = "{% url script.form %}";
+	$("#btn_new_2").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url network.insert.ip4 id %}";	
 	});
 	
 	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir a(s) Rede(s) da Vlan selecionada(s)?')){ 
-			//var data = getSelectionData(oTable);
-			//$("#id_ids").val(data).parent().submit();
+		if (confirm('Excluir um IP não removerá o equipamento do ambiente. Para remover também do ambiente, vá na edição do equipamento.')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
 		}
 	});
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		//location.reload();
+		location.reload();
 	});
+	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	
 	
 })
 </script>
@@ -61,7 +65,7 @@ $(document).ready(function() {
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
-			<button id="btn_new">Novo Registro</button>
+			<button id="btn_new_2">Novo Registro</button>
 			{% has_perm EQUIPMENT_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
@@ -70,37 +74,37 @@ $(document).ready(function() {
 		</div>
 		{% has_perm EQUIPMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url network.delete.ip4 id%}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in form %}
+			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
+	
 		{% endif %}
-		<table id="script_list">
+		
+		<table id="ips_table">
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th class="ids">ID</th>
-					<th>IP</th>					
+					<th>IP</th>
 					<th>Nome do Equipamento</th>
 					<th>Descrição do IP</th>
-					<th>Editar</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for ip in ips %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ ip.id }}" /></td>
-					<td class="text_center">{{ip.id}}</td>
 					<td>{{ip.oct1}}.{{ip.oct2}}.{{ip.oct3}}.{{ip.oct4}}</td>
 					<td>
 					{% for equip_name in ip.equipamento %}
 						{{ equip_name }}<br/>
 					{% endfor %}
 					</td>
-					<td>{{ ip.descricao }}</td>
-					<td><a href="#">Editar</a></td>
+					<td>{% ifnotequal ip.descricao None %}{{ ip.descricao }}{% endifnotequal %}</td>
+					<td class="text_center"><a href="{% url network.edit.ip4 id ip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

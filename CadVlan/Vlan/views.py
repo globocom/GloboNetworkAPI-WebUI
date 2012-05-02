@@ -8,16 +8,14 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 import logging
 from networkapiclient.Pagination import Pagination
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.settings import CACHE_TIMEOUT
 from django.shortcuts import render_to_response, redirect
-from django.views.decorators.cache import cache_page
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT
 from CadVlan.forms import DeleteForm
-from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, VLAN_SEARCH_FORM
+from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS
 from CadVlan.Vlan.forms import SearchVlanForm
 from CadVlan.Util.converters.util import replace_id_to_name
 from CadVlan.Util.utility import DataTablePaginator
@@ -29,7 +27,6 @@ logger = logging.getLogger(__name__)
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def ajax_list_vlans(request):
     
@@ -56,6 +53,7 @@ def ajax_list_vlans(request):
                 iexact = search_form.cleaned_data["iexact"]
                 environment = search_form.cleaned_data["environment"]
                 net_type = search_form.cleaned_data["net_type"]
+                ip_version = search_form.cleaned_data["ip_version"]
                 networkv4 = search_form.cleaned_data["networkv4"]
                 networkv6 = search_form.cleaned_data["networkv6"]
                 subnet = search_form.cleaned_data["subnet"]
@@ -68,11 +66,13 @@ def ajax_list_vlans(request):
                 
                 if len(networkv4) > 0:
                     network = networkv4
-                else:
+                elif len(networkv6) > 0:
                     network = networkv6
+                else:
+                    network = None
                     
                 # Pagination
-                columnIndexNameMap = { 0: '', 1: 'id', 2 : 'num_vlan', 3: 'nome', 4: 'ambiente', 5: 'tipo_rede', 6: 'network', 7: 'roteamento', 8: 'acl_file_name', 9: '' }
+                columnIndexNameMap = { 0: '', 1: 'num_vlan', 2 : 'nome', 3: 'ambiente', 4: 'tipo_rede', 5: 'network', 6: 'roteamento', 7: 'acl_file_name', 8: '' }
                 dtp = DataTablePaginator(request, columnIndexNameMap)
                 
                 # Make params
@@ -82,7 +82,7 @@ def ajax_list_vlans(request):
                 pag = Pagination(dtp.start_record, dtp.end_record, dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
                 
                 # Call API passing all params
-                vlans = client.create_vlan().find_vlans(number, name, iexact, environment, net_type, network, subnet, acl, pag)
+                vlans = client.create_vlan().find_vlans(number, name, iexact, environment, net_type, network, ip_version, subnet, acl, pag)
                 
                 if not vlans.has_key("vlan"):
                     vlans["vlan"] = []
@@ -96,7 +96,7 @@ def ajax_list_vlans(request):
                 lists["search_form"] = search_form
                 
                 # Returns HTML
-                response = HttpResponse(loader.render_to_string(VLAN_SEARCH_FORM, lists, context_instance=RequestContext(request)))
+                response = HttpResponse(loader.render_to_string(SEARCH_FORM_ERRORS, lists, context_instance=RequestContext(request)))
                 # Send response status with error
                 response.status_code = 412
                 return response
@@ -110,7 +110,6 @@ def ajax_list_vlans(request):
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def search_list(request):
     
@@ -138,7 +137,6 @@ def search_list(request):
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
 def list_by_id(request, id_vlan):
         

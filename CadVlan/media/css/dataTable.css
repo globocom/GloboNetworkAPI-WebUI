@@ -43,7 +43,20 @@
 	margin: 0;
 	cursor: pointer;
 	* cursor: hand;
-	color: #333 !important;
+}
+
+.paging_full_numbers .ui-button:hover {
+	border: 1px solid #0073ea;
+	background: #0073ea url(globo/images/ui-bg_highlight-soft_25_0073ea_1x100.png) 50% 50% repeat-x;
+	-webkit-box-shadow:0 0 4px #0073ea;
+	-moz-box-shadow: 0 0 4px #0073ea;
+	box-shadow:0 0 4px #0073ea;
+	font-weight: bold;
+	color: #ffffff;
+	cursor: pointer;
+	* cursor: hand;
+	padding: 2px 6px;
+	margin: 0;
 }
 
 .dataTables_paginate .ui-button {
@@ -216,7 +229,7 @@ table.display tr.even.gradeU {
 }
 
 tr.odd {
-	background-color: #f5f5f5;
+	background-color: #eee;
 }
 
 tr.even {
@@ -327,7 +340,7 @@ table.display tr.odd.row_selected td {
  */
 /* For the standard odd/even */
 tr.odd td.sorting_1 {
-	background-color: #eeeeee;
+	background-color: #e5e5e5;
 }
 
 tr.odd td.sorting_2 {

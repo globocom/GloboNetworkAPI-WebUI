@@ -2,13 +2,15 @@
 
 {% load util %}
 
+{% block title %}[Detalhes da Rede IPv4]{% endblock %}
+
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
 	
 	$("#page_tab").tabs();	
 	$("textarea").maxlength();
-	
+		
 })
 </script>
 {% endblock %}
@@ -19,7 +21,7 @@ $(document).ready(function() {
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Rede</a></li>
 	</ul>
 	<div id="tabs-1">
-		<form id="add_form" method="post" action="">
+		
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			<table>
@@ -63,7 +65,7 @@ $(document).ready(function() {
 				{% include "net/ip4.html" %}
 			</div>
 		
-		</form>
+		
 	</div>
 </div>
 {% endblock %}

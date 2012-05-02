@@ -14,7 +14,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 5 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -60,7 +60,7 @@ $(document).ready(function() {
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
-	autocompleteEquip("{% url equipment.list.ajax %}");
+	autocompleteEquip("{% url equipment.autocomplete.ajax %}", true);
 	
 })
 </script>
@@ -117,7 +117,6 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th class="ids">ID</th>
 					<th>Protocolo</th>
 					<th>Host</th>
 					<th>User</th>
@@ -128,7 +127,6 @@ $(document).ready(function() {
 				{% for acesso in equip_access_list %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{acesso.id}}" /></td>
-					<td class="text_center">{{ acesso.id }}</td>
 					<td class="text_center">{{ acesso.tipo_acesso }}</td>
 					<td>{{ acesso.fqdn }}</td>
 					<td>{{ acesso.user }}</td>

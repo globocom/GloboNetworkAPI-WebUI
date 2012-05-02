@@ -13,7 +13,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 6 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, {% ifequal pp "1" %}6{% else %}5{% endifequal %} ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -63,7 +63,7 @@ $(document).ready(function() {
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
-	autocompleteEquip("{% url equipment.list.ajax %}");
+	autocompleteEquip("{% url equipment.autocomplete.ajax %}", true);
 	
 	$(".btn_equip").live("click", function() {
 		$("#id_equip_name").val($(this).html());
@@ -126,7 +126,6 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th class="ids">ID</th>
 					<th>Interface</th>					
 					<th>Ligação de Front</th>
 					{% ifequal pp "1" %}<th>Ligação de Back</th>{% endifequal %}
@@ -139,7 +138,6 @@ $(document).ready(function() {
 				{% for interface in equip_interface %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ interface.id }}" /></td>
-					<td class="text_center">{{ interface.id }}</td>
 					<td>{{ interface.interface }}</td>
 					<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_front }}</a> {{ interface.nome_ligacao_front }}</td>
 					{% ifequal pp "1" %}<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_back }}</a> {{ interface.nome_ligacao_back }}</td>{% endifequal %}

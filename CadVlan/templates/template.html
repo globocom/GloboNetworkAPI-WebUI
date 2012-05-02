@@ -28,6 +28,55 @@
 				$(".loading").ajaxStop(function() {
 					$(this).hide();
 				});
+				
+				$("#id_new_pass").val("");
+				
+				$("#modal").click(function(){
+					$("#dialog-form-home").dialog("open");
+				});
+				
+				$("#change_pass").click(function() {
+					$.ajax({
+						url: "{% url home.change.pass %}",
+						success: function(data) {
+							$("#change_pass_form").html(data);
+							$("#dialog-form-home").dialog("open");
+						}
+					});
+				});
+				
+				$("#dialog-form-home").dialog({
+					height: 260,
+					width: 500,
+					modal: true,
+					autoOpen: false,
+					draggable: false,
+					resizable: false,
+					buttons: {
+						"Alterar": function() {
+							data_form = $("#new_pass_form").serialize();
+							$.ajax({
+								url: "{% url home.change.pass %}",
+								data: data_form,
+								type: "POST",
+								success: function() {
+									$("#dialog-form-home").dialog("close");
+									location.reload();
+								},
+								error: function(data) {
+									$("#change_pass_form").html(data.responseText);
+									$(this).dialog("open");
+								}
+							});
+						},
+						"Cancelar": function() {
+							$(this).dialog("close");
+						}
+					}
+				});
+				
+		
+				
 			})
 		</script>
 		{% block header %}{% endblock %}
@@ -40,11 +89,12 @@
 			{% if request|is_authenticated %}
 				<div id="user">
 					<div id="name"><img id="img" src="{{ MEDIA_URL }}/img/user_left.png" width="45" height="46" /><div id="text">{% user_name request %}</div><img src="{{ MEDIA_URL }}/img/user_right.png" width="19" height="46" /></div>
-					<div id="btn"><div id="text" onclick="window.location='/logout'">Logout</div></div>
+					<div class="btn"><div id="change_pass" class="text" style="width: 80px">Alterar Senha</div></div>
+					<div class="btn"><div class="text" onclick="window.location='/logout'">Logout</div></div>
 					
 					{% has_perm USER_ADMINISTRATION True None %}
 					{% if has_perm %}
-						<div id="btn"><div id="text">Admin</div></div>
+						<div class="btn"><div class="text">Admin</div></div>
 					{% endif %}
 					
 					{% block btns %}{% endblock %}
@@ -67,7 +117,7 @@
 							
 							{% has_perm EQUIPMENT_MANAGEMENT None True %}
 							{% if has_perm %}
-							<li><a href="#">Equipamentos</a></li>
+							<li><a href="{% url equipment.search.list %}">Equipamentos</a></li>
 							{% endif %}
 							
 							{% has_perm ENVIRONMENT_MANAGEMENT None True %}
@@ -124,7 +174,7 @@
 							
 							{% has_perm ENVIRONMENT_MANAGEMENT True None %}
 							{% if has_perm %}
-							<li><a href="#">Ambiente</a></li>
+							<li><a href="{% url environment.form %}">Ambiente</a></li>
 							{% endif %}
 							
 							<li class="separator"></li>
@@ -195,7 +245,12 @@
 		<div id="content">
 		{% block content %}{% endblock %}
 		</div>
-
+		
+		<div id="dialog-form-home" title="Alterar Senha">
+			<div id="change_pass_form">
+			</div>
+		</div>
+		
 		<div class="loading">
 			<br />
 			<p style="text-align: center;"><img src="{{ MEDIA_URL }}/img/ajax-loading.gif" width="32" height="32" /></p>

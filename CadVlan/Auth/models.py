@@ -46,6 +46,9 @@ class User(object):
 
     def get_active(self):
         return self.__active
+    
+    def set_password(self,password):
+        self.__password = password
 
     def has_perm(self, permission,  write = None, read = None):
         '''Validates that the user has access permission

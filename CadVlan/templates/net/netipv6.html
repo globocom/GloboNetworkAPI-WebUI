@@ -2,6 +2,8 @@
 
 {% load util %}
 
+{% block title %}[Detalhes da Rede IPv6]{% endblock %}
+
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
@@ -20,7 +22,7 @@ $(document).ready(function() {
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Rede</a></li>
 	</ul>
 	<div id="tabs-1">
-		<form id="add_form" method="post" action="">
+		
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			<table>
@@ -39,6 +41,10 @@ $(document).ready(function() {
 						<td><label style="width: 350px;color: blue;text-align: center;">{{n.block1}}:{{n.block2}}:{{n.block3}}:{{n.block4}}:{{n.block5}}:{{n.block6}}:{{n.block7}}:{{n.block8}}</label></td>
 					</tr>
 					<tr>
+						<td><label for="bloco_vlan">Bloco</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{n.block}}</label></td>
+					</tr>
+					<tr>
 					
 						<td><label for="sit_vlan">Máscara</label></td>
 						<td><label style="width: 350px;color: blue;text-align: center;">{{n.mask1}}:{{n.mask2}}:{{n.mask3}}:{{n.mask4}}.{{n.mask5}}:{{n.mask6}}:{{n.mask7}}:{{n.mask8}}</label></td>
@@ -53,7 +59,7 @@ $(document).ready(function() {
 				{% include "net/ip6.html" %}
 			</div>
 		
-		</form>
+	
 	</div>
 </div>
 {% endblock %}

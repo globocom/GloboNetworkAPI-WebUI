@@ -5,11 +5,13 @@
 {% block title %}[Vlan - Listagem]{% endblock %}
 
 {% block header %}
+<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.tab.js"></script>
+
 <script type="text/javascript">
 
 function setupAjaxForm() {
 	form = {};
-	$("#search_form input[type^='text'], #search_form input[type='hidden'], #search_form select, #search_form input[name='subnet']:checked").each(function() {
+	$("#search_form input[type^='text'], #search_form input[type='hidden'], #search_form select, #search_form input[name='subnet']:checked, #search_form input[name='ip_version']:checked").each(function() {
 		form[$(this).attr("name")] = $(this).val();
 	});
 	$("#search_form input[type='checkbox']").each(function() {
@@ -36,6 +38,13 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#ip_all").click(function() {
+		$("input.ipv4").val("");
+		$("input.ipv6").val("");
+		$(".ipv4").hide();
+		$(".ipv6").hide();
+	});
+	
 	$("#ip_v4").click(function() {
 		$("input.ipv6").val("");
 		$(".ipv6").hide();
@@ -58,7 +67,7 @@ $(document).ready(function() {
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
 		"aoColumnDefs": [
-		                 { "bSortable": false, "aTargets": [ 0, 7, 9 ] }
+		                 { "bSortable": false, "aTargets": [ 0, 1, 7 ] }
 		     			]
 	});
 	
@@ -89,7 +98,7 @@ $(document).ready(function() {
 		} else if (version == 1) {
 			version = "ipv6";
 			qnt = 8;
-		} else {
+		} else if (version != 2) {
 			return false;
 		}
 		
@@ -105,20 +114,17 @@ $(document).ready(function() {
 			}
 		});
 		
+		$("#search_form input[name='networkv6']").val("");
+		$("#search_form input[name='networkv4']").val("");
+		
 		if (version == "ipv4") {
 			if (value.length > 4) {
 				$("#search_form input[name='networkv4']").val(value);
 				$("#search_form input[name='networkv6']").val("");
-			} else {
-				$("#search_form input[name='networkv6']").val("");
-				$("#search_form input[name='networkv4']").val("");
 			}
-		} else {
+		} else if (version == "ipv6") {
 			if (value.length > 8) {
 				$("#search_form input[name='networkv6']").val(value);
-				$("#search_form input[name='networkv4']").val("");
-			} else {
-				$("#search_form input[name='networkv6']").val("");
 				$("#search_form input[name='networkv4']").val("");
 			}
 		}
@@ -127,11 +133,11 @@ $(document).ready(function() {
 		oTable.fnAjaxUpdate();
 	});
 	
-	$("#btn_clear").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
+	$("#btn_clear").button({ icons: {primary: "ui-icon-close"}, text: false }).click(function() {
 		$("#ip_v4").click();
 	});
 	
-	$("#tool").buttonset();
+	$(".tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 		alert("Implementar")
@@ -153,7 +159,7 @@ $(document).ready(function() {
 	});
 	
 	$("#vlan_list tbody tr").live("click", function(e) {
-		if (e.target.nodeName != 'A' && e.target.nodeName != 'INPUT' && (e.target.nodeName != 'DIV' && e.target.className != 'expand')) {
+		if (!(e.target.nodeName == 'A' || e.target.nodeName == 'SPAN' || e.target.nodeName == 'INPUT' || (e.target.nodeName == 'DIV' && e.target.className == 'expand'))) {
 			location.href = $(this).find(".table_id").attr("lang");
 		}
 	});
@@ -201,7 +207,7 @@ input {
 								<th>Nome</th>
 								<th>Ambiente</th>
 								<th>Tipo</th>
-								<th>Rede <label for="ip_v4"><input type="radio" id="ip_v4" name="ip_version" checked="checked" value="0" />IPv4</label> <label for="ip_v6"><input type="radio" id="ip_v6" name="ip_version" value="1" />IPv6</label></th>
+								<th>Rede <label for="ip_all"><input type="radio" id="ip_all" name="ip_version" value="2" />Todos</label> <label for="ip_v4"><input type="radio" id="ip_v4" name="ip_version" checked="checked" value="0" />IPv4</label> <label for="ip_v6"><input type="radio" id="ip_v6" name="ip_version" value="1" />IPv6</label></th>
 								<th></th>
 							</tr>
 						</thead>
@@ -211,8 +217,8 @@ input {
 								<td>{{ search_form.name }}</td>
 								<td>{{ search_form.environment }}</td>
 								<td>{{ search_form.net_type }}</td>
-								<td><input type="text" class="ip_input ipv6 ipv4" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" /><label class="ipv4">/</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" /><label></label><label style="display: none;" class="ipv6">/</label><input type="text" class="ip_input ipv6" style="display: none;" /></td>
-								<td style="padding-top: 4px;"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></td>
+								<td><input type="text" class="ip_input ipv6 ipv4" name="oct1" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct2" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct3" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct4" onkeyup="changeInput(this, true)" /><label class="ipv4">/</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct5" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct6" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct7" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">/</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct9" onkeyup="changeInput(this, true)" /></td>
+								<td style="padding-top: 4px;"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
 							</tr>
 							<tr>
 								<td></td>
@@ -230,7 +236,7 @@ input {
 		<div class="buttons">
 			<div style=" color:#EE0000; float:left; margin-top: 6px; margin-left: 4px;"><img border="0" src="/media/img/quadrado.gif"> Redes ainda sem validação de Acl fornecida pela Equipe de Segurança.</div>
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
-			<span id="tool">
+			<span class="tool">
 			<button id="btn_new">Novo Registro</button>
 			{% has_perm VLAN_MANAGEMENT True None %}
 			{% if has_perm %}
@@ -253,15 +259,14 @@ input {
 			<col width="8%" />
 			<col width="16%" />
 			<col width="22%" />
-			<col width="13%" />
+			<col width="15%" />
 			<col width="12%" />
 			<col width="10%" />
-			<col width="11%" />
-			<col width="3%" />
+			<col width="12%" />
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th>ID</th>
+					<th></th>
 					<th>Número</th>
 					<th>Nome</th>
 					<th>Ambiente</th>
@@ -269,7 +274,6 @@ input {
 					<th>Rede</th>
 					<th>Roteamento Em</th>
 					<th>Arquivo ACL</th>
-					<th></th>
 				</tr>
 			</thead>
 			<tbody>

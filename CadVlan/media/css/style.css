@@ -58,12 +58,12 @@ body {
 	float: left;
 }
 
-#btn {
+.btn {
 	border: 1px solid #D3D3D3;
 	float: left;
 }
 
-#btn #text {
+.btn .text {
 	background: url(/media/img/top_btn_bg.png) repeat-x;
 	border: 1px solid #FFF;
 	line-height: 42px;
@@ -75,7 +75,7 @@ body {
 	cursor: pointer;
 }
 
-#btn #text:hover {
+.btn .text:hover {
 	background: url(/media/img/top_btn_bg_over.png) repeat-x;
 }
 
@@ -136,6 +136,10 @@ body {
 
 .error {}
 .error span { background-position: -32px -192px; }
+
+.ui-accordion-header span, .ui-accordion-header a {
+	cursor: default !important;
+}
 
 #search_form table li {
 	list-style: none;

@@ -22,7 +22,7 @@ $(document).ready(function() {
 		location.href = "{% url equip.access.search.list %}";
 	});
 	
-	autocompleteEquip("{% url equipment.list.ajax %}");
+	autocompleteEquip("{% url equipment.autocomplete.ajax %}", true);
 	
 })
 </script>

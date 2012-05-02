@@ -9,7 +9,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -48,8 +48,11 @@ $(document).ready(function() {
 		//location.reload();
 	});
 	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	
 	$("#network_list tbody tr").live("click", function(e) {
-		if (e.target.nodeName != 'A' && e.target.nodeName != 'INPUT') {
+		if (e.target.nodeName != 'A' && e.target.nodeName != 'INPUT' && e.target.nodeName != 'SPAN') {
 			location.href = $(this).find(".table_id").attr("lang");
 		}
 	});
@@ -92,18 +95,16 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th class="ids">ID</th>
 					<th>Rede</th>					
 					<th>Máscara</th>
 					<th>Tipo de Rede</th>
-					<th>Editar</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for net_vlan in net_vlans %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ net_vlan.id }}" /></td>
-					<td class="text_center">{{ net_vlan.id }}</td>
 					{% if net_vlan.ip4 %}
 						<td lang="{% url network.ip4.list.by.id net_vlan.id %}" class="table_id">{{ net_vlan.net_ip_final }}</td>
 					{% else %}
@@ -112,7 +113,7 @@ $(document).ready(function() {
 					<td>{{ net_vlan.mask_ip_final }}</td>
 					<td class="text_center">{{ net_vlan.network_type }}</td>
 				
-					<td><a href="#">Editar</a></td>
+					<td class="text_center"><a href="#" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

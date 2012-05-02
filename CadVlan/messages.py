@@ -23,7 +23,8 @@ auth_messages = {
     '404':                  u'Página não encontrada: [URL: %s]',
     '500':                  u'Ocorreu um erro ao executar sua ação, contate o Administrador do sistema.',
     'user_email_invalid':   u'Usuário e/ou email incorretos.',
-    'email_success':        u'Nova senha enviada com sucesso.'
+    'email_success':        u'Nova senha enviada com sucesso.',
+    'pass_change_sucess':   u'Senha alterada com sucesso.',
 }
 
 script_messages = {
@@ -56,4 +57,19 @@ equip_script_messages = {
 
 equip_interface_messages = {
     'success_remove':       u'Todas as interfaces selecionadas foram excluídas com sucesso.',
+}
+
+network_ip_messages = {
+    'ip_error':             u'Ip não informado ou informado de forma incorreta.',
+    'ip6_error':            u'Ip não informado ou informado de forma incorreta. IPv6 deve ser informado no formato xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx',
+    'ip_sucess':            u'Ip salvo com sucesso.',
+    'not_ip_in_net':        u'O IP %s não pertence a network %s.',
+    'ip_delete_sucess':     u'Os Ips selecionados foram deletados com sucessos.',
+    'ip_edit_sucess':       u'Ip alterado com sucesso.',
+}
+
+environment_messages = {
+    'divisao_dc_sucess':    u'Divisão DC inserida com sucesso.',
+    'grupo_l3_sucess':      u'Grupo Layer3 inserido com sucesso.',
+    'ambiente_log_sucess':  u'Ambiente Lógico inserido com sucesso.',
 }

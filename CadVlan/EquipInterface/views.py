@@ -8,9 +8,8 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST
-from CadVlan.settings import CACHE_TIMEOUT, PATCH_PANEL_ID
+from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response
-from django.views.decorators.cache import cache_page
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError
@@ -26,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
 def search_list(request):
     
@@ -78,7 +76,6 @@ def search_list(request):
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def delete_all(request):
     

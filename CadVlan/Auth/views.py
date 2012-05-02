@@ -6,25 +6,25 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from django.contrib import messages
-from django.views.decorators.cache import cache_page
-from CadVlan.settings import NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD, URL_HOME, URL_LOGIN, SESSION_EXPIRY_AGE, CACHE_TIMEOUT, EMAIL_FROM, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+from CadVlan.settings import NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD, URL_HOME, URL_LOGIN, SESSION_EXPIRY_AGE, EMAIL_FROM, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from CadVlan import templates
 from CadVlan.Util.Decorators import login_required, log
 from CadVlan.messages import auth_messages
 from CadVlan.Auth.models import User
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Auth.forms import LoginForm, PassForm
+from CadVlan.Auth.forms import LoginForm, PassForm, ChangePassForm
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError
 from CadVlan.Util.utility import make_random_password
-from CadVlan.templates import MAIL_NEW_PASS
-from django.core.mail import send_mail,EmailMessage,SMTPConnection
+from CadVlan.templates import MAIL_NEW_PASS, AJAX_NEW_PASS
+from django.core.mail import EmailMessage,SMTPConnection
 from django.template import loader
 
 import logging
+from CadVlan.Util.shortcuts import render_to_response_ajax
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +122,6 @@ def handler500(request):
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 def home(request):
     return render_to_response(templates.HOME, context_instance=RequestContext(request))
 
@@ -192,3 +191,59 @@ def lost_pass(request):
             
     return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
         
+@log
+@login_required
+def change_password(request):
+    
+    lists = dict()
+    
+    if request.method == 'GET':
+            
+        lists['change_pass_form'] = ChangePassForm()
+        return render_to_response_ajax(AJAX_NEW_PASS, lists, context_instance=RequestContext(request))
+    
+    if request.method == 'POST':
+    
+       
+        change_pass_form = ChangePassForm()
+        
+        try:
+           
+            change_pass_form = ChangePassForm(request.POST)
+            
+            if change_pass_form.is_valid():
+                
+                auth = AuthSession(request.session)
+                client = auth.get_clientFactory()
+                
+                new_password = change_pass_form.cleaned_data['new_pass']
+                user = auth.get_user()
+                user_id = user.get_id()
+                user_current_password = user.get_password()
+                
+                client.create_usuario().change_password(user_id,user_current_password,new_password)
+                user.set_password(new_password)
+                
+                messages.add_message(request, messages.SUCCESS, auth_messages.get("pass_change_sucess")) 
+                
+                # Returns HTML
+                response = HttpResponse(loader.render_to_string(AJAX_NEW_PASS, lists, context_instance=RequestContext(request)))
+                # Send response status with error
+                response.status_code = 200
+                return response
+                
+            else:
+                
+                lists['change_pass_form'] = change_pass_form
+                # Returns HTML
+                response = HttpResponse(loader.render_to_string(AJAX_NEW_PASS, lists, context_instance=RequestContext(request)))
+                # Send response status with error
+                response.status_code = 412
+                return response
+   
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e )
+            
+            lists['change_pass_form'] = change_pass_form
+            return render_to_response_ajax(AJAX_NEW_PASS, lists, context_instance=RequestContext(request))

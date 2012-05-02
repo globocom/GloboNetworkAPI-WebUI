@@ -16,3 +16,13 @@ class LoginForm(forms.Form):
 class PassForm(forms.Form):
     username = forms.CharField(label=u'Usuário' , min_length=3, max_length=45, required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
     email = forms.EmailField(label=u'Email', min_length=6,max_length=300,required=True,error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
+    
+class ChangePassForm(forms.Form):
+    new_pass = forms.CharField(label=u'Nova senha' , min_length=6, max_length=20, required=True, error_messages=error_messages, widget=forms.PasswordInput(attrs={'style': "width: 200px"}))
+    confirm_new_password = forms.CharField(label=u'Confirme a nova senha' , min_length=6, max_length=20, required=True, error_messages=error_messages, widget=forms.PasswordInput(attrs={'style': "width: 200px"}))
+    
+    def clean_confirm_new_password(self):
+        if self.cleaned_data['confirm_new_password'] != self.data['new_pass']:
+            raise forms.ValidationError('Confirmacao da senha nao confere')
+
+        return self.cleaned_data['confirm_new_password']

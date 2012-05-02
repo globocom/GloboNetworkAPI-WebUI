@@ -9,7 +9,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }],
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }],
 	});
 	
 	$("#checkAll").click( function() {
@@ -31,15 +31,15 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		//location.href = "{% url script.form %}";
+		location.href = "{% url network.insert.ip6 id %}";
 	});
 	
 	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir a(s) Rede(s) da Vlan selecionada(s)?')){ 
-			//var data = getSelectionData(oTable);
-			//$("#id_ids").val(data).parent().submit();
+		if (confirm('Excluir um IP não removerá o equipamento do ambiente. Para remover também do ambiente, vá na edição do equipamento.')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
 		}
 	});
 	{% endif %}
@@ -47,6 +47,9 @@ $(document).ready(function() {
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		//location.reload();
 	});
+	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
 })
 </script>
@@ -70,9 +73,9 @@ $(document).ready(function() {
 		</div>
 		{% has_perm EQUIPMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url network.delete.ip6 id%}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in form %}
+			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
@@ -81,26 +84,24 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th class="ids">ID</th>
 					<th>IP</th>					
 					<th>Nome do Equipamento</th>
 					<th>Descrição do IP</th>
-					<th>Editar</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for ip in ips %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ ip.id }}" /></td>
-					<td class="text_center">{{ip.id}}</td>
 					<td>{{ip.block1}}:{{ip.block2}}:{{ip.block3}}:{{ip.block4}}:{{ip.block5}}:{{ip.block6}}:{{ip.block7}}:{{ip.block8}}</td>
 					<td>
 					{% for equip_name in ip.equipamento %}
 						{{ equip_name }}<br/>
 					{% endfor %}
 					</td>
-					<td>{{ ip.descricao }}</td>
-					<td><a href="#">Editar</a></td>
+					<td>{% ifnotequal ip.descricao None %}{{ ip.descricao }}{% endifnotequal %}</td>
+					<td class="text_center"><a href="{% url network.edit.ip6 id ip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

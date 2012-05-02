@@ -8,9 +8,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.templates import EQUIPMENT_SCRIPT_SEARCH_LIST,EQUIPMENT_SCRIPT_ADD_FORM
-from CadVlan.settings import CACHE_TIMEOUT
 from django.shortcuts import render_to_response
-from django.views.decorators.cache import cache_page
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, EquipamentoRoteiroError
@@ -27,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
 def search_list(request):
     
@@ -86,7 +83,6 @@ def search_list(request):
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def delete_all(request):
     
@@ -141,7 +137,6 @@ def delete_all(request):
 
 @log
 @login_required
-@cache_page(CACHE_TIMEOUT)
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def ajax_add_form(request):
     try:

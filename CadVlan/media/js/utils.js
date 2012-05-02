@@ -18,7 +18,7 @@ function getSelectionData(oTable) {
 	return data;
 }
 
-function autocompleteEquip(url) {
+function autocompleteEquip(url, submit) {
 	$.ajax({
 		url: url,
 		dataType: "json",
@@ -31,7 +31,9 @@ function autocompleteEquip(url) {
 					minLength: 1,
 					select: function(event, ui) {
 						$("#id_equip_name").val(ui.item.label);
-						$("#search_form").submit()
+						if (submit) {
+							$("#search_form").submit()
+						}
 					}
 				});
 			}

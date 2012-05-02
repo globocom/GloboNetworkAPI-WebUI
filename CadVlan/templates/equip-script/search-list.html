@@ -90,7 +90,7 @@ $(document).ready(function() {
 		}
 	});
 	
-	autocompleteEquip("{% url equipment.list.ajax %}");
+	autocompleteEquip("{% url equipment.autocomplete.ajax %}", true);
 	
 })
 </script>
@@ -150,7 +150,6 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th class="ids">ID</th>
 					<th>Roteiro</th>					
 					<th>Descrição</th>
 					<th>Tipo de Roteiro</th>
@@ -161,7 +160,6 @@ $(document).ready(function() {
 				{% for script in equip_script %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ script.roteiro_id }}" /></td>
-					<td class="text_center">{{ script.id }}</td>
 					<td>{{ script.roteiro_name }}</td>
 					<td>{{ script.roteiro_desc }}</td>
 					<td>{{ script.tipo_roteiro_name }}</td>

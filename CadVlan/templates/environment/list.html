@@ -85,7 +85,6 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th class="ids">ID</th>
 					<th>Divisão DC</th>					
 					<th>Ambiente Lógico</th>
 					<th>Grupo Layer3</th>
@@ -96,7 +95,6 @@ $(document).ready(function() {
 				{% for ambiente in environment %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ ambiente.id }}" /></td>
-					<td class="text_center">{{ ambiente.id }}</td>
 					<td>{{ ambiente.nome_divisao }}</td>
 					<td>{{ ambiente.nome_ambiente_logico }}</td>
 					<td>{{ ambiente.nome_grupo_l3 }}</td>
