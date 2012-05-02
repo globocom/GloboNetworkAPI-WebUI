@@ -1,0 +1,147 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Ambiente - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#page_tab_2").tabs();
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Ambientes</a></li>
+	</ul>
+	<div id="tabs-1">
+	<form id="form_divisao_dc" action="{% url environment.insert.divisao.dc %}" method="post">
+				{% csrf_token %}
+				{% for field in ambiente %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+				
+			{% endfor %}
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+			
+					
+			</form>	
+	</div>
+</div>
+
+
+<div id="page_tab_2">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Inserir Composição de Ambientes
+</a></li>
+	</ul>
+	<div id="tabs-2">
+		<div id = "insert_divisao_dc">
+			<form id="form_divisao_dc" action="{% url environment.insert.divisao.dc %}" method="post">
+				{% csrf_token %}
+				{% for field in divisaodc_form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+				
+				<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Inserir Divisão DC</button>
+			</div>
+				
+			{% endfor %}
+					
+			</form>
+		</div>
+		<div id = "insert_ambiente_logico" style="float: left;">
+			<form id="form_ambiente_logico" action="{% url environment.insert.ambiente.logico %}" method="post">
+				{% csrf_token %}
+				{% for field in ambientelogico_form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+				
+				<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Inserir Amb. Lógico</button>
+			</div>
+				
+			{% endfor %}
+					
+			</form>
+		</div>
+		<div id = "insert_grupo_l3" style="float: left;">
+			<form id="form_grupo_l3" action="{% url environment.insert.grupo.l3 %}" method="post">
+				{% csrf_token %}
+				{% for field in grupol3_form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+				
+				<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Inserir Grupo L3</button>
+			</div>
+				
+			{% endfor %}
+					
+			</form>
+		</div>
+		
+	</div>
+</div>
+
+{% endblock %}

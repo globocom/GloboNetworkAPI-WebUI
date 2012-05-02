@@ -1,0 +1,72 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[IP6 - Edição]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url network.ip6.list.by.id id_net %}";
+	});
+	
+	$("textarea").maxlength();
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de IP6</a></li>
+	</ul>
+	<div id="tabs-1">
+	
+		<form id="add_form" method="post" action="{% url network.edit.ip6 id_net id_ip6 %}">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			
+			<label for="equipamentos">Equipamento(s)</label><br/>
+			<label id="equipamentos">{{equipamentos}}</label><br/><br/>
+			
+			{% for field in form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					{% if forloop.counter == 1  %}
+					<img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
+					{% endif %}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+			{% endfor %}
+					<label for="block1">IP</label><span style="color: red;">*</span><br/>
+					<input type="text" style="width: 28px" maxlength="4" id="block1" name="block1" value="{{block1}}"/>.<input type="text" maxlength="4" name="block2" style="width: 28px" id="block2" value="{{block2}}"/>.<input type="text" maxlength="4" name="block3" style="width: 28px" id="block3" value="{{block3}}"/>.<input type="text" name="block4" maxlength="4" style="width: 28px" id="block4" value="{{block4}}"/>
+					<input type="text" style="width: 28px" maxlength="4" id="block5" name="block5" value="{{block5}}"/>.<input type="text" maxlength="4" name="block6" style="width: 28px" id="block6" value="{{block6}}"/>.<input type="text" maxlength="4" name="block7" style="width: 28px" id="block7" value="{{block7}}"/>.<input type="text" name="block8" maxlength="4" style="width: 28px" id="block8" value="{{block8}}"/>
+			</div>
+			
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}
