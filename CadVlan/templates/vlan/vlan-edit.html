@@ -1,0 +1,136 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Vlan - Edição]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url vlan.search.list %}";
+	});
+	
+	$("#btn_validate").button().click(function() {
+		$.ajax({
+			data: { vlan: {{id_vlan}} },
+			url: "{% url ajax.vlan.acl.validate %}",
+			success: function() {
+				location.reload();
+				$("#div_btn_validate").html("");
+			},
+			error: function(){
+				location.reload();
+			}
+		});
+		
+	});
+	
+	$("#btn_suggest").button().click(function() {
+		ajax = true
+		
+		if ($("#id_name").val() == ""){
+			
+			alert("Digite um nome para a Vlan");
+			ajax = false;
+			
+		}
+		else {
+			if ($("#id_environment").val() == 0){
+				
+				alert("Selecione um ambiente");
+				ajax = false;
+			}
+		}
+		
+		if (ajax){
+		
+		$.ajax({
+			data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
+			url: "{% url ajax.vlan.acl.file.name %}",
+			dataType: 'text',
+			success: function(data) {
+				$("#id_acl_file").val(data);
+			}
+		});
+	}
+	});
+	
+    $("#id_name").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+        $(this).val(valor);
+    });
+    
+    $("#id_name").mouseover(function() {
+    	 $("#id_name").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+    });
+    
+    $("#id_acl_file").mouseover(function() {
+   	 	$("#id_acl_file").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+   });
+    
+    $("#id_acl_file").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+        $(this).val(valor);
+    });
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Vlan</a></li>
+	</ul>
+	<div id="tabs-1">
+	<form id="add_form" method="post" action="{% url vlan.edit.by.id id_vlan %}">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			{% for field in form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					{% if forloop.counter == 4 %}
+					
+						<button id="btn_suggest" type="button">Sugerir nome do arquivo ACL</button>
+						
+						{% if acl_valida == 'False' %}
+							<div id="div_btn_validate">
+								<button id="btn_validate" type="button">Validar ACL</button>
+							</div>
+						{% endif %}
+					
+					{% endif %}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+			{% endfor %}
+			
+			</div>
+			
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	
+	</div>
+</div>
+{% endblock %}

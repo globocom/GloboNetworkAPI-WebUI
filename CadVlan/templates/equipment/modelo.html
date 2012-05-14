@@ -1,0 +1,12 @@
+{% if modelos %}
+	{% for modelo in modelos %}
+	
+	<option value="{{ modelo.id }}">{{modelo.nome}}</option>
+	
+{% endfor %}
+
+{% else %}
+
+	<option value="0" disabled="disabled">---</option>
+	
+{% endif %}

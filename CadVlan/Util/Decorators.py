@@ -101,7 +101,6 @@ def cache_function(length):
     Cache the result of function
     
     @param length: time in seconds to stay in cache
-    @param key: key to cache, if not passed, function name will be used
     """
     def _decorated(func):
         

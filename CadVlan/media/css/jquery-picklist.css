@@ -1,0 +1,9 @@
+.pickList { max-width: 600px; }
+.pickList_sourceListContainer, .pickList_controlsContainer, .pickList_targetListContainer { margin: 0.25em; display: inline-block; width: 500px; }
+.pickList_controlsContainer { text-align: center; }
+.pickList_controlsContainer button { text-align: center; }
+.pickList_list { list-style-type: none; margin: 0; padding: 0; width: 500px; height: 100px; border: 1px inset; overflow-y: auto; cursor: default; }
+.pickList_selectedListItem { background: none !important; background-color: #A3C8F5 !important; border: none !important; }
+.pickList_listItem { border-bottom: 1px solid #999 !important; }
+.pickList_listLabel { font-size: 0.9em; font-weight: bold; text-align: center; width: 500px }
+.pickList_clear { clear: both; }

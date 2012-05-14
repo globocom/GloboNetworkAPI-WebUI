@@ -16,7 +16,7 @@ $(document).ready(function() {
 		location.href = "{% url network.ip4.list.by.id id %}";
 	});
 	
-	autocompleteEquip("{% url equipment.autocomplete.ajax %}", false);
+	autocomplete("{% url equipment.autocomplete.ajax %}", false, "id_equip_name", false);
 	
 	$("textarea").maxlength();
 	

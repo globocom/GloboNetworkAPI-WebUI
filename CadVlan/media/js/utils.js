@@ -18,7 +18,37 @@ function getSelectionData(oTable) {
 	return data;
 }
 
-function autocompleteEquip(url, submit) {
+function changeInput(input, haveBlock) {
+
+	valor = input.value;
+	nome = input.name;
+
+	if (valor.length > 0) {
+
+		if (valor.charAt((valor.length - 1)) == "."
+				|| valor.charAt((valor.length - 1)) == ":"
+				|| valor.charAt((valor.length - 1)) == "/") {
+
+			i = parseInt(nome.charAt(3)) + 1;
+
+			if ($("#search_form input[name='ip_version']:checked").val() == 0) {
+				qnt = 4;
+				if (haveBlock) { qnt = 5; }
+				if (i > qnt) { return false; }
+			} else {
+				qnt = 8;
+				if (haveBlock) { qnt = 9; }
+				if (i > qnt) { return false; }
+			}
+
+			input.value = valor.substring(0, (valor.length - 1));
+			$("#search_form input[name='oct" + i + "']").focus();
+
+		}
+	}
+}
+
+function autocomplete(url, submit, id, hid) {
 	$.ajax({
 		url: url,
 		dataType: "json",
@@ -26,11 +56,14 @@ function autocompleteEquip(url, submit) {
 			if (data.errors.length > 0) {
 				alert(data.errors)
 			} else {
-				$("#id_equip_name").autocomplete({
+				$("#" + id).autocomplete({
 					source: data.list,
 					minLength: 1,
 					select: function(event, ui) {
-						$("#id_equip_name").val(ui.item.label);
+						$("#" + id).val(ui.item.label);
+						if (hid) {
+							$("#" + id + "_id").val(ui.item.aux)
+						}
 						if (submit) {
 							$("#search_form").submit()
 						}

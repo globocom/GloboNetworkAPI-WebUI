@@ -149,20 +149,21 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 CACHE_EQUIPMENTS_TIMEOUT = 900 # Values in seconds
+CACHE_VLANS_TIMEOUT = 300 # Values in seconds
 
 URL_LOGIN = '/login'
 URL_HOME = '/home'
 
 NETWORK_API_URL = 'http://localhost/'
-NETWORK_API_USERNAME = 'HENRIQUE'
+NETWORK_API_USERNAME = 'CadVlan'
 NETWORK_API_PASSWORD = '12345678'
 
 # Configurações de Email
 EMAIL_FROM = 'globo@s2it.com.br'
-EMAIL_HOST = 'smtp.mail.microsoftonline.com'
+EMAIL_HOST = 'pod51028.outlook.com'
 EMAIL_PORT = '587'
 EMAIL_HOST_USER = 'globo@s2it.com.br'
-EMAIL_HOST_PASSWORD = 's2it@2012'
+EMAIL_HOST_PASSWORD = '123$mudar'
 EMAIL_USE_TLS = True
 
 MAX_RESULT_DEFAULT = 25 # Options-> 10, 25, 50, 100

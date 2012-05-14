@@ -25,6 +25,7 @@ from django.template import loader
 
 import logging
 from CadVlan.Util.shortcuts import render_to_response_ajax
+from smtplib import SMTPException
 
 logger = logging.getLogger(__name__)
 
@@ -173,22 +174,28 @@ def lost_pass(request):
                             send_email = EmailMessage('Solicitação de Nova Senha',  loader.render_to_string(MAIL_NEW_PASS, lists) ,EMAIL_FROM, [email], connection = connection)
                             send_email.content_subtype = "html"
                             send_email.send()
-                        
                             
                             messages.add_message(request, messages.SUCCESS, auth_messages.get("email_success"))
                             modal_auto_open = 'false'
                             return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
-            
-            
+                        
                 messages.add_message(request, messages.ERROR, auth_messages.get("user_email_invalid"))
                 modal_auto_open = 'false'
-        
+                
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e )
         modal_auto_open = 'false'
-            
-            
+    except SMTPException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e )
+        modal_auto_open = 'false'
+    except BaseException, e:
+        logger.exception(e)
+        logger.error("URLError Invalid EMAIL_HOST in settings.py")
+        messages.add_message(request, messages.ERROR, "Invalid EMAIL_HOST in settings.py")
+        modal_auto_open = 'false'
+        
     return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
         
 @log

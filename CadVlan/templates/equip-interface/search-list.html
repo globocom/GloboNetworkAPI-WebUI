@@ -63,7 +63,7 @@ $(document).ready(function() {
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
-	autocompleteEquip("{% url equipment.autocomplete.ajax %}", true);
+	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	
 	$(".btn_equip").live("click", function() {
 		$("#id_equip_name").val($(this).html());

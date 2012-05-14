@@ -1,0 +1,84 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Equipamento - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url equipment.search.list %}";
+	});
+		
+	$('#id_marca').change(function(){
+	    $('#id_modelo').load('/equipment/modelo/'+$('#id_marca').val());
+	});
+	
+	$("#id_grupo").pickList();
+	$("#id_ambiente").pickList();
+	
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+	
+	$("#id_nome").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+        $(this).val(valor);
+ }); 
+	
+	$("#id_nome").mouseover(function() {
+    	 $("#id_nome").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+    });
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Equipamento</a></li>
+	</ul>
+	<div id="tabs-1">
+	
+		<form id="add_form" method="post" action="{% url equipment.form %}">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			{% for field in form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+			{% endfor %}	
+			</div>	
+		
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+				<!-- onClick="selectAll(this.form.grupo_equip,this.form.ambiente_equip,this.form.ambiente,this.form.grupo);" -->
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}

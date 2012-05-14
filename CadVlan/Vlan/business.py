@@ -4,6 +4,9 @@ Created on Apr 3, 2012
 
 @author: tromero
 '''
+from CadVlan.Util.Decorators import cache_function
+from CadVlan.settings import CACHE_VLANS_TIMEOUT
+from CadVlan.Util.utility import check_regex
 
 def montaIPRede(listaIPS, ip4 = True):
     '''
@@ -23,3 +26,16 @@ def montaIPRede(listaIPS, ip4 = True):
             item['ip4'] = False
     return listaIPS
     
+@cache_function(CACHE_VLANS_TIMEOUT)
+def cache_list_vlans(vlan):
+    vlans = vlan.list_all()
+    elist = dict()
+    elist["list"] = vlans["vlan"]
+    return elist
+
+def is_valid_name(name):
+    """
+    Validates Name of Vlan
+    """
+    
+    return check_regex(name, r'^[_+0-9a-zA-Z]/$')

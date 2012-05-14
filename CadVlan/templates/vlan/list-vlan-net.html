@@ -1,6 +1,5 @@
 {% load util %}
 
-{% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
 	
@@ -31,7 +30,7 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		//location.href = "{% url script.form %}";
+		location.href = "{% url network.form.vlan vlan.id %}";
 	});
 	
 	{% has_perm VLAN_MANAGEMENT True None %}
@@ -59,23 +58,22 @@ $(document).ready(function() {
 	
 })
 </script>
+
 <style>
 #network_list tbody tr {
 	cursor: pointer;
 }
 </style>
-{% endblock %}
 
-{% block content %}
 <div id="page_tab_2">
-		<ul>
+	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Redes da Vlan</a></li>
-		</ul>
+	</ul>
 	<div id="tabs-2">
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
-			<button id="btn_new">Novo Registro</button>
+			<button id="btn_new" type="button">Novo Registro</button>
 			{% has_perm VLAN_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
@@ -120,4 +118,3 @@ $(document).ready(function() {
 		</table>
 	</div>
 </div>
-{% endblock %}

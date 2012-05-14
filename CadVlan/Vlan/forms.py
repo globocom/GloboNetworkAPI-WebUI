@@ -30,8 +30,8 @@ class SearchVlanForm(forms.Form):
     environment = forms.ChoiceField(label="Ambiente", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     net_type = forms.ChoiceField(label="Tipo", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 180px"}))
     ip_version = forms.IntegerField(label="Versão", required=True, error_messages=error_messages)
-    networkv4 = forms.CharField(label="Rede IPv4", required=False, min_length=1, max_length=15, error_messages=error_messages, widget=forms.HiddenInput())
-    networkv6 = forms.CharField(label="Rede IPv6", required=False, min_length=1, max_length=39, error_messages=error_messages, widget=forms.HiddenInput())
+    networkv4 = forms.CharField(label="Rede IPv4", required=False, min_length=1, max_length=18, error_messages=error_messages, widget=forms.HiddenInput())
+    networkv6 = forms.CharField(label="Rede IPv6", required=False, min_length=1, max_length=43, error_messages=error_messages, widget=forms.HiddenInput())
     subnet = forms.ChoiceField(label="Exato-Sub/Super Redes", required=False, choices=NETWORK_IP_CHOICES, error_messages=error_messages, widget=forms.RadioSelect, initial=0)
     acl = forms.BooleanField(label="Apenas Acls não validadas", required=False, error_messages=error_messages)
     
@@ -45,3 +45,26 @@ class SearchVlanForm(forms.Form):
             raise forms.ValidationError("Preencha apenas um: Rede IPv4 ou Rede IPv6")
         
         return cleaned_data
+    
+class VlanForm(forms.Form):
+    
+    def __init__(self, environment_list, *args, **kwargs):
+        super(VlanForm, self).__init__(*args, **kwargs)
+        
+        env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
+        env_choices.insert(0, (0, "-"))
+        
+        self.fields['environment'].choices = env_choices
+    
+    name = forms.CharField(label="Nome", required=True, min_length=3, max_length=50, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
+    number = forms.IntegerField(label="Número", required=True, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px","maxlength":"9"}))
+    environment = forms.ChoiceField(label="Ambiente", required=True, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 400px"}))
+    acl_file = forms.CharField(label="Arquivo Acl", required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
+    description = forms.CharField(label="Descrição", required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
+    
+    def clean_environment(self):
+        if int(self.cleaned_data['environment']) <= 0:
+            raise forms.ValidationError('Este campo é obrigatório')
+
+        return self.cleaned_data['environment']
+    

@@ -5,12 +5,17 @@ Author: avanzolin / S2it
 Copyright: ( c )  2009 globo.com todos os direitos reservados.
 """
 
+import re
 from random import choice
 from django.utils.cache import add_never_cache_headers
 from django.http import HttpResponse
 from django.template import loader
 from django.template.context import RequestContext
 
+
+def check_regex(string, regex):
+    pattern = re.compile(regex)
+    return pattern.match(string) is not None
 
 def make_random_password(length=8, allowed_chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'):
         "Generates a random password with the given length and given allowed_chars"

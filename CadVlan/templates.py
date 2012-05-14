@@ -11,10 +11,12 @@ HOME = 'home.html'
 
 
 # Ajax
-AJAX_EQUIPMENT_LIST = 'ajax/equipment-list.json'
+AJAX_AUTOCOMPLETE_LIST = 'ajax/autocomplete-list.json'
+AJAX_VLAN_AUTOCOMPLETE = 'ajax/vlan-autocomplete-list.json'
 AJAX_VLAN_LIST = 'ajax/vlan-list.json'
 AJAX_EQUIP_LIST = 'ajax/equip-list.json'
 AJAX_NEW_PASS = 'ajax/newpass.html'
+AJAX_SUGGEST_NAME = 'ajax/suggest-name.html'
 
 # Script
 SCRIPT_LIST = 'script/list.html'
@@ -26,7 +28,7 @@ SCRIPTTYPE_FORM = 'script-type/form.html'
 
 #Environment
 ENVIRONMENT_LIST = 'environment/list.html'
-ENVIRONMENT_FORM = 'environment/insert-environment.html'
+ENVIRONMENT_FORM = 'environment/form.html'
 
 #Equipment Access
 EQUIPMENTACESS_SEARCH_LIST = 'equip-access/search-list.html'
@@ -42,13 +44,19 @@ EQUIPMENT_INTERFACE_SEARCH_LIST = 'equip-interface/search-list.html'
 
 # Equipment
 EQUIPMENT_SEARCH_LIST = 'equipment/search-list.html'
+EQUIPMENT_FORM = 'equipment/equip-form.html'
+EQUIPMENT_MODELO = 'equipment/modelo.html'
+EQUIPMENT_MODELO_AJAX = 'ajax/select-modelo.html'
 
 #Vlans
 VLAN_SEARCH_LIST = 'vlan/search-list.html'
 VLANS_DEETAIL = 'vlan/list-id.html'
 VLANS_DEETAIL = 'vlan/list-id.html'
+VLAN_FORM = 'vlan/vlan-form.html'
+VLAN_EDIT = 'vlan/vlan-edit.html'
 
 #Network
+NET_FORM = 'net/form.html'
 NETIPV4 = 'net/netipv4.html'
 NETIPV6 = 'net/netipv6.html'
 

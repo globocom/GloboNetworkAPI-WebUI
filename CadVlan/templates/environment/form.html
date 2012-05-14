@@ -1,0 +1,120 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Ambiente - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url environment.list %}";
+	});
+	
+	$("#accordion").accordion({ autoHeight: false });
+	
+	$("#btn_sav_dc").button({ icons: {primary: "ui-icon-plus"}, text: false });
+	$("#btn_sav_al").button({ icons: {primary: "ui-icon-plus"}, text: false });
+	$("#btn_sav_l3").button({ icons: {primary: "ui-icon-plus"}, text: false });
+	
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Ambiente</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="accordion">
+			<h3><a href="#">Composição de Ambientes</a></h3>
+			<div>
+				<form id="form_divisao_dc" action="{% url environment.insert.divisao.dc %}" method="post" style="float: left; margin-right: 10px">
+					{% csrf_token %}
+					{% for field in divisaodc_form %}
+					<div>
+						<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+						{{ field }}
+						{% if forloop.last %}<button id="btn_sav_dc" type="submit" style="margin-left: -2px;">Inserir Divisão DC</button>{% endif %}
+						<p id="error">
+						{% if field.errors %} 
+							{% for error in field.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
+						</p>
+					</div>
+					{% endfor %}
+				</form>
+				<form id="form_ambiente_logico" action="{% url environment.insert.ambiente.logico %}" method="post" style="float: left; margin-right: 10px">
+					{% csrf_token %}
+					{% for field in ambientelogico_form %}
+					<div>
+						<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+						{{ field }}
+						{% if forloop.last %}<button id="btn_sav_al" type="submit" style="margin-left: -2px;">Inserir Amb. Lógico</button>{% endif %}
+						<p id="error">
+						{% if field.errors %} 
+							{% for error in field.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
+						</p>
+					</div>
+					{% endfor %}
+				</form>
+				<form id="form_grupo_l3" action="{% url environment.insert.grupo.l3 %}" method="post" style="float: left;">
+					{% csrf_token %}
+					{% for field in grupol3_form %}
+					<div>
+						<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+						{{ field }}
+						{% if forloop.last %}<button id="btn_sav_l3" type="submit" style="margin-left: -2px;">Inserir Grupo L3</button>{% endif %}
+						<p id="error">
+						{% if field.errors %} 
+							{% for error in field.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
+						</p>
+					</div>
+					{% endfor %}
+				</form>
+				<div style="clear: left;"></div>
+			</div>
+		</div>
+		<form id="form_environment" action="{{ action }}" method="post">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+				{% for field in ambiente %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					{{ field }}
+					<p id="error">
+					{% if field.errors %}
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				</div>
+				{% endfor %}
+			</div>
+			
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+		
+	</div>
+</div>
+{% endblock %}

@@ -67,27 +67,36 @@ urlpatterns += patterns('CadVlan.Equipment.views',
     url('^equipment/autocomplete[/]?$', 'ajax_autocomplete_equips', name='equipment.autocomplete.ajax',),
     url('^equipment/list[/]?$', 'search_list', name='equipment.search.list',),
     url('^equipment/find[/]?$', 'ajax_list_equips', name='equipment.list.ajax',),
+    url('^equipment/form[/]?$', 'equip_form', name='equipment.form',),
+    url('^equipment/modelo/(?P<id_marca>\d+)[/]?$', 'ajax_modelo_equip', name='equipment.modelo.ajax',),
 )
 
 # URL's Environment
 urlpatterns += patterns('CadVlan.Environment.views',
-    url('^environment/list[/]?$','list_all', name='environment.list',),
-    url('^environment/ambiente-logico[/]?$','insert_ambiente_logico', name='environment.insert.ambiente.logico',),
-    url('^environment/grupo-l3[/]?$','insert_grupo_l3', name='environment.insert.grupo.l3',),
-    url('^environment/divisao-dc[/]?$','insert_divisao_dc', name='environment.insert.divisao.dc',),
-    url('^environment/form[/]?$','insert_ambiente', name='environment.form',),
+    url('^environment/list[/]?$', 'list_all', name='environment.list',),
+    url('^environment/ambiente-logico[/]?$', 'insert_ambiente_logico', name='environment.insert.ambiente.logico',),
+    url('^environment/grupo-l3[/]?$', 'insert_grupo_l3', name='environment.insert.grupo.l3',),
+    url('^environment/divisao-dc[/]?$', 'insert_divisao_dc', name='environment.insert.divisao.dc',),
+    url('^environment/form[/]?$', 'insert_ambiente', name='environment.form',),
+    url('^environment/form/(?P<id_environment>\d+)[/]?$', 'edit', name='environment.edit',),
 )
 
 # URL's Vlans
 urlpatterns += patterns('CadVlan.Vlan.views',
+    url('^vlan/autocomplete[/]?$', 'ajax_autocomplete_vlans', name='vlan.autocomplete.ajax',),
     url('^vlan/get/(?P<id_vlan>\d+)[/]?$', 'list_by_id', name='vlan.list.by.id',), 
     url('^vlan/list[/]?$','search_list', name='vlan.search.list',),
     url('^vlan/find[/]?$','ajax_list_vlans', name='vlan.list.ajax',),
-    
+    url('^vlan/form[/]?$','vlan_form',name='vlan.form',), 
+    url('^vlan/aclfilename[/]?$', 'ajax_acl_name_suggest', name='ajax.vlan.acl.file.name',),
+    url('^vlan/edit/(?P<id_vlan>\d+)[/]?$','vlan_edit',name='vlan.edit.by.id',),
+    url('^vlan/validate-acl[/]?$','ajax_validate_acl',name='ajax.vlan.acl.validate',),
 )
 
 # URL's Network
 urlpatterns += patterns('CadVlan.Net.views',
+    url('^network/form[/]?$', 'add_network_form', name='network.form',),
+    url('^network/form/(?P<id_vlan>\d+)[/]?$', 'vlan_add_network_form', name='network.form.vlan',),
     url('^network/get/ip4/(?P<id_net>\d+)[/]?$', 'list_netip4_by_id', name='network.ip4.list.by.id',),
     url('^network/get/ip6/(?P<id_net>\d+)[/]?$', 'list_netip6_by_id', name='network.ip6.list.by.id',),
     url('^network/ip4/(?P<id_net>\d+)[/]?$','insert_ip4',name="network.insert.ip4",),

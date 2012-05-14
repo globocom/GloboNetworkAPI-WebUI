@@ -1,0 +1,4 @@
+{
+  "errors": [{% if messages %}{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}],
+  "list": [{% for iten in list %}"{{ iten|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}]
+}

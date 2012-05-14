@@ -5,8 +5,11 @@
 {% block title %}[Equipamentos - Listagem]{% endblock %}
 
 {% block header %}
-<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.tab.js"></script>
-
+<style>
+#search_form label {
+	vertical-align: middle;
+}
+</style>
 <script type="text/javascript">
 
 function setupAjaxForm() {
@@ -136,7 +139,7 @@ $(document).ready(function() {
 	$(".tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		alert("Implementar")
+		location.href = "{% url equipment.form %}";
 	});
 	
 	{% has_perm EQUIPMENT_MANAGEMENT True None %}

@@ -13,7 +13,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 5 ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -35,7 +35,7 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url script.form %}";
+		location.href = "{% url environment.form %}";
 	});
 	
 	{% has_perm ENVIRONMENT_MANAGEMENT True None %}
@@ -51,6 +51,9 @@ $(document).ready(function() {
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
 	});
+	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
 })
 </script>
@@ -89,6 +92,7 @@ $(document).ready(function() {
 					<th>Ambiente Lógico</th>
 					<th>Grupo Layer3</th>
 					<th>Wiki</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -98,7 +102,8 @@ $(document).ready(function() {
 					<td>{{ ambiente.nome_divisao }}</td>
 					<td>{{ ambiente.nome_ambiente_logico }}</td>
 					<td>{{ ambiente.nome_grupo_l3 }}</td>
-					<td><a href="{{ ambiente.link}}">wiki</a></td>
+					<td>{% ifequal ambiente.link None %}-{% else %}<a href="{{ ambiente.link }}" target="_blank">wiki</a>{% endifequal %}</td>
+					<td class="text_center"><a href="{% url environment.edit ambiente.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

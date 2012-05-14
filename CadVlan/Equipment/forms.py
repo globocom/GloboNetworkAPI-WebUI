@@ -8,10 +8,6 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 from django import forms
 from CadVlan.messages import error_messages
 
-class AjaxAutoCompleteForm(forms.Form):
-    
-    name = forms.CharField(min_length=3, max_length=40, required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'autocomplete': "off"}))
-    
 class SearchEquipmentForm(forms.Form):
     
     def __init__(self, environment_list, type_list, groups_list, *args, **kwargs):
@@ -35,8 +31,8 @@ class SearchEquipmentForm(forms.Form):
     environment = forms.ChoiceField(label="Ambiente", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     type_equip = forms.ChoiceField(label="Tipo", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 180px"}))
     group = forms.ChoiceField(label="Grupo", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 180px"}))
-    ipv4 = forms.CharField(label="IPv4", required=False, min_length=1, max_length=18, error_messages=error_messages, widget=forms.HiddenInput())
-    ipv6 = forms.CharField(label="IPv6", required=False, min_length=1, max_length=43, error_messages=error_messages, widget=forms.HiddenInput())
+    ipv4 = forms.CharField(label="IPv4", required=False, min_length=1, max_length=15, error_messages=error_messages, widget=forms.HiddenInput())
+    ipv6 = forms.CharField(label="IPv6", required=False, min_length=1, max_length=39, error_messages=error_messages, widget=forms.HiddenInput())
     
     def clean(self):
         cleaned_data = super(SearchEquipmentForm, self).clean()
@@ -49,3 +45,47 @@ class SearchEquipmentForm(forms.Form):
                 raise forms.ValidationError("Preencha apenas um: IPv4 ou IPv6")
         
         return cleaned_data
+    
+class EquipForm(forms.Form):
+    def __init__(self,forms_aux,*args,**kwargs):
+        super(EquipForm, self).__init__(*args, **kwargs)
+        
+        marca_choices = [(m['id'], m['nome']) for m in forms_aux["marcas"]]
+        marca_choices.insert(0, (0, "Selecione uma marca"))
+        
+        type_choices = [(tp["id"], tp["nome"]) for tp in forms_aux["tipo_equipamento"]]
+        type_choices.insert(0, (0, "Selecione um tipo de Equipamento"))
+        
+        self.fields['tipo_equipamento'].choices = type_choices
+        self.fields['marca'].choices = marca_choices
+        self.fields['grupo'].choices = ([(m['id'], m['nome']) for m in forms_aux["grupos"]])
+        self.fields['ambiente'].choices = ([(env['id'], env["nome_divisao"] + " - " + env["nome_ambiente_logico"] + " - " + env["nome_grupo_l3"]) for env in forms_aux["ambientes"]])
+        
+        if forms_aux['modelos'] is not None:
+            self.fields['modelo'].choices = ([(m['id'], m['nome']) for m in forms_aux["modelos"]])
+       
+        
+    nome = forms.CharField(label=u'Nome' , min_length=3, max_length=30, required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))   
+    tipo_equipamento = forms.ChoiceField(label="Tipo equipamento",required=True,widget=forms.Select(attrs={'style': "width: 400px"}), error_messages=error_messages)
+    marca = forms.ChoiceField(label="Marca" ,required=True, widget=forms.Select(attrs={'style': "width: 400px"}), error_messages=error_messages)
+    modelo = forms.ChoiceField(label=u'Modelo' , required=True,  widget=forms.Select(attrs={'style': "width: 400px"}),error_messages=error_messages)
+    grupo = forms.MultipleChoiceField(label="Grupos Disponíveis",required=True,widget=forms.SelectMultiple(attrs={'style': "width: 400px"}), error_messages=error_messages)
+    ambiente = forms.MultipleChoiceField(label="Ambientes Disponíveis",required=False,widget=forms.SelectMultiple(attrs={'style': "width: 400px"}), error_messages=error_messages)
+    
+    def clean_tipo_equipamento(self):
+        if int(self.cleaned_data['tipo_equipamento']) <= 0:
+            raise forms.ValidationError('Este campo é obrigatório')
+
+        return self.cleaned_data['tipo_equipamento']
+    
+    def clean_marca(self):
+        if int(self.cleaned_data['marca']) <= 0:
+            raise forms.ValidationError('Este campo é obrigatório')
+
+        return self.cleaned_data['marca']
+    
+    def clean_modelo(self):
+        if int(self.cleaned_data['modelo']) <= 0:
+            raise forms.ValidationError('Este campo é obrigatório')
+
+        return self.cleaned_data['modelo']

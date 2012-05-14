@@ -9,12 +9,14 @@
 		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
 		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/globo/jquery-ui-1.8.17.custom.css" />
 		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/dataTable.css" />
-		<script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/jquery-picklist.css" />
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-ui.custom.min.js"></script>	
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dataTables.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/hoverIntent.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dropdown.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-picklist.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(".error-messages").each(function() {
@@ -164,12 +166,17 @@
 						<ul class="sub_menu">
 							{% has_perm VLAN_MANAGEMENT True None %}
 							{% if has_perm %}
-							<li><a href="#">Vlan</a></li>
+							<li><a href="{% url vlan.form %}">Vlan</a></li>
+							{% endif %}
+							
+							{% has_perm VLAN_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="{% url network.form %}">Rede</a></li>
 							{% endif %}
 							
 							{% has_perm EQUIPMENT_MANAGEMENT True None %}
 							{% if has_perm %}
-							<li><a href="#">Equipamento</a></li>
+							<li><a href="{% url equipment.form %}">Equipamento</a></li>
 							{% endif %}
 							
 							{% has_perm ENVIRONMENT_MANAGEMENT True None %}

@@ -12,11 +12,11 @@ from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
-from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT,\
-    NETWORK_TYPE_MANAGEMENT
-from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT
+from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP,\
+    IPS
+from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, NET_FORM
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
-from CadVlan.Net.forms import IPForm, IPEditForm
+from CadVlan.Net.forms import IPForm, IPEditForm, NetworkForm
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
 from CadVlan.messages import network_ip_messages
 from CadVlan.forms import DeleteForm
@@ -24,7 +24,103 @@ from CadVlan.messages import error_messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
+
 logger = logging.getLogger(__name__)
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_VIP, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def add_network_form(request):
+    
+    lists = dict()
+    
+    try:
+        
+        # Get User
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        # Get all needs from NetworkAPI
+        net_type_list = client.create_tipo_rede().listar()
+        env_vip_list = client.create_environment_vip().list_all()
+        
+        # Forms
+        lists['form'] = NetworkForm(net_type_list, env_vip_list)
+        
+        # If form was submited
+        if request.method == 'POST':
+            
+            # Set data in form
+            form = NetworkForm(net_type_list, env_vip_list, request.POST)
+            
+            # Validate
+            if form.is_valid():
+                
+                vlan_id = form.cleaned_data['vlan_name_id']
+                net_type = form.cleaned_data['net_type']
+                env_vip = form.cleaned_data['env_vip']
+                net_version = form.cleaned_data['ip_version']
+                networkv4 = form.cleaned_data['networkv4']
+                networkv6 = form.cleaned_data['networkv6']
+                
+                if net_version == "0":
+                    network = networkv4
+                else:
+                    network = networkv6
+                
+                # Business
+                client.create_vlan().get(vlan_id)
+                client.create_network().add_network(network, vlan_id, net_type, env_vip)
+                messages.add_message(request, messages.SUCCESS, network_ip_messages.get("success_insert"))
+                
+                return HttpResponseRedirect(reverse('vlan.list.by.id', args=[vlan_id]))
+            
+            else:
+                # If invalid, send all error messages in fields
+                lists['form'] = form
+                
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        # If some api error occurred, try to send data to html
+        try:
+            lists['form'] = form
+        except NameError:
+            pass
+    
+    return render_to_response(NET_FORM, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_VIP, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def vlan_add_network_form(request, id_vlan):
+    
+    lists = dict()
+    
+    try:
+        
+        if request.method == 'GET':
+            
+            # Get User
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+            
+            # Get all needs from NetworkAPI
+            net_type_list = client.create_tipo_rede().listar()
+            env_vip_list = client.create_environment_vip().list_all()
+            
+            # Business
+            vlan = client.create_vlan().get(id_vlan)
+            vlan = vlan.get("vlan")
+            
+            # Forms
+            lists['form'] = NetworkForm(net_type_list, env_vip_list, initial={'vlan_name': vlan.get("nome"), 'vlan_name_id': vlan.get("id")})
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    
+    return render_to_response(NET_FORM, lists, context_instance=RequestContext(request))
 
 @log
 @login_required
@@ -164,7 +260,7 @@ def list_netip6_by_id(request, id_net):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def insert_ip4(request, id_net):
     
     lists = dict()
@@ -247,7 +343,7 @@ def insert_ip4(request, id_net):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def insert_ip6(request, id_net):
     lists = dict()
     lists['id'] = id_net
@@ -345,7 +441,7 @@ def insert_ip6(request, id_net):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def edit_ip4(request,id_net,id_ip4):
     try :
         
@@ -456,7 +552,7 @@ def edit_ip4(request,id_net,id_ip4):
         
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def edit_ip6(request,id_net,id_ip6):
     try :
         
@@ -592,7 +688,7 @@ def edit_ip6(request,id_net,id_ip6):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def delete_ip4(request, id_net):
     try:
         
@@ -613,7 +709,7 @@ def delete_ip4(request, id_net):
                 
             if form.is_valid():
                 # Get user
-                ip = auth.get_clientFactory().create_ip()
+                ip = client.create_ip()
             
                 # All ids to be deleted
                 ids = form.cleaned_data['ids']
@@ -676,7 +772,7 @@ def delete_ip4(request, id_net):
     return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def delete_ip6(request, id_net):
     try:
         

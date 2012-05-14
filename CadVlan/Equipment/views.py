@@ -13,16 +13,17 @@ from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Equipment.business import cache_list_equipment
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.templates import AJAX_EQUIPMENT_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS,\
-    AJAX_EQUIP_LIST
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS,\
+    AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO_AJAX, EQUIPMENT_MODELO
 from django.template.context import RequestContext
 from CadVlan.forms import DeleteForm
-from CadVlan.Equipment.forms import SearchEquipmentForm
+from CadVlan.Equipment.forms import SearchEquipmentForm, EquipForm
 from CadVlan.Util.utility import DataTablePaginator
 from networkapiclient.Pagination import Pagination
 from django.http import HttpResponseServerError, HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template import loader
+from CadVlan.messages import equip_messages
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ def ajax_autocomplete_equips(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
     
-    return render_to_response_ajax(AJAX_EQUIPMENT_LIST, equip_list, context_instance=RequestContext(request))
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_LIST, equip_list, context_instance=RequestContext(request))
 
 @log
 @login_required
@@ -164,3 +165,126 @@ def search_list(request):
         messages.add_message(request, messages.ERROR, e)
         
     return render_to_response(EQUIPMENT_SEARCH_LIST, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+def equip_form(request):
+    try:
+        
+        lists = dict()
+        #Enviar listas para formar os Selects do formulário
+        forms_aux = dict()
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        #List All - Tipo Equipamento
+        forms_aux['tipo_equipamento'] =  client.create_tipo_equipamento().listar().get('tipo_equipamento')
+        #List All - Marcas
+        forms_aux['marcas'] = client.create_marca().listar().get('marca')
+        #List All - Grupos
+        forms_aux['grupos'] = client.create_grupo_equipamento().listar().get('grupo')
+        #List All - Ambientes
+        forms_aux['ambientes'] = client.create_ambiente().listar().get('ambiente')
+        
+        if request.method == 'POST':
+            
+            try:
+                marca = int(request.POST['marca'])
+            except:
+                marca = 0
+            
+            if marca  > 0 :
+                forms_aux['modelos'] = client.create_modelo().listar_por_marca(marca).get('modelo')
+            else:
+                forms_aux['modelos'] = None
+                
+            form = EquipForm(forms_aux, request.POST)
+            
+            if form.is_valid():
+                
+                lists['form'] = form
+                
+                grupos = form.cleaned_data['grupo']
+                ambientes = form.cleaned_data['ambiente']
+                nome = form.cleaned_data['nome']
+                marca = form.cleaned_data['marca']
+                modelo = form.cleaned_data['modelo']
+                tipo_equipamento = form.cleaned_data['tipo_equipamento']
+                
+                grupo_aux = grupos[0]
+                
+                equip = client.create_equipamento().inserir(nome, tipo_equipamento, modelo, grupo_aux)
+                equip = equip.get('equipamento').get('id')
+                for g in grupos:
+                    if g != grupo_aux:
+                        client.create_equipamento().associar_grupo(equip, g)
+                        
+                for amb in ambientes:
+                    client.create_equipamento_ambiente().inserir(equip, amb)
+                    
+                messages.add_message(request, messages.SUCCESS, equip_messages.get("equip_sucess"))
+                
+                #redirecionar
+                return redirect("equipment.search.list")
+                
+            else:
+                lists['form'] = form
+        #get        
+        else:
+            #Set Form
+            forms_aux['modelos'] = None
+            
+            lists['form'] = EquipForm(forms_aux)
+                
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return render_to_response(EQUIPMENT_FORM,lists,context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+def ajax_modelo_equip(request, id_marca):
+    try:
+        
+        lists = dict()
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+            
+        marca = int(id_marca)
+            
+        if  marca > 0:
+            modelos = client.create_modelo().listar_por_marca(marca)
+            lists['modelos'] = modelos.get('modelo')
+                
+            # Returns HTML
+            response = HttpResponse(loader.render_to_string(EQUIPMENT_MODELO, lists, context_instance=RequestContext(request)))
+            # Send response status with error
+            response.status_code = 200
+            return response
+                
+        else:
+                
+            # Returns HTML
+            response = HttpResponse(loader.render_to_string(EQUIPMENT_MODELO, lists, context_instance=RequestContext(request)))
+            # Send response status with error
+            response.status_code = 200
+            return response
+        
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    except:
+        logger.error('Erro na requição Ajax de Busca de Modelo do Equipamento por Marca') 
+    # Returns HTML
+    response = HttpResponse(loader.render_to_string(EQUIPMENT_MODELO, lists, context_instance=RequestContext(request)))
+    # Send response status with error
+    response.status_code = 200
+    return response 

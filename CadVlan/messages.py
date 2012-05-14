@@ -25,6 +25,7 @@ auth_messages = {
     'user_email_invalid':   u'Usuário e/ou email incorretos.',
     'email_success':        u'Nova senha enviada com sucesso.',
     'pass_change_sucess':   u'Senha alterada com sucesso.',
+    'email_error':          u'Ocorreu um erro ao enviar email.'
 }
 
 script_messages = {
@@ -60,6 +61,7 @@ equip_interface_messages = {
 }
 
 network_ip_messages = {
+    'success_insert':       u'Rede incluída com sucesso.',
     'ip_error':             u'Ip não informado ou informado de forma incorreta.',
     'ip6_error':            u'Ip não informado ou informado de forma incorreta. IPv6 deve ser informado no formato xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx',
     'ip_sucess':            u'Ip salvo com sucesso.',
@@ -69,7 +71,24 @@ network_ip_messages = {
 }
 
 environment_messages = {
+    'success_insert':       u'Ambiente incluído com sucesso.',
+    'success_edit':         u'Ambiente alterado com sucesso.',
     'divisao_dc_sucess':    u'Divisão DC inserida com sucesso.',
     'grupo_l3_sucess':      u'Grupo Layer3 inserido com sucesso.',
-    'ambiente_log_sucess':  u'Ambiente Lógico inserido com sucesso.',
+    'ambiente_log_sucess':  u'Ambiente Lógico inserido com sucesso.'
+}
+
+equip_messages = {
+                    
+    'equip_sucess':         u'Equipamento inserido com sucesso',                
+
+}
+
+vlan_messages = {
+
+    'vlan_sucess':          u'Vlan cadastrada com sucesso.',
+    'vlan_edit_sucess':     u'Vlan alterada com sucesso.',
+    'acl_file_sucess':      u'ACL validado com sucesso.',
+    'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',                 
+                 
 }

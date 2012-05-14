@@ -1,0 +1,20 @@
+
+{% if modelo %}
+
+	<label>Modelo</label><span style="color: red;">*</span><br/>
+	<select style="width:400px" id="id_modelo" name="modelo">
+
+	<option value="0">---</option>
+
+	{% for modelo in modelos %}
+
+	<option value="{{ modelo.id }}">{{modelo.nome}}</option>
+
+{% endfor %}
+
+{% else %}
+
+	<label>Modelo</label><span style="color: red;">*</span><br/>
+	<select style="width:400px" disabled="disabled"><option value="0">---</option></select>
+
+{% endif %}

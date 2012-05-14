@@ -6,6 +6,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 from django import template
+from django.template.defaultfilters import stringfilter
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.models import Permission, PermissionMenu, SetVariable
 from CadVlan.settings import MAX_RESULT_DEFAULT
@@ -13,7 +14,7 @@ from CadVlan.settings import MAX_RESULT_DEFAULT
 register = template.Library()
 
 # Constants
-MAX_SUBSTRING = 50;
+MAX_SUBSTRING = 32;
 
 
 @register.simple_tag
@@ -21,7 +22,8 @@ def bold(value):
     return '<b>%s</b>' % value
 
 @register.filter
-def substring(value):
+@stringfilter
+def substr(value):
     if len(value) > MAX_SUBSTRING :
         return value[0:MAX_SUBSTRING] + "..."
     else:

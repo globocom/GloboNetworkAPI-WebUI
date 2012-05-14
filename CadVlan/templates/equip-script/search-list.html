@@ -90,7 +90,7 @@ $(document).ready(function() {
 		}
 	});
 	
-	autocompleteEquip("{% url equipment.autocomplete.ajax %}", true);
+	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	
 })
 </script>
