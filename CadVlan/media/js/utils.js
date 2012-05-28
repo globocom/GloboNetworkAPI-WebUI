@@ -4,6 +4,14 @@
  * Copyright: ( c )  2012 globo.com todos os direitos reservados.
  */
 
+function isEmpty(str) {
+    return (!str || 0 === str.length);
+}
+
+function isBlank(str) {
+    return (!str || /^\s*$/.test(str));
+}
+
 function replaceAll(string, token, newtoken) {
 	while (string.indexOf(token) != -1) {
 		string = string.replace(token, newtoken);

@@ -60,6 +60,10 @@ urlpatterns += patterns('CadVlan.EquipScript.views',
 urlpatterns += patterns('CadVlan.EquipInterface.views',
     url('^equip-interface/list[/]?$', 'search_list', name='equip.interface.search.list',),
     url('^equip-interface/delete[/]?$','delete_all', name='equip.interface.delete',),
+    url('^equip-interface/add/(?P<equip_name>[^/]+)[/]?$','add_form', name='equip.interface.form',),
+    url('^equip-interface/edit/(?P<equip_name>[^/]+)/(?P<id_interface>\d+)[/]?$','edit_form', name='equip.interface.edit.form',),
+    url('^equip-interface/addseveral/(?P<equip_name>[^/]+)[/]?$','add_several_forms', name='equip.interface.several.form',),
+    url('^equip-interface/disconnect/(?P<id_interface_1>\d+)/(?P<back_or_front_1>\d+)/(?P<id_interface_2>\d+)/(?P<back_or_front_2>\d+)[/]?$','disconnect', name='equip.interface.disconnect',),
 )
 
 # URL's Equipment
@@ -68,6 +72,7 @@ urlpatterns += patterns('CadVlan.Equipment.views',
     url('^equipment/list[/]?$', 'search_list', name='equipment.search.list',),
     url('^equipment/find[/]?$', 'ajax_list_equips', name='equipment.list.ajax',),
     url('^equipment/form[/]?$', 'equip_form', name='equipment.form',),
+    url('^equipment/edit/(?P<id_equip>\d+)[/]?$', 'equip_edit', name='equipment.edit.by.id',),
     url('^equipment/modelo/(?P<id_marca>\d+)[/]?$', 'ajax_modelo_equip', name='equipment.modelo.ajax',),
 )
 
@@ -96,6 +101,8 @@ urlpatterns += patterns('CadVlan.Vlan.views',
 # URL's Network
 urlpatterns += patterns('CadVlan.Net.views',
     url('^network/form[/]?$', 'add_network_form', name='network.form',),
+    url('^network/edit/rede_ipv4/(?P<id_net>\d+)[/]?$', 'edit_network4_form', name='network.edit.by.id.rede.ipv4',),
+    url('^network/edit/rede_ipv6/(?P<id_net>\d+)[/]?$', 'edit_network6_form', name='network.edit.by.id.rede.ipv6',),
     url('^network/form/(?P<id_vlan>\d+)[/]?$', 'vlan_add_network_form', name='network.form.vlan',),
     url('^network/get/ip4/(?P<id_net>\d+)[/]?$', 'list_netip4_by_id', name='network.ip4.list.by.id',),
     url('^network/get/ip6/(?P<id_net>\d+)[/]?$', 'list_netip6_by_id', name='network.ip6.list.by.id',),
@@ -105,4 +112,8 @@ urlpatterns += patterns('CadVlan.Net.views',
     url('^network/edit/ip6/(?P<id_net>\d+)/(?P<id_ip6>\d+)[/]?$','edit_ip6',name='network.edit.ip6',),
     url('^network/delete/(?P<id_net>\d+)/ip4[/]?$','delete_ip4',name='network.delete.ip4',),
     url('^network/delete/ip6/(?P<id_net>\d+)[/]?$','delete_ip6',name='network.delete.ip6',),
+    url('^network/delete/ip6byequip/(?P<id_ip>\d+)/(?P<id_equip>\d+)[/]?$','delete_ip6_of_equip',name='network.delete.ip6.of.equip',),
+    url('^network/delete/ip4byequip/(?P<id_ip>\d+)/(?P<id_equip>\d+)[/]?$','delete_ip4_of_equip',name='network.delete.ip4.of.equip',),
+    url('^network/insert/ip4byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip4_by_equip',name='network.insert.ip4.of.equip',),
+    url('^network/insert/ip6byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip6_by_equip',name='network.insert.ip6.of.equip',),
 )

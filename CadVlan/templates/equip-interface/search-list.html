@@ -39,11 +39,23 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		alert("Implementar")
+		equip = $("#id_equip_name").val();
+		if (!isBlank(equip)) {
+			url = "/equip-interface/add/" + equip;
+			location.href = url;
+		} else {
+			return;
+		}
 	});
 	
 	$("#btn_add_several").button({ icons: {primary: "ui-icon-copy"} }).click(function(){
-		alert("Implementar")
+		equip = $("#id_equip_name").val();
+		if (!isBlank(equip)) {
+			url = "/equip-interface/addseveral/" + equip;
+			location.href = url;
+		} else {
+			return;
+		}
 	});
 	
 	{% has_perm EQUIPMENT_MANAGEMENT True None %}
@@ -60,8 +72,16 @@ $(document).ready(function() {
 		location.reload();
 	});
 	
-	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
-	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false }).click(function(e) {
+		e.preventDefault();
+		url = "/equip-interface/edit/" + $("#id_equip_name").val() + "/" + $(this).attr("href");
+		location.href = url;
+	});
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false }).click(function(e) {
+		e.preventDefault();
+		url = "/equip-interface/edit/" + $("#id_equip_name").val() + "/" + $(this).attr("href");
+		location.href = url;
+	});
 	
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	
@@ -143,7 +163,7 @@ $(document).ready(function() {
 					{% ifequal pp "1" %}<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_back }}</a> {{ interface.nome_ligacao_back }}</td>{% endifequal %}
 					<td>{% ifequal interface.protegida "True" %}Sim{% else %}Não{% endifequal %}</td>
 					<td>{% ifequal interface.descricao None %}{% else %}{{ interface.descricao }}{% endifequal %}</td>
-					<td class="text_center"><a href="#" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center"><a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

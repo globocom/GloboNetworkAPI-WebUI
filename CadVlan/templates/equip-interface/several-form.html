@@ -1,0 +1,319 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Interface - Cadastro]{% endblock %}
+
+{% block header %}
+<style>
+#fields ul li {
+	list-style: none;
+	display: inline-block;
+}
+</style>
+<script type="text/javascript">
+
+var marca_id_store;
+
+function showHideInput(){
+	
+	valor = $("#id_campos").val();
+	
+	if (valor == 1){
+		$("#c1").show();$("#id_c7").removeAttr("disabled","disabled");
+		$("#c2").hide();$("#id_c2").val("");
+		$("#c3").hide();$("#id_c3").val("");
+		$("#c7").show();
+		$("#c8").hide();
+		$("#c9").hide();
+		
+		
+	}
+	else if (valor == 2){
+		$("#c1").show();$("#id_c7").attr("disabled","disabled");
+		$("#c2").show();$("#id_c8").removeAttr("disabled","disabled");
+		$("#c3").hide();$("#id_c3").val('');
+		$("#c7").show();
+		$("#c8").show();
+		$("#c9").hide();
+	}
+	else if (valor == 3){
+		$("#c1").show();$("#id_c7").attr("disabled","disabled");
+		$("#c2").show();$("#id_c8").attr("disabled","disabled");
+		$("#c3").show();$("#id_c9").removeAttr("disabled",'disabled');
+		
+		$("#c7").show();
+		$("#c8").show();
+		$("#c9").show();
+		
+	}
+	
+	
+}
+
+function setValueAux(){
+	
+	valor = $("#id_combo").val();
+	$("#id_combo_aux").val(valor);	
+}
+
+function setaValores(){
+	
+	nome_interface = $("#id_name").val();
+	marca_id_store = "{{brand}}";
+	campos = $("#id_campos").val();
+	valor_campo_final = $("#id_last_piece_name2").val();
+	n_split = "";
+	aux_name = "";
+	array_valores = "";
+	
+	if (nome_interface != ""){
+	
+		if (marca_id_store == 2) {
+			n_split = ' ';
+		} else if (marca_id_store == 3) {
+			n_split = '/';
+		} else if (marca_id_store == 4) {
+			n_split = '.';
+		} else if (marca_id_store == 5) {
+			n_split = '/';
+		} 
+		
+		
+		if (marca_id_store != 8){
+		
+			if (marca_id_store != 0){
+				aux_name = nome_interface.split($("#id_combo").val());
+				nome_interface = aux_name[1];
+			}
+		
+			if (n_split != ''){
+				array_valores = nome_interface.split(n_split); 
+				
+				if (campos == 1){
+					$("#id_c7").val($.trim(valor_campo_final));
+					$("#id_c1").val($.trim(array_valores[0]));
+				}else if (campos == 2){
+					$("#id_c8").val($.trim(valor_campo_final));
+					$("#id_c1").val($.trim(array_valores[0]));
+					$("#id_c2").val($.trim(array_valores[1]));
+				}
+				else if (campos == 3){
+					$("#id_c9").val($.trim(valor_campo_final));
+					$("#id_c1").val($.trim(array_valores[0]));
+					$("#id_c2").val($.trim(array_valores[1]));
+					$("#id_c3").val($.trim(array_valores[2]));
+				}
+			
+			}
+		 }
+		
+	 }
+	
+}
+
+
+
+if (typeof String.prototype.startsWith != 'function') {
+	String.prototype.startsWith = function (str){
+		return this.slice(0, str.length) == str;
+	};
+}
+
+
+
+$(document).ready(function() {
+	
+	showHideInput();
+	setaValores();
+	
+	$("#id_combo").change(function() {
+		
+		valor = $("#id_combo").val();
+		$("#id_combo_aux").val(valor);
+		
+	});
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function() {
+		
+		nome_interface = "";
+		pre_nome = $("#id_combo").val();
+		campos = $("#id_campos").val();
+		divisor = "{{divisor}}"
+		brand = "{{brand}}"
+		if (brand != 0){
+			nome_interface = pre_nome;
+		}
+		if (campos == 1){
+			$("#id_last_piece_name2").val($("#id_c7").val());
+			$("#id_last_piece_name").val($("#id_c1").val());
+			if (brand == 3 || brand == 5){
+				nome_interface = nome_interface+ $("#id_c1").val();
+			}else{
+				nome_interface = nome_interface +" "+$("#id_c1").val();
+			}
+		}else if (campos == 2){
+			$("#id_last_piece_name2").val($("#id_c8").val());
+			$("#id_last_piece_name").val($("#id_c2").val());
+			if (brand == 3 || brand == 5){
+				nome_interface = nome_interface + $("#id_c1").val()+divisor+$("#id_c2").val();
+			}else{
+				nome_interface = nome_interface +" "+$("#id_c1").val()+divisor+$("#id_c2").val();
+			}
+		}
+		else if (campos == 3){
+			$("#id_last_piece_name2").val($("#id_c9").val());
+			$("#id_last_piece_name").val($("#id_c3").val());
+			if (brand == 3 || brand == 5){
+				nome_interface = nome_interface + $("#id_c1").val()+divisor+$("#id_c2").val()+divisor+$("#id_c3").val();
+			}else{
+				nome_interface = nome_interface +" "+$("#id_c1").val()+divisor+$("#id_c2").val()+divisor+$("#id_c3").val();
+			}	
+		}
+	
+		
+		nome_interface = $.trim(nome_interface);
+		
+		$("#id_name").val(nome_interface);
+		
+		$("#add_form").submit();
+	});
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
+		equip = $("#id_equip_name").val();
+		if (!isBlank(equip)) {
+			location.href = "{% url equip.interface.search.list %}?equip_name=" + equip;
+		} else {
+			location.href = "{% url equip.interface.search.list %}";
+		}
+	});
+	
+	$("textarea").maxlength();
+	
+	$("#id_c1").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9]+/g,'');
+        $(this).val(valor);
+ 	}); 
+	$("#id_c2").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9]+/g,'');
+        $(this).val(valor);
+ 	}); 
+	$("#id_c3").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9]+/g,'');
+        $(this).val(valor);
+ 	});
+	$("#id_c7").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9]+/g,'');
+        $(this).val(valor);
+ 	}); 
+	$("#id_c8").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9]+/g,'');
+        $(this).val(valor);
+ 	}); 
+	$("#id_c9").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9]+/g,'');
+        $(this).val(valor);
+ 	}); 
+	
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Interfaces</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="fields" class="ui-widget-content">
+<form id="add_form" method="post">
+	<div style="border: 1px solid #ccc; width: 500px;">
+		<div style="width: 350px; float: left; padding-top: 4px; padding-left: 6px;">
+		{% csrf_token %}
+		{% for field in form %}
+			{% if field.is_hidden %}
+				{{ field }}
+			{% else %}
+			
+			<!--  -->
+			<div style="{% ifequal forloop.counter 2  %}float: left;{% endifequal %}{% ifequal forloop.counter 3%}float:left{% endifequal %}" >
+				<div><label for="{{ field.auto_id }}">{% if forloop.first %}&nbsp;{% endif %}{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ field }}
+				<p id="error">
+				{% if field.errors %} 
+					{% for error in field.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+				{% ifequal forloop.counter 1 %}
+				<label>Nome Interfaces</label><br/>
+				{%endifequal%}
+			</div>
+			{% ifequal forloop.counter 2 %}
+			
+			<div id="c1" style="float: left;">
+				&nbsp;
+				<input type="text" name="nc1" id="id_c1" style="width: 40px;" maxlength="20"/>
+			</div >
+			<div id="c2" style="float: left;">
+				&nbsp;{{divisor}}&nbsp;
+				<input type="text" name="nc2" id="id_c2" style="width: 40px;" maxlength="20"/>
+			</div>
+			<div id="c3" style="float: left;">
+				&nbsp;{{divisor}}&nbsp;
+				<input type="text" name="nc3" id="id_c3" style="width: 40px;" maxlength="20"/>
+			</div>
+		
+			&nbsp;
+			<label style="float: left;">(inicial)</label>
+			
+			
+			<div style="clear: left;"></div>
+			<br/>
+			
+			{% endifequal %}
+			
+			{% ifequal forloop.counter 3 %}
+			
+			<div id="c7" style="float: left;">
+				&nbsp;
+				<input type="text" name="nc7" id="id_c7" style="width: 40px;" maxlength="20"/>
+			</div >
+			<div id="c8" style="float: left;">
+				&nbsp;{{divisor}}&nbsp;
+				<input type="text" name="nc8" id="id_c8" style="width: 40px;" maxlength="20"/>
+			</div>
+			<div id="c9" style="float: left;">
+				&nbsp;{{divisor}}&nbsp;
+				<input type="text" name="nc9" id="id_c9" style="width: 40px;" maxlength="20"/>
+			</div>
+		
+			&nbsp;
+			<label style="float: left;">(final)</label>
+			
+			<div style="clear: left;"></div>
+			
+			{% endifequal %}
+			
+			<!--  {% ifequal forloop.counter 2 %}<div style="clear: left;"></div>{% endifequal %} -->
+			{% endif %}
+		{% endfor %}
+		</div>
+		<div style="clear: left;"></div>
+	</div>
+</form>
+			<div style="clear: both;"></div>
+		</div>
+		
+		<div class="separator spacer"></div>
+		
+		<div class="buttons-l ui-widget-header">
+			<button id="btn_sav" type="submit">Gravar</button>
+			<button id="btn_can" type="button">Cancelar</button>
+		</div>
+	</div>
+</div>
+{% endblock %}

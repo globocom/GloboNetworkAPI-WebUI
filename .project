@@ -3,6 +3,7 @@
 	<name>CadVlan</name>
 	<comment></comment>
 	<projects>
+		<project>networkapi-client</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

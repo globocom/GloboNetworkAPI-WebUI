@@ -110,8 +110,12 @@ $(document).ready(function() {
 					{% endif %}
 					<td>{{ net_vlan.mask_ip_final }}</td>
 					<td class="text_center">{{ net_vlan.network_type }}</td>
-				
-					<td class="text_center"><a href="#" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					
+					{% if net_vlan.ip4 %}
+					<td class="text_center"><a href="{% url network.edit.by.id.rede.ipv4 net_vlan.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					{% else %}
+					<td class="text_center"><a href="{% url network.edit.by.id.rede.ipv6 net_vlan.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					{% endif %}
 				</tr>
 				{% endfor %}
 			</tbody>

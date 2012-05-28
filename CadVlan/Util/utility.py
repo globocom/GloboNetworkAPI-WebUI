@@ -13,6 +13,11 @@ from django.template import loader
 from django.template.context import RequestContext
 
 
+def get_id_in_list(iten_list, iten_id):
+    for iten in iten_list:
+        if iten['id'] == (str(iten_id)):
+            return iten
+
 def check_regex(string, regex):
     pattern = re.compile(regex)
     return pattern.match(string) is not None

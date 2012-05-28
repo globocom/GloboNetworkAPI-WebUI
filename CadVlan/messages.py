@@ -57,7 +57,14 @@ equip_script_messages = {
 }
 
 equip_interface_messages = {
+    'success_insert':       u'Interface incluída com sucesso.',
     'success_remove':       u'Todas as interfaces selecionadas foram excluídas com sucesso.',
+    'brand_error':          u'Incluir várias interfaces não disponível para este equipamento.',
+    'name_error':           u'Início deve ser menor que Final.',
+    'validation_error':     u'Erro na validação dos dados de Interface, verifique se o campo inicial é menor que o campo final, ou se os campos foram preenchidos da maneira correta.',
+    'several_sucess':       u'Todas interfaces foram cadastradas com sucesso.',
+    'several_warning':      u'Estas interfaces já se encontravam cadastradas: %s. Todas as outras foram registradas com sucesso.',
+    'several_error':        u'Interfaces já cadastradas: %s.',
 }
 
 network_ip_messages = {
@@ -66,8 +73,11 @@ network_ip_messages = {
     'ip6_error':            u'Ip não informado ou informado de forma incorreta. IPv6 deve ser informado no formato xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx',
     'ip_sucess':            u'Ip salvo com sucesso.',
     'not_ip_in_net':        u'O IP %s não pertence a network %s.',
-    'ip_delete_sucess':     u'Os Ips selecionados foram deletados com sucessos.',
+    'ip_delete_sucess':     u'Os Ips selecionados foram excluídos com sucessos.',
     'ip_edit_sucess':       u'Ip alterado com sucesso.',
+    'sucess_edit':          u'Rede alterada com sucesso.',
+    'ip_equip_delete':      u'Ip excluído com sucesso.',
+    'net_invalid':          u'Rede de IP inválida.',
 }
 
 environment_messages = {
@@ -79,16 +89,14 @@ environment_messages = {
 }
 
 equip_messages = {
-                    
-    'equip_sucess':         u'Equipamento inserido com sucesso',                
-
+    'equip_sucess':         u'Equipamento inserido com sucesso',
+    'equip_edit_sucess':    u'Equipamento editado com sucesso',
+    'orquestracao_error':   u"Equipamentos que não sejam do tipo 'Servidor Virtual' não podem fazer parte do grupo 'Equipamentos Orquestração'.",
 }
 
 vlan_messages = {
-
     'vlan_sucess':          u'Vlan cadastrada com sucesso.',
     'vlan_edit_sucess':     u'Vlan alterada com sucesso.',
     'acl_file_sucess':      u'ACL validado com sucesso.',
-    'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',                 
-                 
+    'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',
 }

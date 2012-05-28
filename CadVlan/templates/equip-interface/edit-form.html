@@ -1,0 +1,184 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Interface - Cadastro]{% endblock %}
+
+{% block header %}
+<style>
+#fields ul li {
+	list-style: none;
+	display: inline-block;
+}
+</style>
+<script type="text/javascript">
+
+var marca_id_store;
+
+function defName() {
+	marca_id_store = {{ brand }};
+	if (marca_id_store == 0) {
+		pre_nome = '';
+		n_campos = 6;
+		n_split = ':';
+		exemplo = '00:22:31:3F:A0';
+	} else if (marca_id_store == 2) {
+		pre_nome = 'Int ';
+		n_campos = 1;
+		n_split = '';
+		exemplo = 'Int 12';
+	} else if (marca_id_store == 3) {
+		pre_nome = '';
+		n_campos = 3;
+		n_split = '/';
+		exemplo = 'Serial2/4/4 ou Fa12 ou Gi2/4';
+	} else if (marca_id_store == 4) {
+		pre_nome = 'interface ';
+		n_campos = 2;
+		n_split = '.';
+		exemplo = 'interface 2.4';
+	} else if (marca_id_store == 5) {
+		pre_nome = 'eth';
+		n_campos = 2;
+		n_split = '/';
+		exemplo = 'eth2/4';
+	} else if (marca_id_store == 8) {
+		pre_nome = '';
+		n_campos = 1;
+		n_split = '';
+		exemplo = '1 ou 4 ou 15';
+	} else {
+		pre_nome = null;
+	}
+	
+	if (isBlank($("#id_name").val())) {
+		$("#id_name").focus().val(pre_nome);
+	}
+	
+}
+
+function setMask() {
+	valor = $("#id_combo").val();
+	
+	if (valor == "") {
+		$("#id_name").val("");
+		$("#id_name").attr("readonly", "readonly");
+		pre_nome = null;
+	} else {
+		$("#id_name").focus().val(valor);
+		$("#id_name").removeAttr("readonly");
+		pre_nome = valor;
+	}
+}
+
+function fixName(input) {
+	
+	aux = $("#id_combo").val();
+	
+	if (isBlank(pre_nome) && !isBlank(aux)) {
+		pre_nome = aux;
+	} else if (pre_nome == null) {
+		return;
+	}
+	
+	valor = input.value;
+	splitters = 0;
+	valor2 = "";
+	
+	for (i = 0; i < (valor.length); i++) {
+		
+		if (i < pre_nome.length) {
+			// Prefixo do nome 
+			if (!valor.startsWith(pre_nome)) {
+				input.value = pre_nome;
+				return;
+			}
+		} else {
+			// Resto do campo 
+			if (isNaN(valor.charAt(i)) || valor.charAt(i)==" ") { //nao é numero 
+				if (valor[i] == n_split && splitters<(n_campos-1)) { //é um divisor 
+					if ( isNaN(valor[i-1]) && marca_id_store!=0) {
+						for (j=i+1;j<(valor.length);j++) {
+							valor2 += valor[j];
+						}
+						input.value = valor2;
+						return;
+					} else {
+						splitters += 1;
+					}
+				} else {//é um campo 
+					if (marca_id_store==0 && valor[i]<'G'){ 
+						//Caso especial para servidor 
+					} else {
+						for (j=i+1;j<(valor.length);j++) {
+							valor2 += valor[j];
+						}
+						input.value = valor2;
+						return;
+					}
+				}
+			}
+		}
+		
+		valor2 += valor[i]
+	}
+	return;
+}
+
+if (typeof String.prototype.startsWith != 'function') {
+	String.prototype.startsWith = function (str){
+		return this.slice(0, str.length) == str;
+	};
+}
+
+$(document).ready(function() {
+	
+	defName();
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function() {
+		$("#edit_form").submit();
+	});
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
+		equip = $("#id_equip_name").val();
+		if (!isBlank(equip)) {
+			location.href = "{% url equip.interface.search.list %}?equip_name=" + equip;
+		} else {
+			location.href = "{% url equip.interface.search.list %}";
+		}
+	});
+	
+	$("textarea").maxlength();
+	
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Interfaces</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="fields" class="ui-widget-content">
+			<form id="edit_form" method="post">
+				{{ formset.management_form }}
+				{% for interface_form in formset %}
+					{% cycle "#fefefe" "#f6f6f6" as rowcolors silent%}
+					{% include "equip-interface/add-form.html" with form=interface_form connect=formset.connects.pop equip_type=formset.equip_types.pop rowcolors=rowcolors %}
+		        {% endfor %}
+			</form>
+			<div style="clear: both;"></div>
+		</div>
+		
+		<div class="separator spacer"></div>
+		
+		<div class="buttons-l ui-widget-header">
+			<button id="btn_sav" type="submit">Gravar</button>
+			<button id="btn_can" type="button">Cancelar</button>
+		</div>
+	</div>
+</div>
+{% endblock %}

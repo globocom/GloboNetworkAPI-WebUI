@@ -14,7 +14,8 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Equipment.business import cache_list_equipment
 from CadVlan.Util.shortcuts import render_to_response_ajax
 from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS,\
-    AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO_AJAX, EQUIPMENT_MODELO
+    AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO_AJAX, EQUIPMENT_MODELO,\
+    EQUIPMENT_EDIT
 from django.template.context import RequestContext
 from CadVlan.forms import DeleteForm
 from CadVlan.Equipment.forms import SearchEquipmentForm, EquipForm
@@ -168,9 +169,10 @@ def search_list(request):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
 def equip_form(request):
     try:
+        equip = None
         
         lists = dict()
         #Enviar listas para formar os Selects do formulário
@@ -220,7 +222,7 @@ def equip_form(request):
                 equip = equip.get('equipamento').get('id')
                 for g in grupos:
                     if g != grupo_aux:
-                        client.create_equipamento().associar_grupo(equip, g)
+                        client.create_grupo_equipamento().associa_equipamento(equip, g)
                         
                 for amb in ambientes:
                     client.create_equipamento_ambiente().inserir(equip, amb)
@@ -242,6 +244,8 @@ def equip_form(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        if equip is not None:
+            client.create_equipamento().remover(equip)
         
     return render_to_response(EQUIPMENT_FORM,lists,context_instance=RequestContext(request))
 
@@ -287,4 +291,268 @@ def ajax_modelo_equip(request, id_marca):
     response = HttpResponse(loader.render_to_string(EQUIPMENT_MODELO, lists, context_instance=RequestContext(request)))
     # Send response status with error
     response.status_code = 200
-    return response 
+    return response
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+def equip_edit(request,id_equip):
+    
+    #DADOS NECESSÁRIOS PARA AMMBAS REQUISIÇÕES - GET / POST
+    lists = dict()
+    lists['equip_id'] = id_equip
+    # Get user
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+     
+    #controlar erro no post para remontar formulario
+    not_aut = False
+    
+    list_errors = []
+    
+    forms_aux = dict()
+    #List All - Tipo Equipamento
+    forms_aux['tipo_equipamento'] =  client.create_tipo_equipamento().listar().get('tipo_equipamento')
+    #List All - Marcas
+    forms_aux['marcas'] = client.create_marca().listar().get('marca')
+    #List All - Grupos
+    forms_aux['grupos'] = client.create_grupo_equipamento().listar().get('grupo')
+    #List All - Ambientes 
+    forms_aux['ambientes'] = client.create_ambiente().listar().get('ambiente')
+    
+    #VERIFICAR SE EQUIPAMENTO EXISTE, SENAO, RETORNAR A LISTAGEM
+    try:
+        equip = client.create_equipamento().listar_por_id(id_equip)
+        equip = equip.get('equipamento')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect("equipment.search.list")
+    
+    
+    ambientes = client.create_ambiente().listar_por_equip(id_equip)
+    if (ambientes is not None):
+        ambientes = ambientes.get('ambiente')
+    else:
+        ambientes = []      
+    
+    # Recuperar Grupos
+    grupos = client.create_grupo_equipamento().listar_por_equip(id_equip)
+    if (grupos is not None):
+        grupos = grupos.get('grupo')
+    else:
+        grupos = []
+    
+    #LISTA PARA AUXILIAR FORM COM GRUPOS E AMBIENTES JA SELECIONADOS
+    list_grupos = []
+    list_ambientes = []
+      
+    try:
+        
+        if request.method == 'POST':
+            
+            try:
+                marca = int(request.POST['marca'])
+            except:
+                marca = 0
+            
+            if marca  > 0 :
+                forms_aux['modelos'] = client.create_modelo().listar_por_marca(marca).get('modelo')
+            else:
+                forms_aux['modelos'] = None
+                
+            form = EquipForm(forms_aux, request.POST)
+            
+            lists['form'] = form
+            
+            if form.is_valid():
+                
+                grupos_escolhidos = form.cleaned_data['grupo']
+                ambientes_escolhidos = form.cleaned_data['ambiente']
+                nome = form.cleaned_data['nome']
+                modelo = form.cleaned_data['modelo']
+                tipo_equipamento = form.cleaned_data['tipo_equipamento']
+                
+                #Equipamento orquestração
+                orquestracao = 1
+                list_unremoved = []
+                servidor_virtual = 10
+                
+                remove_group_cont = 0
+                insert_group_cont = 0
+                
+                if str(orquestracao) in grupos_escolhidos and int(tipo_equipamento) != servidor_virtual:
+                    messages.add_message(request, messages.ERROR, equip_messages.get("orquestracao_error"))
+                    raise Exception
+                else:
+                    client.create_equipamento().edit(id_equip, nome, tipo_equipamento, modelo)
+                    
+                
+                if (type(ambientes) == list):
+                    for ambiente in ambientes:
+                        client.create_equipamento_ambiente().remover(id_equip, ambiente['id'])
+                else:
+                    client.create_equipamento_ambiente().remover(id_equip, ambientes['id'])
+                
+                
+                for ambiente in ambientes_escolhidos:
+                    client.create_equipamento_ambiente().inserir(id_equip, ambiente)
+                
+                if (type(grupos)== list):
+                    for grupo in grupos:
+                        try:
+                            client.create_grupo_equipamento().remove(id_equip, grupo['id'])
+                            remove_group_cont = remove_group_cont + 1
+                        except NetworkAPIClientError, e:
+                            logger.error(e)
+                            list_unremoved.append(grupo['id'])
+                else:
+                    try:
+                        client.create_grupo_equipamento().remove(id_equip, grupos['id'])
+                        remove_group_cont = remove_group_cont + 1
+                    except NetworkAPIClientError, e:
+                        logger.error(e)
+                        list_unremoved.append(grupos['id'])
+                    
+                if orquestracao in grupos_escolhidos:
+                    if orquestracao not in list_unremoved:
+                        try:                           
+                            client.create_grupo_equipamento().associa_equipamento(id_equip, 1) 
+                            insert_group_cont = insert_group_cont + 1                           
+                        except NetworkAPIClientError, e:
+                            logger.error(e)
+                            messages.add_message(request, messages.ERROR, e)
+                    
+                for grupo in grupos_escolhidos:
+                    if grupo != orquestracao:
+                        if grupo not in list_unremoved:
+                            try:
+                                client.create_grupo_equipamento().associa_equipamento(id_equip, grupo)
+                                insert_group_cont = insert_group_cont + 1
+                            except NetworkAPIClientError, e:
+                                not_aut = True
+                                list_errors.append(e)
+                try:
+                    if remove_group_cont > 0 and insert_group_cont <= 0:
+                        if  grupos is list:
+                            for grupo in grupos:
+                                client.create_grupo_equipamento().associa_equipamento(id_equip, grupo['id'])
+                        else:
+                            client.create_grupo_equipamento().associa_equipamento(id_equip, grupos['id'])
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                        
+                if not_aut:
+                    
+                    messages.add_message(request, messages.ERROR, list_errors[0])
+                    
+                    raise Exception
+                        
+                messages.add_message(request, messages.SUCCESS, equip_messages.get("equip_edit_sucess"))
+                
+                #redirecionar
+                return redirect("equipment.search.list")
+            
+            #form invalido    
+            else:    
+                
+                ips =  client.create_ip().find_ips_by_equip(id_equip)
+                if ips.get('ips') is not None:
+                    ips4 = ips.get('ips').get('ipv4')
+                    ips6 = ips.get('ips').get('ipv6')
+                        
+                    if ips4 is not None:
+                        if type(ips4) == list:
+                                lists['ips4'] = ips4
+                        else:
+                                lists['ips4'] = [ips4]
+                            
+                    if ips6 is not None:
+                        if type(ips6) == list:
+                                lists['ips6'] = ips6
+                        else:
+                                lists['ips6'] = [ips6]
+        
+        #GET REQUEST
+        else:
+            try:
+                ips =  client.create_ip().find_ips_by_equip(id_equip)
+                if ips.get('ips') is not None:
+                    ips4 = ips.get('ips').get('ipv4')
+                    ips6 = ips.get('ips').get('ipv6')
+                        
+                    if ips4 is not None:
+                        if type(ips4) == list:
+                                lists['ips4'] = ips4
+                        else:
+                                lists['ips4'] = [ips4]
+                            
+                    if ips6 is not None:
+                        if type(ips6) == list:
+                                lists['ips6'] = ips6
+                        else:
+                                lists['ips6'] = [ips6]
+               
+                if type(grupos) == list:
+                    for grupo in grupos:
+                        list_grupos.append(grupo['id'])
+                else:
+                    list_grupos.append(grupos['id'])
+                
+              
+                if (ambientes != None):
+                    if type(ambientes) == list:
+                        for ambiente in ambientes:
+                            list_ambientes.append(ambiente['id'])
+                    else:
+                        list_ambientes.append(ambientes['id'])
+                                       
+                #Set Form
+                modelos = client.create_modelo().listar_por_marca(equip.get('id_marca'))
+                forms_aux['modelos'] = modelos.get('modelo')   
+                lists['form'] = EquipForm(forms_aux,initial={"nome":equip.get('nome'),"tipo_equipamento":equip.get('id_tipo_equipamento'),"marca":equip.get('id_marca'),"modelo":equip.get('id_modelo'),"grupo":list_grupos,"ambiente":list_ambientes})
+        
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+               
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        ips =  client.create_ip().find_ips_by_equip(id_equip)
+        if ips.get('ips') is not None:
+            ips4 = ips.get('ips').get('ipv4')
+            ips6 = ips.get('ips').get('ipv6')
+                        
+            if ips4 is not None:
+                if type(ips4) == list:
+                    lists['ips4'] = ips4
+                else:
+                    lists['ips4'] = [ips4]
+                            
+                if ips6 is not None:
+                    if type(ips6) == list:
+                        lists['ips6'] = ips6
+                    else:
+                        lists['ips6'] = [ips6]
+        
+    except Exception, e:
+        logger.error(e)
+        ips =  client.create_ip().find_ips_by_equip(id_equip)
+        if ips.get('ips') is not None:
+            ips4 = ips.get('ips').get('ipv4')
+            ips6 = ips.get('ips').get('ipv6')
+                        
+            if ips4 is not None:
+                if type(ips4) == list:
+                    lists['ips4'] = ips4
+                else:
+                    lists['ips4'] = [ips4]
+                            
+                if ips6 is not None:
+                    if type(ips6) == list:
+                        lists['ips6'] = ips6
+                    else:
+                        lists['ips6'] = [ips6]
+                        
+    return render_to_response(EQUIPMENT_EDIT,lists,context_instance=RequestContext(request))

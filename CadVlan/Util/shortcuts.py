@@ -6,8 +6,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 from django.http import HttpResponse
-from django.template import loader, RequestContext
-from Json import Json
+from django.template import loader
 import json
 
 JSON = 'json'
@@ -28,4 +27,4 @@ def render_to_response_ajax(*args, **kwargs):
         return HttpResponse(loader.render_to_string(*args, **kwargs))
     
     else:
-        return HttpResponse(json.dumps(kwargs.get(JSON).__dict__))
+        return HttpResponse(json.dumps(kwargs.get(JSON)))

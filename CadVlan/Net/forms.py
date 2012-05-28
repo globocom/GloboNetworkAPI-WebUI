@@ -60,3 +60,22 @@ class NetworkForm(forms.Form):
             
         return self.cleaned_data['networkv6']
     
+    
+class NetworkEditForm(forms.Form):
+    
+    def __init__(self, net_type_list, env_vip_list, *args, **kwargs):
+        super(NetworkEditForm, self).__init__(*args, **kwargs)
+        
+        net_choices = [(net["id"], net["nome"]) for net in net_type_list["tipo_rede"]]
+        net_choices.insert(0, ('', "-"))
+        
+        env_choices = ([(env['id'], env["finalidade_txt"] + " - " + env["cliente_txt"] + " - " + env["ambiente_p44_txt"]) for env in env_vip_list["environmentvip"]])
+        env_choices.insert(0, ('', "-"))
+        
+        self.fields['net_type'].choices = net_choices
+        self.fields['env_vip'].choices = env_choices
+    
+    vlan_name = forms.CharField(label=u'Nome da Vlan', min_length=3, max_length=100, required=True, widget=forms.TextInput(attrs={'style': "width: 300px; height: 19px;", 'class': "ui-state-default", 'autocomplete': "off"}), error_messages=error_messages)
+    ip_version = forms.ChoiceField(label="Rede IPv4/IPv6", required=True, choices=NETWORK_IP_CHOICES, error_messages=error_messages, widget=forms.RadioSelect, initial=0)
+    net_type = forms.ChoiceField(label="Tipo de Rede", required=True, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 180px"}))
+    env_vip = forms.ChoiceField(label="Ambiente VIP", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 340px"}))   

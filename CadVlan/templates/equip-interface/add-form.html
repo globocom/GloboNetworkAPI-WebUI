@@ -1,0 +1,30 @@
+{% load util %}
+<div style="background-color: {% if rowcolors %}{{ rowcolors }}{% else %}#fefefe{% endif %};">
+	<div style="float: left; padding-top: 4px; padding-left: 6px;">
+	{% csrf_token %}
+	{% for field in form %}
+		{% if field.is_hidden %}
+			{{ field }}
+		{% else %}
+		<div style="{% if forloop.counter < 3 %}float: left;{% endif %}">
+			<div><label for="{{ field.auto_id }}">{% if forloop.first %}&nbsp;{% endif %}{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+			{{ field }}
+			<p id="error">
+			{% if field.errors %} 
+				{% for error in field.errors %}
+					{{ error|escape }}
+				{% endfor %}
+			{% endif %}
+			</p>
+		</div>
+		{% ifequal forloop.counter 2 %}<div style="clear: left;"></div>{% endifequal %}
+		{% endif %}
+	{% endfor %}
+	</div>
+	<div style="float: left; margin-left: 40px; width: 166px; text-align: center;">
+		<div style="height: {% ifequal equip_type '8' %}80{% else %}57{% endifequal %}px; {% ifequal connect '1' %}width: 4px; margin: 0 auto; background-color: black;{% endifequal %}"></div>
+		<img src="{{ MEDIA_URL }}/img/{% ifequal equip_type '8' %}patch{% else %}serv{% endifequal %}.png" style="height: {% ifequal equip_type '8' %}28{% else %}74{% endifequal %}px;">
+		<div style="height: {% ifequal equip_type '8' %}80{% else %}57{% endifequal %}px; {% ifequal connect '2' %}width: 4px; margin: 0 auto; background-color: black;{% endifequal %}"></div>
+	</div>
+	<div style="clear: left;"></div>
+</div>

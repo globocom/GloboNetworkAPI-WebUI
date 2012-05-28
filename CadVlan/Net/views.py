@@ -14,9 +14,10 @@ from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP,\
     IPS
-from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, NET_FORM
+from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, NET_FORM, NET6_EDIT, NET4_EDIT,\
+    EQUIPMENT_EDIT
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
-from CadVlan.Net.forms import IPForm, IPEditForm, NetworkForm
+from CadVlan.Net.forms import IPForm, IPEditForm, NetworkForm, NetworkEditForm
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
 from CadVlan.messages import network_ip_messages
 from CadVlan.forms import DeleteForm
@@ -223,7 +224,7 @@ def list_netip6_by_id(request, id_net):
     try:
             
         ips = client.create_ip().find_ip6_by_network(id_net)
-        print ips
+    
         
         ips = ips.get('ips')
         
@@ -854,3 +855,291 @@ def delete_ip6(request, id_net):
         messages.add_message(request, messages.ERROR, e)
      
     return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_VIP, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def edit_network4_form(request,id_net):
+    
+    lists = dict()
+    
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    
+    # Get all needs from NetworkAPI
+    net_type_list = client.create_tipo_rede().listar()
+    env_vip_list = client.create_environment_vip().list_all()
+    try:
+        network = client.create_network().get_network_ipv4(id_net)
+        network =  network.get("network")
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        redirect('vlan.search.list')
+    
+    try:
+    
+        if request.method == 'POST':
+            
+            form = NetworkEditForm(net_type_list, env_vip_list, request.POST)
+            lists['form'] = form
+            
+            if form.is_valid():
+                
+                env_vip = form.cleaned_data['env_vip']
+                net_type = form.cleaned_data['net_type']
+                ip_type = 0
+                    
+                client.create_network().edit_network(id_net, ip_type, net_type, env_vip)
+                messages.add_message(request, messages.SUCCESS, network_ip_messages.get("sucess_edit")) 
+                    
+                return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+            
+            #FORM INVALID
+            else:
+                lists['broadcast'] = network.get('broadcast')
+                lists['oct1'] = network.get("oct1")
+                lists['oct2'] = network.get("oct2")
+                lists['oct3'] = network.get("oct3")
+                lists['oct4'] = network.get("oct4")
+                lists['block_net'] = network.get("block")
+                lists['id_net'] = network.get('id')
+        #Get
+        else:
+                
+            env_vip = network.get("ambient_vip")
+            net_type = network.get("network_type")
+            ip_version = 0
+            vlan_id = network.get('vlan')
+            vlan  = client.create_vlan().get(vlan_id)
+            vlan = vlan.get("vlan")
+            vlan_nome = vlan.get('nome')
+            lists['broadcast'] = network.get('broadcast')
+            lists['oct1'] = network.get("oct1")
+            lists['oct2'] = network.get("oct2")
+            lists['oct3'] = network.get("oct3")
+            lists['oct4'] = network.get("oct4")
+            lists['block_net'] = network.get("block")
+            lists['id_net'] = network.get('id')
+                
+            lists['form'] = NetworkEditForm(net_type_list, env_vip_list,initial={'vlan_name':vlan_nome,'net_type':net_type,'env_vip':env_vip,'ip_version':ip_version})
+                 
+    except NetworkAPIClientError, e:
+        
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return render_to_response(NET4_EDIT, lists, context_instance=RequestContext(request))
+    
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_VIP, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def edit_network6_form(request,id_net):
+    lists = dict()
+    
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    
+    # Get all needs from NetworkAPI
+    net_type_list = client.create_tipo_rede().listar()
+    env_vip_list = client.create_environment_vip().list_all()
+    
+    
+    try:
+        network = client.create_network().get_network_ipv6(id_net)
+        network =  network.get("network")
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        redirect('vlan.search.list')
+    
+    try:
+    
+        if request.method == 'POST':
+            
+            form = NetworkEditForm(net_type_list, env_vip_list, request.POST)
+            lists['form'] = form
+            
+            if form.is_valid():
+                
+                env_vip = form.cleaned_data['env_vip']
+                net_type = form.cleaned_data['net_type']
+                ip_type = 1;
+                
+                client.create_network().edit_network(id_net, ip_type, net_type, env_vip)
+                messages.add_message(request, messages.SUCCESS, network_ip_messages.get("sucess_edit")) 
+                
+                return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+            
+            #FORM INVALID
+            else:
+                lists['block1'] = network.get("block1")
+                lists['block2'] = network.get("block2")
+                lists['block3'] = network.get("block3")
+                lists['block4'] = network.get("block4")
+                lists['block5'] = network.get("block5")
+                lists['block6'] = network.get("block6")
+                lists['block7'] = network.get("block7")
+                lists['block8'] = network.get("block8")
+                lists['block_net'] = network.get("block")
+                lists['id_net'] = network.get("id")       
+       
+        #Get
+        else:
+            env_vip = network.get("ambient_vip")
+            net_type = network.get("network_type")
+            ip_version = 1
+            vlan_id = network.get('vlan')
+            vlan  = client.create_vlan().get(vlan_id)
+            vlan = vlan.get("vlan")
+            vlan_nome = vlan.get('nome')
+            lists['block1'] = network.get("block1")
+            lists['block2'] = network.get("block2")
+            lists['block3'] = network.get("block3")
+            lists['block4'] = network.get("block4")
+            lists['block5'] = network.get("block5")
+            lists['block6'] = network.get("block6")
+            lists['block7'] = network.get("block7")
+            lists['block8'] = network.get("block8")
+            lists['block_net'] = network.get("block")
+            lists['id_net'] = network.get("id")
+            lists['form'] = lists['form'] = NetworkEditForm(net_type_list, env_vip_list,initial={'vlan_name':vlan_nome,'net_type':net_type,'env_vip':env_vip,'ip_version':ip_version})
+                 
+    except NetworkAPIClientError, e:
+        
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return render_to_response(NET6_EDIT, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": IPS, "write": True},{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
+def delete_ip4_of_equip(request,id_ip,id_equip):
+    try:
+        
+        if id_ip is None or id_ip == "":
+            messages.add_message(request, messages.SUCCESS, network_ip_messages.get("net_invalid")) 
+            return redirect("equipment.search.list")
+        
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        client.create_ip().delete_ip4(id_ip)
+        
+        messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_equip_delete")) 
+                
+        return HttpResponseRedirect(reverse('equipment.edit.by.id', args=[id_equip]))
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)   
+        
+    return HttpResponseRedirect(reverse('equipment.edit.by.id', args=[id_equip]))
+
+@log
+@login_required
+@has_perm([{"permission": IPS, "write": True},{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
+def delete_ip6_of_equip(request,id_ip,id_equip):
+    try:
+        
+        if id_ip is None or id_ip == "":
+            messages.add_message(request, messages.SUCCESS, network_ip_messages.get("net_invalid")) 
+            return redirect("equipment.search.list")
+        
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        client.create_ip().delete_ip6(id_ip)
+        
+        messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_equip_delete")) 
+                
+        return HttpResponseRedirect(reverse('equipment.edit.by.id', args=[id_equip]))
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)   
+        
+    return HttpResponseRedirect(reverse('equipment.edit.by.id', args=[id_equip]))
+
+@log
+@login_required
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def insert_ip6_by_equip(request, id_net,id_equip):
+    lists = dict()
+    lists['id'] = id_net
+    
+    if id_net is None or id_net == "":
+        messages.add_message(request, messages.SUCCESS, network_ip_messages.get("net_invalid")) 
+        return redirect("equipment.search.list")
+    
+    #REDIRECIONA PARA A PAGINA PARA ENTRAR NA ACTION CORRETA,USADA APENAS PARA JA INSERIR O EQUIPAMENTO
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        try:
+            client.create_network().get_network_ipv6(id_net)
+            equip = client.create_equipamento().listar_por_id(id_equip).get('equipamento')
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            return redirect('vlan.search.list') 
+        
+        lists['form'] = IPForm(initial={"equip_name":equip.get('nome')})        
+        ip = client.create_ip().get_available_ip6(id_net)
+        ip = ip.get('ip6')
+        ip = ip.get('ip6')
+        ip = ip.split(":")
+        lists['block1'] = ip[0]
+        lists['block2'] = ip[1]
+        lists['block3'] = ip[2]
+        lists['block4'] = ip[3]
+        lists['block5'] = ip[4]
+        lists['block6'] = ip[5]
+        lists['block7'] = ip[6]
+        lists['block8'] = ip[7]
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    
+    return render_to_response(IP6,lists, context_instance=RequestContext(request)) 
+
+
+@log
+@login_required
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def insert_ip4_by_equip(request, id_net,id_equip):
+    lists = dict()
+    lists['id'] = id_net
+    
+    if id_net is None or id_net == "":
+        messages.add_message(request, messages.SUCCESS, network_ip_messages.get("net_invalid")) 
+        return redirect("equipment.search.list")
+    
+    #REDIRECIONA PARA A PAGINA PARA ENTRAR NA ACTION CORRETA, USADA APENAS PARA JA INSERIR O EQUIPAMENTO
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        try:
+            client.create_network().get_network_ipv4(id_net)
+            equip = client.create_equipamento().listar_por_id(id_equip).get('equipamento')
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            return redirect('vlan.search.list') 
+        
+        lists['form'] = IPForm(initial={"equip_name":equip.get('nome')})        
+        ip = client.create_ip().get_available_ip4(id_net)
+        ip = ip.get('ip').get('ip')
+        ip = ip.split(".")
+        lists['oct1'] = ip[0]
+        lists['oct2'] = ip[1]
+        lists['oct3'] = ip[2]
+        lists['oct4'] = ip[3]
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    
+    return render_to_response(IP4,lists, context_instance=RequestContext(request)) 
