@@ -1,16 +1,19 @@
+{% extends "template.html" %}
+
 {% load util %}
+
+{% block title %}[Opções VIP - Listagem]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
 	
 	oTable = $("#script_list").dataTable({
-		"aaSorting": [[ 1, "asc" ]],
+		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }],
-		"aoColumns": [null, { "sType": "ipv6" }, null, null, null ]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 3 ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -27,18 +30,18 @@ $(document).ready(function() {
 		$("#checkAll").attr("checked", false);
 	});
 	
-	$("#page_tab_2").tabs();
+	$("#page_tab").tabs();
 	
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url network.insert.ip6 id %}";
+		location.href = "{% url option-vip.form %}";
 	});
 	
-	{% has_perm VLAN_MANAGEMENT True None %}
+	{% has_perm SCRIPT_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Excluir um IP não removerá o equipamento do ambiente. Para remover também do ambiente, vá na edição do equipamento.')){ 
+		if (confirm('Deseja realmente excluir a(s) Opções Vip selecionada(s)?')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
@@ -46,7 +49,7 @@ $(document).ready(function() {
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		//location.reload();
+		location.reload();
 	});
 	
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
@@ -57,26 +60,26 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block content %}
-<div id="page_tab_2">
+<div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">IPs da Rede</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Opções Vip</a></li>
 	</ul>
-	<div id="tabs-2">
+	<div id="tabs-1">
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
 			<button id="btn_new">Novo Registro</button>
-			{% has_perm EQUIPMENT_MANAGEMENT True None %}
+			{% has_perm OPTION_VIP True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm EQUIPMENT_MANAGEMENT True None %}
+		{% has_perm OPTION_VIP True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url network.delete.ip6 id%}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url option-vip.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in delete_form %}
+			{% for field in form %}
 				{{ field }}
 			{% endfor %}
 		</form>
@@ -85,24 +88,18 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th>IP</th>					
-					<th>Nome do Equipamento</th>
-					<th>Descrição do IP</th>
+					<th>Nome</th>					
+					<th>Tipo</th>
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for ip in ips %}
+				{% for ovip in optionvip %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ ip.id }}" /></td>
-					<td>{{ip.block1}}:{{ip.block2}}:{{ip.block3}}:{{ip.block4}}:{{ip.block5}}:{{ip.block6}}:{{ip.block7}}:{{ip.block8}}</td>
-					<td>
-					{% for equip_name in ip.equipamento %}
-						{{ equip_name }}<br/>
-					{% endfor %}
-					</td>
-					<td>{% ifnotequal ip.descricao None %}{{ ip.descricao }}{% endifnotequal %}</td>
-					<td class="text_center"><a href="{% url network.edit.ip6 id ip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ ovip.id }}" /></td>
+					<td class="text_center">{{ ovip.nome_opcao_txt }}</td>
+					<td class="text_center">{{ ovip.tipo_opcao }}</td>
+					<td class="text_center"><a href="{% url option-vip.edit ovip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

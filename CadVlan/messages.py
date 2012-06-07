@@ -58,6 +58,9 @@ equip_script_messages = {
 
 equip_interface_messages = {
     'success_insert':       u'Interface incluída com sucesso.',
+    'success_edit':         u'Interfaces alteradas com sucesso.',
+    'success_connect':      u'Interface conectada com sucesso.',
+    'success_disconnect':   u'Interface disconectada com sucesso.',
     'success_remove':       u'Todas as interfaces selecionadas foram excluídas com sucesso.',
     'brand_error':          u'Incluir várias interfaces não disponível para este equipamento.',
     'name_error':           u'Início deve ser menor que Final.',
@@ -89,14 +92,26 @@ environment_messages = {
 }
 
 equip_messages = {
-    'equip_sucess':         u'Equipamento inserido com sucesso',
-    'equip_edit_sucess':    u'Equipamento editado com sucesso',
-    'orquestracao_error':   u"Equipamentos que não sejam do tipo 'Servidor Virtual' não podem fazer parte do grupo 'Equipamentos Orquestração'.",
+                    
+    'equip_sucess':         u'Equipamento inserido com sucesso',    
+    'equip_edit_sucess':    u'Equipamento editado com sucesso',      
+    'orquestracao_error':   u"Equipamentos que não sejam do tipo 'Servidor Virtual' não podem fazer parte do grupo 'Equipamentos Orquestração'.", 
+    'marca_sucess':         u'Nova marca inserida com sucesso.', 
+    'modelo_sucess':        u'Novo modelo inserido com sucesso.',
+
 }
 
 vlan_messages = {
+
     'vlan_sucess':          u'Vlan cadastrada com sucesso.',
     'vlan_edit_sucess':     u'Vlan alterada com sucesso.',
     'acl_file_sucess':      u'ACL validado com sucesso.',
-    'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',
+    'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',                 
+                 
+}
+
+option_vip_messages = {
+    'success_remove':       u'Todas as opções vip selecionadas foram excluídas com sucesso.',
+    'success_insert':       u'Opção vip incluída com sucesso.',
+    'invalid_option_vip':   u'Opção VIP inválida',
 }

@@ -7,7 +7,8 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT,\
+    BRAND_MANAGEMENT
 from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
@@ -15,10 +16,11 @@ from CadVlan.Equipment.business import cache_list_equipment
 from CadVlan.Util.shortcuts import render_to_response_ajax
 from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS,\
     AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO_AJAX, EQUIPMENT_MODELO,\
-    EQUIPMENT_EDIT
+    EQUIPMENT_EDIT, EQUIPMENT_MARCAMODELO_FORM, EQUIPMENT_MARCA
 from django.template.context import RequestContext
 from CadVlan.forms import DeleteForm
-from CadVlan.Equipment.forms import SearchEquipmentForm, EquipForm
+from CadVlan.Equipment.forms import SearchEquipmentForm, EquipForm, MarcaForm,\
+    ModeloForm
 from CadVlan.Util.utility import DataTablePaginator
 from networkapiclient.Pagination import Pagination
 from django.http import HttpResponseServerError, HttpResponse
@@ -295,6 +297,38 @@ def ajax_modelo_equip(request, id_marca):
 
 @log
 @login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+def ajax_marca_equip(request):
+    try:
+        
+        lists = dict()
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        marcas = client.create_marca().listar()
+        lists['marcas'] = marcas.get('marca')
+                
+        # Returns HTML
+        response = HttpResponse(loader.render_to_string(EQUIPMENT_MARCA, lists, context_instance=RequestContext(request)))
+        # Send response status with error
+        response.status_code = 200
+        return response
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    except:
+        logger.error('Erro na requição Ajax de Atualização de Marcas') 
+    # Returns HTML
+    response = HttpResponse(loader.render_to_string(EQUIPMENT_MARCA, lists, context_instance=RequestContext(request)))
+    # Send response status with error
+    response.status_code = 200
+    return response
+
+@log
+@login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
 def equip_edit(request,id_equip):
     
@@ -554,5 +588,99 @@ def equip_edit(request,id_equip):
                         lists['ips6'] = ips6
                     else:
                         lists['ips6'] = [ips6]
-                        
+        
+  
+        
+             
     return render_to_response(EQUIPMENT_EDIT,lists,context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": BRAND_MANAGEMENT, "write": True}])
+def marca_form(request):
+    
+    lists = dict()
+    
+    #Primeira aba de cadastro de marcas
+    lists['aba'] = 0
+
+    try:
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        marcas = client.create_marca().listar()
+        
+        lists['form_modelo'] = ModeloForm(marcas)
+        lists['form_marca'] = MarcaForm()  
+        
+        if request.method == 'POST':
+            
+            form = MarcaForm(request.POST)
+            
+            if form.is_valid():
+                
+                nome = form.cleaned_data['nome']
+                
+                client.create_marca().inserir(nome)
+        
+                messages.add_message(request, messages.SUCCESS, equip_messages.get("marca_sucess"))
+                
+                return render_to_response(EQUIPMENT_MARCAMODELO_FORM,lists,context_instance=RequestContext(request))
+            
+            #Form Invalid
+            else:
+                lists['form_marca'] = form
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return render_to_response(EQUIPMENT_MARCAMODELO_FORM,lists,context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": BRAND_MANAGEMENT, "write": True}])
+def modelo_form(request):
+    
+    lists = dict()
+    #Segunda aba de cadastro de modelos
+    lists['aba'] = 1
+    
+    try:
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        marcas = client.create_marca().listar()
+        
+        lists['form_modelo'] = ModeloForm(marcas)
+        lists['form_marca'] = MarcaForm()
+        
+        if request.method == 'POST':
+            
+            form = ModeloForm(marcas,request.POST)
+        
+            if form.is_valid():
+                
+                marca = form.cleaned_data['marca']
+                nome = form.cleaned_data['nome']
+                
+                client.create_modelo().inserir(marca, nome)
+                
+                messages.add_message(request, messages.SUCCESS, equip_messages.get("modelo_sucess"))
+                
+                return render_to_response(EQUIPMENT_MARCAMODELO_FORM,lists,context_instance=RequestContext(request))
+            
+            #Form Invalid
+            else:
+                lists['form_modelo'] = form
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return render_to_response(EQUIPMENT_MARCAMODELO_FORM,lists,context_instance=RequestContext(request))
+        
+        

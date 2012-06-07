@@ -89,3 +89,28 @@ class EquipForm(forms.Form):
             raise forms.ValidationError('Este campo é obrigatório')
 
         return self.cleaned_data['modelo']
+    
+class MarcaForm(forms.Form):
+    
+    nome = forms.CharField(label="Nome da marca", required=True, min_length=3, max_length=100, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
+    
+class ModeloForm(forms.Form):
+    
+    def __init__(self,marcas,*args,**kwargs):
+        super(ModeloForm, self).__init__(*args, **kwargs)
+        
+        marca_choices = [(m['id'], m['nome']) for m in marcas["marca"]]
+        marca_choices.insert(0, (0, "Selecione uma marca"))
+        
+        self.fields['marca'].choices = marca_choices
+        
+    
+    marca = forms.ChoiceField(label="Marca" ,required=True, widget=forms.Select(attrs={'style': "width: 400px"}), error_messages=error_messages)
+    nome = forms.CharField(label="Nome do modelo", required=True, min_length=3, max_length=100, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
+    
+    def clean_marca(self):
+        if int(self.cleaned_data['marca']) <= 0:
+            raise forms.ValidationError('Este campo é obrigatório')
+
+        return self.cleaned_data['marca']
+    

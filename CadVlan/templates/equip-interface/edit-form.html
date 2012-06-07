@@ -13,71 +13,73 @@
 </style>
 <script type="text/javascript">
 
-var marca_id_store;
+var marca_id_store = new Array();
+var pre_nome = new Array();
+var n_campos = new Array();
+var n_split = new Array();
+var exemplo = new Array();
 
-function defName() {
-	marca_id_store = {{ brand }};
-	if (marca_id_store == 0) {
-		pre_nome = '';
-		n_campos = 6;
-		n_split = ':';
-		exemplo = '00:22:31:3F:A0';
-	} else if (marca_id_store == 2) {
-		pre_nome = 'Int ';
-		n_campos = 1;
-		n_split = '';
-		exemplo = 'Int 12';
-	} else if (marca_id_store == 3) {
-		pre_nome = '';
-		n_campos = 3;
-		n_split = '/';
-		exemplo = 'Serial2/4/4 ou Fa12 ou Gi2/4';
-	} else if (marca_id_store == 4) {
-		pre_nome = 'interface ';
-		n_campos = 2;
-		n_split = '.';
-		exemplo = 'interface 2.4';
-	} else if (marca_id_store == 5) {
-		pre_nome = 'eth';
-		n_campos = 2;
-		n_split = '/';
-		exemplo = 'eth2/4';
-	} else if (marca_id_store == 8) {
-		pre_nome = '';
-		n_campos = 1;
-		n_split = '';
-		exemplo = '1 ou 4 ou 15';
+function defName(index, brand) {
+	marca_id_store[index] = brand;
+	if (marca_id_store[index] == 0) {
+		pre_nome[index] = '';
+		n_campos[index] = 6;
+		n_split[index] = ':';
+		exemplo[index] = '00:22:31:3F:A0';
+	} else if (marca_id_store[index] == 2) {
+		pre_nome[index] = 'Int ';
+		n_campos[index] = 1;
+		n_split[index] = '';
+		exemplo[index] = 'Int 12';
+	} else if (marca_id_store[index] == 3) {
+		pre_nome[index] = '';
+		n_campos[index] = 3;
+		n_split[index] = '/';
+		exemplo[index] = 'Serial2/4/4 ou Fa12 ou Gi2/4';
+	} else if (marca_id_store[index] == 4) {
+		pre_nome[index] = 'interface ';
+		n_campos[index] = 2;
+		n_split[index] = '.';
+		exemplo[index] = 'interface 2.4';
+	} else if (marca_id_store[index] == 5) {
+		pre_nome[index] = 'eth';
+		n_campos[index] = 2;
+		n_split[index] = '/';
+		exemplo[index] = 'eth2/4';
+	} else if (marca_id_store[index] == 8) {
+		pre_nome[index] = '';
+		n_campos[index] = 1;
+		n_split[index] = '';
+		exemplo[index] = '1 ou 4 ou 15';
 	} else {
-		pre_nome = null;
+		pre_nome[index] = null;
 	}
 	
-	if (isBlank($("#id_name").val())) {
-		$("#id_name").focus().val(pre_nome);
+	if (isBlank($("#id_form-" + index + "-name").val())) {
+		$("#id_form-" + index + "-name").focus().val(pre_nome[index]);
 	}
 	
 }
 
-function setMask() {
-	valor = $("#id_combo").val();
+function setMask(index) {
+	valor = $("#id_form-" + index + "-combo").val();
 	
 	if (valor == "") {
-		$("#id_name").val("");
-		$("#id_name").attr("readonly", "readonly");
-		pre_nome = null;
+		$("#id_form-" + index + "-name").val("").attr("readonly", "readonly");
+		pre_nome[index] = null;
 	} else {
-		$("#id_name").focus().val(valor);
-		$("#id_name").removeAttr("readonly");
-		pre_nome = valor;
+		$("#id_form-" + index + "-name").focus().val(valor).removeAttr("readonly");
+		pre_nome[index] = valor;
 	}
 }
 
-function fixName(input) {
+function fixName(input, index) {
 	
-	aux = $("#id_combo").val();
+	aux = $("#id_form-" + index + "-combo").val();
 	
-	if (isBlank(pre_nome) && !isBlank(aux)) {
-		pre_nome = aux;
-	} else if (pre_nome == null) {
+	if (isBlank(pre_nome[index]) && !isBlank(aux)) {
+		pre_nome[index] = aux;
+	} else if (pre_nome[index] == null) {
 		return;
 	}
 	
@@ -87,17 +89,17 @@ function fixName(input) {
 	
 	for (i = 0; i < (valor.length); i++) {
 		
-		if (i < pre_nome.length) {
+		if (i < pre_nome[index].length) {
 			// Prefixo do nome 
-			if (!valor.startsWith(pre_nome)) {
-				input.value = pre_nome;
+			if (!valor.startsWith(pre_nome[index])) {
+				input.value = pre_nome[index];
 				return;
 			}
 		} else {
 			// Resto do campo 
 			if (isNaN(valor.charAt(i)) || valor.charAt(i)==" ") { //nao é numero 
-				if (valor[i] == n_split && splitters<(n_campos-1)) { //é um divisor 
-					if ( isNaN(valor[i-1]) && marca_id_store!=0) {
+				if (valor[i] == n_split[index] && splitters<(n_campos[index]-1)) { //é um divisor 
+					if ( isNaN(valor[i-1]) && marca_id_store[index]!=0) {
 						for (j=i+1;j<(valor.length);j++) {
 							valor2 += valor[j];
 						}
@@ -107,7 +109,7 @@ function fixName(input) {
 						splitters += 1;
 					}
 				} else {//é um campo 
-					if (marca_id_store==0 && valor[i]<'G'){ 
+					if (marca_id_store[index]==0 && valor[i]<'G'){ 
 						//Caso especial para servidor 
 					} else {
 						for (j=i+1;j<(valor.length);j++) {
@@ -133,7 +135,21 @@ if (typeof String.prototype.startsWith != 'function') {
 
 $(document).ready(function() {
 	
-	defName();
+	$("#dialog-form").dialog({
+		width: 600,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: false,
+		buttons: {
+			"Associar": function() {
+				$("#connect_form").submit();
+			},
+			"Cancelar": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
 	
 	$("#page_tab").tabs();
 	
@@ -142,12 +158,45 @@ $(document).ready(function() {
 	});
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
-		equip = $("#id_equip_name").val();
-		if (!isBlank(equip)) {
-			location.href = "{% url equip.interface.search.list %}?equip_name=" + equip;
-		} else {
-			location.href = "{% url equip.interface.search.list %}";
+		location.href = "{% url equip.interface.search.list %}?equip_name={{ equip_name }}";
+	});
+	
+	$(".btn_close").button(
+		{ icons: {primary: "ui-icon-close"}, text: false }
+	).hover(
+		function() {
+			num = $(this).attr("lang");
+			$(".line_" + num).css("background-color", "red");
+		},
+		function() {
+			num = $(this).attr("lang");
+			$(".line_" + num).css("background-color", "black");
 		}
+	);
+	
+	$(".connect").button(
+		{ icons: {primary: "ui-icon-arrowthick-2-n-s"} }
+	).click(function(event) {
+		event.preventDefault();
+		url = "/equip-interface/connect/" + $(this).attr("href") + $(this).attr("lang")
+		$.ajax({
+			url: url,
+			type: "GET",
+			complete: function(xhr, status) {
+				if (xhr.status == "500") {
+					$("#dialog-form").dialog("close");
+					location.reload();
+				} else if (xhr.status == "278" || xhr.status == "302") {
+					$("#dialog-form").dialog("close");
+					window.location = xhr.getResponseHeader('Location');
+				} else if (xhr.status == "200") {
+					$("#dialog-form").html(xhr.responseText);
+					$("#dialog-form").dialog("open");
+				} else {
+					$("#dialog-form").dialog("close");
+				}
+			}
+		});
 	});
 	
 	$("textarea").maxlength();
@@ -166,8 +215,8 @@ $(document).ready(function() {
 			<form id="edit_form" method="post">
 				{{ formset.management_form }}
 				{% for interface_form in formset %}
-					{% cycle "#fefefe" "#f6f6f6" as rowcolors silent%}
-					{% include "equip-interface/add-form.html" with form=interface_form connect=formset.connects.pop equip_type=formset.equip_types.pop rowcolors=rowcolors %}
+					{% cycle "#fdfdfd" "#f5f5f5" as rowcolors silent %}
+					{% include "equip-interface/add-form.html" with form=interface_form up=formset.up.pop down=formset.down.pop equip_type=formset.equip_types.pop rowcolors=rowcolors counter=forloop.counter0 counter1=forloop.counter brand=formset.params.pop %}
 		        {% endfor %}
 			</form>
 			<div style="clear: both;"></div>
@@ -181,4 +230,5 @@ $(document).ready(function() {
 		</div>
 	</div>
 </div>
+<div id="dialog-form" title="Ligar ao Equipamento"></div>
 {% endblock %}

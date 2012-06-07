@@ -8,7 +8,8 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 from django import template
 from django.template.defaultfilters import stringfilter
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Util.models import Permission, PermissionMenu, SetVariable
+from CadVlan.Util.models import Permission, PermissionMenu, SetVariable,\
+    IncrementVarNode
 from CadVlan.settings import MAX_RESULT_DEFAULT
 
 register = template.Library()
@@ -72,6 +73,14 @@ def set_var(parser,token):
     from re import split
     bits = split(r'\s+', token.contents, 2)
     return SetVariable(bits[1],bits[2])
+
+@register.tag(name='++')
+def increment_var(parser, token):
+
+    parts = token.split_contents()
+    if len(parts) < 2:
+        raise template.TemplateSyntaxError("'increment' tag must be of the form:  {% increment <var_name> %}")
+    return IncrementVarNode(parts[1])
 
 @register.simple_tag
 def max_results():

@@ -1,0 +1,130 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Marca / Modelo - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	$("#btn_savMarca").button({ icons: {primary: "ui-icon-disk"} });
+	$("#btn_savModelo").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can1").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url home %}";
+	});
+	
+	$("#btn_can2").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url home %}";
+	});
+	
+	
+	$("#btn_att").button({ icons: {primary: "ui-icon-refresh"}, text: false }).click(function(){
+		
+		marca = $("#id_marca").val();
+		
+		$("#id_marca").load('/equipment/marca/', function() {
+			$("#id_marca").val(marca);
+		
+		});
+		
+		
+	});
+	
+	$("#btn_att").mouseover(function() {
+	   	 $("#btn_att").attr("title","Atualizar combo de marca");
+	   });
+	
+	
+	$("#page_tab").tabs({ selected: {{aba}} });
+	
+	
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Marcas</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Cadastro de Modelos</a></li>
+	</ul>
+	<div id="tabs-1">
+	
+		<form id="add_form" method="post" action="{% url equipment.marca.form %}">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			{% for field in form_marca %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+	
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+			{% endfor %}	
+			</div>	
+		
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_savMarca" type="submit">Gravar</button>
+				<button id="btn_can1" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+	
+	
+	<div id="tabs-2">
+	
+		<form id="add_form" method="post" action="{% url equipment.modelo.form %}">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			{% for field in form_modelo %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					{% ifequal forloop.counter 1 %}
+					
+					<button type="button" id="btn_att">Atualizar combos marca/modelo</button>
+					
+					{% endifequal %}
+	
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+			{% endfor %}	
+			</div>	
+		
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_savModelo" type="submit">Gravar</button>
+				<button id="btn_can2" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+	
+</div>
+
+{% endblock %}

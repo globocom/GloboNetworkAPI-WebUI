@@ -155,6 +155,13 @@
 							{% if has_perm %}
 							<li><a href="{% url script.type.list %}">Tipo de Roteiro</a></li>
 							{% endif %}
+							
+							{% has_perm OPTION_VIP None True %}
+							{% if has_perm %}
+							<li><a href="{% url option-vip.list %}">Opções VIP</a></li>
+							{% endif %}
+							
+							
 						</ul>
 					</li>
 					{% endif %}
@@ -199,6 +206,16 @@
 							{% has_perm SCRIPT_MANAGEMENT True None %}
 							{% if has_perm %}
 							<li><a href="{% url script.type.form %}">Tipo de Roteiro</a></li>
+							{% endif %}
+							
+							{% has_perm BRAND_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="{% url equipment.marca.form %}">Marca e/ou Modelo</a></li>
+							{% endif %}
+							
+							{% has_perm OPTION_VIP True None %}
+							{% if has_perm %}
+							<li><a href="{% url option-vip.form %}">Opções VIP</a></li>
 							{% endif %}
 						</ul>
 					</li>

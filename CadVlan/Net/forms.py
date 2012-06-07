@@ -32,7 +32,7 @@ class NetworkForm(forms.Form):
         self.fields['net_type'].choices = net_choices
         self.fields['env_vip'].choices = env_choices
     
-    vlan_name = forms.CharField(label=u'Nome da Vlan', min_length=3, max_length=100, required=True, widget=forms.TextInput(attrs={'style': "width: 300px; height: 19px;", 'class': "ui-state-default", 'autocomplete': "off"}), error_messages=error_messages)
+    vlan_name = forms.CharField(label=u'Número da Vlan', min_length=3, max_length=100, required=True, widget=forms.TextInput(attrs={'style': "width: 300px; height: 19px;", 'class': "ui-state-default", 'autocomplete': "off"}), error_messages=error_messages)
     vlan_name_id = forms.IntegerField(label="Id da Vlan", required=True, error_messages=error_messages, widget=forms.HiddenInput())
     ip_version = forms.ChoiceField(label="Rede IPv4/IPv6", required=True, choices=NETWORK_IP_CHOICES, error_messages=error_messages, widget=forms.RadioSelect, initial=0)
     networkv4 = forms.CharField(label="Rede IPv4", required=False, min_length=1, max_length=18, error_messages=error_messages, widget=forms.HiddenInput())

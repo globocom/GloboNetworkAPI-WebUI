@@ -41,7 +41,7 @@ class BaseFormSet(formsets.BaseFormSet):
         if i >= self.initial_form_count():
             defaults['empty_permitted'] = True
         defaults.update(kwargs)
-        form = self.form(self.params[i], **defaults)
+        form = self.form(self.params[len(self.params)-i-1], i, **defaults)
         self.add_fields(form, i)
         return form
     
@@ -57,10 +57,10 @@ class BaseFormSet(formsets.BaseFormSet):
         return form
     empty_form = property(_get_empty_form)
     
-def formset_factory(form, params=[], equip_types=[], connects=[],formset=BaseFormSet, extra=1, can_order=False,
-                    can_delete=False, max_num=None):
+def formset_factory(form, params=[], equip_types=[], up=[], down=[], front_or_back=[], 
+                    formset=BaseFormSet, extra=1, can_order=False, can_delete=False, max_num=None):
     """Return a FormSet for the given form class with parameters."""
-    attrs = {'form': form, 'extra': extra, 'max_num': max_num,
-             'can_order': can_order, 'can_delete': can_delete,
-             'params': params, 'equip_types': equip_types, 'connects': connects}
+    attrs = {'form': form, 'extra': extra, 'max_num': max_num, 'can_order': can_order,
+             'can_delete': can_delete, 'params': params, 'equip_types': equip_types,
+             'up': up, 'down': down, 'front_or_back': front_or_back}
     return type(form.__name__ + 'Set', (formset,), attrs)

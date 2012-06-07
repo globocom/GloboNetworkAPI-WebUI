@@ -38,6 +38,32 @@ $(document).ready(function() {
     	 $("#id_nome").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
     });
 	
+	
+	$("#btn_marca").button({ icons: {primary: "ui-icon-plus"}, text: false });
+	
+	$("#btn_att_marca").button({ icons: {primary: "ui-icon-refresh"}, text: false }).click(function(){
+		
+		marca = $("#id_marca").val();
+		
+		$('#id_modelo').load('/equipment/modelo/'+marca);
+		
+		$("#id_marca").load('/equipment/marca/', function() {
+			$("#id_marca").val(marca);
+		
+		});
+		
+		
+	});
+	
+	$("#btn_marca").mouseover(function() {
+   	 $("#btn_marca").attr("title","Adcionar marca e/ou modelo");
+   });
+	
+	$("#btn_att_marca").mouseover(function() {
+	   	 $("#btn_att_marca").attr("title","Atualizar combos marca/modelo");
+	   });
+	
+	
 })
 </script>
 {% endblock %}
@@ -56,7 +82,18 @@ $(document).ready(function() {
 				<div>
 					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
 					
+					
+					
 					{{ field }}
+					
+					
+					{% ifequal forloop.counter 3 %}
+					
+						<a href="{% url equipment.marca.form %}" target="blank"><button type="button" id="btn_marca">Adcionar marca/modelo</button></a>
+						<button type="button" id="btn_att_marca">Atualizar combos marca/modelo</button>
+					
+					{% endifequal %}
+					
 					
 					<p id="error">
 					{% if field.errors %} 

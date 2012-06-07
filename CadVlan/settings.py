@@ -136,6 +136,7 @@ INSTALLED_APPS = (
     'CadVlan.ScriptType',
     'CadVlan.EquipAccess',
     'CadVlan.Vlan',
+    'CadVlan.OptionVip',
 )
 
 SESSION_ENGINE = (
@@ -226,6 +227,9 @@ LOGGING = {
             'handlers': ['handlers-view'],
         },
         'CadVlan.EquipAccess.views': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.OptionVip.views': {
             'handlers': ['handlers-view'],
         },
     }

@@ -89,3 +89,71 @@ function autocomplete(url, submit, id, hid) {
 		}
 	});
 }
+
+jQuery.fn.dataTableExt.oSort['ipv6-asc']  = function(a,b) {
+    var m = a.split(":"), x = "";
+    var n = b.split(":"), y = "";
+    x = m.toString(16);
+    y = n.toString(16);
+    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+};
+
+jQuery.fn.dataTableExt.oSort['ipv6-desc']  = function(a,b) {
+    var m = a.split(":"), x = "";
+    var n = b.split(":"), y = "";
+    x = m.toString(16);
+    y = n.toString(16);
+    return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+};
+
+jQuery.fn.dataTableExt.oSort['ipv4-asc']  = function(a,b) {
+    var m = a.split("."), x = "";
+    var n = b.split("."), y = "";
+    for(var i = 0; i < m.length; i++) {
+        var item = m[i];
+        if(item.length == 1) {
+            x += "00" + item;
+        } else if(item.length == 2) {
+            x += "0" + item;
+        } else {
+            x += item;
+        }
+    }
+    for(var i = 0; i < n.length; i++) {
+        var item = n[i];
+        if(item.length == 1) {
+            y += "00" + item;
+        } else if(item.length == 2) {
+            y += "0" + item;
+        } else {
+            y += item;
+        }
+    }
+    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+};
+
+jQuery.fn.dataTableExt.oSort['ipv4-desc']  = function(a,b) {
+    var m = a.split("."), x = "";
+    var n = b.split("."), y = "";
+    for(var i = 0; i < m.length; i++) {
+        var item = m[i];
+        if(item.length == 1) {
+            x += "00" + item;
+        } else if (item.length == 2) {
+            x += "0" + item;
+        } else {
+            x += item;
+        }
+    }
+    for(var i = 0; i < n.length; i++) {
+        var item = n[i];
+        if(item.length == 1) {
+            y += "00" + item;
+        } else if (item.length == 2) {
+            y += "0" + item;
+        } else {
+            y += item;
+        }
+    }
+    return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+};

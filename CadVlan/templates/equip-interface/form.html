@@ -15,7 +15,7 @@
 
 var marca_id_store;
 
-function defName() {
+function defName(index) {
 	marca_id_store = {{ brand }};
 	if (marca_id_store == 0) {
 		pre_nome = '';
@@ -57,7 +57,7 @@ function defName() {
 	
 }
 
-function setMask() {
+function setMask(index) {
 	valor = $("#id_combo").val();
 	
 	if (valor == "") {
@@ -71,7 +71,7 @@ function setMask() {
 	}
 }
 
-function fixName(input) {
+function fixName(input, index) {
 	
 	aux = $("#id_combo").val();
 	

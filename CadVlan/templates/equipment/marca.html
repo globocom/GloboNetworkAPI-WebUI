@@ -1,0 +1,15 @@
+{% if marcas %}
+
+	<option value="0">Selecione uma marca</option>
+
+	{% for marca in marcas %}
+	
+	<option value="{{ marca.id }}">{{marca.nome}}</option>
+	
+{% endfor %}
+
+{% else %}
+
+	<option value="0" disabled="disabled">ERRO NA ATUALIÇÃO DE MARCAS, REINICIE A PÁGINA.</option>
+	
+{% endif %}

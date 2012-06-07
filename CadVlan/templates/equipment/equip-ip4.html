@@ -1,9 +1,9 @@
 {% for ip4 in ips4 %}
 
 				<tr>
-					<td style="max-width: 200px;width: 200px;">{{ip4.descricao}}</td>
+					<td style="max-width: 250px;width: 250px;">{{ip4.descricao}}</td>
 					<td style="max-width: 200px;width: 200px;text-align: center;" >{{ip4.oct1}}.{{ip4.oct2}}.{{ip4.oct3}}.{{ip4.oct4}}</td>
-					<td style="max-width: 200px;width: 200px" >
+					<td style="max-width: 200px;width: 200px;text-align: left;" >
 					<a href="{% url network.insert.ip4.of.equip ip4.id_rede equip_id %}" target="_blank"><button type="button"  class="btn_add4">Adicionar</button></a>
 					<a href="{% url network.delete.ip4.of.equip ip4.id equip_id %}"><button type="button" class="btn_del4" onclick="return confirm('Deseja deletar o IP?');" id="btn_del6">Remover</button></a>
 					</td>

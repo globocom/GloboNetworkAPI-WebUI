@@ -8,7 +8,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_SEVERAL_FORM,\
-    EQUIPMENT_INTERFACE_EDIT_FORM
+    EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
@@ -19,13 +19,11 @@ from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.forms import DeleteForm, SearchEquipForm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
-from CadVlan.EquipInterface.forms import AddInterfaceForm, AddSeveralInterfaceForm
-from CadVlan.Util.utility import get_id_in_list
-from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.EquipInterface.business import find_first_interface,\
-    make_initials_and_params
+from CadVlan.EquipInterface.forms import AddInterfaceForm, AddSeveralInterfaceForm,\
+    ConnectForm
+from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
 
 
@@ -159,12 +157,12 @@ def add_form(request, equip_name):
     
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
-    lists['form'] = AddInterfaceForm(brand, initial={'equip_name': equip['nome'], 'equip_id': equip['id']})
+    lists['form'] = AddInterfaceForm(brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id']})
     
     # If form was submited
     if request.method == "POST":
         
-        form = AddInterfaceForm(brand, request.POST)
+        form = AddInterfaceForm(brand, 0, request.POST)
         
         try:
             
@@ -358,8 +356,8 @@ def edit_form(request, equip_name, id_interface):
         equip = equip.get('equipamento')
         
         # Get interface
-        inter_list = client.create_interface().list_all_by_equip(equip["id"])
-        interface = get_id_in_list(inter_list["interfaces"], id_interface)
+        interface = client.create_interface().get_by_id(id_interface)
+        interface = interface.get('interface')
         if interface is None:
             raise InterfaceNaoExisteError("Interface não cadastrada")
         
@@ -380,23 +378,197 @@ def edit_form(request, equip_name, id_interface):
             url_param = url_param + "?equip_name=" + equip_name
         return HttpResponseRedirect(url_param)
     
-    initials, params, equip_types = make_initials_and_params(related_list)
+    initials, params, equip_types, up, down, front_or_back = make_initials_and_params(related_list)
     
-    AddInterfaceFormSet = formset_factory(AddInterfaceForm, params=params, equip_types=equip_types, extra=len(related_list), max_num=len(related_list))
+    AddInterfaceFormSet = formset_factory(AddInterfaceForm, params=params, equip_types=equip_types, up=up, down=down, front_or_back=front_or_back, extra=len(related_list), max_num=len(related_list))
     
-    brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
+    lists['equip_name'] = equip_name
+    lists['id_interface'] = id_interface
     
-    lists['brand'] = brand
-    lists['formset'] = AddInterfaceFormSet(initial=initials)
-    
+    if request.method == "POST":
+        
+        form_set = AddInterfaceFormSet(request.POST)
+        
+        if form_set.is_valid():
+            
+            for form in form_set:
+                
+                idt = form.cleaned_data['inter_id']
+                name = form.cleaned_data['name']
+                description = form.cleaned_data['description']
+                protected = form.cleaned_data['protected']
+                
+                old_interf = client.create_interface().get_by_id(idt)['interface']
+                
+                try:
+                    client.create_interface().alterar(idt, name, protected, description, old_interf['ligacao_front'], old_interf['ligacao_back'])
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    
+            messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
+            
+            return redirect("equip.interface.edit.form", equip_name, id_interface)
+        
+        else:
+            lists['formset'] = form_set
+    else:
+        lists['formset'] = AddInterfaceFormSet(initial=initials)
+        
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_FORM, lists, context_instance=RequestContext(request))
+
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
-def disconnect(request, id_interface_1, back_or_front_1, id_interface_2, back_or_front_2):
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def connect(request, id_interface, front_or_back):
     
-    lists = dict()
+    lists = dict();
+    
+    if not (front_or_back == "0" or front_or_back == "1"):
+        raise Http404
+    
+    try:
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        lists['id_interface'] = id_interface
+        lists['front_or_back'] = front_or_back
+        lists['search_form'] = SearchEquipForm()
+        
+        if request.method == "GET":
+            
+            if request.GET.__contains__('equip_name'):
+                
+                lists['search_form'] = search_form = SearchEquipForm(request.GET)
+                
+                if search_form.is_valid():
+                    
+                    # Get equip name in form
+                    name_equip = search_form.cleaned_data['equip_name']
+                    
+                    # Get equipment by name from NetworkAPI
+                    equipment = client.create_equipamento().listar_por_nome(name_equip)['equipamento']
+                    # Get interfaces related to equipment selected
+                    interf_list = client.create_interface().list_all_by_equip(equipment['id'])
+                    
+                    #Remove interface that is being added to the combobox
+                    i = []
+                    for inter in interf_list['interfaces']:
+                        
+                        if id_interface != inter['id']:
+                            i.append(inter)
+
+                    interf_list = {}
+                    interf_list['interfaces'] = i
+
+                    lists['connect_form'] = ConnectForm(equipment, interf_list['interfaces'], initial={'equip_name': equipment['nome'], 'equip_id': equipment['id']})
+                    lists['equipment'] = equipment
+                    
+        elif request.method == "POST":
+            
+            equip_id = request.POST['equip_id']
+            
+            # Get equipment by name from NetworkAPI
+            equipment = client.create_equipamento().listar_por_id(equip_id)['equipamento']
+            # Get interfaces related to equipment selected
+            interf_list = client.create_interface().list_all_by_equip(equipment['id'])
+            
+            form = ConnectForm(equipment, interf_list['interfaces'], request.POST)
+            
+            if form.is_valid():
+                
+                front = form.cleaned_data['front']
+                back = form.cleaned_data['back']
+                
+                # Get interface to link
+                interface_client = client.create_interface()
+                interface = interface_client.get_by_id(id_interface)
+                interface = interface.get("interface")
+                if interface['protegida'] == "True":
+                    interface['protegida'] = 1
+                else:
+                    interface['protegida'] = 0
+                    
+                if len(front) > 0:
+                    # Get front interface selected
+                    inter_front = interface_client.get_by_id(front)
+                    inter_front = inter_front.get("interface")
+                    if inter_front['protegida'] == "True":
+                        inter_front['protegida'] = 1
+                    else:
+                        inter_front['protegida'] = 0
+                        
+                    related_list = client.create_interface().list_connections(inter_front["interface"], inter_front["equipamento"])
+                    for i in related_list.get('interfaces'):
+                        
+                        if i['equipamento'] == interface['equipamento']:
+                            lists['connect_form'] = form
+                            lists['equipment'] = equipment
+                            raise Exception('Configuração inválida. Loop detectado nas ligações entre patch-panels')                   
+                    
+                    # Business Rules
+                    interface_client.alterar(inter_front['id'], inter_front['interface'], inter_front['protegida'], inter_front['descricao'], interface['id'], inter_front['ligacao_back'])
+                    if front_or_back == "0":
+                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'], interface['descricao'], interface['ligacao_front'], inter_front['id'])
+                        #interface_client.alterar(id_interface, nome, protegida, descricao, id_ligacao_front, id_ligacao_back)
+                    else:
+                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'], interface['descricao'], inter_front['id'], interface['ligacao_back'])
+                        
+                else:
+                    # Get back interface selected
+                    inter_back = interface_client.get_by_id(back)
+                    inter_back = inter_back.get("interface")
+                    if inter_back['protegida'] == "True":
+                        inter_back['protegida'] = 1
+                    else:
+                        inter_back['protegida'] = 0
+                        
+                    related_list = client.create_interface().list_connections(inter_back["interface"], inter_back["equipamento"])
+                    for i in related_list.get('interfaces'):
+                        
+                        if i['equipamento'] == interface['equipamento']:
+                            lists['connect_form'] = form
+                            lists['equipment'] = equipment
+                            raise Exception('Configuração inválida. Loop detectado nas ligações entre patch-panels')
+                    
+                    # Business Rules
+                    interface_client.alterar(inter_back['id'], inter_back['interface'], inter_back['protegida'], inter_back['descricao'], inter_back['ligacao_front'], interface['id'])
+                    if front_or_back == "0":
+                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'], interface['descricao'], interface['ligacao_front'], inter_back['id'])
+                    else:
+                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'], interface['descricao'], inter_back['id'], interface['ligacao_back'])
+                        
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
+                
+                url_param = reverse("equip.interface.edit.form", args=[interface['equipamento_nome'], id_interface])
+                response = HttpResponseRedirect(url_param)
+                response.status_code = 278
+                
+                return response
+            
+            else:
+                lists['connect_form'] = form
+                lists['equipment'] = equipment
+                
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return render_to_response(EQUIPMENT_INTERFACE_CONNECT_FORM, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def disconnect(request, id_interface, back_or_front, equip_name, id_interf_edit):
     
     try:
         
@@ -405,11 +577,11 @@ def disconnect(request, id_interface_1, back_or_front_1, id_interface_2, back_or
         client = auth.get_clientFactory()
         
         # Business
-        client.create_interface().remove_connection(id_interface_1, back_or_front_1, id_interface_2, back_or_front_2)
-        lists["success"] = True
+        client.create_interface().remove_connection(id_interface, back_or_front)
+        messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_disconnect"))
         
     except NetworkAPIClientError, e:
         logger.error(e)
-        lists["error"] = str(e)
+        messages.add_message(request, messages.ERROR, e)
         
-    return render_to_response_ajax(json = lists)
+    return redirect("equip.interface.edit.form", equip_name, id_interf_edit)

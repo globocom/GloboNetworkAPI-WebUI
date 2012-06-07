@@ -63,7 +63,8 @@ urlpatterns += patterns('CadVlan.EquipInterface.views',
     url('^equip-interface/add/(?P<equip_name>[^/]+)[/]?$','add_form', name='equip.interface.form',),
     url('^equip-interface/edit/(?P<equip_name>[^/]+)/(?P<id_interface>\d+)[/]?$','edit_form', name='equip.interface.edit.form',),
     url('^equip-interface/addseveral/(?P<equip_name>[^/]+)[/]?$','add_several_forms', name='equip.interface.several.form',),
-    url('^equip-interface/disconnect/(?P<id_interface_1>\d+)/(?P<back_or_front_1>\d+)/(?P<id_interface_2>\d+)/(?P<back_or_front_2>\d+)[/]?$','disconnect', name='equip.interface.disconnect',),
+    url('^equip-interface/disconnect/(?P<id_interface>\d+)/(?P<back_or_front>\d+)/(?P<equip_name>[^/]+)/(?P<id_interf_edit>\d+)[/]?$','disconnect', name='equip.interface.disconnect',),
+    url('^equip-interface/connect/(?P<id_interface>\d+)/(?P<front_or_back>\d+)[/]?$','connect', name='equip.interface.connect',),
 )
 
 # URL's Equipment
@@ -74,6 +75,10 @@ urlpatterns += patterns('CadVlan.Equipment.views',
     url('^equipment/form[/]?$', 'equip_form', name='equipment.form',),
     url('^equipment/edit/(?P<id_equip>\d+)[/]?$', 'equip_edit', name='equipment.edit.by.id',),
     url('^equipment/modelo/(?P<id_marca>\d+)[/]?$', 'ajax_modelo_equip', name='equipment.modelo.ajax',),
+    url('^equipment/marca[/]?$', 'ajax_marca_equip', name='equipment.modelo.ajax',),
+    url('^equipment/modelo-form[/]?$', 'modelo_form', name='equipment.modelo.form',),
+    url('^equipment/marca-form[/]?$', 'marca_form', name='equipment.marca.form',),
+    
 )
 
 # URL's Environment
@@ -116,4 +121,12 @@ urlpatterns += patterns('CadVlan.Net.views',
     url('^network/delete/ip4byequip/(?P<id_ip>\d+)/(?P<id_equip>\d+)[/]?$','delete_ip4_of_equip',name='network.delete.ip4.of.equip',),
     url('^network/insert/ip4byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip4_by_equip',name='network.insert.ip4.of.equip',),
     url('^network/insert/ip6byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip6_by_equip',name='network.insert.ip6.of.equip',),
+)
+
+# URL's Option Vip
+urlpatterns += patterns('CadVlan.OptionVip.views',
+    url('^option-vip/list[/]?$', 'list_all', name='option-vip.list',),
+    url('^option-vip/delete[/]?$', 'delete_all', name='option-vip.delete',),
+    url('^option-vip/form[/]?$', 'add_form', name='option-vip.form',),
+    url('^option-vip/form/(?P<id_optionvip>\d+)[/]?$', 'edit_form', name='option-vip.edit',),
 )

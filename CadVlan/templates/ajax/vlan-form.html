@@ -1,3 +1,0 @@
-{% for error in search_form.non_field_errors %}{{ error|escapejs }}{% endfor %}
-{% for field in search_form %}{% for error in field.errors %}{{ field.label }}: {{ error|escapejs }}{% endfor %}
-{% endfor %}

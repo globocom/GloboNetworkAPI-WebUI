@@ -10,6 +10,19 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.permissions import PERMISSIONS
 
 
+class IncrementVarNode(template.Node):
+
+    def __init__(self, var_name):
+        self.var_name = var_name
+
+    def render(self,context):
+        try:
+            value = context[self.var_name]
+            context[self.var_name] = value + 1
+            return u""
+        except:
+            raise template.TemplateSyntaxError("The variable does not exist.")
+        
 class SetVariable(template.Node):
     def __init__(self,varname,value):
         self.varname = varname
