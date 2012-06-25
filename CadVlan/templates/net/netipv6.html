@@ -8,9 +8,18 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	$("#page_tab").tabs();
+	$("#page_tab").tabs({ selected: {{aba}} });
 	
 	$("textarea").maxlength();
+	
+	$("#id_option_vip").pickList();
+	
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 	
 })
 </script>
@@ -20,6 +29,7 @@ $(document).ready(function() {
 <div id="page_tab">
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Rede</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3">Ambiente Vip</a></li>
 	</ul>
 	<div id="tabs-1">
 		
@@ -59,7 +69,65 @@ $(document).ready(function() {
 				{% include "net/ip6.html" %}
 			</div>
 		
-	
 	</div>
+	
+	<div id="tabs-3">
+		
+		<div id="fields" class="ui-widget-content">
+		
+		{% ifequal id_vip 0 %}
+		
+		 <p style="color:red">Não há Ambiente Vip associado com essa Rede</p>
+		
+		{% else %}
+		
+		{% if opt_form %}
+		
+			<form method="POST" action="{% url option-vip.associate.net6 id %}">
+				{% csrf_token %}
+				<table>
+					<tr>
+						<td style="width: 100px"><label>Finalidade</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{vip.finalidade_txt}}</label></td>
+					</tr>
+					<tr>
+						<td style="width: 100px"><label>Cliente</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{vip.cliente_txt}}</label></td>
+					</tr>
+					<tr>
+						<td style="width: 100px"><label>Ambiente P44</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{vip.ambiente_p44_txt}}</label></td>
+					</tr>
+					 
+				</table>
+			
+			{% for field in opt_form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					{{ field }}
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				</div>
+			{% endfor %}
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+			</div>
+			
+			</form>
+			
+			{% endif %}
+		
+		{% endifequal %}
+		
+		
+	</div>
+	</div>
+	
 </div>
 {% endblock %}

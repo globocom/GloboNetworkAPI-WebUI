@@ -7,17 +7,18 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.templates import OPTIONVIP_LIST, OPTIONVIP_FORM
+from CadVlan.templates import OPTIONVIP_LIST, OPTIONVIP_FORM, NETIPV4, NETIPV6
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
 from CadVlan.forms import DeleteForm
-from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.converters.util import split_to_array, replace_id_to_name
 from CadVlan.messages import error_messages, option_vip_messages
-from CadVlan.OptionVip.forms import OptionVipForm
-from CadVlan.permissions import OPTION_VIP
+from CadVlan.OptionVip.forms import OptionVipForm, OptionVipNetForm
+from CadVlan.permissions import OPTION_VIP, EQUIPMENT_MANAGEMENT,\
+    VLAN_MANAGEMENT, NETWORK_TYPE_MANAGEMENT
 from django.core.urlresolvers import reverse
 
 logger = logging.getLogger(__name__)
@@ -158,6 +159,7 @@ def edit_form(request, id_optionvip):
 
     try:
         lists = dict()
+        lists['form'] = OptionVipForm()
 
         if request.method == 'POST':
 
@@ -213,3 +215,321 @@ def edit_form(request, id_optionvip):
         logger.error(e)
 
     return render_to_response(OPTIONVIP_FORM, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": OPTION_VIP, "write": True}])
+def option_vip_associate_net4(request,id_net):
+    '''
+    
+    Método para associar opções Vips ao Ambiente Vip de determinada Rede
+    Método pŕaticamente igual ao método listar net por Id, devido a necessidade de se carregar corretamente as Redes, tanto pelo metodo de listagem 
+    de redes por ID, como por esse, pois ficam na mesma pagina e nao é utilizado AJAX, logo tudo deve ser recarregado.
+    Diferenças: POST, onde é feita a associação
+    
+    '''
+    lists = dict()
+    
+    try:
+        
+        lists['aba'] = 1
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+            
+            
+        #recuperando lista de vlans
+        net = client.create_network().get_network_ipv4(id_net)
+            
+        vlan = client.create_vlan().get(net.get('network').get('vlan'))
+            
+        net['network']['vlan'] = vlan.get('vlan').get('nome')
+            
+        tipo_rede = client.create_tipo_rede().listar()
+        
+        id_vip =  net.get('network').get("ambient_vip")
+                           
+        lists['net'] = replace_id_to_name([net['network']], tipo_rede['tipo_rede'], "network_type", "id", "nome")
+        
+        if id_vip is None:
+            id_vip = 0
+            
+        else:  
+        
+            enviroment_vip = client.create_environment_vip().search(id_vip)
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('vlan.search.list') 
+    
+    try:
+            
+        ips = client.create_ip().find_ip4_by_network(id_net)
+        
+        ips = ips.get('ips')
+        
+        list_nomes = []
+        
+        for ip in ips:
+            list_nomes = []
+            if type(ip.get('equipamento')) == list:
+                for equip in ip.get('equipamento'):
+                    list_nomes.append(equip.get('nome'))
+                ip['equipamento'] = list_nomes
+            else:
+                list_nomes = [ip.get('equipamento').get('nome')]
+                ip['equipamento'] = list_nomes 
+                             
+        
+        lists['ips'] = ips
+        lists['id'] = id_net
+        lists['delete_form'] = DeleteForm()
+                
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        lists['ips'] = None
+    except TypeError,e:
+        logger.error(e)
+        messages.add_message(request,messages.ERROR,e)
+        
+    lists['id'] = id_net
+    lists['delete_form'] = DeleteForm()
+    
+    try:
+        
+        if id_vip == 0:
+            lists['id_vip'] = id_vip
+            return render_to_response(NETIPV4,lists, context_instance=RequestContext(request))
+        
+        opts = client.create_option_vip().get_all()
+        
+        opts_choisen = client.create_option_vip().get_option_vip(id_vip)
+        
+        if opts_choisen is not None:
+                opts_choisen = opts_choisen.get('optionvip')
+                
+        if type(opts_choisen) == dict:
+            opts_choisen = [opts_choisen]
+            
+        if opts_choisen is None:
+            opts_choisen = []
+        
+        post = False
+        
+        if request.method == 'POST':
+            
+            form = OptionVipNetForm(opts, request.POST)
+            
+            if form.is_valid():
+                
+                lista_opcoes = form.cleaned_data['option_vip']
+                
+                for id_opc_vip in opts_choisen:
+                    client.create_option_vip().disassociate(id_opc_vip.get('id'), id_vip)
+                
+                for id_opc_vip in lista_opcoes:
+                    client.create_option_vip().associate(id_opc_vip,id_vip)
+                    
+                
+               
+                messages.add_message(request, messages.SUCCESS, option_vip_messages.get("sucess_options"))
+            else:
+                post = True
+                lists['opt_form'] = form
+            
+            
+        
+        key = u"environmentvip_%s" % (str(id_vip,))
+        enviroment_vip = enviroment_vip.get(key)
+        lists['vip'] = enviroment_vip
+        opts = client.create_option_vip().get_all()
+        options_vip = client.create_option_vip().get_option_vip(id_vip)
+        choice_opts = []
+        if options_vip is not None:
+            options_vip = options_vip.get('optionvip')
+                
+                
+            if type (options_vip) == dict:
+                options_vip = [options_vip]
+                    
+            for opt in options_vip:
+                choice_opts.append(opt.get("id"))
+        
+        if not post:          
+            lists['opt_form'] = OptionVipNetForm(opts, initial = {'option_vip':choice_opts})
+            
+        lists['id_vip'] = id_vip
+            
+        return render_to_response(NETIPV4,lists, context_instance=RequestContext(request))
+            
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    
+    return render_to_response(NETIPV4,lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True},{"permission": OPTION_VIP, "write": True}])
+def option_vip_associate_net6(request,id_net):
+    '''
+    
+    Método para associar opções Vips ao Ambiente Vip de determinada Rede
+    Método pŕaticamente igual ao método listar net por Id, devido a necessidade de se carregar corretamente as Redes, tanto pelo metodo de listagem 
+    de redes por ID, como por esse, pois ficam na mesma pagina e nao é utilizado AJAX, logo tudo deve ser recarregado.
+    Diferenças: POST, onde é feita a associação
+    
+    '''
+    lists = dict()
+    
+    try:
+        
+        lists['aba'] = 1
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+            
+            
+        #recuperando lista de vlans
+        net = client.create_network().get_network_ipv6(id_net)
+            
+        vlan = client.create_vlan().get(net.get('network').get('vlan'))
+            
+        net['network']['vlan'] = vlan.get('vlan').get('nome')
+            
+        tipo_rede = client.create_tipo_rede().listar()
+        
+        id_vip =  net.get('network').get("ambient_vip")
+                           
+        lists['net'] = replace_id_to_name([net['network']], tipo_rede['tipo_rede'], "network_type", "id", "nome")
+        
+        if id_vip is None:
+            id_vip = 0
+            
+        else:  
+        
+            enviroment_vip = client.create_environment_vip().search(id_vip)
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('vlan.search.list') 
+    
+    try:
+            
+        ips = client.create_ip().find_ip6_by_network(id_net)
+        
+        ips = ips.get('ips')
+        
+        list_nomes = []
+        
+        for ip in ips:
+            list_nomes = []
+            if type(ip.get('equipamento')) == list:
+                for equip in ip.get('equipamento'):
+                    list_nomes.append(equip.get('nome'))
+                ip['equipamento'] = list_nomes
+            else:
+                list_nomes = [ip.get('equipamento').get('nome')]
+                ip['equipamento'] = list_nomes 
+                             
+        
+        lists['ips'] = ips
+        lists['id'] = id_net
+        lists['delete_form'] = DeleteForm()
+                
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        lists['ips'] = None
+    except TypeError,e:
+        logger.error(e)
+        messages.add_message(request,messages.ERROR,e)
+        
+    lists['id'] = id_net
+    lists['delete_form'] = DeleteForm()
+    
+    try:
+        
+        if id_vip == 0:
+            lists['id_vip'] = id_vip
+            return render_to_response(NETIPV6,lists, context_instance=RequestContext(request))
+        
+        opts = client.create_option_vip().get_all()
+        
+        opts_choisen = client.create_option_vip().get_option_vip(id_vip)
+        
+        if opts_choisen is not None:
+                opts_choisen = opts_choisen.get('optionvip')
+                
+        if type(opts_choisen) == dict:
+            opts_choisen = [opts_choisen]
+            
+        if opts_choisen is None:
+            opts_choisen = []
+            
+        if int(id_vip) != int(id_vip):
+            
+            messages.add_message(request, messages.ERROR, option_vip_messages.get("vip_not_in_net") % (id_vip,id_net))
+            lists['opt_form'] = False
+            return render_to_response(NETIPV6,lists, context_instance=RequestContext(request))
+        
+        post = False
+        
+        if request.method == 'POST':
+            
+            form = OptionVipNetForm(opts, request.POST)
+            
+            if form.is_valid():
+                
+                lista_opcoes = form.cleaned_data['option_vip']
+                
+                for id_opc_vip in opts_choisen:
+                    client.create_option_vip().disassociate(id_opc_vip.get('id'), id_vip)
+                
+                for id_opc_vip in lista_opcoes:
+                    client.create_option_vip().associate(id_opc_vip,id_vip)
+                    
+                
+               
+                messages.add_message(request, messages.SUCCESS, option_vip_messages.get("sucess_options"))
+            else:
+                post = True
+                lists['opt_form'] = form
+            
+            
+        
+        key = u"environmentvip_%s" % (str(id_vip,))
+        enviroment_vip = enviroment_vip.get(key)
+        lists['vip'] = enviroment_vip
+        opts = client.create_option_vip().get_all()
+        options_vip = client.create_option_vip().get_option_vip(id_vip)
+        choice_opts = []
+        if options_vip is not None:
+            options_vip = options_vip.get('optionvip')
+                
+                
+            if type (options_vip) == dict:
+                options_vip = [options_vip]
+                    
+            for opt in options_vip:
+                choice_opts.append(opt.get("id"))
+        
+        if not post:          
+            lists['opt_form'] = OptionVipNetForm(opts, initial = {'option_vip':choice_opts})
+            
+        lists['id_vip'] = id_vip
+            
+        return render_to_response(NETIPV6,lists, context_instance=RequestContext(request))
+            
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    
+    return render_to_response(NETIPV6,lists, context_instance=RequestContext(request))
+    

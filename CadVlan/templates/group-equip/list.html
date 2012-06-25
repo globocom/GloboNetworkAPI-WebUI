@@ -1,16 +1,19 @@
+{% extends "template.html" %}
+
 {% load util %}
+
+{% block title %}[Grupos de Equipamentos - Listagem]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	oTable = $("#script_list").dataTable({
-		"aaSorting": [[ 1, "asc" ]],
+	oTable = $("#egrops_list").dataTable({
+		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }],
-		"aoColumns": [null, { "sType": "ipv6" }, null, null, null ]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 2 ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -27,22 +30,18 @@ $(document).ready(function() {
 		$("#checkAll").attr("checked", false);
 	});
 	
-	$("#page_tab_2").tabs();
+	$("#page_tab").tabs();
 	
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url network.insert.ip6 id %}";
+		location.href = "{% url group-equip.form %}";
 	});
 	
-	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
-		location.href = "{% url vlan.list.by.id vlan_id %}";
-	});
-	
-	{% has_perm VLAN_MANAGEMENT True None %}
+	{% has_perm ADMINISTRATION True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Excluir um IP não removerá o equipamento do ambiente. Para remover também do ambiente, vá na edição do equipamento.')){ 
+		if (confirm('Deseja realmente excluir o(s) Grupos de equipamentos selecionado(s)?')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
@@ -50,71 +49,71 @@ $(document).ready(function() {
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		//location.reload();
+		location.reload();
 	});
 	
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
+	$("#egrops_list tbody tr").live("click", function(e) {
+		if (!(e.target.nodeName == 'A' || e.target.nodeName == 'SPAN' || e.target.nodeName == 'INPUT' || (e.target.nodeName == 'DIV' && e.target.className == 'expand'))) {
+			location.href = $(this).find(".table_id").attr("lang");
+		}
+	});
+	
+	
 })
 </script>
+<style>
+#egrops_list tbody tr {
+	cursor: pointer;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<div id="page_tab_2">
+<div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">IPs da Rede</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Grupos de Equipamentos</a></li>
 	</ul>
-	<div id="tabs-2">
+	<div id="tabs-1">
 		<div class="buttons">
-			<button id="btn_can" >Voltar</button>
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
 			<button id="btn_new">Novo Registro</button>
-			{% has_perm EQUIPMENT_MANAGEMENT True None %}
+			{% has_perm ADMINISTRATION True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm EQUIPMENT_MANAGEMENT True None %}
+		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url network.delete.ip6 id%}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url group-equip.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in delete_form %}
+			{% for field in form %}
 				{{ field }}
 			{% endfor %}
 		</form>
 		{% endif %}
-		<table id="script_list">
+		<table id="egrops_list">
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th>IP</th>					
-					<th>Nome do Equipamento</th>
-					<th>Descrição do IP</th>
+					<th>Nome</th>					
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for ip in ips %}
+				{% for egroup in grupo %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ ip.id }}" /></td>
-					<td>{{ip.block1}}:{{ip.block2}}:{{ip.block3}}:{{ip.block4}}:{{ip.block5}}:{{ip.block6}}:{{ip.block7}}:{{ip.block8}}</td>
-					<td>
-					{% for equip_name in ip.equipamento %}
-						{{ equip_name }}<br/>
-					{% endfor %}
-					</td>
-					<td>{% ifnotequal ip.descricao None %}{{ ip.descricao }}{% endifnotequal %}</td>
-					<td class="text_center"><a href="{% url network.edit.ip6 id ip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center table_id" lang="{% url equip-group.list egroup.id 0 %}"><input type="checkbox" name="selection" value="{{ egroup.id }}" /></td>
+					<td class="text_center">{{ egroup.nome }}</td>
+					<td class="text_center"><a href="{% url group-equip.edit egroup.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>
 		</table>
 	</div>
-
-
-	
 </div>
 {% endblock %}

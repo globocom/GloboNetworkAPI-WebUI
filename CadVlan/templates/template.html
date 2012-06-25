@@ -94,9 +94,9 @@
 					<div class="btn"><div id="change_pass" class="text" style="width: 80px">Alterar Senha</div></div>
 					<div class="btn"><div class="text" onclick="window.location='/logout'">Logout</div></div>
 					
-					{% has_perm USER_ADMINISTRATION True None %}
+					{% has_perm ADMINISTRATION True None %}
 					{% if has_perm %}
-						<div class="btn"><div class="text">Admin</div></div>
+						<div class="btn"><div class="adm">Admin</div></div>
 					{% endif %}
 					
 					{% block btns %}{% endblock %}
@@ -161,6 +161,10 @@
 							<li><a href="{% url option-vip.list %}">Opções VIP</a></li>
 							{% endif %}
 							
+							{% has_perm ENVIRONMENT_VIP None True %}
+							{% if has_perm %}
+							<li><a href="{% url environment-vip.list %}">Ambiente VIP</a></li>
+							{% endif %}
 							
 						</ul>
 					</li>
@@ -217,6 +221,12 @@
 							{% if has_perm %}
 							<li><a href="{% url option-vip.form %}">Opções VIP</a></li>
 							{% endif %}
+							
+							{% has_perm ENVIRONMENT_VIP True None %}
+							{% if has_perm %}
+							<li><a href="{% url environment-vip.form %}">Ambiente VIP</a></li>
+							{% endif %}
+							
 						</ul>
 					</li>
 					{% endif %}
@@ -240,6 +250,17 @@
 							<li><a href="#">Usuários Externos</a></li>
 							<li><a href="#">Grupos</a></li>
 							<li><a href="#">Sudoers</a></li>
+						</ul>
+					</li>
+					{% endif %}
+					
+					{% has_perm ADMINISTRATION True None %}
+					{% if has_perm %}
+					<li>
+						<a href="#" class="adm">Administração</a>
+						<ul class="sub_menu">
+							<li><a href="{% url group-equip.list %}">Grupos de equipamentos</a></li>
+							<li><a href="{% url group-user.list %}">Grupos de Usuários</a></li>
 						</ul>
 					</li>
 					{% endif %}

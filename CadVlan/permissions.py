@@ -5,6 +5,7 @@ Author: masilva / S2it
 Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
+ADMINISTRATION = 'administrativa'
 USER_ADMINISTRATION = 'administracao_usuarios'
 ENVIRONMENT_MANAGEMENT = 'cadastro_de_ambiente'
 NETWORK_TYPE_MANAGEMENT = 'cadastro_de_tipo_rede'
@@ -29,7 +30,9 @@ ENVIRONMENT_VIP = 'ambiente_vip'
 OPTION_VIP = 'opcao_vip'
 AUTHENTICATE =  'authenticate'
 
-PERMISSIONS = {'USER_ADMINISTRATION': USER_ADMINISTRATION,
+PERMISSIONS = {
+               'ADMINISTRATION': ADMINISTRATION,
+               'USER_ADMINISTRATION': USER_ADMINISTRATION,
                'ENVIRONMENT_MANAGEMENT': ENVIRONMENT_MANAGEMENT,
                'NETWORK_TYPE_MANAGEMENT': NETWORK_TYPE_MANAGEMENT,
                'SCRIPT_MANAGEMENT': SCRIPT_MANAGEMENT,

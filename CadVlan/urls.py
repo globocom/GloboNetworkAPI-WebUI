@@ -129,4 +129,37 @@ urlpatterns += patterns('CadVlan.OptionVip.views',
     url('^option-vip/delete[/]?$', 'delete_all', name='option-vip.delete',),
     url('^option-vip/form[/]?$', 'add_form', name='option-vip.form',),
     url('^option-vip/form/(?P<id_optionvip>\d+)[/]?$', 'edit_form', name='option-vip.edit',),
+    url('^option-vip/associate4/(?P<id_net>\d+)[/]?$','option_vip_associate_net4', name='option-vip.associate.net4',),
+    url('^option-vip/associate6/(?P<id_net>\d+)[/]?$','option_vip_associate_net6', name='option-vip.associate.net6',),
+)
+
+# URL's Environment Vip
+urlpatterns += patterns('CadVlan.EnvironmentVip.views',
+    url('^environment-vip/list[/]?$', 'list_all', name='environment-vip.list',),
+    url('^environment-vip/delete[/]?$', 'delete_all', name='environment-vip.delete',),
+    url('^environment-vip/form[/]?$', 'add_form', name='environment-vip.form',),
+    url('^environment-vip/form/(?P<id_environmentvip>\d+)[/]?$', 'edit_form', name='environment-vip.edit',),
+
+)
+
+# URL's Group Equipment
+urlpatterns += patterns('CadVlan.GroupEquip.views',
+    url('^group-equip/list[/]?$', 'list_all', name='group-equip.list',),
+    url('^group-equip/delete[/]?$', 'delete_all', name='group-equip.delete',),
+    url('^group-equip/form[/]?$', 'add_form', name='group-equip.form',),
+    url('^group-equip/form/(?P<id_group_equipament>\d+)[/]?$', 'edit_form', name='group-equip.edit',),
+)
+
+# URL's Equipment Group
+urlpatterns += patterns('CadVlan.EquipGroup.views',
+    url('^equip-group/list/(?P<id_egroup>\d+)/(?P<tab>\d+)[/]?$', 'list_all', name='equip-group.list',),
+    url('^equip-group/delete/(?P<id_egroup>\d+)[/]?$', 'delete_all', name='equip-group.delete',),
+    url('^equip-group/form/(?P<id_egroup>\d+)[/]?$', 'add_form', name='equip-group.form',),
+)
+
+# URL's Group User
+urlpatterns += patterns('CadVlan.GroupUser.views',
+    url('^group-user/list[/]?$', 'list_all', name='group-user.list',),
+    url('^group-user/delete[/]?$', 'delete_all', name='group-user.delete',),
+    
 )

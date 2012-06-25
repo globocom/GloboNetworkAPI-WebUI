@@ -14,6 +14,9 @@ def cache_list_equipment(equipment):
     elist["list"] = equipments["equipamentos"]
     return elist
 
+def cache_list_equipment_all(equipment):
+    equipments = equipment.get_all()
+    return equipments["equipamentos"]
 
 def get_group_by_id(grupos, id_grupo):
     

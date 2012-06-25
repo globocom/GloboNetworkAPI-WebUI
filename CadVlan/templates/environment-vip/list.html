@@ -1,0 +1,135 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Ambiente VIP - Listagem]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	oTable = $("#script_list").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 5 ] }]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$(":checkbox").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	$("#page_tab").tabs();
+	
+	$("#tool").buttonset();
+	
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url environment-vip.form %}";
+	});
+	
+	{% has_perm SCRIPT_MANAGEMENT True None %}
+	{% if has_perm %}
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Deseja realmente excluir o(s) Ambientes Vip selecionado(s)?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	
+	$(".expand").live("click", function() {
+		id = $(this).attr("lang");
+		if ($(".expandable_" + id).css("max-height") != "999999px") {
+			$(".expandable_" + id).css("max-height", "999999px");
+			$("div[lang=" + id + "]").css("background", "url(/media/img/min.png) transparent bottom center no-repeat");
+		} else {
+			$(".expandable_" + id).css("max-height", "52px");
+			$("div[lang=" + id + "]").css("background", "url(/media/img/max.png) transparent bottom center no-repeat");
+		}
+	});
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Ambientes Vip</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div class="buttons">
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span id="tool">
+			<button id="btn_new">Novo Registro</button>
+			{% has_perm ENVIRONMENT_VIP True None %}
+			{% if has_perm %}
+			<button id="btn_del">Excluir</button>
+			{% endif %}
+			</span>
+		</div>
+		{% has_perm ENVIRONMENT_VIP True None %}
+		{% if has_perm %}
+		<form id="delete_form" method="post" action="{% url environment-vip.delete %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		<table id="script_list">
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th>Finalidade</th>
+					<th>Cliente</th>
+					<th>Ambiente P44</th>
+					<th>Opções VIP</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for evip in environmentvip %}
+				<tr>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ evip.id }}" /></td>
+					<td class="text_center">{{ evip.finalidade_txt }}</td>
+					<td class="text_center">{{ evip.cliente_txt }}</td>
+					<td class="text_center">{{ evip.ambiente_p44_txt }}</td>
+					<td class="text_center">
+
+						<div class="text_center">
+							{% ifequal evip.is_more "True" %}<div class="expandable expandable_{{evip.id|escapejs}}">{% endifequal %}
+							<table style="width: 100%;">
+								{% for option in evip.option_vip %}<tr><td>{{option}}</td></tr>{% endfor %}
+							</table>
+						
+							{% ifequal evip.is_more "True" %}</div><div class="expand" lang="{{ evip.id|escapejs }}"/>{% endifequal %}
+
+						</div>
+					</td>
+					<td class="text_center"><a href="{% url environment-vip.edit evip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

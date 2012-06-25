@@ -114,4 +114,35 @@ option_vip_messages = {
     'success_remove':       u'Todas as opções vip selecionadas foram excluídas com sucesso.',
     'success_insert':       u'Opção vip incluída com sucesso.',
     'invalid_option_vip':   u'Opção VIP inválida',
+    'sucess_options':       u'Opções Vip atualizadas com sucesso.',
+    'vip_not_in_net':       u'Ambiente Vip %s não pertence a rede %s.',
+}
+
+environment_vip_messages = {
+    'success_remove':       u'Todos os Ambientes vip selecionados foram excluídos com sucesso.',
+    'success_insert':       u'Ambiente vip incluído com sucesso.',
+    'invalid_environment_vip':   u'Ambiente VIP inválido',
+    'sucess_edit':          u'Ambiente vip alterado com sucesso.',
+}
+
+group_equip_messages  = {
+    'success_remove':       u'Todos os grupos de equipamento foram excluídos com sucesso.',
+    'success_insert':       u'Grupo de equipamento cadastrado com sucesso.',
+    'invalid_group_equipament':   u'Grupo de equipamento inválido',
+    'sucess_edit':          u'Grupo de equipamento alterado com sucesso.',
+}
+
+equip_group_messages = {
+    'success_remove':       u'Todos os equipamentos foram desassociados do grupo de equipamento com sucesso.',
+    'success_insert':       u'Equipamento foi associado ao Grupo de equipamento com sucesso.',
+    'invalid_equipament_group':   u'Equipamento inválido',
+    'sucess_group_user_equip':  'Direitos de grupos de Usuário em grupo de Equipamentos inserido com sucesso.',
+    'can_not_remove':       u'Não foi possível excluir alguns equipamentos selecionados por estarem associados apenas a este grupo. Equipamentos: %s.',
+}
+
+group_user_messages = {
+    'success_remove':       u'Todos os Grupos de Usuário selecionados foram excluídos com sucesso.',
+    'success_insert':       u'Grupos de Usuário cadastrado com sucesso.',
+    'invalid_group_user':   u'Grupos de Usuário inválido',
+    'success_edit':          u'Grupos de Usuário alterado com sucesso.',
 }

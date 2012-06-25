@@ -27,6 +27,10 @@ $(document).ready(function() {
 	
 	$("#page_tab_2").tabs();
 	
+	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
+		location.href = "{% url vlan.search.list %}";
+	});
+	
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
@@ -71,6 +75,7 @@ $(document).ready(function() {
 	</ul>
 	<div id="tabs-2">
 		<div class="buttons">
+			<button id="btn_can" >Voltar</button>
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
 			<button id="btn_new" type="button">Novo Registro</button>
@@ -121,4 +126,7 @@ $(document).ready(function() {
 			</tbody>
 		</table>
 	</div>
+	
+	
+	
 </div>

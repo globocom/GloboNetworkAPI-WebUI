@@ -75,6 +75,17 @@ body {
 	cursor: pointer;
 }
 
+.btn .adm {
+	background: url(/media/img/top_btn_bg.png) repeat-x;
+	border: 1px solid #FFF;
+	line-height: 42px;
+	text-align: center;
+	height: 42px;
+	width: 40px;
+	padding-right: 6px;
+	padding-left: 6px;
+}
+
 .btn .text:hover {
 	background: url(/media/img/top_btn_bg_over.png) repeat-x;
 }
@@ -229,6 +240,8 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 .cad { background: url(/media/img/ico_cad.png) no-repeat left 9px; }
 .rot { background: url(/media/img/ico_rot.png) no-repeat left 9px; }
 .ldap { background: url(/media/img/ico_ldap.png) no-repeat left 9px; }
+.adm { background: url(/media/img/ico_adm.png) no-repeat left 8px; }
+
 
 .separator { height: 2px; background-color: #F0F0F0 !important; border-bottom: 1px solid #ECECEC !important; }
 

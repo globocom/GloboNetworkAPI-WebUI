@@ -12,10 +12,8 @@ from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
-from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP,\
-    IPS
-from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, NET_FORM, NET6_EDIT, NET4_EDIT,\
-    EQUIPMENT_EDIT
+from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP, IPS
+from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, NET_FORM, NET6_EDIT, NET4_EDIT
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
 from CadVlan.Net.forms import IPForm, IPEditForm, NetworkForm, NetworkEditForm
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
@@ -24,6 +22,7 @@ from CadVlan.forms import DeleteForm
 from CadVlan.messages import error_messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from CadVlan.OptionVip.forms import OptionVipNetForm
 
 
 logger = logging.getLogger(__name__)
@@ -131,7 +130,8 @@ def list_netip4_by_id(request, id_net):
     lists = dict()
     
     try:
-            
+        
+        lists['aba'] = 0
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
             
@@ -140,10 +140,39 @@ def list_netip4_by_id(request, id_net):
         net = client.create_network().get_network_ipv4(id_net)
             
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
+        lists['vlan_id'] = vlan['vlan']['id']
             
         net['network']['vlan'] = vlan.get('vlan').get('nome')
             
         tipo_rede = client.create_tipo_rede().listar()
+        
+        id_vip =  net.get('network').get("ambient_vip")
+        
+        if id_vip is None:
+            id_vip = 0
+            
+        else:
+            
+            enviroment_vip = client.create_environment_vip().search(id_vip)
+            key = u"environmentvip_%s" % (str(id_vip,))
+            enviroment_vip = enviroment_vip.get(key)
+            lists['vip'] = enviroment_vip
+            opts = client.create_option_vip().get_all()
+            options_vip = client.create_option_vip().get_option_vip(id_vip)
+            choice_opts = []
+            if options_vip is not None:
+                options_vip = options_vip.get('optionvip')
+                
+                
+                if type (options_vip) == dict:
+                    options_vip = [options_vip]
+                    
+                for opt in options_vip:
+                    choice_opts.append(opt.get("id"))
+                    
+            lists['opt_form'] = OptionVipNetForm(opts, initial = {'option_vip':choice_opts})
+            
+        lists['id_vip'] = id_vip
            
                         
         lists['net'] = replace_id_to_name([net['network']], tipo_rede['tipo_rede'], "network_type", "id", "nome")
@@ -198,7 +227,8 @@ def list_netip6_by_id(request, id_net):
     lists = dict()
     
     try:
-            
+        
+        lists['aba'] = 0
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
             
@@ -207,10 +237,39 @@ def list_netip6_by_id(request, id_net):
         net = client.create_network().get_network_ipv6(id_net)
             
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
+        lists['vlan_id'] = vlan.get('vlan')['id']
             
         net['network']['vlan'] = vlan.get('vlan').get('nome')
             
         tipo_rede = client.create_tipo_rede().listar()
+        
+        id_vip =  net.get('network').get("ambient_vip")
+        
+        if id_vip is None:
+            id_vip = 0
+            
+        else:
+            
+            enviroment_vip = client.create_environment_vip().search(id_vip)
+            key = u"environmentvip_%s" % (str(id_vip,))
+            enviroment_vip = enviroment_vip.get(key)
+            lists['vip'] = enviroment_vip
+            opts = client.create_option_vip().get_all()
+            options_vip = client.create_option_vip().get_option_vip(id_vip)
+            choice_opts = []
+            if options_vip is not None:
+                options_vip = options_vip.get('optionvip')
+                
+                
+                if type (options_vip) == dict:
+                    options_vip = [options_vip]
+                    
+                for opt in options_vip:
+                    choice_opts.append(opt.get("id"))
+                    
+            lists['opt_form'] = OptionVipNetForm(opts, initial = {'option_vip':choice_opts})
+            
+        lists['id_vip'] = id_vip
            
                         
         lists['net'] = replace_id_to_name([net['network']], tipo_rede['tipo_rede'], "network_type", "id", "nome")

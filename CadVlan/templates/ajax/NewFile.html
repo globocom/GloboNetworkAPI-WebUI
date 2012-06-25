@@ -1,0 +1,19 @@
+"<div class='text_center'><input type='checkbox' name='selection' value='{{ equip.id|escapejs }}' /></div>",
+		"<div class='text_center'>{{ equip.nome|escapejs }}</div>",
+		"<div class='text_center'>{{ equip.tipo_equipamento|escapejs }}</div>",
+		"<div class='text_center'><table style='width: 100%;'>{% for grupo in equip.grupos %}<tr><td>{{ grupo.nome|escapejs }}</td></tr>{% endfor %}</table></div>",
+		"<div class='text_center'>{% ifequal equip.is_more "True" %}
+		<div class='expandable expandable_{{ equip.id|escapejs }}'>
+		{% endifequal %}
+		<table style='width: 100%;'>
+		{% for ip in equip.ips %}
+		<tr><td>{{ ip.ip|escapejs }}</td></tr>{% endfor %}</table>
+		</div>
+		{% ifequal equip.is_more "True" %}
+		<div class='expand' lang='{{ equip.id|escapejs }}'>
+		</div>
+		</div>
+		{% endifequal %}
+		</div>",
+		"<div class='text_center'>{% ifequal equip.is_more "True" %}<div class='expandable expandable_{{ equip.id|escapejs }}'>{% endifequal %}<table style='width: 100%;'>{% for ip in equip.ips %}<tr><td>{{ ip.vlan|escapejs }}</td></tr>{% endfor %}</table></div>{% ifequal equip.is_more "True" %}<div class='expand' lang='{{ equip.id|escapejs }}'></div></div>{% endifequal %}</div>",
+		"<div class='text_center'>{% ifequal equip.is_more "True" %}<div class='expandable expandable_{{ equip.id|escapejs }}'>{% endifequal %}<table style='width: 100%;'>{% for ip in equip.ips %}<tr><td>{{ ip.ambiente|escapejs }}</td></tr>{% endfor %}</table></div>{% ifequal equip.is_more "True" %}<div class='expand' lang='{{ equip.id|escapejs }}'></div></div>{% endifequal %}</div>",

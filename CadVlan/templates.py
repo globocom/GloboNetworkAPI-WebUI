@@ -74,6 +74,20 @@ NET6_EDIT = 'net/edit-net6.html'
 OPTIONVIP_LIST = 'option-vip/list.html'
 OPTIONVIP_FORM = 'option-vip/form.html'
 
+# Environment Vip
+ENVIRONMENTVIP_LIST = 'environment-vip/list.html'
+ENVIRONMENTVIP_FORM = 'environment-vip/form.html'
+ENVIRONMENTVIP_EDIT = 'environment-vip/edit.html'
+
+# Group Equipment
+GROUP_EQUIPMENT_LIST = 'group-equip/list.html'
+GROUP_EQUIPMENT_FORM = 'group-equip/form.html'
+
+# EQUIPMENT_GROUP
+EQUIPMENT_GROUP_LIST = 'equip-group/list.html'
+EQUIPMENT_GROUP_FORM = 'equip-group/form.html'
+EQUIPMENT_USER_GROUP_FORM = 'equip-group/equip-user-group-form.html'
+
 #Mail
 MAIL_NEW_PASS = 'mail/mail.html'
 
@@ -85,3 +99,7 @@ IP4 = 'ip/insert-ip4.html'
 IP6 = 'ip/insert-ip6.html'
 IP4EDIT = 'ip/edit-ip4.html'
 IP6EDIT = 'ip/edit-ip6.html'
+
+#Group User
+GROUPUSER_LIST = 'group-user/list.html'
+GROUPUSER_FORM = 'group-user/form.html'

@@ -28,3 +28,11 @@ class OptionVipForm(forms.Form):
             raise forms.ValidationError('Caracteres inválidos.')
 
         return self.cleaned_data['type_option']
+    
+class OptionVipNetForm(forms.Form):
+    def __init__(self, script_type_list, *args, **kwargs):
+        super(OptionVipNetForm, self).__init__(*args, **kwargs)
+        self.fields['option_vip'].choices = [(st['id'], st['tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["optionvip"]]
+        
+    option_vip = forms.MultipleChoiceField(label=u'Opções VIP'  , required=False, error_messages=error_messages, widget=forms.SelectMultiple(attrs={'style': "width: 310px"}))
+    
