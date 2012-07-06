@@ -157,3 +157,38 @@ jQuery.fn.dataTableExt.oSort['ipv4-desc']  = function(a,b) {
     }
     return ((x < y) ? 1 : ((x > y) ? -1 : 0));
 };
+
+jQuery.fn.dataTableExt.oSort['check-asc']  = function(a,b) {
+    var x = "",  y = "";
+    
+    if ( a.split('title="')[1].split('"></span>')[0] == 'SIM'){ x = 10 }else{ x = 0 };
+    if ( b.split('title="')[1].split('"></span>')[0] == 'SIM'){ y = 10 }else{ y = 0 };
+    
+    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+};
+
+jQuery.fn.dataTableExt.oSort['check-desc']  = function(a,b) {
+    var x = "",  y = "";
+    
+    if ( a.split('title="')[1].split('"></span>')[0] == 'SIM'){ x = 10 }else{ x = 0 };
+    if ( b.split('title="')[1].split('"></span>')[0] == 'SIM'){ y = 10 }else{ y = 0 };
+    
+    return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+};
+
+$.fn.clearForm = function() {
+    this.find(':input').each(function() {
+        switch(this.type) {
+            case 'password':
+            case 'select-multiple':
+            case 'select-one':
+            case 'text':
+            case 'textarea':
+                $(this).val('');
+                break;
+            case 'checkbox':
+            case 'radio':
+                this.checked = false;
+        }
+    });
+};

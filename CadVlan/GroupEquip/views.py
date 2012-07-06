@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def list_all(request):
 
     try:
@@ -48,7 +48,7 @@ def list_all(request):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def delete_all(request):
 
     if request.method == 'POST':
@@ -112,7 +112,7 @@ def delete_all(request):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def add_form(request):
 
     try:
@@ -152,7 +152,7 @@ def add_form(request):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def edit_form(request, id_group_equipament):
 
     try:

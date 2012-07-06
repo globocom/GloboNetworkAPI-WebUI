@@ -90,6 +90,7 @@ EQUIPMENT_USER_GROUP_FORM = 'equip-group/equip-user-group-form.html'
 
 #Mail
 MAIL_NEW_PASS = 'mail/mail.html'
+MAIL_NEW_USER = 'mail/user.html'
 
 #Errors
 SEARCH_FORM_ERRORS = 'ajax/search-form-errors.html'
@@ -103,3 +104,9 @@ IP6EDIT = 'ip/edit-ip6.html'
 #Group User
 GROUPUSER_LIST = 'group-user/list.html'
 GROUPUSER_FORM = 'group-user/form.html'
+
+#User
+USER_LIST = 'users/list.html'
+
+# User Group
+USERGROUP_LIST = 'user-group/list.html'

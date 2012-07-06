@@ -22,6 +22,68 @@ def check_regex(string, regex):
     pattern = re.compile(regex)
     return pattern.match(string) is not None
 
+def convert_string_to_boolean(param):
+    '''Convert the parameter of string to boolean.
+
+    @param param: parameter to be converted.
+
+    @return Parameter converted.  
+    '''
+    if param == 'True':
+        return True
+
+    elif param == 'False':
+        return False
+    
+def convert_boolean_to_int(param):
+    '''Convert the parameter of boolean to int.
+
+    @param param: parameter to be converted.
+
+    @return Parameter converted.  
+    '''
+    if param == True:
+        return int(1)
+
+    elif param == False:
+        return int(0)
+
+def convert_int_to_boolean(param):
+    '''Convert the parameter of int to boolean.
+
+    @param param: parameter to be converted.
+
+    @return Parameter converted.  
+    '''
+    param = int(param)
+    if param == 1:
+        return True
+
+    elif param == 0:
+        return False    
+
+
+def validates_dict(param, key):
+    '''Validates that the list is a dictionary and converts it to a vector
+    
+    @param param: to be verified and converted.
+    
+    @param key: Key List.
+
+    @return list.  
+    '''
+    if param is not None:
+
+        if type(param.get(key)) == dict:
+            return [param.get(key)]
+
+        else:
+            return param.get(key)
+
+    else:
+
+        return None
+
 def make_random_password(length=8, allowed_chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'):
         "Generates a random password with the given length and given allowed_chars"
         return ''.join([choice(allowed_chars) for i in range(length)])

@@ -25,7 +25,8 @@ auth_messages = {
     'user_email_invalid':   u'Usuário e/ou email incorretos.',
     'email_success':        u'Nova senha enviada com sucesso.',
     'pass_change_sucess':   u'Senha alterada com sucesso.',
-    'email_error':          u'Ocorreu um erro ao enviar email.'
+    'email_error':          u'Ocorreu um erro ao enviar email.',
+    'nogroup_error':        u'Somente usuários que pertecem à algum grupo, podem efetuar login no sistema. '
 }
 
 script_messages = {
@@ -133,11 +134,14 @@ group_equip_messages  = {
 }
 
 equip_group_messages = {
+    'duplicated_error':     u'Grupo de Usuário selecionado já se encontra cadastrado nesse grupo de equipamento.',
     'success_remove':       u'Todos os equipamentos foram desassociados do grupo de equipamento com sucesso.',
     'success_insert':       u'Equipamento foi associado ao Grupo de equipamento com sucesso.',
     'invalid_equipament_group':   u'Equipamento inválido',
     'sucess_group_user_equip':  'Direitos de grupos de Usuário em grupo de Equipamentos inserido com sucesso.',
+    'sucess_group_user_equip_edit':  'Direitos de grupos de Usuário em grupo de Equipamentos foi editado com sucesso.',
     'can_not_remove':       u'Não foi possível excluir alguns equipamentos selecionados por estarem associados apenas a este grupo. Equipamentos: %s.',
+    'sucesso_user_equip_remove': u'Todos os grupos de usuários foram desassociados do grupos de equipamento com sucesso.',
 }
 
 group_user_messages = {
@@ -145,4 +149,27 @@ group_user_messages = {
     'success_insert':       u'Grupos de Usuário cadastrado com sucesso.',
     'invalid_group_user':   u'Grupos de Usuário inválido',
     'success_edit':          u'Grupos de Usuário alterado com sucesso.',
+}
+
+user_messages = {
+    'success_remove':       u'Todos os Usuários selecionados foram inativados com sucesso.',
+    'success_insert':       u'Usuário cadastrado com sucesso.',
+    'success_edit':         u'Usuário alterado com sucesso.',
+}
+
+user_group_messages = {
+    'success_remove':       u'Todos os Usuários selecionados foram desassociados do grupo de usuário com sucesso.',
+    'success_insert':       u'Usuário(s) foram associado(s) ao Grupo de usuário com sucesso.',
+    'invalid_group_user':   u'Usuário inválido',
+}
+
+perm_group_messages = {
+    'success_remove':       u'Todas as Permissões Administrativa foram excluídas com sucesso.',
+    'success_insert':       u'Permissão Administrativa cadastrada com sucesso.',
+    'success_edit':         u'Permissão Administrativa alterada com sucesso.',
+    'invalid_group_user':   u'Permissão Administrativa inválida',
+    'invalid_function_duplicate':   u'Permissão Administrativa com função %s já cadastrada',
+    
+    
+    
 }

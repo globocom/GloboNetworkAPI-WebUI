@@ -58,6 +58,12 @@ def login(request):
                         #auth.login(User(**user.get('user')))
 
                         user = user.get('user')
+                        
+                        if user.get('permission') is None:
+                            messages.add_message(request, messages.ERROR, auth_messages.get("nogroup_error"))
+                            return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
+                            
+                        
                         auth.login(User(user.get('id'), user.get('user'), user.get('nome'), user.get('email'), user.get('pwd'), user.get('permission'), user.get('ativo')))
 
                         if form.cleaned_data['redirect'] != "" :

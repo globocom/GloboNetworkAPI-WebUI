@@ -1,0 +1,221 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Usuários - Listagem]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	oTable = $("#users-table").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 6 ] }],
+		"aoColumns": [null, null, null,null, { "sType": "check" }, null, null ]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$(":checkbox").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	$("#page_tab").tabs();
+	
+	$("#page_tab_form_user").tabs();
+	
+	$("#id_groups").pickList();
+	
+	$("#tool").buttonset();
+	
+	{% has_perm ADMINISTRATION True None %}
+	{% if has_perm %}
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Deseja realmente excluir o(s) Usuário(s) selecionado(s)?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.href = "{% url user.list 0 0 %}";
+	});
+	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	
+	$(".yes").button({ icons: {primary: "ui-icon-check"}, text: false });
+	$(".no").button({ icons: {primary: "ui-icon-close"}, text: false });
+	
+	$(".expand").live("click", function() {
+		id = $(this).attr("lang");
+		if ($(".expandable_" + id).css("max-height") != "999999px") {
+			$(".expandable_" + id).css("max-height", "999999px");
+			$("div[lang=" + id + "]").css("background", "url(/media/img/min.png) transparent bottom center no-repeat");
+		} else {
+			$(".expandable_" + id).css("max-height", "52px");
+			$("div[lang=" + id + "]").css("background", "url(/media/img/max.png) transparent bottom center no-repeat");
+		}
+	});
+	
+	{% ifequal open_form 'True' %}
+		$('html, body').animate({
+	    	scrollTop: $("#page_tab_form_user").show(1000).offset().top
+	    }, 2000);
+	{% else %}
+		$("#page_tab_form_user").hide();
+	
+	{% endifequal %}
+	
+	$("#btn_new_user").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		$("#add_users_form").clearForm();
+		$("#add_users_form").attr('action', '{{ action_new_users }}');
+		$("#add_users_form .user").html('');
+		$('.pickList_removeAll').click();
+		$('html, body').animate({
+		    scrollTop: $("#page_tab_form_user").show(1000).offset().top
+		}, 2000);
+	});
+	
+	$("#btn_sav_user").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can_user").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		$("#page_tab_form_user").hide(2000);
+	});
+	
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+	
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Usuários</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div class="buttons">
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span id="tool">
+			<button id="btn_new_user">Novo Registro</button>
+			{% has_perm ADMINISTRATION True None %}
+			{% if has_perm %}
+			<button id="btn_del">Excluir</button>
+			{% endif %}
+			</span>
+		</div>
+		{% has_perm ADMINISTRATION True None %}
+		{% if has_perm %}
+		<form id="delete_form" method="post" action="{% url user.delete %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		<table id="users-table">
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th>Nome</th>					
+					<th>Usuário</th>
+					<th>Email</th>
+					<th>Ativos</th>
+					<th>Grupos de Usuário</th>
+					<th></th>
+			
+				</tr>
+			</thead>
+			<tbody>
+				{% for usuario in users %}
+				<tr>
+				
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ usuario.id }}" /></td>
+					<td class="text_center"> {{usuario.nome}}</td>
+					<td class="text_center"> {{usuario.user}}</td>
+					<td class="text_center"> {{usuario.email}}</td>
+					<td class="text_center">{% ifequal usuario.ativo 'True' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
+					<td class="text_center">
+						<div class="text_center">
+							{% ifequal usuario.is_more "True" %}<div class="expandable expandable_{{usuario.id|escapejs}}">{% endifequal %}
+							<table style="width: 100%;">
+								{% for group in usuario.grupos %}<tr><td>{{group}}</td></tr>{% endfor %}
+							</table>
+							{% ifequal usuario.is_more "True" %}</div><div class="expand" lang="{{ usuario.id|escapejs }}"/>{% endifequal %}
+						</div>
+					</td>
+					<td class="text_center"><a href="{% url user.edit usuario.id 1 %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+	{% has_perm ADMINISTRATION True None %}
+					{% if has_perm %}					
+						<div id="page_tab_form_user">
+							<ul>
+								<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Cadastro de Usuário</a></li>
+							</ul>
+							<div id="tabs-2">
+								<form id="add_users_form" method="post" 
+								
+								{% ifequal edit "True" %}
+								
+								action = "{% url user.edit id_user 1 %}"
+								
+								{% else %}
+								
+								action = "{% url user.form 0 0 %}"
+								
+								{% endifequal %}
+								>
+								
+									{% csrf_token %}
+									<div id="fields" class="ui-widget-content">
+									{% for field in form_user %}
+										<div>
+											<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+											 {{ field }}
+											<p id="error" class="user">
+											{% if field.errors %} 
+												{% for error in field.errors %}
+													{{ error|escape }}
+												{% endfor %}
+											{% endif %}
+											</p>
+										</div>
+									{% endfor %}
+									</div>
+									
+									<div class="separator spacer"></div>
+									
+									<div class="buttons-l ui-widget-header">
+										<button id="btn_sav_user" type="submit">Gravar</button>
+										<button id="btn_can_user" type="button">Cancelar</button>
+									</div>
+								</form>
+							</div>
+						</div>					
+					{% endif %}
+
+
+{% endblock %}

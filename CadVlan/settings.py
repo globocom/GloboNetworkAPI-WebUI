@@ -138,6 +138,11 @@ INSTALLED_APPS = (
     'CadVlan.Vlan',
     'CadVlan.OptionVip',
     'CadVlan.EnvironmentVip',
+    'CadVlan.GroupEquip',
+    'CadVlan.EquipGroup',
+    'CadVlan.GroupUser',
+    'CadVlan.UserGroup',
+    
 )
 
 SESSION_ENGINE = (
@@ -240,6 +245,12 @@ LOGGING = {
             'handlers': ['handlers-view'],
         },
         'CadVlan.EquipGroup.views': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.GroupUser.views': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.UserGroup.views': {
             'handlers': ['handlers-view'],
         },
     }

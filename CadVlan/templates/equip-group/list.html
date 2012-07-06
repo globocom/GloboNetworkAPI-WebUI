@@ -8,6 +8,8 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	
+	new_right = false;
+
 	oTable = $("#egrops_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
@@ -21,16 +23,26 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }],
+		"aoColumns": [ null, null, { "sType": "check" }, { "sType": "check" }, { "sType": "check" }, { "sType": "check" }, null  ]
+		
 	});
 	
-	$("#checkAll").click( function() {
+	$("#checkAll_equip").click( function() {
 		if ($(this).attr('checked')) {
-			$(":checkbox").attr("checked", true);
+			$("#egrops_list :checkbox").attr("checked", true);
 		} else {
-			$(":checkbox").attr("checked", false);
+			$("#egrops_list :checkbox").attr("checked", false);
 		}
 	});
+	
+	$("#checkAll_user").click( function() {
+		if ($(this).attr('checked')) {
+			$("#ugrops_list :checkbox").attr("checked", true);
+		} else {
+			$("#ugrops_list :checkbox").attr("checked", false);
+		}
+	})
 	
 	$(".fg-button").live("click", function(){
 		$(":checkbox").attr("checked", false);
@@ -40,17 +52,41 @@ $(document).ready(function() {
 	
 	$("#page_tab").tabs();
 	
+	$("#page_tab_form_right").tabs();
+	
 	$("#page_tab_equip").tabs({ selected: {{tab}} });
 	
 	$("#page_tab_equip2").tabs({ selected: {{tab}} });
 	
+	
+	{% ifequal open_form 'True' %}
+	
+	
+		$('html, body').animate({
+		    scrollTop: $("#page_tab_form_right").show(1000).offset().top
+		}, 2000);
+		
+		
+	{% else %}
+	
+		
+		$("#page_tab_form_right").hide();
+		
+		
+	{% endifequal %}
+
+
+	
 	$("#tool").buttonset();
+	$("#tool_user").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 		window.open('{% url equip-group.form egroup.id %}','blank');
 	});
 	
-	$("#btn_new_u").button({ icons: {primary: "ui-icon-document"} });
+	$("#btn_new_u").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		window.open('{% url equip-user-group.form egroup.id %}','blank');
+	});
 		
 	{% has_perm ADMINISTRATION True None %}
 	{% if has_perm %}
@@ -63,8 +99,14 @@ $(document).ready(function() {
 	{% endif %}
 	
 	{% has_perm ADMINISTRATION True None %}
+	$("#btn_del_u").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Deseja realmente desassociar o(s) equipamentos do grupos de usuários selecionado(s)?')){ 
+			var data = getSelectionData(oTableAux);
+			$("#id_ids_aux").val(data).parent().submit();
+		}
+	});
 	{% if has_perm %}
-		$("#btn_del_u").button({ icons: {primary: "ui-icon-trash"} });
+
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
@@ -79,8 +121,52 @@ $(document).ready(function() {
 		location.href = "{% url equip-group.list egroup.id 1 %}";
 	});
 	
-	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false }).click (function() {
+		new_right = false;
+	});
 	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	
+	$("#btn_new_right").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		new_right = true;
+		$("#id_ugroup").removeAttr("disabled");
+		
+		$("#id_ugroup").val(0);
+		$("#id_delete").attr("checked",false);
+		$("#id_update").attr("checked",false);
+		$("#id_write").attr("checked",false);
+		$("#id_read").attr("checked",false);
+		
+		
+		$('html, body').animate({
+		    scrollTop: $("#page_tab_form_right").show(1000).offset().top
+		}, 2000);
+		$("#form_perm .perm").html('');
+	});
+	
+	$("#btn_sav_right").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+		
+		if (new_right) {
+			$("#form_perm").attr("action","{{url_form}}");
+		}
+		else{
+			$("form_perm").attr("action","{{url_edit}}");
+			$("#id_ugroup").removeAttr("disabled");
+		}
+		
+		$("#form_perm").submit();
+		
+	});
+	
+	$("#btn_can_right").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		
+		$("#page_tab_form_right").hide(2000);
+		
+	});
+	
+	if (("{{edit}}") == "True"){
+		$("#id_ugroup").attr("disabled","disabled");
+	}
+	
 	
 })
 </script>
@@ -110,7 +196,7 @@ $(document).ready(function() {
 			<div id="page_tab_equip">
 				<ul>
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Equipamentos</a></li>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Grupo de Usários</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Grupo de Usuários</a></li>
 				</ul>
 				<div id="tabs-1">
 					<div class="buttons">
@@ -136,7 +222,7 @@ $(document).ready(function() {
 					<table id="egrops_list">
 						<thead>
 							<tr>
-								<th><input id="checkAll" type="checkbox" /></th>
+								<th><input id="checkAll_equip" type="checkbox" /></th>
 								<th>Nome</th>
 								<th>Tipo de equipamento</th>
 								<th>Modelo</th>
@@ -167,8 +253,8 @@ $(document).ready(function() {
 				<div class="buttons">
 						<button title="voltar" class="voltar">Voltar</button>
 						<button id="btn_ref_u" title="Atualizar dados da listagem">Atualizar</button>
-						<span id="tool">
-						<button id="btn_new_u">Novo Registro</button>
+						<span id="tool_user">
+						<button id="btn_new_right">Novo Registro</button>
 						{% has_perm ADMINISTRATION True None %}
 						{% if has_perm %}
 						<button id="btn_del_u">Excluir</button>
@@ -177,7 +263,7 @@ $(document).ready(function() {
 					</div>
 					{% has_perm ADMINISTRATION True None %}
 					{% if has_perm %}
-					<form id="delete_form_u" method="post" action="" style="visibility: hidden;">
+					<form id="delete_form_u" method="post" action="{% url equip-user-group.delete egroup.id %}" style="visibility: hidden;">
 						{% csrf_token %}
 						{% for field in form_ugroup %}
 							{{ field }}
@@ -187,28 +273,69 @@ $(document).ready(function() {
 					<table id="ugrops_list">
 						<thead>
 							<tr>
-								<th><input id="checkAll" type="checkbox" /></th>
+								<th><input id="checkAll_user" type="checkbox" /></th>
 								<th>Nome Grupo Usuário</th>
 								<th>Alterar Configuração</th>
 								<th>Escrita</th>
 								<th>Leitura</th>
 								<th>Exclusão</th>
+								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 						
 							{% for ugroup in ugroups %}
 							<tr>
-								<td class="text_center"><input type="checkbox" name="selection" value="{{ equip.id }}" /></td>
+								<td class="text_center"><input type="checkbox" name="selection" value="{{ ugroup.id }}" /></td>
 								<td class="text_center"> {{ ugroup.nome_grupo_usuario }}</td>
 								<td class="text_center">  {% ifequal  ugroup.alterar_config "1" %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span> {% endifequal %} </td>
 								<td class="text_center">  {% ifequal ugroup.escrita "1" %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span> {% endifequal %} </td>
 								<td class="text_center">  {% ifequal ugroup.leitura "1" %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span> {% endifequal %} </td>
 								<td class="text_center">  {% ifequal ugroup.exclusao "1" %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span> {% endifequal %} </td>
+								<td class="text_center"><a href="{% url equip-user-group.edit egroup.id ugroup.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 							</tr>
 							{% endfor %}
 						</tbody>
 					</table>
+					
+					{% has_perm ADMINISTRATION True None %}
+					{% if has_perm %}					
+						<div id="page_tab_form_right">
+							<ul>
+								<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3">Cadastro de Permissão Administrativa</a></li>
+							</ul>
+							<div id="tabs-3">
+								<form id="form_perm" method="post" >
+									{% csrf_token %}
+									<div id="fields" class="ui-widget-content">
+									{% for field in ugroup_form %}
+										<div>
+											<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+											 {% ifequal field.field.label 'Função' %} </div>{{ field }} {% else %} {{ field }}</div> {% endifequal %}
+											<p id="error" class="perm">
+											{% if field.errors %} 
+												{% for error in field.errors %}
+													{{ error|escape }}
+												{% endfor %}
+											{% endif %}
+											</p>
+										</div>
+									{% endfor %}
+									</div>
+									
+									<div class="separator spacer"></div>
+									
+									<div class="buttons-l ui-widget-header">
+										<button id="btn_sav_right" type="submit">Gravar</button>
+										<button id="btn_can_right" type="button">Cancelar</button>
+									</div>
+								</form>
+							</div>
+						</div>					
+					{% endif %}
+					
+					
+					
 				</div>
 			</div>
 			</div>

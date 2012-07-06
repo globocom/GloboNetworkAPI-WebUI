@@ -13,7 +13,8 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 3 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 6 ] }],
+		"aoColumns": [null, null, { "sType": "check" }, { "sType": "check" }, { "sType": "check" }, { "sType": "check" }, null ]
 	});
 	
 	$("#checkAll").click( function() {
@@ -35,10 +36,10 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "#";
+		location.href = "{% url group-user.form %}";
 	});
 	
-	{% has_perm SCRIPT_MANAGEMENT True None %}
+	{% has_perm ADMINISTRATION True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
 		if (confirm('Deseja realmente excluir o(s) Grupo(s) de Usuário selecionado(s)?')){ 
@@ -58,9 +59,21 @@ $(document).ready(function() {
 	$(".yes").button({ icons: {primary: "ui-icon-check"}, text: false });
 	$(".no").button({ icons: {primary: "ui-icon-close"}, text: false });
 	
+	$("#group-user tbody tr").live("click", function(e) {
+		if (!(e.target.nodeName == 'A' || e.target.nodeName == 'SPAN' || e.target.nodeName == 'INPUT' || (e.target.nodeName == 'DIV' && e.target.className == 'expand'))) {
+			location.href = $(this).find(".table_id").attr("lang");
+		}
+	});
+	
+	
 	
 })
 </script>
+<style>
+#group-user tbody tr {
+	cursor: pointer;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -73,13 +86,13 @@ $(document).ready(function() {
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
 			<button id="btn_new">Novo Registro</button>
-			{% has_perm USER_ADMINISTRATION True None %}
+			{% has_perm ADMINISTRATION True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm USER_ADMINISTRATION True None %}
+		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
 		<form id="delete_form" method="post" action="{% url group-user.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
@@ -104,13 +117,13 @@ $(document).ready(function() {
 			<tbody>
 				{% for grupo in grupos %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ grupo.id }}" /></td>
+					<td class="text_center table_id" lang="{% url user-group.list grupo.id 0 %}"><input type="checkbox" name="selection" value="{{ grupo.id }}" /></td>
 					<td class="text_center"> {{grupo.nome}}</td>
 					<td class="text_center">{% ifequal grupo.leitura 'S' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
 					<td class="text_center">{% ifequal grupo.escrita 'S' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
 					<td class="text_center">{% ifequal grupo.edicao 'S' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
 					<td class="text_center">{% ifequal grupo.exclusao 'S' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
-					<td class="text_center"><a href="#" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center"><a href="{% url group-user.edit grupo.id  %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

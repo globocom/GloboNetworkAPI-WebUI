@@ -155,11 +155,34 @@ urlpatterns += patterns('CadVlan.EquipGroup.views',
     url('^equip-group/list/(?P<id_egroup>\d+)/(?P<tab>\d+)[/]?$', 'list_all', name='equip-group.list',),
     url('^equip-group/delete/(?P<id_egroup>\d+)[/]?$', 'delete_all', name='equip-group.delete',),
     url('^equip-group/form/(?P<id_egroup>\d+)[/]?$', 'add_form', name='equip-group.form',),
+    url('^equip-group/form/(?P<id_egroup>\d+)/(?P<id_right>\d+)[/]?$', 'edit_right', name='equip-user-group.edit',),
+    url('^equip-user-group/form/(?P<id_egroup>\d+)[/]?$', 'add_right', name='equip-user-group.form',),
+    url('^equip-user-group/delete/(?P<id_egroup>\d+)[/]?$', 'delete_right', name='equip-user-group.delete',),
 )
 
 # URL's Group User
 urlpatterns += patterns('CadVlan.GroupUser.views',
     url('^group-user/list[/]?$', 'list_all', name='group-user.list',),
     url('^group-user/delete[/]?$', 'delete_all', name='group-user.delete',),
+    url('^group-user/form[/]?$', 'add_form', name='group-user.form',),
+    url('^group-user/form/(?P<id_group_user>\d+)[/]?$', 'edit_form', name='group-user.edit',),    
     
+)
+
+# URL's Group User
+urlpatterns += patterns('CadVlan.User.views',
+    url('^user/list/(?P<id_user>\d+)/(?P<status>\d+)[/]?$', 'list_all', name='user.list',),
+    url('^user/form/(?P<id_user>\d+)/(?P<status>\d+)[/]?$', 'list_all', name='user.form',),
+    url('^user/edit/(?P<id_user>\d+)/(?P<status>\d+)[/]?$', 'list_all', name='user.edit',),
+    url('^user/delete[/]?$', 'delete_all', name='user.delete',),
+)
+
+# URL's User Group
+urlpatterns += patterns('CadVlan.UserGroup.views',
+    url('^user-group/list/(?P<id_ugroup>\d+)/(?P<tab>\d+)[/]?$', 'list_all', name='user-group.list',),
+    url('^user-group/delete/(?P<id_ugroup>\d+)[/]?$', 'delete_user', name='user-group.delete',),
+    url('^user-group/form/(?P<id_ugroup>\d+)[/]?$', 'add_form_user', name='user-group.form',),
+    url('^user-group-perm/form/(?P<id_ugroup>\d+)[/]?$', 'add_form_perm', name='user-group-perm.form',),
+    url('^user-group-perm/form/(?P<id_ugroup>\d+)/(?P<id_perm>\d+)[/]?$', 'edit_form_perm', name='user-group-perm.edit',),
+    url('^user-group-perm/delete/(?P<id_ugroup>\d+)[/]?$', 'delete_perm', name='user-group-perm.delete',),
 )
