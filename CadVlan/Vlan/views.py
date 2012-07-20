@@ -25,8 +25,11 @@ from django.http import HttpResponseServerError, HttpResponse,\
 from django.template import loader
 from CadVlan.Vlan.business import montaIPRede , cache_list_vlans
 from CadVlan.Util.shortcuts import render_to_response_ajax
+from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.messages import vlan_messages
 from django.core.urlresolvers import reverse
+from CadVlan.Acl.acl import checkAclCvs
+from CadVlan.Util.cvs import CVSCommandError
 
 logger = logging.getLogger(__name__)
 
@@ -285,6 +288,9 @@ def vlan_edit(request,id_vlan):
     
     lists = dict()
     lists['id_vlan'] = id_vlan
+    lists['acl_created'] = "False"
+    lists['acl_created_v4'] = "False"
+    vlan = None
     
     try:
         auth = AuthSession(request.session)
@@ -321,14 +327,32 @@ def vlan_edit(request,id_vlan):
                 acl_file = form.cleaned_data['acl_file']
                 descricao = form.cleaned_data['description']
                 ambiente = form.cleaned_data['environment']
+                apply_vlan = form.cleaned_data['apply_vlan']
                 
                 #client.editar
                 client.create_vlan().edit_vlan(ambiente, nome, numero, descricao, acl_file, id_vlan)
                 messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_edit_sucess"))
                 
+                #If click apply
+                if apply_vlan == True :
+                    return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+                
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
-             
+            
     except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    try:     
+        if vlan.get('acl_file_name') is not None:
+            
+            environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+                        
+            is_acl_created = checkAclCvs(vlan.get('acl_file_name'), environment, NETWORK_TYPES.v4 ,AuthSession(request.session).get_user())
+            
+            lists['acl_created_v4'] = "False" if is_acl_created == False else "True"
+            
+    except CVSCommandError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         

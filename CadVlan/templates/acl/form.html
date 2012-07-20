@@ -1,0 +1,173 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[ACL - Cadastro- {{ network }}]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	$("#page_tab_lists").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
+		location.href = "{% url vlan.edit.by.id id_vlan %}";
+	});
+	
+	
+	{% ifequal vlan.acl_valida 'True'%}
+	
+		$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
+			$("#id_apply_acl").val('1');
+			$("#add_form").submit();
+		});
+		
+		
+	{% endifequal %}
+	
+	{% if script %}
+	
+		$("#btn_script").button({ icons: {primary: "ui-icon-script"} }).click(function(){
+			location.href = "{% url acl.script id_vlan network %}";
+		});
+
+	{% endif %}
+	
+	oTable = $("#network_list").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumns": [{ "sType": "ip{{network}}" }, null, null]
+	});
+	
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Vlan</a></li>
+	</ul>
+	<div id="tabs-1">
+		{% csrf_token %}
+
+		<div id="fields" class="ui-widget-content">
+		
+			<table border="5">
+				<tr>
+					<td style="width: 150px"><label for="nome_ambiente">Nome do Ambiente</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.ambiente}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="nome_vlan">Nome da Vlan</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.nome}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="num_vlan">Número da Vlan</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.num_vlan}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="acl_vlan">ACL's</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.acl_file_name}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="sit_vlan">Situacao</label></td>
+					{% if vlan.ativada == 'False'%}
+					<td><label style="width: 350px;color: blue;text-align: center;" >NÃO ATIVADA</label></td>
+					{% else %}
+					<td><label style="width: 350px;color: blue;text-align: center;" >ATIVADA</label></td>
+					{% endif %}
+				</tr>
+				<tr>
+					<td><label for="desc_vlan">Descrição</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.descricao}}</label></td>
+				</tr>
+			</table>
+		</div>
+	
+		<div class="separator spacer"></div>
+	
+		<div>
+			<div id="page_tab_lists">
+				<ul>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">{{vlan.acl_file_name}} - Ip{{ network }}</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Redes - Ip{{ network }}</a></li>
+				</ul>
+
+				<div id="tabs-1">
+					<form id="add_form" method="post" action="{% url acl.edit id_vlan network %}">
+						{% csrf_token %}
+						<div id="fields" class="ui-widget-content">
+						{% for field in form %}
+							<div>
+								<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+								{{ field }}
+								<p id="error">
+								{% if field.errors %} 
+									{% for error in field.errors %}
+										{{ error|escape }}
+									{% endfor %}
+								{% endif %}
+								</p>
+							</div>
+						{% endfor %}
+						</div>
+						
+						<div class="separator spacer"></div>
+						
+						<div class="buttons-l ui-widget-header">
+							
+							{% if script %}
+							
+								<button id="btn_script" type="button">Gerar Script</button>
+							
+							{% endif %}
+						
+						
+							{% ifequal vlan.acl_valida 'True' %}
+							
+								<button id="btn_apply" type="button">Aplicar ACL</button>
+							
+							{% endifequal %}
+						
+						
+							<button id="btn_sav" type="submit">Gravar</button>
+							<button id="btn_can" type="button">Voltar</button>
+						</div>
+					</form>
+				</div>
+				
+				<div id="tabs-2">
+				
+					<table id="network_list">
+						<thead>
+							<tr>
+								<th>Rede</th>					
+								<th>Máscara</th>
+								<th>Tipo de Rede</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for net in vlan.network %}
+							<tr>
+								<td class="text_center">{{ net.ip }}</td>
+								<td class="text_center">{{ net.mask }}</td>
+								<td class="text_center">{{ net.network_type }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

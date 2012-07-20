@@ -113,8 +113,11 @@ def vlan_add_network_form(request, id_vlan):
             vlan = client.create_vlan().get(id_vlan)
             vlan = vlan.get("vlan")
             
+            environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+            vlan_nome = "%s | %s - %s - %s" %(  vlan.get("num_vlan"), environment.get("nome_divisao"), environment.get("nome_ambiente_logico"), environment.get("nome_grupo_l3"))
+            
             # Forms
-            lists['form'] = NetworkForm(net_type_list, env_vip_list, initial={'vlan_name': vlan.get("nome"), 'vlan_name_id': vlan.get("id")})
+            lists['form'] = NetworkForm(net_type_list, env_vip_list, initial={'vlan_name':vlan_nome, 'vlan_name_id': vlan.get("id")})
             
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -972,7 +975,8 @@ def edit_network4_form(request,id_net):
             vlan_id = network.get('vlan')
             vlan  = client.create_vlan().get(vlan_id)
             vlan = vlan.get("vlan")
-            vlan_nome = vlan.get('nome')
+            environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+            vlan_nome = "%s | %s - %s - %s" %(  vlan.get("num_vlan"), environment.get("nome_divisao"), environment.get("nome_ambiente_logico"), environment.get("nome_grupo_l3"))
             lists['broadcast'] = network.get('broadcast')
             lists['oct1'] = network.get("oct1")
             lists['oct2'] = network.get("oct2")
@@ -1051,7 +1055,8 @@ def edit_network6_form(request,id_net):
             vlan_id = network.get('vlan')
             vlan  = client.create_vlan().get(vlan_id)
             vlan = vlan.get("vlan")
-            vlan_nome = vlan.get('nome')
+            environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+            vlan_nome = "%s | %s - %s - %s" %(  vlan.get("num_vlan"), environment.get("nome_divisao"), environment.get("nome_ambiente_logico"), environment.get("nome_grupo_l3"))
             lists['block1'] = network.get("block1")
             lists['block2'] = network.get("block2")
             lists['block3'] = network.get("block3")

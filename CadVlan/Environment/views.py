@@ -15,10 +15,11 @@ from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
 from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
 from CadVlan.forms import DeleteForm
-from CadVlan.Environment.forms import AmbienteLogicoForm,DivisaoDCForm,Grupol3Form,\
-    AmbienteForm
+from CadVlan.Environment.forms import AmbienteLogicoForm,DivisaoDCForm,Grupol3Form, AmbienteForm
 from CadVlan.messages import environment_messages
 from django.core.urlresolvers import reverse
+from CadVlan.Acl.acl import mkdir_divison_dc
+from CadVlan.Util.cvs import CVSCommandError
 
 logger = logging.getLogger(__name__)
 
@@ -279,6 +280,8 @@ def insert_divisao_dc(request):
                 
                 nome_divisao_dc = divisao_dc_form.cleaned_data['nome']
                 
+                mkdir_divison_dc(nome_divisao_dc, AuthSession(request.session).get_user())
+                
                 # Business
                 client.create_divisao_dc().inserir(nome_divisao_dc.upper())
                 messages.add_message(request, messages.SUCCESS, environment_messages.get("divisao_dc_sucess"))
@@ -287,7 +290,7 @@ def insert_divisao_dc(request):
                 # If invalid, send all error messages in fields
                 lists['divisaodc_form'] = divisao_dc_form
                 
-        except NetworkAPIClientError, e:
+        except (NetworkAPIClientError, CVSCommandError), e:
             logger.error(e)
             lists['divisaodc_form'] = divisao_dc_form
             messages.add_message(request, messages.ERROR, e)

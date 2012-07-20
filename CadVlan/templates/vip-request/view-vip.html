@@ -1,0 +1,160 @@
+<div id="fields" class="ui-widget-content">
+	<table id="dados_comuns">
+		<tr>
+			<td  style="width: 175px"><label >Validado</label></td>
+			<td>
+				<label style="width: 350px;color: blue;text-align: center;" >
+					{% ifequal 'True' vip.validado %}
+						SIM
+					{% else %}
+						NÃO
+					{% endifequal %}
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td ><label >Vip Criado</label></td>
+			<td>
+				<label style="width: 350px;color: blue;text-align: center;" >
+					{% ifequal 'True' vip.vip_criado %}
+						SIM
+					{% else %}
+						NÃO
+					{% endifequal %}
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td ><label >Expect String</label></td>
+			<td>
+				<label style="width: 350px;color: blue;text-align: center;" >
+					{% ifequal 'None' vip.expect_string %}
+						
+					{% else %}
+						{{vip.expect_string}}
+					{% endifequal %}
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td ><label>Match List</label></td>
+			<td>
+				<label style="width: 350px;color: blue;text-align: center;" >
+					{% ifequal 'None' vip.math_list %}
+						
+					{% else %}
+						{{vip.math_list}}
+					{% endifequal %}
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td ><label for="ip">IP</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.ip_number}}</label></td>
+		</tr>	
+		<tr>
+			<td><label>Equipamento(s)</label></td>
+			
+			
+			{% for equip in vip.equipamento %}
+			
+				{% if forloop.counter == len_equip %}
+					<td>
+					<label style="color: blue;text-align: center;" >{{equip}}</label><br/>
+					<td>
+				{% else %}
+					<td>
+					<label style="color: blue;text-align: center;" >{{equip}}</label><br/>
+					<td>
+					<td><label style="color: red;">&nbsp;|&nbsp;</label></td>
+				{% endif %}
+			
+			{% endfor %}
+			</td>
+		</tr>		
+	</table>
+	<br/>
+	
+<h2>Variáveis</h2>
+	<table id="variaveis">
+				<tr>
+					<td style="width: 175px"><label for="finalidade">Finalidade</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.finalidade}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="cliente">Cliente</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.cliente}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="ambiente">Ambiente</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.ambiente}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="acl_vlan">Cache</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.cache}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="metodo_bal">Método Bal</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.metodo_bal}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Persistencia</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.persistencia}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Healthcheck Type</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.healthcheck_type}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Timeout</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.timeout}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Área Negócio</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.areanegocio}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Nome Serviço</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.nome_servico}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Host</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.host}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Healthcheck</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.healthcheck}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Max_con</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.maxcon}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="persistencia">Porta(s) Serviço</label></td>
+					
+					<td>
+					
+					{% for p in vip.portas_servicos.porta %}
+					
+						{% if forloop.counter == len_porta %}
+							<label style="width: 150px;color: blue;text-align: center;" >{{p}} </label>
+						{% else %}
+							<label style="width: 150px;color: blue;text-align: center;" >{{p}} <label style="color: red;"> - </label> </label>
+						{% endif %}
+					{% endfor %}
+					
+					</td>
+					
+				</tr>
+				
+				{% for real in vip.reals.real %}
+				
+				<tr>
+					<td><label for="persistencia">Real(s) Name/Real(s) IP - {{forloop.counter}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{real.real_name}} <label style="color: red;">/</label>  {{real.real_ip}}</label></td>
+				</tr>
+				
+				{% endfor %}
+			</table>	
+</div>
+		

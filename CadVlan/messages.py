@@ -169,7 +169,30 @@ perm_group_messages = {
     'success_edit':         u'Permissão Administrativa alterada com sucesso.',
     'invalid_group_user':   u'Permissão Administrativa inválida',
     'invalid_function_duplicate':   u'Permissão Administrativa com função %s já cadastrada',
-    
-    
-    
+        
+}
+
+acl_messages = {
+    'success_create':  u'Acl criada com sucesso.',
+    'success_remove':  u'Acl foi excluida com sucesso.',
+    'success_edit':    u'Acl alterada com sucesso.',
+    'success_apply':   u'Acl aplicada a todos os Equipamentos com sucesso.',
+    'error_apply':     u'Não foi possível aplicar ACL a nenhum dos equipamentos selecionados.',
+    'error_acl_not_exist': u'Acl não foi criada',
+}
+
+request_vip_messages = {
+    'success_remove':       u'Todas as Requisições VIP foram excluídas com sucesso.',
+    'success_validate':      u'Todas as Requisições VIP foram validadas com sucesso.',
+    'success_create':        u'Todas as Requisições VIP foram criadas com sucesso.',
+    'can_not_validate':     u'Não foi possível validar alguns dos itens selecionados: %s.',
+    'can_not_create':       u'Não foi possível criar alguns dos itens selecionados: %s.',
+    'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluído.',
+    'can_not_remove':       u'Não foi possível excluir alguns dos itens selecionados: %s.',
+    'validate_before':      u'Não foi possível criar alguns dos itens selecionados,pois ainda não foram validados pela equipe de segurança: %s.',
+    'can_not_remove_all':   u'Não foi possível excluir nenhum dos itens selecionados.',
+    'can_not_validate_all': u'Não foi possível validar nenhum dos itens selecionados.',
+    'can_not_create_all':   u'Não foi possível criar nenhum dos itens selecionados.',
+    'all_ready_create':     u'Itens selecionados já foram criados: %s .',
+        
 }

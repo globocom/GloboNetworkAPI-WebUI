@@ -142,6 +142,7 @@ INSTALLED_APPS = (
     'CadVlan.EquipGroup',
     'CadVlan.GroupUser',
     'CadVlan.UserGroup',
+    'CadVlan.Acl',
     
 )
 
@@ -176,6 +177,8 @@ EMAIL_USE_TLS = True
 MAX_RESULT_DEFAULT = 25 # Options-> 10, 25, 50, 100
 
 PATCH_PANEL_ID = 8
+
+PATH_ACL = os.path.join(PROJECT_ROOT_PATH, 'ACLS/')
 
 LOG_FILE = PROJECT_ROOT_PATH + '/log.log'
 
@@ -223,34 +226,37 @@ LOGGING = {
             'handlers': ['handlers-request'],
             'level': 'INFO',
         },
-        'CadVlan.Auth.views': {
+        'CadVlan.Auth': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.Script.views': {
+        'CadVlan.Script': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.ScriptType.views': {
+        'CadVlan.ScriptType': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.EquipAccess.views': {
+        'CadVlan.EquipAccess': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.OptionVip.views': {
+        'CadVlan.OptionVip': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.EnvironmentVip.views': {
+        'CadVlan.EnvironmentVip': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.GroupEquip.views': {
+        'CadVlan.GroupEquip': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.EquipGroup.views': {
+        'CadVlan.EquipGroup': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.GroupUser.views': {
+        'CadVlan.GroupUser': {
             'handlers': ['handlers-view'],
         },
-        'CadVlan.UserGroup.views': {
+        'CadVlan.UserGroup': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.Acl': {
             'handlers': ['handlers-view'],
         },
     }

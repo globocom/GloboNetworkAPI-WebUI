@@ -1,0 +1,343 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Requisição VIP - Listagem]{% endblock %}
+
+{% block header %}
+<style>
+#search_form label {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript">
+
+function setupAjaxForm() {
+	form = {};
+	$("#search_form input[type^='text'], #search_form input[type='hidden'], #search_form select").each(function() {
+		form[$(this).attr("name")] = $(this).val();
+	});
+	$("#search_form input[type='checkbox']").each(function() {
+		form[$(this).attr("name")] = $(this).is(":checked");
+	});
+	
+	$.ajaxSetup({
+		data: form
+	});
+}
+
+$(document).ready(function() {
+	
+	setupAjaxForm();
+	
+	$(".expand").live("click", function() {
+		id = $(this).attr("lang");
+		if ($(".expandable_" + id).css("max-height") != "999999px") {
+			$(".expandable_" + id).css("max-height", "999999px");
+			$("div[lang=" + id + "]").css("background", "url(/media/img/min.png) transparent bottom center no-repeat");
+		} else {
+			$(".expandable_" + id).css("max-height", "52px");
+			$("div[lang=" + id + "]").css("background", "url(/media/img/max.png) transparent bottom center no-repeat");
+		}
+	});
+	
+	$("#ip_v4").click(function() {
+		$("input.ipv6").val("");
+		$(".ipv6").hide();
+		$(".ipv4").show();
+	});
+	
+	$("#ip_v6").click(function() {
+		$("input.ipv4").val("");
+		$(".ipv4").hide();
+		$(".ipv6").show();
+	});
+	
+	oTable = $("#vip_list").dataTable({
+		"sAjaxSource": "{% url vip-request.list.ajax %}",
+		"bServerSide": true,
+		"aaSorting": [],
+		"bAutoWidth": false,
+		"bJQueryUI": true,
+		"bFilter": false,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [
+		                 { "bSortable": false, "aTargets": [ 0, 2, 3,4,5,6,7,8] }
+		     			]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$("[name='selection']").attr("checked", true);
+		} else {
+			$("[name='selection']").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$("name['selection']").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	$("#page_tab").tabs();
+	
+	$("#accordion").accordion({ autoHeight: false });
+	
+	$("#btn_search").button({ icons: {primary: "ui-icon-search"} }).live("click", function(event){
+		event.preventDefault();
+		version = $("#search_form input[name='ip_version']:checked").val();
+		if (version == 0) {
+			version = "ipv4";
+			qnt = 4;
+		} else if (version == 1) {
+			version = "ipv6";
+			qnt = 8;
+		} else {
+			return false;
+		}
+		
+		value = ""
+		$("input." + version).each(function(index) {
+			value = value + $(this).val();
+			if (index < qnt) {
+				if (version == "ipv4") {
+					value = value + $.trim($(this).next().text());
+				} else {
+					value = value + $.trim($(this).next().next().text());
+				}
+			}
+		});
+		
+		if (version == "ipv4") {
+			if (value.length > 3) {
+				$("#search_form input[name='ipv4']").val(value);
+				$("#search_form input[name='ipv6']").val("");
+			} else {
+				$("#search_form input[name='ipv6']").val("");
+				$("#search_form input[name='ipv4']").val("");
+			}
+		} else {
+			if (value.length > 7) {
+				$("#search_form input[name='ipv6']").val(value);
+				$("#search_form input[name='ipv4']").val("");
+			} else {
+				$("#search_form input[name='ipv6']").val("");
+				$("#search_form input[name='ipv4']").val("");
+			}
+		}
+		
+		if (($("#id_id_request").val() != "") && ( $("#id_ipv4").val() != "" ||  $("#id_ipv6").val() != "" ) ){
+			alert("A pesquisa deve ser realizada ou por Id Requisição ou por IP");
+			$("#id_id_request").focus();
+		}else{
+			setupAjaxForm();
+			oTable.fnAjaxUpdate();
+		}
+		
+		
+	});
+	
+	$("#btn_clear").button({ icons: {primary: "ui-icon-close"}, text: false }).click(function() {
+		$("#ip_v4").click();
+	});
+	
+	$(".tool").buttonset();
+	
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} });
+	
+	{% has_perm ADMINISTRATION True None %}
+	{% if has_perm %}
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Deseja realmente excluir as Requisições Vip selecionadas?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	{% has_perm ADMINISTRATION True None %}
+	{% if has_perm %}
+	$("#btn_create").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+		if (confirm('Deseja realmente criar as Requisições Vip selecionadas ?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids_create").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	{% has_perm ADMINISTRATION True None %}
+	{% if has_perm %}
+	$("#btn_validate").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+		if (confirm('Deseja realmente validar as Requisições Vip selecionadas ?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids_val").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+	
+	
+	$("#vip_list tbody tr").live("click", function(e) {
+		if (!(e.target.nodeName == 'A' || e.target.nodeName == 'SPAN' || e.target.nodeName == 'INPUT' || (e.target.nodeName == 'DIV' && e.target.className == 'expand'))) {
+			url = $(this).find(".table_id").attr("lang");
+			$.ajax({
+				url: url,
+				success: function(data) {
+					$("#vip-view").html(data);
+					$("#dialog-vip").dialog("open");
+				}
+			});
+		}
+	});
+		
+	$("#dialog-vip").dialog({
+		height: 600,
+		width: 1000,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: true,
+		buttons: {
+			"Voltar": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+})
+</script>
+<style>
+#vip_list tbody tr {
+	cursor: pointer;
+}
+input {
+	padding: 4px 0px !important;
+}
+#search_form table th {
+	padding: 2px;
+    text-align: center !important;
+    background: url("/media/css/globo/images/ui-bg_highlight-soft_80_dddddd_1x100.png") repeat-x scroll 50% 50% #DDDDDD;
+}
+#search_form table td {
+    text-align: center !important;
+	background-color: #F6F6F6;
+}
+.ui-accordion .ui-accordion-content {
+	padding: 5px !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+	
+
+
+<div id="page_tab">
+	<div id="dialog-vip" title="Visualizar Requisição VIP">
+			<div id="vip-view">
+			</div>
+		</div>
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Requisições VIP</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="accordion">
+			<h3><a href="#">Pesquisar</a></h3>
+			<div id="search">
+				<form id="search_form" method="post" action="">
+					{% csrf_token %}
+					{{ search_form.ipv4 }}{{ search_form.ipv6 }}
+					<table style="width: 45%">
+						<thead>
+							<tr>
+								<th>Id Requisição</th>
+								<th>IP <label for="ip_v4"><input type="radio" id="ip_v4" name="ip_version" checked="checked" value="0" />IPv4</label> <label for="ip_v6"><input type="radio" id="ip_v6" name="ip_version" value="1" />IPv6</label></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>{{ search_form.id_request }}</td>
+								<td><input type="text" class="ip_input ipv6 ipv4" name="oct1" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct2" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct3" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct4" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input style="display: none;" type="text" class="ip_input ipv6" name="oct5" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct6" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct7" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, false)" /></td>								
+								<td style="padding-top: 4px;"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+			</div>
+		</div>
+		<div class="buttons">
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span class="tool">
+			{% has_perm ADMINISTRATION True None %}
+			{% if has_perm %}
+			<button id="btn_new">Novo Registro</button>
+			<button id="btn_create">Criar VIP</button>
+			<button id="btn_validate">Validar</button>
+			<button id="btn_del">Excluir</button>
+			{% endif %}
+			</span>
+		</div>
+		{% has_perm ADMINISTRATION True None %}
+		{% if has_perm %}
+		<form id="delete_form" method="post" action="{% url vip.delete.create.validate 0 %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in delete_form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		{% has_perm ADMINISTRATION True None %}
+		{% if has_perm %}
+		<form id="valid_form" method="post" action="{% url vip.delete.create.validate 1 %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in validate_form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		{% has_perm ADMINISTRATION True None %}
+		{% if has_perm %}
+		<form id="create_form" method="post" action="{% url vip.delete.create.validate 2 %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in create_form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		<table id="vip_list">
+			<col width="3%" />
+			<col width="8%" />
+			<col width="15%" />
+			<col width="29%" />
+			<col width="15%" />
+			<col width="15%" />
+			<col width="6%" />
+			<col width="6%" />
+			<col width="3%" />
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th>Id Requisição</th>
+					<th>IP</th>
+					<th>Descrição</th>
+					<th>Equipamento</th>
+					<th>Ambiente</th>
+					<th>Validado</th>
+					<th>Criado</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

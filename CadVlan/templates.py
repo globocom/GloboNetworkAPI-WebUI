@@ -15,8 +15,10 @@ AJAX_AUTOCOMPLETE_LIST = 'ajax/autocomplete-list.json'
 AJAX_VLAN_AUTOCOMPLETE = 'ajax/vlan-autocomplete-list.json'
 AJAX_VLAN_LIST = 'ajax/vlan-list.json'
 AJAX_EQUIP_LIST = 'ajax/equip-list.json'
+AJAX_VIPREQUEST_LIST = 'ajax/vip-list.json'
 AJAX_NEW_PASS = 'ajax/newpass.html'
 AJAX_SUGGEST_NAME = 'ajax/suggest-name.html'
+VIPREQUEST_VIEW = 'ajax/view-vip.html'
 
 # Script
 SCRIPT_LIST = 'script/list.html'
@@ -110,3 +112,12 @@ USER_LIST = 'users/list.html'
 
 # User Group
 USERGROUP_LIST = 'user-group/list.html'
+
+# ACL
+ACL_FORM = 'acl/form.html'
+ACL_APPLY_LIST = 'acl/apply.html'
+ACL_APPLY_RESULT = 'acl/result.html'
+
+# VipRequest 
+VIPREQUEST_SEARCH_LIST = 'vip-request/search-list.html'
+VIPREQUEST_VIEW_AJAX = 'vip-request/view-vip.html'

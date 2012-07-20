@@ -134,10 +134,7 @@
 							
 							<li class="separator"></li>
 							
-							{% has_perm VIPS_REQUEST None True %}
-							{% if has_perm %}
-							<li><a href="#">Requisições de VIP</a></li>
-							{% endif %}
+							
 							
 							<li class="separator"></li>
 							
@@ -250,6 +247,7 @@
 							<li><a href="#">Usuários Externos</a></li>
 							<li><a href="#">Grupos</a></li>
 							<li><a href="#">Sudoers</a></li>
+							
 						</ul>
 					</li>
 					{% endif %}
@@ -262,6 +260,7 @@
 							<li><a href="{% url group-equip.list %}">Grupos de equipamentos</a></li>
 							<li><a href="{% url group-user.list %}">Grupos de Usuários</a></li>
 							<li><a href="{% url user.list 0 0 %}">Usuários</a></li>
+							<li><a href="{% url vip-request.list %}">Requisições de VIP</a></li>
 						</ul>
 					</li>
 					{% endif %}

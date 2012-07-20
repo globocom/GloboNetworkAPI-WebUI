@@ -5,12 +5,13 @@ Author: avanzolin / S2it
 Copyright: ( c )  2009 globo.com todos os direitos reservados.
 """
 
-import re
-from random import choice
-from django.utils.cache import add_never_cache_headers
 from django.http import HttpResponse
 from django.template import loader
 from django.template.context import RequestContext
+from django.utils.cache import add_never_cache_headers
+from random import choice
+import copy
+import re
 
 
 def get_id_in_list(iten_list, iten_id):
@@ -87,6 +88,15 @@ def validates_dict(param, key):
 def make_random_password(length=8, allowed_chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'):
         "Generates a random password with the given length and given allowed_chars"
         return ''.join([choice(allowed_chars) for i in range(length)])
+
+def clone(obj):
+    '''Clone the object
+
+    @param obj: object to be cloned
+
+    @return object cloned.  
+    '''
+    return copy.copy(obj)
 
 class DataTablePaginator():
     

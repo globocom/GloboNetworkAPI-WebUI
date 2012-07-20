@@ -186,3 +186,20 @@ urlpatterns += patterns('CadVlan.UserGroup.views',
     url('^user-group-perm/form/(?P<id_ugroup>\d+)/(?P<id_perm>\d+)[/]?$', 'edit_form_perm', name='user-group-perm.edit',),
     url('^user-group-perm/delete/(?P<id_ugroup>\d+)[/]?$', 'delete_perm', name='user-group-perm.delete',),
 )
+
+# URL's ACL
+urlpatterns += patterns('CadVlan.Acl.views',
+    url('^acl/create/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'create', name='acl.create',),
+    url('^acl/remove/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'remove', name='acl.remove',),
+    url('^acl/edit/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'edit', name='acl.edit',),
+    url('^acl/script/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'script', name='acl.script',),
+    url('^acl/apply/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'apply_acl', name='acl.apply',),
+)
+
+# URL's Vip Requests
+urlpatterns += patterns('CadVlan.VipRequest.views',
+    url('^vip-request/list[/]?$', 'search_list', name='vip-request.list',),
+    url('^vip-request/find[/]?$', 'ajax_list_equips', name='vip-request.list.ajax',),
+    url('^vip-request/ajax_view/(?P<id_vip>\d+)[/]?$', 'ajax_view_vip', name='vip.view.ajax',),
+    url('^vip-request/operation/(?P<operation>\d+)[/]?$', 'delete_validate_create', name='vip.delete.create.validate',), 
+)

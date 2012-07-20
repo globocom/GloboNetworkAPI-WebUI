@@ -59,8 +59,9 @@ class VlanForm(forms.Form):
     name = forms.CharField(label="Nome", required=True, min_length=3, max_length=50, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     number = forms.IntegerField(label="Número", required=True, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px","maxlength":"9"}))
     environment = forms.ChoiceField(label="Ambiente", required=True, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 400px"}))
-    acl_file = forms.CharField(label="Arquivo Acl", required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
+    acl_file = forms.CharField(label="Arquivo Acl - Ipv4", required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     description = forms.CharField(label="Descrição", required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
+    apply_vlan = forms.BooleanField(widget=forms.HiddenInput(), label='', required=False)
     
     def clean_environment(self):
         if int(self.cleaned_data['environment']) <= 0:
