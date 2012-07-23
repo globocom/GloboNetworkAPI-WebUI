@@ -131,31 +131,23 @@ $(document).ready(function() {
 					
 						{% if field.value == None or acl_created_v4 == 'False' %}
 							<button id="btn_suggest" type="button">Sugerir nome do arquivo ACL</button>
+							<button id="btn_create_acl_v4" type="button">Criar arquivo ACL</button>
 							
 						{% else %}
 							
-							{% ifequal acl_created_v4 'False' %}
-							
-								<button id="btn_create_acl_v4" type="button">Criar arquivo ACL</button>
-	
-							{% else %}
-							
-							
-								<script type="text/javascript">
-									$("#id_acl_file").attr("disabled", "disabled");
-									$("#id_environment").attr("disabled", "disabled").attr("title", "ACL depende do ambiente para poder alterá-lo é preciso excluir a ACL.");
-								</script>
+							<script type="text/javascript">
+								$("#id_acl_file").attr("disabled", "disabled");
+								$("#id_environment").attr("disabled", "disabled").attr("title", "ACL depende do ambiente para poder alterá-lo é preciso excluir a ACL.");
+							</script>
+						
+							{% if acl_valida == 'False' %}
+								<button id="btn_validate_v4" type="button">Validar ACL</button>
+							{% endif %}
 							
 							
-								{% if acl_valida == 'False' %}
-									<button id="btn_validate_v4" type="button">Validar ACL</button>
-								{% endif %}
+							<button id="btn_edit_acl_v4" type="button">Editar ACL</button>
+							<button id="btn_remove_acl_v4" type="button">Excluir ACL</button>
 								
-								
-								<button id="btn_edit_acl_v4" type="button">Editar ACL</button>
-								<button id="btn_remove_acl_v4" type="button">Excluir ACL</button>
-								
-							{% endifequal %}
 							
 						{% endif %}
 					
