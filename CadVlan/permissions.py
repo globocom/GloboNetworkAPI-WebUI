@@ -29,6 +29,7 @@ ACL_VLAN_VALIDATION = 'validar_acl_vlans'
 ENVIRONMENT_VIP = 'ambiente_vip'
 OPTION_VIP = 'opcao_vip'
 AUTHENTICATE =  'authenticate'
+ACCESS_TYPE_MANAGEMENT = 'cadastro_de_tipo_acesso'
 
 PERMISSIONS = {
                'ADMINISTRATION': ADMINISTRATION,
@@ -54,5 +55,6 @@ PERMISSIONS = {
                'ACL_VLAN_VALIDATION': ACL_VLAN_VALIDATION,
                'ENVIRONMENT_VIP': ENVIRONMENT_VIP,
                'OPTION_VIP': OPTION_VIP,
-               'AUTHENTICATE': AUTHENTICATE
+               'AUTHENTICATE': AUTHENTICATE,
+               'ACCESS_TYPE_MANAGEMENT' : ACCESS_TYPE_MANAGEMENT
                }

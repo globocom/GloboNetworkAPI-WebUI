@@ -121,3 +121,16 @@ ACL_APPLY_RESULT = 'acl/result.html'
 # VipRequest 
 VIPREQUEST_SEARCH_LIST = 'vip-request/search-list.html'
 VIPREQUEST_VIEW_AJAX = 'vip-request/view-vip.html'
+
+# AccessTypeRequest
+ACCESSTYPE_FORM = 'access-type/form.html'
+
+# NetworkTypeRequest
+NETWORKTYPE_FORM = 'network-type/form.html'
+
+# EquipementTypeRequest
+EQUIPMENTTYPE_FORM = 'equipment-type/form.html'
+
+# HealthCheckRequest
+HEALTHCHECKEXPECT_FORM = 'healthcheck-expect/form.html'
+

@@ -93,9 +93,9 @@ environment_messages = {
 }
 
 equip_messages = {
-                    
     'equip_sucess':         u'Equipamento inserido com sucesso',    
-    'equip_edit_sucess':    u'Equipamento editado com sucesso',      
+    'equip_edit_sucess':    u'Equipamento editado com sucesso',    
+    'success_remove':       u'Todos os equipamentos selecionados foram excluídos com sucesso.',  
     'orquestracao_error':   u"Equipamentos que não sejam do tipo 'Servidor Virtual' não podem fazer parte do grupo 'Equipamentos Orquestração'.", 
     'marca_sucess':         u'Nova marca inserida com sucesso.', 
     'modelo_sucess':        u'Novo modelo inserido com sucesso.',
@@ -103,12 +103,11 @@ equip_messages = {
 }
 
 vlan_messages = {
-
     'vlan_sucess':          u'Vlan cadastrada com sucesso.',
+    'success_remove':       u'Todas as vlans selecionadas foram excluídas com sucesso.',
+    'success_remove_network': u'Todas as redes selecionadas foram excluídas com sucesso.',
     'vlan_edit_sucess':     u'Vlan alterada com sucesso.',
-    'acl_file_sucess':      u'ACL validado com sucesso.',
     'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',                 
-                 
 }
 
 option_vip_messages = {
@@ -177,6 +176,7 @@ acl_messages = {
     'success_remove':  u'Acl foi excluida com sucesso.',
     'success_edit':    u'Acl alterada com sucesso.',
     'success_apply':   u'Acl aplicada a todos os Equipamentos com sucesso.',
+    'success_validate':  u'ACL IP%s validado com sucesso.',
     'error_apply':     u'Não foi possível aplicar ACL a nenhum dos equipamentos selecionados.',
     'error_acl_not_exist': u'Acl não foi criada',
 }
@@ -189,10 +189,26 @@ request_vip_messages = {
     'can_not_create':       u'Não foi possível criar alguns dos itens selecionados: %s.',
     'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluído.',
     'can_not_remove':       u'Não foi possível excluir alguns dos itens selecionados: %s.',
-    'validate_before':      u'Não foi possível criar alguns dos itens selecionados,pois ainda não foram validados pela equipe de segurança: %s.',
+    'validate_before':      u'Não foi possível criar alguns dos itens selecionados: %s, , pois ainda não foram validados.',
     'can_not_remove_all':   u'Não foi possível excluir nenhum dos itens selecionados.',
     'can_not_validate_all': u'Não foi possível validar nenhum dos itens selecionados.',
     'can_not_create_all':   u'Não foi possível criar nenhum dos itens selecionados.',
     'all_ready_create':     u'Itens selecionados já foram criados: %s .',
         
+}
+
+access_type_messages = {
+    'success_create':        u'Tipo de Acesso cadastrado com sucesso.',  
+}
+
+type_network_messages = {
+    'success_create':        u'Tipo de Rede cadastrado com sucesso.',  
+}
+
+equipment_type_messages = {
+    'success_create':        u'Tipo de Equipamento cadastrado com sucesso.',  
+}
+
+healthcheck_messages = {
+    'success_create':        u'Healtcheck Expect cadastrado com sucesso.',  
 }

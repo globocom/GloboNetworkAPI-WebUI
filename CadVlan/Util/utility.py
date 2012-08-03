@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.template.context import RequestContext
 from django.utils.cache import add_never_cache_headers
+from CadVlan.Util.Enum import NETWORK_TYPES
 from random import choice
 import copy
 import re
@@ -97,6 +98,24 @@ def clone(obj):
     @return object cloned.  
     '''
     return copy.copy(obj)
+
+def acl_key(network):
+    '''Convert the key of value acl.
+
+    @param network: v4 or v6.
+
+    @return value of key.  
+    
+    @raise ValueError: Parameter null or blank
+    '''
+    if network is None:
+        raise ValueError("Parameter null or blank")
+    
+    if network == NETWORK_TYPES.v4:
+        return 'acl_file_name' 
+    
+    else:
+        return 'acl_file_name_v6'
 
 class DataTablePaginator():
     

@@ -11,25 +11,24 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError
+from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError, VlanError
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT
 from CadVlan.forms import DeleteForm
-from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS, AJAX_VLAN_AUTOCOMPLETE,\
-    VLAN_FORM, VLAN_EDIT, AJAX_SUGGEST_NAME
+from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS, AJAX_VLAN_AUTOCOMPLETE, VLAN_FORM, VLAN_EDIT, AJAX_SUGGEST_NAME
 from CadVlan.Vlan.forms import SearchVlanForm, VlanForm
-from CadVlan.Util.converters.util import replace_id_to_name
+from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
 from CadVlan.Util.utility import DataTablePaginator
-from django.http import HttpResponseServerError, HttpResponse,\
-    HttpResponseRedirect
+from django.http import HttpResponseServerError, HttpResponse,HttpResponseRedirect
 from django.template import loader
 from CadVlan.Vlan.business import montaIPRede , cache_list_vlans
 from CadVlan.Util.shortcuts import render_to_response_ajax
 from CadVlan.Util.Enum import NETWORK_TYPES
-from CadVlan.messages import vlan_messages
+from CadVlan.messages import vlan_messages, error_messages
 from django.core.urlresolvers import reverse
 from CadVlan.Acl.acl import checkAclCvs
 from CadVlan.Util.cvs import CVSCommandError
+from CadVlan.Util.Enum import NETWORK_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +79,7 @@ def ajax_list_vlans(request):
                     network = None
                     
                 # Pagination
-                columnIndexNameMap = { 0: '', 1: '', 2: 'num_vlan', 3 : 'nome', 4: 'ambiente', 5: 'tipo_rede', 6: 'network', 7: '', 8: 'acl_file_name' }
+                columnIndexNameMap = { 0: '', 1: '', 2: 'num_vlan', 3 : 'nome', 4: 'ambiente', 5: 'tipo_rede', 6: 'network', 7: '', 8: 'acl_file_name', 9: 'acl_file_name_v6'  }
                 dtp = DataTablePaginator(request, columnIndexNameMap)
                 
                 # Make params
@@ -175,6 +174,7 @@ def list_by_id(request, id_vlan):
     lists = dict()
     listaIps = []
     lista = []
+    lists["delete_form"] = DeleteForm()
     
     try:
         
@@ -260,12 +260,13 @@ def vlan_form(request):
                 
                 name = form.cleaned_data['name'] 
                 acl_file = form.cleaned_data['acl_file']
+                acl_file_v6 = form.cleaned_data['acl_file_v6']
                 description = form.cleaned_data['description']
                 number = form.cleaned_data['number']
                 environment_id = form.cleaned_data['environment']
                 
                 #Salva a Vlan
-                vlan = client.create_vlan().insert_vlan(environment_id, name, number, description, acl_file)
+                vlan = client.create_vlan().insert_vlan(environment_id, name, number, description, acl_file, acl_file_v6)
                 messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
                 id_vlan = vlan.get('vlan').get('id')
                 #redireciona para a listagem de vlans
@@ -288,8 +289,9 @@ def vlan_edit(request,id_vlan):
     
     lists = dict()
     lists['id_vlan'] = id_vlan
-    lists['acl_created'] = "False"
     lists['acl_created_v4'] = "False"
+    lists['acl_created_v6'] = "False"
+    lists['form_error'] = "False"
     vlan = None
     
     try:
@@ -303,14 +305,12 @@ def vlan_edit(request,id_vlan):
             messages.add_message(request, messages.ERROR, e)
             return redirect('vlan.search.list') 
         
-        
         if request.method == 'GET':
             
             environment = client.create_ambiente().list_all()
             vlan = vlan.get("vlan")
             
-            lists['acl_valida'] = vlan.get("acl_valida")       
-            lists['form'] = VlanForm(environment,initial={'name':vlan.get('nome'),"number":vlan.get('num_vlan'),"environment":vlan.get("ambiente"),"description":vlan.get('descricao'),"acl_file":vlan.get('acl_file_name')})
+            lists['form'] = VlanForm(environment,initial={'name':vlan.get('nome'),"number":vlan.get('num_vlan'),"environment":vlan.get("ambiente"),"description":vlan.get('descricao'),"acl_file":vlan.get('acl_file_name'),"acl_file_v6":vlan.get('acl_file_name_v6')})
         
         if request.method == 'POST':
            
@@ -318,19 +318,19 @@ def vlan_edit(request,id_vlan):
             form = VlanForm(environment,request.POST)
             lists['form'] = form
             vlan = vlan.get('vlan')
-            lists['acl_valida'] = vlan.get("acl_valida")
             
             if form.is_valid():
                 
                 nome = form.cleaned_data['name']
                 numero = form.cleaned_data['number']
                 acl_file = form.cleaned_data['acl_file']
+                acl_file_v6 = form.cleaned_data['acl_file_v6']
                 descricao = form.cleaned_data['description']
                 ambiente = form.cleaned_data['environment']
                 apply_vlan = form.cleaned_data['apply_vlan']
                 
                 #client.editar
-                client.create_vlan().edit_vlan(ambiente, nome, numero, descricao, acl_file, id_vlan)
+                client.create_vlan().edit_vlan(ambiente, nome, numero, descricao, acl_file, acl_file_v6, id_vlan)
                 messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_edit_sucess"))
                 
                 #If click apply
@@ -339,18 +339,31 @@ def vlan_edit(request,id_vlan):
                 
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
             
+            else:
+                lists['form_error'] = "True"
+                
+        lists['acl_valida_v4'] = vlan.get("acl_valida")
+        lists['acl_valida_v6'] = vlan.get("acl_valida_v6")
+        
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         
-    try:     
+    try:
+        
+        environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+
         if vlan.get('acl_file_name') is not None:
-            
-            environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
                         
             is_acl_created = checkAclCvs(vlan.get('acl_file_name'), environment, NETWORK_TYPES.v4 ,AuthSession(request.session).get_user())
             
             lists['acl_created_v4'] = "False" if is_acl_created == False else "True"
+            
+        if vlan.get('acl_file_name_v6') is not None:
+            
+            is_acl_created = checkAclCvs(vlan.get('acl_file_name_v6'), environment, NETWORK_TYPES.v6 ,AuthSession(request.session).get_user())
+            
+            lists['acl_created_v6'] = "False" if is_acl_created == False else "True"
             
     except CVSCommandError, e:
         logger.error(e)
@@ -374,7 +387,7 @@ def ajax_acl_name_suggest(request):
             
             environment = client.create_ambiente().buscar_por_id(id_ambiente).get('ambiente')
             
-            suggest_name = nome+environment['nome_ambiente_logico']
+            suggest_name = str(nome+environment['nome_ambiente_logico']).replace(" ", "")
             lists['suggest_name'] = suggest_name
             
             # Returns HTML
@@ -391,34 +404,3 @@ def ajax_acl_name_suggest(request):
         # Send response status with error
         response.status_code = 200
         return response
-        
-@log
-@login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])           
-def ajax_validate_acl(request):
-    try:
-        
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-        
-        vlan = request.GET['vlan']
-        
-        client.create_vlan().validar(vlan)
-        
-        messages.add_message(request, messages.SUCCESS, vlan_messages.get("acl_file_sucess"))
-        
-        # Returns HTML
-        response = HttpResponse()
-        # Send response status with error
-        response.status_code = 200
-        return response
-        
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        # Returns HTML
-        response = HttpResponse()
-        # Send response status with error
-        response.status_code = 412
-        return response
-        

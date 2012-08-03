@@ -12,10 +12,10 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.Util.converters.util import split_to_array, replace_id_to_name
 from CadVlan.Util.cvs import CVSError
-from CadVlan.Util.utility import validates_dict, clone
+from CadVlan.Util.utility import validates_dict, clone, acl_key
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import acl_messages, error_messages
-from CadVlan.permissions import VLAN_MANAGEMENT
+from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT
 from CadVlan.templates import ACL_FORM, ACL_APPLY_LIST, ACL_APPLY_RESULT
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -38,14 +38,15 @@ def create(request, id_vlan, network):
         client = auth.get_clientFactory()
         
         vlan = client.create_vlan().get(id_vlan).get("vlan")
-        
         environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
         
-        createAclCvs(vlan.get('acl_file_name'), environment, network, AuthSession(request.session).get_user())
+        key_acl =  acl_key(network)
+        
+        createAclCvs(vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
         
         messages.add_message(request, messages.SUCCESS, acl_messages.get("success_create"))
         
-    except (NetworkAPIClientError, CVSError), e:
+    except (NetworkAPIClientError, CVSError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         
@@ -64,17 +65,23 @@ def remove(request, id_vlan, network):
         vlan = client.create_vlan().get(id_vlan).get("vlan")
         environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
         
-        if vlan.get('acl_file_name') is None:
+        key_acl =  acl_key(network)
+        
+        if vlan.get(key_acl) is None:
             messages.add_message(request, messages.ERROR, acl_messages.get("error_acl_not_exist"))
             return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
         
-        client.create_vlan().invalidate(id_vlan)
+        if network == NETWORK_TYPES.v4:
+            client.create_vlan().invalidate(id_vlan)
         
-        deleteAclCvs(vlan.get('acl_file_name'), environment, network, AuthSession(request.session).get_user())
+        else:
+            client.create_vlan().invalidate_ipv6(id_vlan)
+        
+        deleteAclCvs(vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
         
         messages.add_message(request, messages.SUCCESS, acl_messages.get("success_remove"))
         
-    except NetworkAPIClientError, e:
+    except (NetworkAPIClientError, CVSError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         
@@ -94,13 +101,15 @@ def script(request, id_vlan, network):
         vlan = client.create_vlan().get(id_vlan).get("vlan")
         environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
         
-        if vlan.get('acl_file_name') is None:
+        key_acl =  acl_key(network)
+        
+        if vlan.get(key_acl) is None:
             messages.add_message(request, messages.ERROR, acl_messages.get("error_acl_not_exist"))
             return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
         
-        scriptAclCvs(vlan, environment, network, AuthSession(request.session).get_user())
+        scriptAclCvs(vlan.get(key_acl), vlan, environment, network, AuthSession(request.session).get_user())
         
-    except (NetworkAPIClientError, CVSError), e:
+    except (NetworkAPIClientError, CVSError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         
@@ -126,7 +135,9 @@ def edit(request, id_vlan, network):
         vlan = client.create_vlan().get(id_vlan).get("vlan")
         environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
         
-        if vlan.get('acl_file_name') is None:
+        key_acl =  acl_key(network)
+        
+        if vlan.get(key_acl) is None:
             messages.add_message(request, messages.ERROR, acl_messages.get("error_acl_not_exist"))
             return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
         
@@ -144,7 +155,7 @@ def edit(request, id_vlan, network):
                 comments = form.cleaned_data['comments']
                 apply_acl = form.cleaned_data['apply_acl']
                 
-                alterAclCvs(vlan.get('acl_file_name'), acl, environment, comments, network, AuthSession(request.session).get_user())
+                alterAclCvs(vlan.get(key_acl), acl, environment, comments, network, AuthSession(request.session).get_user())
                 
                 lists['form'] = AclForm(initial={'acl': form.cleaned_data['acl'], 'comments': ''})
                 
@@ -155,10 +166,10 @@ def edit(request, id_vlan, network):
                     return HttpResponseRedirect(reverse('acl.apply', args=[id_vlan, network]))
                 
         else:
-        
-            content = getAclCvs(vlan.get('acl_file_name'), environment, network, AuthSession(request.session).get_user())
-            lists['form'] = AclForm(initial={'acl':content, 'comments': ''})
             
+        
+            content = getAclCvs(vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
+            lists['form'] = AclForm(initial={'acl':content, 'comments': ''})
             
             if content is None or content == "":
                 lists['script'] = script_template(environment.get("nome_ambiente_logico"), environment.get("nome_divisao"), environment.get("nome_grupo_l3"))
@@ -182,11 +193,10 @@ def edit(request, id_vlan, network):
                 n["network_type"] = net["network_type"]
                 list_ips.append(n)
         
-        
         # Replace id network_type for name network_type
         vlan['network'] = replace_id_to_name(list_ips, client.create_tipo_rede().listar().get('tipo_rede'), "network_type", "id", "nome")
         
-    except (NetworkAPIClientError, CVSError), e:
+    except (NetworkAPIClientError, CVSError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         
@@ -210,7 +220,9 @@ def apply_acl(request,id_vlan, network):
         vlan = client.create_vlan().get(id_vlan).get("vlan")
         environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
         
-        if vlan.get('acl_file_name') is None:
+        key_acl =  acl_key(network)
+        
+        if vlan.get(key_acl) is None:
             messages.add_message(request, messages.ERROR, acl_messages.get("error_acl_not_exist"))
             return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
         
@@ -312,8 +324,34 @@ def apply_acl(request,id_vlan, network):
                     
         lists["equipments"] = list_equipments
         
-    except (NetworkAPIClientError, CVSError), e:
+    except (NetworkAPIClientError, CVSError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         
     return render_to_response(ACL_APPLY_LIST,lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])           
+def validate(request, id_vlan, network):
+    try:
+        
+        auth = AuthSession(request.session)
+        client_vlan = auth.get_clientFactory().create_vlan()
+        
+        client_vlan.get(id_vlan)
+        
+        if network == NETWORK_TYPES.v4:
+            client_vlan.validar(id_vlan)
+        
+        else:
+            client_vlan.validate_ipv6(id_vlan)
+        
+        messages.add_message(request, messages.SUCCESS, acl_messages.get("success_validate") % network)
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))

@@ -14,6 +14,7 @@ def cache_list_equipment(equipment):
     elist["list"] = equipments["equipamentos"]
     return elist
 
+@cache_function(CACHE_EQUIPMENTS_TIMEOUT)
 def cache_list_equipment_all(equipment):
     equipments = equipment.get_all()
     return equipments["equipamentos"]

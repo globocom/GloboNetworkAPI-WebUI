@@ -14,6 +14,7 @@ $(document).ready(function() {
 	
 	$("#add_form").submit( function () {
 		$("#id_acl_file").removeAttr("disabled");
+		$("#id_acl_file_v6").removeAttr("disabled");
 		$("#id_environment").removeAttr("disabled");
 		return true
 	} );
@@ -27,58 +28,67 @@ $(document).ready(function() {
 		location.href = "{% url vlan.search.list %}";
 	});
 	
-	$("#btn_suggest").button().click(function() {
-		ajax = true
-		
-		if ($("#id_name").val() == ""){
-			
-			alert("Digite um nome para a Vlan");
-			ajax = false;
-			
-		}
-		else {
-			if ($("#id_environment").val() == 0){
-				
-				alert("Selecione um ambiente");
-				ajax = false;
-			}
-		}
-		
-		if (ajax){
-		
-		$.ajax({
-			data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
-			url: "{% url ajax.vlan.acl.file.name %}",
-			dataType: 'text',
-			success: function(data) {
-				$("#id_acl_file").val(data);
-			}
-		});
-	}
-	});
-	
     $("#id_name").keyup(function() {
         var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
         $(this).val(valor);
     });
     
     $("#id_name").mouseover(function() {
-    	 $("#id_name").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
     });
     
     $("#id_acl_file").mouseover(function() {
-   	 	$("#id_acl_file").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
-   });
+    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+   	});
+    
+    $("#id_acl_file_v6").mouseover(function() {
+    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+   	});
     
     $("#id_acl_file").keyup(function() {
         var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
         $(this).val(valor);
     });
     
+	$("#id_acl_file_v6").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+        $(this).val(valor);
+ 	}); 
+    
 	{% ifequal acl_created_v4 'False' %}
 	
 		$("#btn_create_acl_v4").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
 			location.href = "{% url acl.create id_vlan 'v4' %}";
+		});
+		
+		$("#btn_suggest_v4").button().click(function() {
+			ajax = true
+			
+			if ($("#id_name").val() == ""){
+				
+				alert("Digite um nome para a Vlan");
+				ajax = false;
+				
+			}
+			else {
+				if ($("#id_environment").val() == 0){
+					
+					alert("Selecione um ambiente");
+					ajax = false;
+				}
+			}
+			
+			if (ajax){
+			
+			$.ajax({
+				data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
+				url: "{% url ajax.vlan.acl.file.name %}",
+				dataType: 'text',
+				success: function(data) {
+					$("#id_acl_file").val(data);
+				}
+			});
+		}
 		});
 	
 	
@@ -94,19 +104,61 @@ $(document).ready(function() {
 		
 		
 		$("#btn_validate_v4").button({ icons: {primary: "ui-icon-carat-1-s"} }).click(function() {
-			$.ajax({
-				data: { vlan: {{id_vlan}} },
-				url: "{% url ajax.vlan.acl.validate %}",
-				success: function() {
-					location.reload();
-				},
-				error: function(){
-					location.reload();
-				}
-			});
+			location.href = "{% url acl.validate id_vlan 'v4' %}";
 		});
 		
 	{% endifequal %}
+	
+	
+	
+	{% ifequal acl_created_v6 'False' %}
+	
+		$("#btn_create_acl_v6").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+			location.href = "{% url acl.create id_vlan 'v6' %}";
+		});
+		
+		$("#btn_suggest_v6").button().click(function() {
+			ajax = true
+			if ($("#id_name").val() == ""){
+				alert("Digite um nome para a Vlan");
+				ajax = false;
+			} else {
+				if ($("#id_environment").val() == 0){
+					alert("Selecione um ambiente");
+					ajax = false;
+				}
+			}
+			if (ajax){
+				$.ajax({
+					data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
+					url: "{% url ajax.vlan.acl.file.name %}",
+					dataType: 'text',
+					success: function(data) {
+						$("#id_acl_file_v6").val(data);
+					}
+				});
+			}
+		});
+
+
+	{% else %}
+	
+		$("#btn_remove_acl_v6").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+			location.href = "{% url acl.remove id_vlan 'v6' %}";
+		});
+	
+		$("#btn_edit_acl_v6").button({ icons: {primary: "ui-icon-pencil"} }).click(function(){
+			location.href = "{% url acl.edit id_vlan 'v6' %}";
+		});
+		
+		
+		$("#btn_validate_v6").button({ icons: {primary: "ui-icon-carat-1-s"} }).click(function() {
+			location.href = "{% url acl.validate id_vlan 'v6' %}";
+		});
+		
+	{% endifequal %}
+	
+	
 	
 })
 </script>
@@ -130,8 +182,11 @@ $(document).ready(function() {
 					{% if field.name == 'acl_file' %}
 					
 						{% if field.value == None or acl_created_v4 == 'False' %}
-							<button id="btn_suggest" type="button">Sugerir nome do arquivo ACL</button>
-							<button id="btn_create_acl_v4" type="button">Criar arquivo ACL</button>
+							<button id="btn_suggest_v4" type="button">Sugerir nome do arquivo ACL</button>
+							
+							{% if field.value != None and field.value != '' and form_error != 'True' %}
+								<button id="btn_create_acl_v4" type="button">Criar arquivo ACL</button>
+							{% endif %}
 							
 						{% else %}
 							
@@ -140,13 +195,43 @@ $(document).ready(function() {
 								$("#id_environment").attr("disabled", "disabled").attr("title", "ACL depende do ambiente para poder alterá-lo é preciso excluir a ACL.");
 							</script>
 						
-							{% if acl_valida == 'False' %}
+							{% if acl_valida_v4 == 'False' %}
 								<button id="btn_validate_v4" type="button">Validar ACL</button>
 							{% endif %}
 							
 							
 							<button id="btn_edit_acl_v4" type="button">Editar ACL</button>
 							<button id="btn_remove_acl_v4" type="button">Excluir ACL</button>
+								
+							
+						{% endif %}
+					
+					
+					{% endif %}
+					
+					{% if field.name == 'acl_file_v6' %}
+					
+						{% if field.value == None or acl_created_v6 == 'False' %}
+							<button id="btn_suggest_v6" type="button">Sugerir nome do arquivo ACL</button>
+							
+							{% if field.value != None and field.value != '' and form_error != 'True' %}
+								<button id="btn_create_acl_v6" type="button">Criar arquivo ACL</button>
+							{% endif %}
+							
+						{% else %}
+							
+							<script type="text/javascript">
+								$("#id_acl_file_v6").attr("disabled", "disabled");
+								$("#id_environment").attr("disabled", "disabled").attr("title", "ACL depende do ambiente para poder alterá-lo é preciso excluir a ACL.");
+							</script>
+						
+							{% if acl_valida_v6 == 'False' %}
+								<button id="btn_validate_v6" type="button">Validar ACL</button>
+							{% endif %}
+							
+							
+							<button id="btn_edit_acl_v6" type="button">Editar ACL</button>
+							<button id="btn_remove_acl_v6" type="button">Excluir ACL</button>
 								
 							
 						{% endif %}

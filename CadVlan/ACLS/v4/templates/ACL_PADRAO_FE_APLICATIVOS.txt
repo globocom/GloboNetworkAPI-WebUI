@@ -1,0 +1,93 @@
+! SR03 e SR04
+
+! Retira as acls aplicadas
+interface vlan %NUMERO
+ no ip access-group %ACLin in
+ no ip access-group %ACLout out
+exit
+
+! Limpa acl
+no ip access-list  %ACLout
+
+! Cria acl
+ip access-list  %ACLout
+
+! Acessos ICMP
+
+! Acesso icmp NAT FE
+permit icmp 172.16.0.0/12 %REDE/%BLOCO echo
+permit icmp 172.16.0.0/12 %REDE/%BLOCO echo-reply
+permit icmp 172.16.0.0/12 %REDE/%BLOCO packet-too-big
+permit icmp 172.16.0.0/12 %REDE/%BLOCO unreachable
+permit icmp 172.16.0.0/12 %REDE/%BLOCO traceroute
+permit icmp 172.16.0.0/12 %REDE/%BLOCO time-exceeded
+
+! Retorno de acessos
+permit tcp any %REDE/%BLOCO established
+
+! Bloqueio anti-spoof
+deny ip %REDE/%BLOCO any
+
+! Acessos TCP
+! Balanceador
+permit tcp 172.31.11.0 0.0.0.255 %REDE/%BLOCO eq 80
+permit tcp 172.31.12.0 0.0.0.255 %REDE/%BLOCO eq 80
+permit tcp 172.31.11.0 0.0.0.255 %REDE/%BLOCO eq 443
+permit tcp 172.31.12.0 0.0.0.255 %REDE/%BLOCO eq 443
+
+! Monitoracao
+permit tcp 172.16.55.0 0.0.0.255 %REDE/%BLOCO eq 80
+permit tcp 172.16.55.0 0.0.0.255 %REDE/%BLOCO eq 443
+
+! NAT
+permit tcp 172.31.255.128/25 %REDE/%BLOCO eq 80
+permit tcp 172.31.255.128/25 %REDE/%BLOCO eq 443
+
+! Bloqueia outras Redes Privadas
+deny tcp 10.0.0.0/8 %REDE/%BLOCO 
+deny tcp 172.16.0.0/12 %REDE/%BLOCO 
+deny tcp 192.168.0.0/16 %REDE/%BLOCO 
+
+! Permite mundo
+permit tcp any %REDE/%BLOCO eq 80
+permit tcp any %REDE/%BLOCO eq 443
+
+! Bloqueia ALL
+deny ip any any
+
+! Limpa acl
+no ip access-list  %ACLin
+
+! Cria acl
+ip access-list  %ACLin
+
+! Acesso hsrp
+permit udp any eq 1985 224.0.0.0/24 eq 1985
+
+! Acessos ICMP
+
+! Acesso icmp NAT FE
+permit icmp %REDE/%BLOCO 172.16.0.0/12 echo
+permit icmp %REDE/%BLOCO 172.16.0.0/12 echo-reply
+permit icmp %REDE/%BLOCO 172.16.0.0/12 packet-too-big
+permit icmp %REDE/%BLOCO 172.16.0.0/12 unreachable
+permit icmp %REDE/%BLOCO 172.16.0.0/12 traceroute
+permit icmp %REDE/%BLOCO 172.16.0.0/12 time-exceeded
+
+! Bloqueio anti-spoof
+deny ip any %REDE/%BLOCO
+
+! Retorno de acessos
+permit tcp %REDE/%BLOCO any established
+
+! Bloqueia ALL
+deny ip any any
+
+! Reaplica a acl
+interface Vlan %NUMERO
+ ip access-group %ACLout out
+ ip access-group %ACLin in
+ no shutdown
+!
+end
+

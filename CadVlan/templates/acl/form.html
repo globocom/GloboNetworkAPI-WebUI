@@ -2,7 +2,7 @@
 
 {% load util %}
 
-{% block title %}[ACL - Cadastro- {{ network }}]{% endblock %}
+{% block title %}[ACL - Cadastro- IP{{ network }}]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
@@ -17,16 +17,14 @@ $(document).ready(function() {
 		location.href = "{% url vlan.edit.by.id id_vlan %}";
 	});
 	
-	
-	{% ifequal vlan.acl_valida 'True'%}
+	{% if vlan.acl_valida == 'True' and network == 'v4' or vlan.acl_valida_v6 == 'True' and network == 'v6' %}
 	
 		$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
 			$("#id_apply_acl").val('1');
 			$("#add_form").submit();
 		});
 		
-		
-	{% endifequal %}
+	{% endif %}
 	
 	{% if script %}
 	
@@ -96,8 +94,21 @@ $(document).ready(function() {
 		<div>
 			<div id="page_tab_lists">
 				<ul>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">{{vlan.acl_file_name}} - Ip{{ network }}</a></li>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Redes - Ip{{ network }}</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">
+					
+					{% ifequal network 'v4' %}
+					
+						{{ vlan.acl_file_name }}
+					
+					{% else %}
+					
+						{{ vlan.acl_file_name_v6 }}
+						
+					{% endifequal %}
+					
+					- IP{{ network }}</a></li>
+
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Redes - IP{{ network }}</a></li>
 				</ul>
 
 				<div id="tabs-1">
@@ -129,12 +140,17 @@ $(document).ready(function() {
 							
 							{% endif %}
 						
-						
-							{% ifequal vlan.acl_valida 'True' %}
+							{% if vlan.acl_valida == 'True' and network == 'v4' %}
 							
 								<button id="btn_apply" type="button">Aplicar ACL</button>
 							
-							{% endifequal %}
+							{% endif %}
+							
+							{% if vlan.acl_valida_v6 == 'True' and network == 'v6' %}
+							
+								<button id="btn_apply" type="button">Aplicar ACL</button>
+							
+							{% endif %}
 						
 						
 							<button id="btn_sav" type="submit">Gravar</button>

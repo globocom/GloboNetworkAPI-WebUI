@@ -143,6 +143,10 @@ INSTALLED_APPS = (
     'CadVlan.GroupUser',
     'CadVlan.UserGroup',
     'CadVlan.Acl',
+    'CadVlan.AccessType',
+    'CadVlan.EquipmentType',
+    'CadVlan.NetworkType',
+    'CadVlan.HealthcheckExpect',
     
 )
 
@@ -257,6 +261,18 @@ LOGGING = {
             'handlers': ['handlers-view'],
         },
         'CadVlan.Acl': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.AccessType': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.EquipmentType': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.NetworkType': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.HealthcheckExpect': {
             'handlers': ['handlers-view'],
         },
     }

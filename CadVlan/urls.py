@@ -100,7 +100,6 @@ urlpatterns += patterns('CadVlan.Vlan.views',
     url('^vlan/form[/]?$','vlan_form',name='vlan.form',), 
     url('^vlan/aclfilename[/]?$', 'ajax_acl_name_suggest', name='ajax.vlan.acl.file.name',),
     url('^vlan/edit/(?P<id_vlan>\d+)[/]?$','vlan_edit',name='vlan.edit.by.id',),
-    url('^vlan/validate-acl[/]?$','ajax_validate_acl',name='ajax.vlan.acl.validate',),
 )
 
 # URL's Network
@@ -194,6 +193,7 @@ urlpatterns += patterns('CadVlan.Acl.views',
     url('^acl/edit/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'edit', name='acl.edit',),
     url('^acl/script/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'script', name='acl.script',),
     url('^acl/apply/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'apply_acl', name='acl.apply',),
+    url('^acl/validate/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$','validate',name='acl.validate',),
 )
 
 # URL's Vip Requests
@@ -202,4 +202,24 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/find[/]?$', 'ajax_list_equips', name='vip-request.list.ajax',),
     url('^vip-request/ajax_view/(?P<id_vip>\d+)[/]?$', 'ajax_view_vip', name='vip.view.ajax',),
     url('^vip-request/operation/(?P<operation>\d+)[/]?$', 'delete_validate_create', name='vip.delete.create.validate',), 
+)
+
+# URL's Access Type Requests
+urlpatterns += patterns('CadVlan.AccessType.views',
+    url('^access-type/form[/]?$', 'access_type_form', name='access-type.form',),
+)
+
+# URL's Network Type Requests
+urlpatterns += patterns('CadVlan.NetworkType.views',
+    url('^network-type/form[/]?$', 'network_type_form', name='network-type.form',),
+)
+
+# URL's Equipment Type Requests
+urlpatterns += patterns('CadVlan.EquipmentType.views',
+    url('^equipment-type/form[/]?$', 'equipment_type_form', name='equipment-type.form',),
+)
+
+# URL's HealthcheckExpect Type Requests
+urlpatterns += patterns('CadVlan.HealthcheckExpect.views',
+    url('^healthcheck-expect/form[/]?$', 'healthcheck_expect_form', name='healthcheck-expect.form',),
 )

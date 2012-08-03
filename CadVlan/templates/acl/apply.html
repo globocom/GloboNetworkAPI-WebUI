@@ -2,7 +2,7 @@
 
 {% load util %}
 
-{% block title %}[ACL - Aplicar]{% endblock %}
+{% block title %}[ACL - Aplicar - IP{{ network }}]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
@@ -17,7 +17,7 @@ $(document).ready(function() {
 		"aoColumns": [null, null, { "sType": "ip{{network}}" }, null]
 	});
 	
-	$("#btn_apply").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+	$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
 		if (confirm('Deseja realmente aplicar acl para o(s) Equipamento(s) selecionado(s)?')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
@@ -89,7 +89,7 @@ $(document).ready(function() {
 		<div>
 			<div id="page_tab_lists">
 				<ul>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Aplica ACL - Ip{{ network }}</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Aplica ACL - IP{{ network }}</a></li>
 				</ul>
 
 				<div id="tabs-1">

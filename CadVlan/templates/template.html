@@ -131,13 +131,7 @@
 							{% if has_perm %}
 							<li><a href="{% url equip.interface.search.list %}">Interfaces</a></li>
 							{% endif %}
-							
-							<li class="separator"></li>
-							
-							
-							
-							<li class="separator"></li>
-							
+														
 							{% has_perm EQUIPMENT_MANAGEMENT None True %}
 							{% if has_perm %}
 							<li><a href="{% url equip.access.search.list %}">Acessos</a></li>
@@ -224,6 +218,25 @@
 							<li><a href="{% url environment-vip.form %}">Ambiente VIP</a></li>
 							{% endif %}
 							
+							{% has_perm ACCESS_TYPE_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="{% url access-type.form %}">Tipo de Acesso</a></li>
+							{% endif %}
+							
+							{% has_perm NETWORK_TYPE_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="{% url network-type.form %}">Tipo de Rede</a></li>
+							{% endif %}
+							
+							{% has_perm EQUIPMENT_MANAGEMENT True None %}
+							{% if has_perm %}
+							<li><a href="{% url equipment-type.form %}">Tipo de Equipamento</a></li>
+							{% endif %}
+							
+							{% has_perm HEALTH_CHECK_EXPECT True None %}
+							{% if has_perm %}
+							<li><a href="{% url healthcheck-expect.form %}">Healthcheck Expect para Ambiente</a></li>
+							{% endif %}
 						</ul>
 					</li>
 					{% endif %}

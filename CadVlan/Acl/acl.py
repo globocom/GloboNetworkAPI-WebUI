@@ -24,11 +24,13 @@ PATH_TYPES =  Enum(["ACL", "TEMPLATE"])
 
 DIVISON_DC =  Enum(["FE", "BE", "DEV_QA_FE", "DEV_QA", "BORDA"])
 
-ENVIRONMENT_LOGICAL =  Enum(["APLICATIVOS", "PORTAL", "HOMOLOGACAO"])
+ENVIRONMENT_LOGICAL =  Enum(["APLICATIVOS", "PORTAL", "HOMOLOGACAO", "PRODUCAO"])
 
 TEMPLATES =  Enum(["BE", "BEHO", "FE_APLICATIVOS", "FE_DEV_QA", "FE_PORTAL", "FE_STAGING"])
 
 PREFIX_TEMPLATES = "ACL_PADRAO_"
+
+hexa = lambda x: hex(x)[2:]
 
 
 def mkdir_divison_dc(divison_dc, user):
@@ -48,15 +50,23 @@ def mkdir_divison_dc(divison_dc, user):
         
         Cvs.synchronization()
         
-        if not os.path.exists(divison_dc):
-            
-            os.mkdir(divison_dc)
-            
-            Cvs.add(divison_dc)
-            
-            Cvs.commit(divison_dc, "Criação do diretório de divisão dc %s pelo usuário: %s" % ( divison_dc, user.get_username()))
-            
-            logger.info("%s criou no CVS o diretório: %s" % (user.get_username(), divison_dc) )
+        #Set path - Ipv4 - Ipv6
+        list_path = []
+        list_path.append("%s%s/" % (PATH_ACL, 'v4'))
+        list_path.append("%s%s/" % (PATH_ACL, 'v6'))
+        
+        for path in list_path:
+
+            os.chdir(path)
+            if not os.path.exists(divison_dc):
+                
+                os.mkdir(divison_dc)
+                
+                Cvs.add(divison_dc)
+                
+                Cvs.commit(divison_dc, "Criação do diretório de divisão dc %s/%s pelo usuário: %s" % ( path, divison_dc, user.get_username()))
+                
+                logger.info("%s criou no CVS o diretório: %s/%s" % (user.get_username(), path, divison_dc) )
         
     except Exception, e:
         logger.error("Erro quando o usuário %s tentou criar o diretório: %s no Cvs" % (user.get_username(), divison_dc))
@@ -82,7 +92,7 @@ def script_template(environment_logical, divison_dc, group_l3):
                 
     elif divison_dc == DIVISON_DC.BE:
     
-        if environment_logical == ENVIRONMENT_LOGICAL.APLICATIVOS or environment_logical == ENVIRONMENT_LOGICAL.HOMOLOGACAO:
+        if environment_logical == ENVIRONMENT_LOGICAL.PRODUCAO or environment_logical == ENVIRONMENT_LOGICAL.HOMOLOGACAO:
             
             if group_l3 == "CORE/DENSIDADE":
                 
@@ -90,10 +100,11 @@ def script_template(environment_logical, divison_dc, group_l3):
                 
     return script
     
-def chdir(type_path, path = None):
+def chdir(type_path, network, path = None):
     '''Change the current working directory to path.
     
     @param type_path: type path
+    @param network: v4 or v6
     @param path: path
     
     @raise CVSCommandError:  Failed to execute command
@@ -101,10 +112,10 @@ def chdir(type_path, path = None):
     try:
         
         if type_path == PATH_TYPES.ACL:
-            path = PATH_ACL + path
+            path = "%s%s/%s" % ( PATH_ACL, network, path )
         
         elif type_path == PATH_TYPES.TEMPLATE:
-            path = PATH_ACL + PATH_ACL_TEMPLATES
+            path = "%s%s/%s" % ( PATH_ACL, network, PATH_ACL_TEMPLATES )
         
         os.chdir(path)
         
@@ -184,7 +195,7 @@ def checkAclCvs(acl_file_name, environment, network, user):
         
         mkdir_divison_dc(environment["nome_divisao"], user)
         
-        chdir(PATH_TYPES.ACL, path)
+        chdir(PATH_TYPES.ACL, network, path)
         
         Cvs.synchronization()
         
@@ -218,7 +229,7 @@ def getAclCvs(acl_file_name, environment, network, user):
         
         mkdir_divison_dc(environment["nome_divisao"], user)
         
-        chdir(PATH_TYPES.ACL, path)
+        chdir(PATH_TYPES.ACL, network, path)
         
         Cvs.synchronization()
         
@@ -249,7 +260,7 @@ def alterAclCvs(acl_name, acl_content, environment,comment,  network, user):
         
         path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
         
-        chdir(PATH_TYPES.ACL, path)
+        chdir(PATH_TYPES.ACL, network, path)
             
         Cvs.synchronization()
         
@@ -282,7 +293,7 @@ def createAclCvs(acl_name, environment, network, user):
         
         mkdir_divison_dc(environment["nome_divisao"], user)
         
-        chdir(PATH_TYPES.ACL, path)
+        chdir(PATH_TYPES.ACL, network, path)
         
         Cvs.synchronization()
         
@@ -315,7 +326,7 @@ def deleteAclCvs(acl_name, environment, network, user):
         
         path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
         
-        chdir(PATH_TYPES.ACL, path)
+        chdir(PATH_TYPES.ACL, network, path)
         
         Cvs.synchronization()
         
@@ -364,7 +375,9 @@ def applyAcl(equipments, vlan, environment, network, user):
     '''
     try:
         
-        acl = check_name_file(vlan["acl_file_name"])
+        key_acl =  'acl_file_name' if network == NETWORK_TYPES.v4 else 'acl_file_name_v6'
+        
+        acl = check_name_file(vlan[key_acl])
         
         path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
         
@@ -397,9 +410,10 @@ def applyAcl(equipments, vlan, environment, network, user):
         logger.error(e)
         raise Exception(e)
 
-def scriptAclCvs(vlan, environment, network, user):
+def scriptAclCvs(acl_name, vlan, environment, network, user):
     '''Generates the acl based on a template
     
+    @param acl_name: acl name
     @param vlan: Vvlan
     @param environment: Environment
     @param network: v4 or v6
@@ -409,29 +423,26 @@ def scriptAclCvs(vlan, environment, network, user):
     '''
     try:    
     
-        acl = check_name_file(vlan["acl_file_name"])
-        acl_name = check_name_file(vlan["acl_file_name"], extention = False)
-        
-        #sufix v4 or v6
-        network_ = "_" + network
+        acl = check_name_file(acl_name)
+        acl_name = check_name_file(acl_name, extention = False)
         
         if ((environment["nome_divisao"] == "BE") and (environment["nome_ambiente_logico"] == "PRODUCAO") and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
             
-            chdir(PATH_TYPES.ACL, DIVISON_DC.BE)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.BE)
             
             Cvs.synchronization()
             
             arquivo = open("./%s" % acl , "w")
             
-            chdir(PATH_TYPES.TEMPLATE)
+            chdir(PATH_TYPES.TEMPLATE, network)
             
-            file_template = open(PREFIX_TEMPLATES + TEMPLATES.BE + network_ + EXTENTION_FILE, "r")
+            file_template = open(PREFIX_TEMPLATES + TEMPLATES.BE + EXTENTION_FILE, "r")
             
             content_template = file_template.read()
             
             nova_acl = replace_template(acl_name, vlan, content_template, network)
             
-            chdir(DIVISON_DC.BE, PATH_TYPES.ACL)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.BE)
             
             arquivo.write("%s" % nova_acl)
             arquivo.close()
@@ -443,21 +454,21 @@ def scriptAclCvs(vlan, environment, network, user):
             
         if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.HOMOLOGACAO) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
             
-            chdir(PATH_TYPES.ACL, DIVISON_DC.DEV_QA_FE)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.DEV_QA_FE)
             
             Cvs.synchronization()
             
             arquivo = open("./%s" % acl, "w")
             
-            chdir(PATH_TYPES.TEMPLATE)
+            chdir(PATH_TYPES.TEMPLATE,  network)
             
-            file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_DEV_QA + network_ + EXTENTION_FILE, "r")
+            file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_DEV_QA + EXTENTION_FILE, "r")
             
             content_template = file_template.read()
             
             nova_acl = replace_template(acl_name, vlan, content_template, network)
             
-            chdir(PATH_TYPES.ACL, DIVISON_DC.DEV_QA_FE)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.DEV_QA_FE)
             
             arquivo.write("%s" % nova_acl)
             arquivo.close()
@@ -469,25 +480,25 @@ def scriptAclCvs(vlan, environment, network, user):
         
         if ((environment["nome_divisao"] ==  DIVISON_DC.FE ) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.PORTAL) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
             
-            chdir(PATH_TYPES.ACL, DIVISON_DC.FE)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.FE)
             
             Cvs.synchronization()
             
             arquivo = open("./%s" % acl, "w")
             
-            chdir(PATH_TYPES.TEMPLATE)
+            chdir(PATH_TYPES.TEMPLATE, network)
             
             if "staging" in acl.lower():
-                file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_STAGING + network_ + EXTENTION_FILE, "r")
+                file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_STAGING + EXTENTION_FILE, "r")
             else:
-                file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_PORTAL + network_ + EXTENTION_FILE, "r")
+                file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_PORTAL + EXTENTION_FILE, "r")
 
             
             content_template = file_template.read()
             
             nova_acl = replace_template(acl_name, vlan, content_template, network)
 
-            chdir(PATH_TYPES.ACL, DIVISON_DC.FE)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.FE)
             
             arquivo.write("%s" % nova_acl)
             arquivo.close()
@@ -499,21 +510,21 @@ def scriptAclCvs(vlan, environment, network, user):
         
         if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.APLICATIVOS) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
             
-            chdir(PATH_TYPES.ACL, DIVISON_DC.FE)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.FE)
             
             Cvs.synchronization()
             
             arquivo = open("./%s" % acl, "w")
             
-            chdir(PATH_TYPES.TEMPLATE)
+            chdir(PATH_TYPES.TEMPLATE, network)
             
-            file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_APLICATIVOS + network_ + EXTENTION_FILE, "r")
+            file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_APLICATIVOS + EXTENTION_FILE, "r")
             
             content_template = file_template.read()
             
             nova_acl = replace_template(acl_name, vlan, content_template, network)
             
-            chdir(PATH_TYPES.ACL, DIVISON_DC.FE)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.FE)
             
             arquivo.write("%s" % nova_acl)
             arquivo.close()
@@ -525,21 +536,21 @@ def scriptAclCvs(vlan, environment, network, user):
         
         if ((environment["nome_divisao"] == DIVISON_DC.BE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.HOMOLOGACAO) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
             
-            chdir(PATH_TYPES.ACL, DIVISON_DC.DEV_QA)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.DEV_QA)
             
             Cvs.synchronization()
             
             arquivo = open("./%s" % acl, "w")
             
-            chdir(PATH_TYPES.TEMPLATE)
+            chdir(PATH_TYPES.TEMPLATE, network)
             
-            file_template = open(PREFIX_TEMPLATES + TEMPLATES.BEHO + network_ + EXTENTION_FILE, "r")
+            file_template = open(PREFIX_TEMPLATES + TEMPLATES.BEHO + EXTENTION_FILE, "r")
             
             content_template = file_template.read()
             
             nova_acl = replace_template(acl_name, vlan, content_template, network)
             
-            chdir(PATH_TYPES.ACL, DIVISON_DC.BE)
+            chdir(PATH_TYPES.ACL, network, DIVISON_DC.BE)
             
             arquivo.write("%s" % nova_acl)
             arquivo.close()
@@ -592,28 +603,31 @@ def parse_template(vlan, network):
             
             net = "%s:%s:%s:%s:%s:%s:%s:%s" % (network["block1"], network["block2"], network["block3"], network["block4"], network["block5"], network["block6"], network["block7"], network["block8"])
             
-            wmasc_1 = int(network["mask1"]) ^ 255
-            wmasc_2 = int(network["mask2"]) ^ 255
-            wmasc_3 = int(network["mask3"]) ^ 255
-            wmasc_4 = int(network["mask4"]) ^ 255
-            wmasc_5 = int(network["mask5"]) ^ 255
-            wmasc_6 = int(network["mask6"]) ^ 255
-            wmasc_7 = int(network["mask7"]) ^ 255
-            wmasc_8 = int(network["mask8"]) ^ 255
+            wmasc_1 = mask_ipv6(network["mask1"])
+            wmasc_2 = mask_ipv6(network["mask2"])
+            wmasc_3 = mask_ipv6(network["mask3"])
+            wmasc_4 = mask_ipv6(network["mask4"])
+            wmasc_5 = mask_ipv6(network["mask5"])
+            wmasc_6 = mask_ipv6(network["mask6"])
+            wmasc_7 = mask_ipv6(network["mask7"])
+            wmasc_8 = mask_ipv6(network["mask8"])
             
             wmasc = "%s:%s:%s:%s:%s:%s:%s:%s" % (wmasc_1, wmasc_2, wmasc_3, wmasc_4, wmasc_5, wmasc_6, wmasc_7, wmasc_8)
             
-            ipEsp_1 =  int(network["block1"]) | wmasc_1
-            ipEsp_2 =  int(network["block2"]) | wmasc_2
-            ipEsp_3 =  int(network["block3"]) | wmasc_3
-            ipEsp_4 =  int(network["block4"]) | wmasc_4
-            ipEsp_5 =  int(network["block5"]) | wmasc_1
-            ipEsp_6 =  int(network["block6"]) | wmasc_2
-            ipEsp_7 =  int(network["block7"]) | wmasc_3
-            ipEsp_8 =  int(network["block8"]) | wmasc_4
+            ipEsp_1 =  block_ipv6(network["block1"], wmasc_1)
+            ipEsp_2 =  block_ipv6(network["block2"], wmasc_2)
+            ipEsp_3 =  block_ipv6(network["block3"], wmasc_3)
+            ipEsp_4 =  block_ipv6(network["block4"], wmasc_4)
+            ipEsp_5 =  block_ipv6(network["block5"], wmasc_5)
+            ipEsp_6 =  block_ipv6(network["block6"], wmasc_6)
+            ipEsp_7 =  block_ipv6(network["block7"], wmasc_7)
+            ipEsp_8 =  block_ipv6(network["block8"], wmasc_8)
+            
+            sp1 = hexa(int(ipEsp_8, 16) - 1)
+            sp2 = hexa(int(ipEsp_8, 16) - 2)
              
-            special_1 = "%s:%s:%s:%s:%s:%s:%s:%s" % (ipEsp_1, ipEsp_2, ipEsp_3, ipEsp_4, ipEsp_5, ipEsp_6, ipEsp_7, (ipEsp_8 - 1) )
-            special_2 = "%s:%s:%s:%s:%s:%s:%s:%s" % (ipEsp_1, ipEsp_2, ipEsp_3, ipEsp_4, ipEsp_5, ipEsp_6, ipEsp_7, (ipEsp_8 - 2) )
+            special_1 = "%s:%s:%s:%s:%s:%s:%s:%s" % (ipEsp_1, ipEsp_2, ipEsp_3, ipEsp_4, ipEsp_5, ipEsp_6, ipEsp_7, sp1 )
+            special_2 = "%s:%s:%s:%s:%s:%s:%s:%s" % (ipEsp_1, ipEsp_2, ipEsp_3, ipEsp_4, ipEsp_5, ipEsp_6, ipEsp_7, sp2 )
              
             block = "%s" % (network['block'])
         
@@ -640,3 +654,17 @@ def replace_template(acl_name, vlan, content_template, network):
         acl = acl.replace('%ESPECIAL2', special_2)
         
     return acl
+
+def mask_ipv6(param):
+    param = hexa( int(param, 16) ^ int('ffff',16))
+    if param == '0':
+        param = '0000'
+    
+    return param
+
+def block_ipv6(param, wmasc):
+    param =  hexa( int(param, 16) | int(wmasc, 16))
+    if param == '0':
+        param = '0000'
+    
+    return param

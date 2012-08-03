@@ -16,7 +16,7 @@ $(document).ready(function() {
 		location.href = "{% url vlan.search.list %}";
 	});
 	
-	$("#btn_suggest").button().click(function() {
+	$("#btn_suggest_v4").button().click(function() {
 		ajax = true
 		if ($("#id_name").val() == ""){
 			alert("Digite um nome para a Vlan");
@@ -36,6 +36,30 @@ $(document).ready(function() {
 		});
 	}
 	});
+	
+	$("#btn_suggest_v6").button().click(function() {
+		ajax = true
+		if ($("#id_name").val() == ""){
+			alert("Digite um nome para a Vlan");
+			ajax = false;
+		} else {
+			if ($("#id_environment").val() == 0){	
+				alert("Selecione um ambiente");
+				ajax = false;
+			}
+		}
+		if (ajax){
+			$.ajax({
+				data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
+				url: "{% url ajax.vlan.acl.file.name %}",
+				dataType: 'text',
+				success: function(data) {
+					$("#id_acl_file_v6").val(data);
+				}
+			});
+		}
+	});
+	
 	$("#id_name").keyup(function() {
 	        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
 	        $(this).val(valor);
@@ -46,13 +70,22 @@ $(document).ready(function() {
         $(this).val(valor);
  	}); 
 	
-	   $("#id_name").mouseover(function() {
-	    	 $("#id_name").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
-	    });
-	    
-	    $("#id_acl_file").mouseover(function() {
-	   	 	$("#id_acl_file").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
-	   });
+	$("#id_acl_file_v6").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+        $(this).val(valor);
+ 	}); 
+	
+   $("#id_name").mouseover(function() {
+	   $(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+    });
+    
+    $("#id_acl_file").mouseover(function() {
+    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+   });
+    
+   $("#id_acl_file_v6").mouseover(function() {
+	   $(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+   });
 	
 	
 })
@@ -77,7 +110,13 @@ $(document).ready(function() {
 					
 					{% if forloop.counter == 4 %}
 					
-					<button id="btn_suggest" type="button">Sugerir nome do arquivo ACL</button>
+					<button id="btn_suggest_v4" type="button">Sugerir nome do arquivo ACL</button>
+					
+					{% endif %}
+					
+					{% if forloop.counter == 5 %}
+					
+					<button id="btn_suggest_v6" type="button">Sugerir nome do arquivo ACL</button>
 					
 					{% endif %}
 					

@@ -1,0 +1,93 @@
+! Retira a acl aplicada
+interface Vlan%NUMERO
+ no ip access-group %ACLout out
+ no ip access-group %ACLin in
+
+! Limpa acl out
+no ip access-list extended %ACLout
+
+! Cria acl out
+ip access-list extended %ACLout
+
+! Acesso icmp restritivo BE
+permit icmp 10.0.0.0 0.255.255.255 %REDE %WMASC echo
+permit icmp 10.0.0.0 0.255.255.255 %REDE %WMASC echo-reply
+permit icmp 10.0.0.0 0.255.255.255 %REDE %WMASC packet-too-big
+permit icmp 10.0.0.0 0.255.255.255 %REDE %WMASC unreachable
+permit icmp 10.0.0.0 0.255.255.255 %REDE %WMASC traceroute
+permit icmp 10.0.0.0 0.255.255.255 %REDE %WMASC time-exceeded
+
+! Bloqueio anti-spoof
+deny ip %REDE %WMASC any
+
+!Acessos BE Prod - controlados na acl de acesso
+permit ip 10.2.0.0 0.0.255.255 %REDE %WMASC 
+permit ip 10.10.0.0 0.0.255.255 %REDE %WMASC 
+permit ip 10.12.0.0 0.0.255.255 %REDE %WMASC 
+permit ip 10.13.0.0 0.0.255.255 %REDE %WMASC 
+!VPN
+permit ip 10.254.0.0 0.0.255.255 %REDE %WMASC 
+
+! Retorno de acessos TCP
+permit tcp 10.0.0.0 0.255.255.255 %REDE %WMASC established
+
+! Helth-Check Balanceadores
+permit ip host 10.249.255.3 %REDE %WMASC
+permit ip host 10.249.255.1 %REDE %WMASC
+
+! Bloqueia ALL
+deny ip any any
+
+
+! Limpa acl
+no ip access-list extended %ACLin
+
+! Cria acl
+ip access-list extended %ACLin
+
+! Acesso hsrp
+permit udp host %ESPECIAL1 eq 1985 host 224.0.0.2 eq 1985
+permit udp host %ESPECIAL2 eq 1985 host 224.0.0.2 eq 1985
+
+! Acesso icmp restritivo BE
+permit icmp %REDE %WMASC 10.0.0.0 0.255.255.255 echo
+permit icmp %REDE %WMASC 10.0.0.0 0.255.255.255 echo-reply
+permit icmp %REDE %WMASC 10.0.0.0 0.255.255.255 packet-too-big
+permit icmp %REDE %WMASC 10.0.0.0 0.255.255.255 unreachable
+permit icmp %REDE %WMASC 10.0.0.0 0.255.255.255 traceroute
+permit icmp %REDE %WMASC 10.0.0.0 0.255.255.255 time-exceeded
+
+! Bloqueio anti-spoof
+deny ip any %REDE %WMASC
+
+!Acessos BE Prod - controlados na acl de acesso
+permit ip %REDE %WMASC 10.2.0.0 0.0.255.255
+permit ip %REDE %WMASC 10.10.0.0 0.0.255.255
+permit ip %REDE %WMASC 10.12.0.0 0.0.255.255
+permit ip %REDE %WMASC 10.13.0.0 0.0.255.255
+!VPN
+permit ip %REDE %WMASC 10.254.0.0 0.0.255.255
+
+! Retorno de acessos TCP
+permit tcp %REDE %WMASC 10.0.0.0 0.255.255.255 established
+
+! Helth-Check Balanceadores
+permit ip %REDE %WMASC host 10.249.255.3
+permit ip %REDE %WMASC host 10.249.255.1
+
+!Proxy
+permit tcp %REDE %WMASC host 10.70.129.96 eq 3128
+permit tcp %REDE %WMASC host 10.70.129.152 eq 3128
+
+
+! Bloqueia ALL
+deny ip any any
+
+! Reaplica a acl
+interface Vlan%NUMERO
+ ip access-group %ACLout out
+ ip access-group %ACLin in
+ no shutdown
+!
+end
+

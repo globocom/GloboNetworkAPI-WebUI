@@ -2,7 +2,7 @@
 
 {% load util %}
 
-{% block title %}[ACL - Aplicar - Resultado]{% endblock %}
+{% block title %}[ACL - Aplicar - Resultado - IP{{ network }}]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
@@ -52,7 +52,18 @@ $(document).ready(function() {
 		<div>
 			<div id="page_tab_lists">
 				<ul>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">{{vlan.acl_file_name}} - {{ network }}</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">
+					{% ifequal network 'v4' %}
+					
+						{{ vlan.acl_file_name }}
+					
+					{% else %}
+					
+						{{ vlan.acl_file_name_v6 }}
+						
+					{% endifequal %}
+					
+					- IP{{ network }}</a></li>
 				</ul>
 
 				<div id="tabs-1">
