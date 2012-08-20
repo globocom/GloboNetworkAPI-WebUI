@@ -24,6 +24,16 @@ def check_regex(string, regex):
     pattern = re.compile(regex)
     return pattern.match(string) is not None
 
+def is_valid_uri(param):
+    '''Checks if the parameter is a valid uri.
+    
+    @param param: Value to be validated.
+    
+    @return True if the parameter has a valid uri value, or False otherwise.  
+    '''    
+    pattern = r"^[a-zA-Z0-9\\-_\\\-\\.!\\~\\*'\\(\\);/\\?:\\@\\&=\\{\\}\\#\\\[\\\]\\,]*$"
+    return re.match(pattern, param)
+
 def convert_string_to_boolean(param):
     '''Convert the parameter of string to boolean.
 

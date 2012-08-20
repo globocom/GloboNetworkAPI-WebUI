@@ -1,0 +1,7 @@
+{
+    "timeout": "{% for time in timeout %}<option value='{{time.timeout_opt}}'>{{time.timeout_opt}}</option>{% endfor %}",
+    "balancing": "{% for bal in balancing %}<option value='{{bal.balanceamento_opt}}'>{{bal.balanceamento_opt}}</option>{% endfor %}",
+    "caches": "{% for cache in caches %}<option value='{{cache.grupocache_opt}}'>{{cache.grupocache_opt}}</option>{% endfor %}",
+    "persistence": "{% for per in persistence %}<option value='{{per.persistencia_opt}}'>{{per.persistencia_opt}}</option>{% endfor %}"
+    
+}

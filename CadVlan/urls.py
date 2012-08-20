@@ -78,6 +78,7 @@ urlpatterns += patterns('CadVlan.Equipment.views',
     url('^equipment/marca[/]?$', 'ajax_marca_equip', name='equipment.modelo.ajax',),
     url('^equipment/modelo-form[/]?$', 'modelo_form', name='equipment.modelo.form',),
     url('^equipment/marca-form[/]?$', 'marca_form', name='equipment.marca.form',),
+    url('^equipment/delete[/]?$','delete_all', name='equipment.delete',),
     
 )
 
@@ -100,6 +101,8 @@ urlpatterns += patterns('CadVlan.Vlan.views',
     url('^vlan/form[/]?$','vlan_form',name='vlan.form',), 
     url('^vlan/aclfilename[/]?$', 'ajax_acl_name_suggest', name='ajax.vlan.acl.file.name',),
     url('^vlan/edit/(?P<id_vlan>\d+)[/]?$','vlan_edit',name='vlan.edit.by.id',),
+    url('^vlan/delete[/]?$','delete_all', name='vlan.delete',),
+    url('^vlan/delete/network/(?P<id_vlan>\d+)[/]?$','delete_all_network', name='vlan.network.delete',),
 )
 
 # URL's Network
@@ -201,7 +204,16 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/list[/]?$', 'search_list', name='vip-request.list',),
     url('^vip-request/find[/]?$', 'ajax_list_equips', name='vip-request.list.ajax',),
     url('^vip-request/ajax_view/(?P<id_vip>\d+)[/]?$', 'ajax_view_vip', name='vip.view.ajax',),
-    url('^vip-request/operation/(?P<operation>\d+)[/]?$', 'delete_validate_create', name='vip.delete.create.validate',), 
+    url('^vip-request/operation/(?P<operation>\d+)[/]?$', 'delete_validate_create', name='vip.delete.create.validate',),
+    url('^vip-request/form[/]?$', 'add_form', name='vip-request.form',),
+    url('^vip-request/form/(?P<id_vip>\d+)[/]?$', 'edit_form', name='vip-request.edit',),
+    url('^vip-request/ajax_client[/]?$', 'ajax_popular_client', name='vip-request.client.ajax',),
+    url('^vip-request/ajax_environment[/]?$', 'ajax_popular_environment', name='vip-request.environment.ajax',),
+    url('^vip-request/ajax_options[/]?$', 'ajax_popular_options', name='vip-request.options.ajax',),
+    url('^vip-request/ajax_add_healthcheck[/]?$', 'ajax_add_healthcheck', name='vip-request.add.healthcheck.ajax',),
+    url('^vip-request/ajax_modal_real_server[/]?$', 'ajax_model_ip_real_server', name='vip-request.modal.real.server.ajax',),
+    
+    
 )
 
 # URL's Access Type Requests

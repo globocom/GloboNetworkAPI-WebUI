@@ -152,10 +152,9 @@ $(document).ready(function() {
 	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Roteiro(s) do Equipamento selecionado(s)?')){ 
-			alert("Implementar")
-			//var data = getSelectionData(oTable);
-			//$("#id_ids").val(data).parent().submit();
+		if (confirm('Deseja realmente excluir a(s) Vlan(s) selecionada(s)?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
 		}
 	});
 	{% endif %}
@@ -253,9 +252,9 @@ input {
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url equip.script.delete %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url vlan.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in del_form %}
+			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
 		</form>

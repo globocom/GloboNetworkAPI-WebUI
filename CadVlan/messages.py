@@ -183,17 +183,31 @@ acl_messages = {
 
 request_vip_messages = {
     'success_remove':       u'Todas as Requisições VIP foram excluídas com sucesso.',
-    'success_validate':      u'Todas as Requisições VIP foram validadas com sucesso.',
-    'success_create':        u'Todas as Requisições VIP foram criadas com sucesso.',
+    'success_validate':     u'Todas as Requisições VIP foram validadas com sucesso.',
+    'success_create':       u'Todas as Requisições VIP foram criadas com sucesso.',
+    'success_insert':       u'Requisições VIP cadastrada com sucesso.',
+    'success_edit':         u'Requisições VIP alterada com sucesso.',
     'can_not_validate':     u'Não foi possível validar alguns dos itens selecionados: %s.',
     'can_not_create':       u'Não foi possível criar alguns dos itens selecionados: %s.',
     'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluído.',
     'can_not_remove':       u'Não foi possível excluir alguns dos itens selecionados: %s.',
+    'can_not_edit':         u'Não é possível editar Requisições VIP por estar criada.',
     'validate_before':      u'Não foi possível criar alguns dos itens selecionados: %s, , pois ainda não foram validados.',
     'can_not_remove_all':   u'Não foi possível excluir nenhum dos itens selecionados.',
     'can_not_validate_all': u'Não foi possível validar nenhum dos itens selecionados.',
     'can_not_create_all':   u'Não foi possível criar nenhum dos itens selecionados.',
+    'invalid_vip':          u'Requisições VIP inválida',
     'all_ready_create':     u'Itens selecionados já foram criados: %s .',
+    'error_ports':          u'Deve-se preencher todos os campos de portas.',
+    'error_reals':          u'Deve-se preencher todos os campos de reals.',
+    'error_reals_required': u'Deve conter pelo menos 1 porta cadastrada.',
+    'error_existing_reals': u'Não foi possível recuperar real server por inconsistência do banco de dados. ( %s - %s )',
+    'error_existing_environment_vip': u'Não foi possível recuperar Ambiente VIP por inconsistência do banco de dados. ( %s - %s - %s )',
+    'error_existing_timeout': u'Não foi possível recuperar Timeout por inconsistência do banco de dados. ( %s )',
+    'error_existing_cache': u'Não foi possível recuperar Grupos de caches por inconsistência do banco de dados. ( %s )',
+    'error_existing_persistence': u'Não foi possível recuperar Persistência por inconsistência do banco de dados. ( %s )',
+    'error_existing_balancing': u'Não foi possível recuperar Método de balanceamento por inconsistência do banco de dados. ( %s )',
+    
         
 }
 

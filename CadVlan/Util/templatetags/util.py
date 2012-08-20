@@ -19,6 +19,13 @@ MAX_SUBSTRING = 32;
 
 
 @register.simple_tag
+def value_form(value):
+    if value is None or value == "":
+        return ""
+    else:
+        return value
+
+@register.simple_tag
 def bold(value):
     return '<b>%s</b>' % value
 

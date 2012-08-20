@@ -146,9 +146,9 @@ $(document).ready(function() {
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
 		if (confirm('Deseja realmente excluir o(s) Equipamento(s) selecionado(s)?')){ 
-			alert("Implementar")
-			//var data = getSelectionData(oTable);
-			//$("#id_ids").val(data).parent().submit();
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+			
 		}
 	});
 	{% endif %}
@@ -235,9 +235,9 @@ input {
 		</div>
 		{% has_perm EQUIPMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url equipment.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in del_form %}
+			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
 		</form>

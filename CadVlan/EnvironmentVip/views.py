@@ -230,8 +230,7 @@ def edit_form(request, id_environmentvip):
         else: 
             #Montar formulario com dados do Ambient VIP do ID id_environmentvip   
             environment_vip = client.create_environment_vip().search(id_environmentvip)
-            key = u"environmentvip_%s" % (str(id_environmentvip,))
-            environment_vip = environment_vip.get(key)
+            environment_vip = environment_vip.get("environmentvip")
             
             opts = []
             

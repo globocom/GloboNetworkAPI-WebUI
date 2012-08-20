@@ -11,7 +11,8 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError, VlanError
+from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError, VlanError,\
+    VipIpError
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT
 from CadVlan.forms import DeleteForm
@@ -404,3 +405,142 @@ def ajax_acl_name_suggest(request):
         # Send response status with error
         response.status_code = 200
         return response
+    
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def delete_all(request):
+
+    if request.method == 'POST':
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            # Get user
+            auth = AuthSession(request.session)
+            client_vlan = auth.get_clientFactory().create_vlan()
+
+            # All ids to be deleted
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            # All messages to display
+            error_list = list()
+
+            # Control others exceptions
+            have_errors = False
+
+            # For each vlan selected to remove
+            for id_vlan in ids:
+                try:
+
+                    # Execute in NetworkAPI
+                    client_vlan.deallocate(id_vlan)
+                
+                except VipIpError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR,e)
+                    error_list.append(id_vlan)
+                    have_errors  = True
+                  
+                except VlanError, e:
+                    error_list.append(id_vlan)
+                    have_errors = True
+
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    error_list.append(id_vlan)
+                    messages.add_message(request, messages.ERROR, e)
+                    have_errors = True
+                    
+            # If all has ben removed
+            if have_errors == False:
+                messages.add_message(request, messages.SUCCESS, vlan_messages.get("success_remove"))
+
+            else:
+                if len(ids) == len(error_list):
+                    messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_error"))
+                else:
+                    msg = ""
+                    for id_error in error_list:
+                        msg = msg + id_error + ", "
+                    msg = error_messages.get("can_not_remove") % msg[:-2]
+                    messages.add_message(request, messages.WARNING, msg)
+                
+
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            
+    # Redirect to list_all action
+    return redirect('vlan.search.list')
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def delete_all_network(request, id_vlan):
+
+    if request.method == 'POST':
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            # Get user
+            auth = AuthSession(request.session)
+            client_network = auth.get_clientFactory().create_network()
+
+            # All ids to be deleted
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            # Control others exceptions
+            have_errors = False
+            error_list = list()
+
+            # For each networks selected to remove
+            for value  in ids:
+                try:
+                    
+                    var = split_to_array(value, sep='-')
+                    
+                    id_network = var[0]
+                    network = var[1]
+                    
+                    # Execute in NetworkAPI
+                    if network == NETWORK_TYPES.v4:
+                        client_network.deallocate_network_ipv4(id_network)
+                    
+                    else:
+                        client_network.deallocate_network_ipv6(id_network)
+                
+                except VipIpError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR,e)
+                    have_errors = True
+                    error_list.append(id_network)
+                        
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    have_errors = True
+                    error_list.append(id_network)
+                    
+            # If all has ben removed
+            if have_errors == False:
+                messages.add_message(request, messages.SUCCESS, vlan_messages.get("success_remove_network"))
+
+            else:
+                if len(ids) == len(error_list):
+                    messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_error"))
+                else:
+                    msg = ""
+                    for id_error in error_list:
+                        msg = msg + id_error + ", "
+                    msg = error_messages.get("can_not_remove") % msg[:-2]
+                    messages.add_message(request, messages.WARNING, msg)
+                
+
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    # Redirect to list_all action
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))

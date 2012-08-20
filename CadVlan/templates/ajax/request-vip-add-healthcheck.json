@@ -1,0 +1,5 @@
+{
+    "healthcheck": "{% for hh in healthchecks %}<option value='{{hh.id}}'>{{hh.expect_string}}</option>{% endfor %}",
+    "form": "<td></td><td style='padding-left: 5px;'>{{ form.excpect_new|escapejs }}<input type='button' id='btn_new_excpect' value='Adicionar Novo' /></td>",
+    "msg": {% if success %}"<td></td><td style='color: #0073EA;font-weight: bold;padding-left: 5px;'>{{success}}</td>"{% else %}"<td></td><td style='padding-left: 5px;'><p id='error'>{% if form.excpect_new.errors %}{% for error in form.excpect_new.errors %}{{ error|escapejs }}{% endfor %}{% endif %}</p></td>"{% endif %}
+}

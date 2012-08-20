@@ -19,6 +19,12 @@ AJAX_VIPREQUEST_LIST = 'ajax/vip-list.json'
 AJAX_NEW_PASS = 'ajax/newpass.html'
 AJAX_SUGGEST_NAME = 'ajax/suggest-name.html'
 VIPREQUEST_VIEW = 'ajax/view-vip.html'
+AJAX_VIPREQUEST_CLIENT = 'ajax/request-vip-client.html'
+AJAX_VIPREQUEST_ENVIRONMENT = 'ajax/request-vip-environment.html'
+AJAX_VIPREQUEST_OPTIONS = 'ajax/request-vip-options.json'
+AJAX_VIPREQUEST_HEALTHCHECK = 'ajax/request-vip-add-healthcheck.json'
+AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER = 'ajax/request-vip-model-ip-real-server.json'
+AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML = 'ajax/request-vip-model-ip-real-server.html'
 
 # Script
 SCRIPT_LIST = 'script/list.html'
@@ -121,6 +127,8 @@ ACL_APPLY_RESULT = 'acl/result.html'
 # VipRequest 
 VIPREQUEST_SEARCH_LIST = 'vip-request/search-list.html'
 VIPREQUEST_VIEW_AJAX = 'vip-request/view-vip.html'
+VIPREQUEST_FORM = 'vip-request/form.html'
+VIPREQUEST_EDIT = 'vip-request/edit.html'
 
 # AccessTypeRequest
 ACCESSTYPE_FORM = 'access-type/form.html'

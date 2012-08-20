@@ -129,30 +129,25 @@
 					<td><label for="persistencia">Max_con</label></td>
 					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.maxcon}}</label></td>
 				</tr>
-				<tr>
-					<td><label for="persistencia">Porta(s) Serviço</label></td>
-					
-					<td>
+				
 					
 					{% for p in vip.portas_servicos.porta %}
 					
-						{% if forloop.counter == len_porta %}
-							<label style="width: 150px;color: blue;text-align: center;" >{{p}} </label>
-						{% else %}
-							<label style="width: 150px;color: blue;text-align: center;" >{{p}} <label style="color: red;"> - </label> </label>
-						{% endif %}
+					<tr>
+						
+						<td><label for="persistencia">Porta(s) Serviço - {{forloop.counter}}</label></td>
+						<td><label style="width: 150px;color: blue;text-align: center;" >{{p}} </label></td>
+						
+					</tr>
+					
 					{% endfor %}
-					
-					</td>
-					
-				</tr>
-				
+
 				{% for real in vip.reals.real %}
 				
-				<tr>
-					<td><label for="persistencia">Real(s) Name/Real(s) IP - {{forloop.counter}}</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{real.real_name}} <label style="color: red;">/</label>  {{real.real_ip}}</label></td>
-				</tr>
+					<tr>
+						<td><label for="persistencia">Real(s) Name/Real(s) IP - {{forloop.counter}}</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;" >{{real.real_name}} <label style="color: red;">/</label>  {{real.real_ip}}</label></td>
+					</tr>
 				
 				{% endfor %}
 			</table>	

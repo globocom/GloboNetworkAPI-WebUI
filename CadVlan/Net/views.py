@@ -10,7 +10,7 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError
+from networkapiclient.exception import NetworkAPIClientError, VipIpError
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP, IPS
 from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, NET_FORM, NET6_EDIT, NET4_EDIT
@@ -804,6 +804,11 @@ def delete_ip4(request, id_net):
                 try:
                     for id in ids:
                         ip.delete_ip4(id) 
+                        
+                except VipIpError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR,e)
+                    error_list.append(id)
                            
                 except NetworkAPIClientError, e:
                     error_list.append(id)
@@ -888,6 +893,11 @@ def delete_ip6(request, id_net):
                 try:
                     for id in ids:
                         ip.delete_ip6(id) 
+                        
+                except VipIpError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR,e)
+                    error_list.append(id)
                            
                 except NetworkAPIClientError, e:
                     error_list.append(id)

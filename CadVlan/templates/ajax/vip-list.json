@@ -13,7 +13,7 @@
 		"<div class='text_center'>{{ vip.ambiente|escapejs }}</div>",
 		"<div class='text_center'>{% ifequal vip.validado 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
 		"<div class='text_center'>{% ifequal vip.criado 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
-		"<div class='text_center'><a href='' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a></div>"
+		"<div class='text_center'><a href='{% url vip-request.edit vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a></div>"
 		
 	]
     {% if not forloop.last %}

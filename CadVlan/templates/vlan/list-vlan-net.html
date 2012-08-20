@@ -41,8 +41,8 @@ $(document).ready(function() {
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
 		if (confirm('Deseja realmente excluir a(s) Rede(s) da Vlan selecionada(s)?')){ 
-			//var data = getSelectionData(oTable);
-			//$("#id_ids").val(data).parent().submit();
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
 		}
 	});
 	{% endif %}
@@ -87,9 +87,9 @@ $(document).ready(function() {
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url vlan.network.delete vlan.id %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in form %}
+			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
@@ -107,7 +107,7 @@ $(document).ready(function() {
 			<tbody>
 				{% for net_vlan in net_vlans %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ net_vlan.id }}" /></td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ net_vlan.id }}-{% if net_vlan.ip4 %}v4{% else %}v6{% endif %}" /></td>
 					{% if net_vlan.ip4 %}
 						<td lang="{% url network.ip4.list.by.id net_vlan.id %}" class="table_id">{{ net_vlan.net_ip_final }}</td>
 					{% else %}

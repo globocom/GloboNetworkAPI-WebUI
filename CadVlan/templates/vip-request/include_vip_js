@@ -1,0 +1,225 @@
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url vip-request.list %}";
+	});
+	
+	$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
+		
+		$("#err_new_healthcheck").html("");
+		
+		$.ajax({
+			data: { excpect_new:  $("#id_excpect_new").val() },
+			url: "{% url vip-request.add.healthcheck.ajax %}",
+			dataType: "json",
+			success: function(data, textStatus, xhr) {
+				if (xhr.status == "278")
+					window.location = xhr.getResponseHeader('Location');
+				
+				$("#id_excpect").html(data.healthcheck);
+				$("#add_new_healthcheck").html(data.form);
+				$("#msg_new_healthcheck").html(data.msg);
+				$("#msg_new_healthcheck").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+				$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} });
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}	
+		});
+		
+	});
+	
+	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
+	
+	$("#btn_new_real").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
+		
+		if ( $('#id_equip_name').val() != '' ) {
+			$.ajax({
+				data: { environment_vip: $('#id_environment_vip').val(), equip_name: $('#id_equip_name').val(), balancing: $('#id_balancing').val(), equip_real: getInputsData('input[name=equip]', 'equip'), ips_real: getInputsData('input[name=ip]', 'ip') },
+				url: "{% url vip-request.modal.real.server.ajax %}",
+				dataType: 'json',
+				success: function(data, textStatus, xhr) {
+					if (xhr.status == "278")
+						window.location = xhr.getResponseHeader('Location');
+					
+					if ( data.msg == "" ) {
+						$("#ip-view").html(data.ips);
+						$("#dialog-ip").dialog("open");
+					} else {
+						$("#error_real_server").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+						$("#error_real_server").html(data.msg);
+					}
+				},
+				error: function (xhr, error, thrown) {
+					location.reload();
+				}	
+			});
+		}
+	});
+	
+	$("#dialog-ip").dialog({
+		height: 600,
+		width: 1000,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: true,
+		buttons: {
+			"Voltar": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	
+	if ( $("#id_environment_vip").val() == '' ) {
+		$("#id_equip_name").attr('disabled', 'disabled');
+		$("#btn_new_real").attr('disabled', 'disabled');
+	}
+		
+	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
+		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><label class='editable'></label> <input type='hidden' name='ports_real' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
+		$('.editable').editableTable();
+	});
+	
+	$('.numbersOnly').live("keyup", function(){  
+          $(this).val($(this).val().replace(/[^0-9]+/g,''));
+	});
+	
+	$('#table_ports tbody tr span').live("click", function(){  
+			if (confirm('Deseja realmente excluir a(s) Portas selecionada(s)?')){ 
+			$(this).parents(".remove_port").remove();
+			return false;
+		}
+	});
+	
+	$('#table_real tbody tr span').live("click", function(){  
+		if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){ 
+		$(this).parents(".remove_port").remove();
+		return false;
+		}
+	});
+	
+	$("input[name=finality]").change(function(){
+		$.ajax({
+			data: { finality: $(this).val() },
+			url: "{% url vip-request.client.ajax %}",
+			dataType: 'text',
+			success: function(data, textStatus, xhr) {
+				if (xhr.status == "278")
+					window.location = xhr.getResponseHeader('Location');
+				
+				$("#id_client_content").html(data);
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}	
+		});
+		
+		$("#id_environment_content").html('');
+		$("#id_caches").html('');
+		$("#id_persistence").html('');
+		$("#id_timeout").html('');
+		$("#id_balancing").html('');
+		$("#id_environment_vip").val('');
+		
+		$("#id_equip_name").attr('disabled', 'disabled');
+		$("#btn_new_real").attr('disabled', 'disabled');
+		$("#table_real tbody tr").remove();
+		
+	});
+	
+	
+	$("input[name=client]").live("change", function(){  
+		$.ajax({
+			data: { client: $(this).val(), finality: $('input:radio[name=finality]:checked').val() },
+			url: "{% url vip-request.environment.ajax %}",
+			dataType: 'text',
+			success: function(data, textStatus, xhr) {
+				if (xhr.status == "278")
+					window.location = xhr.getResponseHeader('Location');
+				
+				$("#id_environment_content").html(data);
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}	
+		});
+		
+		$("#id_caches").html('');
+		$("#id_persistence").html('');
+		$("#id_timeout").html('');
+		$("#id_balancing").html('');
+		$("#id_environment_vip").val('');
+		
+		$("#id_equip_name").attr('disabled', 'disabled');
+		$("#btn_new_real").attr('disabled', 'disabled');
+		$("#table_real tbody tr").remove();
+		
+	});
+	
+	
+	$("input[name=environment]").live("change", function(){
+		var id_environment_vip = $('input:radio[name=environment]:checked').attr("attr");
+		$.ajax({
+			data: { environment_vip: id_environment_vip },
+			url: "{% url vip-request.options.ajax %}",
+			dataType: 'json',
+			success: function(data, textStatus, xhr) {
+				if (xhr.status == "278")
+					window.location = xhr.getResponseHeader('Location');
+
+				$("#id_caches").html(data.caches);
+				$("#id_persistence").html(data.persistence);
+				$("#id_timeout").html(data.timeout);
+				$("#id_balancing").html(data.balancing);
+				$("#id_environment_vip").val(id_environment_vip);
+				
+				$("#id_equip_name").removeAttr('disabled');
+				$("#btn_new_real").removeAttr('disabled');
+				
+				if ( $('#id_balancing').val().toLowerCase() == "weighted".toLowerCase())
+					$('.weighted').show();
+				else{
+					$('.weighted').hide();
+				}
+				
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}	
+		});
+	});
+	
+	$("input[name=healthcheck_type]").live("change", function(){
+		if ( $(this).val() == "HTTP" ) {
+			$("#table_healthcheck").show();
+		} else {
+			$("#table_healthcheck").hide();
+		}
+	});
+	
+	if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+		$('.weighted').show();
+	}else{
+		
+		$('.weighted').hide();
+	}
+		
+	if ( $("input[name=healthcheck_type]:checked'").val() == "HTTP" ) {
+		$("#table_healthcheck").show();
+	} else {
+		$("#table_healthcheck").hide();
+	}
+	
+	$("#id_balancing").live("change", function(){
+		if ( $(this).val().toLowerCase() == "weighted".toLowerCase())
+			$('.weighted').show();
+		else{
+			$('input[name=weight]').val('-');
+			$("label[for=weighted]").text('Click para editar.');
+			$('.weighted').hide();
+		}
+	});

@@ -192,3 +192,42 @@ $.fn.clearForm = function() {
         }
     });
 };
+
+$.fn.disabledForm = function() {
+    this.find('input').attr('disabled', 'disabled');
+    this.find('select').attr('disabled', 'disabled');
+    this.find('textarea').attr('disabled', 'disabled');
+};
+
+$.fn.disabledRemoveForm = function() {
+    this.find('input').removeAttr("disabled");
+    this.find('select').removeAttr("disabled");
+    this.find('textarea').removeAttr("disabled");
+};
+
+
+$.fn.editableTable = function() {
+	
+	 $(this).editable(function(value, settings) { 
+		var _value_ = "-";
+			 
+		if ( value != "" )
+			_value_ = value;
+			 
+		$(this).next().val(_value_);
+	    return(value);
+	  }, { 
+	     type    : "text",
+	     tooltip : "Click para editar.",
+	     submit  : 'Ok',
+	 });
+};
+
+
+function getInputsData(seletor, key) {
+	data = $(seletor).serialize();
+	data = replaceAll(data, key + '=', '');
+	data = replaceAll(data, '&', ';');
+	data = replaceAll(data, '&' + key + '=' , ';');
+	return data;
+}

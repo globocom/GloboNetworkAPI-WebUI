@@ -7,26 +7,23 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT,\
-    BRAND_MANAGEMENT
-from networkapiclient.exception import NetworkAPIClientError
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT, BRAND_MANAGEMENT
+from networkapiclient.exception import NetworkAPIClientError, EquipamentoError
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Equipment.business import cache_list_equipment
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS,\
-    AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO_AJAX, EQUIPMENT_MODELO,\
-    EQUIPMENT_EDIT, EQUIPMENT_MARCAMODELO_FORM, EQUIPMENT_MARCA
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO, EQUIPMENT_EDIT, EQUIPMENT_MARCAMODELO_FORM, EQUIPMENT_MARCA
 from django.template.context import RequestContext
 from CadVlan.forms import DeleteForm
-from CadVlan.Equipment.forms import SearchEquipmentForm, EquipForm, MarcaForm,\
-    ModeloForm
+from CadVlan.Equipment.forms import SearchEquipmentForm, EquipForm, MarcaForm, ModeloForm
 from CadVlan.Util.utility import DataTablePaginator
 from networkapiclient.Pagination import Pagination
 from django.http import HttpResponseServerError, HttpResponse
 from django.shortcuts import render_to_response, redirect
 from django.template import loader
-from CadVlan.messages import equip_messages
+from CadVlan.messages import equip_messages, error_messages
+from CadVlan.Util.converters.util import split_to_array
 
 logger = logging.getLogger(__name__)
 
@@ -683,4 +680,69 @@ def modelo_form(request):
         
     return render_to_response(EQUIPMENT_MARCAMODELO_FORM,lists,context_instance=RequestContext(request))
         
-        
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+def delete_all(request):
+
+    if request.method == 'POST':
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            # Get user
+            auth = AuthSession(request.session)
+            client_equip = auth.get_clientFactory().create_equipamento()
+
+            # All ids to be deleted
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            # All messages to display
+            error_list = list()
+
+            # Control others exceptions
+            have_errors = False
+
+            # For each equip selected to remove
+            for id_equip in ids:
+                try:
+
+                    # Execute in NetworkAPI
+                    client_equip.remover(id_equip);
+                    
+                except EquipamentoError, e:
+                    error_list.append(id_equip)
+
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    have_errors = True
+                    break
+
+            # If cant remove nothing
+            if len(error_list) == len(ids):
+                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+
+            # If cant remove someones
+            elif len(error_list) > 0:
+                msg = ""
+                for id_error in error_list:
+                    msg = msg + id_error + ", "
+
+                msg = error_messages.get("can_not_remove") % msg[:-2]
+
+                messages.add_message(request, messages.WARNING, msg)
+
+            # If all has ben removed
+            elif have_errors == False:
+                messages.add_message(request, messages.SUCCESS, equip_messages.get("success_remove"))
+
+            else:
+                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    # Redirect to list_all action
+    return redirect('equipment.search.list')

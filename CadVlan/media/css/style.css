@@ -4,6 +4,41 @@
  * --- INTERFACE ---
  */
 
+table.bordasimples {
+	width: 480px;
+	border:1px solid black;
+	padding: 15px 15px 15px 15px;
+}
+
+table.bordasimplesReal {
+	width: 480px;
+	text-align:center;
+	border-collapse: collapse;
+	border:1px solid black;
+	padding: 15px 15px 15px 15px;
+}
+
+table.bordasimplesReal thead tr td {
+	font-weight: bold;
+}
+
+table.bordasimplesReal tr td {
+	border:1px solid black;
+}
+
+
+table.bordasimplesIP {
+	width: 480px;
+	text-align:center;
+	border-collapse: collapse;
+	border:1px solid black;
+	padding: 15px 15px 15px 15px;
+}
+
+table.bordasimplesIP thead tr td {
+	font-weight: bold;
+}
+
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 12px;
