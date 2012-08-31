@@ -1,4 +1,20 @@
+{% load util %}
+
 <div id="fields" class="ui-widget-content">
+
+	{% if message %}
+		<table>
+			<tr>
+				<td class="ui-widget error-messages">
+					<div class="{% ifequal msg_type 'error' %} ui-state-error {% else %} ui-state-highlight success {% endifequal %} ui-corner-all">
+						{{ message }}
+					</div>
+					<br/>
+				</td>
+			</tr>
+		</table>
+	{% endif %}
+
 	<table id="dados_comuns">
 		<tr>
 			<td  style="width: 175px"><label >Validado</label></td>
@@ -28,8 +44,8 @@
 			<td ><label >Expect String</label></td>
 			<td>
 				<label style="width: 350px;color: blue;text-align: center;" >
-					{% ifequal 'None' vip.expect_string %}
-						
+					{% ifequal None vip.expect_string %}
+						NÃO CADASTRADO
 					{% else %}
 						{{vip.expect_string}}
 					{% endifequal %}
@@ -40,38 +56,34 @@
 			<td ><label>Match List</label></td>
 			<td>
 				<label style="width: 350px;color: blue;text-align: center;" >
-					{% ifequal 'None' vip.math_list %}
-						
+					{% ifequal None vip.expect_string %}
+						NÃO CADASTRADO
 					{% else %}
-						{{vip.math_list}}
+						{{vip.match_list}}
 					{% endifequal %}
 				</label>
 			</td>
 		</tr>
+		{% for ip in vip.ips %}
 		<tr>
-			<td ><label for="ip">IP</label></td>
-			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.ip_number}}</label></td>
-		</tr>	
+			{% ifequal forloop.counter 1 %}
+				<td ><label for="ip">IP</label></td>
+			{% else %}
+				<td></td>
+			{% endifequal %}
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{ip}}</label></td>
+		</tr>
+		{% endfor %}
+		{% for equip in vip.equipamento %}
 		<tr>
-			<td><label>Equipamento(s)</label></td>
-			
-			
-			{% for equip in vip.equipamento %}
-			
-				{% if forloop.counter == len_equip %}
-					<td>
-					<label style="color: blue;text-align: center;" >{{equip}}</label><br/>
-					<td>
-				{% else %}
-					<td>
-					<label style="color: blue;text-align: center;" >{{equip}}</label><br/>
-					<td>
-					<td><label style="color: red;">&nbsp;|&nbsp;</label></td>
-				{% endif %}
-			
-			{% endfor %}
-			</td>
-		</tr>		
+			{% ifequal forloop.counter 1 %}
+				<td><label>Equipamento(s)</label></td>
+			{% else %}
+				<td></td>
+			{% endifequal %}
+			<td><label style="width: 350px;color: blue;text-align: center;" > {{equip}} </label> </td>
+		</tr>
+		{% endfor %}	
 	</table>
 	<br/>
 	
@@ -126,7 +138,7 @@
 					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.healthcheck}}</label></td>
 				</tr>
 				<tr>
-					<td><label for="persistencia">Max_con</label></td>
+					<td><label for="persistencia">Max_conn</label></td>
 					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.maxcon}}</label></td>
 				</tr>
 				
@@ -153,3 +165,72 @@
 			</table>	
 </div>
 		
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$(".error-messages").each(function() {
+		$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+	});
+
+	$("#dialog-vip").dialog({
+		height: 600,
+		width: 1000,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: true,
+		beforeClose: function(event, ui) {
+			{% if changed %}
+				window.location.reload();
+			{% endif %}
+			return true;
+		},
+		buttons: {
+			
+			{% has_perm ADMINISTRATION True None %}
+			{% if has_perm %}
+			
+			{% ifequal 'False' vip.vip_criado %}
+			"Criar VIP": function() {
+				if (confirm('Deseja realmente criar a Requisição Vip ?')){ 
+					
+					$.ajax({
+						url: "{% url vip.ajax.create.validate vip.id 2 %}",
+						dataType: 'text',
+						success: function(data) {
+							$("#vip-view").html(data);
+						}
+					});
+					
+				}
+			},
+			{% endifequal %}
+			
+			{% ifequal 'False' vip.validado %}
+			"Validar": function() {
+				if (confirm('Deseja realmente validar a Requisição Vip ?')){ 
+					
+					$.ajax({
+						url: "{% url vip.ajax.create.validate vip.id 1 %}",
+						dataType: 'text',
+						success: function(data) {
+							$("#vip-view").html(data);
+						}
+					});
+					
+				}
+			},
+			{% endifequal %}
+			
+			{% endif %}
+			
+			"Voltar": function() {
+					$(this).dialog("close");
+			}
+		}
+	
+	});
+	
+})
+</script>
+

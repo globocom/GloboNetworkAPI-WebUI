@@ -6,7 +6,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
-from CadVlan.Util.utility import validates_dict, is_valid_uri
+from CadVlan.Util.utility import validates_dict
 from CadVlan.Util.forms.customRenderer import RadioCustomRenderer
 from CadVlan.Util.forms.decorators import autostrip
 from CadVlan.messages import error_messages, request_vip_messages
@@ -18,7 +18,8 @@ class SearchVipRequestForm(forms.Form):
     id_request = forms.IntegerField(label="Id Requisição", required=False,error_messages=error_messages,widget=forms.TextInput(attrs={"style": "width: 40px"}))
     ipv4 = forms.CharField(label="IPv4", required=False, min_length=1, max_length=15, error_messages=error_messages, widget=forms.HiddenInput())
     ipv6 = forms.CharField(label="IPv6", required=False, min_length=1, max_length=39, error_messages=error_messages, widget=forms.HiddenInput())
-    
+    vip_create = forms.BooleanField(label="Buscar apenas vips criados", required=False, error_messages=error_messages)
+
     def clean(self):
         cleaned_data = super(SearchVipRequestForm, self).clean()
         ipv4 = cleaned_data.get("ipv4")
@@ -38,21 +39,9 @@ class RequestVipFormInputs(forms.Form):
     business = forms.CharField(label=u'Área de negócio' , min_length=3, max_length=100, required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     service = forms.CharField(label=u'Nome do serviço',  min_length=3, max_length=100, required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     name = forms.CharField(label=u'Nome do VIP (Host FQDN)',  min_length=3, max_length=100, required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    filter_l7 = forms.CharField(label=u'Filtro L7', required=True, error_messages=error_messages, widget=forms.Textarea(attrs={'style': "width: 300px",'rows': 10}))
+    filter_l7 = forms.CharField(label=u'Filtro L7', required=False, error_messages=error_messages, widget=forms.Textarea(attrs={'style': "width: 300px",'rows': 10}))
     created = forms.BooleanField(label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
     validated = forms.BooleanField(label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
-    
-    def clean(self):
-        cleaned_data = self.cleaned_data
-
-        filter_l7  = cleaned_data.get("filter_l7")
-        
-        if filter_l7 is not None:
-
-            if not is_valid_uri(filter_l7):
-                self._errors["filter_l7"] = self.error_class(["Este campo permite apenas caracteres válidos em uma URI e os caracteres '*', '{' e '}' ."])
-                
-        return cleaned_data
 
 @autostrip
 class RequestVipFormEnvironment(forms.Form):

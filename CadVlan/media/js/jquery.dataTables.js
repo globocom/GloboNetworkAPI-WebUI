@@ -8398,6 +8398,7 @@
 					$(oSettings.oInstance).trigger('xhr', oSettings);
 					fnCallback( json );
 					$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+					$(".btn_edit_create").button({ icons: {primary: "ui-icon-wrench"}, text: false });
 				},
 				"error": function (xhr, error, thrown) {
 					if ( error == "parsererror" ) {

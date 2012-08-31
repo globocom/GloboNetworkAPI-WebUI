@@ -14,6 +14,10 @@ from random import choice
 import copy
 import re
 
+class IP_VERSION:
+    IPv6 = ('v6', 'IPv6')
+    IPv4 = ('v4', 'IPv4')
+    List = (IPv4, IPv6)
 
 def get_id_in_list(iten_list, iten_id):
     for iten in iten_list:
@@ -33,6 +37,17 @@ def is_valid_uri(param):
     '''    
     pattern = r"^[a-zA-Z0-9\\-_\\\-\\.!\\~\\*'\\(\\);/\\?:\\@\\&=\\{\\}\\#\\\[\\\]\\,]*$"
     return re.match(pattern, param)
+
+def is_valid_cn(param):
+    '''Checks if the parameter is a valid cn.
+    
+    @param param: Value to be validated.
+    
+    @return True if the parameter has a valid cn value, or False otherwise.  
+    '''   
+    pattern = r"^[a-zA-Z0-9\\-_\\\-]*$"
+    return re.match(pattern, param)
+
 
 def convert_string_to_boolean(param):
     '''Convert the parameter of string to boolean.
@@ -86,7 +101,7 @@ def validates_dict(param, key):
     '''
     if param is not None:
 
-        if type(param.get(key)) == dict:
+        if type(param.get(key)) == dict or type(param.get(key)) == str or type(param.get(key)) == unicode:
             return [param.get(key)]
 
         else:

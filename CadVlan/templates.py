@@ -129,6 +129,7 @@ VIPREQUEST_SEARCH_LIST = 'vip-request/search-list.html'
 VIPREQUEST_VIEW_AJAX = 'vip-request/view-vip.html'
 VIPREQUEST_FORM = 'vip-request/form.html'
 VIPREQUEST_EDIT = 'vip-request/edit.html'
+VIPREQUEST_TAB_REAL_SERVER = 'vip-request/tab-real-server.html'
 
 # AccessTypeRequest
 ACCESSTYPE_FORM = 'access-type/form.html'
@@ -141,4 +142,10 @@ EQUIPMENTTYPE_FORM = 'equipment-type/form.html'
 
 # HealthCheckRequest
 HEALTHCHECKEXPECT_FORM = 'healthcheck-expect/form.html'
+
+# LDAP
+LDAP_GROUP_LIST = 'ldap/group-list.html'
+LDAP_GROUP_FORM = 'ldap/group-form.html'
+LDAP_SUDOER_LIST = 'ldap/sudoer-list.html'
+LDAP_SUDOER_FORM = 'ldap/sudoer-form.html'
 

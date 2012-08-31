@@ -35,10 +35,10 @@
 			removeClass:                "pickList_remove",
 
 			// Control labels
-			addAllLabel:                "&gt;&gt;",
-			addLabel:                   "&gt;",
-			removeAllLabel:             "&lt;&lt;",
-			removeLabel:                "&lt;",
+			addAllLabel:                "&#8595;",
+			addLabel:                   "&#8595;",
+			removeAllLabel:             "&#8593;",
+			removeLabel:                "&#8593;",
 
 			// List labels
 			listLabelClass:             "pickList_listLabel",
@@ -51,9 +51,11 @@
 			sortItems:                  true,
 			sortAttribute:              "label",
 
+			// Name of custom value attribute for list items
+			listItemValueAttribute:     "pickList:value",
+
 			// Additional list items
-			items:						[],
-			richItems:                  []     // DEPRECATED -- Use "items" instead.
+			items:						[]
 		},
 
 		_create: function()
@@ -68,6 +70,8 @@
 		{
 			var self = this;
 
+			self._trigger("beforeBuild");
+
 			self.pickList = $("<div/>")
 					.hide()
 					.addClass(self.options.mainClass)
@@ -81,6 +85,8 @@
 
 			self.element.hide();
 			self.pickList.show();
+
+			self._trigger("afterBuild");
 		},
 
 		_buildSourceList: function()
@@ -109,7 +115,7 @@
 			self.sourceList = $("<ul/>")
 					.addClass(self.options.listClass)
 					.addClass(self.options.sourceListClass)
-					.delegate("li", "click", {pickList: self}, self._changeHandler);
+					.delegate("li", "click", { pickList: self }, self._changeHandler);
 
 			container
 					.append(label)
@@ -144,7 +150,7 @@
 			self.targetList = $("<ul/>")
 					.addClass(self.options.listClass)
 					.addClass(self.options.targetListClass)
-					.delegate("li", "click", {pickList: self}, self._changeHandler);
+					.delegate("li", "click", { pickList: self }, self._changeHandler);
 
 			container
 					.append(label)
@@ -177,13 +183,15 @@
 		{
 			var self = this;
 
+			self._trigger("beforePopulate");
+
 			self.element.children().each(function()
 			{
 				var text = $(this).text();
 				var copy = $("<li/>")
 						.text(text)
-						.val($(this).val())
 						.attr("label", text)
+						.attr(self.options.listItemValueAttribute, $(this).val())
 						.addClass(self.options.listItemClass);
 
 				if($(this).attr("selected") == "selected")
@@ -196,138 +204,94 @@
 				}
 			});
 
-			$(self.options.items).each(function()
-			{
-				self.insert(this);
-			});
+			self.insertItems(self.options.items);
 
-			$(self.options.richItems).each(function()
-			{
-				self.insert(this);
-			});
-		},
-
-		_addItem: function(value)
-		{
-			var self = this;
-
-			self.sourceList.children("[value='" + value + "']").each(function()
-			{
-				self.targetList.append( self._removeSelection($(this)) );
-			});
-
-			self.element.children("[value='" + value + "']").each(function()
-			{
-				$(this).attr("selected", "selected");
-			});
-		},
-
-		_removeItem: function(value)
-		{
-			var self = this;
-
-			self.targetList.children("[value='" + value + "']").each(function()
-			{
-				self.sourceList.append( self._removeSelection($(this)) );
-			});
-
-			self.element.children("[value='" + value + "']").each(function()
-			{
-				$(this).removeAttr("selected");
-			});
+			self._trigger("afterPopulate");
 		},
 
 		_addAllHandler: function(e)
 		{
 			var self = e.data.pickList;
 
-			self.sourceList.children().each(function()
+			self._trigger("beforeAddAll");
+
+			var items = self.sourceList.children();
+			self.targetList.append( self._removeSelections(items) );
+
+			items.each(function()
 			{
-				self._addItem( $(this).val() );
+				self.element.children("[value='" + self._getItemValue(this) + "']").attr("selected", "selected");
 			});
 
 			self._refresh();
+
+			self._trigger("afterAddAll");
 		},
 
 		_addHandler: function(e)
 		{
 			var self = e.data.pickList;
 
-			self.sourceList.children(".ui-selected").each(function()
+			self._trigger("beforeAdd");
+
+			var items = self.sourceList.children(".ui-selected");
+			self.targetList.append( self._removeSelections(items) );
+
+			items.each(function()
 			{
-				self._addItem( $(this).val() );
+				self.element.children("[value='" + self._getItemValue(this) + "']").attr("selected", "selected");
 			});
 
 			self._refresh();
+
+			self._trigger("afterAdd");
 		},
 
 		_removeHandler: function(e)
 		{
 			var self = e.data.pickList;
 
-			self.targetList.children(".ui-selected").each(function()
+			self._trigger("beforeRemove");
+
+			var items = self.targetList.children(".ui-selected");
+			self.sourceList.append( self._removeSelections(items) );
+
+			items.each(function()
 			{
-				self._removeItem( $(this).val() );
+				self.element.children("[value='" + self._getItemValue(this) + "']").removeAttr("selected");
 			});
 
 			self._refresh();
+
+			self._trigger("afterRemove");
 		},
 
 		_removeAllHandler: function(e)
 		{
 			var self = e.data.pickList;
 
-			self.targetList.children().each(function()
+			self._trigger("beforeRemoveAll");
+
+			var items = self.targetList.children();
+			self.sourceList.append( self._removeSelections(items) );
+
+			items.each(function()
 			{
-				self._removeItem( $(this).val() );
+				self.element.children("[value='" + self._getItemValue(this) + "']").removeAttr("selected");
 			});
 
 			self._refresh();
+
+			self._trigger("afterRemoveAll");
 		},
 
 		_refresh: function()
 		{
 			var self = this;
 
-			// Enable/disable the Add All button state.
-			if(self.sourceList.children().length)
-			{
-				self.addAllButton.button( "option", "disabled", false );
-			}
-			else
-			{
-				self.addAllButton.button( "option", "disabled", true ).removeClass("ui-state-hover ui-state-focus");
-			}
+			self._trigger("beforeRefresh");
 
-			// Enable/disable the Remove All button state.
-			if(self.targetList.children().length)
-			{
-				self.removeAllButton.button( "option", "disabled", false );
-			}
-			else
-			{
-				self.removeAllButton.button( "option", "disabled", true ).removeClass("ui-state-hover ui-state-focus");
-			}
-
-			// Enable/disable the Add button state.
-			if(self.sourceList.children(".ui-selected").length)
-			{
-				self.addButton.button( "option", "disabled", false );
-			}
-			else
-			{
-				self.addButton.button( "option", "disabled", true ).removeClass("ui-state-hover ui-state-focus");
-			}
-
-			// Enable/disable the Remove button state.
-			if(self.targetList.children(".ui-selected").length)
-			{
-				self.removeButton.button( "option", "disabled", false );
-			}
-			else
-			{
-				self.removeButton.button( "option", "disabled", true ).removeClass("ui-state-hover ui-state-focus");
-			}
+			self._refreshControls();
 
 			// Sort the selection lists.
 			if(self.options.sortItems)
@@ -335,6 +299,65 @@
 				self._sortItems(self.sourceList, self.options);
 				self._sortItems(self.targetList, self.options);
 			}
+
+			self._trigger("afterRefresh");
+		},
+
+		_refreshControls: function()
+		{
+			var self = this;
+
+			self._trigger("beforeRefreshControls");
+
+			// Enable/disable the Add All button state.
+			if(self.sourceList.children().length)
+			{
+				self.addAllButton.removeAttr("disabled");
+				self.addAllButton.removeClass('ui-button-disabled ui-state-disabled')
+			}
+			else
+			{
+				self.addAllButton.attr("disabled", "disabled");
+				self.addAllButton.addClass('ui-button-disabled ui-state-disabled')
+			}
+
+			// Enable/disable the Remove All button state.
+			if(self.targetList.children().length)
+			{
+				self.removeAllButton.removeAttr("disabled");
+				self.removeAllButton.removeClass('ui-button-disabled ui-state-disabled')
+			}
+			else
+			{
+				self.removeAllButton.attr("disabled", "disabled");
+				self.removeAllButton.addClass('ui-button-disabled ui-state-disabled')
+			}
+
+			// Enable/disable the Add button state.
+			if(self.sourceList.children(".ui-selected").length)
+			{
+				self.addButton.removeAttr("disabled");
+				self.addButton.removeClass('ui-button-disabled ui-state-disabled')
+			}
+			else
+			{
+				self.addButton.attr("disabled", "disabled");
+				self.addButton.addClass('ui-button-disabled ui-state-disabled')
+			}
+
+			// Enable/disable the Remove button state.
+			if(self.targetList.children(".ui-selected").length)
+			{
+				self.removeButton.removeAttr("disabled");
+				self.removeButton.removeClass('ui-button-disabled ui-state-disabled')
+			}
+			else
+			{
+				self.removeButton.attr("disabled", "disabled");
+				self.removeButton.addClass('ui-button-disabled ui-state-disabled')
+			}
+
+			self._trigger("afterRefreshControls");
 		},
 
 		_sortItems: function(list, options)
@@ -388,8 +411,8 @@
 			}
 			else if(e.shiftKey)
 			{
-				var current = $(this).val();
-				var last = self.lastSelectedItem.val();
+				var current = self._getItemValue(this);
+				var last = self._getItemValue(self.lastSelectedItem);
 
 				if($(this).index() < $(self.lastSelectedItem).index())
 				{
@@ -405,7 +428,7 @@
 
 				$(this).parent().children().each(function()
 				{
-					if($(this).val() == last)
+					if(self._getItemValue(this) == last)
 					{
 						pastStart = true;
 					}
@@ -415,7 +438,7 @@
 						self._addSelection( $(this) );
 					}
 
-					if($(this).val() == current)
+					if(self._getItemValue(this) == current)
 					{
 						beforeEnd = false;
 					}
@@ -429,7 +452,7 @@
 				self._addSelection( $(this) );
 			}
 
-			self._refresh();
+			self._refreshControls();
 		},
 
 		_isSelected: function(listItem)
@@ -455,6 +478,21 @@
 					.removeClass("ui-selected")
 					.removeClass("ui-state-highlight")
 					.removeClass(self.options.selectedListItemClass);
+		},
+
+		_removeSelections: function(listItems)
+		{
+			var self = this;
+
+			listItems.each(function()
+			{
+				$(this)
+						.removeClass("ui-selected")
+						.removeClass("ui-state-highlight")
+						.removeClass(self.options.selectedListItemClass);
+			});
+
+			return listItems;
 		},
 
 		_clearSelections: function(list)
@@ -484,6 +522,8 @@
 		{
 			var self = this;
 
+			self._trigger("onDestroy");
+
 			self.pickList.remove();
 			self.element.show();
 
@@ -504,39 +544,62 @@
 			self._refresh();
 		},
 
+		insertItems: function(items)
+		{
+			var self = this;
+
+			var selectItems = [];
+			var sourceItems = [];
+			var targetItems = [];
+
+			$(items).each(function()
+			{
+				var selectItem = self._createSelectItem(this);
+				var listItem = (this.element == undefined) ? self._createRegularItem(this) : self._createRichItem(this);
+
+				selectItems.push(selectItem);
+
+				if(this.selected)
+				{
+					targetItems.push(listItem);
+				}
+				else
+				{
+					sourceItems.push(listItem);
+				}
+			});
+
+			self.element.append(selectItems.join("\n"));
+			self.sourceList.append(sourceItems.join("\n"));
+			self.targetList.append(targetItems.join("\n"));
+		},
+
 		_createSelectItem: function(item)
 		{
-			var selectItem = $("<option/>").val(item.value).text(item.label);
-
-			if(item.selected)
-			{
-				selectItem.attr("selected", "selected");
-			}
-
-			return selectItem;
+			var selected = item.selected ? " selected='selected'" : "";
+			return "<option value='" + item.value + "'" + selected + ">" + item.label + "</option>";
 		},
 
 		_createRegularItem: function(item)
 		{
 			var self = this;
-
-			return $("<li/>")
-					.val(item.value)
-					.text(item.label)
-					.attr("label", item.label)
-					.addClass(self.options.listItemClass);
+			return "<li " + self.options.listItemValueAttribute + "='" + item.value + "' label='" + item.label + "' class='" + self.options.listItemClass + "'>" + item.label + "</li>";
 		},
 
 		_createRichItem: function(item)
 		{
 			var self = this;
 
-			return $("<li/>")
-					.val(item.value)
-					.attr("label", item.label)
-					.addClass(self.options.listItemClass)
-					.addClass(self.options.richListItemClass)
-					.append(item.element);
+			var richItemHtml = item.element.clone().wrap("<div>").parent().html();
+			item.element.hide();
+
+			return "<li " + self.options.listItemValueAttribute + "='" + item.value + "' label='" + item.label + "' class='" + self.options.listItemClass + " " + self.options.richListItemClass + "'>" + richItemHtml + "</li>";
+		},
+
+		_getItemValue: function(item)
+		{
+			var self = this;
+			return $(item).attr(self.options.listItemValueAttribute);
 		}
 	});
 }(jQuery));

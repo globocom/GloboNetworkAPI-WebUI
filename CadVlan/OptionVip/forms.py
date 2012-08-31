@@ -9,7 +9,7 @@ from django import forms
 from CadVlan.messages import error_messages
 from CadVlan.Util.utility import check_regex
 
-REGEX_TEXT = r"^[1-9a-zA-Z\\-_\\\-\\ ]*$"
+REGEX_TEXT = r"^[0-9a-zA-Z\\-_\\\-\\ ]*$"
 
 class OptionVipForm(forms.Form):
 

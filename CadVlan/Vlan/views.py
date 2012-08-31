@@ -11,24 +11,22 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError, VlanError,\
-    VipIpError
+from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError, VlanError, VipIpError
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT
 from CadVlan.forms import DeleteForm
 from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS, AJAX_VLAN_AUTOCOMPLETE, VLAN_FORM, VLAN_EDIT, AJAX_SUGGEST_NAME
 from CadVlan.Vlan.forms import SearchVlanForm, VlanForm
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
-from CadVlan.Util.utility import DataTablePaginator
+from CadVlan.Util.utility import DataTablePaginator, acl_key
 from django.http import HttpResponseServerError, HttpResponse,HttpResponseRedirect
 from django.template import loader
 from CadVlan.Vlan.business import montaIPRede , cache_list_vlans
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.messages import vlan_messages, error_messages
 from django.core.urlresolvers import reverse
-from CadVlan.Acl.acl import checkAclCvs
-from CadVlan.Util.cvs import CVSCommandError
+from CadVlan.Acl.acl import checkAclCvs, deleteAclCvs
+from CadVlan.Util.cvs import CVSCommandError, CVSError
 from CadVlan.Util.Enum import NETWORK_TYPES
 
 logger = logging.getLogger(__name__)
@@ -420,6 +418,7 @@ def delete_all(request):
             # Get user
             auth = AuthSession(request.session)
             client_vlan = auth.get_clientFactory().create_vlan()
+            client  = auth.get_clientFactory()
 
             # All ids to be deleted
             ids = split_to_array(form.cleaned_data['ids'])
@@ -434,8 +433,21 @@ def delete_all(request):
             for id_vlan in ids:
                 try:
 
+                    vlan = client_vlan.get(id_vlan).get("vlan")
+                    environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+
                     # Execute in NetworkAPI
                     client_vlan.deallocate(id_vlan)
+
+                    key_acl_v4 =  acl_key(NETWORK_TYPES.v4)
+                    key_acl_v6 =  acl_key(NETWORK_TYPES.v6)
+                    user = AuthSession(request.session).get_user()
+
+                    if vlan.get(key_acl_v4) is not None:
+                        deleteAclCvs(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
+
+                    if vlan.get(key_acl_v6) is not None:
+                        deleteAclCvs(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
                 
                 except VipIpError, e:
                     logger.error(e)
@@ -447,7 +459,7 @@ def delete_all(request):
                     error_list.append(id_vlan)
                     have_errors = True
 
-                except NetworkAPIClientError, e:
+                except (NetworkAPIClientError,CVSError), e:
                     logger.error(e)
                     error_list.append(id_vlan)
                     messages.add_message(request, messages.ERROR, e)

@@ -176,7 +176,7 @@ $(document).ready(function() {
 										<input type='hidden' name='ports_real' value='{{field.ports_real}}'>
 									</td>
 									<td>
-										{% if not form_inputs.created %}
+										{% if form_inputs.created.value == '0' %}
 											<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
 										{% endif %}
 									</td>
@@ -264,7 +264,7 @@ $(document).ready(function() {
 										<input type='hidden' name='weight' value='{{field.weight}}'>
 									</td>
 									<td>
-										{% if not form_inputs.created %}
+										{% if form_inputs.created.value == '0' %}
 											<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
 										{% endif %}
 									</td>

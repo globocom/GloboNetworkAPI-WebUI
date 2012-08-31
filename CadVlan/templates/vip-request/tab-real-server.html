@@ -1,0 +1,169 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Requisição VIP - Real Severs]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	oTable = $("#real_list").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 2, 5 ] }]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$("[name='selection']").attr("checked", true);
+		} else {
+			$("[name='selection']").attr("checked", false);
+		}
+	});
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+	
+	$(".voltar").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
+		location.href = "{% url vip-request.list %}";
+	});
+	
+	$("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+		if (confirm('Deseja realmente Habilitar os Real servers selecionados ?')){ 
+			var data = getSelectionData(oTable);
+			$("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'enable' %}" )
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	
+	$("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+		if (confirm('Deseja realmente Desabilitar os Real servers selecionados ?')){ 
+			var data = getSelectionData(oTable);
+			$("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'disable' %}" )
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	
+	$("#page_tab").tabs();
+	$("#page_tab_lists").tabs();
+	
+	$("#tool").buttonset();
+	
+	
+	{% ifequal vip.balancing 'WEIGHTED' %}
+		$('.weighted').show();
+	{% else %}
+		$('.weighted').hide();
+	{% endifequal %}
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes do Requisição VIP</a></li>
+	</ul>
+	<div id="tabs-1">
+		{% csrf_token %}
+
+		<div id="fields" class="ui-widget-content">
+			<table border="5">
+				<tr>
+					<td style="width: 120px"><label for="nome_ambiente">Id</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.id}}</label></td>
+				</tr>
+				<tr>
+					<td><label>Ip</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for ip in vip.ips %}{{ip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Descrição Ipv4</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv4_description %}{%else%}{{vip.ipv4_description}}{% endifequal %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Descrição Ipv6</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv6_description %}{%else%}{{vip.ipv6_description}}{% endifequal %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Equipamento</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for equip in vip.equipamento %}{{equip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+				<tr>
+					<td style="width: 120px"><label>Ambiente</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for environment in vip.environments %}{{environment}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="separator spacer"></div>
+		
+		<div>
+		
+			<div id="page_tab_lists">
+				<ul>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Reals Server - Status</a></li>
+					<!-- <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Maxconn</a></li> -->
+				</ul>
+				<div id="tabs-1">
+					<div class="buttons">
+						<button title="voltar" class="voltar">Voltar</button>
+						<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+						<span id="tool">
+							<button id="btn_enable">Habilitar Real</button>
+							<button id="btn_disable">Desabilitar Real</button>
+						</span>
+					</div>
+					{% has_perm ADMINISTRATION True None %}
+					{% if has_perm %}
+					<form id="status_form" method="post" action="" style="visibility: hidden;">
+						{% csrf_token %}
+						{% for field in status_form %}
+							{{ field }}
+						{% endfor %}
+					</form>
+					{% endif %}
+					<table id="real_list">
+						<thead>
+							<tr>
+								<th><input id="checkAll" type="checkbox" /></th>
+								<th>Nome do Real</th>
+								<th>IP do Real</th>
+								<th>Prioridade</th>
+								<th class='weighted'>Peso</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for field in reals %}
+								<tr class="text_center">
+									<td style="width: 37px;"><input type="checkbox" name="selection" value="{{field.id_equip}}-{{field.id_ip}}-{{field.version}}" /></td>
+									<td>{{field.equip}}</td>
+									<td>{{field.ip}}</td>
+									<td>{{field.priority}}</td>
+									<td class='weighted' >{{field.weight}}</td>
+									<td style="width: 70px;">
+										{% ifequal field.status 0 %}<span  title="Desabilitado" class="ui-icon ui-icon-closethick text_center"></span>{% endifequal %}
+										{% ifequal field.status 1 %}<span title="Habilitado" class="ui-icon ui-icon-check text_center"></span>{% endifequal %}
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+					
+				</div>
+				
+			</div>
+				
+					
+		</div>
+	</div>
+		
+</div>
+				
+{% endblock %}

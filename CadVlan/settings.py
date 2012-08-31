@@ -147,6 +147,7 @@ INSTALLED_APPS = (
     'CadVlan.EquipmentType',
     'CadVlan.NetworkType',
     'CadVlan.HealthcheckExpect',
+    'CadVlan.Ldap',
     
 )
 
@@ -183,6 +184,12 @@ MAX_RESULT_DEFAULT = 25 # Options-> 10, 25, 50, 100
 PATCH_PANEL_ID = 8
 
 PATH_ACL = os.path.join(PROJECT_ROOT_PATH, 'ACLS/')
+
+LDAP_DC = "dc=globoi,dc=com"
+LDAP_INITIALIZE = "ldap://192.168.24.14:389"
+LDAP_CREDENTIALS_USER = "ldapweb"
+LDAP_CREDENTIALS_PWD = "senha"
+LDAP_MANAGER_PWD = "senha"
 
 LOG_FILE = PROJECT_ROOT_PATH + '/log.log'
 
@@ -226,9 +233,8 @@ LOGGING = {
             'propagate': True,
             'level': 'ERROR',
         },
-        'CadVlan.Util.Decorators': {
+        'CadVlan.Util': {
             'handlers': ['handlers-request'],
-            'level': 'INFO',
         },
         'CadVlan.Auth': {
             'handlers': ['handlers-view'],
@@ -273,6 +279,12 @@ LOGGING = {
             'handlers': ['handlers-view'],
         },
         'CadVlan.HealthcheckExpect': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.VipRequest': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.Ldap': {
             'handlers': ['handlers-view'],
         },
     }

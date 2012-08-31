@@ -8,19 +8,20 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone
+from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, IP_VERSION
 from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, RequestVipFormReal, HealthcheckForm, RequestVipFormIP
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm
 from CadVlan.messages import error_messages, request_vip_messages, healthcheck_messages, equip_group_messages
 from CadVlan.permissions import ADMINISTRATION
-from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, AJAX_VIPREQUEST_HEALTHCHECK, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT
+from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, AJAX_VIPREQUEST_HEALTHCHECK, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, VIPREQUEST_TAB_REAL_SERVER
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseServerError
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseServerError, HttpResponseRedirect
 from django.shortcuts import render_to_response, redirect
 from django.template import loader
 from django.template.context import RequestContext
 from networkapiclient.Pagination import Pagination
-from networkapiclient.exception import NetworkAPIClientError, VipError, ScriptError, VipAllreadyCreateError, EquipamentoNaoExisteError, IpError, VipNaoExisteError, IpNaoExisteError
+from networkapiclient.exception import NetworkAPIClientError, VipError,ScriptError, VipAllreadyCreateError, EquipamentoNaoExisteError, IpError, VipNaoExisteError, IpNaoExisteError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -38,14 +39,7 @@ def search_list(request):
         lists["delete_form"] = DeleteForm()
         lists["validate_form"] = ValidateForm()
         lists["create_form"] = CreateForm()
-        
-        # Get user
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-        
-        search_form = SearchVipRequestForm()
-        
-        lists["search_form"] = search_form
+        lists["search_form"] = SearchVipRequestForm()
         lists['modal'] = 'false'
         
     except NetworkAPIClientError, e:
@@ -54,11 +48,10 @@ def search_list(request):
         
     return render_to_response(VIPREQUEST_SEARCH_LIST, lists, context_instance=RequestContext(request))
 
-
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
-def ajax_list_equips(request):
+def ajax_list_vips(request):
     
     try:
         
@@ -76,6 +69,7 @@ def ajax_list_equips(request):
                 id_vip = search_form.cleaned_data['id_request']
                 ipv4 = search_form.cleaned_data["ipv4"]
                 ipv6 = search_form.cleaned_data["ipv6"]
+                vip_create = search_form.cleaned_data["vip_create"]
                 
                 
                 if len(ipv4) > 0:
@@ -86,7 +80,7 @@ def ajax_list_equips(request):
                     ip = None
                     
                 # Pagination
-                columnIndexNameMap = { 0: '', 1: 'id', 2 : 'ip', 3: 'descricao', 4: 'equipamento', 5: 'ambiente', 6: 'valido', 7: 'criado',8: '' }
+                columnIndexNameMap = { 0: '', 1: 'id', 2 : 'ip', 3: 'descricao_ipv4', 4:'descricao_ipv6',5: 'equipamento', 6: 'ambiente', 7: 'valido', 8: 'criado',9: '' }
                 dtp = DataTablePaginator(request, columnIndexNameMap)
                 
                 # Make params
@@ -96,7 +90,7 @@ def ajax_list_equips(request):
                 pag = Pagination(dtp.start_record, dtp.end_record, dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
                 
                 # Call API passing all params
-                vips = client.create_vip().find_vip_requests(id_vip, ip, pag)
+                vips = client.create_vip().find_vip_requests(id_vip, ip, pag, vip_create)
                 
                 if not vips.has_key("vips"):
                     vips["vips"] = []
@@ -127,14 +121,9 @@ def ajax_list_equips(request):
     except BaseException, e:
         logger.error(e)
         return HttpResponseServerError(e, mimetype='application/javascript')
-    
 
-@log
-@login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
-def ajax_view_vip(request,id_vip):   
+def ajax_shared_view_vip(request,id_vip, lists):
     
-    lists= dict()
     lists['id_vip'] = id_vip
     
     try:
@@ -145,9 +134,9 @@ def ajax_view_vip(request,id_vip):
         
         lists['vip'] = client.create_vip().get_by_id(id_vip).get('vip')
         
-        
-        if type(lists['vip']['reals']['real']) is not list:
-            lists['vip']['reals']['real'] = [lists['vip']['reals']['real']]
+        if 'reals' in lists['vip']:
+            if type(lists['vip']['reals']['real']) is not list:
+                lists['vip']['reals']['real'] = [lists['vip']['reals']['real']]
             
         if type(lists['vip']['portas_servicos']['porta']) is not list:
             lists['vip']['portas_servicos']['porta'] = [lists['vip']['portas_servicos']['porta']]
@@ -170,6 +159,13 @@ def ajax_view_vip(request,id_vip):
     # Send response status with error
     response.status_code = 412
     return response    
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+def ajax_view_vip(request,id_vip):   
+    lists= dict()
+    return ajax_shared_view_vip(request, id_vip, lists)  
     
 @log
 @login_required
@@ -214,13 +210,7 @@ def delete_validate_create(request,operation):
                     
                     elif operation_text == 'CREATE':
                         
-                        vip = client_vip.get_by_id(id_vip).get('vip')
-                        
-                        if vip['is_ip4'] == 'True':
-                        
-                            client_vip.criar(id_vip)
-                        else:
-                            client_vip.create_ipv6(id_vip)
+                        client_vip.criar(id_vip)
                         
                     elif operation_text == 'VALIDATE':
                         #criar validar
@@ -292,6 +282,62 @@ def delete_validate_create(request,operation):
     # Redirect to list_all action
     return redirect('vip-request.list')    
 
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+def ajax_validate_create(request,id_vip, operation):
+    
+    operation_text = OPERATION.get(int(operation))
+
+    # Get user
+    auth = AuthSession(request.session)
+    client_vip = auth.get_clientFactory().create_vip()
+
+    msg = ""
+    msg_type = ""
+    changed = ""
+    msg_error_call,msg_success_call = getErrorMessagesOne(operation_text)
+
+    try:
+        
+        if operation_text == 'CREATE':
+            client_vip.criar(id_vip)
+            
+        elif operation_text == 'VALIDATE':
+            client_vip.validate(id_vip)
+    
+    except VipAllreadyCreateError, e:
+        logger.error(e)
+        msg = request_vip_messages.get('all_ready_create_one')
+    except VipError, e:
+        logger.error(e)
+        msg = request_vip_messages.get('validate_before_one')
+    except ScriptError, e:
+        logger.error(e)
+        msg = request_vip_messages.get(msg_error_call)
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        msg = request_vip_messages.get(msg_error_call)
+    except Exception, e:
+        logger.error(e)
+        msg = e
+        
+    if (msg):
+        msg_type = 'error'
+    else:
+        msg = request_vip_messages.get(msg_success_call)
+        msg_type = 'success'
+        changed = True
+            
+    # Return the shared view method with messages
+    lists = dict()
+    lists['message'] = msg
+    lists['msg_type'] = msg_type
+    if (changed):
+        lists['changed'] = changed
+    
+    return ajax_shared_view_vip(request, id_vip, lists)
+    
 
 def getErrorMesages(operation_text):
     
@@ -321,7 +367,23 @@ def getErrorMesages(operation_text):
         return None,None,None
     
     return msg_erro,msg_sucesso,msg_erro_parcial
+
+def getErrorMessagesOne(operation_text):
     
+    msg_erro = ""
+    msg_sucesso = ""
+    
+    if operation_text == 'VALIDATE':
+        msg_erro = 'can_not_validate_one'
+        msg_sucesso = 'success_validate_one'
+    elif operation_text == 'CREATE':
+        msg_erro = 'can_not_create_one'
+        msg_sucesso = 'success_create_one'
+    else:
+        return None, None
+    
+    return msg_erro,msg_sucesso
+
 def valid_field_table_dynamic(field):
     field = clone(field)
     if field is not None:
@@ -403,7 +465,7 @@ def mount_table_ports(lists, ports_vip, ports_real):
     return lists
 
 
-def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip):
+def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version=None, status=None):
 
     if id_equip is not None and id_equip != '':
     
@@ -424,7 +486,14 @@ def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip):
                         reals.append({'priority': priority[i] , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i] })
                     else:
                         reals.append({'priority': '' , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i] })
-                    
+
+        if status is not None:
+            for i in range(0, len(reals)):
+                reals[i]['status'] = status[i]
+
+        if version is not None:
+            for i in range(0, len(reals)):
+                reals[i]['version'] = version[i]
         
         lists['reals'] = reals
         
@@ -473,6 +542,7 @@ def mount_ips(id_ipv4, id_ipv6, client_api):
 def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client_api, edit = False, idt = False):
     
     is_valid = True
+    is_error = False
     
     #Real - data
     ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip')) if "ports_vip" in request.POST else None
@@ -507,7 +577,6 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
         service =  form_inputs.cleaned_data["service"]
         name =  form_inputs.cleaned_data["name"]
         filter_l7 =  form_inputs.cleaned_data["filter_l7"]
-        validated =  form_inputs.cleaned_data["validated"]
         created =  form_inputs.cleaned_data["created"]
         
         
@@ -553,35 +622,61 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
                     ipv4_type = form_ip.cleaned_data["ipv4_type"]
                     ipv4_specific = form_ip.cleaned_data["ipv4_specific"]
                     
-                    if ipv4_type == '0': 
-                        ipv4 = client_api.create_ip().get_available_ip4_for_vip(environment_vip).get("ip").get("id")
-                        
-                    else:
-                        ipv4 = client_api.create_ip().check_vip_ip(ipv4_specific, environment_vip).get("ip").get("id")
+                    try:
+                        if ipv4_type == '0': 
+                            ipv4 = client_api.create_ip().get_available_ip4_for_vip(environment_vip).get("ip").get("id")
+                            
+                        else:
+                            ipv4 = client_api.create_ip().check_vip_ip(ipv4_specific, environment_vip).get("ip").get("id")
+                    except NetworkAPIClientError, e:
+                        is_valid = False
+                        is_error = True
+                        logger.error(e)
+                        messages.add_message(request, messages.ERROR, e)
                         
                 if ipv6_check:
                     
                     ipv6_type = form_ip.cleaned_data["ipv6_type"]
                     ipv6_specific = form_ip.cleaned_data["ipv6_specific"]
                     
-                    if ipv6_type == '0': 
-                        ipv6 = client_api.create_ip().get_available_ip6_for_vip(environment_vip).get("ip").get("id")
+                    try:
+                        if ipv6_type == '0': 
+                            ipv6 = client_api.create_ip().get_available_ip6_for_vip(environment_vip).get("ip").get("id")
+                            
+                        else:
+                            ipv6 = client_api.create_ip().check_vip_ip(ipv6_specific, environment_vip).get("ip").get("id")
+                    except NetworkAPIClientError, e:
+                        is_valid = False
+                        is_error = True
+                        logger.error(e)
+                        messages.add_message(request, messages.ERROR, e)
                         
-                    else:
-                        ipv6 = client_api.create_ip().check_vip_ip(ipv6_specific, environment_vip).get("ip").get("id")
+                if not is_error:
                 
-                if edit:
-                    client_api.create_vip().alter(idt, ipv4, ipv6, excpect, '0', created, finality, client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
-
-                else:
-                    client_api.create_vip().add(ipv4, ipv6, excpect, finality, client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
+                    if edit:
+                        client_api.create_vip().alter(idt, ipv4, ipv6, excpect, '0', created, finality, client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
+    
+                    else:
+                        client_api.create_vip().add(ipv4, ipv6, excpect, finality , client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
                 
             except NetworkAPIClientError, e:
                 is_valid = False
+                is_error = True
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
+
+            finally:
+                try:
+
+                    if is_error and ipv4_check and ipv4_type == '0' and ipv4 is not None:
+                        client_api.create_ip().delete_ip4(ipv4)
+
+                    if is_error and ipv6_check and ipv6_type == '0' and ipv6 is not None:
+                        client_api.create_ip().delete_ip6(ipv6)
+
+                except NetworkAPIClientError, e:
+                    logger.error(e)
                 
-                form_ip = mount_ips(ipv4, ipv6, client_api)
         else:
             is_valid = False    
                 
@@ -761,65 +856,7 @@ def edit_form(request, id_vip):
 
             lists = mount_table_ports(lists, ports_vip, ports_real)
             
-            reals = []
-            if "reals" in vip:
-                if type(vip['reals']['real']) == dict or len(vip['reals']['real']) == 1:
-                    vip['reals']['real'] = [vip['reals']['real']]
-                    
-                reals = vip.get("reals").get("real")
-            
-            prioritys = []
-            if "reals_prioritys" in vip:
-                if len(vip['reals_prioritys']['reals_priority']) == 1:
-                    vip['reals_prioritys']['reals_priority'] = [vip['reals_prioritys']['reals_priority']]
-                    
-                prioritys = vip.get("reals_prioritys").get("reals_priority")
-
-            
-            weights = []
-            if "reals_weights" in vip:
-                if len(vip['reals_weights']['reals_weight']) == 1:
-                    vip['reals_weights']['reals_weight'] = [vip['reals_weights']['reals_weight']]
-
-                weights = vip.get("reals_weights").get("reals_weight")
-            
-            balancing = []
-            id_equip = []
-            id_ip = []
-            weight = []
-            priority = []
-            equip = []
-            ip = []
-            for i in range(0, len(reals)):
-                
-                try:
-                    
-                    real_name = reals[i].get("real_name")
-                    real_ip = reals[i].get("real_ip")
-                
-                    equip_aux = client_api.create_equipamento().listar_por_nome(real_name).get("equipamento")
-                    
-                    ip_aux = client_api.create_ip().get_ipv4_or_ipv6(real_ip).get("ip")
-                    
-                    equip.append(equip_aux.get("nome"))
-                    id_equip.append(equip_aux.get("id"))
-                    
-                    id_ip.append(ip_aux.get("id"))
-                    ip.append(real_ip)
-                    
-                    if prioritys:
-                        priority.append(prioritys[i])
-
-                    if weights:
-                        weight.append(weights[i])
-                        
-                except (EquipamentoNaoExisteError, IpNaoExisteError), e:
-                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_reals") % (real_name, real_ip))
-                
-                except NetworkAPIClientError, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
-            
+            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip)
                 
             lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip)
             
@@ -1043,3 +1080,235 @@ def ajax_model_ip_real_server(request):
     
     # Returns Json
     return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, lists, context_instance=RequestContext(request)), status=status_code)
+
+
+def parse_real_server(request, vip, client_api, id_vip, is_status=False):
+    reals = []
+    if "reals" in vip:
+        if type(vip['reals']['real']) == dict or len(vip['reals']['real']) == 1:
+            vip['reals']['real'] = [vip['reals']['real']]
+            
+        reals = vip.get("reals").get("real")
+    
+    prioritys = []
+    if "reals_prioritys" in vip:
+        if len(vip['reals_prioritys']['reals_priority']) == 1:
+            vip['reals_prioritys']['reals_priority'] = [vip['reals_prioritys']['reals_priority']]
+            
+        prioritys = vip.get("reals_prioritys").get("reals_priority")
+    
+    
+    weights = []
+    if "reals_weights" in vip:
+        if len(vip['reals_weights']['reals_weight']) == 1:
+            vip['reals_weights']['reals_weight'] = [vip['reals_weights']['reals_weight']]
+    
+            weights = vip.get("reals_weights").get("reals_weight")
+    
+    id_equip = []
+    id_ip = []
+    weight = []
+    priority = []
+    equip = []
+    ip = []
+    status = []
+    version = []
+    for i in range(0, len(reals)):
+        
+        try:
+            
+            real_name = reals[i].get("real_name")
+            real_ip = reals[i].get("real_ip")
+        
+            equip_aux = client_api.create_equipamento().listar_por_nome(real_name).get("equipamento")
+            ip_aux = client_api.create_ip().get_ipv4_or_ipv6(real_ip).get("ip")
+            
+            ips_equip = client_api.create_ip().find_ips_by_equip(equip_aux.get("id")).get("ips")
+            
+            is_equip_ip_valid = False
+            key_ip = ''
+            if ip_aux.get("version") == IP_VERSION.IPv4[1]:
+                key_ip = 'ipv4'
+            else:
+                key_ip = 'ipv6'
+    
+            for _ip in validates_dict(ips_equip,key_ip):
+                if _ip.get("id") == ip_aux.get("id"):
+                    is_equip_ip_valid = True
+                    break
+            
+            if not is_equip_ip_valid:
+                raise EquipamentoNaoExisteError("")
+                    
+            equip.append(equip_aux.get("nome"))
+            id_equip.append(equip_aux.get("id"))
+            
+            id_ip.append(ip_aux.get("id"))
+            ip.append(real_ip)
+            
+            if is_status:
+            
+                version.append(ip_aux.get("version"))
+                
+                try:
+                
+                    if ip_aux.get("version")  == IP_VERSION.IPv4[1]:
+                        code = client_api.create_vip().checar_real(id_vip, ip_aux.get("id"), equip_aux.get("id"))
+                    else:
+                        code = client_api.create_vip().check_real_ipv6 (id_vip, ip_aux.get("id"), equip_aux.get("id"))
+                    
+                    if code is not None and 'sucesso' in code:
+                        
+                        code = int(code.get('sucesso').get('descricao').get('stdout'))
+                        
+                        if 2 == code: #Disable
+                            status.append(0)
+                            
+                        elif 3 == code: #Enable
+                            status.append(1)
+                        
+                        else:
+                            status.append(0)
+                        
+                    else:
+                        status.append(0)
+                    
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    status.append(0)
+
+            if prioritys:
+                priority.append(prioritys[i])
+    
+            if weights:
+                weight.append(weights[i])
+                
+        except (EquipamentoNaoExisteError, IpNaoExisteError), e:
+            messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_reals") % (real_name, real_ip))
+        
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)    
+    
+    return  id_equip, id_ip, weight, priority, equip, ip, status, version
+
+
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+def tab_real_server(request, id_vip):
+
+    try:
+        
+        lists = dict()
+        lists['idt'] = id_vip
+        lists['status_form'] = DeleteForm()
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client_api = auth.get_clientFactory()
+        
+        vip = client_api.create_vip().get_by_id(id_vip).get("vip")
+        vip['equipamento'] = validates_dict(vip, 'equipamento')
+        vip['environments'] = validates_dict(vip, 'environments')
+        vip['balancing'] = str(vip.get("metodo_bal")).upper()
+        lists['vip'] = vip
+        
+        id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, True)
+            
+        lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version, status)
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return render_to_response(VIPREQUEST_TAB_REAL_SERVER, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+def status_real_server(request, id_vip, status):
+
+    if request.method == 'POST':
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            # Get user
+            auth = AuthSession(request.session)
+            client_api = auth.get_clientFactory()
+            client_vip = auth.get_clientFactory().create_vip()
+
+            # All ids to be change status
+            ids = split_to_array(form.cleaned_data['ids'])
+            
+            # All messages to display
+            error_list = list()
+
+            # Control others exceptions
+            have_errors = False
+            
+            enable = False
+            if status == "enable":
+                enable = True
+
+            for idts in ids:
+                
+                try:
+                    
+                    idt_vector = split_to_array(idts, sep="-")
+                    
+                    equip_id = idt_vector[0]
+                    ip_id = idt_vector[1]
+                    version = idt_vector[2]
+                    
+                    if version == IP_VERSION.IPv4[1]:
+                        
+                        if enable:
+                            client_vip.adicionar_real(id_vip, ip_id, equip_id)
+                        else:
+                            client_vip.desabilitar_real(id_vip, ip_id, equip_id)
+                    
+                    elif version == IP_VERSION.IPv6[1]:
+                        
+                        if enable:
+                            client_vip.add_real_ipv6(id_vip, ip_id, equip_id)
+                        else:
+                            client_vip.disable_real_ipv6(id_vip, ip_id, equip_id)
+
+                except ScriptError, e:
+                    logger.error(e)
+                    have_errors = True
+                    equip_aux = client_api.create_equipamento().listar_por_id(equip_id).get("equipamento")
+                    error_list.append(equip_aux.get("nome"))
+
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    have_errors = True
+                    break
+
+            # If cant change nothing
+            if len(error_list) == len(ids):
+                messages.add_message(request, messages.ERROR, request_vip_messages.get("can_not_real_all") % ('Habilitar' if enable else 'Desabilitar') )
+
+            # If cant change someones
+            elif len(error_list) > 0:
+                msg = ""
+                for id_error in error_list:
+                    msg = msg + id_error + ", "
+
+                messages.add_message(request, messages.WARNING, request_vip_messages.get("can_not_real") % ( ('Habilitar' if enable else 'Desabilitar'),  msg[:-2]))
+                
+            # If all has ben changed
+            elif have_errors == False:
+                messages.add_message(request, messages.SUCCESS, request_vip_messages.get("success_real") % ('Habilitado' if enable else 'Desabilitado') )
+
+            else:
+                messages.add_message(request, messages.SUCCESS, request_vip_messages.get("can_not_real") % ('Habilitar' if enable else 'Desabilitar') )
+
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    return HttpResponseRedirect(reverse('vip-request.tab.real.server', args=[id_vip]))

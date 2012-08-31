@@ -7,13 +7,14 @@
     [	
     	"<div class='text_center'><input type='checkbox' name='selection' value='{{ vip.id|escapejs }}' /></div>",
 		"<div class='text_center table_id' lang='{% url vip.view.ajax vip.id %}'>{{ vip.id|escapejs }}</div>",
-		"<div class='text_center'>{{ vip.ip|escapejs }}</div>",
-		"<div class='text_center'>{{ vip.descricao|escapejs }}</div>",
-		"<div class='text_center'>{% ifequal vip.is_more "True" %}<div class='expandable expandable_{{ vip.id|escapejs }}'>{% endifequal %}<table style='width: 100%;'>{% for equip in vip.equipamento %}<tr><td>{{ equip|escapejs }}</td></tr>{% endfor %}</table></div>{% ifequal vip.is_more "True" %}<div class='expand' lang='{{ vip.id|escapejs }}'></div></div>{% endifequal %}</div>",
-		"<div class='text_center'>{{ vip.ambiente|escapejs }}</div>",
-		"<div class='text_center'>{% ifequal vip.validado 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
-		"<div class='text_center'>{% ifequal vip.criado 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
-		"<div class='text_center'><a href='{% url vip-request.edit vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a></div>"
+		"<div class='text_center'> {% for ip in vip.ips %} {{ ip|escapejs }} {% endfor %} </div>",
+		"<div class='text_center'>{% ifequal None vip.ipv4_description %} {%else%}{{ vip.ipv4_description|escapejs }}{% endifequal %}</div>",
+		"<div class='text_center'>{% ifequal None vip.ipv6_description %} {% else %}{{ vip.ipv6_description|escapejs }} {% endifequal %}</div>",
+		"<div class='text_center'>{% ifequal vip.is_more "True" %}<div class='expandable expandable_{{ vip.id|escapejs }}'>{% endifequal %}<table style='width: 100%;'>{% for equip in vip.equipments %}<tr><td>{{ equip|escapejs }}</td></tr>{% endfor %}</table></div>{% ifequal vip.is_more "True" %}<div class='expand' lang='{{ vip.id|escapejs }}'></div></div>{% endifequal %}</div>",
+		"<div class='text_center'> {% for environment in vip.environments %} {{ environment|escapejs}} <br/> {% endfor %}</div>",
+		"<div class='text_center'>{% ifequal vip.validate 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
+		"<div class='text_center'>{% ifequal vip.create 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
+		"<div class='text_center'>{% ifequal vip.create 'True' %}<a href='{% url vip-request.tab.real.server vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit_create'>Editar Vip Criado (Healthcheck,Portas, Maxconn, Real(s) Server(s))</a>{% else %} <a href='{% url vip-request.edit vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a> {% endifequal %} </div>"
 		
 	]
     {% if not forloop.last %}

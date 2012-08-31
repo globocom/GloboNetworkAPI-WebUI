@@ -225,6 +225,7 @@ $.fn.editableTable = function() {
 
 
 function getInputsData(seletor, key) {
+	var data = "";
 	data = $(seletor).serialize();
 	data = replaceAll(data, key + '=', '');
 	data = replaceAll(data, '&', ';');

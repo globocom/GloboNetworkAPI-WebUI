@@ -184,20 +184,26 @@ acl_messages = {
 request_vip_messages = {
     'success_remove':       u'Todas as Requisições VIP foram excluídas com sucesso.',
     'success_validate':     u'Todas as Requisições VIP foram validadas com sucesso.',
+    'success_validate_one': u'Requisição VIP validada com sucesso.',
     'success_create':       u'Todas as Requisições VIP foram criadas com sucesso.',
+    'success_create_one':   u'Requisição VIP foi criada com sucesso.',
     'success_insert':       u'Requisições VIP cadastrada com sucesso.',
     'success_edit':         u'Requisições VIP alterada com sucesso.',
     'can_not_validate':     u'Não foi possível validar alguns dos itens selecionados: %s.',
+    'can_not_validate_one': u'Não foi possível validar o item.',
     'can_not_create':       u'Não foi possível criar alguns dos itens selecionados: %s.',
+    'can_not_create_one':   u'Não foi possível criar o item.',
     'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluído.',
     'can_not_remove':       u'Não foi possível excluir alguns dos itens selecionados: %s.',
     'can_not_edit':         u'Não é possível editar Requisições VIP por estar criada.',
     'validate_before':      u'Não foi possível criar alguns dos itens selecionados: %s, , pois ainda não foram validados.',
+    'validate_before_one':  u'Não foi possível criar o item selecionado pois ainda não foi validado',
     'can_not_remove_all':   u'Não foi possível excluir nenhum dos itens selecionados.',
     'can_not_validate_all': u'Não foi possível validar nenhum dos itens selecionados.',
     'can_not_create_all':   u'Não foi possível criar nenhum dos itens selecionados.',
     'invalid_vip':          u'Requisições VIP inválida',
     'all_ready_create':     u'Itens selecionados já foram criados: %s .',
+    'all_ready_create_one': u'Item já foi criado.',
     'error_ports':          u'Deve-se preencher todos os campos de portas.',
     'error_reals':          u'Deve-se preencher todos os campos de reals.',
     'error_reals_required': u'Deve conter pelo menos 1 porta cadastrada.',
@@ -207,8 +213,9 @@ request_vip_messages = {
     'error_existing_cache': u'Não foi possível recuperar Grupos de caches por inconsistência do banco de dados. ( %s )',
     'error_existing_persistence': u'Não foi possível recuperar Persistência por inconsistência do banco de dados. ( %s )',
     'error_existing_balancing': u'Não foi possível recuperar Método de balanceamento por inconsistência do banco de dados. ( %s )',
-    
-        
+    'success_real':      u'Todos os Real Server foram %ss com sucesso.',
+    'can_not_real':      u'Não foi possível %s alguns dos itens selecionados: %s.',
+    'can_not_real_all':  u'Não foi possível %s nenhum dos itens selecionados.',
 }
 
 access_type_messages = {
@@ -225,4 +232,16 @@ equipment_type_messages = {
 
 healthcheck_messages = {
     'success_create':        u'Healtcheck Expect cadastrado com sucesso.',  
+}
+
+
+ldap_messages = {
+    'success_remove_group': u'Todos os grupos selecionados foram excluídos com sucesso.',
+    'success_insert_group': u'Grupo incluído com sucesso.',
+    'success_edit_group':   u'Grupo atualizado com sucesso.',
+    'invalid_group':        u'Grupo %s inválido ou não cadastrado.',
+    'error_range_out_group':      u'Este campo deve estar entre a faixa %s a %s.',
+    'error_duplicated_name_group':  u'Já existe um grupo cadastrado com nome %s .',
+    'error_duplicated_gidNumber_group':  u'Já existe um grupo cadastrado com gidNumber %s .',
+    'invalid_cn':        u"Este campo permite apenas caracteres alfanuméricos e os caracteres '_' e '-'.",
 }

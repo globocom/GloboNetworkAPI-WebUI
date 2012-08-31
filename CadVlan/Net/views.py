@@ -904,16 +904,16 @@ def delete_ip6(request, id_net):
                         
                         
                 if len(error_list) == len(ids):
-                            messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
-                            return list_netip4_by_id(request, id_net)
+                    messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                    return list_netip6_by_id(request, id_net)
                     
                 elif len(error_list) > 0:
-                            msg = ""
-                            for id_error in error_list:
-                                msg = msg + id_error + ", "
-                                msg = error_messages.get("can_not_remove") % msg[:-2]
-                                messages.add_message(request, messages.WARNING, msg)
-                                return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+                    msg = ""
+                    for id_error in error_list:
+                        msg = msg + id_error + ", "
+                        msg = error_messages.get("can_not_remove") % msg[:-2]
+                        messages.add_message(request, messages.WARNING, msg)
+                        return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
                                 
                 else:
                     messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_delete_sucess")) 

@@ -13,7 +13,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 3 ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -35,10 +35,10 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "#";
+		location.href = "{% url ldap.group.form %}";
 	});
 	
-	{% has_perm SCRIPT_MANAGEMENT True None %}
+	{% has_perm ADMINISTRATION True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
 		if (confirm('Deseja realmente excluir o(s) Grupo(s) selecionado(s)?')){ 
@@ -51,6 +51,8 @@ $(document).ready(function() {
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
 	});
+	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
 })
 </script>
@@ -72,9 +74,9 @@ $(document).ready(function() {
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm SCRIPT_MANAGEMENT True None %}
+		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url script.type.delete %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url ldap.group.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in form %}
 				{{ field }}
@@ -87,14 +89,16 @@ $(document).ready(function() {
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th class="ids">gidNumber</th>
 					<th>gid</th>
+					<th></th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody class="text_center">
 				{% for group in groups %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ group.gidNumber }}" /></td>
+					<td style="width: 47px;" ><input type="checkbox" name="selection" value="{{ group.cn }}" /></td>
 					<td>{{ group.gidNumber }}</td>
-					<td>{{ group.gid }}</td>
+					<td>{{ group.cn }}</td>
+					<td style="width: 47px;"><a href="{% url ldap.group.edit group.cn  %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

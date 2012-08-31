@@ -202,7 +202,7 @@ urlpatterns += patterns('CadVlan.Acl.views',
 # URL's Vip Requests
 urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/list[/]?$', 'search_list', name='vip-request.list',),
-    url('^vip-request/find[/]?$', 'ajax_list_equips', name='vip-request.list.ajax',),
+    url('^vip-request/find[/]?$', 'ajax_list_vips', name='vip-request.list.ajax',),
     url('^vip-request/ajax_view/(?P<id_vip>\d+)[/]?$', 'ajax_view_vip', name='vip.view.ajax',),
     url('^vip-request/operation/(?P<operation>\d+)[/]?$', 'delete_validate_create', name='vip.delete.create.validate',),
     url('^vip-request/form[/]?$', 'add_form', name='vip-request.form',),
@@ -212,7 +212,9 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/ajax_options[/]?$', 'ajax_popular_options', name='vip-request.options.ajax',),
     url('^vip-request/ajax_add_healthcheck[/]?$', 'ajax_add_healthcheck', name='vip-request.add.healthcheck.ajax',),
     url('^vip-request/ajax_modal_real_server[/]?$', 'ajax_model_ip_real_server', name='vip-request.modal.real.server.ajax',),
-    
+    url('^vip-request/operation/ajax/(?P<id_vip>\d+)/(?P<operation>\d+)[/]?$', 'ajax_validate_create', name='vip.ajax.create.validate',),
+    url('^vip-request/tab/real-server/(?P<id_vip>\d+)[/]?$', 'tab_real_server', name='vip-request.tab.real.server',),
+    url('^vip-request/tab/real-server/(?P<id_vip>\d+)/status/(?P<status>enable|disable)[/]?$', 'status_real_server', name='vip-request.tab.real.server.status',),
     
 )
 
@@ -234,4 +236,12 @@ urlpatterns += patterns('CadVlan.EquipmentType.views',
 # URL's HealthcheckExpect Type Requests
 urlpatterns += patterns('CadVlan.HealthcheckExpect.views',
     url('^healthcheck-expect/form[/]?$', 'healthcheck_expect_form', name='healthcheck-expect.form',),
+)
+
+# URL's LDAP
+urlpatterns += patterns('CadVlan.Ldap.views',
+    url('^ldap/group-list[/]?$', 'list_all_group', name='ldap.group.list',),
+    url('^ldap/group-form[/]?$', 'add_group_form', name='ldap.group.form',),
+    url('^ldap/group-form/(?P<cn>[^/]+)[/]?$', 'edit_group_form', name='ldap.group.edit',),
+    url('^ldap/group-delete[/]?$', 'delete_group_all', name='ldap.group.delete',),
 )
