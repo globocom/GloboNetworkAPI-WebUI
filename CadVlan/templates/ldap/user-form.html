@@ -1,0 +1,285 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[LDAP - Usuários - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url ldap.user.list pattern %}";
+	});
+	
+	$("#id_groups").pickList();
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+	
+	{% if edit %}
+
+		$("#id_cn").attr("disabled", "disabled");
+		$("#id_uidNumber").attr("disabled", "disabled");
+		$("#id_homeDirectory").attr("disabled", "disabled");
+		$("#id_employeeNumber").attr("disabled", "disabled");
+		
+		
+	{% endif %}
+	
+	{% if pattern == "externo" %}
+		$("#id_homeDirectory").attr("disabled", "disabled");
+	{% endif %}
+	
+	$("#add_form").submit( function () {
+		$(this).disabledRemoveForm();
+		return true
+	} );
+	
+	$('input[name=groupPattern]').attr("disabled", "disabled");
+	
+	$("#accordion-profile").accordion({ autoHeight: false });
+	$("#accordion-user").accordion({ autoHeight: false });
+	$("#accordion-ldap").accordion({ autoHeight: false });
+	
+	
+	
+	$("#id_cn").change(function(){
+		
+		{% if pattern == "interno" %}
+			//set homeDirectory
+			$("#id_homeDirectory").val( '/home/' + $("input[name=userType]").val() + '/' +  $(this).val());
+			
+		{% endif %}
+		
+		//set email
+		$("#id_mail").val($(this).val() + '@corp.globo.com');
+	});	
+	
+	$("input[name=userType]").change(function(){
+		
+		//set homeDirectory
+		$("#id_homeDirectory").val( '/home/' + $(this).val() + '/' +  $("#id_cn").val());
+		
+		//set email
+		$("#id_mail").val($("#id_cn").val() + '@corp.globo.com');
+		
+	});
+	
+})
+</script>
+
+<style>
+#add_form label {
+	vertical-align: middle;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Usuários no LDAP</a></li>
+	</ul>
+	<div id="tabs-1">
+		<form id="add_form" method="post" action="{{ action }}">
+			{% csrf_token %}
+			
+			<div id="accordion-profile">
+				<h3><a href="#">Perfil</a></h3>
+				<div>
+				{% for field in form %}
+					{% if field.name == 'groupPattern' or field.name == 'userType' %} 
+					
+						{% if field.name == 'userType' and edit %}
+						
+						{% else %}
+						
+							<div>
+								<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+								{{ field }}
+								<p id="error">
+								{% if field.errors %} 
+									{% for error in field.errors %}
+										{{ error|escape }}
+									{% endfor %}
+								{% endif %}
+								</p>
+							</div>
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+				</div>
+				
+			</div>
+			
+			<div id="accordion-ldap">
+				<h3><a href="#">LDAP</a></h3>
+				<div>			
+			
+			
+					{% for field in form %}
+					
+						{% if  field.name == 'cn' or field.name == 'uidNumber' or field.name == 'homeDirectory' or field.name == 'loginShell' %} 
+					
+							<div>
+								<div><label for="{{ form.field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+								{{ field }}
+								<p id="error">{% if field.errors %}{% for error in field.errors %}{{ error|escape }}{% endfor %}{% endif %}</p>
+							</div>
+					
+						{% endif %}
+						
+					{% endfor %}
+			
+				
+					<div>
+						<table>
+							<tr>
+								<td><label for="{{ form.shadowMin.auto_id }}">{{ form.shadowMin.label_tag }}{% if form.shadowMin.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+								<td style="padding-left: 5px;"><label for="{{ form.shadowMax.auto_id }}">{{ form.shadowMax.label_tag }}{% if form.shadowMax.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+							</tr>
+							<tr>
+								<td>{{ form.shadowMin }}</td>
+								<td style="padding-left: 5px;">{{ form.shadowMax }}</td>
+							</tr>
+							<tr>
+								<td><p id="error">{% if form.shadowMin.errors %}{% for error in form.shadowMin.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+								<td style="padding-left: 5px;"><p id="error">{% if form.shadowMax.errors %}{% for error in form.shadowMax.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+							</tr>
+						</table>
+						<table>
+							<tr>
+								<td><label for="{{ form.shadowWarning.auto_id }}">{{ form.shadowWarning.label_tag }}{% if form.shadowWarning.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+								<td style="padding-left: 5px;"><label for="{{ form.shadowLastChange.auto_id }}">{{ form.shadowLastChange.label_tag }}{% if form.shadowLastChange.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+							</tr>
+							<tr>
+								<td>{{ form.shadowWarning }}</td>
+								<td style="padding-left: 5px;">{{ form.shadowLastChange }}</td>
+							</tr>
+							<tr>
+								<td><p id="error">{% if form.shadowWarning.errors %}{% for error in form.shadowWarning.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+								<td style="padding-left: 5px;"><p id="error">{% if form.shadowLastChange.errors %}{% for error in form.shadowLastChange.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+							</tr>
+						</table>
+					</div>
+					
+					
+					{% for field in form %}
+					
+						{% if field.name == 'policy' or field.name == 'groups' %} 
+					
+							<div>
+								<div><label for="{{ form.field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+								{{ field }}
+								<p id="error">{% if field.errors %}{% for error in field.errors %}{{ error|escape }}{% endfor %}{% endif %}</p>
+							</div>
+					
+						{% endif %}
+						
+					{% endfor %}
+			
+				</div>
+			</div>
+			
+			
+			<div id="accordion-user">
+				<h3><a href="#">Usuário</a></h3>
+				<div>
+			
+					<div>
+						<table>
+							<tr>
+								<td><label for="{{ form.givenName.auto_id }}">{{ form.givenName.label_tag }}{% if form.givenName.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+								<td style="padding-left: 5px;"><label for="{{ form.initials.auto_id }}">{{ form.initials.label_tag }}{% if form.initials.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+								<td style="padding-left: 5px;"><label for="{{ form.sn.auto_id }}">{{ form.sn.label_tag }}{% if form.sn.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+							</tr>
+							<tr>
+								<td>{{ form.givenName }}</td>
+								<td style="padding-left: 5px;">{{ form.initials }}</td>
+								<td style="padding-left: 5px;">{{ form.sn }}</td>
+							</tr>
+							<tr>
+								<td><p id="error">{% if form.givenName.errors %}{% for error in form.givenName.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+								<td style="padding-left: 5px;"><p id="error">{% if form.initials.errors %}{% for error in form.initials.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+								<td style="padding-left: 5px;"><p id="error">{% if form.sn.errors %}{% for error in form.sn.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+							</tr>
+						</table>
+					</div>
+					
+					<div>
+						<div><label for="{{ form.mail.auto_id }}">{{ form.mail.label_tag }}{% if form.mail.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+						{{ form.mail }}
+						<p id="error">{% if form.mail.errors %}{% for error in form.mail.errors %}{{ error|escape }}{% endfor %}{% endif %}</p>
+					</div>
+					
+					<div>
+						<table>
+							<tr>
+								<td><label for="{{ form.employeeNumber.auto_id }}">{{ form.employeeNumber.label_tag }}{% if form.employeeNumber.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+								<td style="padding-left: 5px;"><label for="{{ form.employeeType.auto_id }}">{{ form.employeeType.label_tag }}{% if form.employeeType.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+							</tr>
+							<tr>
+								<td>{{ form.employeeNumber }}</td>
+								<td style="padding-left: 5px;">{{ form.employeeType }}</td>
+							</tr>
+							<tr>
+								<td><p id="error">{% if form.employeeNumber.errors %}{% for error in form.employeeNumber.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+								<td style="padding-left: 5px;"><p id="error">{% if form.employeeType.errors %}{% for error in form.employeeType.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+							</tr>
+						</table>
+					</div>
+					
+					<div>
+						<table>
+							<tr>
+								<td><label for="{{ form.homePhoner.auto_id }}">{{ form.homePhone.label_tag }}{% if form.homePhone.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+								<td style="padding-left: 5px;"><label for="{{ form.mobile.auto_id }}">{{ form.mobile.label_tag }}{% if form.mobile.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+							</tr>
+							<tr>
+								<td>{{ form.homePhone }}</td>
+								<td style="padding-left: 5px;">{{ form.mobile }}</td>
+							</tr>
+							<tr>
+								<td><p id="error">{% if form.homePhone.errors %}{% for error in form.homePhone.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+								<td style="padding-left: 5px;"><p id="error">{% if form.mobile.errors %}{% for error in form.mobile.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+							</tr>
+						</table>
+					</div>
+					
+					
+					{% for field in form %}
+					
+						{% if field.name == 'street' or field.name == 'description' %} 
+					
+							<div>
+								<div><label for="{{ form.field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+								{{ field }}
+								<p id="error">{% if field.errors %}{% for error in field.errors %}{{ error|escape }}{% endfor %}{% endif %}</p>
+							</div>
+						
+						{% endif %}
+							
+					{% endfor %}
+					
+			
+				</div>
+			</div>
+			
+			
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,256 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[LDAP - Usuários - Listagem]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	oTable = $("#user_list").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$(":checkbox").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	$("#page_tab").tabs();
+	
+	$("#tool").buttonset();
+	
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url ldap.user.form pattern %}";
+	});
+	
+	{% has_perm ADMINISTRATION True None %}
+	{% if has_perm %}
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Deseja realmente excluir o(s) Usuário(s) selecionado(s)?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+	
+	$("#btn_search").button({ icons: {primary: "ui-icon-search"} });
+	
+	$("#btn_clear").button({ icons: {primary: "ui-icon-close"}, text: false }).click(function(){
+		$("#search_form").clearForm();
+	});
+	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	
+	$(".btn_reset_pwd").button({ icons: {primary: "ui-icon-key"}, text: false }).click(function(){
+		if (confirm('Deseja realmente resetar a senha do ' + $(this).attr("lang") + ' ?')){
+			$.ajax({
+				data: { cn:  $(this).attr("lang") },
+				url: "{% url ldap.user.reset.pwd.ajax %}",
+				success: function(data, textStatus, xhr) {
+					if (xhr.status == "278")
+						window.location = xhr.getResponseHeader('Location');
+					
+					$("#pwd-view").html(data);
+					$("#dialog-pwd").dialog("open");
+					
+				},
+				error: function (xhr, error, thrown) {
+					location.reload();
+				}	
+			});
+		}
+	});
+	
+	$(".btn_lock").button({ icons: {primary: "ui-icon-unlocked"}, text: false }).click(function(){
+		if (confirm('Deseja realmente bloquear ' + $(this).attr("lang") + ' ?')){
+			$.ajax({
+				data: { cn:  $(this).attr("lang") },
+				url: "{% url ldap.user.lock.ajax %}",
+				success: function(data, textStatus, xhr) {
+					if (xhr.status == "278")
+						window.location = xhr.getResponseHeader('Location');
+					
+					$("#search_form").submit();
+				},
+				error: function (xhr, error, thrown) {
+					location.reload();
+				}	
+			});
+		}
+	});
+	
+	$(".btn_unlock").button({ icons: {primary: "ui-icon-locked"}, text: false }).click(function(){
+		if (confirm('Deseja realmente desbloquear ' + $(this).attr("lang") + ' ?')){
+			$.ajax({
+				data: { cn:  $(this).attr("lang") },
+				url: "{% url ldap.user.unlock.ajax %}",
+				success: function(data, textStatus, xhr) {
+					if (xhr.status == "278")
+						window.location = xhr.getResponseHeader('Location');
+					
+					$("#search_form").submit();
+				},
+				error: function (xhr, error, thrown) {
+					location.reload();
+				}	
+			});
+		}
+	});
+	
+	$("#dialog-pwd").dialog({
+		height: 100,
+		width: 100,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: false,
+		beforeClose: function(event, ui) {
+			$("#pwd-view").html("");
+			return true;
+		},
+	});
+	
+	$("#accordion").accordion({ autoHeight: false });
+	
+})
+</script>
+<style>
+#search_form label {
+	vertical-align: middle;
+}
+
+#search_form table th {
+	padding: 2px;
+    text-align: center !important;
+    background: url("/media/css/globo/images/ui-bg_highlight-soft_80_dddddd_1x100.png") repeat-x scroll 50% 50% #DDDDDD;
+}
+#search_form table td {
+    text-align: center !important;
+	background-color: #F6F6F6;
+}
+.ui-accordion .ui-accordion-content {
+	padding: 5px !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+
+	<div id="dialog-pwd" title="Senha Resetada">
+		<div id="pwd-view" class="text_center">
+		</div>
+	</div>
+
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Usuários do LDAP</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="accordion">
+			<h3><a href="#">Pesquisar</a></h3>
+			<div id="search">
+				<form id="search_form" method="post" action="{% url ldap.user.list pattern %}">{% csrf_token %}
+					<table style="width: 55%">
+						<thead>
+							<tr>
+								<th>uidNumber</th>		
+								<th>uid</th>
+								<th>Nome</th>
+								<th></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>{{ search_form.uidNumner }}</td>
+								<td>{{ search_form.cn }}</td>
+								<td>{{ search_form.name }}</td>
+								<td>{{ search_form.lock }}{{ search_form.lock.label_tag }}</td>		
+								<td style="padding-top: 4px;"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="button">Limpar</button></span></td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+			</div>
+		</div>
+		<div class="buttons">
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span id="tool">
+			<button id="btn_new">Novo Registro</button>
+			{% has_perm SCRIPT_MANAGEMENT True None %}
+			{% if has_perm %}
+			<button id="btn_del">Excluir</button>
+			{% endif %}
+			</span>
+		</div>
+		{% has_perm ADMINISTRATION True None %}
+		{% if has_perm %}
+		<form id="delete_form" method="post" action="{% url ldap.user.delete pattern %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		<table id="user_list">
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th class="ids">uidNumber</th>
+					<th>uid</th>
+					<th>Nome</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody class="text_center">
+				{% for user in users %}
+				<tr>
+					<td style="width: 47px;" ><input type="checkbox" name="selection" value="{{ user.cn }}" /></td>
+					<td>{{ user.uidNumber }}</td>
+					<td>{{ user.cn }}</td>
+					<td>{{ user.name }}</td>
+					<td style="width: 80px;">
+					{% if search_form.lock.value %}
+
+						{% if user.pwdAccountLockedTime %}
+							{% if user.pwdAccountLockedTime.0.length > 0 %}
+								<a lang="{{ user.cn }}" title="Bloqueado em: {{user.pwdAccountLockedTime.2}}/{{user.pwdAccountLockedTime.1}}/{{user.pwdAccountLockedTime.0}} {{user.pwdAccountLockedTime.3}}:{{user.pwdAccountLockedTime.4}} - Desbloquear Usuário" style="width: 20px; height: 20px;" class="btn_unlock"></a>
+							{% else %}
+								<a lang="{{ user.cn }}" title="Bloqueado Administrativamente - Desbloquear Usuário" style="width: 20px; height: 20px;" class="btn_unlock"></a>
+							{% endif %}
+						{% else %}
+							<a lang="{{ user.cn }}" title="Bloquear Usuário" style="width: 20px; height: 20px;" class="btn_lock"></a>	
+						{% endif %}
+
+					{% endif %}
+					
+
+					<a lang="{{ user.cn }}" title="Resetar para a senha padrão" style="width: 20px; height: 20px;" class="btn_reset_pwd"></a>
+					<a href="{% url ldap.user.edit pattern=pattern cn=user.cn  %}" title="Editar" style="width: 20px; height: 20px;" class="btn_edit"></a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

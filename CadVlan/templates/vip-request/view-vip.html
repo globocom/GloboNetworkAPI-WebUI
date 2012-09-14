@@ -5,7 +5,7 @@
 	{% if message %}
 		<table>
 			<tr>
-				<td class="ui-widget error-messages">
+				<td class="ui-widget error-messages-view">
 					<div class="{% ifequal msg_type 'error' %} ui-state-error {% else %} ui-state-highlight success {% endifequal %} ui-corner-all">
 						{{ message }}
 					</div>
@@ -168,7 +168,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	$(".error-messages").each(function() {
+	$(".error-messages-view").each(function() {
 		$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
 	});
 
@@ -190,37 +190,51 @@ $(document).ready(function() {
 			{% has_perm ADMINISTRATION True None %}
 			{% if has_perm %}
 			
-			{% ifequal 'False' vip.vip_criado %}
-			"Criar VIP": function() {
-				if (confirm('Deseja realmente criar a Requisição Vip ?')){ 
-					
-					$.ajax({
-						url: "{% url vip.ajax.create.validate vip.id 2 %}",
-						dataType: 'text',
-						success: function(data) {
-							$("#vip-view").html(data);
-						}
-					});
-					
-				}
-			},
-			{% endifequal %}
-			
-			{% ifequal 'False' vip.validado %}
-			"Validar": function() {
-				if (confirm('Deseja realmente validar a Requisição Vip ?')){ 
-					
-					$.ajax({
-						url: "{% url vip.ajax.create.validate vip.id 1 %}",
-						dataType: 'text',
-						success: function(data) {
-							$("#vip-view").html(data);
-						}
-					});
-					
-				}
-			},
-			{% endifequal %}
+				{% ifequal 'False' vip.validado %}
+				"Validar": function() {
+					if (confirm('Deseja realmente validar a Requisição Vip ?')){ 
+						
+						$.ajax({
+							url: "{% url vip.ajax.create.validate.remove vip.id 1 %}",
+							dataType: 'text',
+							success: function(data) {
+								$("#vip-view").html(data);
+							}
+						});
+						
+					}
+				},
+				{% endifequal %}
+				
+				{% ifequal 'False' vip.vip_criado %}
+				"Criar VIP": function() {
+					if (confirm('Deseja realmente criar a Requisição Vip ?')){ 
+						
+						$.ajax({
+							url: "{% url vip.ajax.create.validate.remove vip.id 2 %}",
+							dataType: 'text',
+							success: function(data) {
+								$("#vip-view").html(data);
+							}
+						});
+						
+					}
+				},
+				{% else %}
+				"Remover VIP": function() {
+					if (confirm('Deseja realmente remover a Requisição Vip ?')){ 
+						
+						$.ajax({
+							url: "{% url vip.ajax.create.validate.remove vip.id 3 %}",
+							dataType: 'text',
+							success: function(data) {
+								$("#vip-view").html(data);
+							}
+						});
+						
+					}
+				},
+				{% endifequal %}
 			
 			{% endif %}
 			

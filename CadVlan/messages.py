@@ -89,7 +89,11 @@ environment_messages = {
     'success_edit':         u'Ambiente alterado com sucesso.',
     'divisao_dc_sucess':    u'Divisão DC inserida com sucesso.',
     'grupo_l3_sucess':      u'Grupo Layer3 inserido com sucesso.',
-    'ambiente_log_sucess':  u'Ambiente Lógico inserido com sucesso.'
+    'ambiente_log_sucess':  u'Ambiente Lógico inserido com sucesso.',
+    'env_not_found':        u'O(s) ambiente(s): %s não está(ão) cadastrado(s).',
+    'env_associated':       u'O(s) ambiente(s): %s tem algum equipamento ou vlan que não pode ser removido.',
+    'invalid_id':           u'Valor do id nulo ou inválido.',
+    'success_delete_all':   u'Remoção de ambiente realizada com sucesso.',
 }
 
 equip_messages = {
@@ -108,6 +112,7 @@ vlan_messages = {
     'success_remove_network': u'Todas as redes selecionadas foram excluídas com sucesso.',
     'vlan_edit_sucess':     u'Vlan alterada com sucesso.',
     'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',                 
+    'vlan_cvs_error':       u'Vlan excluída com sucesso mas ocorreu um erro de CVS, contate o administrador.',
 }
 
 option_vip_messages = {
@@ -183,26 +188,31 @@ acl_messages = {
 
 request_vip_messages = {
     'success_remove':       u'Todas as Requisições VIP foram excluídas com sucesso.',
+    'success_remove2':      u'Todas as Requisições VIP foram removidas com sucesso.',
     'success_validate':     u'Todas as Requisições VIP foram validadas com sucesso.',
     'success_validate_one': u'Requisição VIP validada com sucesso.',
     'success_create':       u'Todas as Requisições VIP foram criadas com sucesso.',
     'success_create_one':   u'Requisição VIP foi criada com sucesso.',
-    'success_insert':       u'Requisições VIP cadastrada com sucesso.',
-    'success_edit':         u'Requisições VIP alterada com sucesso.',
+    'success_remove_one':   u'Requisição VIP foi removida com sucesso.',
+    'success_insert':       u'Requisições VIP cadastradas com sucesso.',
+    'success_edit':         u'Requisições VIP alteradas com sucesso.',
     'can_not_validate':     u'Não foi possível validar alguns dos itens selecionados: %s.',
     'can_not_validate_one': u'Não foi possível validar o item.',
     'can_not_create':       u'Não foi possível criar alguns dos itens selecionados: %s.',
     'can_not_create_one':   u'Não foi possível criar o item.',
-    'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluído.',
+    'can_not_remove_one':   u'Não foi possível remover o item.',
+    'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluída.',
     'can_not_remove':       u'Não foi possível excluir alguns dos itens selecionados: %s.',
+    'can_not_remove2':      u'Não foi possível remover alguns dos itens selecionados: %s.',
     'can_not_edit':         u'Não é possível editar Requisições VIP por estar criada.',
-    'validate_before':      u'Não foi possível criar alguns dos itens selecionados: %s, , pois ainda não foram validados.',
-    'validate_before_one':  u'Não foi possível criar o item selecionado pois ainda não foi validado',
+    'validate_before':      u'Não foi possível criar alguns dos itens selecionados: %s, pois ainda não foram validados.',
+    'validate_before_one':  u'Não foi possível criar o item selecionado pois ainda não foi validado.',
     'can_not_remove_all':   u'Não foi possível excluir nenhum dos itens selecionados.',
+    'can_not_remove2_all':  u'Não foi possível remover nenhum dos itens selecionados.',
     'can_not_validate_all': u'Não foi possível validar nenhum dos itens selecionados.',
     'can_not_create_all':   u'Não foi possível criar nenhum dos itens selecionados.',
-    'invalid_vip':          u'Requisições VIP inválida',
-    'all_ready_create':     u'Itens selecionados já foram criados: %s .',
+    'invalid_vip':          u'Requisição VIP inválida.',
+    'all_ready_create':     u'Itens selecionados já foram criados: %s.',
     'all_ready_create_one': u'Item já foi criado.',
     'error_ports':          u'Deve-se preencher todos os campos de portas.',
     'error_reals':          u'Deve-se preencher todos os campos de reals.',
@@ -216,6 +226,7 @@ request_vip_messages = {
     'success_real':      u'Todos os Real Server foram %ss com sucesso.',
     'can_not_real':      u'Não foi possível %s alguns dos itens selecionados: %s.',
     'can_not_real_all':  u'Não foi possível %s nenhum dos itens selecionados.',
+    'not_created':          u'Não foi possível remover alguns dos itens selecionados: %s, pois ainda não foram criados.',
 }
 
 access_type_messages = {
@@ -243,5 +254,24 @@ ldap_messages = {
     'error_range_out_group':      u'Este campo deve estar entre a faixa %s a %s.',
     'error_duplicated_name_group':  u'Já existe um grupo cadastrado com nome %s .',
     'error_duplicated_gidNumber_group':  u'Já existe um grupo cadastrado com gidNumber %s .',
-    'invalid_cn':        u"Este campo permite apenas caracteres alfanuméricos e os caracteres '_' e '-'.",
+    'error_duplicated_employeeNumber_group':  u'Já existe um grupo cadastrado com cargo %s .',
+    'error_duplicated_mail_group':  u'Já existe um grupo cadastrado com E-mail %s .',
+    
+    'success_remove_sudoer': u'Todos os sudoers selecionados foram excluídos com sucesso.',
+    'success_insert_sudoer': u'Sudoer incluído com sucesso.',
+    'success_edit_sudoer':   u'Sudoer atualizado com sucesso.',
+    'invalid_sudoer':        u'Sudoer %s inválido ou não cadastrado.',
+    'error_duplicated_name_sudoer':  u'Já existe um Sudoer cadastrado com nome %s .',
+
+    'success_remove_user': u'Todos os usuários selecionados foram excluídos com sucesso.',
+    'success_insert_user': u'Usuário incluído com sucesso.',
+    'success_edit_user':   u'Usuário atualizado com sucesso.',
+    'success_lock_user':   u'Usuário %s bloqueado com sucesso.',
+    'success_unlock_user':   u'Usuário %s desbloqueado com sucesso.',
+    'invalid_user':        u'Usuário %s inválido ou não cadastrado.',    
+    'error_range_out_user':      u'Este campo deve estar entre a faixa %s a %s.',
+    'error_duplicated_name_user':  u'Já existe um usuário cadastrado com nome %s .',
+    'error_duplicated_uidNumber_user':  u'Já existe um usuário cadastrado com uidNumber %s .',
+    
+    
 }

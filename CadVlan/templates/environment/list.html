@@ -77,7 +77,7 @@ $(document).ready(function() {
 		</div>
 		{% has_perm ENVIRONMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url environment.remove %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in form %}
 				{{ field }}

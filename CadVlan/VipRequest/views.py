@@ -10,7 +10,7 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, IP_VERSION
 from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, RequestVipFormReal, HealthcheckForm, RequestVipFormIP
-from CadVlan.forms import DeleteForm, ValidateForm, CreateForm
+from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, healthcheck_messages, equip_group_messages
 from CadVlan.permissions import ADMINISTRATION
 from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, AJAX_VIPREQUEST_HEALTHCHECK, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, VIPREQUEST_TAB_REAL_SERVER
@@ -27,7 +27,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-OPERATION = { 0 : 'DELETE' , 1: 'VALIDATE', 2: 'CREATE'}
+OPERATION = { 0 : 'DELETE' , 1: 'VALIDATE', 2: 'CREATE', 3: 'REMOVE'}
 
 @log
 @login_required
@@ -39,6 +39,7 @@ def search_list(request):
         lists["delete_form"] = DeleteForm()
         lists["validate_form"] = ValidateForm()
         lists["create_form"] = CreateForm()
+        lists["remove_form"] = RemoveForm()
         lists["search_form"] = SearchVipRequestForm()
         lists['modal'] = 'false'
         
@@ -170,14 +171,14 @@ def ajax_view_vip(request,id_vip):
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
-def delete_validate_create(request,operation):
+def delete_validate_create_remove(request,operation):
     
     operation_text = OPERATION.get(int(operation))
     
     if request.method == 'POST':
 
-        form = DeleteForm(request.POST) if operation_text == 'DELETE' else ValidateForm(request.POST) if operation_text == 'VALIDATE' else CreateForm(request.POST)
-        id = 'ids' if operation_text == 'DELETE' else 'ids_val' if operation_text == 'VALIDATE' else 'ids_create'
+        form = DeleteForm(request.POST) if operation_text == 'DELETE' else ValidateForm(request.POST) if operation_text == 'VALIDATE' else CreateForm(request.POST) if operation_text == 'CREATE' else RemoveForm(request.POST)
+        id = 'ids' if operation_text == 'DELETE' else 'ids_val' if operation_text == 'VALIDATE' else 'ids_create' if operation_text == 'CREATE' else 'ids_remove'
         
         if form.is_valid():
 
@@ -215,14 +216,16 @@ def delete_validate_create(request,operation):
                     elif operation_text == 'VALIDATE':
                         #criar validar
                         client_vip.validate(id_vip)
+                    
+                    elif operation_text == 'REMOVE':
+                        #remover
+                        client_vip.remove_script(id_vip)
                 
                 except VipAllreadyCreateError, e:
                     logger.error(e)
-                    error_list.append(id_vip)
                     error_list_created.append(id_vip) 
                 except VipError, e:
                     logger.error(e)
-                    error_list.append(id_vip)
                     error_list_not_validate.append(id_vip)
                 except ScriptError, e:
                     logger.error(e)
@@ -243,8 +246,12 @@ def delete_validate_create(request,operation):
                 for id_error in error_list_not_validate:
                     msg = msg + id_error + ','
                 
-                msg = request_vip_messages.get('validate_before') % msg[:-1]
+                if operation_text == 'REMOVE':
+                    msg = request_vip_messages.get('not_created') % msg[:-1]
+                else:
+                    msg = request_vip_messages.get('validate_before') % msg[:-1]
                 messages.add_message(request, messages.WARNING, msg)
+                have_errors = True
                     
             if len(error_list_created) > 0 :
                 
@@ -254,11 +261,12 @@ def delete_validate_create(request,operation):
                 
                 msg = request_vip_messages.get('all_ready_create') % msg[:-1]
                 messages.add_message(request, messages.WARNING, msg)
+                have_errors = True
                 
             # If cant remove nothing
             if len(error_list) == len(ids):
                 messages.add_message(request, messages.ERROR, request_vip_messages.get(msg_error_call))
-
+                
             # If cant remove someones
             elif len(error_list) > 0:
                 msg = ""
@@ -268,13 +276,11 @@ def delete_validate_create(request,operation):
                 msg = request_vip_messages.get(msg_some_error_call) % msg[:-2]
 
                 messages.add_message(request, messages.WARNING, msg)
-
+                
             # If all has ben removed
             elif have_errors == False:
                 messages.add_message(request, messages.SUCCESS, request_vip_messages.get(msg_sucess_call))
 
-            else:
-                messages.add_message(request, messages.ERROR, request_vip_messages.get(msg_error_call))
 
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
@@ -285,7 +291,7 @@ def delete_validate_create(request,operation):
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
-def ajax_validate_create(request,id_vip, operation):
+def ajax_validate_create_remove(request,id_vip, operation):
     
     operation_text = OPERATION.get(int(operation))
 
@@ -305,6 +311,9 @@ def ajax_validate_create(request,id_vip, operation):
             
         elif operation_text == 'VALIDATE':
             client_vip.validate(id_vip)
+        
+        elif operation_text == 'REMOVE':
+            client_vip.remove_script(id_vip)
     
     except VipAllreadyCreateError, e:
         logger.error(e)
@@ -363,6 +372,12 @@ def getErrorMesages(operation_text):
         msg_sucesso = 'success_create'
         msg_erro_parcial = 'can_not_create'
     
+    elif operation_text == 'REMOVE':
+        
+        msg_erro = 'can_not_remove2_all'
+        msg_sucesso = 'success_remove2'
+        msg_erro_parcial = 'can_not_remove2'
+    
     else:
         return None,None,None
     
@@ -379,6 +394,9 @@ def getErrorMessagesOne(operation_text):
     elif operation_text == 'CREATE':
         msg_erro = 'can_not_create_one'
         msg_sucesso = 'success_create_one'
+    elif operation_text == 'REMOVE':
+        msg_erro = 'can_not_remove_one'
+        msg_sucesso = 'success_remove_one'
     else:
         return None, None
     

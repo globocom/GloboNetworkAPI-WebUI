@@ -48,6 +48,25 @@ def is_valid_cn(param):
     pattern = r"^[a-zA-Z0-9\\-_\\\-]*$"
     return re.match(pattern, param)
 
+def is_valid_command(param):
+    '''Check if the parameter is a valid command.
+    
+    @param param: Value to be validated.
+    
+    @return True if the parameter is a valid command, or False otherwise.
+    '''
+    pattern = r"^[a-zA-Z0-9\!\@\#\$\%\&\*\/\_\\\-\(\)\'\"\+\=\<\>\,\.\[\]\{\}\|\?\;\:\ ]*$"
+    return re.match(pattern, param)
+
+def is_valid_phone(param):
+    '''Check if the parameter is a valid phone number.
+    
+    @param param: Value to be validated.
+    
+    @return True if the parameter is a valid phone number, or False otherwise.
+    '''
+    pattern = r"^[0-9\\\-\\(\\)]*$"
+    return re.match(pattern, param)
 
 def convert_string_to_boolean(param):
     '''Convert the parameter of string to boolean.

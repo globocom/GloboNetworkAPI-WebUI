@@ -1,0 +1,132 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[LDAP - Sudoers - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url ldap.sudoer.list %}";
+	});
+	
+	$("#btn_add_command").button({ icons: {primary: "ui-icon-gear"} }).click(function(){
+		
+		var value = $("#id_command").val();
+		var is_duplicate = false;
+		
+		if ( value != '' )  {
+			
+			$('#id_commands').children().each(function() {
+			    if (this.value == value )
+			    	is_duplicate = true;
+			});
+			
+			if ( is_duplicate == false)
+				$('#id_commands').append(new Option(value, value, true, true));
+			
+			$("#id_command").val('');
+			
+		}
+	});
+	
+	$('#id_commands option').live("dblclick", function(){  
+		$(this).remove();
+		return false;
+	});
+	
+	$('#id_commands').live("focusout", function(){  
+		$('#id_commands').children().each(function() {
+			$(this).attr("selected", true);
+		});
+	});
+	
+	$("#id_groups").pickList();
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+	
+	{% if edit %}
+
+		$("#id_cn").attr("disabled", "disabled");
+		$("#id_host").attr("disabled", "disabled");
+		
+		$("#add_form").submit( function () {
+			$(this).disabledRemoveForm();
+			return true
+		} );
+
+	{% endif %}
+	
+})
+</script>
+<style>
+#id_commands  {
+	border-color: #EEE #CCC #CCC #EEE;
+	border-style: solid;
+	border-width: 1px;
+	background-color: white;
+	font-size: 12px;
+	margin: 0 0 0px;
+	padding: 5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Sudoers do LDAP</a></li>
+	</ul>
+	<div id="tabs-1">
+		<form id="add_form" method="post" action="{{ action }}">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			{% for field in form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}
+					
+						{% if field.name != 'commands' or field.name == 'command' %}
+							<span style="color: red;">*</span>
+						{% endif %}
+							
+					</label></div>
+					
+					{{ field }}
+					
+					{% ifequal field.name 'command' %}
+						<button id="btn_add_command" type="button">Inserir</button>							
+					{% endifequal %}
+					
+					{% ifequal field.name 'commands' %}
+						<div>(duplo-clique para remover um item)</div>							
+					{% endifequal %}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				</div>
+			{% endfor %}
+			</div>
+			
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

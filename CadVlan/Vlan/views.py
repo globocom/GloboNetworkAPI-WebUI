@@ -443,11 +443,17 @@ def delete_all(request):
                     key_acl_v6 =  acl_key(NETWORK_TYPES.v6)
                     user = AuthSession(request.session).get_user()
 
-                    if vlan.get(key_acl_v4) is not None:
-                        deleteAclCvs(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
-
-                    if vlan.get(key_acl_v6) is not None:
-                        deleteAclCvs(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
+                    try:
+                        if vlan.get(key_acl_v4) is not None:
+                            if checkAclCvs(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4 , user):
+                                deleteAclCvs(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
+    
+                        if vlan.get(key_acl_v6) is not None:
+                            if checkAclCvs(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6 , user):
+                                deleteAclCvs(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
+                                
+                    except CVSError, e:
+                        messages.add_message(request, messages.WARNING, vlan_messages.get("vlan_cvs_error"))
                 
                 except VipIpError, e:
                     logger.error(e)
@@ -459,7 +465,7 @@ def delete_all(request):
                     error_list.append(id_vlan)
                     have_errors = True
 
-                except (NetworkAPIClientError,CVSError), e:
+                except NetworkAPIClientError, e:
                     logger.error(e)
                     error_list.append(id_vlan)
                     messages.add_message(request, messages.ERROR, e)

@@ -25,6 +25,7 @@ AJAX_VIPREQUEST_OPTIONS = 'ajax/request-vip-options.json'
 AJAX_VIPREQUEST_HEALTHCHECK = 'ajax/request-vip-add-healthcheck.json'
 AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER = 'ajax/request-vip-model-ip-real-server.json'
 AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML = 'ajax/request-vip-model-ip-real-server.html'
+AJAX_LDAP_RESET_PASSWORD = 'ajax/ldap-reset-password.html'
 
 # Script
 SCRIPT_LIST = 'script/list.html'
@@ -148,4 +149,7 @@ LDAP_GROUP_LIST = 'ldap/group-list.html'
 LDAP_GROUP_FORM = 'ldap/group-form.html'
 LDAP_SUDOER_LIST = 'ldap/sudoer-list.html'
 LDAP_SUDOER_FORM = 'ldap/sudoer-form.html'
+LDAP_USER_LIST = 'ldap/user-list.html'
+LDAP_USER_FORM = 'ldap/user-form.html'
+LDAP_USER_FORM = 'ldap/user-form.html'
 

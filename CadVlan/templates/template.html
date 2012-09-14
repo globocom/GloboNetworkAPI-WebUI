@@ -257,10 +257,10 @@
 					<li>
 						<a href="#" class="ldap">LDAP</a>
 						<ul class="sub_menu">
-							<li><a href="#">Usuários Internos</a></li>
-							<li><a href="#">Usuários Externos</a></li>
+							<li><a href="{% url ldap.user.list 'interno' %}">Usuários Internos</a></li>
+							<li><a href="{% url ldap.user.list 'externo' %}">Usuários Externos</a></li>
 							<li><a href="{% url ldap.group.list %}">Grupos</a></li>
-							<li><a href="#">Sudoers</a></li>
+							<li><a href="{% url ldap.sudoer.list %}">Sudoers</a></li>
 							
 						</ul>
 					</li>

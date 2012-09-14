@@ -152,7 +152,7 @@ $(document).ready(function() {
 	{% has_perm ADMINISTRATION True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir as Requisições Vip selecionadas?')){ 
+		if (confirm('Deseja realmente excluir as Requisições Vip selecionadas ?')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
@@ -165,6 +165,16 @@ $(document).ready(function() {
 		if (confirm('Deseja realmente criar as Requisições Vip selecionadas ?')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids_create").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	{% has_perm ADMINISTRATION True None %}
+	{% if has_perm %}
+	$("#btn_remove").button({ icons: {primary: "ui-icon-circle-close"} }).click(function(){
+		if (confirm('Deseja realmente remover as Requisições Vip selecionadas ?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids_remove").val(data).parent().submit();
 		}
 	});
 	{% endif %}
@@ -270,15 +280,16 @@ input {
 			{% has_perm ADMINISTRATION True None %}
 			{% if has_perm %}
 			<button id="btn_new">Novo Registro</button>
-			<button id="btn_create">Criar VIP</button>
 			<button id="btn_validate">Validar</button>
+			<button id="btn_create">Criar VIP</button>
+			<button id="btn_remove">Remover VIP</button>
 			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
 		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url vip.delete.create.validate 0 %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url vip.delete.create.validate.remove 0 %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in delete_form %}
 				{{ field }}
@@ -287,7 +298,7 @@ input {
 		{% endif %}
 		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="valid_form" method="post" action="{% url vip.delete.create.validate 1 %}" style="visibility: hidden;">
+		<form id="valid_form" method="post" action="{% url vip.delete.create.validate.remove 1 %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in validate_form %}
 				{{ field }}
@@ -296,13 +307,24 @@ input {
 		{% endif %}
 		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="create_form" method="post" action="{% url vip.delete.create.validate 2 %}" style="visibility: hidden;">
+		<form id="create_form" method="post" action="{% url vip.delete.create.validate.remove 2 %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in create_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
 		{% endif %}
+		
+		{% has_perm ADMINISTRATION True None %}
+		{% if has_perm %}
+		<form id="remove_form" method="post" action="{% url vip.delete.create.validate.remove 3 %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in remove_form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		
 		<table id="vip_list">
 			<col width="3%" />
 			<col width="3%" />

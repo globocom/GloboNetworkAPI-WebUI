@@ -23,6 +23,9 @@ class ValidateForm(EquipForm):
     
 class CreateForm(EquipForm):
     ids_create = forms.CharField(widget=forms.HiddenInput(), label='', required=True)
+
+class RemoveForm(EquipForm):
+    ids_remove = forms.CharField(widget=forms.HiddenInput(), label='', required=True)
     
 class SearchEquipForm(forms.Form):
     equip_name = forms.CharField(label=u'Nome de Equipamento', min_length=3, required=True, widget=forms.TextInput(attrs={'style': "width: 300px; height: 19px;", 'class': "ui-state-default", 'autocomplete': "off"}), error_messages=error_messages)
