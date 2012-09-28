@@ -1,0 +1,69 @@
+{% load util %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Globo.com - CadVlan {% block title %}{% endblock %}</title>
+		<link rel="shortcut icon" href="{{ MEDIA_URL }}/img/favicon.png" type="image/ico" />
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/reset.css" />
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/globo/jquery-ui-1.8.17.custom.css" />
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/dataTable.css" />
+		<link   type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/jquery-picklist.css" />
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-ui.custom.min.js"></script>	
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dataTables.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/hoverIntent.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dropdown.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-picklist.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.jeditable.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/postmessage.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$(".error-messages").each(function() {
+					$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+				});
+				
+				$(".loading").ajaxStart(function() {
+					$(this).show();
+				});
+				
+				$(".loading").ajaxStop(function() {
+					$(this).hide();
+				});
+			})
+		</script>
+		{% block header %}{% endblock %}
+	</head>
+{% autoescape on %}
+	<body>
+		<div id="messages">
+		{% if messages %}
+			<!-- <ul class="messages">  -->
+				{% for message in messages %}
+					<div class='ui-widget error-messages'>
+						<p></p>
+						<div id="messagesError" class="{% if message.tags == 'error'%}ui-state-error{% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
+							<span class="ui-icon"></span>
+							{{ message }}
+						</div>
+						<p></p>
+					</div>
+				{% endfor %}
+			<!--</ul>  -->
+		{% endif %}
+		</div>
+
+		<div id="content">
+		{% block content %}{% endblock %}
+		</div>
+		
+		<div class="loading">
+			<br />
+			<p style="text-align: center;"><img src="{{ MEDIA_URL }}/img/ajax-loading.gif" width="32" height="32" /></p>
+			<p style="text-align: center; font-size: 14px;"><b>Aguarde</b></p>
+		</div>
+	</body>
+{% endautoescape %}
+</html>

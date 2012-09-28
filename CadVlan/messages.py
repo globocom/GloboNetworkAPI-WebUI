@@ -15,6 +15,7 @@ error_messages = {
     'can_not_remove':       u'Não foi possível excluir alguns dos itens selecionados: %s.',
     'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluído.',
     'select_one':           u'Nenhum item foi selecionado.',
+    'invalid_param':           u'Valor do %s nulo ou inválido.',
 }
 
 auth_messages = {
@@ -26,7 +27,8 @@ auth_messages = {
     'email_success':        u'Nova senha enviada com sucesso.',
     'pass_change_sucess':   u'Senha alterada com sucesso.',
     'email_error':          u'Ocorreu um erro ao enviar email.',
-    'nogroup_error':        u'Somente usuários que pertecem à algum grupo, podem efetuar login no sistema. '
+    'nogroup_error':        u'Somente usuários que pertecem à algum grupo, podem efetuar login no sistema. ',
+    'token_invalid':        u'O seu tempo de acesso expirou. Por favor, atualize a página.'
 }
 
 script_messages = {
@@ -194,8 +196,8 @@ request_vip_messages = {
     'success_create':       u'Todas as Requisições VIP foram criadas com sucesso.',
     'success_create_one':   u'Requisição VIP foi criada com sucesso.',
     'success_remove_one':   u'Requisição VIP foi removida com sucesso.',
-    'success_insert':       u'Requisições VIP cadastradas com sucesso.',
-    'success_edit':         u'Requisições VIP alteradas com sucesso.',
+    'success_insert':       u'Requisição VIP cadastrada com sucesso.',
+    'success_edit':         u'Requisição VIP alterada com sucesso.',
     'can_not_validate':     u'Não foi possível validar alguns dos itens selecionados: %s.',
     'can_not_validate_one': u'Não foi possível validar o item.',
     'can_not_create':       u'Não foi possível criar alguns dos itens selecionados: %s.',
@@ -216,7 +218,7 @@ request_vip_messages = {
     'all_ready_create_one': u'Item já foi criado.',
     'error_ports':          u'Deve-se preencher todos os campos de portas.',
     'error_reals':          u'Deve-se preencher todos os campos de reals.',
-    'error_reals_required': u'Deve conter pelo menos 1 porta cadastrada.',
+    'error_ports_required': u'Deve conter pelo menos 1 porta cadastrada.',
     'error_existing_reals': u'Não foi possível recuperar real server por inconsistência do banco de dados. ( %s - %s )',
     'error_existing_environment_vip': u'Não foi possível recuperar Ambiente VIP por inconsistência do banco de dados. ( %s - %s - %s )',
     'error_existing_timeout': u'Não foi possível recuperar Timeout por inconsistência do banco de dados. ( %s )',
@@ -227,6 +229,8 @@ request_vip_messages = {
     'can_not_real':      u'Não foi possível %s alguns dos itens selecionados: %s.',
     'can_not_real_all':  u'Não foi possível %s nenhum dos itens selecionados.',
     'not_created':          u'Não foi possível remover alguns dos itens selecionados: %s, pois ainda não foram criados.',
+    'tab_edit_error':     u'Ocorreu um erro ao persistir a requisição vip que contém este %s no banco de dados.',
+    'tab_edit_success':  u'Alteração de %s realizada com sucesso.',
 }
 
 access_type_messages = {

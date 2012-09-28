@@ -160,6 +160,44 @@ def acl_key(network):
     
     else:
         return 'acl_file_name_v6'
+    
+def is_valid_int_param(param, required=True):
+    '''Checks if the parameter is a valid integer value.
+    
+    @param param: Value to be validated.
+    
+    @return True if the parameter has a valid integer value, or False otherwise.  
+    '''
+    if param is None and not required:
+        return True
+    elif param is None:
+        return False
+    
+    try:
+        int(param)
+    except (TypeError, ValueError):
+        return False
+    return True
+ 
+def get_param_in_request(request, param):
+    '''Get value of param in request
+
+    @param request: request.
+    @param param: param.
+
+    @return value of key.  
+    '''
+    if param in request.POST:
+        value = str(request.POST[param])
+    
+    elif param in request.GET: 
+        value = str(request.GET[param])
+        
+    else:
+        value = None
+        
+    return value
+
 
 class DataTablePaginator():
     

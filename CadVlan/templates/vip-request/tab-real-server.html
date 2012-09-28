@@ -1,169 +1,185 @@
-{% extends "template.html" %}
-
+{% extends "vip-request/tabs-template.html" %}
 {% load util %}
 
-{% block title %}[Requisição VIP - Real Severs]{% endblock %}
-
-{% block header %}
-<script type="text/javascript">
-$(document).ready(function() {
-	
-	oTable = $("#real_list").dataTable({
-		"aaSorting": [],
-		"bJQueryUI": true,
-		"sPaginationType": "full_numbers",
-		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 2, 5 ] }]
-	});
-	
-	$("#checkAll").click( function() {
-		if ($(this).attr('checked')) {
-			$("[name='selection']").attr("checked", true);
-		} else {
-			$("[name='selection']").attr("checked", false);
-		}
-	});
-	
-	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		location.reload();
-	});
-	
-	$(".voltar").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
-		location.href = "{% url vip-request.list %}";
-	});
-	
-	$("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
-		if (confirm('Deseja realmente Habilitar os Real servers selecionados ?')){ 
-			var data = getSelectionData(oTable);
-			$("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'enable' %}" )
-			$("#id_ids").val(data).parent().submit();
-		}
-	});
-	
-	$("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-		if (confirm('Deseja realmente Desabilitar os Real servers selecionados ?')){ 
-			var data = getSelectionData(oTable);
-			$("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'disable' %}" )
-			$("#id_ids").val(data).parent().submit();
-		}
-	});
-	
-	$("#page_tab").tabs();
-	$("#page_tab_lists").tabs();
-	
-	$("#tool").buttonset();
-	
-	
-	{% ifequal vip.balancing 'WEIGHTED' %}
-		$('.weighted').show();
-	{% else %}
-		$('.weighted').hide();
-	{% endifequal %}
-	
-})
-</script>
+{% block tab_select %}
+	$("#page_tab_lists").tabs({selected:1});
 {% endblock %}
 
-{% block content %}
-<div id="page_tab">
-	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes do Requisição VIP</a></li>
-	</ul>
-	<div id="tabs-1">
-		{% csrf_token %}
+{% block js %}
 
-		<div id="fields" class="ui-widget-content">
-			<table border="5">
+	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
+	
+	$("#btn_new_real").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
+		
+		if ( $('#id_equip_name').val() != '' ) {
+			$.ajax({
+				data: { environment_vip: $('#id_environment_vip').val(), equip_name: $('#id_equip_name').val(), balancing: $('#id_balancing').val(), equip_real: getInputsData('input[name=equip]', 'equip'), ips_real: getInputsData('input[name=ip]', 'ip') },
+				url: "{% url vip-request.modal.real.server.ajax %}",
+				dataType: 'json',
+				success: function(data, textStatus, xhr) {
+					if (xhr.status == "278")
+						window.location = xhr.getResponseHeader('Location');
+					
+					if ( data.msg == "" ) {
+						$("#ip-view").html(data.ips);
+						$("#dialog-ip").dialog("open");
+					} else {
+						$("#error_real_server").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+						$("#error_real_server").html(data.msg);
+					}
+				},
+				error: function (xhr, error, thrown) {
+					location.reload();
+				}	
+			});
+		}
+	});
+	
+	$("#btn_sav_rs").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
+		var data = $('#add_form').serialize()
+		$.ajax({
+			data: data,
+			url: "{% url vip-request.tab.real.server vip.id %}",
+			type: 'POST',
+			success: function(data, textStatus, xhr) {
+				
+				if (xhr.status == "278")
+					window.location = xhr.getResponseHeader('Location');
+				
+				if (data != "")
+					$('#error').html(data);
+				else
+					location.reload();
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}	
+		});
+	});
+	
+	$("#dialog-ip").dialog({
+		height: 600,
+		width: 1000,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: true,
+		buttons: {
+			"Voltar": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	if ( $("#id_environment_vip").val() == '' ) {
+		$("#id_equip_name").attr('disabled', 'disabled');
+		$("#btn_new_real").attr('disabled', 'disabled');
+	}
+	
+	$('#table_real tbody tr span').live("click", function(){  
+		if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){ 
+		$(this).parents(".remove_port").remove();
+		return false;
+		}
+	});
+	
+	if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+		$('.weighted').show();
+	}else{
+		$('.weighted').hide();
+	}
+	
+	$('.editable').editableTable();
+	
+{% endblock %}
+
+{% block title %}[Requisição VIP - Real Servers]{% endblock %}
+
+{% block tab-data %}
+<div id="tabs-2">
+	<form id="add_form" method="post" action="">
+		{% csrf_token %}
+		
+		<input type="hidden" name="balancing" value="{{ balancing }}" id="id_balancing" />
+		<input type="hidden" name="environment_vip" value="{{ environment_vip }}" id="id_environment_vip" />			
+		
+		<div class="ui-widget-content">
+			<table style="padding: 15px 15px 15px 15px;" >
 				<tr>
-					<td style="width: 120px"><label for="nome_ambiente">Id</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.id}}</label></td>
+					<td colspan="3">Reals</td>
 				</tr>
 				<tr>
-					<td><label>Ip</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% for ip in vip.ips %}{{ip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+					<td>{{form_real.equip_name.label_tag}}</td>
+					<td style="padding-left: 5px;">{{form_real.equip_name}}</td>
+					<td><input type="button" id="btn_new_real" value="Adicionar Novo Real" /></td>
+				</tr>
+				<tr id="error_real_server">
 				</tr>
 				<tr>
-					<td><label>Descrição Ipv4</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv4_description %}{%else%}{{vip.ipv4_description}}{% endifequal %}</label></td>
+					<td colspan="3">&nbsp</td>
 				</tr>
 				<tr>
-					<td><label>Descrição Ipv6</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv6_description %}{%else%}{{vip.ipv6_description}}{% endifequal %}</label></td>
+					<td colspan="3">
+						<table id="table_real" class="bordasimplesReal">
+							<thead>
+								<tr>
+									<td>Nome do Real</td>
+									<td>IP do Real</td>
+									<td>Prioridade</td>
+									<td class="weighted">Peso do Real</td>
+									<td style="width: 20px;"></td>
+								</tr>
+							</thead>
+							<tbody>
+	
+							{% for field in reals %}
+	
+								<tr class='remove_port'>
+									<td>
+										<label>{% if field.equip != "-" %}{{field.equip}}{% endif %}</label>
+										<input type='hidden' name='equip' value='{{field.equip}}'>
+										<input type='hidden' name='id_equip' value='{{field.id_equip}}'>
+									</td>
+									<td>
+										<label>{% if field.ip != "-" %}{{field.ip}}{% endif %}</label>
+										<input type='hidden' name='ip' value='{{field.ip}}'>
+										<input type='hidden' name='id_ip' value='{{field.id_ip}}'>
+									</td>
+									<td>
+										<label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
+										<input type='hidden' name='priority' value='{{field.priority}}'>
+									</td>
+									<td class='weighted'>
+										<label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>
+										<input type='hidden' name='weight' value='{{field.weight}}'>
+									</td>
+									<td>
+										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
+									</td>
+								</tr>
+	
+							{% endfor %}
+	
+	
+							</tbody>
+						</table>
+					</td>
 				</tr>
 				<tr>
-					<td><label>Equipamento</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% for equip in vip.equipamento %}{{equip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
-				</tr>
-				<tr>
-					<td style="width: 120px"><label>Ambiente</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% for environment in vip.environments %}{{environment}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+					<td colspan="3">
+						<p id="error">{{reals_error}}</p>
+					</td>
 				</tr>
 			</table>
 		</div>
 		
-		<div class="separator spacer"></div>
 		
-		<div>
-		
-			<div id="page_tab_lists">
-				<ul>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Reals Server - Status</a></li>
-					<!-- <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Maxconn</a></li> -->
-				</ul>
-				<div id="tabs-1">
-					<div class="buttons">
-						<button title="voltar" class="voltar">Voltar</button>
-						<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
-						<span id="tool">
-							<button id="btn_enable">Habilitar Real</button>
-							<button id="btn_disable">Desabilitar Real</button>
-						</span>
-					</div>
-					{% has_perm ADMINISTRATION True None %}
-					{% if has_perm %}
-					<form id="status_form" method="post" action="" style="visibility: hidden;">
-						{% csrf_token %}
-						{% for field in status_form %}
-							{{ field }}
-						{% endfor %}
-					</form>
-					{% endif %}
-					<table id="real_list">
-						<thead>
-							<tr>
-								<th><input id="checkAll" type="checkbox" /></th>
-								<th>Nome do Real</th>
-								<th>IP do Real</th>
-								<th>Prioridade</th>
-								<th class='weighted'>Peso</th>
-								<th>Status</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for field in reals %}
-								<tr class="text_center">
-									<td style="width: 37px;"><input type="checkbox" name="selection" value="{{field.id_equip}}-{{field.id_ip}}-{{field.version}}" /></td>
-									<td>{{field.equip}}</td>
-									<td>{{field.ip}}</td>
-									<td>{{field.priority}}</td>
-									<td class='weighted' >{{field.weight}}</td>
-									<td style="width: 70px;">
-										{% ifequal field.status 0 %}<span  title="Desabilitado" class="ui-icon ui-icon-closethick text_center"></span>{% endifequal %}
-										{% ifequal field.status 1 %}<span title="Habilitado" class="ui-icon ui-icon-check text_center"></span>{% endifequal %}
-									</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-					
-				</div>
-				
-			</div>
-				
-					
+		<div class="buttons-l ui-widget-header">
+			<button id="btn_sav_rs" type="button">Gravar</button>
+			<button id="btn_can" type="button">Cancelar</button>
 		</div>
-	</div>
 		
+	</form>
+	
 </div>
-				
 {% endblock %}

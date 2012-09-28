@@ -243,6 +243,8 @@ def option_vip_associate_net4(request,id_net):
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
             
         net['network']['vlan'] = vlan.get('vlan').get('nome')
+
+        lists['vlan_id'] = vlan.get('vlan').get('id')
             
         tipo_rede = client.create_tipo_rede().listar()
         
@@ -340,9 +342,7 @@ def option_vip_associate_net4(request,id_net):
             
             
         
-        key = u"environmentvip_%s" % (str(id_vip,))
-        enviroment_vip = enviroment_vip.get(key)
-        lists['vip'] = enviroment_vip
+        lists['vip'] = enviroment_vip.get("environmentvip")
         opts = client.create_option_vip().get_all()
         options_vip = client.create_option_vip().get_option_vip(id_vip)
         choice_opts = []
@@ -399,6 +399,8 @@ def option_vip_associate_net6(request,id_net):
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
             
         net['network']['vlan'] = vlan.get('vlan').get('nome')
+
+        lists['vlan_id'] = vlan.get('vlan').get("id")
             
         tipo_rede = client.create_tipo_rede().listar()
         
@@ -502,9 +504,7 @@ def option_vip_associate_net6(request,id_net):
             
             
         
-        key = u"environmentvip_%s" % (str(id_vip,))
-        enviroment_vip = enviroment_vip.get(key)
-        lists['vip'] = enviroment_vip
+        lists['vip'] = enviroment_vip.get("environmentvip")
         opts = client.create_option_vip().get_all()
         options_vip = client.create_option_vip().get_option_vip(id_vip)
         choice_opts = []

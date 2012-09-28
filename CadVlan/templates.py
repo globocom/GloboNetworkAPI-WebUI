@@ -26,6 +26,8 @@ AJAX_VIPREQUEST_HEALTHCHECK = 'ajax/request-vip-add-healthcheck.json'
 AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER = 'ajax/request-vip-model-ip-real-server.json'
 AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML = 'ajax/request-vip-model-ip-real-server.html'
 AJAX_LDAP_RESET_PASSWORD = 'ajax/ldap-reset-password.html'
+JSON_ERROR = "error.json"
+TOKEN_INVALID = "token_invalid.html"
 
 # Script
 SCRIPT_LIST = 'script/list.html'
@@ -129,8 +131,14 @@ ACL_APPLY_RESULT = 'acl/result.html'
 VIPREQUEST_SEARCH_LIST = 'vip-request/search-list.html'
 VIPREQUEST_VIEW_AJAX = 'vip-request/view-vip.html'
 VIPREQUEST_FORM = 'vip-request/form.html'
+VIPREQUEST_FORM_EXTERNAL = 'vip-request/form-external.html'
 VIPREQUEST_EDIT = 'vip-request/edit.html'
+VIPREQUEST_EDIT_EXTERNAL = 'vip-request/edit-external.html'
 VIPREQUEST_TAB_REAL_SERVER = 'vip-request/tab-real-server.html'
+VIPREQUEST_TAB_REAL_SERVER_STATUS = 'vip-request/tab-real-server-status.html'
+VIPREQUEST_TAB_HEALTHCHECK = 'vip-request/tab-healthcheck.html'
+VIPREQUEST_TAB_MAXCON = 'vip-request/tab-maxcon.html'
+VIPREQUEST_TOKEN = 'vip-request/token.json'
 
 # AccessTypeRequest
 ACCESSTYPE_FORM = 'access-type/form.html'

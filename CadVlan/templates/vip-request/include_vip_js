@@ -11,18 +11,26 @@
 		$("#err_new_healthcheck").html("");
 		
 		$.ajax({
-			data: { excpect_new:  $("#id_excpect_new").val() },
-			url: "{% url vip-request.add.healthcheck.ajax %}",
+			data: { excpect_new:  $("#id_excpect_new").val(),  token: $("#id_token").val() },
+			url: "{% if external %}{% url vip-request.add.healthcheck.ajax.external %}{% else %}{% url vip-request.add.healthcheck.ajax %}{% endif %}",
 			dataType: "json",
 			success: function(data, textStatus, xhr) {
+			
 				if (xhr.status == "278")
 					window.location = xhr.getResponseHeader('Location');
+					
+				else if (xhr.status == "203")
+					alert(data);
 				
-				$("#id_excpect").html(data.healthcheck);
-				$("#add_new_healthcheck").html(data.form);
-				$("#msg_new_healthcheck").html(data.msg);
-				$("#msg_new_healthcheck").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
-				$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} });
+				else {
+				
+					$("#id_excpect").html(data.healthcheck);
+					$("#add_new_healthcheck").html(data.form);
+					$("#msg_new_healthcheck").html(data.msg);
+					$("#msg_new_healthcheck").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+					$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} });
+					
+				}
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
@@ -31,20 +39,21 @@
 		
 	});
 	
-	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
-	
 	$("#btn_new_real").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
 		
 		if ( $('#id_equip_name').val() != '' ) {
 			$.ajax({
-				data: { environment_vip: $('#id_environment_vip').val(), equip_name: $('#id_equip_name').val(), balancing: $('#id_balancing').val(), equip_real: getInputsData('input[name=equip]', 'equip'), ips_real: getInputsData('input[name=ip]', 'ip') },
-				url: "{% url vip-request.modal.real.server.ajax %}",
+				data: { environment_vip: $('#id_environment_vip').val(), equip_name: $('#id_equip_name').val(), balancing: $('#id_balancing').val(), equip_real: getInputsData('input[name=equip]', 'equip'), ips_real: getInputsData('input[name=ip]', 'ip'),  token: $("#id_token").val() },
+				url: "{% if external %}{% url vip-request.modal.real.server.ajax.external %}{% else %}{% url vip-request.modal.real.server.ajax %}{% endif %}",
 				dataType: 'json',
 				success: function(data, textStatus, xhr) {
 					if (xhr.status == "278")
 						window.location = xhr.getResponseHeader('Location');
-					
-					if ( data.msg == "" ) {
+
+					else if (xhr.status == "203")
+						alert(data);
+
+					else if ( data.msg == "" ) {
 						$("#ip-view").html(data.ips);
 						$("#dialog-ip").dialog("open");
 					} else {
@@ -104,14 +113,19 @@
 	
 	$("input[name=finality]").change(function(){
 		$.ajax({
-			data: { finality: $(this).val() },
-			url: "{% url vip-request.client.ajax %}",
+			data: { finality: $(this).val(), token: $("#id_token").val() },
+			url: "{% if external %}{% url vip-request.client.ajax.external %}{% else %}{% url vip-request.client.ajax %}{% endif %}",
 			dataType: 'text',
 			success: function(data, textStatus, xhr) {
+			
 				if (xhr.status == "278")
 					window.location = xhr.getResponseHeader('Location');
+					
+				else if (xhr.status == "203")
+					alert(data);
 				
-				$("#id_client_content").html(data);
+				else
+					$("#id_client_content").html(data);
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
@@ -134,14 +148,18 @@
 	
 	$("input[name=client]").live("change", function(){  
 		$.ajax({
-			data: { client: $(this).val(), finality: $('input:radio[name=finality]:checked').val() },
-			url: "{% url vip-request.environment.ajax %}",
+			data: { client: $(this).val(), finality: $('input:radio[name=finality]:checked').val(),  token: $("#id_token").val() },
+			url: "{% if external %}{% url vip-request.environment.ajax.external %}{% else %}{% url vip-request.environment.ajax %}{% endif %}",
 			dataType: 'text',
 			success: function(data, textStatus, xhr) {
 				if (xhr.status == "278")
 					window.location = xhr.getResponseHeader('Location');
+					
+				else if (xhr.status == "203")
+					alert(data);
 				
-				$("#id_environment_content").html(data);
+				else
+					$("#id_environment_content").html(data);
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
@@ -164,26 +182,32 @@
 	$("input[name=environment]").live("change", function(){
 		var id_environment_vip = $('input:radio[name=environment]:checked').attr("attr");
 		$.ajax({
-			data: { environment_vip: id_environment_vip },
-			url: "{% url vip-request.options.ajax %}",
+			data: { environment_vip: id_environment_vip,  token: $("#id_token").val() },
+			url: "{% if external %}{% url vip-request.options.ajax.external %}{% else %}{% url vip-request.options.ajax %}{% endif %}",
 			dataType: 'json',
 			success: function(data, textStatus, xhr) {
 				if (xhr.status == "278")
 					window.location = xhr.getResponseHeader('Location');
+					
+				else if (xhr.status == "203")
+					alert(data.msg);
+				
+				else {
 
-				$("#id_caches").html(data.caches);
-				$("#id_persistence").html(data.persistence);
-				$("#id_timeout").html(data.timeout);
-				$("#id_balancing").html(data.balancing);
-				$("#id_environment_vip").val(id_environment_vip);
-				
-				$("#id_equip_name").removeAttr('disabled');
-				$("#btn_new_real").removeAttr('disabled');
-				
-				if ( $('#id_balancing').val().toLowerCase() == "weighted".toLowerCase())
-					$('.weighted').show();
-				else{
-					$('.weighted').hide();
+					$("#id_caches").html(data.caches);
+					$("#id_persistence").html(data.persistence);
+					$("#id_timeout").html(data.timeout);
+					$("#id_balancing").html(data.balancing);
+					$("#id_environment_vip").val(id_environment_vip);
+					
+					$("#id_equip_name").removeAttr('disabled');
+					$("#btn_new_real").removeAttr('disabled');
+					
+					if ( $("#id_balancing").val() != null && $('#id_balancing').val().toLowerCase() == "weighted".toLowerCase())
+						$('.weighted').show();
+					else{
+						$('.weighted').hide();
+					}
 				}
 				
 			},

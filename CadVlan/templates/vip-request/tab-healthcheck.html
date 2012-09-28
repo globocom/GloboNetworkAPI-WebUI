@@ -1,0 +1,105 @@
+{% extends "vip-request/tabs-template.html" %}
+{% load util %}
+
+{% block tab_select %}
+	$("#page_tab_lists").tabs({selected:2});
+{% endblock %}
+
+{% block js %}
+	if ( $("input[name=healthcheck_type]:checked'").val() == "HTTP" ) {
+		$("#table_healthcheck").show();
+	} else {
+		$("#table_healthcheck").hide();
+	}
+	
+	$("input[name=healthcheck_type]").live("change", function(){
+		if ( $(this).val() == "HTTP" ) {
+			$("#table_healthcheck").show();
+		} else {
+			$("#table_healthcheck").hide();
+		}
+	});	
+	
+	$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
+		
+		$("#err_new_healthcheck").html("");
+		
+		$.ajax({
+			data: { excpect_new:  $("#id_excpect_new").val() },
+			url: "{% url vip-request.add.healthcheck.ajax %}",
+			dataType: "json",
+			success: function(data, textStatus, xhr) {
+				if (xhr.status == "278")
+					window.location = xhr.getResponseHeader('Location');
+				
+				$("#id_excpect").html(data.healthcheck);
+				$("#add_new_healthcheck").html(data.form);
+				$("#msg_new_healthcheck").html(data.msg);
+				$("#msg_new_healthcheck").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+				$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} });
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}	
+		});
+		
+	});
+{% endblock %}
+
+{% block title %}[Requisição VIP - Healthcheck]{% endblock %}
+
+{% block tab-data %}
+<div id="tabs-3">
+	<form id="add_form" method="post" action="{% url vip-request.tab.healthcheck vip.id %}">
+		{% csrf_token %}
+		<div id="fields" class="ui-widget-content">
+			<div>
+				<div><label for="{{ form_healthcheck.healthcheck_type.auto_id }}">{{ form_healthcheck.healthcheck_type.label_tag }}{% if form_healthcheck.healthcheck_type.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_healthcheck.healthcheck_type }}
+				<p id="error">
+				{% if form_healthcheck.healthcheck_type.errors %} 
+					{% for error in field.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			
+			<table id="table_healthcheck" class="bordasimples" style="width: 511px;">
+				{% for field in form_healthcheck %}
+
+					{% if field.name != "healthcheck_type"  and field.name != "excpect_new" %} 
+						<tr>
+							<td><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+							<td style="padding-left: 5px;">{{ field }}</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td style="padding-left: 5px;"><p id="error">{% if field.errors %}{% for error in field.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+						</tr>
+					{% endif %}
+
+					{% if field.name == "excpect_new" %}
+						<tr id="add_new_healthcheck">
+							<td></td>
+							<td style="padding-left: 5px;">{{ field }}<input type="button" id="btn_new_excpect" value="Adicionar Novo" /></td>
+						</tr>
+					{% endif %}
+
+				{% endfor %}
+				<tr id="msg_new_healthcheck">
+				</tr>
+			</table>
+		</div>
+		
+		<!-- div class="separator spacer"></div> -->
+		
+		<div class="buttons-l ui-widget-header">
+			<button id="btn_sav" type="submit">Gravar</button>
+			<button id="btn_can" type="button">Cancelar</button>
+		</div>
+		
+	</form>
+	
+</div>				
+{% endblock %}

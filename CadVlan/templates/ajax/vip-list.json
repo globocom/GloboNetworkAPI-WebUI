@@ -14,7 +14,7 @@
 		"<div class='text_center'> {% for environment in vip.environments %} {{ environment|escapejs}} <br/> {% endfor %}</div>",
 		"<div class='text_center'>{% ifequal vip.validate 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
 		"<div class='text_center'>{% ifequal vip.create 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
-		"<div class='text_center'>{% ifequal vip.create 'True' %}<a href='{% url vip-request.tab.real.server vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit_create'>Editar Vip Criado (Healthcheck,Portas, Maxconn, Real(s) Server(s))</a>{% else %} <a href='{% url vip-request.edit vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a> {% endifequal %} </div>"
+		"<div class='text_center'>{% ifequal vip.create 'True' %}<a href='{% url vip-request.tab.real.server.status.edit vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit_create'>Editar Vip Criado (Healthcheck,Portas, Maxconn, Real(s) Server(s))</a>{% else %} <a href='{% url vip-request.edit vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a> {% endifequal %} </div>"
 		
 	]
     {% if not forloop.last %}

@@ -1,4 +1,4 @@
-{% extends "template.html" %}
+{% extends "template-external.html" %}
 
 {% load util %}
 
@@ -12,24 +12,11 @@ list-style-type: none;
 </style>
 <script type="text/javascript">
 $(document).ready(function() {
-
 	{% include "vip-request/include_vip_js" %}
 	
-	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
-	
-	if ( $("#id_created").val() == "1") {
-		$('#add_form').disabledForm();
-		$('#add_form').find('button').attr('disabled', 'disabled');
-		$('#btn_can').removeAttr("disabled");
-		
-	} else {
-		$('.editable').editableTable();
-	}
-	
-	$("#add_form").submit( function () {
-		$("#add_form").disabledRemoveForm();
-		return true
-	} );
+	autocomplete_external("{% url equipment.autocomplete.ajax.external %}", true, "id_equip_name", false);
+
+	$('.editable').editableTable();
 	
 })
 </script>
@@ -47,11 +34,12 @@ $(document).ready(function() {
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Requisição VIP </a></li>
 	</ul>
 	<div id="tabs-1">
-		<form id="add_form" method="post" action="{% url vip-request.edit idt %}">
+		<form id="add_form" method="post" action="{% url vip-request.form.external %}">
 			{% csrf_token %}
 			{% for field in form_acess %}
 				{{ field }}
 			{% endfor %}
+			
 			<div id="fields" class="ui-widget-content">
 
 			{% for field in form_inputs %}
@@ -181,9 +169,7 @@ $(document).ready(function() {
 										<input type='hidden' name='ports_real' value='{{field.ports_real}}'>
 									</td>
 									<td>
-										{% if form_inputs.created.value == '0' %}
-											<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
-										{% endif %}
+										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
 									</td>
 								</tr>
 
@@ -269,9 +255,7 @@ $(document).ready(function() {
 										<input type='hidden' name='weight' value='{{field.weight}}'>
 									</td>
 									<td>
-										{% if form_inputs.created.value == '0' %}
-											<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
-										{% endif %}
+										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
 									</td>
 								</tr>
 
@@ -390,7 +374,6 @@ $(document).ready(function() {
 			
 			<div class="buttons-l ui-widget-header">
 				<button id="btn_sav" type="submit">Gravar</button>
-				<button id="btn_can" type="button">Cancelar</button>
 			</div>
 		</form>
 	</div>

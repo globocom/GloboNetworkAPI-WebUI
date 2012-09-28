@@ -194,6 +194,10 @@ LDAP_MANAGER_PWD = "senha"
 LDAP_PWD_DEFAULT_HASH = "{MD5}a5FE2fqsjiUZ6q41LBDswQ=="
 LDAP_PWD_DEFAULT = "globo.com"
 
+ACCESS_EXTERNAL_TTL = 1800 # Values in seconds
+
+SECRET_KEY = '12345678' # Generates key encryption 
+
 LOG_FILE = PROJECT_ROOT_PATH + '/log.log'
 
 LOGGING = {

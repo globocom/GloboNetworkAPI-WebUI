@@ -6,7 +6,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm
+from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT, BRAND_MANAGEMENT
 from networkapiclient.exception import NetworkAPIClientError, EquipamentoError
 from django.contrib import messages
@@ -21,6 +21,7 @@ from CadVlan.Util.utility import DataTablePaginator
 from networkapiclient.Pagination import Pagination
 from django.http import HttpResponseServerError, HttpResponse
 from django.shortcuts import render_to_response, redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.template import loader
 from CadVlan.messages import equip_messages, error_messages
 from CadVlan.Util.converters.util import split_to_array
@@ -38,6 +39,27 @@ def ajax_autocomplete_equips(request):
         # Get user auth
         auth = AuthSession(request.session)
         equipment = auth.get_clientFactory().create_equipamento()
+        
+        # Get list of equipments from cache
+        equip_list = cache_list_equipment(equipment)
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_LIST, equip_list, context_instance=RequestContext(request))
+
+@csrf_exempt
+@access_external()
+@log
+def ajax_autocomplete_equips_external(request, form_acess, client):
+    try:
+        
+        equip_list = dict()
+        equipment = client.create_equipamento()
         
         # Get list of equipments from cache
         equip_list = cache_list_equipment(equipment)

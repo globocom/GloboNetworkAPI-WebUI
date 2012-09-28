@@ -6,22 +6,49 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Util.Decorators import log, login_required, has_perm
+from CadVlan.Util.Decorators import log, login_required, has_perm, \
+    access_external
 from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, IP_VERSION
-from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, RequestVipFormReal, HealthcheckForm, RequestVipFormIP
+from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
+    get_param_in_request, IP_VERSION, is_valid_int_param
+from CadVlan.VipRequest.encryption import Encryption
+from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, \
+    RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, \
+    RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
-from CadVlan.messages import error_messages, request_vip_messages, healthcheck_messages, equip_group_messages
+from CadVlan.messages import error_messages, request_vip_messages, \
+    healthcheck_messages, equip_group_messages
 from CadVlan.permissions import ADMINISTRATION
-from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, AJAX_VIPREQUEST_HEALTHCHECK, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, VIPREQUEST_TAB_REAL_SERVER
+from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL
+from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
+    AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, \
+    AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, \
+    AJAX_VIPREQUEST_HEALTHCHECK, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, \
+    AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, \
+    VIPREQUEST_TAB_REAL_SERVER, VIPREQUEST_TAB_REAL_SERVER_STATUS, \
+    VIPREQUEST_TAB_HEALTHCHECK, VIPREQUEST_TAB_MAXCON, VIPREQUEST_FORM_EXTERNAL, \
+    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR
 from django.contrib import messages
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseServerError, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseServerError, \
+    HttpResponseRedirect
 from django.shortcuts import render_to_response, redirect
 from django.template import loader
 from django.template.context import RequestContext
+from django.views.decorators.csrf import csrf_exempt
+from networkapiclient.exception import UserNotAuthenticatedError
+from hashlib import sha1
+from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.Pagination import Pagination
-from networkapiclient.exception import NetworkAPIClientError, VipError,ScriptError, VipAllreadyCreateError, EquipamentoNaoExisteError, IpError, VipNaoExisteError, IpNaoExisteError
+from networkapiclient.exception import NetworkAPIClientError, VipError, \
+    ScriptError, VipAllreadyCreateError, EquipamentoNaoExisteError, IpError, \
+    VipNaoExisteError, IpNaoExisteError, InvalidParameterError, \
+    InvalidTimeoutValueError, InvalidBalMethodValueError, InvalidCacheValueError, \
+    InvalidPersistenceValueError, InvalidPriorityValueError, EnvironmentVipError, \
+    IpEquipmentError, RealServerPriorityError, RealServerWeightError, \
+    RealServerPortError, RealParameterValueError, RealServerScriptError
+from time import strftime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -427,7 +454,7 @@ def valid_ports(lists, ports_vip, ports_real):
             is_valid = False
     
     else:
-        lists['ports_error'] = request_vip_messages.get("error_reals_required")
+        lists['ports_error'] = request_vip_messages.get("error_ports_required")
         is_valid = False
             
     return lists, is_valid
@@ -441,11 +468,9 @@ def valid_reals(lists, balancing, id_equip, id_ip, weight, priority):
                     
         if str(balancing).upper() == "WEIGHTED":
         
-            if weight and priority:
-                
-                if len(id_equip) != len(weight) or len(id_equip) != len(priority):
-                    lists['reals_error'] = request_vip_messages.get("error_len_reals")
-                    is_valid = False
+            if len(id_equip) != len(weight) or len(id_equip) != len(priority):
+                lists['reals_error'] = request_vip_messages.get("error_reals")
+                is_valid = False
                 
         if not priority:
             lists['reals_error'] = request_vip_messages.get("error_reals")
@@ -453,7 +478,7 @@ def valid_reals(lists, balancing, id_equip, id_ip, weight, priority):
         
         else:
             if len(id_equip) != len(priority):
-                lists['reals_error'] = request_vip_messages.get("error_len_reals")
+                lists['reals_error'] = request_vip_messages.get("error_reals")
                 is_valid = False
             
     return lists, is_valid
@@ -561,6 +586,7 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
     
     is_valid = True
     is_error = False
+    id_vip = None
     
     #Real - data
     ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip')) if "ports_vip" in request.POST else None
@@ -673,9 +699,12 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
                 
                     if edit:
                         client_api.create_vip().alter(idt, ipv4, ipv6, excpect, '0', created, finality, client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
+                        id_vip = idt
     
                     else:
-                        client_api.create_vip().add(ipv4, ipv6, excpect, finality , client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
+                        vip = client_api.create_vip().add(ipv4, ipv6, excpect, finality , client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
+                        id_vip = vip.get("requisicao_vip").get("id")
+
                 
             except NetworkAPIClientError, e:
                 is_valid = False
@@ -724,404 +753,120 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
     lists['form_options'] = form_options
     lists['form_ip'] = form_ip
         
-    return is_valid
-    
+    return is_valid, id_vip
+
+@csrf_exempt
+@log
+@access_external()
+def add_form_external(request, form_acess, client):
+    return add_form_shared(request, client, form_acess, True)
+
+
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def add_form(request):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return add_form_shared(request, client_api)
 
-    try:
-        
-        lists = dict()
-        lists['ports'] = ''
-        lists['ports_error'] = ''
-        lists['reals_error'] = ''
-        
-        # Get user
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-        
-        finality_list =  client_api.create_environment_vip().buscar_finalidade().get("finalidade")
-        healthcheck_list =  client_api.create_ambiente().listar_healtchcheck_expect_distinct().get("healthcheck_expect")
-
-        if request.method == "POST":
-            
-            is_valid = valid_form_and_submit(request, lists, finality_list, healthcheck_list, client_api)
-            
-            if is_valid:
-                messages.add_message(request, messages.SUCCESS, request_vip_messages.get("success_insert"))
-                return redirect('vip-request.list')
-            
-        else:
-
-            lists['form_inputs'] = RequestVipFormInputs()
-            lists['form_environment'] = RequestVipFormEnvironment(finality_list)
-            lists['form_real'] = RequestVipFormReal()
-            lists['form_healthcheck'] = RequestVipFormHealthcheck(healthcheck_list)
-            lists['form_options'] = RequestVipFormOptions()
-            lists['form_ip'] = RequestVipFormIP()
-            
-            
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    return render_to_response(VIPREQUEST_FORM, lists, context_instance=RequestContext(request))
-
+@csrf_exempt
+@log
+@access_external()
+def edit_form_external(request, id_vip, form_acess, client):
+    return edit_form_shared(request, id_vip, client, form_acess, True)
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def edit_form(request, id_vip):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return edit_form_shared(request, id_vip, client_api)
 
-    try:
-        
-        lists = dict()
-        lists['ports'] = ''
-        lists['ports_error'] = ''
-        lists['idt'] = id_vip
-        
-        # Get user
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-        
-        vip = client_api.create_vip().buscar(id_vip).get("vip")
-        
-        finality_list =  client_api.create_environment_vip().buscar_finalidade().get("finalidade")
-        healthcheck_list =  client_api.create_ambiente().listar_healtchcheck_expect_distinct().get("healthcheck_expect")
-        
-        if request.method == "POST":
-            
-            is_valid = valid_form_and_submit(request, lists, finality_list, healthcheck_list, client_api, edit = True, idt = id_vip)
-            
-            if is_valid:
-                messages.add_message(request, messages.SUCCESS, request_vip_messages.get("success_edit"))
-                return redirect('vip-request.list')
-        
-        else:
-            
-            business = vip.get("areanegocio")
-            service = vip.get("nome_servico")
-            name = vip.get("host")
-            filter_l7 = vip.get("l7_filter")
-            created = vip.get("vip_criado")
-            validated = vip.get("validado")
-            
-            if created == "1" :
-                messages.add_message(request, messages.ERROR, request_vip_messages.get("can_not_edit"))
-            
-            form_inputs = RequestVipFormInputs(initial={"business": business, "service": service, "name": name, "filter_l7": filter_l7, "created": created, "validated": validated   })            
-            
-            finality = vip.get("finalidade")
-            client = vip.get("cliente")
-            environment = vip.get("ambiente")
-            
-            try:
-            
-                environment_vip = client_api.create_environment_vip().search(None, finality, client, environment).get("environmentvip").get("id")
-                
-            except Exception, e:
-                environment_vip = None
-                messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( finality, client, environment ))
-            
-            form_environment = RequestVipFormEnvironment(finality_list, finality, client, environment, client_api, initial={"finality": finality, "client": client, "environment": environment, "environment_vip": environment_vip })
-            
-            excpect = None
-            healthcheck_type = vip.get("healthcheck_type")
-            healthcheck = vip.get("healthcheck")
-            
-            id_healthcheck_expect = vip.get("id_healthcheck_expect")
-            
-            if id_healthcheck_expect is not None:
-                excpect =  client_api.create_ambiente().buscar_healthcheck_por_id(id_healthcheck_expect).get("healthcheck_expect").get("id")    
-            
-            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, initial={"healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
-            
-            maxcon = vip.get("maxcon")            
-            form_real = RequestVipFormReal(initial={"maxcom": maxcon})
-            
-            timeout = vip.get("timeout")
-            caches = vip.get("cache")
-            persistence = vip.get("persistencia")
-            balancing = vip.get("metodo_bal")
-            
-            form_options = RequestVipFormOptions(request, environment_vip, client_api, initial={"timeout": timeout, "caches": caches, "persistence": persistence, "balancing": balancing})
-            
-            id_ipv4 = vip.get("id_ip")
-            id_ipv6 = vip.get("id_ipv6")
-
-            form_ip = mount_ips(id_ipv4, id_ipv6, client_api)
-            
-            ports = []
-            if "portas_servicos" in vip:
-                if type(vip['portas_servicos']['porta']) == unicode or  len(vip['portas_servicos']['porta']) == 1:
-                    vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
-                
-                ports = vip.get("portas_servicos").get('porta')
-            
-            ports_vip = []
-            ports_real = []
-            for port in ports:
-                p = str(port).split(":")
-                ports_vip.append(p[0])
-                
-                if len(p) > 1:
-                    ports_real.append(p[1])
-                else:
-                    ports_real.append('')
-
-            lists = mount_table_ports(lists, ports_vip, ports_real)
-            
-            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip)
-                
-            lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip)
-            
-            lists['form_inputs'] = form_inputs
-            lists['form_environment'] = form_environment
-            lists['form_real'] = form_real
-            lists['form_healthcheck'] = form_healthcheck
-            lists['form_options'] = form_options
-            lists['form_ip'] = form_ip
-
-
-
-    except VipNaoExisteError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
-        return redirect('vip-request.form')
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    return render_to_response(VIPREQUEST_EDIT, lists, context_instance=RequestContext(request))
+@csrf_exempt
+@access_external()
+@log
+def ajax_popular_client_external(request, form_acess, client):
+    return popular_client_shared(request, client)
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def ajax_popular_client(request):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return popular_client_shared(request, client_api)
 
-    lists = dict()
-    status_code = None
-    lists['clients'] = ''
-
-    try:    
-        finality = request.GET['finality']
-        
-        auth = AuthSession(request.session)
-        client_evip = auth.get_clientFactory().create_environment_vip()
-        
-        lists['clients'] = validates_dict(client_evip.buscar_cliente_por_finalidade(finality), 'cliente_txt')
-            
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        status_code = 500
-        
-    # Returns HTML
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_CLIENT, lists, context_instance=RequestContext(request)), status=status_code)
+@csrf_exempt
+@access_external()
+@log
+def ajax_popular_environment_external(request, form_acess, client):
+    return popular_environment_shared(request, client)
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def ajax_popular_environment(request):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return popular_environment_shared(request, client_api)
 
-    lists = dict()
-    status_code = None
-    lists['environments'] = ''
-
-    try:    
-        finality = request.GET['finality']
-        client = request.GET['client']
-        
-        auth = AuthSession(request.session)
-        client_evip = auth.get_clientFactory().create_environment_vip()
-        
-        lists['environments'] = validates_dict(client_evip.buscar_ambientep44_por_finalidade_cliente(finality, client), 'ambiente_p44')
-        
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        status_code = 500
-        
-    # Returns HTML
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_ENVIRONMENT, lists, context_instance=RequestContext(request)), status=status_code)
+@csrf_exempt
+@access_external()
+@log
+def ajax_popular_options_external(request, form_acess, client):
+    return popular_options_shared(request, client)
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def ajax_popular_options(request):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return popular_options_shared(request, client_api)
 
-    lists = dict()
-    status_code = None
-
-    try:    
-        environment_vip = request.GET['environment_vip']
-        
-        auth = AuthSession(request.session)
-        client_ovip = auth.get_clientFactory().create_option_vip()
-        
-        lists['timeout'] = validates_dict(client_ovip.buscar_timeout_opcvip(environment_vip), 'timeout_opt')
-        lists['balancing'] = validates_dict(client_ovip.buscar_balanceamento_opcvip(environment_vip), 'balanceamento_opt')
-        lists['caches'] = validates_dict(client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
-        lists['persistence'] = validates_dict(client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
-        
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        status_code = 500
-        
-    # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_OPTIONS, lists, context_instance=RequestContext(request)), status=status_code)
-
+@csrf_exempt
+@access_external()
+@log
+def ajax_add_healthcheck_external(request, form_acess, client):
+    return popular_add_healthcheck_shared(request, client)
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def ajax_add_healthcheck(request):
-    
-    lists = dict()
-    status_code = None
-    form = HealthcheckForm()
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return popular_add_healthcheck_shared(request, client_api)
 
-    try:
-        
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory().create_ambiente()
-        
-        if request.method == "GET":
+@csrf_exempt
+@access_external()
+@log
+def ajax_model_ip_real_server_external(request, form_acess, client):
+    return model_ip_real_server_shared(request, client)
 
-            form = HealthcheckForm(request.GET)
-
-            if form.is_valid():
-        
-                excpect  = form.cleaned_data['excpect_new']
-        
-                client.add_expect_string_healthcheck(excpect)
-                
-                lists['success'] =  healthcheck_messages.get("success_create")
-                
-                
-        lists['healthchecks'] =  client.listar_healtchcheck_expect_distinct().get("healthcheck_expect")
-        lists['form'] = form
-        
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        status_code = 500
-    
-    # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_HEALTHCHECK, lists, context_instance=RequestContext(request)), status=status_code)
-
-
+@log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
 def ajax_model_ip_real_server(request):
-    
-    lists = dict()
-    lists['msg'] = ''
-    lists['ips'] = ''
-    ips = None
-    equip = None
-    balancing = None
-    status_code = None
-
-    try:
-        
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-        
-        if request.method == "GET":
-
-            id_evip = request.GET['environment_vip']
-            equip_name = request.GET['equip_name']
-            balancing = request.GET['balancing']
-            
-            equip_real = split_to_array(request.GET['equip_real']) if "equip_real" in request.GET else None
-            ips_real = split_to_array(request.GET['ips_real']) if "ips_real" in request.GET else None
-            
-            #Valid Equipament
-            equip = client.create_equipamento().listar_por_nome(equip_name).get("equipamento")
-            
-            ips = client.create_ip().get_ip_by_equip_and_vip(equip_name, id_evip)
-            
-            ipv4 = validates_dict(ips, 'ipv4')
-            ipv6 = validates_dict(ips, 'ipv6')
-            
-            #Valid is IP existing in table
-            for equi in equip_real:
-                
-                if equip_name == equi:
-                    
-                    if ipv4 is not None:
-            
-                        for i in range(0, len(ipv4)):
-                            
-                            for ip_r in ips_real:
-                                
-                                if  ( i <= (len(ipv4)-1) )  :
-                                
-                                    if ipv4[i]['ip'] == str(ip_r).replace("%3A", ":"):
-                                        del ipv4[i]
-                                        
-                    if ipv6 is not None:
-                        
-                        for i in range(0, len(ipv6)):
-                            
-                            for ip_r in ips_real:
-                                
-                                if  ( i <= (len(ipv6)-1) )  :
-                                
-                                    if ipv6[i]['ip'] == str(ip_r).replace("%3A", ":"):
-                                        del ipv6[i]
-            
-            
-            ips['ipv4'] = ipv4
-            ips['ipv6'] = ipv6
-            
-
-    except IpError, e:
-        pass
-
-    except EquipamentoNaoExisteError, e:        
-        logger.error(e)
-        lists['msg'] = equip_group_messages.get("invalid_equipament_group")
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        status_code = 500
-        
-    lists['ips'] = loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, { 'ips': ips , 'equip': equip, 'balancing': balancing}, context_instance=RequestContext(request))
-    
-    # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, lists, context_instance=RequestContext(request)), status=status_code)
-
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return model_ip_real_server_shared(request, client_api)
 
 def parse_real_server(request, vip, client_api, id_vip, is_status=False):
     reals = []
     if "reals" in vip:
-        if type(vip['reals']['real']) == dict or len(vip['reals']['real']) == 1:
-            vip['reals']['real'] = [vip['reals']['real']]
-            
-        reals = vip.get("reals").get("real")
+        reals = validates_dict(vip['reals'], 'real')
     
     prioritys = []
     if "reals_prioritys" in vip:
-        if len(vip['reals_prioritys']['reals_priority']) == 1:
-            vip['reals_prioritys']['reals_priority'] = [vip['reals_prioritys']['reals_priority']]
-            
-        prioritys = vip.get("reals_prioritys").get("reals_priority")
+        prioritys = validates_dict(vip['reals_prioritys'], 'reals_priority')
     
     
     weights = []
     if "reals_weights" in vip:
-        if len(vip['reals_weights']['reals_weight']) == 1:
-            vip['reals_weights']['reals_weight'] = [vip['reals_weights']['reals_weight']]
-    
-            weights = vip.get("reals_weights").get("reals_weight")
+        weights = validates_dict(vip['reals_weights'], 'reals_weight')
     
     id_equip = []
     id_ip = []
@@ -1214,7 +959,7 @@ def parse_real_server(request, vip, client_api, id_vip, is_status=False):
 
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
-def tab_real_server(request, id_vip):
+def tab_real_server_status(request, id_vip):
 
     try:
         
@@ -1240,7 +985,323 @@ def tab_real_server(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         
-    return render_to_response(VIPREQUEST_TAB_REAL_SERVER, lists, context_instance=RequestContext(request))
+    return render_to_response(VIPREQUEST_TAB_REAL_SERVER_STATUS, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+def tab_real_server(request, id_vip):
+    
+    try:
+        lists = dict()
+        lists['idt'] = id_vip
+        html = ''
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client_api = auth.get_clientFactory()
+        
+        vip = client_api.create_vip().get_by_id(id_vip).get("vip")
+        vip['equipamento'] = validates_dict(vip, 'equipamento')
+        vip['environments'] = validates_dict(vip, 'environments')
+        vip['balancing'] = str(vip.get("metodo_bal")).upper()
+        lists['vip'] = vip
+        
+        finality = vip.get("finalidade")
+        client = vip.get("cliente")
+        environment = vip.get("ambiente")
+        
+        try:
+            environment_vip = client_api.create_environment_vip().search(None, finality, client, environment).get("environmentvip").get("id")
+            lists['environment_vip'] = environment_vip
+        except Exception, e:
+            environment_vip = None
+            messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( finality, client, environment ))
+            
+        maxcon = vip.get("maxcon")   
+        
+        balancing = vip.get("metodo_bal")
+        lists['balancing'] = balancing
+                 
+        form_real = RequestVipFormReal(initial={"maxcom": maxcon})
+        lists['form_real'] = form_real
+        
+        parse = True
+        
+        #Already edited
+        if request.method == "POST":
+            try:
+                
+                priority = valid_field_table_dynamic(request.POST.getlist('priority')) if "priority" in request.POST else None
+                weight = valid_field_table_dynamic(request.POST.getlist('weight')) if "weight" in request.POST else None
+                id_equip = valid_field_table_dynamic(request.POST.getlist('id_equip')) if "id_equip" in request.POST else None
+                equip = valid_field_table_dynamic(request.POST.getlist('equip')) if "equip" in request.POST else None
+                id_ip = valid_field_table_dynamic(request.POST.getlist('id_ip')) if "id_ip" in request.POST else None
+                ip = valid_field_table_dynamic(request.POST.getlist('ip')) if "ip" in request.POST else None
+                
+                lists, is_valid_reals = valid_reals(lists, balancing, id_equip, id_ip, weight, priority)
+                if is_valid_reals:
+                    reals = reals_(id_equip, id_ip, equip, ip)
+                    client_api.create_vip().edit_reals(id_vip, finality, client, environment, balancing, reals, priority, weight)
+                    
+                    messages.add_message(request, messages.SUCCESS, request_vip_messages.get("tab_edit_success") % 'real server')
+                else:
+                    html = lists['reals_error']
+                    parse = False
+                
+            except (EnvironmentVipError, InvalidTimeoutValueError, InvalidBalMethodValueError, InvalidCacheValueError, InvalidPersistenceValueError, InvalidPriorityValueError, EquipamentoNaoExisteError, IpEquipmentError, IpError, RealServerPriorityError, RealServerWeightError, RealServerPortError, RealParameterValueError), e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, request_vip_messages.get("tab_edit_error") % 'real server')
+                
+                try:
+                    raise e
+                except InvalidTimeoutValueError, e:
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_timeout") % vip['timeout'])
+                except InvalidBalMethodValueError, e:
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_balancing") % vip['balancing'])
+                except InvalidCacheValueError, e:
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_cache") % vip['cache'])
+                except InvalidPersistenceValueError, e:
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_persistence") % vip['persistencia'])
+                except InvalidPriorityValueError, e:
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_priority"))
+                except EnvironmentVipError, e:
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( finality, client, environment ))
+                except (EquipamentoNaoExisteError, IpEquipmentError, IpError, RealServerPriorityError, RealServerWeightError, RealServerPortError, RealParameterValueError), e:
+                    messages.add_message(request, messages.ERROR, e)
+                
+            except RealServerScriptError, e:
+                logger.error(e)
+                messages.add_message(request, messages.WARNING, e)
+            except InvalidParameterError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+            except Exception, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+                
+        if parse is True:
+            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, True)
+            lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version, status)
+    
+    except VipNaoExisteError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
+        return redirect('vip-request.form')
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    if request.method == "POST":
+        return HttpResponse(content=html, status=200)
+    else:
+        return render_to_response(VIPREQUEST_TAB_REAL_SERVER, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+def tab_healthcheck(request, id_vip):
+    
+    try:
+        # Get user
+        auth = AuthSession(request.session)
+        client_api = auth.get_clientFactory()
+        
+        lists = dict()
+        lists['idt'] = id_vip
+        
+        vip = client_api.create_vip().get_by_id(id_vip).get("vip")
+        vip['equipamento'] = validates_dict(vip, 'equipamento')
+        vip['environments'] = validates_dict(vip, 'environments')
+        vip['balancing'] = str(vip.get("metodo_bal")).upper()
+        lists['vip'] = vip
+        
+        healthcheck_list =  client_api.create_ambiente().listar_healtchcheck_expect_distinct().get("healthcheck_expect")
+        
+        #Already edited
+        if request.method == "POST":
+            
+            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, request.POST)
+            lists['form_healthcheck'] = form_healthcheck
+            
+            if form_healthcheck.is_valid():
+                
+                healthcheck_type =  form_healthcheck.cleaned_data["healthcheck_type"]
+                healthcheck =  form_healthcheck.cleaned_data["healthcheck"]
+                excpect =  form_healthcheck.cleaned_data["excpect"]
+                
+                if excpect is not None:
+                    excpect = int(excpect)
+                
+                try:
+                    
+                    finality = vip.get("finalidade")
+                    client = vip.get("cliente")
+                    environment = vip.get("ambiente")
+                    
+                    environment_vip = client_api.create_environment_vip().search(None, finality, client, environment)
+                    if environment_vip is None:
+                        raise EnvironmentVipError(environment_vip)
+                    
+                    
+                    client_api.create_vip().alter_healthcheck(id_vip, healthcheck_type, healthcheck, excpect)
+                    messages.add_message(request, messages.SUCCESS, request_vip_messages.get("tab_edit_success") % 'healthcheck')
+                    
+                except (EnvironmentVipError, InvalidTimeoutValueError, InvalidBalMethodValueError, InvalidCacheValueError, InvalidPersistenceValueError, InvalidPriorityValueError, EquipamentoNaoExisteError, IpEquipmentError, IpError, RealServerPriorityError, RealServerWeightError, RealServerPortError, RealParameterValueError), e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("tab_edit_error") % 'healthcheck')
+                    
+                    try:
+                        raise e
+                    except InvalidTimeoutValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_timeout") % vip['timeout'])
+                    except InvalidBalMethodValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_balancing") % vip['balancing'])
+                    except InvalidCacheValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_cache") % vip['cache'])
+                    except InvalidPersistenceValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_persistence") % vip['persistencia'])
+                    except InvalidPriorityValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_priority"))
+                    except EnvironmentVipError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( finality, client, environment ))
+                    except (EquipamentoNaoExisteError, IpEquipmentError, IpError, RealServerPriorityError, RealServerWeightError, RealServerPortError, RealParameterValueError), e:
+                        messages.add_message(request, messages.ERROR, e)
+                    
+                    
+                except InvalidParameterError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                except Exception, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    
+                    
+        #Request to edit
+        else:
+            excpect = vip.get("id_healthcheck_expect")
+            healthcheck_type = vip.get("healthcheck_type")
+            healthcheck = vip.get("healthcheck")
+            
+            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, initial={"healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
+            
+            lists['form_healthcheck'] = form_healthcheck
+            
+        
+    except VipNaoExisteError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
+        return redirect('vip-request.form')
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(VIPREQUEST_TAB_HEALTHCHECK, lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+def tab_maxcon(request, id_vip):
+    
+    try:
+        # Get user
+        auth = AuthSession(request.session)
+        client_api = auth.get_clientFactory()
+        
+        lists = dict()
+        lists['idt'] = id_vip
+        
+        vip = client_api.create_vip().get_by_id(id_vip).get("vip")
+        vip['equipamento'] = validates_dict(vip, 'equipamento')
+        vip['environments'] = validates_dict(vip, 'environments')
+        vip['balancing'] = str(vip.get("metodo_bal")).upper()
+        lists['vip'] = vip
+        
+        #Already edited
+        if request.method == "POST":
+            
+            form_real = RequestVipFormReal(request.POST)
+            lists['form_real'] = form_real
+            
+            if form_real.is_valid():
+                
+                maxcon = form_real.cleaned_data["maxcom"]
+                #equip_name = form_real.cleaned_data["equip_name"]
+                
+                try:
+                    
+                    finality = vip.get("finalidade")
+                    client = vip.get("cliente")
+                    environment = vip.get("ambiente")
+                    
+                    environment_vip = client_api.create_environment_vip().search(None, finality, client, environment)
+                    if environment_vip is None:
+                        raise EnvironmentVipError(environment_vip)
+                    
+                    client_api.create_vip().alter_maxcon(id_vip, maxcon)
+                    messages.add_message(request, messages.SUCCESS, request_vip_messages.get("tab_edit_success") % 'maxconn')
+                    
+                except (EnvironmentVipError, InvalidTimeoutValueError, InvalidBalMethodValueError, InvalidCacheValueError, InvalidPersistenceValueError, InvalidPriorityValueError, EquipamentoNaoExisteError, IpEquipmentError, IpError, RealServerPriorityError, RealServerWeightError, RealServerPortError, RealParameterValueError), e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("tab_edit_error") % 'maxconn')
+                    
+                    try:
+                        raise e
+                    except InvalidTimeoutValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_timeout") % vip['timeout'])
+                    except InvalidBalMethodValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_balancing") % vip['balancing'])
+                    except InvalidCacheValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_cache") % vip['cache'])
+                    except InvalidPersistenceValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_persistence") % vip['persistencia'])
+                    except InvalidPriorityValueError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_priority"))
+                    except EnvironmentVipError, e:
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( finality, client, environment ))
+                    except (EquipamentoNaoExisteError, IpEquipmentError, IpError, RealServerPriorityError, RealServerWeightError, RealServerPortError, RealParameterValueError), e:
+                        messages.add_message(request, messages.ERROR, e)
+                    
+                    
+                except InvalidParameterError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                except Exception, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    
+        #Request to edit
+        else:
+            maxcon = vip.get("maxcon")
+            equip_name = vip.get("equip_name")
+            
+            form_real = RequestVipFormReal(initial={"equip_name": equip_name, "maxcom": maxcon})
+            lists['form_real'] = form_real
+        
+        
+        
+    except VipNaoExisteError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
+        return redirect('vip-request.form')
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(VIPREQUEST_TAB_MAXCON, lists, context_instance=RequestContext(request))
 
 @log
 @login_required
@@ -1329,4 +1390,443 @@ def status_real_server(request, id_vip, status):
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
-    return HttpResponseRedirect(reverse('vip-request.tab.real.server', args=[id_vip]))
+    return HttpResponseRedirect(reverse('vip-request.tab.real.server.status.edit', args=[id_vip]))
+
+@csrf_exempt
+@log
+def generate_token(request):
+    try:
+        
+        lists = {}
+        
+        form = GenerateTokenForm(request.POST) if request.method == 'POST' else GenerateTokenForm()            
+        
+        if form.is_valid():
+            
+            user = str(form.cleaned_data['user'])
+            idt  = None if not form.cleaned_data['requestVip'] else form.cleaned_data['requestVip'] 
+            ttl  = ACCESS_EXTERNAL_TTL if not form.cleaned_data['p'] else form.cleaned_data['p']
+            
+            #Valid User
+            client = validate_user_networkapi(user)
+            
+            #Valid idt
+            if idt is not None and not is_valid_int_param(idt):
+                raise Exception(error_messages.get("invalid_param") % "requestVip")
+            
+            #Valid ttl
+            if not is_valid_int_param(ttl):
+                raise Exception(error_messages.get("invalid_param") % "p")
+
+            if idt is not None:
+                client.create_vip().get_by_id(idt)
+
+            #Encrypt hash
+            user_hash = Encryption().Encrypt(user)
+            
+            #Generates token
+            key = "%s:%s:%s" % ( __name__, str(user) , str(strftime("%Y%m%d%H%M%S")))
+            token = sha1(key).hexdigest()
+            
+            # Set token in cache
+            cache.set(token, user_hash, int(ttl))
+            
+            lists["token"] = token
+            lists["url"] = reverse("vip-request.edit.external", args=[idt]) if idt is not None else reverse("vip-request.form.external")
+            
+            
+            return render_to_response(VIPREQUEST_TOKEN, lists, context_instance=RequestContext(request))
+        
+    except InvalidParameterError, e:
+        logger.error(e)
+        lists["error"] = error_messages.get("invalid_param") % "id"
+             
+    except VipNaoExisteError, e:         
+        logger.error(e)
+        lists["error"] = request_vip_messages.get("invalid_vip")
+    except Exception, e:
+        logger.error(e)
+        lists["error"] = e
+        
+    return render_to_response(JSON_ERROR, lists, context_instance=RequestContext(request))
+
+def validate_user_networkapi(user_request):
+    
+    try:
+        
+        username, password = str(user_request).split("@")
+        
+        client = ClientFactory(NETWORK_API_URL, username, password)
+            
+        client.create_usuario().authenticate(username, password)
+        
+    except Exception,  e:
+        logger.error(e)
+        raise UserNotAuthenticatedError(e)
+        
+    return client
+
+def add_form_shared(request, client_api, form_acess = "", external = False):
+
+    try:
+        
+        lists = dict()
+        lists['ports'] = ''
+        lists['ports_error'] = ''
+        lists['reals_error'] = ''
+        lists['form_acess'] = form_acess
+        lists['external'] = True if external else False
+        
+        finality_list =  client_api.create_environment_vip().buscar_finalidade().get("finalidade")
+        healthcheck_list =  client_api.create_ambiente().listar_healtchcheck_expect_distinct().get("healthcheck_expect")
+
+        if request.method == "POST":
+            
+            is_valid, id_vip = valid_form_and_submit(request, lists, finality_list, healthcheck_list, client_api)
+            
+            if is_valid:
+                messages.add_message(request, messages.SUCCESS, request_vip_messages.get("success_insert"))
+                
+                if external:
+                    return HttpResponseRedirect("%s?token=%s" % (reverse('vip-request.edit.external', args=[id_vip]), form_acess.initial.get("token")))
+                else:
+                    return redirect('vip-request.list')
+            
+        else:
+
+            lists['form_inputs'] = RequestVipFormInputs()
+            lists['form_environment'] = RequestVipFormEnvironment(finality_list)
+            lists['form_real'] = RequestVipFormReal()
+            lists['form_healthcheck'] = RequestVipFormHealthcheck(healthcheck_list)
+            lists['form_options'] = RequestVipFormOptions()
+            lists['form_ip'] = RequestVipFormIP()
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+        
+    template =  VIPREQUEST_FORM_EXTERNAL if external else VIPREQUEST_FORM
+
+    return render_to_response(template, lists, context_instance=RequestContext(request))
+
+def edit_form_shared(request, id_vip, client_api, form_acess = "", external = False):
+
+    try:
+        
+        lists = dict()
+        lists['ports'] = ''
+        lists['ports_error'] = ''
+        lists['idt'] = id_vip
+        lists['form_acess'] = form_acess
+        lists['external'] = True if external else False
+        
+        vip = client_api.create_vip().buscar(id_vip).get("vip")
+        
+        finality_list =  client_api.create_environment_vip().buscar_finalidade().get("finalidade")
+        healthcheck_list =  client_api.create_ambiente().listar_healtchcheck_expect_distinct().get("healthcheck_expect")
+        
+        if request.method == "POST":
+            
+            is_valid, id_vip = valid_form_and_submit(request, lists, finality_list, healthcheck_list, client_api, edit = True, idt = id_vip)
+            
+            if is_valid:
+                messages.add_message(request, messages.SUCCESS, request_vip_messages.get("success_edit"))
+                
+                if external:
+                    return HttpResponseRedirect("%s?token=%s" % (reverse('vip-request.edit.external', args=[id_vip]), form_acess.initial.get("token")))
+                else:
+                    return redirect('vip-request.list')
+        
+        else:
+            
+            business = vip.get("areanegocio")
+            service = vip.get("nome_servico")
+            name = vip.get("host")
+            filter_l7 = vip.get("l7_filter")
+            created = vip.get("vip_criado")
+            validated = vip.get("validado")
+            
+            if created == "1" :
+                messages.add_message(request, messages.ERROR, request_vip_messages.get("can_not_edit"))
+            
+            form_inputs = RequestVipFormInputs(initial={"business": business, "service": service, "name": name, "filter_l7": filter_l7, "created": created, "validated": validated   })            
+            
+            finality = vip.get("finalidade")
+            client = vip.get("cliente")
+            environment = vip.get("ambiente")
+            
+            try:
+            
+                environment_vip = client_api.create_environment_vip().search(None, finality, client, environment).get("environmentvip").get("id")
+                
+            except Exception, e:
+                environment_vip = None
+                messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( finality, client, environment ))
+            
+            form_environment = RequestVipFormEnvironment(finality_list, finality, client, environment, client_api, initial={"finality": finality, "client": client, "environment": environment, "environment_vip": environment_vip })
+            
+            excpect = None
+            healthcheck_type = vip.get("healthcheck_type")
+            healthcheck = vip.get("healthcheck")
+            
+            id_healthcheck_expect = vip.get("id_healthcheck_expect")
+            
+            if id_healthcheck_expect is not None:
+                excpect =  client_api.create_ambiente().buscar_healthcheck_por_id(id_healthcheck_expect).get("healthcheck_expect").get("id")    
+            
+            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, initial={"healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
+            
+            maxcon = vip.get("maxcon")            
+            form_real = RequestVipFormReal(initial={"maxcom": maxcon})
+            
+            timeout = vip.get("timeout")
+            caches = vip.get("cache")
+            persistence = vip.get("persistencia")
+            balancing = vip.get("metodo_bal")
+            
+            form_options = RequestVipFormOptions(request, environment_vip, client_api, initial={"timeout": timeout, "caches": caches, "persistence": persistence, "balancing": balancing})
+            
+            id_ipv4 = vip.get("id_ip")
+            id_ipv6 = vip.get("id_ipv6")
+
+            form_ip = mount_ips(id_ipv4, id_ipv6, client_api)
+            
+            ports = []
+            if "portas_servicos" in vip:
+                if type(vip['portas_servicos']['porta']) == unicode or  len(vip['portas_servicos']['porta']) == 1:
+                    vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
+                
+                ports = vip.get("portas_servicos").get('porta')
+            
+            ports_vip = []
+            ports_real = []
+            for port in ports:
+                p = str(port).split(":")
+                ports_vip.append(p[0])
+                
+                if len(p) > 1:
+                    ports_real.append(p[1])
+                else:
+                    ports_real.append('')
+
+            lists = mount_table_ports(lists, ports_vip, ports_real)
+            
+            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip)
+                
+            lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip)
+            
+            lists['form_inputs'] = form_inputs
+            lists['form_environment'] = form_environment
+            lists['form_real'] = form_real
+            lists['form_healthcheck'] = form_healthcheck
+            lists['form_options'] = form_options
+            lists['form_ip'] = form_ip
+
+    except VipNaoExisteError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
+        return redirect('vip-request.form')
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    template =  VIPREQUEST_EDIT_EXTERNAL if external else VIPREQUEST_EDIT
+
+    return render_to_response(template, lists, context_instance=RequestContext(request))
+
+
+def popular_client_shared(request, client_api):
+
+    lists = dict()
+    status_code = None
+    lists['clients'] = ''
+
+    try:    
+        finality = get_param_in_request(request, 'finality')
+
+        if finality is None:
+            raise InvalidParameterError("Parâmetro inválido: O campo finalidade inválido ou não foi informado.")
+        
+        client_evip = client_api.create_environment_vip()
+        
+        lists['clients'] = validates_dict(client_evip.buscar_cliente_por_finalidade(finality), 'cliente_txt')
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        status_code = 500
+        
+    # Returns HTML
+    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_CLIENT, lists, context_instance=RequestContext(request)), status=status_code)
+
+def popular_environment_shared(request, client_api):
+
+    lists = dict()
+    status_code = None
+    lists['environments'] = ''
+
+    try:
+        
+        finality = get_param_in_request(request, 'finality')
+        if finality is None:
+            raise InvalidParameterError("Parâmetro inválido: O campo finalidade inválido ou não foi informado.")
+        
+        client = get_param_in_request(request, 'client')
+        if client is None:
+            raise InvalidParameterError("Parâmetro inválido: O campo cliente inválido ou não foi informado.")
+        
+        client_evip = client_api.create_environment_vip()
+        
+        lists['environments'] = validates_dict(client_evip.buscar_ambientep44_por_finalidade_cliente(finality, client), 'ambiente_p44')
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        status_code = 500
+        
+    # Returns HTML
+    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_ENVIRONMENT, lists, context_instance=RequestContext(request)), status=status_code)
+
+
+def popular_options_shared(request, client_api):
+
+    lists = dict()
+    status_code = None
+
+    try:    
+        environment_vip = get_param_in_request(request, 'environment_vip')
+        if environment_vip is None:
+            raise InvalidParameterError("Parâmetro inválido: O campo Ambiente Vip inválido ou não foi informado.")
+        
+        client_ovip = client_api.create_option_vip()
+        
+        lists['timeout'] = validates_dict(client_ovip.buscar_timeout_opcvip(environment_vip), 'timeout_opt')
+        lists['balancing'] = validates_dict(client_ovip.buscar_balanceamento_opcvip(environment_vip), 'balanceamento_opt')
+        lists['caches'] = validates_dict(client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
+        lists['persistence'] = validates_dict(client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        status_code = 500
+        
+    # Returns Json
+    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_OPTIONS, lists, context_instance=RequestContext(request)), status=status_code)
+
+
+def popular_add_healthcheck_shared(request, client_api):
+    
+    lists = dict()
+    status_code = None
+    form = HealthcheckForm()
+
+    try:
+        
+        client = client_api.create_ambiente()
+        
+        if request.method == "GET":
+            form = HealthcheckForm(request.GET)
+            
+        else:
+            form = HealthcheckForm(request.POST)
+        
+
+        if form.is_valid():
+    
+            excpect  = form.cleaned_data['excpect_new']
+    
+            client.add_expect_string_healthcheck(excpect)
+            
+            lists['success'] =  healthcheck_messages.get("success_create")
+                
+                
+        lists['healthchecks'] =  client.listar_healtchcheck_expect_distinct().get("healthcheck_expect")
+        lists['form'] = form
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        status_code = 500
+    
+    # Returns Json
+    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_HEALTHCHECK, lists, context_instance=RequestContext(request)), status=status_code)
+
+
+def model_ip_real_server_shared(request, client_api):
+    
+    lists = dict()
+    lists['msg'] = ''
+    lists['ips'] = ''
+    ips = None
+    equip = None
+    balancing = None
+    status_code = None
+
+    try:
+        
+        
+        id_evip = get_param_in_request(request, 'environment_vip')
+        equip_name = get_param_in_request(request, 'equip_name')
+        balancing = get_param_in_request(request, 'balancing')
+        
+        equip_real = split_to_array(get_param_in_request(request, 'equip_real') ) if get_param_in_request(request, 'equip_real') is not None else None
+        ips_real = split_to_array(get_param_in_request(request, 'ips_real') ) if get_param_in_request(request, 'ips_real') is not None else None
+                
+        #Valid Equipament
+        equip = client_api.create_equipamento().listar_por_nome(equip_name).get("equipamento")
+        
+        ips = client_api.create_ip().get_ip_by_equip_and_vip(equip_name, id_evip)
+        
+        ipv4 = validates_dict(ips, 'ipv4')
+        ipv6 = validates_dict(ips, 'ipv6')
+        
+        #Valid is IP existing in table
+        for equi in equip_real:
+            
+            if equip_name == equi:
+                
+                if ipv4 is not None:
+        
+                    for i in range(0, len(ipv4)):
+                        
+                        for ip_r in ips_real:
+                            
+                            if  ( i <= (len(ipv4)-1) )  :
+                            
+                                if ipv4[i]['ip'] == str(ip_r).replace("%3A", ":"):
+                                    del ipv4[i]
+                                    
+                if ipv6 is not None:
+                    
+                    for i in range(0, len(ipv6)):
+                        
+                        for ip_r in ips_real:
+                            
+                            if  ( i <= (len(ipv6)-1) )  :
+                            
+                                if ipv6[i]['ip'] == str(ip_r).replace("%3A", ":"):
+                                    del ipv6[i]
+        
+        
+        ips['ipv4'] = ipv4
+        ips['ipv6'] = ipv6
+        
+
+    except IpError, e:
+        pass
+
+    except EquipamentoNaoExisteError, e:        
+        logger.error(e)
+        lists['msg'] = equip_group_messages.get("invalid_equipament_group")
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        status_code = 500
+        
+    lists['ips'] = loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, { 'ips': ips , 'equip': equip, 'balancing': balancing}, context_instance=RequestContext(request))
+    
+    # Returns Json
+    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, lists, context_instance=RequestContext(request)), status=status_code)

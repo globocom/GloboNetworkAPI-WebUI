@@ -90,6 +90,56 @@ function autocomplete(url, submit, id, hid) {
 	});
 }
 
+function autocomplete_external(url, submit, id, hid) {
+	$.ajax({
+		url: url,
+		data: { token: $("#id_token").val() },
+		dataType: "json",
+		success: function(data, textStatus, xhr) {
+			
+			if (xhr.status == "278")
+				window.location = xhr.getResponseHeader('Location');
+				
+			else if (xhr.status == "203")
+				alert(data);
+			
+			else {
+			
+				if ( data != null ) {
+				
+					if ( data != null && data.errors.length > 0) {
+						alert(data.errors)
+					} else {
+						
+						$("#" + id).autocomplete({
+							source: data.list,
+							minLength: 1,
+							select: function(event, ui) {
+								$("#" + id).val(ui.item.label);
+								if (hid) {
+									$("#" + id + "_id").val(ui.item.aux)
+								}
+								if (submit) {
+									$("#search_form").submit()
+								}
+							}
+						});
+					}
+				}
+			}
+				
+		},
+		beforeSend: function() {
+			$(".loading").attr("style", "visibility: hidden;")
+			$("#loading-autocomplete").show();
+		},
+		complete: function() {
+			$("#loading-autocomplete").hide();
+			$(".loading").removeAttr("style")
+		}
+	});
+}
+
 jQuery.fn.dataTableExt.oSort['ipv6-asc']  = function(a,b) {
     var m = a.split(":"), x = "";
     var n = b.split(":"), y = "";

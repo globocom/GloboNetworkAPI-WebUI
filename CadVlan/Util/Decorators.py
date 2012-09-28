@@ -5,22 +5,29 @@ Author: masilva / S2it
 Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
-from django.http import HttpResponseRedirect, HttpResponse
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.Util.Json import Json
+from CadVlan.Util.utility import get_param_in_request
+from CadVlan.VipRequest.encryption import Encryption
+from CadVlan.forms import ControlAcessForm
+from CadVlan.messages import auth_messages
+from CadVlan.settings import URL_HOME, URL_LOGIN, NETWORK_API_URL
+from CadVlan.templates import TOKEN_INVALID
+from networkapiclient.ClientFactory import ClientFactory
 from django.contrib import messages
 from django.core.cache import cache
-from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.messages import auth_messages
-from CadVlan.settings import URL_HOME, URL_LOGIN
-from CadVlan.Util.Json import Json
+from django.http import HttpResponseRedirect, HttpResponse
+from django.template import loader
 from hashlib import sha1
-import logging
 import json
+import logging
 import time
 
 logger = logging.getLogger(__name__)
 
 AJAX = 'AJAX'
 LOCK = 'LOCK'
+TOKEN = 'token'
 
 def login_required(view_func):
     '''
@@ -94,6 +101,58 @@ def log(view_func):
 
         return view_func(request,*args, **kwargs)
 
+    return _decorated
+
+def access_external():
+    '''
+    Controls access external request vip form with token stored in memcached
+    '''
+    def _decorated(func):
+
+        def _control(request, *args, **kwargs):
+                    
+            key = get_param_in_request(request, TOKEN)
+            
+            is_valid = True
+            if key is not None:
+                
+                # Search in cache if it exists
+                if cache.has_key(key): 
+                
+                    # Get hash in cache
+                    hash = cache.get(key)
+                    
+                    #Decrypt hash
+                    user = Encryption().Decrypt(hash)
+                    
+                    username, password = str(user).split("@")
+                    
+                    client = ClientFactory(NETWORK_API_URL, username, password)
+                    
+                else:
+                    is_valid = False
+            
+            #If it is not valid  mount of return depending on the type of request
+            if not is_valid:
+                
+                msg = auth_messages.get("token_invalid")
+               
+                if request.is_ajax():
+                    return HttpResponse(msg, status=203)
+            
+                else :
+                    
+                    return HttpResponse(loader.render_to_string(TOKEN_INVALID ,{"error" : msg}), status=200)
+            
+            
+            kwargs["form_acess"] = ControlAcessForm(initial={"token":key})
+            kwargs["client"] = client
+            
+            # Execute method
+            return func(request, *args, **kwargs)
+        
+        return _control
+    
     return _decorated
 
 def cache_function(length):

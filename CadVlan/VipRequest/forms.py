@@ -202,3 +202,10 @@ class RequestVipFormIP(forms.Form):
                         self._errors["ipv6_specific"] = self.error_class(["Ip não informado ou informado de forma incorreta. IPv6 deve ser informado no formato xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx"])
                 
         return cleaned_data
+
+@autostrip
+class GenerateTokenForm(forms.Form):
+    
+    user = forms.CharField(required=True)
+    requestVip = forms.CharField(required=False)
+    p = forms.CharField(required=False)

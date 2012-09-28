@@ -1,0 +1,105 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	{% block js %}
+		
+	{%endblock js %}
+	
+	$("#page_tab").tabs();
+	
+	{% block tab_select %}
+		$("#page_tab_lists").tabs();
+	{% endblock tab_select %}
+	
+	$(".realserver_status_tab").attr("href", "{% url vip-request.tab.real.server.status.edit vip.id %}");
+	$(".realserver_tab").attr("href", "{% url vip-request.tab.real.server vip.id %}");
+	$(".healthcheck_tab").attr("href", "{% url vip-request.tab.healthcheck vip.id %}");
+	$(".maxcon_tab").attr("href", "{% url vip-request.tab.maxcon vip.id %}");
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+		location.reload();
+	});
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url vip-request.list %}";
+	});
+	
+
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes do Requisição VIP</a></li>
+	</ul>
+	
+	<div id="dialog-ip" title="Selecionar IP do Real Server">
+		<div id="ip-view">
+		</div>
+	</div>
+	
+	<div id="tabs-1">
+		{% csrf_token %}
+
+		<div id="fields" class="ui-widget-content">
+			<table border="5">
+				<tr>
+					<td style="width: 120px"><label for="nome_ambiente">Id</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.id}}</label></td>
+				</tr>
+				<tr>
+					<td><label>Ip</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for ip in vip.ips %}{{ip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Descrição Ipv4</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv4_description %}{%else%}{{vip.ipv4_description}}{% endifequal %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Descrição Ipv6</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv6_description %}{%else%}{{vip.ipv6_description}}{% endifequal %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Equipamento</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for equip in vip.equipamento %}{{equip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+				<tr>
+					<td style="width: 120px"><label>Ambiente</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for environment in vip.environments %}{{environment}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="separator spacer"></div>
+		
+		<div>
+		
+			<div id="page_tab_lists">
+				<ul>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-1" class="realserver_status_tab">Reals Server - Status</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-2" class="realserver_tab">Reals Server</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3" class="healthcheck_tab">Healthcheck</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-4" class="maxcon_tab">Maxconn</a></li>
+					
+				</ul>
+				
+				{% block tab-data %}
+					
+				{% endblock %}
+				
+			</div>
+				
+					
+		</div>
+	</div>
+		
+</div>
+				
+{% endblock %}
