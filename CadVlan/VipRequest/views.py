@@ -47,7 +47,7 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     InvalidTimeoutValueError, InvalidBalMethodValueError, InvalidCacheValueError, \
     InvalidPersistenceValueError, InvalidPriorityValueError, EnvironmentVipError, \
     IpEquipmentError, RealServerPriorityError, RealServerWeightError, \
-    RealServerPortError, RealParameterValueError, RealServerScriptError
+    RealServerPortError, RealParameterValueError, RealServerScriptError, EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError
 from time import strftime
 import logging
 
@@ -854,7 +854,7 @@ def ajax_model_ip_real_server(request):
     client_api = auth.get_clientFactory()
     return model_ip_real_server_shared(request, client_api)
 
-def parse_real_server(request, vip, client_api, id_vip, is_status=False):
+def parse_real_server(request, vip, client_api, id_vip, id_evip, is_status=False):
     reals = []
     if "reals" in vip:
         reals = validates_dict(vip['reals'], 'real')
@@ -878,31 +878,18 @@ def parse_real_server(request, vip, client_api, id_vip, is_status=False):
     version = []
     for i in range(0, len(reals)):
         
+        real = None
+        
         try:
             
             real_name = reals[i].get("real_name")
             real_ip = reals[i].get("real_ip")
-        
-            equip_aux = client_api.create_equipamento().listar_por_nome(real_name).get("equipamento")
-            ip_aux = client_api.create_ip().get_ipv4_or_ipv6(real_ip).get("ip")
             
-            ips_equip = client_api.create_ip().find_ips_by_equip(equip_aux.get("id")).get("ips")
+            real = client_api.create_vip().valid_real_server(real_ip, real_name , id_evip).get("real")
             
-            is_equip_ip_valid = False
-            key_ip = ''
-            if ip_aux.get("version") == IP_VERSION.IPv4[1]:
-                key_ip = 'ipv4'
-            else:
-                key_ip = 'ipv6'
-    
-            for _ip in validates_dict(ips_equip,key_ip):
-                if _ip.get("id") == ip_aux.get("id"):
-                    is_equip_ip_valid = True
-                    break
-            
-            if not is_equip_ip_valid:
-                raise EquipamentoNaoExisteError("")
-                    
+            equip_aux = real.get("equipment")
+            ip_aux = real.get("ip")
+                      
             equip.append(equip_aux.get("nome"))
             id_equip.append(equip_aux.get("id"))
             
@@ -947,7 +934,8 @@ def parse_real_server(request, vip, client_api, id_vip, is_status=False):
             if weights:
                 weight.append(weights[i])
                 
-        except (EquipamentoNaoExisteError, IpNaoExisteError), e:
+        except (EquipamentoNaoExisteError, IpNaoExisteError, IpNotFoundByEquipAndVipError), e:
+            logger.error(e)
             messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_reals") % (real_name, real_ip))
         
         except NetworkAPIClientError, e:
@@ -977,10 +965,20 @@ def tab_real_server_status(request, id_vip):
         vip['balancing'] = str(vip.get("metodo_bal")).upper()
         lists['vip'] = vip
         
-        id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, True)
+        finality = vip.get("finalidade")
+        client = vip.get("cliente")
+        environment = vip.get("ambiente")
+
+        id_evip = client_api.create_environment_vip().search(None, finality, client, environment).get("environmentvip").get("id")
+
+        id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, id_evip, True)
             
         lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version, status)
-        
+    
+    except EnvironmentVipNotFoundError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( finality, client, environment ))
+    
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -1084,7 +1082,7 @@ def tab_real_server(request, id_vip):
                 messages.add_message(request, messages.ERROR, e)
                 
         if parse is True:
-            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, True)
+            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip, True)
             lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version, status)
     
     except VipNaoExisteError, e:
@@ -1612,7 +1610,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
 
             lists = mount_table_ports(lists, ports_vip, ports_real)
             
-            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip)
+            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip)
                 
             lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip)
             

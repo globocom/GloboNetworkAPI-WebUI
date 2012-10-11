@@ -174,7 +174,7 @@ def delete_all(request):
             # Control others exceptions
             have_errors = False
 
-            # For each script selected to remove
+            # For each user selected to remove
             for id_user in ids:
                 try:
 

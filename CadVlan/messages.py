@@ -105,7 +105,9 @@ equip_messages = {
     'orquestracao_error':   u"Equipamentos que não sejam do tipo 'Servidor Virtual' não podem fazer parte do grupo 'Equipamentos Orquestração'.", 
     'marca_sucess':         u'Nova marca inserida com sucesso.', 
     'modelo_sucess':        u'Novo modelo inserido com sucesso.',
-
+    'modelo_sucess':        u'Novo modelo inserido com sucesso.',
+    'error_associate_group': u'Grupo %s não pode ser associado ao equipamento pois seu grupo de usuário não ter permissão.',
+    'error_disassociate_group': u'Grupo %s não pode ser desassociado ao equipamento pois seu grupo de usuário não ter permissão.',
 }
 
 vlan_messages = {

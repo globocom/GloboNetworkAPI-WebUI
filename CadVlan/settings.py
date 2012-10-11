@@ -167,7 +167,7 @@ CACHE_VLANS_TIMEOUT = 300 # Values in seconds
 URL_LOGIN = '/login'
 URL_HOME = '/home'
 
-NETWORK_API_URL = 'http://localhost/'
+NETWORK_API_URL = 'http://192.168.24.33/'
 NETWORK_API_USERNAME = 'CadVlan'
 NETWORK_API_PASSWORD = '12345678'
 
@@ -184,6 +184,8 @@ MAX_RESULT_DEFAULT = 25 # Options-> 10, 25, 50, 100
 PATCH_PANEL_ID = 8
 
 PATH_ACL = os.path.join(PROJECT_ROOT_PATH, 'ACLS/')
+
+PATH_PERMLISTS = os.path.join(PROJECT_ROOT_PATH, 'permissions')
 
 LDAP_DC = "dc=globoi,dc=com"
 LDAP_SSL = False

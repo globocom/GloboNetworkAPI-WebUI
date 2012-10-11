@@ -944,6 +944,14 @@ def edit_network4_form(request,id_net):
         redirect('vlan.search.list')
     
     try:
+        
+        lists['id_net'] = network.get('id')
+        lists['broadcast'] = network.get('broadcast')
+        lists['oct1'] = network.get("oct1")
+        lists['oct2'] = network.get("oct2")
+        lists['oct3'] = network.get("oct3")
+        lists['oct4'] = network.get("oct4")
+        lists['block_net'] = network.get("block")
     
         if request.method == 'POST':
             
@@ -960,16 +968,7 @@ def edit_network4_form(request,id_net):
                 messages.add_message(request, messages.SUCCESS, network_ip_messages.get("sucess_edit")) 
                     
                 return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
-            
-            #FORM INVALID
-            else:
-                lists['broadcast'] = network.get('broadcast')
-                lists['oct1'] = network.get("oct1")
-                lists['oct2'] = network.get("oct2")
-                lists['oct3'] = network.get("oct3")
-                lists['oct4'] = network.get("oct4")
-                lists['block_net'] = network.get("block")
-                lists['id_net'] = network.get('id')
+
         #Get
         else:
                 
@@ -981,14 +980,6 @@ def edit_network4_form(request,id_net):
             vlan = vlan.get("vlan")
             environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
             vlan_nome = "%s | %s - %s - %s" %(  vlan.get("num_vlan"), environment.get("nome_divisao"), environment.get("nome_ambiente_logico"), environment.get("nome_grupo_l3"))
-            lists['broadcast'] = network.get('broadcast')
-            lists['oct1'] = network.get("oct1")
-            lists['oct2'] = network.get("oct2")
-            lists['oct3'] = network.get("oct3")
-            lists['oct4'] = network.get("oct4")
-            lists['block_net'] = network.get("block")
-            lists['id_net'] = network.get('id')
-                
             lists['form'] = NetworkEditForm(net_type_list, env_vip_list,initial={'vlan_name':vlan_nome,'net_type':net_type,'env_vip':env_vip,'ip_version':ip_version})
                  
     except NetworkAPIClientError, e:
@@ -1021,6 +1012,17 @@ def edit_network6_form(request,id_net):
         redirect('vlan.search.list')
     
     try:
+        
+        lists['id_net'] = network.get("id")
+        lists['block1'] = network.get("block1")
+        lists['block2'] = network.get("block2")
+        lists['block3'] = network.get("block3")
+        lists['block4'] = network.get("block4")
+        lists['block5'] = network.get("block5")
+        lists['block6'] = network.get("block6")
+        lists['block7'] = network.get("block7")
+        lists['block8'] = network.get("block8")
+        lists['block_net'] = network.get("block")
     
         if request.method == 'POST':
             
@@ -1038,19 +1040,6 @@ def edit_network6_form(request,id_net):
                 
                 return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
             
-            #FORM INVALID
-            else:
-                lists['block1'] = network.get("block1")
-                lists['block2'] = network.get("block2")
-                lists['block3'] = network.get("block3")
-                lists['block4'] = network.get("block4")
-                lists['block5'] = network.get("block5")
-                lists['block6'] = network.get("block6")
-                lists['block7'] = network.get("block7")
-                lists['block8'] = network.get("block8")
-                lists['block_net'] = network.get("block")
-                lists['id_net'] = network.get("id")       
-       
         #Get
         else:
             env_vip = network.get("ambient_vip")
@@ -1061,16 +1050,6 @@ def edit_network6_form(request,id_net):
             vlan = vlan.get("vlan")
             environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
             vlan_nome = "%s | %s - %s - %s" %(  vlan.get("num_vlan"), environment.get("nome_divisao"), environment.get("nome_ambiente_logico"), environment.get("nome_grupo_l3"))
-            lists['block1'] = network.get("block1")
-            lists['block2'] = network.get("block2")
-            lists['block3'] = network.get("block3")
-            lists['block4'] = network.get("block4")
-            lists['block5'] = network.get("block5")
-            lists['block6'] = network.get("block6")
-            lists['block7'] = network.get("block7")
-            lists['block8'] = network.get("block8")
-            lists['block_net'] = network.get("block")
-            lists['id_net'] = network.get("id")
             lists['form'] = lists['form'] = NetworkEditForm(net_type_list, env_vip_list,initial={'vlan_name':vlan_nome,'net_type':net_type,'env_vip':env_vip,'ip_version':ip_version})
                  
     except NetworkAPIClientError, e:

@@ -6,7 +6,7 @@
 				
 				<tr>
 					<td style="max-width: 200px;width: 200px;" >{{ip6.description}}</td>
-					<td style="max-width: 200px;width: 200px;text-align: center;" >{{ip6.block1}}:{{ip6.block2}}:{{ip6.block3}}:{{ip6.block4}}:{{ip6.block5}}:{{ip6.block5}}:{{ip6.block6}}:{{ip6.block7}}:{{ip6.block8}}</td>
+					<td style="max-width: 260px;width: 260px;text-align: center;" >{{ip6.block1}}:{{ip6.block2}}:{{ip6.block3}}:{{ip6.block4}}:{{ip6.block5}}:{{ip6.block5}}:{{ip6.block6}}:{{ip6.block7}}:{{ip6.block8}}</td>
 					<td style="max-width: 200px;width: 200px;">
 					<a href="{% url network.insert.ip6.of.equip ip6.id_rede equip_id %}" target="_blank"><button type="button" id="btn_add6" class="btn_add6">Adicionar</button></a>
 					<a href="{% url network.delete.ip6.of.equip ip6.id equip_id %}"><button type="button" class="btn_del6" onclick="return confirm('Deseja deletar o IP?');" id="btn_del6">Remover</button></a>

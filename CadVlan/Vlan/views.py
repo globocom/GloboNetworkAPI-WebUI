@@ -126,7 +126,7 @@ def ajax_autocomplete_vlans(request):
         auth = AuthSession(request.session)
         vlan = auth.get_clientFactory().create_vlan()
         
-        # Get list of equipments from cache
+        # Get list of vlans from cache
         vlan_list = cache_list_vlans(vlan)
         
     except NetworkAPIClientError, e:

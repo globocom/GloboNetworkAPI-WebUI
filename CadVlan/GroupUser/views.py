@@ -44,7 +44,7 @@ def list_all(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        # Get all script_types from NetworkAPI
+        # Get all user groups from NetworkAPI
         user_groups = client.create_grupo_usuario().listar()
         lists['form'] = DeleteForm()
         lists['grupos'] = user_groups.get("grupo")

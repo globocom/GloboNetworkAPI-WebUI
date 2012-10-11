@@ -54,7 +54,7 @@ def list_all(request):
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def remove_environment(request):
     
     if request.method == 'POST':

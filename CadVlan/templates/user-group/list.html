@@ -29,6 +29,7 @@ $(document).ready(function() {
 	$("#page_tab_lists").tabs({ selected: {{tab}} });
 	$("#page_tab_form_user").tabs();
 	$("#page_tab_form_perm").tabs();
+	$("#page_tab_perms").tabs();
 	
 	$("#page_tab_form_user").hide();
 	$("#page_tab_form_perm").hide();
@@ -148,6 +149,28 @@ $(document).ready(function() {
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	$(".btn_edit", oTable_perms.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
+	$("#cadperm_outer").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"bPaginate": false,
+		"bFilter": true,
+		"bInfo": false,
+		"aoColumnDefs": [
+		                 { "bSortable": false, "aTargets": [ 1, 2 ] }
+		               ]
+	});
+	
+	$("#apiperms").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"bPaginate": false,
+		"bFilter": true,
+		"bInfo": false,
+		"aoColumnDefs": [
+		                 { "bSortable": false, "aTargets": [ 2 ] }
+		               ]
+	});
+	
 	
 })
 </script>
@@ -181,7 +204,7 @@ $(document).ready(function() {
 				</tr>
 				<tr>
 					<td><label>Exclusão</label></td>
-					<td class="text_center">{% ifequal ugroup.exclusa 'S' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
+					<td class="text_center">{% ifequal ugroup.exclusao 'S' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
 				</tr>
 			</table>
 		</div>
@@ -194,6 +217,7 @@ $(document).ready(function() {
 				<ul>
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Usuários</a></li>
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Permissão Administrativa</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3">Lista de Permissões</a></li>
 				</ul>
 				<div id="tabs-1">
 					<div class="buttons">
@@ -363,6 +387,149 @@ $(document).ready(function() {
 					
 				</div>
 				
+				<!-- ----------------------------------------------------- -->
+								
+				<div id="tabs-3">
+					
+					<div id="page_tab_perms">
+					
+						<ul>
+							<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#subtabs-1">CadVlan</a></li>
+							<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#subtabs-2">NetworkAPI</a></li>
+						</ul>
+						<div id="subtabs-1">
+							<table id="cadperm_outer" style="height:100%;">
+								<thead>
+									<tr>
+										<th>Funcionalidade</th>
+										<th>Permissões de Acesso a Tela</th>
+										<th>Funções - API</th>
+									</tr>
+								</thead>
+								<tbody style="height:100%;">
+									{% for cperm in cadperms %}
+									<tr>
+										<td class="text_center">{{ cperm.function }}</td>
+										
+										<td class="text_center" style="padding: 5px 5px 5px 5px; height:100%;">
+											<table class="permtrees bordasimplesPerm">
+												<thead>
+													<tr>
+														<th>Permissão</th>
+														<th>Leitura</th>
+														<th>Escrita</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for permission in cperm.perms %}
+													<tr>
+														<td class="text_center" style="width:226px;">{{ permission.perm }}</td>
+														<td class="text_center">{% ifequal permission.read 'True' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span> {% endifequal %}</td>
+														<td class="text_center">{% ifequal permission.write 'True' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span> {% endifequal %}</td>
+													</tr>
+													{% endfor %}
+												</tbody>
+											</table>
+										</td>
+									
+										<td class="text_center" style="padding: 5px 5px 5px 5px; height:100%;">
+											{% if cperm.api_calls %}
+											<table class="permtree_api bordasimplesPerm">
+												<thead>
+													<tr>
+														<th style="width:137px;">Classe</th>
+														<th style="width:260px;">Funções</th>
+														<th>Detalhes</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for api_call in cperm.api_calls %}
+													<tr>
+														<td class="text_center">{{ api_call.class }}</td>
+														<td class="text_center">{{ api_call.function }}</td>
+														
+														<td class="text_center" style="padding: 5px 5px 5px 5px;">
+															<table class="permtrees bordasimplesPerm" style="border: 0px;">
+																<thead>
+																	<tr>
+																		<th style="width:230px;">Permissões</th>
+																		<th style="width:48px;">Tipo</th>
+																		<th style="width:48px;">Equip</th>
+																		<th style="width:84px;">Tipo</th>
+																	</tr>
+																</thead>
+																
+																<tbody>
+																	{% for permis in api_call.perms %}
+																	<tr>
+																		<td class="text_center" style="border: 0px;">{{ permis.perm }}</td>
+																		<td class="text_center" style="border: 0px;">{{ permis.type }}</td>
+																		<td class="text_center" style="border: 0px;">{% ifequal permis.equip 'True' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span> {% endifequal %}</td>
+																		<td class="text_center" style="border: 0px;">{% ifequal permis.equip_type 'None' %} {% else %}{{ permis.equip_type }}{% endifequal %}</td>
+																	</tr>
+																	{% endfor %}
+																</tbody>
+															</table>
+														</td>
+													</tr>
+													{% endfor %}
+												</tbody>
+											</table>
+											{% endif %}
+										</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+						
+						<div id="subtabs-2">
+							
+							<table id="apiperms">
+								<thead>
+									<tr>
+										<th>Classe</th>
+										<th>Funções</th>
+										<th>Detalhes</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for api_call in apiperms %}
+									<tr>
+										<td class="text_center">{{ api_call.class }}</td>
+										<td class="text_center">{{ api_call.function }}</td>
+										
+										<td class="text_center" style="padding: 5px 5px 5px 5px;">
+											<table class="permtrees bordasimplesPerm" style="border: 0px;">
+												<thead>
+													<tr>
+														<th style="width:230px;">Permissões</th>
+														<th style="width:48px;">Tipo</th>
+														<th style="width:48px;">Equip</th>
+														<th style="width:84px;">Tipo</th>
+													</tr>
+												</thead>
+												
+												<tbody>
+													{% for permis in api_call.perms %}
+													<tr>
+														<td class="text_center" style="border: 0px;">{{ permis.perm }}</td>
+														<td class="text_center" style="border: 0px;">{{ permis.type }}</td>
+														<td class="text_center" style="border: 0px;">{% ifequal permis.equip 'True' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span> {% endifequal %}</td>
+														<td class="text_center" style="border: 0px;">{% ifequal permis.equip_type 'None' %} {% else %}{{ permis.equip_type }}{% endifequal %}</td>
+													</tr>
+													{% endfor %}
+												</tbody>
+											</table>
+										</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+							
+						</div>
+						
+				</div>
 					
 			</div>
 			</div>

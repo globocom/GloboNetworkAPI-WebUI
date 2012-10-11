@@ -14,14 +14,107 @@ from CadVlan.forms import DeleteForm, DeleteFormAux
 from CadVlan.messages import error_messages, user_group_messages, perm_group_messages
 from CadVlan.permissions import ADMINISTRATION
 from CadVlan.templates import USERGROUP_LIST
+from CadVlan.settings import PATH_PERMLISTS
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError, PermissaoAdministrativaDuplicadaError
 import logging
+import re
+import codecs
 
 logger = logging.getLogger(__name__)
+
+def parse_cad_perms(filename):
+    permtree = list()
+    
+    with codecs.open(filename,"r", "utf-8") as fl:
+        data = fl.read()
+        
+        #iterate over cadvlan functions
+        for permcad in re.finditer(ur'^(?P<function>[A-Z][^\n]+)\n(?P<resto>(?:\t[a-zA-Z _]+\n\t\t(?:False|True)\n\t\t(?:False|True)\n)+(?:\tapi:\n(?:\t[a-zA-Z]+\n\t[a-zA-Z0-9_\(\)]+\n(?:\t\t[a-zA-Z_]+\n\t\t(?:Leitura|Escrita)\n\t\t(?:True|False)\n\t\t(?:None|Leitura|Escrita|Update_Config)\n)*)+)*)', data, re.MULTILINE|re.UNICODE):
+            permcadvlan = dict()
+            permcadvlan['function'] = permcad.group('function')
+            permcadvlan['perms'] = list()
+            permcadvlan['api_calls'] = None
+            
+            resto = permcad.group('resto')
+            
+            #iterate over cadvlan perms
+            for perms_cad in re.finditer('^\t(?P<perm>[a-zA-Z_]+)\n\t\t(?P<read>False|True)\n\t\t(?P<write>False|True)\n', resto, re.MULTILINE):
+                new_perm = dict()
+                new_perm['perm'] = perms_cad.group('perm')
+                new_perm['read'] = perms_cad.group('read')
+                new_perm['write'] = perms_cad.group('write')
+                
+                permcadvlan['perms'].append(new_perm)
+            
+            api_data = re.search('\tapi:\n((?:\t[a-zA-Z]+\n\t[a-zA-Z0-9_\(\)]+\n(?:\t\t[a-zA-Z_]+\n\t\t(?:Leitura|Escrita)\n\t\t(?:True|False)\n\t\t(?:None|Leitura|Escrita|Update_Config)\n)*)+)', resto, re.MULTILINE)
+            if api_data != None:
+                
+                permcadvlan['api_calls'] = list()
+                api_data = api_data.group(1)
+                
+                #iterate over api calls
+                for api_call in re.finditer('\t(?P<class>[a-zA-Z0-9]+)\n\t(?P<function>[a-zA-Z0-9_\(\)]+)\n(?P<mais_resto>(?:\t\t[a-zA-Z_]+\n\t\t(?:Leitura|Escrita)\n\t\t(?:True|False)\n\t\t(?:None|Leitura|Escrita|Update_Config)\n)+)*', api_data, re.MULTILINE):
+                    perm_api = dict()
+                    perm_api['class'] = api_call.group('class')
+                    perm_api['function'] = api_call.group('function')
+                    
+                    #iterate over api function perms
+                    resto_perms_api = api_call.group('mais_resto')
+                    if resto_perms_api is not None:
+                        perm_api['perms'] = list()
+                        
+                        for api_new_perm in re.finditer('\t\t(?P<perm>[a-zA-Z_]+)\n\t\t(?P<type>Leitura|Escrita)\n\t\t(?P<equip>True|False)\n\t\t(?P<equip_type>None|Leitura|Escrita|Update_Config)\n', resto_perms_api, re.MULTILINE):
+                            perm_api_call = dict()
+                            perm_api_call['perm'] = api_new_perm.group('perm')
+                            perm_api_call['type'] = api_new_perm.group('type')
+                            perm_api_call['equip'] = api_new_perm.group('equip')
+                            perm_api_call['equip_type'] = api_new_perm.group('equip_type')
+                            
+                            perm_api['perms'].append(perm_api_call)
+                    
+                    permcadvlan['api_calls'].append(perm_api)
+            
+            if permcadvlan['api_calls'] is not None:
+                permcadvlan['api_calls'].sort(key=lambda call: (call['class'], call['function']))
+            permtree.append(permcadvlan)
+    
+    permtree.sort(key=lambda perm: perm['function'])
+    return permtree
+
+def parse_api_perms(filename):
+    apitree = list()
+    
+    with codecs.open(filename,"r", "utf-8") as fl:
+        data = fl.read()
+        
+        #iterate over api calls
+        for api_call in re.finditer('(?P<class>[a-zA-Z0-9]+)\n(?P<function>[a-zA-Z0-9_\(\)]+)\n(?P<mais_resto>(?:\t[a-zA-Z_]+\n\t(?:Leitura|Escrita)\n\t(?:True|False)\n\t(?:None|Leitura|Escrita|Update_Config)\n)+)*', data, re.MULTILINE):
+            perm_api = dict()
+            perm_api['class'] = api_call.group('class')
+            perm_api['function'] = api_call.group('function')
+            
+            #iterate over api function perms
+            resto_perms_api = api_call.group('mais_resto')
+            if resto_perms_api is not None:
+                perm_api['perms'] = list()
+            
+                for api_new_perm in re.finditer('\t(?P<perm>[a-zA-Z_]+)\n\t(?P<type>Leitura|Escrita)\n\t(?P<equip>True|False)\n\t(?P<equip_type>None|Leitura|Escrita|Update_Config)\n', resto_perms_api, re.MULTILINE):
+                    perm_api_call = dict()
+                    perm_api_call['perm'] = api_new_perm.group('perm')
+                    perm_api_call['type'] = api_new_perm.group('type')
+                    perm_api_call['equip'] = api_new_perm.group('equip')
+                    perm_api_call['equip_type'] = api_new_perm.group('equip_type')
+                    
+                    perm_api['perms'].append(perm_api_call)
+            
+            apitree.append(perm_api)
+    
+    apitree.sort(key=lambda call: (call['class'], call['function']))
+    return apitree
 
 def load_list(request, lists, id_ugroup, tab):
     
@@ -49,7 +142,7 @@ def load_list(request, lists, id_ugroup, tab):
 
         lists['form'] = DeleteForm()
         lists['form_aux'] = DeleteFormAux()
-        lists['tab'] = '0' if tab == '0' else '1'
+        lists['tab'] = '0' if tab == '0' else '1' if tab == '1' else '2'
         
         lists['action_new_users'] =  reverse("user-group.form", args=[id_ugroup])
         lists['action_new_perms'] =  reverse("user-group-perm.form", args=[id_ugroup])
@@ -64,6 +157,9 @@ def load_list(request, lists, id_ugroup, tab):
                 list_suggestion_perm.append(function)
 
         lists['suggestion_perm'] = list_suggestion_perm
+        
+        lists['cadperms'] = parse_cad_perms(PATH_PERMLISTS+"/cadperms.txt")
+        lists['apiperms'] = parse_api_perms(PATH_PERMLISTS+"/apiperms.txt")
 
 
     except NetworkAPIClientError, e:

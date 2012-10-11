@@ -1,0 +1,1693 @@
+Ambiente
+list_all()
+	cadastro_de_ambiente
+	Leitura
+	False
+	None
+
+Ambiente
+listar()
+	cadastro_de_ambiente
+	Leitura
+	False
+	None
+
+Ambiente
+buscar_por_equipamento()
+	cadastro_de_ambiente
+	Leitura
+	True
+	Leitura
+
+Ambiente
+buscar_por_id()
+	cadastro_de_ambiente
+	Leitura
+	False
+	None
+
+Ambiente
+buscar_healthcheck_por_id()
+	healthcheck_expect
+	Leitura
+	False
+	None
+
+Ambiente
+listar_por_equip()
+	cadastro_de_ambiente
+	Leitura
+	False
+	None
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+Ambiente
+listar_healthcheck_expect()
+	healthcheck_expect
+	Leitura
+	False
+	None
+
+Ambiente
+add_healthcheck_expect()
+	healthcheck_expect
+	Escrita
+	False
+	None
+
+Ambiente
+inserir()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+Ambiente
+insert_with_ip_range()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+Ambiente
+add_ip_range()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+Ambiente
+alterar()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+Ambiente
+remover()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+Ambiente
+add_expect_string_healthcheck()
+	healthcheck_expect
+	Escrita
+	False
+	None
+
+Ambiente
+listar_healtchcheck_expect_distinct()
+	healthcheck_expect
+	Leitura
+	False
+	None
+
+AmbienteLogico
+listar()
+	cadastro_de_ambiente
+	Leitura
+	False
+	None
+
+AmbienteLogico
+inserir()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+AmbienteLogico
+alterar()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+AmbienteLogico
+remover()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+DireitoGrupoEquipamento
+listar()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+DireitoGrupoEquipamento
+listar_por_grupo_usuario()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+DireitoGrupoEquipamento
+listar_por_grupo_equipamento()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+DireitoGrupoEquipamento
+buscar_por_id()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+DireitoGrupoEquipamento
+inserir()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+DireitoGrupoEquipamento
+alterar()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+DireitoGrupoEquipamento
+remover()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+DivisaoDC
+listar()
+	cadastro_de_ambiente
+	Leitura
+	False
+	None
+
+DivisaoDC
+inserir()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+DivisaoDC
+alterar()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+DivisaoDC
+remover()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+EnvironmentVIP
+list_all()
+	ambiente_vip
+	Leitura
+	False
+	None
+
+EnvironmentVIP
+add()
+	ambiente_vip
+	Escrita
+	False
+	None
+
+EnvironmentVIP
+alter()
+	ambiente_vip
+	Escrita
+	False
+	None
+
+EnvironmentVIP
+remove()
+	ambiente_vip
+	Escrita
+	False
+	None
+
+EnvironmentVIP
+search()
+	ambiente_vip
+	Leitura
+	False
+	None
+
+EnvironmentVIP
+get_vips()
+	ambiente_vip
+	Leitura
+	False
+	None
+
+EnvironmentVIP
+buscar_finalidade()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+EnvironmentVIP
+buscar_cliente_por_finalidade()
+	ambiente_vip
+	Leitura
+	False
+	None
+
+EnvironmentVIP
+buscar_ambientep44_por_finalidade_cliente()
+	ambiente_vip
+	Leitura
+	False
+	None
+
+Equipamento
+find_equips()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+Equipamento
+inserir()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Equipamento
+edit()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Equipamento
+criar_ip()
+	ips
+	Escrita
+	True
+	Escrita
+
+Equipamento
+add_ipv4()
+	ips
+	Escrita
+	True
+	Escrita
+
+Equipamento
+add_ipv6()
+	ips
+	Escrita
+	True
+	Escrita
+
+Equipamento
+remover_ip()
+	ips
+	Escrita
+	True
+	Escrita
+
+Equipamento
+associar_ip()
+	ips
+	Escrita
+	True
+	Escrita
+
+Equipamento
+associate_ipv6()
+	ips
+	Escrita
+	True
+	Escrita
+
+Equipamento
+remove_ipv6()
+	ips
+	Escrita
+	True
+	Escrita
+
+Equipamento
+listar_por_tipo_ambiente()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+Equipamento
+listar_por_nome()
+	cadastro_de_equipamentos
+	Leitura
+	True
+	Leitura
+
+Equipamento
+listar_por_id()
+	cadastro_de_equipamentos
+	Leitura
+	True
+	Leitura
+
+Equipamento
+list_all()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+Equipamento
+get_all()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+Equipamento
+remover()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Equipamento
+associar_grupo()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Equipamento
+remover_grupo()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Equipamento
+list_by_group()
+	cadastro_de_grupos_equipamentos
+	Leitura
+	False
+	None
+
+EquipamentoAcesso
+get_access()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+EquipamentoAcesso
+listar()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+EquipamentoAcesso
+list_by_equip()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+EquipamentoAcesso
+inserir()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+EquipamentoAcesso
+edit_by_id()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+EquipamentoAcesso
+remover()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+EquipamentoAmbiente
+inserir()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+EquipamentoAmbiente
+remover()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+EquipamentoRoteiro
+listar()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+EquipamentoRoteiro
+list_by_equip()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+EquipamentoRoteiro
+inserir()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+EquipamentoRoteiro
+remover()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+GrupoEquipamento
+search()
+	cadastro_de_grupos_equipamentos
+	Leitura
+	False
+	None
+
+GrupoEquipamento
+listar()
+	cadastro_de_grupos_equipamentos
+	Leitura
+	False
+	None
+
+GrupoEquipamento
+listar_por_equip()
+	cadastro_de_grupos_equipamentos
+	Leitura
+	False
+	None
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+GrupoEquipamento
+inserir()
+	cadastro_de_grupos_equipamentos
+	Escrita
+	False
+	None
+
+GrupoEquipamento
+alterar()
+	cadastro_de_grupos_equipamentos
+	Escrita
+	False
+	None
+
+GrupoEquipamento
+remover()
+	cadastro_de_grupos_equipamentos
+	Escrita
+	False
+	None
+
+GrupoEquipamento
+associa_equipamento()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+GrupoEquipamento
+remove()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+GrupoL3
+listar()
+	cadastro_de_ambiente
+	Leitura
+	False
+	None
+
+GrupoL3
+inserir()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+GrupoL3
+alterar()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+GrupoL3
+remover()
+	cadastro_de_ambiente
+	Escrita
+	False
+	None
+
+GrupoUsuario
+search()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+GrupoUsuario
+listar()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+GrupoUsuario
+inserir()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+GrupoUsuario
+alterar()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+GrupoUsuario
+remover()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+GrupoVirtual
+provisionar()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+	ips
+	Escrita
+	True
+	Escrita
+	requisicao_vips
+	Escrita
+	False
+	None
+
+GrupoVirtual
+remover_provisionamento()
+	ips
+	Escrita
+	True
+	Escrita
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Interface
+listar_por_equipamento()
+	cadastro_de_equipamentos
+	Leitura
+	True
+	Leitura
+
+Interface
+list_all_by_equip()
+	cadastro_de_equipamentos
+	Leitura
+	True
+	Leitura
+
+Interface
+get_by_id()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+Interface
+inserir()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Interface
+alterar()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Interface
+remover()
+	cadastro_de_equipamentos
+	Escrita
+	True
+	Escrita
+
+Interface
+remove_connection()
+	cadastro_de_equipamentos
+	Escrita
+	False
+	None
+
+Interface
+listar_ligacoes()
+	cadastro_de_equipamentos
+	Leitura
+	True
+	Leitura
+
+Interface
+list_connections()
+	cadastro_de_equipamentos
+	Leitura
+	True
+	Leitura
+
+Ip
+get_ipv4()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+get_ipv6()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+buscar_por_ip_ambiente()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+get_available_ip4()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+get_ip_by_equip_and_vip()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+get_ipv4_or_ipv6()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+check_vip_ip()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+get_available_ip6()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+get_available_ip6_for_vip()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+get_available_ip4_for_vip()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+edit_ipv4()
+	ips
+	Escrita
+	False
+	None
+
+Ip
+save_ipv4()
+	ips
+	Escrita
+	True
+	Escrita
+
+Ip
+edit_ipv6()
+	ips
+	Escrita
+	False
+	None
+
+Ip
+find_ip4_by_id()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+find_ips_by_equip()
+	ips
+	Leitura
+	False
+	None
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+Ip
+find_ip6_by_id()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+save_ipv6()
+	ips
+	Escrita
+	True
+	Escrita
+
+Ip
+delete_ip4()
+	ips
+	Escrita
+	False
+	None
+
+Ip
+delete_ip6()
+	ips
+	Escrita
+	False
+	None
+
+Ip
+find_ip4_by_network()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+find_ip6_by_network()
+	ips
+	Leitura
+	False
+	None
+
+Ip
+search_ipv6_environment()
+	ips
+	Leitura
+	False
+	None
+
+Marca
+listar()
+	cadastro_de_marca
+	Leitura
+	False
+	None
+
+Marca
+inserir()
+	cadastro_de_marca
+	Escrita
+	False
+	None
+
+Marca
+alterar()
+	cadastro_de_marca
+	Escrita
+	False
+	None
+
+Marca
+remover()
+	cadastro_de_marca
+	Escrita
+	False
+	None
+
+Modelo
+listar_por_marca()
+	cadastro_de_marca
+	Leitura
+	False
+	None
+
+Modelo
+listar()
+	cadastro_de_marca
+	Leitura
+	False
+	None
+
+Modelo
+inserir()
+	cadastro_de_marca
+	Escrita
+	False
+	None
+
+Modelo
+alterar()
+	cadastro_de_marca
+	Escrita
+	False
+	None
+
+Modelo
+remover()
+	cadastro_de_marca
+	Escrita
+	False
+	None
+
+Network
+add_network()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Network
+add_network_ipv4()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Network
+edit_network()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Network
+get_network_ipv4()
+	cadastro_de_vlans
+	Leitura
+	False
+	None
+
+Network
+get_network_ipv6()
+	cadastro_de_vlans
+	Leitura
+	False
+	None
+
+Network
+deallocate_network_ipv4()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Network
+add_network_ipv6()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Network
+deallocate_network_ipv6()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+OptionVIP
+add()
+	opcao_vip
+	Escrita
+	False
+	None
+
+OptionVIP
+alter()
+	opcao_vip
+	Escrita
+	False
+	None
+
+OptionVIP
+remove()
+	opcao_vip
+	Escrita
+	False
+	None
+
+OptionVIP
+search()
+	opcao_vip
+	Leitura
+	False
+	None
+
+OptionVIP
+get_all()
+	opcao_vip
+	Leitura
+	False
+	None
+
+OptionVIP
+get_option_vip()
+	opcao_vip
+	Leitura
+	False
+	None
+
+OptionVIP
+associate()
+	opcao_vip
+	Escrita
+	False
+	None
+
+OptionVIP
+disassociate()
+	opcao_vip
+	Escrita
+	False
+	None
+
+OptionVIP
+buscar_timeout_opcvip()
+	opcao_vip
+	Leitura
+	False
+	None
+
+OptionVIP
+buscar_grupo_cache_opcvip()
+	opcao_vip
+	Leitura
+	False
+	None
+
+OptionVIP
+buscar_balanceamento_opcvip()
+	opcao_vip
+	Leitura
+	False
+	None
+
+OptionVIP
+buscar_persistencia_opcvip()
+	opcao_vip
+	Leitura
+	False
+	None
+
+PermissaoAdministrativa
+list_by_group()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+PermissaoAdministrativa
+search()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+PermissaoAdministrativa
+listar()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+PermissaoAdministrativa
+inserir()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+PermissaoAdministrativa
+alterar()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+PermissaoAdministrativa
+remover()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Roteiro
+listar()
+	cadastro_de_roteiro
+	Leitura
+	False
+	None
+
+Roteiro
+inserir()
+	cadastro_de_roteiro
+	Escrita
+	False
+	None
+
+Roteiro
+alterar()
+	cadastro_de_roteiro
+	Escrita
+	False
+	None
+
+Roteiro
+remover()
+	cadastro_de_roteiro
+	Escrita
+	False
+	None
+
+Roteiro
+listar_por_tipo()
+	cadastro_de_roteiro
+	Leitura
+	False
+	None
+
+Roteiro
+listar_por_equipamento()
+	cadastro_de_equipamentos
+	Leitura
+	True
+	Leitura
+
+TipoAcesso
+listar()
+	cadastro_de_tipo_acesso
+	Leitura
+	False
+	None
+
+TipoAcesso
+inserir()
+	cadastro_de_tipo_acesso
+	Escrita
+	False
+	None
+
+TipoAcesso
+alterar()
+	cadastro_de_tipo_acesso
+	Escrita
+	False
+	None
+
+TipoAcesso
+remover()
+	cadastro_de_tipo_acesso
+	Escrita
+	False
+	None
+
+TipoEquipamento
+listar()
+	cadastro_de_equipamentos
+	Leitura
+	False
+	None
+
+TipoEquipamento
+inserir()
+	cadastro_de_equipamentos
+	Escrita
+	False
+	None
+
+TipoRede
+listar()
+	cadastro_de_tipo_rede
+	Leitura
+	False
+	None
+
+TipoRede
+inserir()
+	cadastro_de_tipo_rede
+	Escrita
+	False
+	None
+
+TipoRede
+alterar()
+	cadastro_de_tipo_rede
+	Escrita
+	False
+	None
+
+TipoRede
+remover()
+	cadastro_de_tipo_rede
+	Escrita
+	False
+	None
+
+TipoRoteiro
+listar()
+	cadastro_de_roteiro
+	Leitura
+	False
+	None
+
+TipoRoteiro
+inserir()
+	cadastro_de_roteiro
+	Escrita
+	False
+	None
+
+TipoRoteiro
+alterar()
+	cadastro_de_roteiro
+	Escrita
+	False
+	None
+
+TipoRoteiro
+remover()
+	cadastro_de_roteiro
+	Escrita
+	False
+	None
+
+Usuario
+list_by_group()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+Usuario
+list_by_group_out()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+Usuario
+listar()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+Usuario
+list_with_usergroup()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+Usuario
+get_by_id()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+Usuario
+inserir()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Usuario
+alterar()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Usuario
+change_password()
+
+Usuario
+remover()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Usuario
+authenticate()
+	authenticate
+	Escrita
+	False
+	None
+
+UsuarioGrupo
+inserir()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+UsuarioGrupo
+remover()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Vip
+criar_requisicao()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+Vip
+add()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+Vip
+alter()
+	script_alterar_vip
+	Escrita
+	False
+	None
+
+Vip
+edit_reals()
+	script_alterar_vip
+	Escrita
+	False
+	None
+
+Vip
+adicionar_real()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+add_real_ipv6()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+habilitar_real()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+enable_real_ipv6()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+desabilitar_real()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+disable_real_ipv6()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+checar_real()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+check_real_ipv6()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+remover()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+Vip
+validate()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+Vip
+remover_real()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+remover_real_ipv6()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+alterar()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+Vip
+buscar()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+Vip
+find_vip_requests()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+Vip
+get_by_id()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+Vip
+get_all()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+Vip
+get_by_ipv4()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+Vip
+get_by_ipv6()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+Vip
+criar()
+	requisicao_vips
+	Escrita
+	False
+	None
+	script_criacao_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+remove_script()
+	requisicao_vips
+	Escrita
+	False
+	None
+	script_criacao_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+alter_maxcon()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+alter_healthcheck()
+	script_alterar_vip
+	Escrita
+	True
+	Update_Config
+
+Vip
+alter_priority()
+	script_criacao_vip
+	Escrita
+	True
+	Update_Config
+
+Vlan
+invalidate()
+	validar_acl_vlans
+	Escrita
+	False
+	None
+
+Vlan
+invalidate_ipv6()
+	validar_acl_vlans
+	Escrita
+	False
+	None
+
+Vlan
+find_vlans()
+	cadastro_de_vlans
+	Leitura
+	False
+	None
+
+Vlan
+list_all()
+	cadastro_de_vlans
+	Leitura
+	False
+	None
+
+Vlan
+listar_por_ambiente()
+	cadastro_de_vlans
+	Leitura
+	False
+	None
+
+Vlan
+alocar()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+insert_vlan()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+edit_vlan()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+allocate_without_network()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+adicionar_permissao()
+	script_alterar_vlan
+	Escrita
+	True
+	Update_Config
+
+Vlan
+remover_permissao()
+	script_alterar_vlan
+	Escrita
+	True
+	Update_Config
+
+Vlan
+verificar_permissao()
+	script_alterar_vlan
+	Leitura
+	True
+	Leitura
+
+Vlan
+buscar()
+	cadastro_de_vlans
+	Leitura
+	False
+	None
+
+Vlan
+get()
+	cadastro_de_vlans
+	Leitura
+	False
+	None
+
+Vlan
+listar_permissao()
+	script_alterar_vlan
+	Leitura
+	True
+	Leitura
+
+Vlan
+criar()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+create_ipv4()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+create_ipv6()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+validar()
+	validar_acl_vlans
+	Escrita
+	False
+	None
+
+Vlan
+validate_ipv6()
+	validar_acl_vlans
+	Escrita
+	False
+	None
+
+Vlan
+remove()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+deallocate()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
+allocate_IPv6()
+	cadastro_de_vlans
+	Escrita
+	False
+	None

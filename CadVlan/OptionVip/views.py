@@ -218,7 +218,7 @@ def edit_form(request, id_optionvip):
 
 @log
 @login_required
-@has_perm([{"permission": OPTION_VIP, "write": True}])
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True},{"permission": OPTION_VIP, "write": True}])
 def option_vip_associate_net4(request,id_net):
     '''
     
