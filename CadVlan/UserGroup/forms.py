@@ -19,7 +19,11 @@ class UserGroupForm(forms.Form):
     
 class PermissionGroupForm(forms.Form):
     
+    def __init__(self, function_list, *args, **kwargs):
+        super(PermissionGroupForm, self).__init__(*args, **kwargs)
+        self.fields['function'].choices = [(st['id'], st['function']) for st in function_list]
+
     id_group_perms = forms.IntegerField(label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
-    function = forms.CharField  (label=u'Função', min_length=3, max_length=100 , required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
+    function = forms.ChoiceField(label=u'Função'  , required=True, error_messages=error_messages)
     read = forms.BooleanField(label=u'Leitura', required=False, error_messages=error_messages)
     write = forms.BooleanField(label=u'Escrita', required=False, error_messages=error_messages)

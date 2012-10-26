@@ -135,7 +135,8 @@ def load_list(request, lists, id_ugroup, tab):
         lists['perms'] = validates_dict(client.create_permissao_administrativa().list_by_group(id_ugroup), 'perms')
 
         if not 'form_perms' in lists:
-            lists['form_perms'] = PermissionGroupForm()
+            function_list = validates_dict(client.create_permission().list_all(), 'perms')            
+            lists['form_perms'] = PermissionGroupForm(function_list)
 
         if not 'action_edit_perms' in lists:
             lists['action_edit_perms'] = reverse("user-group-perm.form", args=[id_ugroup])
@@ -147,17 +148,6 @@ def load_list(request, lists, id_ugroup, tab):
         lists['action_new_users'] =  reverse("user-group.form", args=[id_ugroup])
         lists['action_new_perms'] =  reverse("user-group-perm.form", args=[id_ugroup])
 
-        #Suggestion Administrative Permission 
-        list_suggestion_perm = []
-        for perm in validates_dict(client.create_permissao_administrativa().listar(), 'permissao_administrativa'):
-
-            function = perm.get('funcao')
-
-            if not function in list_suggestion_perm:
-                list_suggestion_perm.append(function)
-
-        lists['suggestion_perm'] = list_suggestion_perm
-        
         lists['cadperms'] = parse_cad_perms(PATH_PERMLISTS+"/cadperms.txt")
         lists['apiperms'] = parse_api_perms(PATH_PERMLISTS+"/apiperms.txt")
 
@@ -362,17 +352,19 @@ def add_form_perm(request, id_ugroup):
     try:
 
         lists = dict()
-
+        
         # Get user
         auth = AuthSession(request.session)
         client_perm = auth.get_clientFactory().create_permissao_administrativa()
 
         # Get Group User by ID from NetworkAPI
         lists['ugroup'] = auth.get_clientFactory().create_grupo_usuario().search(id_ugroup).get('group_user')
+        
+        function_list = validates_dict(auth.get_clientFactory().create_permission().list_all(), 'perms')            
 
         if request.method == "POST":
 
-            form = PermissionGroupForm(request.POST)
+            form = PermissionGroupForm(function_list, request.POST)
             lists['form_perms'] = form
 
             if form.is_valid():
@@ -386,10 +378,6 @@ def add_form_perm(request, id_ugroup):
                 messages.add_message(request, messages.SUCCESS, perm_group_messages.get("success_insert"))
 
                 return redirect('user-group.list', id_ugroup, 1)
-
-    except PermissaoAdministrativaDuplicadaError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, perm_group_messages.get("invalid_function_duplicate") % function )
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -409,6 +397,7 @@ def edit_form_perm(request, id_ugroup, id_perm):
     try:
         
         lists = dict()
+        lists['edit_perms'] = True
         lists['action_edit_perms'] = reverse("user-group-perm.edit", args=[id_ugroup,id_perm]) 
 
         # Get user
@@ -417,12 +406,14 @@ def edit_form_perm(request, id_ugroup, id_perm):
 
         # Get Group User by ID from NetworkAPI
         lists['ugroup'] = auth.get_clientFactory().create_grupo_usuario().search(id_ugroup).get('group_user')
+        
+        function_list = validates_dict(auth.get_clientFactory().create_permission().list_all(), 'perms')
 
         perm = client_perm.search(id_perm).get("perm")
 
         if request.method == "POST":
 
-            form = PermissionGroupForm(request.POST)
+            form = PermissionGroupForm(function_list, request.POST)
             lists['form_perms'] = form
 
             if form.is_valid():
@@ -440,8 +431,8 @@ def edit_form_perm(request, id_ugroup, id_perm):
 
         #GET
         else: 
-            initial={"id_group_perms" : perm.get("id"), "function" : perm.get("funcao"), "read" : convert_string_to_boolean(perm.get("leitura")), "write" : convert_string_to_boolean(perm.get("escrita"))}
-            lists['form_perms'] = PermissionGroupForm(initial=initial)
+            initial={"id_group_perms" : perm.get("id"), "function" : perm.get("permission"), "read" : convert_string_to_boolean(perm.get("leitura")), "write" : convert_string_to_boolean(perm.get("escrita"))}
+            lists['form_perms'] = PermissionGroupForm(function_list, initial=initial)
 
     except NetworkAPIClientError, e:
         logger.error(e)

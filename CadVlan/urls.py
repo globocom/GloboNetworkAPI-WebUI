@@ -269,3 +269,12 @@ urlpatterns += patterns('CadVlan.Ldap.views',
     url('^ldap/user/lock[/]?$', 'ajax_lock_user', name='ldap.user.lock.ajax',),
     url('^ldap/user/unlock[/]?$', 'ajax_unlock_user', name='ldap.user.unlock.ajax',),
 )
+
+# URL's Filter
+urlpatterns += patterns('CadVlan.Filter.views',
+    url('^filter/list[/]?$', 'list_all', name='filter.list',),
+    url('^filter/delete[/]?$', 'delete_all', name='filter.delete',),
+    url('^filter/form[/]?$', 'add_form', name='filter.form',),
+    url('^filter/form/(?P<id_filter>\d+)[/]?$', 'edit_form', name='filter.edit',),
+
+)

@@ -39,7 +39,7 @@ def list_all(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         
-        # Get all scripts from NetworkAPI
+        # Get all environments from NetworkAPI
         environment = client.create_ambiente().listar()
         
         # Business
@@ -194,9 +194,10 @@ def insert_ambiente(request):
         env_logic = client.create_ambiente_logico().listar()
         division_dc = client.create_divisao_dc().listar()
         group_l3 = client.create_grupo_l3().listar()
+        filters = client.create_filter().list_all()
         
         # Forms
-        lists['ambiente'] = AmbienteForm(env_logic, division_dc, group_l3)
+        lists['ambiente'] = AmbienteForm(env_logic, division_dc, group_l3, filters)
         lists['divisaodc_form'] = DivisaoDCForm()
         lists['grupol3_form'] = Grupol3Form()
         lists['ambientelogico_form'] = AmbienteLogicoForm()
@@ -206,7 +207,7 @@ def insert_ambiente(request):
         if request.method == 'POST':
             
             # Set data in form
-            ambiente_form = AmbienteForm(env_logic, division_dc, group_l3, request.POST)
+            ambiente_form = AmbienteForm(env_logic, division_dc, group_l3, filters, request.POST)
             
             # Validate
             if ambiente_form.is_valid():
@@ -214,10 +215,13 @@ def insert_ambiente(request):
                 divisao_dc = ambiente_form.cleaned_data['divisao']
                 ambiente_logico = ambiente_form.cleaned_data['ambiente_logico']
                 grupo_l3 = ambiente_form.cleaned_data['grupol3']
+                filter_ = ambiente_form.cleaned_data['filter']
+                if str(filter_) == str(None):
+                    filter_ = None
                 link = ambiente_form.cleaned_data['link']
                 
                 # Business
-                client.create_ambiente().inserir(grupo_l3, ambiente_logico, divisao_dc, link)
+                client.create_ambiente().inserir(grupo_l3, ambiente_logico, divisao_dc, link, filter_)
                 messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
                 
                 return redirect('environment.list')
@@ -248,6 +252,7 @@ def edit(request, id_environment):
         env_logic = client.create_ambiente_logico().listar()
         division_dc = client.create_divisao_dc().listar()
         group_l3 = client.create_grupo_l3().listar()
+        filters = client.create_filter().list_all()
         
         try:
             env = client.create_ambiente().buscar_por_id(id_environment)
@@ -260,8 +265,10 @@ def edit(request, id_environment):
         # Set Environment data
         initial = {"id_env": env.get("id"), "divisao": env.get("id_divisao"),
                    "ambiente_logico": env.get("id_ambiente_logico"),
-                   "grupol3": env.get("id_grupo_l3"), "link": env.get("link")}
-        env_form = AmbienteForm(env_logic, division_dc, group_l3, initial=initial)
+                   "grupol3": env.get("id_grupo_l3"),
+                   "filter": env.get("id_filter"),
+                   "link": env.get("link")}
+        env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, initial=initial)
         
         # Forms
         lists['ambiente'] = env_form
@@ -274,7 +281,7 @@ def edit(request, id_environment):
         if request.method == 'POST':
             
             # Set data in form
-            ambiente_form = AmbienteForm(env_logic, division_dc, group_l3, request.POST)
+            ambiente_form = AmbienteForm(env_logic, division_dc, group_l3, filters, request.POST)
             
             # Validate
             if ambiente_form.is_valid():
@@ -283,10 +290,13 @@ def edit(request, id_environment):
                 divisao_dc = ambiente_form.cleaned_data['divisao']
                 ambiente_logico = ambiente_form.cleaned_data['ambiente_logico']
                 grupo_l3 = ambiente_form.cleaned_data['grupol3']
+                filter_ = ambiente_form.cleaned_data['filter']
+                if str(filter_) == str(None):
+                    filter_ = None
                 link = ambiente_form.cleaned_data['link']
                 
                 # Business
-                client.create_ambiente().alterar(id_env, grupo_l3, ambiente_logico, divisao_dc, link)
+                client.create_ambiente().alterar(id_env, grupo_l3, ambiente_logico, divisao_dc, link, filter_)
                 messages.add_message(request, messages.SUCCESS, environment_messages.get("success_edit"))
                 
                 return redirect('environment.list')
@@ -346,9 +356,10 @@ def insert_grupo_l3(request):
             env_logic = client.create_ambiente_logico().listar()
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
+            filters = client.create_filter().list_all()
             
             # Forms
-            env_form = AmbienteForm(env_logic, division_dc, group_l3)
+            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters)
             div_form = DivisaoDCForm()
             amb_form = AmbienteLogicoForm()
             action = reverse("environment.form")
@@ -361,8 +372,10 @@ def insert_grupo_l3(request):
                 # Set Environment data
                 initial = {"id_env": env.get("id"), "divisao": env.get("id_divisao"),
                            "ambiente_logico": env.get("id_ambiente_logico"),
-                           "grupol3": env.get("id_grupo_l3"), "link": env.get("link")}
-                env_form = AmbienteForm(env_logic, division_dc, group_l3, initial=initial)
+                           "grupol3": env.get("id_grupo_l3"),
+                           "filter": env.get("id_filter"),
+                           "link": env.get("link")}
+                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -429,9 +442,10 @@ def insert_divisao_dc(request):
             env_logic = client.create_ambiente_logico().listar()
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
+            filters = client.create_filter().list_all()
             
             # Forms
-            env_form = AmbienteForm(env_logic, division_dc, group_l3)
+            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters)
             gro_form = Grupol3Form()
             amb_form = AmbienteLogicoForm()
             action = reverse("environment.form")
@@ -444,8 +458,10 @@ def insert_divisao_dc(request):
                 # Set Environment data
                 initial = {"id_env": env.get("id"), "divisao": env.get("id_divisao"),
                            "ambiente_logico": env.get("id_ambiente_logico"),
-                           "grupol3": env.get("id_grupo_l3"), "link": env.get("link")}
-                env_form = AmbienteForm(env_logic, division_dc, group_l3, initial=initial)
+                           "grupol3": env.get("id_grupo_l3"),
+                           "filter": env.get("id_filter"),
+                           "link": env.get("link")}
+                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, initial=initial)
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -510,9 +526,10 @@ def insert_ambiente_logico(request):
             env_logic = client.create_ambiente_logico().listar()
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
+            filters = client.create_filter().list_all()
             
             # Forms
-            env_form = AmbienteForm(env_logic, division_dc, group_l3)
+            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters)
             div_form = DivisaoDCForm()
             gro_form = Grupol3Form()
             action = reverse("environment.form")
@@ -525,8 +542,10 @@ def insert_ambiente_logico(request):
                 # Set Environment data
                 initial = {"id_env": env.get("id"), "divisao": env.get("id_divisao"),
                            "ambiente_logico": env.get("id_ambiente_logico"),
-                           "grupol3": env.get("id_grupo_l3"), "link": env.get("link")}
-                env_form = AmbienteForm(env_logic, division_dc, group_l3, initial=initial)
+                           "grupol3": env.get("id_grupo_l3"),
+                           "filter": env.get("id_filter"),
+                           "link": env.get("link")}
+                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])

@@ -18,7 +18,7 @@ def montaIPRede(listaIPS, ip4 = True):
     for item in listaIPS:
         if (ip4):
             item['net_ip_final'] = item.get('oct1')+ "." + item.get('oct2') + "." + item.get('oct3') + "." + item.get('oct4')
-            item['mask_ip_final'] = item.get('mask_oct1')+ "." + item.get('mask_oct1') + "." + item.get('mask_oct1') + "." + item.get('mask_oct1')
+            item['mask_ip_final'] = item.get('mask_oct1')+ "." + item.get('mask_oct2') + "." + item.get('mask_oct3') + "." + item.get('mask_oct4')
             item['ip4'] = True
         else:
             item['net_ip_final'] = item.get('block1') + ":" + item.get('block2') + ":" + item.get('block3') + ":" + item.get('block4') + ":" + item.get('block5') + ":" + item.get('block6') + ":" + item.get('block7') + ":" + item.get('block8')

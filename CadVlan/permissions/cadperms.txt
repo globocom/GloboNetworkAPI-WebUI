@@ -1711,8 +1711,8 @@ Inserir permissão em grupo de usuários
 		Leitura
 		False
 		None
-	PermissaoAdministrativa
-	listar()
+	Permission
+	list_all()
 		administracao_usuarios
 		Leitura
 		False
@@ -1759,8 +1759,8 @@ Editar permissões de grupo de usuários
 		Leitura
 		False
 		None
-	PermissaoAdministrativa
-	listar()
+	Permission
+	list_all()
 		administracao_usuarios
 		Leitura
 		False
@@ -3290,3 +3290,87 @@ Editar interfaces de equipamento
 		Escrita
 		True
 		Escrita
+
+Listar filtros de equipamentos
+	administrativa
+		True
+		False
+	api:
+	Filter
+	list_all()
+		administracao_usuarios
+		Leitura
+		False
+		None
+
+Inserir filtro de equipamentos
+	administrativa
+		False
+		True
+	api:
+	TipoEquipamento
+	listar()
+		cadastro_de_equipamentos
+		Leitura
+		False
+		None
+	Filter
+	add()
+		administracao_usuarios
+		Escrita
+		False
+		None
+	Filter
+	associate()
+		administracao_usuarios
+		Escrita
+		False
+		None
+
+Remover filtros de equipamentos
+	administrativa
+		False
+		True
+	api:
+	Filter
+	remove()
+		administracao_usuarios
+		Escrita
+		False
+		None
+
+Editar filtro de equipamentos
+	administrativa
+		False
+		True
+	api:
+	TipoEquipamento
+	listar()
+		cadastro_de_equipamentos
+		Leitura
+		False
+		None
+	Filter
+	get()
+		administracao_usuarios
+		Leitura
+		False
+		None
+	Filter
+	alter()
+		administracao_usuarios
+		Escrita
+		False
+		None
+	Filter
+	dissociate()
+		administracao_usuarios
+		Escrita
+		False
+		None
+	Filter
+	associate()
+		administracao_usuarios
+		Escrita
+		False
+		None

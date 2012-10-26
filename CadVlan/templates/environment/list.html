@@ -13,7 +13,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 5 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 6 ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -91,6 +91,7 @@ $(document).ready(function() {
 					<th>Divisão DC</th>					
 					<th>Ambiente Lógico</th>
 					<th>Grupo Layer3</th>
+					<th>Filtro</th>
 					<th>Wiki</th>
 					<th></th>
 				</tr>
@@ -102,7 +103,8 @@ $(document).ready(function() {
 					<td>{{ ambiente.nome_divisao }}</td>
 					<td>{{ ambiente.nome_ambiente_logico }}</td>
 					<td>{{ ambiente.nome_grupo_l3 }}</td>
-					<td>{% ifequal ambiente.link None %}-{% else %}<a href="{{ ambiente.link }}" target="_blank">wiki</a>{% endifequal %}</td>
+					<td class="text_center">{% if ambiente.filter_name %}{{ ambiente.filter_name }}{% else %}-{% endif %}</td>
+					<td class="text_center">{% ifequal ambiente.link None %}-{% else %}<a href="{{ ambiente.link }}" target="_blank">wiki</a>{% endifequal %}</td>
 					<td class="text_center"><a href="{% url environment.edit ambiente.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}

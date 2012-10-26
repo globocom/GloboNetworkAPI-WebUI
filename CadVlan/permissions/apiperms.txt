@@ -492,6 +492,55 @@ remover()
 	True
 	Escrita
 
+Filter
+list_all()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+Filter
+add()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Filter
+alter()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Filter
+remove()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Filter
+get()
+	administracao_usuarios
+	Leitura
+	False
+	None
+
+Filter
+associate()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
+Filter
+dissociate()
+	administracao_usuarios
+	Escrita
+	False
+	None
+
 GrupoEquipamento
 search()
 	cadastro_de_grupos_equipamentos
@@ -1689,5 +1738,12 @@ Vlan
 allocate_IPv6()
 	cadastro_de_vlans
 	Escrita
+	False
+	None
+
+Permission
+list_all()
+	administracao_usuarios
+	Leitura
 	False
 	None

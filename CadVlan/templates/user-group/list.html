@@ -60,8 +60,17 @@ $(document).ready(function() {
 			    scrollTop: $("#page_tab_form_perm").show(1000).offset().top
 			}, 2000);
 		{% endifequal %}
-
-	{% endifequal %}	
+		
+		{% if edit_perms %}
+			$("#id_function").attr("disabled", "disabled");
+	
+			$("#page_tab_form_perm").submit( function () {
+				$("#id_function").removeAttr("disabled");
+				return true
+			});
+		{% endif %}
+		
+	{% endifequal %}
 	
 	$("#btn_new_user").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 		$("#form_user").clearForm();
@@ -119,6 +128,7 @@ $(document).ready(function() {
 		$("#form_perm").clearForm();
 		$("#form_perm").attr('action', '{{ action_new_perms }}');
 		$("#form_perm .perm").html('');
+		$("#id_function").removeAttr("disabled");
 		$('html, body').animate({
 		    scrollTop: $("#page_tab_form_perm").show(1000).offset().top
 		}, 2000);
@@ -143,8 +153,6 @@ $(document).ready(function() {
 	$("#btn_ref_perm").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.href = "{% url user-group.list ugroup.id 1 %}";
 	});
-	
-	$( "#id_function" ).autocomplete({ source: [{% for suggestion in suggestion_perm %} '{{ suggestion }}', {% endfor %}] });
 	
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	$(".btn_edit", oTable_perms.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
@@ -338,7 +346,7 @@ $(document).ready(function() {
 							{% for perm in perms %}
 							<tr>
 								<td class="text_center"><input type="checkbox" name="selection" value="{{ perm.id }}" /></td>
-								<td class="text_center">{{ perm.funcao }}</td>
+								<td class="text_center">{{ perm.permission.function }}</td>
 								<td class="text_center">{% ifequal perm.leitura 'True' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
 								<td class="text_center">{% ifequal perm.escrita 'True' %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endifequal %}</td>
 								<td class="text_center"><a href="{% url user-group-perm.edit ugroup.id perm.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>

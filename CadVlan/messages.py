@@ -176,8 +176,6 @@ perm_group_messages = {
     'success_insert':       u'Permissão Administrativa cadastrada com sucesso.',
     'success_edit':         u'Permissão Administrativa alterada com sucesso.',
     'invalid_group_user':   u'Permissão Administrativa inválida',
-    'invalid_function_duplicate':   u'Permissão Administrativa com função %s já cadastrada',
-        
 }
 
 acl_messages = {
@@ -280,4 +278,10 @@ ldap_messages = {
     'error_duplicated_uidNumber_user':  u'Já existe um usuário cadastrado com uidNumber %s .',
     
     
+}
+
+filter_messages = {
+    'success_remove': u'Todos os filtros selecionados foram excluídos com sucesso.',
+    'success_insert': u'Filtro incluído com sucesso.',
+    'success_edit':   u'Filtro atualizado com sucesso.',
 }

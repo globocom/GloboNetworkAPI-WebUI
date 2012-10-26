@@ -29,6 +29,7 @@ AJAX_LDAP_RESET_PASSWORD = 'ajax/ldap-reset-password.html'
 JSON_ERROR = "error.json"
 TOKEN_INVALID = "token_invalid.html"
 
+
 # Script
 SCRIPT_LIST = 'script/list.html'
 SCRIPT_FORM = 'script/form.html'
@@ -161,3 +162,7 @@ LDAP_USER_LIST = 'ldap/user-list.html'
 LDAP_USER_FORM = 'ldap/user-form.html'
 LDAP_USER_FORM = 'ldap/user-form.html'
 
+# Filter
+FILTER_LIST = 'filter/list.html'
+FILTER_FORM = 'filter/form.html'
+FILTER_EDIT = 'filter/edit.html'
