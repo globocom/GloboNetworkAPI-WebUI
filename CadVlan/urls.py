@@ -6,6 +6,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
 from django.conf.urls.defaults import patterns, url
+from django.http import HttpResponse
 import settings
 
 handler404 = 'CadVlan.Auth.views.handler404'
@@ -14,6 +15,11 @@ handler500 = 'CadVlan.Auth.views.handler500'
 urlpatterns = patterns('',
     # CSS - JS
     (r'^media/(.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT})
+)
+
+# Healthcheck
+urlpatterns += patterns('', 
+    url(r'^healthcheck$', lambda _: HttpResponse("WORKING")),
 )
 
 # URL's Auth
