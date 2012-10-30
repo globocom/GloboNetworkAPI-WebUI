@@ -160,9 +160,18 @@ SESSION_COOKIE_AGE = 300
 SESSION_EXPIRY_AGE = 300
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': [
+            '127.0.0.1:11211'
+        ]
+    }
+}
+
 CACHE_EQUIPMENTS_TIMEOUT = 900 # Values in seconds
 CACHE_VLANS_TIMEOUT = 300 # Values in seconds
+
 
 URL_LOGIN = '/login'
 URL_HOME = '/home'
