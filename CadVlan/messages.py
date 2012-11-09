@@ -40,7 +40,6 @@ script_messages = {
 script_type_messages = {
     'success_remove':       u'Todos os tipos de roteiros selecionados foram excluídos com sucesso.',
     'success_insert':       u'Tipo de Roteiro incluído com sucesso.',
-    'error_equal_name':     u'Tipo de roteiro com nome %s já cadastrado',
 }
 
 equip_access_messages = {

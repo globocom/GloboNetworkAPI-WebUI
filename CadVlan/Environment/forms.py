@@ -44,9 +44,9 @@ class AmbienteForm(forms.Form):
     
     def __init__(self, env_logic, division_dc, group_l3, filters, *args, **kwargs):
         super(AmbienteForm, self).__init__(*args, **kwargs)
-        self.fields['divisao'].choices = [(div['id'], div['nome']) for div in division_dc["divisao_dc"]]
-        self.fields['ambiente_logico'].choices = [(amb_log['id'], amb_log['nome']) for amb_log in env_logic["ambiente_logico"]]
-        self.fields['grupol3'].choices = [(grupo['id'], grupo['nome']) for grupo in group_l3["grupo_l3"]]
+        self.fields['divisao'].choices = [(div['id'], div['nome']) for div in division_dc["division_dc"]]
+        self.fields['ambiente_logico'].choices = [(amb_log['id'], amb_log['nome']) for amb_log in env_logic["logical_environment"]]
+        self.fields['grupol3'].choices = [(grupo['id'], grupo['nome']) for grupo in group_l3["group_l3"]]
         self.fields['filter'].choices = [(filter_['id'], filter_['name']) for filter_ in filters["filter"]]
         self.fields['filter'].choices.insert(0, (None,'--------'))
         

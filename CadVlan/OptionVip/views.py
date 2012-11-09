@@ -199,7 +199,7 @@ def edit_form(request, id_optionvip):
             messages.add_message(request, messages.ERROR, option_vip_messages.get("invalid_option_vip"))
             return redirect('option-vip.list') 
 
-        option_vip = option_vip.get('opcoesvip')
+        option_vip = option_vip.get('option_vip')
 
         # Set Option VIP data
         initial = {'id_option':  option_vip.get('id'), 'name_option':  option_vip.get('nome_opcao_txt'), 'type_option':  option_vip.get('tipo_opcao')}
@@ -309,7 +309,7 @@ def option_vip_associate_net4(request,id_net):
         opts_choisen = client.create_option_vip().get_option_vip(id_vip)
         
         if opts_choisen is not None:
-                opts_choisen = opts_choisen.get('optionvip')
+            opts_choisen = opts_choisen.get('option_vip')
                 
         if type(opts_choisen) == dict:
             opts_choisen = [opts_choisen]
@@ -342,12 +342,12 @@ def option_vip_associate_net4(request,id_net):
             
             
         
-        lists['vip'] = enviroment_vip.get("environmentvip")
+        lists['vip'] = enviroment_vip.get("environment_vip")
         opts = client.create_option_vip().get_all()
         options_vip = client.create_option_vip().get_option_vip(id_vip)
         choice_opts = []
         if options_vip is not None:
-            options_vip = options_vip.get('optionvip')
+            options_vip = options_vip.get('option_vip')
                 
                 
             if type (options_vip) == dict:
@@ -465,7 +465,7 @@ def option_vip_associate_net6(request,id_net):
         opts_choisen = client.create_option_vip().get_option_vip(id_vip)
         
         if opts_choisen is not None:
-                opts_choisen = opts_choisen.get('optionvip')
+                opts_choisen = opts_choisen.get('option_vip')
                 
         if type(opts_choisen) == dict:
             opts_choisen = [opts_choisen]
@@ -504,12 +504,12 @@ def option_vip_associate_net6(request,id_net):
             
             
         
-        lists['vip'] = enviroment_vip.get("environmentvip")
+        lists['vip'] = enviroment_vip.get("environment_vip")
         opts = client.create_option_vip().get_all()
         options_vip = client.create_option_vip().get_option_vip(id_vip)
         choice_opts = []
         if options_vip is not None:
-            options_vip = options_vip.get('optionvip')
+            options_vip = options_vip.get('option_vip')
                 
                 
             if type (options_vip) == dict:

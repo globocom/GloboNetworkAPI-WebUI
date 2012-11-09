@@ -64,7 +64,6 @@ $(document).ready(function() {
 	});
 	
 	oTable = $("#vlan_list").dataTable({
-		"sAjaxSource": "{% url vlan.list.ajax %}",
 		"bServerSide": true,
 		"aaSorting": [],
 		"bAutoWidth": false,
@@ -76,6 +75,8 @@ $(document).ready(function() {
 		                 { "bSortable": false, "aTargets": [ 0, 1, 7 ] }
 		     			]
 	});
+	
+	$("#vlan_list_wrapper").hide();
 	
 	$("#checkAll").click( function() {
 		if ($(this).attr('checked')) {
@@ -134,6 +135,11 @@ $(document).ready(function() {
 				$("#search_form input[name='networkv4']").val("");
 			}
 		}
+		
+		oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax %}";
+		oTable.fnSettings().bServerSide = true;
+		
+		$("#vlan_list_wrapper").show();
 		
 		setupAjaxForm();
 		oTable.fnAjaxUpdate();

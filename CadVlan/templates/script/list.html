@@ -94,9 +94,9 @@ $(document).ready(function() {
 				{% for script in scripts %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ script.id }}" /></td>
-					<td>{{ script.nome }}</td>
+					<td>{{ script.roteiro }}</td>
 					<td>{{ script.descricao }}</td>
-					<td class="text_center">{{ script.id_tipo_roteiro }}</td>
+					<td class="text_center">{{ script.tipo_roteiro }}</td>
 				</tr>
 				{% endfor %}
 			</tbody>

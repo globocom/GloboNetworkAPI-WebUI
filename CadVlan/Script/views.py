@@ -41,7 +41,7 @@ def list_all(request):
         script_type_list = client.create_tipo_roteiro().listar()
         
         # Business
-        lists['scripts'] = replace_id_to_name(script_list["roteiro"], script_type_list["tipo_roteiro"], "id_tipo_roteiro", "id", "tipo")
+        lists['scripts'] = replace_id_to_name(script_list["script"], script_type_list["script_type"], "tipo_roteiro", "id", "tipo")
         lists['form'] = DeleteForm()
         
     except NetworkAPIClientError, e:
@@ -150,7 +150,7 @@ def add_form(request):
                     
                     return redirect('script.list')
                 except NomeRoteiroDuplicadoError, e:
-                    messages.add_message(request, messages.ERROR, script_messages.get("error_equal_name") % name)
+                    messages.add_message(request, messages.ERROR, e)
                     
         else:
             

@@ -26,7 +26,7 @@ class NetworkForm(forms.Form):
         net_choices = [(net["id"], net["nome"]) for net in net_type_list["tipo_rede"]]
         net_choices.insert(0, ('', "-"))
         
-        env_choices = ([(env['id'], env["finalidade_txt"] + " - " + env["cliente_txt"] + " - " + env["ambiente_p44_txt"]) for env in env_vip_list["environmentvip"]])
+        env_choices = ([(env['id'], env["finalidade_txt"] + " - " + env["cliente_txt"] + " - " + env["ambiente_p44_txt"]) for env in env_vip_list["environment_vip"]])
         env_choices.insert(0, ('', "-"))
         
         self.fields['net_type'].choices = net_choices
@@ -69,7 +69,7 @@ class NetworkEditForm(forms.Form):
         net_choices = [(net["id"], net["nome"]) for net in net_type_list["tipo_rede"]]
         net_choices.insert(0, ('', "-"))
         
-        env_choices = ([(env['id'], env["finalidade_txt"] + " - " + env["cliente_txt"] + " - " + env["ambiente_p44_txt"]) for env in env_vip_list["environmentvip"]])
+        env_choices = ([(env['id'], env["finalidade_txt"] + " - " + env["cliente_txt"] + " - " + env["ambiente_p44_txt"]) for env in env_vip_list["environment_vip"]])
         env_choices.insert(0, ('', "-"))
         
         self.fields['net_type'].choices = net_choices

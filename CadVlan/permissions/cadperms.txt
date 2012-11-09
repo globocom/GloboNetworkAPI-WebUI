@@ -1950,7 +1950,7 @@ Remover redes da vlan
 		None
 
 Listar requisições VIP
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -1962,7 +1962,7 @@ Listar requisições VIP
 		None
 
 Listar dados de VIP
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -1974,7 +1974,7 @@ Listar dados de VIP
 		None
 
 Remover requisição VIP
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -1986,7 +1986,7 @@ Remover requisição VIP
 		None
 
 Validar requisição VIP
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -1998,7 +1998,7 @@ Validar requisição VIP
 		None
 
 Criar requisição VIP
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2014,7 +2014,7 @@ Criar requisição VIP
 		Update_Config
 
 Remover VIP criado
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2030,7 +2030,7 @@ Remover VIP criado
 		Update_Config
 
 Inserir requisição VIP
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2120,7 +2120,7 @@ Inserir requisição VIP
 		None
 
 Editar requisição VIP
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2274,7 +2274,7 @@ Editar requisição VIP
 		Update_Config
 
 Inserir healthcheck
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2292,7 +2292,7 @@ Inserir healthcheck
 		None
 
 Listar e editar real servers
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2356,7 +2356,7 @@ Listar e editar real servers
 		None
 
 Listar real server status
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2402,7 +2402,7 @@ Listar real server status
 		Update_Config
 
 Editar healthcheck
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2432,7 +2432,7 @@ Editar healthcheck
 		Update_Config
 
 Editar maxcon
-	administrativa
+	administracao_vips
 		True
 		True
 	api:
@@ -2456,7 +2456,7 @@ Editar maxcon
 		Update_Config
 
 Editar status do real server
-	administrativa
+	administracao_vips
 		True
 		True
 	api:

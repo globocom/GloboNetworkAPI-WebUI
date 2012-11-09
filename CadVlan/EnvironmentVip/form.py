@@ -12,7 +12,7 @@ class EnvironmentVipForm(forms.Form):
     
     def __init__(self, script_type_list, *args, **kwargs):
         super(EnvironmentVipForm, self).__init__(*args, **kwargs)
-        self.fields['option_vip'].choices = [(st['id'], st['tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["optionvip"]]
+        self.fields['option_vip'].choices = [(st['id'], st['tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["option_vip"]]
 
     id = forms.IntegerField(label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
     finality = forms.CharField  (label=u'Finalidade', min_length=3, max_length=50 , required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))

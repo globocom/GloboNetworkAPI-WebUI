@@ -32,7 +32,7 @@ class OptionVipForm(forms.Form):
 class OptionVipNetForm(forms.Form):
     def __init__(self, script_type_list, *args, **kwargs):
         super(OptionVipNetForm, self).__init__(*args, **kwargs)
-        self.fields['option_vip'].choices = [(st['id'], st['tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["optionvip"]]
+        self.fields['option_vip'].choices = [(st['id'], st['tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["option_vip"]]
         
     option_vip = forms.MultipleChoiceField(label=u'Opções VIP'  , required=False, error_messages=error_messages, widget=forms.SelectMultiple(attrs={'style': "width: 310px"}))
     

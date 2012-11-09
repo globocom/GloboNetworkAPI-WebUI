@@ -18,7 +18,7 @@ from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs,
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages
-from CadVlan.permissions import ADMINISTRATION
+from CadVlan.permissions import VIP_ADMINISTRATION
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL
 from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, \
@@ -58,7 +58,7 @@ OPERATION = { 0 : 'DELETE' , 1: 'VALIDATE', 2: 'CREATE', 3: 'REMOVE'}
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def search_list(request): 
     try:
         
@@ -78,7 +78,7 @@ def search_list(request):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def ajax_list_vips(request):
     
     try:
@@ -190,14 +190,14 @@ def ajax_shared_view_vip(request,id_vip, lists):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def ajax_view_vip(request,id_vip):   
     lists= dict()
     return ajax_shared_view_vip(request, id_vip, lists)  
     
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def delete_validate_create_remove(request,operation):
     
     operation_text = OPERATION.get(int(operation))
@@ -317,7 +317,7 @@ def delete_validate_create_remove(request,operation):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def ajax_validate_create_remove(request,id_vip, operation):
     
     operation_text = OPERATION.get(int(operation))
@@ -764,7 +764,7 @@ def add_form_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def add_form(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -778,7 +778,7 @@ def edit_form_external(request, id_vip, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def edit_form(request, id_vip):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -792,7 +792,7 @@ def ajax_popular_client_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def ajax_popular_client(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -806,7 +806,7 @@ def ajax_popular_environment_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def ajax_popular_environment(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -820,7 +820,7 @@ def ajax_popular_options_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def ajax_popular_options(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -834,7 +834,7 @@ def ajax_add_healthcheck_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def ajax_add_healthcheck(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -848,7 +848,7 @@ def ajax_model_ip_real_server_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def ajax_model_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -946,7 +946,7 @@ def parse_real_server(request, vip, client_api, id_vip, id_evip, is_status=False
 
 
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def tab_real_server_status(request, id_vip):
 
     try:
@@ -969,7 +969,7 @@ def tab_real_server_status(request, id_vip):
         client = vip.get("cliente")
         environment = vip.get("ambiente")
 
-        id_evip = client_api.create_environment_vip().search(None, finality, client, environment).get("environmentvip").get("id")
+        id_evip = client_api.create_environment_vip().search(None, finality, client, environment).get("environment_vip").get("id")
 
         id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, id_evip, True)
             
@@ -987,7 +987,7 @@ def tab_real_server_status(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def tab_real_server(request, id_vip):
     
     try:
@@ -1010,7 +1010,7 @@ def tab_real_server(request, id_vip):
         environment = vip.get("ambiente")
         
         try:
-            environment_vip = client_api.create_environment_vip().search(None, finality, client, environment).get("environmentvip").get("id")
+            environment_vip = client_api.create_environment_vip().search(None, finality, client, environment).get("environment_vip").get("id")
             lists['environment_vip'] = environment_vip
         except Exception, e:
             environment_vip = None
@@ -1101,7 +1101,7 @@ def tab_real_server(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def tab_healthcheck(request, id_vip):
     
     try:
@@ -1207,7 +1207,7 @@ def tab_healthcheck(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def tab_maxcon(request, id_vip):
     
     try:
@@ -1303,7 +1303,7 @@ def tab_maxcon(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def status_real_server(request, id_vip, status):
 
     if request.method == 'POST':
@@ -1556,7 +1556,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
             
             try:
             
-                environment_vip = client_api.create_environment_vip().search(None, finality, client, environment).get("environmentvip").get("id")
+                environment_vip = client_api.create_environment_vip().search(None, finality, client, environment).get("environment_vip").get("id")
                 
             except Exception, e:
                 environment_vip = None

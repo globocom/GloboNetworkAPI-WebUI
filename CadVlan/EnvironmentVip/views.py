@@ -38,17 +38,17 @@ def list_all(request):
         # Get all environment vips from NetworkAPI
         environment_vip_list = client.create_environment_vip().list_all()
         
-        for environment_vip in environment_vip_list.get("environmentvip"):
+        for environment_vip in environment_vip_list.get("environment_vip"):
             environment_vip['is_more'] = str(False)
             option_vip = client.create_option_vip().get_option_vip(environment_vip['id'])
             if option_vip is not None:
                 
                 ovip = []
                 
-                if type(option_vip.get('optionvip')) is dict:
-                    option_vip['optionvip'] = [option_vip['optionvip']]
+                if type(option_vip.get('option_vip')) is dict:
+                    option_vip['option_vip'] = [option_vip['option_vip']]
                     
-                for option in option_vip['optionvip']:
+                for option in option_vip['option_vip']:
                     ovip.append(option.get('nome_opcao_txt'))
                     
                 if len(ovip) > 3:
@@ -160,7 +160,7 @@ def add_form(request):
                 environment_vip =  client.create_environment_vip().add(finality, client_vip, environment_p44)
                     
                 for opt in option_vip:
-                    client.create_option_vip().associate(opt, environment_vip.get('ambientevip').get('id'))
+                    client.create_option_vip().associate(opt, environment_vip.get('environment_vip').get('id'))
                     
                 messages.add_message(request, messages.SUCCESS, environment_vip_messages.get("success_insert"))
 
@@ -196,7 +196,7 @@ def edit_form(request, id_environmentvip):
         options = client.create_option_vip().get_option_vip(id_environmentvip)
         
         if options is not None:
-            options = options.get("optionvip")
+            options = options.get("option_vip")
         
         
         if type(options) is dict:
@@ -228,9 +228,9 @@ def edit_form(request, id_environmentvip):
                 return redirect('environment-vip.list')                  
         #GET
         else: 
-            #Montar formulario com dados do Ambient VIP do ID id_environmentvip   
+            #Build form with environment vip data for id_environmentvip   
             environment_vip = client.create_environment_vip().search(id_environmentvip)
-            environment_vip = environment_vip.get("environmentvip")
+            environment_vip = environment_vip.get("environment_vip")
             
             opts = []
             

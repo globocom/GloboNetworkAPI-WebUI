@@ -156,12 +156,12 @@ def list_netip4_by_id(request, id_net):
             
         else:
             
-            lists['vip'] = client.create_environment_vip().search(id_vip).get("environmentvip")
+            lists['vip'] = client.create_environment_vip().search(id_vip).get("environment_vip")
             opts = client.create_option_vip().get_all()
             options_vip = client.create_option_vip().get_option_vip(id_vip)
             choice_opts = []
             if options_vip is not None:
-                options_vip = options_vip.get('optionvip')
+                options_vip = options_vip.get('option_vip')
                 
                 
                 if type (options_vip) == dict:
@@ -250,12 +250,12 @@ def list_netip6_by_id(request, id_net):
             
         else:
             
-            lists['vip'] = client.create_environment_vip().search(id_vip).get("environmentvip")
+            lists['vip'] = client.create_environment_vip().search(id_vip).get("environment_vip")
             opts = client.create_option_vip().get_all()
             options_vip = client.create_option_vip().get_option_vip(id_vip)
             choice_opts = []
             if options_vip is not None:
-                options_vip = options_vip.get('optionvip')
+                options_vip = options_vip.get('option_vip')
                 
                 
                 if type (options_vip) == dict:

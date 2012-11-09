@@ -10,6 +10,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
+		"bPaginate": false,
 		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }],
         "aoColumns": [null, { "sType": "ipv4" }, null, null, null ]
 	});

@@ -222,7 +222,7 @@ $(document).ready(function() {
 				},
 				{% else %}
 				"Remover VIP": function() {
-					if (confirm('Deseja realmente remover a Requisição Vip ?')){ 
+					if (confirm('Os VIPs selecionados serão removidos dos seus respectivos equipamentos. Os serviços desses VIPs serão interrompidos. Tem certeza que deseja continuar ?')){ 
 						
 						$.ajax({
 							url: "{% url vip.ajax.create.validate.remove vip.id 3 %}",

@@ -25,6 +25,7 @@ VIPS_REQUEST = 'requisicao_vips'
 VIP_ALTER_SCRIPT = 'script_alterar_vip'
 VIP_CREATE_SCRIPT = 'script_criacao_vip'
 VIP_VALIDATION = 'validar_vip'
+VIP_ADMINISTRATION = 'administracao_vips'
 ACL_VLAN_VALIDATION = 'validar_acl_vlans'
 ENVIRONMENT_VIP = 'ambiente_vip'
 OPTION_VIP = 'opcao_vip'
@@ -52,6 +53,7 @@ PERMISSIONS = {
                'VIP_ALTER_SCRIPT': VIP_ALTER_SCRIPT,
                'VIP_CREATE_SCRIPT': VIP_CREATE_SCRIPT,
                'VIP_VALIDATION': VIP_VALIDATION,
+               'VIP_ADMINISTRATION': VIP_ADMINISTRATION,
                'ACL_VLAN_VALIDATION': ACL_VLAN_VALIDATION,
                'ENVIRONMENT_VIP': ENVIRONMENT_VIP,
                'OPTION_VIP': OPTION_VIP,

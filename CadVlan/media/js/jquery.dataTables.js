@@ -8385,32 +8385,37 @@
 		 *    } );
 		 */
 		"fnServerData": function ( sUrl, aoData, fnCallback, oSettings ) {
-			oSettings.jqXHR = $.ajax( {
-				"url":  sUrl,
-				"data": aoData,
-				"dataType": "json",
-				"cache": false,
-				"type": oSettings.sServerMethod,
-				"success": function (json, textStatus, xhr) {
-					if (xhr.status == "278") {
-						window.location = xhr.getResponseHeader('Location');
+			
+			if ( sUrl != null ) { 
+			
+				oSettings.jqXHR = $.ajax( {
+					"url":  sUrl,
+					"data": aoData,
+					"dataType": "json",
+					"cache": false,
+					"type": oSettings.sServerMethod,
+					"success": function (json, textStatus, xhr) {
+						if (xhr.status == "278") {
+							window.location = xhr.getResponseHeader('Location');
+						}
+						$(oSettings.oInstance).trigger('xhr', oSettings);
+						fnCallback( json );
+						$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+						$(".btn_edit_create").button({ icons: {primary: "ui-icon-wrench"}, text: false });
+					},
+					"error": function (xhr, error, thrown) {
+						if ( error == "parsererror" ) {
+							alert( "DataTables warning: JSON data from server could not be parsed. "+
+								"This is caused by a JSON formatting error." );
+						} else if (xhr.status == "412") {
+							alert($.trim(xhr.responseText));
+						} else if (xhr.status == "500") {
+							alert($.trim(xhr.responseText));
+						}
 					}
-					$(oSettings.oInstance).trigger('xhr', oSettings);
-					fnCallback( json );
-					$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
-					$(".btn_edit_create").button({ icons: {primary: "ui-icon-wrench"}, text: false });
-				},
-				"error": function (xhr, error, thrown) {
-					if ( error == "parsererror" ) {
-						alert( "DataTables warning: JSON data from server could not be parsed. "+
-							"This is caused by a JSON formatting error." );
-					} else if (xhr.status == "412") {
-						alert($.trim(xhr.responseText));
-					} else if (xhr.status == "500") {
-						alert($.trim(xhr.responseText));
-					}
-				}
-			} );
+				} );
+				
+			}
 		},
 	
 	
