@@ -911,6 +911,20 @@ search_ipv6_environment()
 	False
 	None
 
+Ip
+assoc_ipv4()
+	ips
+	Escrita
+	True
+	Escrita
+
+Ip
+assoc_ipv6()
+	ips
+	Escrita
+	True
+	Escrita
+
 Marca
 listar()
 	cadastro_de_marca

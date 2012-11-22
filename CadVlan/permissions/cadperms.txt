@@ -1196,6 +1196,84 @@ Inserir IPv4 para equipamento
 		False
 		None
 
+Associar IPv4 existente com equipamento
+	ips
+		False
+		True
+	cadastro_de_equipamentos
+		True
+		False
+	cadastro_de_vlans
+		True
+		False
+	cadastro_de_tipo_rede
+		True
+		False
+	api:
+	Network
+	get_network_ipv4()
+		cadastro_de_vlans
+		Leitura
+		False
+		None
+	Equipamento
+	listar_por_nome()
+		cadastro_de_equipamentos
+		Leitura
+		True
+		Leitura
+	Ip
+	assoc_ipv4()
+		ips
+		Escrita
+		True
+		Escrita
+	Ip
+	find_ip4_by_id()
+		ips
+		Leitura
+		False
+		None
+
+Associar IPv6 existente com equipamento
+	ips
+		False
+		True
+	cadastro_de_equipamentos
+		True
+		False
+	cadastro_de_vlans
+		True
+		False
+	cadastro_de_tipo_rede
+		True
+		False
+	api:
+	Network
+	get_network_ipv6()
+		cadastro_de_vlans
+		Leitura
+		False
+		None
+	Equipamento
+	listar_por_nome()
+		cadastro_de_equipamentos
+		Leitura
+		True
+		Leitura
+	Ip
+	assoc_ipv6()
+		ips
+		Escrita
+		True
+		Escrita
+	Ip
+	find_ip6_by_id()
+		ips
+		Leitura
+		False
+		None
+
 Inserir tipo de rede
 	cadastro_de_tipo_rede
 		False

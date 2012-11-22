@@ -1,0 +1,73 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[IP4 - Associação]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url network.ip4.list.by.id id_net %}";
+	});
+	
+	autocomplete("{% url equipment.autocomplete.ajax %}", false, "id_equip_name", false);
+	
+	$("textarea").maxlength();
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Associação de IP4</a></li>
+	</ul>
+	<div id="tabs-1">
+	
+		<form id="add_form" method="post" action="{% url network.assoc.ip4 id_net id_ip %}">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			<label for="equipamentos">Equipamento(s)</label><br/>
+			<label id="equipamentos">{{equipamentos}}</label><br/><br/>
+			
+			{% for field in form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					{% if forloop.counter == 1  %}
+					<img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
+					{% endif %}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+			{% endfor %}
+					<label for="oct1">IP</label><span style="color: red;">*</span><br/>
+					<input type="text" readonly="True" style="width: 25px" maxlength="3" id="oct1" name="oct1" value="{{oct1}}"/>.<input type="text" readonly="True" maxlength="3" name="oct2" style="width: 25px" id="oct2" value="{{oct2}}"/>.<input type="text" readonly="True" maxlength="3" name="oct3" style="width: 25px" id="oct3" value="{{oct3}}"/>.<input type="text" readonly="True" name="oct4" maxlength="3" style="width: 25px" id="oct4" value="{{oct4}}"/>
+			</div>
+			
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

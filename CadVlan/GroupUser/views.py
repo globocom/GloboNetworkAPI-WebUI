@@ -47,7 +47,7 @@ def list_all(request):
         # Get all user groups from NetworkAPI
         user_groups = client.create_grupo_usuario().listar()
         lists['form'] = DeleteForm()
-        lists['grupos'] = user_groups.get("grupo")
+        lists['grupos'] = user_groups.get("user_group")
         
         
     except NetworkAPIClientError, e:
@@ -215,7 +215,7 @@ def edit_form(request, id_group_user):
             messages.add_message(request, messages.ERROR, group_user_messages.get("invalid_group_user"))
             return redirect('group-user.list') 
 
-        group_user = group_user.get('group_user')
+        group_user = group_user.get('user_group')
         
         # Set Group User data
         initial = {'id_group_user':  group_user.get('id'), 'name':  group_user.get('nome'), 'read': get_permission(group_user.get('leitura')), 'write': get_permission(group_user.get('escrita')), 'edition': get_permission(group_user.get('edicao')),'delete': get_permission(group_user.get('exclusao'))}

@@ -127,7 +127,7 @@ def load_list(request, lists, id_ugroup, tab):
         lists['users'] = validates_dict(client.create_usuario().list_by_group(id_ugroup), 'users')
 
         if not 'ugroup' in lists: 
-            lists['ugroup'] = client.create_grupo_usuario().search(id_ugroup).get('group_user')
+            lists['ugroup'] = client.create_grupo_usuario().search(id_ugroup).get('user_group')
 
         if not 'form_users' in lists:
             lists['form_users'] = UserGroupForm(client.create_usuario().list_by_group_out(id_ugroup))
@@ -244,7 +244,7 @@ def add_form_user(request, id_ugroup):
         client = auth.get_clientFactory()
 
         # Get Group User by ID from NetworkAPI
-        lists['ugroup'] = client.create_grupo_usuario().search(id_ugroup).get('group_user')
+        lists['ugroup'] = client.create_grupo_usuario().search(id_ugroup).get('user_group')
 
         if request.method == "POST":
 
@@ -358,7 +358,7 @@ def add_form_perm(request, id_ugroup):
         client_perm = auth.get_clientFactory().create_permissao_administrativa()
 
         # Get Group User by ID from NetworkAPI
-        lists['ugroup'] = auth.get_clientFactory().create_grupo_usuario().search(id_ugroup).get('group_user')
+        lists['ugroup'] = auth.get_clientFactory().create_grupo_usuario().search(id_ugroup).get('user_group')
         
         function_list = validates_dict(auth.get_clientFactory().create_permission().list_all(), 'perms')            
 
@@ -405,7 +405,7 @@ def edit_form_perm(request, id_ugroup, id_perm):
         client_perm = auth.get_clientFactory().create_permissao_administrativa()
 
         # Get Group User by ID from NetworkAPI
-        lists['ugroup'] = auth.get_clientFactory().create_grupo_usuario().search(id_ugroup).get('group_user')
+        lists['ugroup'] = auth.get_clientFactory().create_grupo_usuario().search(id_ugroup).get('user_group')
         
         function_list = validates_dict(auth.get_clientFactory().create_permission().list_all(), 'perms')
 

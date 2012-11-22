@@ -113,6 +113,9 @@ IP6 = 'ip/insert-ip6.html'
 IP4EDIT = 'ip/edit-ip4.html'
 IP6EDIT = 'ip/edit-ip6.html'
 
+IP4ASSOC = 'ip/assoc-ip4.html'
+IP6ASSOC = 'ip/assoc-ip6.html'
+
 #Group User
 GROUPUSER_LIST = 'group-user/list.html'
 GROUPUSER_FORM = 'group-user/form.html'

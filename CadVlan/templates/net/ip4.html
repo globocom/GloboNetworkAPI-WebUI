@@ -58,6 +58,8 @@ $(document).ready(function() {
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	
+	$("#btn_assoc").button({ icons: {primary: "ui-icon-plus"} });
+	$(".btn_assoc").button({ icons: {primary: "ui-icon-plus"}, text: false });
 })
 </script>
 {% endblock %}
@@ -103,15 +105,13 @@ $(document).ready(function() {
 			<tbody>
 				{% for ip in ips %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ ip.id }}" /></td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ ip.id }}-{{ ip.equip_id }}" /></td>
 					<td>{{ip.oct1}}.{{ip.oct2}}.{{ip.oct3}}.{{ip.oct4}}</td>
 					<td>
-					{% for equip_name in ip.equipamento %}
-						{{ equip_name }}<br/>
-					{% endfor %}
+						{{ ip.equip_name }}
 					</td>
 					<td>{% ifnotequal ip.descricao None %}{{ ip.descricao }}{% endifnotequal %}</td>
-					<td class="text_center"><a href="{% url network.edit.ip4 id ip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center" style="width: 50px;"><a href="{% url network.edit.ip4 id ip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a><a href="{% url network.assoc.ip4 id ip.id %}" style="width: 20px; height: 20px;" class="btn_assoc">Associar novo equipamento ao IP</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

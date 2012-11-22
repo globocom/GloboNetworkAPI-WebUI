@@ -13,7 +13,7 @@ class UserForm(forms.Form):
     def __init__(self, group_list, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
         if group_list is not None:
-            self.fields['groups'].choices = [(gl['id'], gl['nome']) for gl in group_list["grupo"]]
+            self.fields['groups'].choices = [(gl['id'], gl['nome']) for gl in group_list["user_group"]]
     
     name = forms.CharField(label=u'Nome',required=True,max_length = 200, min_length = 3,error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
     email = forms.EmailField(label=u'Email',required=True,max_length = 300, min_length = 6,error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))

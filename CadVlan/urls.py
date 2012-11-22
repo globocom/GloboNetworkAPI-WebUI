@@ -131,6 +131,8 @@ urlpatterns += patterns('CadVlan.Net.views',
     url('^network/delete/ip4byequip/(?P<id_ip>\d+)/(?P<id_equip>\d+)[/]?$','delete_ip4_of_equip',name='network.delete.ip4.of.equip',),
     url('^network/insert/ip4byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip4_by_equip',name='network.insert.ip4.of.equip',),
     url('^network/insert/ip6byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip6_by_equip',name='network.insert.ip6.of.equip',),
+    url('^network/assoc/ip4/(?P<id_net>\d+)/(?P<id_ip4>\d+)[/]?$','assoc_ip4',name='network.assoc.ip4',),
+    url('^network/assoc/ip6/(?P<id_net>\d+)/(?P<id_ip6>\d+)[/]?$','assoc_ip6',name='network.assoc.ip6',),
 )
 
 # URL's Option Vip

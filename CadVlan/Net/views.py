@@ -10,12 +10,12 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, VipIpError
+from networkapiclient.exception import NetworkAPIClientError, VipIpError, IpEquipCantDissociateFromVip
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP, IPS
-from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, NET_FORM, NET6_EDIT, NET4_EDIT
+from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, IP4ASSOC, IP6ASSOC, NET_FORM, NET6_EDIT, NET4_EDIT
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
-from CadVlan.Net.forms import IPForm, IPEditForm, NetworkForm, NetworkEditForm
+from CadVlan.Net.forms import IPForm, IPEditForm, IPAssocForm, NetworkForm, NetworkEditForm
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
 from CadVlan.messages import network_ip_messages
 from CadVlan.forms import DeleteForm
@@ -188,23 +188,47 @@ def list_netip4_by_id(request, id_net):
         
         ips = ips.get('ips')
         
+        ips_to_screen = []
+        
         list_nomes = []
         
         for ip in ips:
             list_nomes = []
             if type(ip.get('equipamento')) == list:
                 for equip in ip.get('equipamento'):
+                    ip2 = dict()
+                    ip2['id'] = ip['id']
+                    ip2['oct1'] = ip['oct1']
+                    ip2['oct2'] = ip['oct2']
+                    ip2['oct3'] = ip['oct3']
+                    ip2['oct4'] = ip['oct4']
+                    ip2['descricao'] = ip['descricao']
+                    ip2['equip_name'] = equip.get('nome')
+                    ip2['equip_id'] = equip.get('id')
+                    ips_to_screen.append(ip2)
+                    
                     list_nomes.append(equip.get('nome'))
+                    
                 ip['equipamento'] = list_nomes
             else:
+                ip2 = dict()
+                ip2['id'] = ip['id']
+                ip2['oct1'] = ip['oct1']
+                ip2['oct2'] = ip['oct2']
+                ip2['oct3'] = ip['oct3']
+                ip2['oct4'] = ip['oct4']
+                ip2['descricao'] = ip['descricao']
+                ip2['equip_name'] = ip.get('equipamento').get('nome')
+                ip2['equip_id'] = ip.get('equipamento').get('id')
+                ips_to_screen.append(ip2)
+                
                 list_nomes = [ip.get('equipamento').get('nome')]
-                ip['equipamento'] = list_nomes 
+                ip['equipamento'] = list_nomes              
                              
         
-        lists['ips'] = ips
+        lists['ips'] = ips_to_screen
         lists['id'] = id_net
         lists['delete_form'] = DeleteForm()
-              
         return render_to_response(NETIPV4, lists , context_instance=RequestContext(request))
                 
     except NetworkAPIClientError, e:
@@ -281,8 +305,9 @@ def list_netip6_by_id(request, id_net):
             
         ips = client.create_ip().find_ip6_by_network(id_net)
     
-        
         ips = ips.get('ips')
+        
+        ips_to_screen = []
         
         list_nomes = []
         
@@ -290,14 +315,45 @@ def list_netip6_by_id(request, id_net):
             list_nomes = []
             if type(ip.get('equipamento')) == list:
                 for equip in ip.get('equipamento'):
+                    ip2 = dict()
+                    ip2['id'] = ip['id']
+                    ip2['block1'] = ip['block1']
+                    ip2['block2'] = ip['block2']
+                    ip2['block3'] = ip['block3']
+                    ip2['block4'] = ip['block4']
+                    ip2['block5'] = ip['block5']
+                    ip2['block6'] = ip['block6']
+                    ip2['block7'] = ip['block7']
+                    ip2['block8'] = ip['block8']
+                    ip2['descricao'] = ip['descricao']
+                    ip2['equip_name'] = equip.get('nome')
+                    ip2['equip_id'] = equip.get('id')
+                    ips_to_screen.append(ip2)
+                    
                     list_nomes.append(equip.get('nome'))
+                    
                 ip['equipamento'] = list_nomes
             else:
-                list_nomes = [ip.get('equipamento').get('nome')]
-                ip['equipamento'] = list_nomes 
+                ip2 = dict()
+                ip2['id'] = ip['id']
+                ip2['block1'] = ip['block1']
+                ip2['block2'] = ip['block2']
+                ip2['block3'] = ip['block3']
+                ip2['block4'] = ip['block4']
+                ip2['block5'] = ip['block5']
+                ip2['block6'] = ip['block6']
+                ip2['block7'] = ip['block7']
+                ip2['block8'] = ip['block8']
+                ip2['descricao'] = ip['descricao']
+                ip2['equip_name'] = ip.get('equipamento').get('nome')
+                ip2['equip_id'] = ip.get('equipamento').get('id')
+                ips_to_screen.append(ip2)
                 
+                list_nomes = [ip.get('equipamento').get('nome')]
+                ip['equipamento'] = list_nomes              
+                             
         
-        lists['ips'] = ips
+        lists['ips'] = ips_to_screen
         lists['id'] = id_net
         lists['delete_form'] = DeleteForm()
             
@@ -766,7 +822,8 @@ def delete_ip4(request, id_net):
                 
             if form.is_valid():
                 # Get user
-                ip = client.create_ip()
+                ip_client = client.create_ip()
+                equip_client = client.create_equipamento()
             
                 # All ids to be deleted
                 ids = form.cleaned_data['ids']
@@ -774,10 +831,16 @@ def delete_ip4(request, id_net):
                     messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
                     return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
                
-                ids = split_to_array(ids)
+                ids_eqs = split_to_array(ids)
+                ids = []
+                eq_ids = []
                 
-                
-                ips = ip.find_ip4_by_network(id_net)
+                for elem in ids_eqs:
+                    elem_sep = split_to_array(elem, '-')
+                    ids.append(elem_sep[0])
+                    eq_ids.append(elem_sep[1])
+                                    
+                ips = ip_client.find_ip4_by_network(id_net)
                 ips = ips.get('ips')
                 
                 #Verifica se Ip pertence e Rede passada    
@@ -786,32 +849,30 @@ def delete_ip4(request, id_net):
                 for i in ips:
                     listaIps.append(i.get('id'))
                 
-               
                 for id in ids:
                     if id not in listaIps:
                         messages.add_message(request, messages.ERROR, network_ip_messages.get("not_ip_in_net") % (id,id_net))
                         return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
-            
+                
                 error_list = list()
-                 
-                #deleta ip    
+                
+                #remove ip equipment associations, and ip if its the last ip-equipment
                 try:
-                    for id in ids:
-                        ip.delete_ip4(id) 
-                        
-                except VipIpError, e:
+                    for i in range(0, len(ids)):
+                        equip_client.remover_ip(eq_ids[i], ids[i])
+                
+                except (VipIpError, IpEquipCantDissociateFromVip), e:
                     logger.error(e)
-                    messages.add_message(request, messages.ERROR,e)
-                    error_list.append(id)
-                           
+                    messages.add_message(request, messages.ERROR, e)
+                    error_list.append(ids[i])
+                
                 except NetworkAPIClientError, e:
-                    error_list.append(id)
-                        
-                        
+                    error_list.append(ids[i])
+                
                 if len(error_list) == len(ids):
                             messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
                             return list_netip4_by_id(request, id_net)
-                    
+                
                 elif len(error_list) > 0:
                             msg = ""
                             for id_error in error_list:
@@ -819,7 +880,7 @@ def delete_ip4(request, id_net):
                                 msg = error_messages.get("can_not_remove") % msg[:-2]
                                 messages.add_message(request, messages.WARNING, msg)
                                 return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
-                                
+                
                 else:
                     messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_delete_sucess")) 
                     return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
@@ -855,18 +916,25 @@ def delete_ip6(request, id_net):
                 
             if form.is_valid():
                 # Get user
-                ip = auth.get_clientFactory().create_ip()
+                ip_client = client.create_ip()
+                equip_client = client.create_equipamento()
             
                 # All ids to be deleted
                 ids = form.cleaned_data['ids']
                 if ids is None or len(ids) <= 0:
                     messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
-                    return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+                    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
                
-                ids = split_to_array(ids)
+                ids_eqs = split_to_array(ids)
+                ids = []
+                eq_ids = []
                 
-                
-                ips = ip.find_ip6_by_network(id_net)
+                for elem in ids_eqs:
+                    elem_sep = split_to_array(elem, '-')
+                    ids.append(elem_sep[0])
+                    eq_ids.append(elem_sep[1])
+                                    
+                ips = ip_client.find_ip6_by_network(id_net)
                 ips = ips.get('ips')
                 
                 #Verifica se Ip pertence e Rede passada    
@@ -875,28 +943,26 @@ def delete_ip6(request, id_net):
                 for i in ips:
                     listaIps.append(i.get('id'))
                 
-               
                 for id in ids:
                     if id not in listaIps:
                         messages.add_message(request, messages.ERROR, network_ip_messages.get("not_ip_in_net") % (id,id_net))
                         return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
-            
+                
                 error_list = list()
-                 
-                #deleta ip    
+                
+                #remove ip equipment associations, and ip if its the last ip-equipment
                 try:
-                    for id in ids:
-                        ip.delete_ip6(id) 
-                        
+                    for i in range(0, len(ids)):
+                        equip_client.remove_ipv6(eq_ids[i], ids[i])
+                
                 except VipIpError, e:
                     logger.error(e)
-                    messages.add_message(request, messages.ERROR,e)
-                    error_list.append(id)
-                           
+                    messages.add_message(request, messages.ERROR, e)
+                    error_list.append(ids[i])
+                
                 except NetworkAPIClientError, e:
-                    error_list.append(id)
-                        
-                        
+                    error_list.append(ids[i])
+                    
                 if len(error_list) == len(ids):
                     messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
                     return list_netip6_by_id(request, id_net)
@@ -1072,7 +1138,8 @@ def delete_ip4_of_equip(request,id_ip,id_equip):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         
-        client.create_ip().delete_ip4(id_ip)
+        client.create_equipamento().remover_ip(id_equip, id_ip)
+        #client.create_ip().delete_ip4(id_ip)
         
         messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_equip_delete")) 
                 
@@ -1097,7 +1164,8 @@ def delete_ip6_of_equip(request,id_ip,id_equip):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         
-        client.create_ip().delete_ip6(id_ip)
+        client.create_equipamento().remove_ipv6(id_equip, id_ip)
+        #client.create_ip().delete_ip6(id_ip)
         
         messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_equip_delete")) 
                 
@@ -1189,4 +1257,273 @@ def insert_ip4_by_equip(request, id_net,id_equip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
     
-    return render_to_response(IP4,lists, context_instance=RequestContext(request)) 
+    return render_to_response(IP4,lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def assoc_ip4(request, id_net, id_ip4):
+    try :
+        
+        lists = dict()
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        form = IPAssocForm()
+        
+        try:
+            client.create_network().get_network_ipv4(id_net)
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            return redirect('vlan.search.list') 
+        
+        if request.method == 'POST':
+            form = IPAssocForm(request.POST)
+            lists['form'] = form
+            
+            if form.is_valid():
+                
+                flag_error = False
+                
+                oct1 = request.POST['oct1'] 
+                oct2 = request.POST['oct2']
+                oct3 = request.POST['oct3']
+                oct4 = request.POST['oct4']
+                equipamentos = form.cleaned_data['equip_names']
+                new_equip = form.cleaned_data['equip_name']
+                
+                if new_equip in equipamentos.split(','):
+                    messages.add_message(request, messages.ERROR, network_ip_messages.get("already_assoc_equip"))
+                    flag_error = True
+                else:
+                    equip_dict = client.create_equipamento().listar_por_nome(new_equip)
+                
+                ip = "%s.%s.%s.%s" % (oct1,oct2,oct3,oct4)
+                
+                if not (is_valid_ipv4(ip)):
+                    messages.add_message(request, messages.ERROR, network_ip_messages.get("ip_error"))
+                    lists['equipamentos'] = equipamentos
+                    lists['id_net'] = id_net
+                    lists['id_ip'] = id_ip4
+                    lists['form'] = form
+                    lists['oct1'] = oct1
+                    lists['oct2'] = oct2
+                    lists['oct3'] = oct3
+                    lists['oct4'] = oct4
+                    flag_error = True
+                    
+                if flag_error:
+                    return render_to_response(IP4ASSOC,lists, context_instance=RequestContext(request))  
+                    
+                else:
+                    try:
+                        client.create_ip().assoc_ipv4(id_ip4, equip_dict['equipamento']['id'], id_net)
+                        messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_assoc_success")) 
+                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+                        
+                    except NetworkAPIClientError, e:
+                        logger.error(e)
+                        messages.add_message(request, messages.ERROR, e)
+                        lists['equipamentos'] = equipamentos
+                        lists['id_net'] = id_net
+                        lists['id_ip'] = id_ip4
+                        lists['form'] = form
+                        lists['oct1'] = oct1
+                        lists['oct2'] = oct2
+                        lists['oct3'] = oct3
+                        lists['oct4'] = oct4
+                    
+                        return render_to_response(IP4ASSOC,lists, context_instance=RequestContext(request)) 
+            else:
+                lists['equipamentos'] = request.POST['equip_names']    
+                lists['id_net'] = id_net
+                lists['id_ip'] = id_ip4
+                lists['form'] = form
+                lists['oct1'] = request.POST['oct1'] 
+                lists['oct2'] = request.POST['oct2'] 
+                lists['oct3'] = request.POST['oct3'] 
+                lists['oct4'] = request.POST['oct4'] 
+                return render_to_response(IP4ASSOC, lists, context_instance=RequestContext(request)) 
+        
+        if request.method == 'GET':
+            
+            ip =  client.create_ip().find_ip4_by_id(id_ip4)
+            ip = ip.get('ips')
+            equipamentos = ip.get('equipamento')
+            nomesEquipamentos = ''
+            cont = 0
+            if type(ip.get('equipamento')) == dict:
+                nomesEquipamentos = equipamentos.get('nome')
+            else:
+                for equip in ip.get('equipamento'):
+                    cont = cont + 1
+                    if (cont == len(ip.get('equipamento'))):
+                        nomesEquipamentos =  nomesEquipamentos + equip.get('nome')
+                    else:
+                        nomesEquipamentos = nomesEquipamentos + equip.get('nome') + ', '
+            
+            lists['equipamentos'] = nomesEquipamentos            
+            lists['form'] = IPAssocForm(initial={'descricao':ip.get('descricao'),'equip_names':nomesEquipamentos})
+            lists['oct1'] = ip.get('oct1')
+            lists['oct2'] = ip.get('oct2')
+            lists['oct3'] = ip.get('oct3')
+            lists['oct4'] = ip.get('oct4')
+            
+            lists['form'].fields['descricao'].widget.attrs['readonly'] = True
+            
+            lists['id_net'] = id_net
+            lists['id_ip'] = ip.get('id')
+            
+            return render_to_response(IP4ASSOC,lists, context_instance=RequestContext(request))                                              
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+
+@log
+@login_required
+@has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def assoc_ip6(request, id_net, id_ip6):
+    try :
+        
+        lists = dict()
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        form = IPAssocForm()
+        
+        try:
+            client.create_network().get_network_ipv6(id_net)
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            return redirect('vlan.search.list') 
+        
+        if request.method == 'POST':
+            form = IPAssocForm(request.POST)
+            lists['form'] = form
+            
+            if form.is_valid():
+                
+                flag_error = False
+                
+                block1 = request.POST['block1']
+                block2 = request.POST['block2']
+                block3 = request.POST['block3']
+                block4 = request.POST['block4']
+                block5 = request.POST['block5']
+                block6 = request.POST['block6']
+                block7 = request.POST['block7']
+                block8 = request.POST['block8']
+                
+                equipamentos = form.cleaned_data['equip_names']
+                new_equip = form.cleaned_data['equip_name']
+                
+                if new_equip in equipamentos.split(','):
+                    messages.add_message(request, messages.ERROR, network_ip_messages.get("already_assoc_equip"))
+                    flag_error = True
+                else:
+                    equip_dict = client.create_equipamento().listar_por_nome(new_equip)
+                
+                ip6 = "%s:%s:%s:%s:%s:%s:%s:%s" % (block1,block2,block3,block4,block5,block6,block7,block8)
+                
+                if not (is_valid_ipv6(ip6)):
+                    messages.add_message(request, messages.ERROR, network_ip_messages.get("ip_error"))
+                    lists['equipamentos'] = equipamentos
+                    lists['id_net'] = id_net
+                    lists['id_ip'] = id_ip6
+                    lists['form'] = form
+                    lists['block1'] = block1
+                    lists['block2'] = block2
+                    lists['block3'] = block3
+                    lists['block4'] = block4
+                    lists['block5'] = block5
+                    lists['block6'] = block6
+                    lists['block7'] = block7
+                    lists['block8'] = block8
+
+                    flag_error = True
+                    
+                if flag_error:
+                    return render_to_response(IP6ASSOC,lists, context_instance=RequestContext(request))  
+                    
+                else:
+                    try:
+                        client.create_ip().assoc_ipv6(id_ip6, equip_dict['equipamento']['id'], id_net)
+                        messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_assoc_success")) 
+                        return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+                        
+                    except NetworkAPIClientError, e:
+                        logger.error(e)
+                        messages.add_message(request, messages.ERROR, e)
+                        lists['equipamentos'] = equipamentos
+                        lists['id_net'] = id_net
+                        lists['id_ip'] = id_ip6
+                        lists['form'] = form
+                        lists['block1'] = block1
+                        lists['block2'] = block2
+                        lists['block3'] = block3
+                        lists['block4'] = block4
+                        lists['block5'] = block5
+                        lists['block6'] = block6
+                        lists['block7'] = block7
+                        lists['block8'] = block8
+                    
+                        return render_to_response(IP6ASSOC,lists, context_instance=RequestContext(request)) 
+            else:
+                lists['equipamentos'] = request.POST['equip_names']    
+                lists['id_net'] = id_net
+                lists['id_ip'] = id_ip6
+                lists['form'] = form
+                lists['block1'] = request.POST['block1']
+                lists['block2'] = request.POST['block2']
+                lists['block3'] = request.POST['block3']
+                lists['block4'] = request.POST['block4']
+                lists['block5'] = request.POST['block5']
+                lists['block6'] = request.POST['block6']
+                lists['block7'] = request.POST['block7']
+                lists['block8'] = request.POST['block8']
+
+                return render_to_response(IP6ASSOC, lists, context_instance=RequestContext(request)) 
+        
+        if request.method == 'GET':
+            
+            ip =  client.create_ip().find_ip6_by_id(id_ip6)
+            ip = ip.get('ips')
+            equipamentos = ip.get('equipamento')
+            nomesEquipamentos = ''
+            cont = 0
+            if type(ip.get('equipamento')) == dict:
+                nomesEquipamentos = equipamentos.get('nome')
+            else:
+                for equip in ip.get('equipamento'):
+                    cont = cont + 1
+                    if (cont == len(ip.get('equipamento'))):
+                        nomesEquipamentos =  nomesEquipamentos + equip.get('nome')
+                    else:
+                        nomesEquipamentos = nomesEquipamentos + equip.get('nome') + ', '
+            
+            lists['equipamentos'] = nomesEquipamentos            
+            lists['form'] = IPAssocForm(initial={'descricao':ip.get('descricao'),'equip_names':nomesEquipamentos})
+            lists['block1'] = ip.get('block1')
+            lists['block2'] = ip.get('block2')
+            lists['block3'] = ip.get('block3')
+            lists['block4'] = ip.get('block4')
+            lists['block5'] = ip.get('block5')
+            lists['block6'] = ip.get('block6')
+            lists['block7'] = ip.get('block7')
+            lists['block8'] = ip.get('block8')
+            
+            lists['form'].fields['descricao'].widget.attrs['readonly'] = True
+            
+            lists['id_net'] = id_net
+            lists['id_ip'] = ip.get('id')
+            
+            return render_to_response(IP6ASSOC,lists, context_instance=RequestContext(request))                                              
+            
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        
+    return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))

@@ -204,9 +204,9 @@ def equip_form(request):
         client = auth.get_clientFactory()
         
         #List All - Tipo Equipamento
-        forms_aux['tipo_equipamento'] =  client.create_tipo_equipamento().listar().get('tipo_equipamento')
-        #List All - Marcas
-        forms_aux['marcas'] = client.create_marca().listar().get('marca')
+        forms_aux['tipo_equipamento'] =  client.create_tipo_equipamento().listar().get('equipment_type')
+        #List All - Brands
+        forms_aux['marcas'] = client.create_marca().listar().get('brand')
         #List All - Grupos
         forms_aux['grupos'] = client.create_grupo_equipamento().listar().get('grupo')
         #List All - Ambientes
@@ -220,7 +220,7 @@ def equip_form(request):
                 marca = 0
             
             if marca  > 0 :
-                forms_aux['modelos'] = client.create_modelo().listar_por_marca(marca).get('modelo')
+                forms_aux['modelos'] = client.create_modelo().listar_por_marca(marca).get('model')
             else:
                 forms_aux['modelos'] = None
                 
@@ -285,7 +285,7 @@ def ajax_modelo_equip(request, id_marca):
             
         if  marca > 0:
             modelos = client.create_modelo().listar_por_marca(marca)
-            lists['modelos'] = modelos.get('modelo')
+            lists['modelos'] = modelos.get('model')
                 
             # Returns HTML
             response = HttpResponse(loader.render_to_string(EQUIPMENT_MODELO, lists, context_instance=RequestContext(request)))
@@ -326,7 +326,7 @@ def ajax_marca_equip(request):
         client = auth.get_clientFactory()
 
         marcas = client.create_marca().listar()
-        lists['marcas'] = marcas.get('marca')
+        lists['marcas'] = marcas.get('brand')
                 
         # Returns HTML
         response = HttpResponse(loader.render_to_string(EQUIPMENT_MARCA, lists, context_instance=RequestContext(request)))
@@ -361,8 +361,8 @@ def equip_edit(request,id_equip):
     is_error = False
     
     forms_aux = dict()
-    forms_aux['tipo_equipamento'] =  client.create_tipo_equipamento().listar().get('tipo_equipamento')
-    forms_aux['marcas'] = client.create_marca().listar().get('marca')
+    forms_aux['tipo_equipamento'] =  client.create_tipo_equipamento().listar().get('equipment_type')
+    forms_aux['marcas'] = client.create_marca().listar().get('brand')
     forms_aux['grupos'] = client.create_grupo_equipamento().listar().get('grupo')
     forms_aux['ambientes'] = client.create_ambiente().listar().get('ambiente')
     
@@ -400,7 +400,7 @@ def equip_edit(request,id_equip):
                 marca = 0
             
             if marca  > 0 :
-                forms_aux['modelos'] = client.create_modelo().listar_por_marca(marca).get('modelo')
+                forms_aux['modelos'] = client.create_modelo().listar_por_marca(marca).get('model')
             else:
                 forms_aux['modelos'] = None
                 
@@ -520,10 +520,10 @@ def equip_edit(request,id_equip):
                 if (environments != None):
                     for environment in environments:
                         list_environments.append(environment['id'])
-                                       
+                
                 #Set Form
                 modelos = client.create_modelo().listar_por_marca(equip.get('id_marca'))
-                forms_aux['modelos'] = modelos.get('modelo')   
+                forms_aux['modelos'] = modelos.get('model')   
                 lists['form'] = EquipForm(forms_aux,initial={"nome":equip.get('nome'),"tipo_equipamento":equip.get('id_tipo_equipamento'),"marca":equip.get('id_marca'),"modelo":equip.get('id_modelo'),"grupo":list_groups, "ambiente":list_environments})
         
             except NetworkAPIClientError, e:

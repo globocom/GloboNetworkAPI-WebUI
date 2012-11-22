@@ -83,6 +83,8 @@ network_ip_messages = {
     'sucess_edit':          u'Rede alterada com sucesso.',
     'ip_equip_delete':      u'Ip excluído com sucesso.',
     'net_invalid':          u'Rede de IP inválida.',
+    'already_assoc_equip':  u'Este equipamento já está associado ao ip.',
+    'ip_assoc_success':     u'Ip associado ao equipamento com sucesso.',
 }
 
 environment_messages = {

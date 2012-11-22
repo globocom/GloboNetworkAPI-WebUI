@@ -20,7 +20,7 @@ class UserEquipGroupForm(forms.Form):
     def __init__(self, ugroup_list, *args, **kwargs):
         super(UserEquipGroupForm, self).__init__(*args, **kwargs)
         
-        ugroup_choices = [(group["id"], group["nome"]) for group in ugroup_list["grupo"]]
+        ugroup_choices = [(group["id"], group["nome"]) for group in ugroup_list["user_group"]]
         ugroup_choices.insert(0, ('', "-"))
         
         self.fields['ugroup'].choices = ugroup_choices

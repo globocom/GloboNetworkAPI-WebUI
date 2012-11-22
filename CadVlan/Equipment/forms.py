@@ -16,7 +16,7 @@ class SearchEquipmentForm(forms.Form):
         env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
         env_choices.insert(0, (0, "-"))
         
-        type_choices = [(tp["id"], tp["nome"]) for tp in type_list["tipo_equipamento"]]
+        type_choices = [(tp["id"], tp["nome"]) for tp in type_list["equipment_type"]]
         type_choices.insert(0, (0, "-"))
         
         groups_choices = [(tp["id"], tp["nome"]) for tp in groups_list["grupo"]]
@@ -99,7 +99,7 @@ class ModeloForm(forms.Form):
     def __init__(self,marcas,*args,**kwargs):
         super(ModeloForm, self).__init__(*args, **kwargs)
         
-        marca_choices = [(m['id'], m['nome']) for m in marcas["marca"]]
+        marca_choices = [(m['id'], m['nome']) for m in marcas["brand"]]
         marca_choices.insert(0, (0, "Selecione uma marca"))
         
         self.fields['marca'].choices = marca_choices
