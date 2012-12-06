@@ -1302,6 +1302,9 @@ def assoc_ip4(request, id_net, id_ip4):
                 
                 if not (is_valid_ipv4(ip)):
                     messages.add_message(request, messages.ERROR, network_ip_messages.get("ip_error"))
+                    flag_error = True
+                    
+                if flag_error:
                     lists['equipamentos'] = equipamentos
                     lists['id_net'] = id_net
                     lists['id_ip'] = id_ip4
@@ -1310,9 +1313,6 @@ def assoc_ip4(request, id_net, id_ip4):
                     lists['oct2'] = oct2
                     lists['oct3'] = oct3
                     lists['oct4'] = oct4
-                    flag_error = True
-                    
-                if flag_error:
                     return render_to_response(IP4ASSOC,lists, context_instance=RequestContext(request))  
                     
                 else:
@@ -1360,7 +1360,7 @@ def assoc_ip4(request, id_net, id_ip4):
                     if (cont == len(ip.get('equipamento'))):
                         nomesEquipamentos =  nomesEquipamentos + equip.get('nome')
                     else:
-                        nomesEquipamentos = nomesEquipamentos + equip.get('nome') + ', '
+                        nomesEquipamentos = nomesEquipamentos + equip.get('nome') + ','
             
             lists['equipamentos'] = nomesEquipamentos            
             lists['form'] = IPAssocForm(initial={'descricao':ip.get('descricao'),'equip_names':nomesEquipamentos})
@@ -1430,6 +1430,9 @@ def assoc_ip6(request, id_net, id_ip6):
                 
                 if not (is_valid_ipv6(ip6)):
                     messages.add_message(request, messages.ERROR, network_ip_messages.get("ip_error"))
+                    flag_error = True
+                    
+                if flag_error:
                     lists['equipamentos'] = equipamentos
                     lists['id_net'] = id_net
                     lists['id_ip'] = id_ip6
@@ -1442,10 +1445,6 @@ def assoc_ip6(request, id_net, id_ip6):
                     lists['block6'] = block6
                     lists['block7'] = block7
                     lists['block8'] = block8
-
-                    flag_error = True
-                    
-                if flag_error:
                     return render_to_response(IP6ASSOC,lists, context_instance=RequestContext(request))  
                     
                 else:
@@ -1502,7 +1501,7 @@ def assoc_ip6(request, id_net, id_ip6):
                     if (cont == len(ip.get('equipamento'))):
                         nomesEquipamentos =  nomesEquipamentos + equip.get('nome')
                     else:
-                        nomesEquipamentos = nomesEquipamentos + equip.get('nome') + ', '
+                        nomesEquipamentos = nomesEquipamentos + equip.get('nome') + ','
             
             lists['equipamentos'] = nomesEquipamentos            
             lists['form'] = IPAssocForm(initial={'descricao':ip.get('descricao'),'equip_names':nomesEquipamentos})

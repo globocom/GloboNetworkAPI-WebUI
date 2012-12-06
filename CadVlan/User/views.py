@@ -74,11 +74,11 @@ def list_all(request,id_user,status):
             else:
                 lists['open_form'] = 'True'
                 
+        lists['users'] = list_user(client)
+    
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        
-    lists['users'] = list_user(client)
 
     return render_to_response(USER_LIST, lists, context_instance=RequestContext(request))
 
@@ -141,14 +141,13 @@ def edit_user(form,client,id_user):
     
     groups = client.create_usuario().get_by_id(id_user).get('usuario')['grupos']
     
-    if groups is not None:
-        for group in groups:
-            client.create_usuario_grupo().remover(id_user, group)
-        
-    for group in groups_new:
-        client.create_usuario_grupo().inserir(id_user, group)
-    
     client.create_usuario().alterar(id_user, user.upper(), pwd, name, ativo, email)
+    
+    to_add, to_rem = diff(groups, groups_new)
+    for group in to_add:
+        client.create_usuario_grupo().inserir(id_user, group)
+    for group in to_rem:
+        client.create_usuario_grupo().remover(id_user, group)
     
 @log
 @login_required
@@ -214,3 +213,10 @@ def delete_all(request):
 
     # Redirect to list_all action
     return redirect('user.list',0,0)
+
+def diff(old, new):
+        
+    to_add = list(set(new) - set(old))
+    to_rem = list(set(old) - set(new))
+    
+    return to_add, to_rem
