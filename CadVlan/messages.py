@@ -139,7 +139,7 @@ group_equip_messages  = {
     'success_remove':       u'Todos os grupos de equipamento foram excluídos com sucesso.',
     'success_insert':       u'Grupo de equipamento cadastrado com sucesso.',
     'invalid_group_equipament':   u'Grupo de equipamento inválido',
-    'sucess_edit':          u'Grupo de equipamento alterado com sucesso.',
+    'success_edit':          u'Grupo de equipamento alterado com sucesso.',
 }
 
 equip_group_messages = {

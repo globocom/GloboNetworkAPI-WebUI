@@ -459,25 +459,8 @@ def equip_edit(request,id_equip):
                     
                 groups_rm = list( set(groups_list) - set(groups_chosen) )
                 groups_add = list( set(groups_chosen) - set(groups_list) )
-
-                #Remove group
-                for group in groups_rm:
-                    try:
-                        client.create_grupo_equipamento().remove(id_equip, group)
-                    except UserNotAuthorizedError, e:
-                        logger.error(e)
-                        is_error = True
-                        
-                        for grp in forms_aux['grupos']:
-                            if grp["id"] == group:
-                                messages.add_message(request, messages.ERROR, equip_messages.get("error_disassociate_group") % grp["nome"] )
-                            
-                    except NetworkAPIClientError, e:
-                        logger.error(e)
-                        messages.add_message(request, messages.ERROR, e)
-                        is_error = True
                 
-                #ADD group
+                # Add groups before because the equipment cannot be groupless
                 for group in groups_add:
                     try:
                         client.create_grupo_equipamento().associa_equipamento(id_equip, group)
@@ -493,7 +476,25 @@ def equip_edit(request,id_equip):
                     except NetworkAPIClientError, e:
                         logger.error(e)
                         messages.add_message(request, messages.ERROR, e)
-                        is_error = True 
+                        is_error = True
+
+                # Remove groups
+                for group in groups_rm:
+                    try:
+                        client.create_grupo_equipamento().remove(id_equip, group)
+                    except UserNotAuthorizedError, e:
+                        logger.error(e)
+                        is_error = True
+                        
+                        for grp in forms_aux['grupos']:
+                            if grp["id"] == group:
+                                messages.add_message(request, messages.ERROR, equip_messages.get("error_disassociate_group") % grp["nome"] )
+                            
+                    except NetworkAPIClientError, e:
+                        logger.error(e)
+                        messages.add_message(request, messages.ERROR, e)
+                        is_error = True
+                        
                         
                 if is_error:
                     raise Exception

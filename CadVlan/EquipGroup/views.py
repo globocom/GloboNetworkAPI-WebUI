@@ -99,7 +99,7 @@ def delete_all(request, id_egroup):
             # Control others exceptions
             have_errors = False
 
-            # For each script selected to remove
+            # For each equipment selected to remove
             for id_equip in ids:
                 try:
 
@@ -107,7 +107,7 @@ def delete_all(request, id_egroup):
                     client_equipament.remover_grupo(id_equip, id_egroup)
                     
                 except EquipmentDontRemoveError, e:
-                    # If isnt possible, add in error list
+                    # If isn't possible, add in error list
                     error_list.append(id_equip)
 
                 except NetworkAPIClientError, e:
@@ -116,7 +116,7 @@ def delete_all(request, id_egroup):
                     have_errors = True
                     break
 
-            # If cant remove someones
+            # If can't remove some
             if len(error_list) > 0:
                 
                 list_equipment = cache_list_equipment_all(client_equipament)
@@ -134,7 +134,7 @@ def delete_all(request, id_egroup):
 
                 messages.add_message(request, messages.WARNING, msg)
 
-            # If all has ben removed
+            # If all have been removed
             elif have_errors == False:
                 messages.add_message(request, messages.SUCCESS, equip_group_messages.get("success_remove"))
 

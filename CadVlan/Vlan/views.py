@@ -215,9 +215,9 @@ def list_by_id(request, id_vlan):
             for i in item:
                 lista.append(i)
                 
-        tipo_rede = client.create_tipo_rede().listar()
+        net_type = client.create_tipo_rede().listar()
         
-        lista = replace_id_to_name(lista, tipo_rede['tipo_rede'], "network_type", "id", "nome")
+        lista = replace_id_to_name(lista, net_type['net_type'], "network_type", "id", "name")
         
         lists['net_vlans'] = lista
         

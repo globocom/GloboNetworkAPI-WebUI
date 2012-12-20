@@ -1594,6 +1594,13 @@ alter_priority()
 	True
 	Update_Config
 
+Vip
+valid_real_server()
+	requisicao_vips
+	Leitura
+	False
+	None
+
 Vlan
 invalidate()
 	validar_acl_vlans

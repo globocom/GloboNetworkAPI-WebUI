@@ -147,7 +147,7 @@ def list_netip4_by_id(request, id_net):
             
         net['network']['vlan'] = vlan.get('vlan').get('nome')
             
-        tipo_rede = client.create_tipo_rede().listar()
+        net_type = client.create_tipo_rede().listar()
         
         id_vip =  net.get('network').get("ambient_vip")
         
@@ -175,7 +175,7 @@ def list_netip4_by_id(request, id_net):
         lists['id_vip'] = id_vip
            
                         
-        lists['net'] = replace_id_to_name([net['network']], tipo_rede['tipo_rede'], "network_type", "id", "nome")
+        lists['net'] = replace_id_to_name([net['network']], net_type['net_type'], "network_type", "id", "name")
         
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -265,7 +265,7 @@ def list_netip6_by_id(request, id_net):
             
         net['network']['vlan'] = vlan.get('vlan').get('nome')
             
-        tipo_rede = client.create_tipo_rede().listar()
+        net_type = client.create_tipo_rede().listar()
         
         id_vip =  net.get('network').get("ambient_vip")
         
@@ -293,7 +293,7 @@ def list_netip6_by_id(request, id_net):
         lists['id_vip'] = id_vip
            
                         
-        lists['net'] = replace_id_to_name([net['network']], tipo_rede['tipo_rede'], "network_type", "id", "nome")
+        lists['net'] = replace_id_to_name([net['network']], net_type['net_type'], "network_type", "id", "name")
         
         
     except NetworkAPIClientError, e:
@@ -1029,10 +1029,10 @@ def edit_network4_form(request,id_net):
                 env_vip = form.cleaned_data['env_vip']
                 net_type = form.cleaned_data['net_type']
                 ip_type = 0
-                    
+                
                 client.create_network().edit_network(id_net, ip_type, net_type, env_vip)
                 messages.add_message(request, messages.SUCCESS, network_ip_messages.get("sucess_edit")) 
-                    
+                
                 return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
 
         #Get
@@ -1047,7 +1047,7 @@ def edit_network4_form(request,id_net):
             environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
             vlan_nome = "%s | %s - %s - %s" %(  vlan.get("num_vlan"), environment.get("nome_divisao"), environment.get("nome_ambiente_logico"), environment.get("nome_grupo_l3"))
             lists['form'] = NetworkEditForm(net_type_list, env_vip_list,initial={'vlan_name':vlan_nome,'net_type':net_type,'env_vip':env_vip,'ip_version':ip_version})
-                 
+            
     except NetworkAPIClientError, e:
         
         logger.error(e)
@@ -1067,7 +1067,6 @@ def edit_network6_form(request,id_net):
     # Get all needs from NetworkAPI
     net_type_list = client.create_tipo_rede().listar()
     env_vip_list = client.create_environment_vip().list_all()
-    
     
     try:
         network = client.create_network().get_network_ipv6(id_net)

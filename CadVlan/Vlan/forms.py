@@ -18,7 +18,7 @@ class SearchVlanForm(forms.Form):
         env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
         env_choices.insert(0, (0, "-"))
         
-        net_choices = [(net["id"], net["nome"]) for net in net_type_list["tipo_rede"]]
+        net_choices = [(net["id"], net["name"]) for net in net_type_list["net_type"]]
         net_choices.insert(0, (0, "-"))
         
         self.fields['environment'].choices = env_choices

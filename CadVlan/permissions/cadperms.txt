@@ -2350,6 +2350,12 @@ Editar requisição VIP
 		Escrita
 		True
 		Update_Config
+	Vip
+	valid_real_server()
+		requisicao_vips
+		Leitura
+		False
+		None
 
 Inserir healthcheck
 	administracao_vips
@@ -2432,6 +2438,12 @@ Listar e editar real servers
 		Leitura
 		False
 		None
+	Vip
+	valid_real_server()
+		requisicao_vips
+		Leitura
+		False
+		None
 
 Listar real server status
 	administracao_vips
@@ -2478,6 +2490,12 @@ Listar real server status
 		Escrita
 		True
 		Update_Config
+	Vip
+	valid_real_server()
+		requisicao_vips
+		Leitura
+		False
+		None
 
 Editar healthcheck
 	administracao_vips
@@ -2568,6 +2586,12 @@ Editar status do real server
 		Leitura
 		True
 		Leitura
+	Vip
+	valid_real_server()
+		requisicao_vips
+		Leitura
+		False
+		None
 
 Inserir tipo de acesso
 	cadastro_de_tipo_acesso

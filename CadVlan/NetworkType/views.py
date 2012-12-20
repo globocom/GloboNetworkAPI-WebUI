@@ -37,9 +37,9 @@ def network_type_form(request):
             
             if form.is_valid():
                 
-                nome = form.cleaned_data['nome']
+                name = form.cleaned_data['name']
                 
-                client.create_tipo_rede().inserir(nome)
+                client.create_tipo_rede().inserir(name)
                 messages.add_message(request,messages.SUCCESS, type_network_messages.get('success_create'))
                 
                 lists['form'] =  TipoRedeForm()
