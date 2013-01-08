@@ -1040,7 +1040,7 @@ def tab_real_server(request, id_vip):
                 lists, is_valid_reals = valid_reals(lists, balancing, id_equip, id_ip, weight, priority)
                 if is_valid_reals:
                     reals = reals_(id_equip, id_ip, equip, ip)
-                    client_api.create_vip().edit_reals(id_vip, finality, client, environment, balancing, reals, priority, weight)
+                    client_api.create_vip().edit_reals(id_vip, balancing, reals, priority, weight)
                     
                     messages.add_message(request, messages.SUCCESS, request_vip_messages.get("tab_edit_success") % 'real server')
                 else:
