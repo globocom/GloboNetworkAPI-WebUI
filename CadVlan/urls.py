@@ -181,12 +181,16 @@ urlpatterns += patterns('CadVlan.GroupUser.views',
     
 )
 
-# URL's Group User
+# URL's User
 urlpatterns += patterns('CadVlan.User.views',
     url('^user/list/(?P<id_user>\d+)/(?P<status>\d+)[/]?$', 'list_all', name='user.list',),
     url('^user/form/(?P<id_user>\d+)/(?P<status>\d+)[/]?$', 'list_all', name='user.form',),
     url('^user/edit/(?P<id_user>\d+)/(?P<status>\d+)[/]?$', 'list_all', name='user.edit',),
     url('^user/delete[/]?$', 'delete_all', name='user.delete',),
+    #Ajax for ldap users selection
+    url('ldap/usersbygroup/(?P<ldap_group>[^/]+)/(?P<id_user>[^/]+)[/]', 'ajax_ldap_users_by_group', name='ldap.userbygroup.ajax'),
+    url('ldap/pop_ldap_user_mail/(?P<cn>[^/]+)[/]', 'ajax_ldap_pop_name_mail', name='ldap.pop_name_mail.ajax'),
+
 )
 
 # URL's User Group

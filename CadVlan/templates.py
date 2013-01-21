@@ -30,6 +30,10 @@ JSON_ERROR = "error.json"
 TOKEN_INVALID = "token_invalid.html"
 
 
+AJAX_LDAP_USERS_BY_GROUP = 'ajax/select-ldap-user.html'
+AJAX_LDAP_USER_POP_NAME_MAIL = 'ajax/pop_ldap_user_mail.json'
+
+
 # Script
 SCRIPT_LIST = 'script/list.html'
 SCRIPT_FORM = 'script/form.html'

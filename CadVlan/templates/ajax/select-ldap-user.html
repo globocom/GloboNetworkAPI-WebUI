@@ -1,0 +1,8 @@
+
+{% if ldap_users %}
+	{% for usr in ldap_users %}
+		<option value="{{ usr }}">{{usr}}</option>
+	{% endfor %}
+{% else %}
+	{{ error }}
+{% endif %}

@@ -98,7 +98,7 @@ $(document).ready(function() {
 					{% if field.name == 'groupPattern' or field.name == 'userType' %} 
 					
 						{% if field.name == 'userType' and edit %}
-						
+							<div style="display:none;">{{ field }}</div>
 						{% else %}
 						
 							<div>

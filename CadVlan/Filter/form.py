@@ -12,7 +12,7 @@ class FilterForm(forms.Form):
     
     def __init__(self, equip_type_list, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
-        self.fields['equip_type'].choices = [(et['id'], et['nome']) for et in equip_type_list["tipo_equipamento"]]
+        self.fields['equip_type'].choices = [(et['id'], et['nome']) for et in equip_type_list["equipment_type"]]
 
     id = forms.IntegerField(label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
     name = forms.CharField  (label=u'Nome', min_length=3, max_length=100 , required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))

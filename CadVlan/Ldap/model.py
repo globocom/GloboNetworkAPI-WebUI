@@ -8,7 +8,8 @@ import  ldap, logging, commands
 from datetime import datetime
 from datetime import timedelta
 from ldap import modlist, SERVER_DOWN, NO_SUCH_OBJECT
-from CadVlan.settings import LDAP_INITIALIZE, LDAP_DC, LDAP_CREDENTIALS_USER, LDAP_CREDENTIALS_PWD, LDAP_MANAGER_PWD, LDAP_SSL, LDAP_PWD_DEFAULT_HASH
+from CadVlan.settings import LDAP_INITIALIZE, LDAP_DC, LDAP_CREDENTIALS_USER, LDAP_CREDENTIALS_PWD, LDAP_MANAGER_PWD, LDAP_SSL, LDAP_PWD_DEFAULT_HASH,\
+    LDAP_INITIALIZE_SSL, CACERTDIR
 
 class LDAPError(Exception):
     
@@ -74,7 +75,13 @@ class Ldap():
         """
         try:
             
-            conn = ldap.initialize("%s://%s" % (('ldaps' if LDAP_SSL else 'ldap'), LDAP_INITIALIZE) )
+            if LDAP_SSL:
+                ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, CACERTDIR + 'glb_cacert.pem')
+                ldap.set_option(ldap.OPT_X_TLS_CERTFILE, CACERTDIR + 'glb_clientcrt.pem')
+                ldap.set_option(ldap.OPT_X_TLS_KEYFILE, CACERTDIR + 'glb_clientkey.pem')
+                ldap.set_option(ldap.OPT_DEBUG_LEVEL,1)
+            
+            conn = ldap.initialize("%s://%s" % (('ldaps' if LDAP_SSL else 'ldap'), (LDAP_INITIALIZE_SSL if LDAP_SSL else LDAP_INITIALIZE)) )
             
             conn.protocol_version = ldap.VERSION3
             conn.simple_bind_s(self._get_str(LDAP_CREDENTIALS_USER, CN_TYPES.USER), LDAP_CREDENTIALS_PWD)
@@ -719,6 +726,32 @@ class Ldap():
         except Exception, e:
             raise LDAPError(e)
         
+    def get_users_group(self, gid, exclude_list=[]):
+        """
+        Returns the users from the group from LDAP
+        
+        @param gid: gidNumber of group.
+        """
+        try:
+            gps = self.get_groups()
+            
+            out = []
+            gp = gps[int(gid)]
+            if gp.has_key("memberUid"):
+                out = list(set(gp["memberUid"]) - set(exclude_list))
+                for ldap_usr in out:
+                    try:
+                        usr = self.get_user(ldap_usr)
+                        if usr['givenName'] == None or usr['givenName'] == '' or (usr.get('nsaccountlock') != None and usr['nsaccountlock'] == 'TRUE'):
+                            out.remove(ldap_usr)
+                    except Exception:
+                        out.remove(ldap_usr)
+            
+            return out
+            
+        except Exception, e:
+            raise LDAPError(e)
+    
     def add_user(self, cn, uidNumber, groupPattern, homeDirectory, givenName, initials, sn, mail, homePhone, mobile, street, description, employeeNumber, employeeType, loginShell, shadowLastChange, shadowMin, shadowMax, shadowWarning, policy, groups):
         """
         Add new user in LDAP

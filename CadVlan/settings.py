@@ -195,14 +195,16 @@ PATH_ACL = os.path.join(PROJECT_ROOT_PATH, 'ACLS/')
 
 PATH_PERMLISTS = os.path.join(PROJECT_ROOT_PATH, 'permissions')
 
+CACERTDIR='/etc/pki/globocom/'
 LDAP_DC = "dc=globoi,dc=com"
-LDAP_SSL = False
+LDAP_SSL = True
 LDAP_INITIALIZE = "192.168.24.14:389"
+LDAP_INITIALIZE_SSL = "globoi.com:636"
 LDAP_CREDENTIALS_USER = "ldapweb"
 LDAP_CREDENTIALS_PWD = "senha"
 LDAP_MANAGER_PWD = "senha"
 LDAP_PWD_DEFAULT_HASH = "{MD5}a5FE2fqsjiUZ6q41LBDswQ=="
-LDAP_PWD_DEFAULT = "globo.com"
+LDAP_PWD_DEFAULT = "globocom"
 
 ACCESS_EXTERNAL_TTL = 1800 # Values in seconds
 

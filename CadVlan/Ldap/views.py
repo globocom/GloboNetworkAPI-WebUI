@@ -22,6 +22,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 import logging
+from networkapiclient.exception import UsuarioNaoExisteError
 
 logger = logging.getLogger(__name__)
 
@@ -712,6 +713,15 @@ def delete_user_all(request, pattern):
 
                     ldap.rem_user(cn)
                     
+                    client_user = AuthSession(request.session).get_clientFactory().create_usuario()
+                    
+                    try:
+                        local_user = client_user.get_by_user_ldap(cn)
+                        local_user = local_user['usuario']
+                        client_user.alterar(local_user['id'], local_user['user'], local_user['pwd'], local_user['nome'], local_user['ativo'], local_user['email'], None)
+                    except UsuarioNaoExisteError:
+                        pass
+                    
                 except LDAPMethodError, e:
                     error_list.append(cn)
                     have_errors = True
@@ -880,6 +890,16 @@ def edit_user_form(request, pattern, cn):
                 if valid_form_user(ldap, request, data['cn'], data['uidNumber'], data['employeeNumber'], data['mail'], edit=True):
                 
                     ldap.edit_user(data['cn'], data['uidNumber'], data['groupPattern'], data['homeDirectory'], data['givenName'], data['initials'], data['sn'], data['mail'], data['homePhone'], data['mobile'], data['street'], data['description'], data['employeeNumber'], data['employeeType'], data['loginShell'], data['shadowLastChange'], data['shadowMin'], data['shadowMax'], data['shadowWarning'], data['policy'], data['groups'])
+                    
+                    client_user = AuthSession(request.session).get_clientFactory().create_usuario()
+                    
+                    try:
+                        local_user = client_user.get_by_user_ldap(data['cn'])
+                        local_user = local_user['usuario']
+                        name = data['givenName'] + ' ' + data['initials'] + ' ' + data['sn']
+                        client_user.alterar(local_user['id'], local_user['user'], local_user['pwd'], name, local_user['ativo'], data['mail'], local_user['user_ldap'])
+                    except UsuarioNaoExisteError:
+                        pass
                     
                     messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_edit_user"))
                     return HttpResponseRedirect(reverse('ldap.user.list', args=[pattern]))

@@ -22,10 +22,12 @@ from CadVlan.Util.utility import make_random_password
 from CadVlan.templates import MAIL_NEW_PASS, AJAX_NEW_PASS
 from django.core.mail import EmailMessage,SMTPConnection
 from django.template import loader
-
 import logging
 from CadVlan.Util.shortcuts import render_to_response_ajax
 from smtplib import SMTPException
+from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
+import re
+import hashlib, base64
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +45,25 @@ def login(request):
         if form.is_valid():
 
                 try:
-
+                    
                     client = ClientFactory(NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD)
-                    user = client.create_usuario().authenticate(form.cleaned_data['username'], form.cleaned_data['password'])
+                    
+                    if form.cleaned_data['is_ldap_user']:
+                        user = Ldap("").get_user(form.cleaned_data['username'])
+                        pwd_ldap = user['userPassword']
+                        activate = user.get('nsaccountlock')
+                        pwd = form.cleaned_data['password']
+                        
+                        if re.match("\{(MD|md)5\}.*", pwd_ldap, 0):
+                            pwd = base64.b64encode(hashlib.md5(pwd).digest())
+                            pwd_ldap = pwd_ldap[pwd_ldap.index("}")+1:]
+                            
+                        if pwd == pwd_ldap and (activate is None or activate.upper() == 'FALSE'):
+                            user = client.create_usuario().authenticate(form.cleaned_data['username'], form.cleaned_data['password'], form.cleaned_data['is_ldap_user'])
+                        else:
+                            user = None
+                    else:
+                        user = client.create_usuario().authenticate(form.cleaned_data['username'], form.cleaned_data['password'], form.cleaned_data['is_ldap_user'])
 
                     if user is None:
                         messages.add_message(request, messages.ERROR, auth_messages.get("user_invalid"))
@@ -64,7 +82,7 @@ def login(request):
                             return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
                             
                         
-                        auth.login(User(user.get('id'), user.get('user'), user.get('nome'), user.get('email'), user.get('pwd'), user.get('permission'), user.get('ativo')))
+                        auth.login(User(user.get('id'), user.get('user'), user.get('nome'), user.get('email'), user.get('pwd'), user.get('permission'), user.get('ativo'), user.get('user_ldap')))
 
                         if form.cleaned_data['redirect'] != "" :
                             return HttpResponseRedirect(form.cleaned_data['redirect'])
@@ -78,6 +96,10 @@ def login(request):
                 except NetworkAPIClientError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e )
+                    
+                except LDAPNotFoundError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, auth_messages.get("user_ldap_not_found") )
 
                 return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
 
@@ -157,33 +179,44 @@ def lost_pass(request):
                     if user.get("user").upper() == username.upper():
                         if user.get("email") == email:
                             
-                            password = make_random_password()
-                            
-                            ativo = None
-                            
-                            if user.get('ativo'):
-                                ativo = '1'
+                            if not user.get('user_ldap'):
+                                pass_open = make_random_password()
+                                password = hashlib.md5(pass_open).hexdigest()
+                                
+                                ativo = None
+                                
+                                if user.get('ativo'):
+                                    ativo = '1'
+                                else:
+                                    ativo = '0'
+                                
+                                client.create_usuario().alterar(user.get('id'), user.get('user'), password, user.get('nome'), ativo, user.get('email'), user.get('user_ldap')) 
+                                
+                                
+                                lists = dict()
+                                lists['user'] = user.get('user')
+                                lists['new_pass'] = pass_open
+                                
+                                #Montar Email com nova senha
+                                connection = SMTPConnection(username = EMAIL_HOST_USER, password = EMAIL_HOST_PASSWORD)
+                                send_email = EmailMessage('Solicitação de Nova Senha',  loader.render_to_string(MAIL_NEW_PASS, lists) ,EMAIL_FROM, [email], connection = connection)
+                                send_email.content_subtype = "html"
+                                send_email.send()
+                                
+                                messages.add_message(request, messages.SUCCESS, auth_messages.get("email_success"))
+                                modal_auto_open = 'false'
+                                return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
                             else:
-                                ativo = '0'
-                            
-                            client.create_usuario().alterar(user.get('id'), user.get('user'), password, user.get('nome'), ativo, user.get('email')) 
-                            
-                            
-                            lists = dict()
-                            lists['user'] = user.get('user')
-                            lists['new_pass'] = password
-                            
-                            #Montar Email com nova senha
-                            
-                            
-                            connection = SMTPConnection(username = EMAIL_HOST_USER, password = EMAIL_HOST_PASSWORD)
-                            send_email = EmailMessage('Solicitação de Nova Senha',  loader.render_to_string(MAIL_NEW_PASS, lists) ,EMAIL_FROM, [email], connection = connection)
-                            send_email.content_subtype = "html"
-                            send_email.send()
-                            
-                            messages.add_message(request, messages.SUCCESS, auth_messages.get("email_success"))
-                            modal_auto_open = 'false'
-                            return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
+                                messages.add_message(request, messages.ERROR, auth_messages.get("user_ldap_cant_recover_pass"))
+                                modal_auto_open = 'false'
+                                return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
+                                
+                
+                for user in users:
+                    if user.get("user_ldap") is not None and user.get("user_ldap").upper() == username.upper():
+                        messages.add_message(request, messages.ERROR, auth_messages.get("user_ldap_cant_recover_pass"))
+                        modal_auto_open = 'false'
+                        return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
                         
                 messages.add_message(request, messages.ERROR, auth_messages.get("user_email_invalid"))
                 modal_auto_open = 'false'

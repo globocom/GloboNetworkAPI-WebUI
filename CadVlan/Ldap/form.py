@@ -62,7 +62,9 @@ class UserForm(forms.Form):
         self.fields['policy'].choices = [(st['cn'], st['cn']) for st in policys_list]
         if usertype_list is None:
             self.fields['userType'].choices = []
-        
+        else:
+            self.fields['userType'].choices = CHOICES_USER_TYPE
+
     groupPattern = forms.ChoiceField(label=u'Grupo Padrão:', required=True, choices=CHOICES_GROUP, error_messages=error_messages,  widget=forms.RadioSelect(renderer=RadioCustomRenderer))
     userType = forms.ChoiceField(label=u'Tipo de Usuário:',  required=False, choices=CHOICES_USER_TYPE, initial=CHOICES_USER_TYPE[0][0], error_messages=error_messages,  widget=forms.RadioSelect(renderer=RadioCustomRenderer))
     

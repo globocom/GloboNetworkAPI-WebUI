@@ -16,8 +16,9 @@ class User(object):
     __password = None
     __permission = None
     __active = None
+    __user_ldap = None
 
-    def __init__(self, id, user, nome, email, pwd, permission, ativo):
+    def __init__(self, id, user, nome, email, pwd, permission, ativo, user_ldap):
         self.__id = id
         self.__username = user
         self.__name = nome
@@ -25,6 +26,7 @@ class User(object):
         self.__password = pwd
         self.__permission = permission
         self.__active = ativo
+        self.__user_ldap = user_ldap
 
     def get_id(self):
         return self.__id
@@ -46,6 +48,9 @@ class User(object):
 
     def get_active(self):
         return self.__active
+
+    def get_user_ldap(self):
+        return self.__user_ldap
     
     def set_password(self,password):
         self.__password = password

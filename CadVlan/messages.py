@@ -19,16 +19,18 @@ error_messages = {
 }
 
 auth_messages = {
-    'user_not_authorized':  u'Usuário não autorizado para acessar/executar está operação.',
-    'user_invalid':         u'Usuário e/ou senha incorretos.',
-    '404':                  u'Página não encontrada: [URL: %s]',
-    '500':                  u'Ocorreu um erro ao executar sua ação, contate o Administrador do sistema.',
-    'user_email_invalid':   u'Usuário e/ou email incorretos.',
-    'email_success':        u'Nova senha enviada com sucesso.',
-    'pass_change_sucess':   u'Senha alterada com sucesso.',
-    'email_error':          u'Ocorreu um erro ao enviar email.',
-    'nogroup_error':        u'Somente usuários que pertecem à algum grupo, podem efetuar login no sistema. ',
-    'token_invalid':        u'O seu tempo de acesso expirou. Por favor, atualize a página.'
+    'user_not_authorized':          u'Usuário não autorizado para acessar/executar está operação.',
+    'user_invalid':                 u'Usuário e/ou senha incorretos.',
+    '404':                          u'Página não encontrada: [URL: %s]',
+    '500':                          u'Ocorreu um erro ao executar sua ação, contate o Administrador do sistema.',
+    'user_email_invalid':           u'Usuário e/ou email incorretos.',
+    'email_success':                u'Nova senha enviada com sucesso.',
+    'pass_change_sucess':           u'Senha alterada com sucesso.',
+    'email_error':                  u'Ocorreu um erro ao enviar email.',
+    'nogroup_error':                u'Somente usuários que pertecem à algum grupo, podem efetuar login no sistema. ',
+    'token_invalid':                u'O seu tempo de acesso expirou. Por favor, atualize a página.',
+    'user_ldap_not_found':          u'Usuário de rede não encontrado.',
+    'user_ldap_cant_recover_pass':  u'Função não disponível para usuários de rede. Contate o administrador.'
 }
 
 script_messages = {
@@ -164,6 +166,7 @@ user_messages = {
     'success_remove':       u'Todos os Usuários selecionados foram inativados com sucesso.',
     'success_insert':       u'Usuário cadastrado com sucesso.',
     'success_edit':         u'Usuário alterado com sucesso.',
+    'ldap_offline':         u'O LDAP não está disponível, não será possível associar o usuário CadVlan a um usuário do LDAP.',
 }
 
 user_group_messages = {

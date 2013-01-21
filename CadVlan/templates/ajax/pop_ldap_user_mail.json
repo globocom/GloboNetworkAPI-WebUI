@@ -1,0 +1,5 @@
+{
+    "ldap_username": "{{ ldap_name|escapejs }}",
+    "ldap_email": "{{ ldap_email|escapejs }}",
+    "error": "{{ error|escapejs }}"
+}

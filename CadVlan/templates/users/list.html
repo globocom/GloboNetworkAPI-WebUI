@@ -83,6 +83,9 @@ $(document).ready(function() {
 		$("#add_users_form").clearForm();
 		$("#add_users_form").attr('action', '{{ action_new_users }}');
 		$("#add_users_form .user").html('');
+		$("#id_is_ldap").removeAttr('checked');
+		$("#id_ldap_user").parent("div").hide();
+		$("#id_ldap_group").parent("div").hide();
 		$('.pickList_removeAll').click();
 		$('html, body').animate({
 		    scrollTop: $("#page_tab_form_user").show(1000).offset().top
@@ -100,6 +103,87 @@ $(document).ready(function() {
 	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
 	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
 	
+	
+	if ($("#id_is_ldap").attr('checked')) {
+		$("#id_ldap_user").parent("div").show();
+		$("#id_ldap_group").parent("div").show();
+		$("#id_name").attr('readonly', 'readonly');
+		$("#id_email").attr('readonly', 'readonly');
+	} else {
+		$("#id_ldap_user").parent("div").hide();
+		$("#id_ldap_group").parent("div").hide();
+		$("#id_name").removeAttr('readonly');
+		$("#id_email").removeAttr('readonly');
+	}
+	
+	$("#id_is_ldap").change(function(){
+		
+		var act = $("#add_users_form").attr('action');
+		var idt_user = act.substring(act.search(/(\d+)\//),act.length-2);
+		
+		if ($(this).attr('checked')) {
+			$("#id_ldap_user").parent("div").show(1000);
+			$("#id_ldap_group").parent("div").show(1000);
+			$("#id_name").attr('readonly', 'readonly');
+			$("#id_email").attr('readonly', 'readonly');
+			$('#id_ldap_user').load('/ldap/usersbygroup/'+$('#id_ldap_group').val()+'/'+idt_user);
+		} else {
+			$("#id_ldap_user").parent("div").hide(1000);
+			$("#id_ldap_group").parent("div").hide(1000);
+			$("#id_name").removeAttr('readonly');
+			$("#id_email").removeAttr('readonly');
+		}
+		
+	});
+	
+	$('#id_ldap_group').change(function(){
+		
+		var act = $("#add_users_form").attr('action');
+		var idt_user = act.substring(act.search(/(\d+)\//),act.length-2);
+		
+		$.ajax({
+	         url: '/ldap/usersbygroup/'+$('#id_ldap_group').val()+'/'+idt_user,
+	         success: function(data, textStatus, xhr) {
+					if (xhr.status == "278") {
+						$("#id_ldap_user").parent("div").hide();
+						$("#id_ldap_group").parent("div").hide();
+						$("#id_name").removeAttr('readonly');
+						$("#id_email").removeAttr('readonly');
+						$("#id_is_ldap").parent().children("p").html('O LDAP não está disponível, não será possível associar o usuário CadVlan a um usuário do LDAP.');
+					}
+					else
+						$('#id_ldap_user').html(data);
+				},
+	    });
+	});
+	
+	
+	$('#id_ldap_user').change(function(){
+		$.ajax({
+	         url: '/ldap/pop_ldap_user_mail/'+$('#id_ldap_user').val(),
+	         dataType: "json",
+	         success: function(data, textStatus, xhr) {
+					if (xhr.status == "278") {
+						$("#id_ldap_user").parent("div").hide();
+						$("#id_ldap_group").parent("div").hide();
+						$("#id_name").removeAttr('readonly');
+						$("#id_email").removeAttr('readonly');
+						$("#id_is_ldap").removeAttr('checked');
+						$("#id_is_ldap").parent("div").children("p").html('O LDAP não está disponível, não será possível associar o usuário CadVlan a um usuário do LDAP.');
+					}
+					else {
+						$('#id_name').val(data.ldap_username);
+			            $('#id_email').val(data.ldap_email);
+					}
+				},
+	    });
+		
+	});
+	
+	{% if not ldap_up %}
+		$("#id_is_ldap").attr('title', 'O LDAP não está disponível, não será possível associar o usuário CadVlan a um usuário do LDAP.');
+		$("#id_is_ldap").attr('disabled', 'disabled');
+	{% endif %}
 	
 })
 </script>
