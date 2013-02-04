@@ -110,6 +110,7 @@ TEMPLATE_CONTEXT_PROCESSORS =(
 )
 
 MIDDLEWARE_CLASSES = (
+    'CadVlan.processExceptionMiddleware.LoggingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

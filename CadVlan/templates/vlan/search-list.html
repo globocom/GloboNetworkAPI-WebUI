@@ -35,9 +35,15 @@ $(document).ready(function() {
 		if ($(".expandable_" + id).css("max-height") != "9999px") {
 			$(".expandable_" + id).css("max-height", "9999px");
 			$("div[lang=" + id + "]").css("background", "url(/media/img/min.png) transparent bottom center no-repeat");
+			
+			$("#expandir_tipo_" + id).attr('rowspan', $("#expandir_tipo_" + id).attr('lenght') );
+			$("#expandir_rede_" + id).attr('rowspan', $("#expandir_rede_" + id).attr('lenght') );
 		} else {
 			$(".expandable_" + id).css("max-height", "52px");
 			$("div[lang=" + id + "]").css("background", "url(/media/img/max.png) transparent bottom center no-repeat");
+			
+			$("#expandir_tipo_" + id).attr('rowspan', 4);
+			$("#expandir_rede_" + id).attr('rowspan', 4);
 		}
 	});
 	
