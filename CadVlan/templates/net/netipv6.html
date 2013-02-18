@@ -59,6 +59,16 @@ $(document).ready(function() {
 						<td><label for="sit_vlan">Máscara</label></td>
 						<td><label style="width: 350px;color: blue;text-align: center;">{{n.mask1}}:{{n.mask2}}:{{n.mask3}}:{{n.mask4}}.{{n.mask5}}:{{n.mask6}}:{{n.mask7}}:{{n.mask8}}</label></td>
 					</tr>
+					<tr>
+						<td><label for="sit_rede">Situação</label></td>
+						<td>
+						{% if n.active == 'False' %} 
+							<label style="width: 350px;color: blue;text-align: center;" >NÃO ATIVADA</label>
+						{% else %} 
+							<label style="width: 350px;color: blue;text-align: center;" >ATIVADA</label>
+						{% endif %}
+						</td>
+					</tr>
 			{% endfor %}
 			
 			</table>

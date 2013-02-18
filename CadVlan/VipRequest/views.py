@@ -668,7 +668,7 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
                     
                     try:
                         if ipv4_type == '0': 
-                            ipv4 = client_api.create_ip().get_available_ip4_for_vip(environment_vip).get("ip").get("id")
+                            ipv4 = client_api.create_ip().get_available_ip4_for_vip(environment_vip, name).get("ip").get("id")
                             
                         else:
                             ipv4 = client_api.create_ip().check_vip_ip(ipv4_specific, environment_vip).get("ip").get("id")
@@ -685,7 +685,7 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
                     
                     try:
                         if ipv6_type == '0': 
-                            ipv6 = client_api.create_ip().get_available_ip6_for_vip(environment_vip).get("ip").get("id")
+                            ipv6 = client_api.create_ip().get_available_ip6_for_vip(environment_vip, name).get("ip").get("id")
                             
                         else:
                             ipv6 = client_api.create_ip().check_vip_ip(ipv6_specific, environment_vip).get("ip").get("id")

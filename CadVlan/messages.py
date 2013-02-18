@@ -15,7 +15,9 @@ error_messages = {
     'can_not_remove':       u'Não foi possível excluir alguns dos itens selecionados: %s.',
     'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluído.',
     'select_one':           u'Nenhum item foi selecionado.',
-    'invalid_param':           u'Valor do %s nulo ou inválido.',
+    'invalid_param':        u'Valor do %s nulo ou inválido.',
+    'vlan_select_one':      u'Vlan já criada, selecione ao menos uma Rede',
+    
 }
 
 auth_messages = {
@@ -87,6 +89,9 @@ network_ip_messages = {
     'net_invalid':          u'Rede de IP inválida.',
     'already_assoc_equip':  u'Este equipamento já está associado ao ip.',
     'ip_assoc_success':     u'Ip associado ao equipamento com sucesso.',
+    'net_create_success':   u'Rede(s) criada(s) com sucesso.',
+    'networks_activated':   u'Alguma(s) rede(s) selecionada(s) já está(ão) criada(s).'
+    
 }
 
 environment_messages = {
@@ -120,6 +125,7 @@ vlan_messages = {
     'vlan_edit_sucess':     u'Vlan alterada com sucesso.',
     'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',                 
     'vlan_cvs_error':       u'Vlan excluída com sucesso mas ocorreu um erro de CVS, contate o administrador.',
+    'vlan_create_success':  u'Vlan criada com sucesso.',
 }
 
 option_vip_messages = {

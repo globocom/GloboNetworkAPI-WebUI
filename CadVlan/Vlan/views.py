@@ -13,8 +13,9 @@ from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError, VlanError, VipIpError
 from django.contrib import messages
-from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT
-from CadVlan.forms import DeleteForm
+from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT,\
+    VLAN_CREATE_SCRIPT
+from CadVlan.forms import DeleteForm, CreateForm
 from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS, AJAX_VLAN_AUTOCOMPLETE, VLAN_FORM, VLAN_EDIT, AJAX_SUGGEST_NAME
 from CadVlan.Vlan.forms import SearchVlanForm, VlanForm
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
@@ -23,7 +24,7 @@ from django.http import HttpResponseServerError, HttpResponse,HttpResponseRedire
 from django.template import loader
 from CadVlan.Vlan.business import montaIPRede , cache_list_vlans
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.messages import vlan_messages, error_messages
+from CadVlan.messages import vlan_messages, error_messages, network_ip_messages
 from django.core.urlresolvers import reverse
 from CadVlan.Acl.acl import checkAclCvs, deleteAclCvs
 from CadVlan.Util.cvs import CVSCommandError, CVSError
@@ -174,6 +175,7 @@ def list_by_id(request, id_vlan):
     listaIps = []
     lista = []
     lists["delete_form"] = DeleteForm()
+    lists["create_form"] = CreateForm()
     
     try:
         
@@ -211,8 +213,14 @@ def list_by_id(request, id_vlan):
         if  len(redesIPV6) > 0:
             listaIps.append(montaIPRede(redesIPV6,False))
             
+        # Show 'Criar Redes' button
+        lists['networks_active'] = 1
+        
         for item in listaIps:
             for i in item:
+                if i['active'] == 'False':
+                    # Hide 'Criar Redes' button
+                    lists['networks_active'] = 0
                 lista.append(i)
                 
         net_type = client.create_tipo_rede().listar()
@@ -561,4 +569,92 @@ def delete_all_network(request, id_vlan):
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def create(request, id_vlan):
+    
+    """ Set column 'ativada = 1' """
+    
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        # If vlan with parameter id_vlan  don't exist, VlanNaoExisteError exception will be called
+        vlan = client.create_vlan().get(id_vlan)
+        
+        client.create_vlan().create_vlan(id_vlan)
+        
+        messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_create_success"))
+    
+    except VlanNaoExisteError, e:
+        logger.error(e)
+        return redirect('vlan.search.list') 
+    
+    # Redirect to list_all action
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def create_network(request, id_vlan):
+    
+    """ Set column 'active = 1' in tables  """
+    try:
+        if request.method == 'POST':
+        
+            form = CreateForm(request.POST)
+            
+            # Get user
+            auth   = AuthSession(request.session)
+            client = auth.get_clientFactory()
+            
+            networks_activated     = False
+            networks_was_activated = True
+            
+            if form.is_valid():
+                
+    
+                # If vlan with parameter id_vlan  don't exist, VlanNaoExisteError exception will be called
+                vlan = client.create_vlan().get(id_vlan)
+
+                # All ids to be activated        
+                ids = split_to_array(form.cleaned_data['ids_create'])
+                
+                for id in ids:
+                    value        = id.split('-')
+                    id_net       = value[0]
+                    network_type = value[1]
+                    
+                    if network_type == 'v4':
+                        net = client.create_network().get_network_ipv4(id_net)
+                    else:
+                        net = client.create_network().get_network_ipv6(id_net)
+                    
+                    if net['network']['active'] == 'True':
+                        networks_activated = True
+                    else:
+                        networks_was_activated = False
+                
+                # Create networks
+                client.create_network().create_networks(ids, id_vlan)
+                
+                if networks_activated == True:
+                    messages.add_message(request, messages.ERROR, network_ip_messages.get("networks_activated"))
+                
+                if networks_was_activated == False:
+                    messages.add_message(request, messages.SUCCESS, network_ip_messages.get("net_create_success"))
+            
+            else:
+                vlan = client.create_vlan().get(id_vlan)
+                if vlan['vlan']['ativada'] == 'True':
+                    messages.add_message(request, messages.ERROR, error_messages.get("vlan_select_one"))
+                else:
+                    messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+    except VlanNaoExisteError, e:
+        logger.error(e)
+        return redirect('vlan.search.list')   
+    
     return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))

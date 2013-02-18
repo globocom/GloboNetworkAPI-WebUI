@@ -70,6 +70,16 @@ $(document).ready(function() {
 						<td><label for="desc_vlan">Broadcast</label></td>
 						<td><label style="width: 350px;color: blue;text-align: center;" >{{n.broadcast}}</label></td>
 					</tr>
+					<tr>
+						<td><label for="sit_rede">Situação</label></td>
+						<td>
+						{% if n.active == 'False' %} 
+							<label style="width: 350px;color: blue;text-align: center;" >NÃO ATIVADA</label>
+						{% else %} 
+							<label style="width: 350px;color: blue;text-align: center;" >ATIVADA</label>
+						{% endif %}
+						</td>
+					</tr>
 		
 			{% endfor %}
 		

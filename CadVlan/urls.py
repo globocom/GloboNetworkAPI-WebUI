@@ -111,6 +111,8 @@ urlpatterns += patterns('CadVlan.Vlan.views',
     url('^vlan/edit/(?P<id_vlan>\d+)[/]?$','vlan_edit',name='vlan.edit.by.id',),
     url('^vlan/delete[/]?$','delete_all', name='vlan.delete',),
     url('^vlan/delete/network/(?P<id_vlan>\d+)[/]?$','delete_all_network', name='vlan.network.delete',),
+    url('^vlan/create/(?P<id_vlan>\d+)[/]?$', 'create', name='vlan.create'),
+    url('^vlan/create/network/(?P<id_vlan>\d+)[/]?$', 'create_network', name='vlan.create.network'),
 )
 
 # URL's Network
