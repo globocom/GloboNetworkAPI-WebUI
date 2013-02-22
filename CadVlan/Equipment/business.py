@@ -34,3 +34,15 @@ def get_ambiente_by_id(ambientes,id_ambiente):
             return ambiente
             
     return None
+
+def list_users(user):
+    users = user.listar()
+    ulist = dict()
+    ulist["list_from_model"] = users["usuario"]
+    user_list = []
+
+    for list in ulist["list_from_model"]:
+        user_list.append(str(list['nome']) + ' - ' + str(list['user']))
+        
+    ulist['list'] = user_list
+    return ulist

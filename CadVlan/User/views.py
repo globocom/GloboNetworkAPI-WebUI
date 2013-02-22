@@ -14,9 +14,10 @@ from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.utility import make_random_password, validates_dict
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import user_messages, error_messages
-from CadVlan.permissions import ADMINISTRATION
+from CadVlan.permissions import ADMINISTRATION, ENVIRONMENT_VIP
 from CadVlan.settings import EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_FROM
-from CadVlan.templates import USER_LIST, MAIL_NEW_USER, AJAX_LDAP_USERS_BY_GROUP, AJAX_LDAP_USER_POP_NAME_MAIL
+from CadVlan.templates import USER_LIST, MAIL_NEW_USER, AJAX_LDAP_USERS_BY_GROUP, AJAX_LDAP_USER_POP_NAME_MAIL,\
+    AJAX_AUTOCOMPLETE_LIST
 from django.http import HttpResponse
 from django.conf.urls.defaults import url
 from django.contrib import messages
@@ -28,6 +29,8 @@ from django.template import loader
 from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError
 import logging
+from CadVlan.Equipment.business import list_users
+from CadVlan.Util.shortcuts import render_to_response_ajax
 
 logger = logging.getLogger(__name__)
 
@@ -332,3 +335,30 @@ def diff(old, new):
     to_rem = list(set(old) - set(new))
     
     return to_add, to_rem
+
+
+
+@log
+@login_required
+@has_perm([{"permission": ENVIRONMENT_VIP, "read": True}])
+def ajax_autocomplete_users(request):
+    try:
+        
+        user_list = dict()
+        
+        # Get user auth
+        auth = AuthSession(request.session)
+        user = auth.get_clientFactory().create_usuario()
+        
+        # Get list of equipments from cache
+        user_list = list_users(user)
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_LIST, user_list, context_instance=RequestContext(request))
+

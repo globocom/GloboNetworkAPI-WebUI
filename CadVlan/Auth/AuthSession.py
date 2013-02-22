@@ -48,4 +48,3 @@ class AuthSession:
         '''
         user = self.get_user()
         return ClientFactory(NETWORK_API_URL, user.get_username(), user.get_password(), user.get_user_ldap())
-    

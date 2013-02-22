@@ -107,7 +107,7 @@ def vlan_add_network_form(request, id_vlan):
             
             # Get all needs from NetworkAPI
             net_type_list = client.create_tipo_rede().listar()
-            env_vip_list = client.create_environment_vip().list_all()
+            env_vip_list = client.create_environment_vip().list_all_available(id_vlan)
             
             # Business
             vlan = client.create_vlan().get(id_vlan)

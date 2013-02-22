@@ -173,3 +173,6 @@ LDAP_USER_FORM = 'ldap/user-form.html'
 FILTER_LIST = 'filter/list.html'
 FILTER_FORM = 'filter/form.html'
 FILTER_EDIT = 'filter/edit.html'
+
+# EventLog
+LOG_SEARCH_LIST = 'event_log/search-list.html'

@@ -192,6 +192,9 @@ urlpatterns += patterns('CadVlan.User.views',
     #Ajax for ldap users selection
     url('ldap/usersbygroup/(?P<ldap_group>[^/]+)/(?P<id_user>[^/]+)[/]', 'ajax_ldap_users_by_group', name='ldap.userbygroup.ajax'),
     url('ldap/pop_ldap_user_mail/(?P<cn>[^/]+)[/]', 'ajax_ldap_pop_name_mail', name='ldap.pop_name_mail.ajax'),
+    
+    #Auto complete users in Logs
+    url('^user/autocomplete[/]?$', 'ajax_autocomplete_users', name='user.autocomplete.ajax')
 
 )
 
@@ -243,6 +246,12 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/tab/healthcheck/(?P<id_vip>\d+)[/]?$', 'tab_healthcheck', name='vip-request.tab.healthcheck',),
     url('^vip-request/tab/maxcon/(?P<id_vip>\d+)[/]?$', 'tab_maxcon', name='vip-request.tab.maxcon',),
     
+)
+
+# URL's Event Log
+urlpatterns += patterns('CadVlan.EventLog.views',
+    url('^event-log/list[/]?$', 'search_list', name='event-log.list',),
+    url('^event-log/find[/]?$', 'ajax_list_logs', name='event-log.list.ajax',),
 )
 
 # URL's Access Type Requests
