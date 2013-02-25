@@ -175,4 +175,4 @@ FILTER_FORM = 'filter/form.html'
 FILTER_EDIT = 'filter/edit.html'
 
 # EventLog
-LOG_SEARCH_LIST = 'event_log/search-list.html'
+# LOG_SEARCH_LIST = 'event_log/search-list.html'

@@ -249,10 +249,10 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
 )
 
 # URL's Event Log
-urlpatterns += patterns('CadVlan.EventLog.views',
-    url('^event-log/list[/]?$', 'search_list', name='event-log.list',),
-    url('^event-log/find[/]?$', 'ajax_list_logs', name='event-log.list.ajax',),
-)
+#urlpatterns += patterns('CadVlan.EventLog.views',
+#    url('^event-log/list[/]?$', 'search_list', name='event-log.list',),
+#    url('^event-log/find[/]?$', 'ajax_list_logs', name='event-log.list.ajax',),
+#)
 
 # URL's Access Type Requests
 urlpatterns += patterns('CadVlan.AccessType.views',
