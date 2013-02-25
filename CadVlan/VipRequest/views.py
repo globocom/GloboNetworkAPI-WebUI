@@ -854,7 +854,7 @@ def ajax_model_ip_real_server(request):
     client_api = auth.get_clientFactory()
     return model_ip_real_server_shared(request, client_api)
 
-def parse_real_server(request, vip, client_api, id_vip, id_evip, is_status=False):
+def parse_real_server(request, vip, client_api, id_vip, id_evip, is_status=False, valid = True):
     reals = []
     if "reals" in vip:
         reals = validates_dict(vip['reals'], 'real')
@@ -885,7 +885,7 @@ def parse_real_server(request, vip, client_api, id_vip, id_evip, is_status=False
             real_name = reals[i].get("real_name")
             real_ip = reals[i].get("real_ip")
             
-            real = client_api.create_vip().valid_real_server(real_ip, real_name , id_evip).get("real")
+            real = client_api.create_vip().valid_real_server(real_ip, real_name , id_evip, valid).get("real")
             
             equip_aux = real.get("equipment")
             ip_aux = real.get("ip")
@@ -1082,7 +1082,7 @@ def tab_real_server(request, id_vip):
                 messages.add_message(request, messages.ERROR, e)
                 
         if parse is True:
-            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip, True)
+            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip, True, False)
             lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version, status)
     
     except VipNaoExisteError, e:
@@ -1610,7 +1610,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
 
             lists = mount_table_ports(lists, ports_vip, ports_real)
             
-            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip)
+            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip, False, False)
                 
             lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip)
             

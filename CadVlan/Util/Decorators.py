@@ -22,6 +22,7 @@ from hashlib import sha1
 import json
 import logging
 import time
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,9 @@ def log(view_func):
     '''
     def _decorated(request, *args, **kwargs):
 
-        logger.info(u'Start of the request[%s] for URL[%s] with DATA[%s].' % (request.method, request.path, request.raw_post_data))
+        post_data = request.raw_post_data
+        post_data = re.sub(r'password=(.*?)&', 'password=****&', post_data)
+        logger.info(u'Start of the request[%s] for URL[%s] with DATA[%s].' % (request.method, request.path, post_data))
 
         return view_func(request,*args, **kwargs)
 
