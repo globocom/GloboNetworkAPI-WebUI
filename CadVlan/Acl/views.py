@@ -194,7 +194,7 @@ def edit(request, id_vlan, network):
                 list_ips.append(n)
         
         # Replace id network_type for name network_type
-        vlan['network'] = replace_id_to_name(list_ips, client.create_tipo_rede().listar().get('tipo_rede'), "network_type", "id", "nome")
+	vlan['network'] = replace_id_to_name(list_ips, client.create_tipo_rede().listar().get('net_type'), "network_type", "id", "name")
         
     except (NetworkAPIClientError, CVSError, ValueError), e:
         logger.error(e)
