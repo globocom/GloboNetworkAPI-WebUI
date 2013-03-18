@@ -24,6 +24,7 @@ IPS = 'ips'
 VIPS_REQUEST = 'requisicao_vips'
 VIP_ALTER_SCRIPT = 'script_alterar_vip'
 VIP_CREATE_SCRIPT = 'script_criacao_vip'
+VIP_REMOVE_SCRIPT = 'script_remover_vip'
 VIP_VALIDATION = 'validar_vip'
 VIP_ADMINISTRATION = 'administracao_vips'
 ACL_VLAN_VALIDATION = 'validar_acl_vlans'
@@ -31,6 +32,8 @@ ENVIRONMENT_VIP = 'ambiente_vip'
 OPTION_VIP = 'opcao_vip'
 AUTHENTICATE =  'authenticate'
 ACCESS_TYPE_MANAGEMENT = 'cadastro_de_tipo_acesso'
+AUDIT_LOG = 'audit_logs'
+ACL_APPLY= 'aplicar_acl'
 
 PERMISSIONS = {
                'ADMINISTRATION': ADMINISTRATION,
@@ -58,5 +61,9 @@ PERMISSIONS = {
                'ENVIRONMENT_VIP': ENVIRONMENT_VIP,
                'OPTION_VIP': OPTION_VIP,
                'AUTHENTICATE': AUTHENTICATE,
-               'ACCESS_TYPE_MANAGEMENT' : ACCESS_TYPE_MANAGEMENT
+               'ACCESS_TYPE_MANAGEMENT' : ACCESS_TYPE_MANAGEMENT,
+               'AUDIT_LOG' : AUDIT_LOG,
+               'VIP_REMOVE_SCRIPT' : VIP_REMOVE_SCRIPT,
+               'ACL_APPLY' : ACL_APPLY
                }
+

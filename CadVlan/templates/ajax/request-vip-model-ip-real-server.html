@@ -82,7 +82,7 @@ $(document).ready(function() {
 
 function setIpReal(real_name, real_id, ip, id_ip) {
 	
-	$('#table_real tbody').append("<tr class='remove_port'><td><label>" + real_name + "</label><input type='hidden' name='equip' value='" + real_name + "'><input type='hidden' name='id_equip' value='" + real_id + "'></td><td><label>" + ip + "</label><input type='hidden' name='ip' value='" + ip + "'><input type='hidden' name='id_ip' value='" + id_ip + "'></td><td><label class='editable'></label><input type='hidden' name='priority' value='-'></td><td class='weighted'><label class='editable' for='weighted'></label><input type='hidden' name='weight' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
+	$('#table_real tbody').append("<tr class='remove_port'><td><label>" + real_name + "</label><input type='hidden' name='equip' value='" + real_name + "'><input type='hidden' name='id_equip' value='" + real_id + "'></td><td><label>" + ip + "</label><input type='hidden' name='ip' value='" + ip + "'><input type='hidden' name='id_ip' value='" + id_ip + "'></td><td><label class='editable'>0</label><input type='hidden' name='priority' value='0'></td><td class='weighted'><label class='editable' for='weighted'></label><input type='hidden' name='weight' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
 	
 	$('.editable').editableTable();
 	 

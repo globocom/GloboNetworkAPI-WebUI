@@ -250,7 +250,7 @@ def option_vip_associate_net4(request,id_net):
         
         id_vip =  net.get('network').get("ambient_vip")
                            
-        lists['net'] = replace_id_to_name([net['network']], tipo_rede['tipo_rede'], "network_type", "id", "nome")
+        lists['net'] = replace_id_to_name([net['network']], tipo_rede['net_type'], "network_type", "id", "name")
         
         if id_vip is None:
             id_vip = 0

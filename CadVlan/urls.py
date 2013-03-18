@@ -224,7 +224,15 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/list[/]?$', 'search_list', name='vip-request.list',),
     url('^vip-request/find[/]?$', 'ajax_list_vips', name='vip-request.list.ajax',),
     url('^vip-request/ajax_view/(?P<id_vip>\d+)[/]?$', 'ajax_view_vip', name='vip.view.ajax',),
-    url('^vip-request/operation/(?P<operation>\d+)[/]?$', 'delete_validate_create_remove', name='vip.delete.create.validate.remove',),
+    
+    
+    url('^vip-request/operation/delete?$', 'delete_vip',  name='vip.delete',),
+    url('^vip-request/operation/valid?$', 'validate_vip', name='vip.valid',),
+    url('^vip-request/operation/create?$', 'create_vip', name='vip.create',),
+    url('^vip-request/operation/remove?$', 'remove_vip', name='vip.remove',),
+    
+    
+    
     url('^vip-request/form[/]?$', 'add_form', name='vip-request.form',),
     url('^vip-request/form/external[/]?$', 'add_form_external', name='vip-request.form.external',),
     url('^vip-request/form/(?P<id_vip>\d+)[/]?$', 'edit_form', name='vip-request.edit',),
@@ -249,10 +257,11 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
 )
 
 # URL's Event Log
-#urlpatterns += patterns('CadVlan.EventLog.views',
-#    url('^event-log/list[/]?$', 'search_list', name='event-log.list',),
-#    url('^event-log/find[/]?$', 'ajax_list_logs', name='event-log.list.ajax',),
-#)
+urlpatterns += patterns('CadVlan.EventLog.views',
+    url('^event-log/list[/]?$', 'search_list', name='event-log.list',),
+    url('^event-log/find[/]?$', 'ajax_list_logs', name='event-log.list.ajax',),
+    url('^version?$', 'version_checks', name='version.check',),
+)
 
 # URL's Access Type Requests
 urlpatterns += patterns('CadVlan.AccessType.views',

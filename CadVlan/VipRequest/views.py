@@ -18,7 +18,8 @@ from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs,
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages
-from CadVlan.permissions import VIP_ADMINISTRATION
+from CadVlan.permissions import VIP_ADMINISTRATION, VIP_CREATE_SCRIPT,\
+    VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL
 from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, \
@@ -58,7 +59,7 @@ OPERATION = { 0 : 'DELETE' , 1: 'VALIDATE', 2: 'CREATE', 3: 'REMOVE'}
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def search_list(request): 
     try:
         
@@ -78,7 +79,7 @@ def search_list(request):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def ajax_list_vips(request):
     
     try:
@@ -198,7 +199,7 @@ def ajax_view_vip(request,id_vip):
 @log
 @login_required
 @has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
-def delete_validate_create_remove(request,operation):
+def delete_validate_create_remove(request, operation):
     
     operation_text = OPERATION.get(int(operation))
     
@@ -314,6 +315,39 @@ def delete_validate_create_remove(request,operation):
 
     # Redirect to list_all action
     return redirect('vip-request.list')    
+
+@log
+@login_required
+@has_perm([{"permission": VIP_CREATE_SCRIPT, "write": True}])
+def create_vip(request):
+    delete_validate_create_remove(request, 2)
+    # Redirect to list_all action
+    return redirect('vip-request.list')  
+
+@log
+@login_required
+@has_perm([{"permission": VIP_REMOVE_SCRIPT, "write": True}])
+def remove_vip(request):
+    delete_validate_create_remove(request, 3)
+    # Redirect to list_all action
+    return redirect('vip-request.list')  
+
+@log
+@login_required
+@has_perm([{"permission": VIP_VALIDATION, "write": True}])   
+def validate_vip(request):
+    delete_validate_create_remove(request, 1)
+    # Redirect to list_all action
+    return redirect('vip-request.list')  
+
+@log
+@login_required
+@has_perm([{"permission": VIP_ADMINISTRATION, "write": True}])
+def delete_vip(request):
+    delete_validate_create_remove(request, 0)
+    # Redirect to list_all action
+    return redirect('vip-request.list')  
+    
 
 @log
 @login_required
@@ -1343,14 +1377,14 @@ def status_real_server(request, id_vip, status):
                     if version == IP_VERSION.IPv4[1]:
                         
                         if enable:
-                            client_vip.adicionar_real(id_vip, ip_id, equip_id)
+                            client_vip.habilitar_real(id_vip, ip_id, equip_id)
                         else:
                             client_vip.desabilitar_real(id_vip, ip_id, equip_id)
                     
                     elif version == IP_VERSION.IPv6[1]:
                         
                         if enable:
-                            client_vip.add_real_ipv6(id_vip, ip_id, equip_id)
+                            client_vip.enable_real_ipv6(id_vip, ip_id, equip_id)
                         else:
                             client_vip.disable_real_ipv6(id_vip, ip_id, equip_id)
 

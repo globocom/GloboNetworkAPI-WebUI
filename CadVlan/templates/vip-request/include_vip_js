@@ -93,7 +93,14 @@
 		$('.editable').editableTable();
 	});
 	
-	$('.numbersOnly').live("keyup", function(){  
+	$('.numbersOnly').live("keydown", function(e){
+      	  if(e.keyCode == 9){
+    		label = $(this).parent().parent().parent().next().find('.editable');
+      		$(this).next().click();
+      		label.click();
+      		return false;
+      	  }
+	}).live("keyup", function(e){ 
           $(this).val($(this).val().replace(/[^0-9]+/g,''));
 	});
 	

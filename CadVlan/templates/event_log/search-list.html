@@ -1,0 +1,324 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Logs - Listagem]{% endblock %}
+
+{% block header %}
+<style>
+#search_form label {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript">
+
+function setupAjaxForm() {
+	form = {};
+	$("#search_form input[type^='text'], #search_form input[type='hidden'], #search_form select").each(function() {
+		form[$(this).attr("name")] = $(this).val();
+	});
+	$("#search_form input[type='checkbox']").each(function() {
+		form[$(this).attr("name")] = $(this).is(":checked");
+	});
+	
+	$.ajaxSetup({
+		data: form
+	});
+}
+
+$(document).ready(function() {
+	setupAjaxForm();
+	
+	$("#id_first_date, #id_last_date").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9/]+/g,'');
+        $(this).val(valor);
+ 	}); 
+
+	$("#id_start_time, #id_end_time").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9:]+/g,'');
+        $(this).val(valor);
+ 	});
+	
+	//autocomplete("{% url user.autocomplete.ajax %}", false, "id_user", false);
+	
+	$("#id_parameter, #parameter_field").css('visibility', 'hidden');
+	
+	$(function(){
+	     $("#id_first_date, #id_last_date, #id_start_time, #id_end_time").keypress(function(e){
+	         var k=e.keyCode || e.which;
+	         if(k==13){
+	             e.preventDefault();
+	         }
+	     });
+	 });
+	
+	/* MÁSCARA E VALIDAÇÕES DOS CAMPOS DE DATA */
+	
+	$("#id_first_date").mask('99/99/9999').datepicker({ 
+		dayNamesMin: [ "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab" ], 
+		monthNames: [ "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+		              "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro" ],
+		changeMonth: true,
+		changeYear: true,
+		dateFormat: "dd/mm/yy",
+		buttonImageOnly: true,
+		maxDate: "+0d +0m +0w"
+	});
+	
+	$("#id_last_date").mask('99/99/9999').datepicker({ 
+		dayNamesMin: [ "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab" ], 
+		monthNames: [ "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+		              "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro" ],
+		changeMonth: true,
+		changeYear: true,
+		dateFormat: "dd/mm/yy",
+		buttonImageOnly: true
+	});
+	
+	$("#id_first_date, #id_last_date").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9/]+/g,'');
+        $(this).val(valor);
+ 	});
+	
+	$("#id_first_date, #id_last_date").on('blur', function(){
+		$(this).val(function(i,val){
+			if (val == ''){
+				return '';
+			}
+			else{
+				if ($(this).val().length < 10){
+					alert("Data informada em formato inválido.");
+					$(this).focus();
+					return '';
+				}
+				var valor = $(this).val().replace(/[^0-9/]+/g,'');
+				if (valor == ''){
+					alert("Data informada em formato inválido.");
+					$(this).focus();
+					return '';
+				}
+				var date = val.split('/');
+				var yr = date[2].substr(0,2);
+				if ((date[0] > 31)||(date[1]>12)||(!(yr == 20))){
+					alert('Data do período inválida.');
+					$(this).focus();
+					return '';
+				}
+				return val;
+			}
+		});
+	});
+	
+	
+ 	/* MÁSCARA E VALIDAÇÕES DOS CAMPOS DE HORA */
+ 	
+	$("#id_start_time").mask('00:00').on('click', function(){
+		$(this).val(function(i,val){
+			if (val == '00:00'){
+				return '';
+			}
+			else return val;
+		});
+	});
+	$("#id_end_time").mask('00:00').on('click', function(){
+		$(this).val(function(i,val){
+			if (val == '23:59'){
+				return '';
+			}
+			else return val;
+		});
+	});
+	$("#id_start_time").mask('00:00').on('blur', function(){
+		$(this).val(function(i,val){
+			if (val == ''){
+				return '00:00';
+			}
+			else{
+				if (val.length < 5){
+					alert('Hora do período inválida.');
+					$(this).focus();
+					return '00:00';
+				}
+				var time = val.split(":");
+				if (time[0] > 23){
+					alert('Hora do período inválida.');
+					$(this).focus();
+					return '00:00';
+				}
+				if (time[1]>59){
+					alert('Hora do período inválida.');
+					$(this).focus();
+					return '00:00';
+				}
+				return val;
+			}
+		});
+	});
+	$("#id_end_time").mask('00:00').on('blur', function(){
+		$(this).val(function(i,val){
+			if (val == ''){
+				return '23:59';
+			}
+			else{
+				if (val.length < 5){
+					alert('Hora do período inválida.');
+					$(this).focus();
+					return '23:59';
+				}
+				var time = val.split(":");
+				if (time[0] > 23){
+					alert('Hora do período inválida.');
+					$(this).focus();
+					return '23:59';
+				}
+				if (time[1]>59){
+					alert('Hora do período inválida.');
+					$(this).focus();
+					return '23:59';
+				}
+				return val;
+			}
+		});
+	});
+	
+	/* EXIBIR CAMPO DE PARÂMETRO QUANDO HOUVER DATA SELECIONADA */
+	
+	$('#id_first_date, #id_last_date').change(function(){
+		if (($('#id_first_date').val() != '') && ($('#id_last_date').val() != '')){
+			$("#id_parameter, #parameter_field").css('visibility', 'visible');
+		}else{
+			$("#id_parameter, #parameter_field").css('visibility', 'hidden');
+		}
+	});
+	
+	oTable = $("#log_list").dataTable({
+		"bServerSide": true,
+		"aaSorting": [],
+		"bAutoWidth": false,
+		"bJQueryUI": true,
+		"bFilter": false,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [
+		                 { "bSortable": false, "aTargets": [ 0, 1, 2, 3, 4, 5 ] }
+		     			]
+	});
+	
+	$("#page_tab").tabs();
+	
+	$("#accordion").accordion({ autoHeight: false });
+	
+	$("#log_list_wrapper").hide();
+	
+	$("#btn_search").button({ icons: {primary: "ui-icon-search"} }).live("click", function(event){
+		
+		event.preventDefault();
+
+		
+		setupAjaxForm();
+		
+		oTable.fnSettings().sAjaxSource = "{% url event-log.list.ajax %}";
+		
+		$("#log_list_wrapper").show();
+		
+		oTable.fnAjaxUpdate();
+	});
+	
+	$("#btn_clear").button({ icons: {primary: "ui-icon-close"}, text: false }).click(function() {
+		$("#id_parameter, #parameter_field").css('visibility', 'hidden');
+	});
+	
+	$(".tool").buttonset();
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+	
+})
+</script>
+<style>
+input {
+	padding: 4px 0px !important;
+}
+#search_form table th {
+	padding: 2px;
+    text-align: center !important;
+    background: url("/media/css/globo/images/ui-bg_highlight-soft_80_dddddd_1x100.png") repeat-x scroll 50% 50% #DDDDDD;
+}
+#search_form table td {
+    text-align: center !important;
+	background-color: #F6F6F6;
+	width: auto !important;
+	margin: 10px !important;
+}
+.ui-accordion .ui-accordion-content {
+	padding: 5px !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Logs</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="accordion">
+			<h3><a href="#">Pesquisar</a></h3>
+			<div id="search">
+				<form id="search_form" method="post" action="">
+					{% csrf_token %}
+					<table style="width: 100%">
+						<thead>
+							<tr>
+								<th>Usuário</th>
+								<th>De</th>
+								<th>Até</th>
+								<th>Ação</th>
+								<th>Funcionalidade</th>
+								<th><span id="parameter_field">Parâmetro</span></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr height="25">
+								<td>{{ search_form.user }}</td>
+								<td>{{ search_form.first_date }}&nbsp;{{ search_form.start_time }}</td>
+								<td>{{ search_form.last_date }}&nbsp;{{ search_form.end_time }}</td>
+								<td>{{ search_form.action }}</td>
+								<td>{{ search_form.functionality }}</td>
+								<td>{{ search_form.parameter }}</td>
+								<td style="padding-top: 0px;"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+			</div>
+		</div>
+		<div class="buttons">
+			
+		</div>
+		<table id="log_list">
+			<col width="12%" />
+			<col width="12%" />
+			<col width="12%" />
+			<col width="12%" />
+			<col width="26%" />
+			<col width="26%" />
+			<thead>
+				<tr>
+					<th>Usuário</th>
+					<th>Data/Hora</th>
+					<th>Ação</th>
+					<th>Funcionalidade</th>
+					<th>Parâmetro Anterior</th>
+					<th>Parâmetro Atual</th>
+				</tr>
+			</thead>
+			<tbody>
+
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

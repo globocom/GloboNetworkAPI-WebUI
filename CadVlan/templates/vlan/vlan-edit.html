@@ -29,12 +29,12 @@ $(document).ready(function() {
 	});
 	
     $("#id_name").keyup(function() {
-        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+        var valor = $(this).val().replace(/[^0-9A-Za-z_-]+/g,'');
         $(this).val(valor);
     });
     
     $("#id_name").mouseover(function() {
-    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+    	$(this).attr("title","Somente letras maiúsculas e minúsculas, números, '-' e '_' são permitidos.");
     });
     
     $("#id_acl_file").mouseover(function() {
@@ -85,6 +85,7 @@ $(document).ready(function() {
 				url: "{% url ajax.vlan.acl.file.name %}",
 				dataType: 'text',
 				success: function(data) {
+					data = data.toUpperCase();
 					$("#id_acl_file").val(data);
 				}
 			});
@@ -134,6 +135,7 @@ $(document).ready(function() {
 					url: "{% url ajax.vlan.acl.file.name %}",
 					dataType: 'text',
 					success: function(data) {
+						data = data.toUpperCase();
 						$("#id_acl_file_v6").val(data);
 					}
 				});

@@ -17,6 +17,8 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+CADVLAN_VERSION = 1
+
 MANAGERS = ADMINS
 
 DATABASES = {
@@ -149,6 +151,7 @@ INSTALLED_APPS = (
     'CadVlan.NetworkType',
     'CadVlan.HealthcheckExpect',
     'CadVlan.Ldap',
+    'CadVlan.EventLog',
     
 )
 
@@ -305,6 +308,9 @@ LOGGING = {
             'handlers': ['handlers-view'],
         },
         'CadVlan.Ldap': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.EventLog': {
             'handlers': ['handlers-view'],
         },
     }

@@ -98,7 +98,15 @@ $(document).ready(function() {
 			$("#id_networkv6").val("");
 		} else {
 			$("#network_ipv6 input").each(function() {
-				value = value + $(this).val() + $.trim($(this).next().text());
+				if ($(this).val() == ""){
+					if ($(this).is("#mask")){
+						value = value + "000" + $.trim($(this).next().text());
+					}
+					else value = value + "0000" + $.trim($(this).next().text());
+				}
+				else{
+					value = value + $(this).val() + $.trim($(this).next().text());
+				}
 			});
 			$("#id_networkv6").val(value);
 			$("#id_networkv4").val("");
@@ -150,7 +158,7 @@ $(document).ready(function() {
 						<input type="text" name="oct6" maxlength="5" style="width:30px;" onkeyup="changeInput(this, true)" /><label> : </label>
 						<input type="text" name="oct7" maxlength="5" style="width:30px;" onkeyup="changeInput(this, true)" /><label> : </label>
 						<input type="text" name="oct8" maxlength="5" style="width:30px;" onkeyup="changeInput(this, true)" /><label> / </label>
-						<input type="text" name="oct9" maxlength="3" style="width:24px;" onkeyup="changeInput(this, true)" /><label></label>
+						<input type="text" name="oct9" maxlength="3" style="width:24px;" onkeyup="changeInput(this, true)" id="mask" /><label></label>
 						<p id="error">
 						{% if form.networkv6.errors %} 
 							{% for error in form.networkv6.errors %}

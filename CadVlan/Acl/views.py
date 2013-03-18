@@ -194,7 +194,7 @@ def edit(request, id_vlan, network):
                 list_ips.append(n)
         
         # Replace id network_type for name network_type
-	vlan['network'] = replace_id_to_name(list_ips, client.create_tipo_rede().listar().get('net_type'), "network_type", "id", "name")
+        vlan['network'] = replace_id_to_name(list_ips, client.create_tipo_rede().listar().get('net_type'), "network_type", "id", "name")
         
     except (NetworkAPIClientError, CVSError, ValueError), e:
         logger.error(e)
@@ -251,7 +251,7 @@ def apply_acl(request,id_vlan, network):
                     
                         equip = client_equip.listar_por_id(_id)
                         
-                        equipments.append(equip.get("equipamento").get("nome"))
+                        equipments.append(equip)
                         
                     except NetworkAPIClientError, e:
                         logger.error(e)
@@ -259,8 +259,11 @@ def apply_acl(request,id_vlan, network):
                    
                 if equipments is not None and equipments != "":
                 
-                    is_apply, result = applyAcl(equipments, vlan, environment, network, AuthSession(request.session).get_user())
+                    #is_apply, result = applyAcl(equipments, vlan, environment, network, AuthSession(request.session).get_user())
+                    apply_result = client.create_vlan().apply_acl(equipments, vlan, environment, network) 
                     
+                    is_apply = apply_result.get('is_apply')
+                    result   = apply_result.get('result')
                     if is_apply == True:
                         
                         lists['result'] = result

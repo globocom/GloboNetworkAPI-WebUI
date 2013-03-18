@@ -423,8 +423,7 @@ def equip_edit(request,id_equip):
                 if str(orquestracao) in groups_chosen and int(type_equipment) != server_virtual:
                     messages.add_message(request, messages.ERROR, equip_messages.get("orquestracao_error"))
                     raise Exception
-                else:
-                    client.create_equipamento().edit(id_equip, name, type_equipment, model)
+                    
                     
                 #diff environments
                 environments_list = []
@@ -471,6 +470,7 @@ def equip_edit(request,id_equip):
                         for grp in forms_aux['grupos']:
                             if grp["id"] == group:
                                 messages.add_message(request, messages.ERROR, equip_messages.get("error_associate_group") % grp["nome"] )
+                                raise Exception
                                 break
                     
                     except NetworkAPIClientError, e:
@@ -494,7 +494,9 @@ def equip_edit(request,id_equip):
                         logger.error(e)
                         messages.add_message(request, messages.ERROR, e)
                         is_error = True
-                        
+                
+                # edit name
+                client.create_equipamento().edit(id_equip, name, type_equipment, model)        
                         
                 if is_error:
                     raise Exception

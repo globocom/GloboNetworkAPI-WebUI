@@ -1,0 +1,21 @@
+{% load util %}
+{
+    "sEcho": {{ sEcho|escapejs }},
+    "iTotalRecords": {{ iTotalRecords|escapejs }},
+    "iTotalDisplayRecords": {{ iTotalDisplayRecords|escapejs }},
+    "aaData":[
+    {% for log in aaData %}
+    [
+	"<div class='text_center'>{{ log.nome_usuario|escapejs }}</div>",
+	"<div class='text_center'>{{ log.hora_evento|escapejs }}</div>",
+	"<div class='text_center'>{{ log.acao|escapejs }}</div>",
+	"<div class='text_center'>{{ log.funcionalidade|escapejs }}</div>",
+	"<div class='text_center'>{{ log.parametro_anterior|escapejs }}</div>",
+	"<div class='text_center'>{{ log.parametro_atual|escapejs }}</div>"
+	]
+	{% if not forloop.last %}
+	,
+	{% endif %}
+	{% endfor %}
+	]
+}

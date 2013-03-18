@@ -149,7 +149,7 @@ $(document).ready(function() {
 		location.href = "{% url vip-request.form %}";
 	});
 	
-	{% has_perm ADMINISTRATION True None %}
+	{% has_perm VIP_ADMINISTRATION True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
 		if (confirm('Deseja realmente excluir as Requisições Vip selecionadas ?')){ 
@@ -159,7 +159,7 @@ $(document).ready(function() {
 	});
 	{% endif %}
 	
-	{% has_perm ADMINISTRATION True None %}
+	{% has_perm VIP_CREATE_SCRIPT True None %}
 	{% if has_perm %}
 	$("#btn_create").button({ icons: {primary: "ui-icon-power"} }).click(function(){
 		if (confirm('Deseja realmente criar as Requisições Vip selecionadas ?')){ 
@@ -169,7 +169,7 @@ $(document).ready(function() {
 	});
 	{% endif %}
 	
-	{% has_perm ADMINISTRATION True None %}
+	{% has_perm VIP_REMOVE_SCRIPT True None %}
 	{% if has_perm %}
 	$("#btn_remove").button({ icons: {primary: "ui-icon-circle-close"} }).click(function(){
 		if (confirm('Os VIPs selecionados serão removidos dos seus respectivos equipamentos. Os serviços desses VIPs serão interrompidos. Tem certeza que deseja continuar ?')){ 
@@ -179,7 +179,7 @@ $(document).ready(function() {
 	});
 	{% endif %}
 	
-	{% has_perm ADMINISTRATION True None %}
+	{% has_perm VIP_VALIDATION True None %}
 	{% if has_perm %}
 	$("#btn_validate").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
 		if (confirm('Deseja realmente validar as Requisições Vip selecionadas ?')){ 
@@ -253,7 +253,7 @@ input {
 				<form id="search_form" method="post" action="">
 					{% csrf_token %}
 					{{ search_form.ipv4 }}{{ search_form.ipv6 }}
-					<table style="width: 45%">
+					<table style="width: 100%">
 						<thead>
 							<tr>
 								<th>Id Requisição</th>
@@ -267,7 +267,7 @@ input {
 								<td>{{ search_form.id_request }}</td>
 								<td><input type="text" class="ip_input ipv6 ipv4" name="oct1" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct2" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct3" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct4" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input style="display: none;" type="text" class="ip_input ipv6" name="oct5" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct6" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct7" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, false)" /></td>	
 								<td>{{ search_form.vip_create }}<label for="id_iexact"> Buscar apenas Vips criados</label></td>							
-								<td style="padding-top: 4px;"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
+								<td style="padding-top: 4px; float: right; width: 10%"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
 							</tr>
 						</tbody>
 					</table>
@@ -277,19 +277,31 @@ input {
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span class="tool">
-			{% has_perm ADMINISTRATION True None %}
+			{% has_perm VIP_ADMINISTRATION True None %}
 			{% if has_perm %}
 			<button id="btn_new">Novo Registro</button>
-			<button id="btn_validate">Validar</button>
-			<button id="btn_create">Criar VIP</button>
-			<button id="btn_remove">Remover VIP</button>
+			{% endif %}
+			{% has_perm VIP_VALIDATION True None %}
+			{% if has_perm %}
+				<button id="btn_validate">Validar</button>
+			{% endif %}
+			{% has_perm VIP_CREATE_SCRIPT True None %}
+			{% if has_perm %}
+				<button id="btn_create">Criar VIP</button>
+			{% endif %}
+			{% has_perm VIP_REMOVE_SCRIPT True None %}
+			{% if has_perm %}
+				<button id="btn_remove">Remover VIP</button>
+			{% endif %}
+			{% has_perm VIP_ADMINISTRATION True None %}
+			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
 			{% endif %}
 			</span>
 		</div>
 		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url vip.delete.create.validate.remove 0 %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url vip.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in delete_form %}
 				{{ field }}
@@ -298,7 +310,7 @@ input {
 		{% endif %}
 		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="valid_form" method="post" action="{% url vip.delete.create.validate.remove 1 %}" style="visibility: hidden;">
+		<form id="valid_form" method="post" action="{% url vip.valid %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in validate_form %}
 				{{ field }}
@@ -307,7 +319,7 @@ input {
 		{% endif %}
 		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="create_form" method="post" action="{% url vip.delete.create.validate.remove 2 %}" style="visibility: hidden;">
+		<form id="create_form" method="post" action="{% url vip.create %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in create_form %}
 				{{ field }}
@@ -317,7 +329,7 @@ input {
 		
 		{% has_perm ADMINISTRATION True None %}
 		{% if has_perm %}
-		<form id="remove_form" method="post" action="{% url vip.delete.create.validate.remove 3 %}" style="visibility: hidden;">
+		<form id="remove_form" method="post" action="{% url vip.remove %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in remove_form %}
 				{{ field }}

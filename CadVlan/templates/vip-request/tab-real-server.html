@@ -91,6 +91,13 @@
 	
 	$('.editable').editableTable();
 	
+	$('.numbersOnly').live("keydown", function(e){
+    	  if(e.keyCode == 9){
+      		$(this).next().click();
+      		return false;
+      	  }
+	});
+	
 {% endblock %}
 
 {% block title %}[Requisição VIP - Real Servers]{% endblock %}

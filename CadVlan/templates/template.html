@@ -18,6 +18,7 @@
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-picklist.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.jeditable.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.mask.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(".error-messages").each(function() {
@@ -158,6 +159,11 @@
 							<li><a href="{% url environment-vip.list %}">Ambiente VIP</a></li>
 							{% endif %}
 							
+							{% has_perm VIPS_REQUEST None True %}
+							{% if has_perm %}
+							<li><a href="{% url vip-request.list %}">Requisições de VIP</a></li>
+							{% endif %}
+							
 						</ul>
 					</li>
 					{% endif %}
@@ -238,6 +244,12 @@
 							{% if has_perm %}
 							<li><a href="{% url healthcheck-expect.form %}">Healthcheck Expect para Ambiente</a></li>
 							{% endif %}
+							
+							{% has_perm VIP_ADMINISTRATION None True %}
+							{% if has_perm %}
+							<li><a href="{% url vip-request.form %}">Requisições de VIP</a></li>
+							{% endif %}
+							
 						</ul>
 					</li>
 					{% endif %}
@@ -275,7 +287,10 @@
 							<li><a href="{% url group-equip.list %}">Grupos de equipamentos</a></li>
 							<li><a href="{% url group-user.list %}">Grupos de Usuários</a></li>
 							<li><a href="{% url user.list 0 0 %}">Usuários</a></li>
-							<li><a href="{% url vip-request.list %}">Requisições de VIP</a></li>
+							{% has_perm AUDIT_LOG None True %}
+							{% if has_perm %}
+							<li><a href="{% url event-log.list %}">Pesquisar Log</a></li>
+							{% endif %}
 						</ul>
 					</li>
 					{% endif %}

@@ -21,7 +21,7 @@ error_messages = {
 }
 
 auth_messages = {
-    'user_not_authorized':          u'Usuário não autorizado para acessar/executar está operação.',
+    'user_not_authorized':          u'Usuário não autorizado para acessar/executar esta operação.',
     'user_invalid':                 u'Usuário e/ou senha incorretos.',
     '404':                          u'Página não encontrada: [URL: %s]',
     '500':                          u'Ocorreu um erro ao executar sua ação, contate o Administrador do sistema.',
@@ -114,8 +114,8 @@ equip_messages = {
     'marca_sucess':         u'Nova marca inserida com sucesso.', 
     'modelo_sucess':        u'Novo modelo inserido com sucesso.',
     'modelo_sucess':        u'Novo modelo inserido com sucesso.',
-    'error_associate_group': u'Grupo %s não pode ser associado ao equipamento pois seu grupo de usuário não ter permissão.',
-    'error_disassociate_group': u'Grupo %s não pode ser desassociado ao equipamento pois seu grupo de usuário não ter permissão.',
+    'error_associate_group': u'Grupo %s não pode ser associado ao equipamento pois seu grupo de usuário não tem permissão.',
+    'error_disassociate_group': u'Grupo %s não pode ser desassociado ao equipamento pois seu grupo de usuário não tem permissão.',
 }
 
 vlan_messages = {

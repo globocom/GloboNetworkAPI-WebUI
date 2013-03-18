@@ -9,6 +9,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 LOGIN = 'login.html'
 HOME = 'home.html'
 
+VERSION_HTML = 'version.html'
 
 # Ajax
 AJAX_AUTOCOMPLETE_LIST = 'ajax/autocomplete-list.json'
@@ -16,6 +17,7 @@ AJAX_VLAN_AUTOCOMPLETE = 'ajax/vlan-autocomplete-list.json'
 AJAX_VLAN_LIST = 'ajax/vlan-list.json'
 AJAX_EQUIP_LIST = 'ajax/equip-list.json'
 AJAX_VIPREQUEST_LIST = 'ajax/vip-list.json'
+AJAX_LOG_LIST = 'ajax/log-list.json'
 AJAX_NEW_PASS = 'ajax/newpass.html'
 AJAX_SUGGEST_NAME = 'ajax/suggest-name.html'
 VIPREQUEST_VIEW = 'ajax/view-vip.html'
@@ -175,4 +177,4 @@ FILTER_FORM = 'filter/form.html'
 FILTER_EDIT = 'filter/edit.html'
 
 # EventLog
-# LOG_SEARCH_LIST = 'event_log/search-list.html'
+LOG_SEARCH_LIST = 'event_log/search-list.html'
