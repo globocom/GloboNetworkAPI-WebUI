@@ -264,7 +264,7 @@ def apply_acl(request,id_vlan, network):
                     
                     is_apply = apply_result.get('is_apply')
                     result   = apply_result.get('result')
-                    if is_apply == True:
+                    if is_apply == '0':
                         
                         lists['result'] = result
                         
