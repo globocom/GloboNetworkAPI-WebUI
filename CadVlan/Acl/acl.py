@@ -389,7 +389,7 @@ def applyAcl(equipments, vlan, environment, network, user):
 
             if not  equip in name_equipaments:
 
-                if equip == equipments[0]:
+		if equip == equipments[0].get("equipamento").get("nome"):
                     name_equipaments += "%s" % equip
                 else:
                     name_equipaments += ",%s" % equip
