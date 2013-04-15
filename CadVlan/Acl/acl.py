@@ -22,9 +22,9 @@ PATH_ACL_TEMPLATES = "/templates/"
 
 PATH_TYPES =  Enum(["ACL", "TEMPLATE"])
 
-DIVISON_DC =  Enum(["FE", "BE", "DEV_QA_FE", "DEV_QA", "BORDA"])
+DIVISON_DC =  Enum(["FE", "BE", "DEV_QA_FE", "DEV_QA", "BORDA", "BE_POP_SP", "FE_POP_SP", "BORDA_POP_SP"])
 
-ENVIRONMENT_LOGICAL =  Enum(["APLICATIVOS", "PORTAL", "HOMOLOGACAO", "PRODUCAO"])
+ENVIRONMENT_LOGICAL =  Enum(["APLICATIVOS", "PORTAL", "HOMOLOGACAO", "PRODUCAO", "BORDA"])
 
 TEMPLATES =  Enum(["BE", "BEHO", "FE_APLICATIVOS", "FE_DEV_QA", "FE_PORTAL", "FE_STAGING"])
 
@@ -47,6 +47,9 @@ def mkdir_divison_dc(divison_dc, user):
         divison_dc = str(divison_dc).upper()
         
         os.chdir(PATH_ACL)
+        
+        if divison_dc ==  DIVISON_DC.BORDA:
+            divison_dc = "Borda"
         
         Cvs.synchronization()
         
@@ -169,11 +172,31 @@ def path_acl(environment_logical, divison_dc):
             
         else:
             path = DIVISON_DC.DEV_QA
-
+    
+    elif environment_logical == ENVIRONMENT_LOGICAL.PRODUCAO:
+        
+        if divison_dc == replace_to_correct(DIVISON_DC.BE_POP_SP):
+            path = replace_to_correct(DIVISON_DC.BE_POP_SP)
+        
+        else:
+            path = replace_to_correct(DIVISON_DC.FE_POP_SP)
+            
+    elif environment_logical == ENVIRONMENT_LOGICAL.BORDA:
+        
+        if divison_dc == replace_to_correct(DIVISON_DC.BORDA_POP_SP):
+            path = replace_to_correct(DIVISON_DC.BORDA_POP_SP)
+        else:
+            path = divison_dc
     else:
         path = divison_dc
     
+    if path ==  DIVISON_DC.BORDA:
+        path = "Borda"
+    
     return path
+
+def replace_to_correct(value):
+    return value.replace('_', '-');
 
 def checkAclCvs(acl_file_name, environment, network, user):
     '''Validates if the file is created acl.
@@ -389,7 +412,7 @@ def applyAcl(equipments, vlan, environment, network, user):
 
             if not  equip in name_equipaments:
 
-		if equip == equipments[0].get("equipamento").get("nome"):
+                if equip == equipments[0].get("equipamento").get("nome"):
                     name_equipaments += "%s" % equip
                 else:
                     name_equipaments += ",%s" % equip
