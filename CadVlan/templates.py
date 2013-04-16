@@ -148,6 +148,7 @@ VIPREQUEST_TAB_REAL_SERVER = 'vip-request/tab-real-server.html'
 VIPREQUEST_TAB_REAL_SERVER_STATUS = 'vip-request/tab-real-server-status.html'
 VIPREQUEST_TAB_HEALTHCHECK = 'vip-request/tab-healthcheck.html'
 VIPREQUEST_TAB_MAXCON = 'vip-request/tab-maxcon.html'
+VIPREQUEST_TAB_L7FILTER = 'vip-request/tab-l7-filter.html'
 VIPREQUEST_TOKEN = 'vip-request/token.json'
 
 # AccessTypeRequest

@@ -82,7 +82,7 @@ class AddInterfaceForm(forms.Form):
         self.fields['name'].widget = widget
         
         if marca == "0":
-            self.regex = "^([a-zA-Z0-9]+(:)?){1,6}$"
+            self.regex = "^([a-zA-Z0-9-_/ ]+(:)?){1,6}$"
         elif marca == "2":
             self.regex = "^(Int)\s[0-9]+$"
         elif marca == "3":
@@ -97,7 +97,7 @@ class AddInterfaceForm(forms.Form):
             self.regex = ""
             
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
-    name = forms.CharField(label="Nome da Interface", required=True, min_length=3, max_length=20, error_messages=error_messages)
+    name = forms.CharField(label="Nome da Interface", required=True, min_length=1, max_length=20, error_messages=error_messages)
     description = forms.CharField(label=u'Descrição', required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.Textarea(attrs={'style': "width: 250px; height: 34px;", 'rows': 2, 'data-maxlenght':200}))
     protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"),(1, "Sim")], error_messages=error_messages, widget=forms.RadioSelect, initial=0)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
