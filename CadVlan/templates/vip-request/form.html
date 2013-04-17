@@ -152,7 +152,7 @@ $(document).ready(function() {
 							<thead>
 								<tr>
 									<td>Porta Vip</td>
-									<td>Porta Real Padrão</td>
+									<td>Porta Real</td>
 									<td style="width: 20px;"></td>
 								</tr>
 							</thead>
@@ -224,12 +224,10 @@ $(document).ready(function() {
 						<table id="table_real" class="bordasimplesReal">
 							<thead>
 								<tr>
-									<td>Porta Vip</td>
 									<td>Nome do Real</td>
 									<td>IP do Real</td>
 									<td>Prioridade</td>
 									<td class="weighted">Peso do Real</td>
-									<td>Porta Real</td>
 									<td style="width: 20px;"></td>
 								</tr>
 							</thead>
@@ -238,10 +236,6 @@ $(document).ready(function() {
 							{% for field in reals %}
 
 								<tr class='remove_port'>
-									<td>
-										<label>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
-										<input type="hidden" value="{{field.ports_vip}}" name="ports_vip_reals">
-									</td>
 									<td>
 										<label>{% if field.equip != "-" %}{{field.equip}}{% endif %}</label>
 										<input type='hidden' name='equip' value='{{field.equip}}'>
@@ -259,10 +253,6 @@ $(document).ready(function() {
 									<td class='weighted'>
 										<label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>
 										<input type='hidden' name='weight' value='{{field.weight}}'>
-									</td>
-									<td>
-										<label class="editable" style="" title="Click para editar.">{% if field.ports_real != "-" %}{{field.ports_real}}{%endif%}</label>
-										<input type="hidden" value="{{field.ports_real}}" name="ports_real_reals">
 									</td>
 									<td>
 										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>

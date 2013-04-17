@@ -232,10 +232,6 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/operation/remove?$', 'remove_vip', name='vip.remove',),
     
     
-    url('^vip-request/l7/operation/valid?$', 'validate_l7', name='l7.valid'),
-    url('^vip-request/l7/operation/apply?$', 'apply_l7', name='l7.apply'),
-    url('^vip-request/l7/operation/rollback?$', 'apply_rollback_l7', name='l7.rollback'),
-    
     
     url('^vip-request/form[/]?$', 'add_form', name='vip-request.form',),
     url('^vip-request/form/external[/]?$', 'add_form_external', name='vip-request.form.external',),
@@ -257,7 +253,6 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/tab/real-server/(?P<id_vip>\d+)/status/(?P<status>enable|disable)[/]?$', 'status_real_server', name='vip-request.tab.real.server.status',),
     url('^vip-request/tab/healthcheck/(?P<id_vip>\d+)[/]?$', 'tab_healthcheck', name='vip-request.tab.healthcheck',),
     url('^vip-request/tab/maxcon/(?P<id_vip>\d+)[/]?$', 'tab_maxcon', name='vip-request.tab.maxcon',),
-    url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$', 'tab_l7filter', name='vip-request.tab.l7filter',),
     
 )
 

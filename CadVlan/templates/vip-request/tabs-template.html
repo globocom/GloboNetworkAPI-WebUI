@@ -20,7 +20,6 @@ $(document).ready(function() {
 	$(".realserver_tab").attr("href", "{% url vip-request.tab.real.server vip.id %}");
 	$(".healthcheck_tab").attr("href", "{% url vip-request.tab.healthcheck vip.id %}");
 	$(".maxcon_tab").attr("href", "{% url vip-request.tab.maxcon vip.id %}");
-	$(".l7-filter_tab").attr("href", "{% url vip-request.tab.l7filter vip.id %}");
 	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
 		location.reload();
@@ -88,7 +87,6 @@ $(document).ready(function() {
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-2" class="realserver_tab">Reals Server</a></li>
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3" class="healthcheck_tab">Healthcheck</a></li>
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-4" class="maxcon_tab">Maxconn</a></li>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-5" class="l7-filter_tab">Filtro L7</a></li>
 					
 				</ul>
 				
