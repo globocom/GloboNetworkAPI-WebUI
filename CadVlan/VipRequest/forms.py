@@ -172,7 +172,7 @@ class RequestVipFormIP(forms.Form):
         ipv6_check  = cleaned_data.get("ipv6_check")
         
         if not ipv4_check and not ipv6_check:
-            self._errors["ipv4_check"] = self.error_class(["Pelo menos uma opção de IP tem ser selecionada"])
+            self._errors["ipv4_check"] = self.error_class(["Pelo menos uma opção de IP tem que ser selecionada"])
         
         else:
 
@@ -209,3 +209,19 @@ class GenerateTokenForm(forms.Form):
     user = forms.CharField(required=True)
     requestVip = forms.CharField(required=False)
     p = forms.CharField(required=False)
+    
+
+@autostrip
+class FilterL7Form(forms.Form):
+    filter_applied = forms.CharField(label=u'Filtro L7 atual', 
+                                required=False, error_messages=error_messages, 
+                                widget=forms.Textarea(attrs={'style': "width: 300px",
+                                                             'rows': 10, 'disabled':'disabled'}))  
+    filter_l7 = forms.CharField(label=u'Novo Filtro L7 a ser aplicado', 
+                                required=False, error_messages=error_messages, 
+                                widget=forms.Textarea(attrs={'style': "width: 300px",
+                                                             'rows': 10}))  
+    filter_rollback = forms.CharField(label=u'Rollback (última configuração válida)', 
+                                required=False, error_messages=error_messages, 
+                                widget=forms.Textarea(attrs={'style': "width: 300px",
+                                                             'rows': 10, 'disabled':'disabled'}))
