@@ -402,12 +402,11 @@ def edit_form(request, equip_name, id_interface):
                 
                 try:
                     client.create_interface().alterar(idt, name, protected, description, old_interf['ligacao_front'], old_interf['ligacao_back'])
-                    messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
                 except NetworkAPIClientError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     
-            
+            messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
             
             return redirect("equip.interface.edit.form", equip_name, id_interface)
         

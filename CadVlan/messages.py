@@ -241,12 +241,6 @@ request_vip_messages = {
     'not_created':          u'Não foi possível remover alguns dos itens selecionados: %s, pois ainda não foram criados.',
     'tab_edit_error':     u'Ocorreu um erro ao persistir a requisição vip que contém este %s no banco de dados.',
     'tab_edit_success':  u'Alteração de %s realizada com sucesso.',
-    'success_l7_save': u'Filtro L7 gravado com sucesso.',
-    'success_l7_validate': u'Filtro L7 validado com sucesso.',
-    'success_l7_alter': u'Filtro L7 aplicado com sucesso.',
-    'success_l7_rollback': u'Rollback aplicado com sucesso.',
-    'duplicate_vip': u'O valor da Porta VIP deve ser único.',
-    'invalid_port': u'O número da porta deve estar entre 1 e 65535.',
 }
 
 access_type_messages = {

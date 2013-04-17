@@ -164,7 +164,8 @@ def path_acl(environment_logical, divison_dc):
     @param environment_logical: environment logical
     @param divison_dc: divison dc
     '''
-    path = ""
+    path = divison_dc
+    
     if environment_logical == ENVIRONMENT_LOGICAL.HOMOLOGACAO:
 
         if divison_dc == DIVISON_DC.FE:
@@ -178,7 +179,7 @@ def path_acl(environment_logical, divison_dc):
         if divison_dc == replace_to_correct(DIVISON_DC.BE_POP_SP):
             path = replace_to_correct(DIVISON_DC.BE_POP_SP)
         
-        else:
+        elif divison_dc == replace_to_correct(DIVISON_DC.FE_POP_SP):
             path = replace_to_correct(DIVISON_DC.FE_POP_SP)
             
     elif environment_logical == ENVIRONMENT_LOGICAL.BORDA:
@@ -187,8 +188,7 @@ def path_acl(environment_logical, divison_dc):
             path = replace_to_correct(DIVISON_DC.BORDA_POP_SP)
         else:
             path = divison_dc
-    else:
-        path = divison_dc
+        
     
     if path ==  DIVISON_DC.BORDA:
         path = "Borda"
