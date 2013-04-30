@@ -14,12 +14,12 @@ from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
 from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, \
     RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, \
-    RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm, FilterL7Form
+    RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages
 from CadVlan.permissions import VIP_ADMINISTRATION, VIP_CREATE_SCRIPT,\
-    VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST, VIP_ALTER_SCRIPT
+    VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL
 from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, \
@@ -28,7 +28,7 @@ from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, \
     VIPREQUEST_TAB_REAL_SERVER, VIPREQUEST_TAB_REAL_SERVER_STATUS, \
     VIPREQUEST_TAB_HEALTHCHECK, VIPREQUEST_TAB_MAXCON, VIPREQUEST_FORM_EXTERNAL, \
-    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER
+    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -166,16 +166,12 @@ def ajax_shared_view_vip(request,id_vip, lists):
         if 'reals' in lists['vip']:
             if type(lists['vip']['reals']['real']) is not list:
                 lists['vip']['reals']['real'] = [lists['vip']['reals']['real']]
+            
+        if type(lists['vip']['portas_servicos']['porta']) is not list:
+            lists['vip']['portas_servicos']['porta'] = [lists['vip']['portas_servicos']['porta']]
         
-        # *** Change this verification in next Sprint, it need to be adjusted ***
-        if 'portas_servicos' in lists['vip']:  
-            if type(lists['vip']['portas_servicos']['porta']) is not list:
-                lists['vip']['portas_servicos']['porta'] = [lists['vip']['portas_servicos']['porta']]
         
-        # *** Change this verification in next Sprint, it need to be adjusted ***
-        if 'portas_servicos' in lists['vip']:
-            lists['len_porta'] =  int(len(lists['vip']['portas_servicos']['porta']))
-             
+        lists['len_porta'] =  int(len(lists['vip']['portas_servicos']['porta'])) 
         lists['len_equip'] = int (len(lists['vip']['equipamento']))
         
         # Returns HTML
@@ -481,23 +477,12 @@ def valid_ports(lists, ports_vip, ports_real):
     
     if ports_vip is not None and ports_real is not None:
     
-        invalid_port_vip = [i for i in ports_vip if int(i) > 65535 or int(i) < 1 ]
-        invalid_ports_real = [i for i in ports_real if int(i) > 65535 or int(i) < 1 ]
-        
-        if invalid_port_vip or invalid_ports_real:
-            lists['ports_error'] = request_vip_messages.get("invalid_port")
-            is_valid = False
-    
-        if len(ports_vip)!=len(set(ports_vip)):
-            lists['ports_error'] = request_vip_messages.get("duplicate_vip")
-            is_valid = False
-                 
         if ports_vip and ports_real:
             
             if len(ports_vip) != len(ports_real):
                 lists['ports_error'] = request_vip_messages.get("error_ports")
                 is_valid = False
-
+                
         if ports_vip is None or ports_real is None or not ports_vip or not ports_real:
             lists['ports_error'] = request_vip_messages.get("error_ports")
             is_valid = False
@@ -509,22 +494,11 @@ def valid_ports(lists, ports_vip, ports_real):
     return lists, is_valid
 
 
-def valid_reals(lists, balancing, id_equip, id_ip, weight, priority, ports_vip_reals, ports_real_reals):
+def valid_reals(lists, balancing, id_equip, id_ip, weight, priority):
     
     is_valid = True
     
     if id_equip is not None and id_ip is not None:
-           
-        invalid_port_vip = [i for i in ports_vip_reals if int(i) > 65535 or int(i) < 1 ]
-        invalid_ports_real = [i for i in ports_real_reals if int(i) > 65535 or int(i) < 1 ]
-        
-        if invalid_port_vip or invalid_ports_real:
-            lists['reals_error'] = request_vip_messages.get("invalid_port")
-            is_valid = False
-           
-        if len(ports_vip_reals) != len(ports_real_reals):
-            lists['reals_error'] = request_vip_messages.get("error_reals")
-            is_valid = False 
                     
         if str(balancing).upper() == "WEIGHTED":
         
@@ -568,7 +542,7 @@ def mount_table_ports(lists, ports_vip, ports_real):
     return lists
 
 
-def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, ports_vip_reals, ports_real_reals, version=None, status=None):
+def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version=None, status=None):
 
     if id_equip is not None and id_equip != '':
     
@@ -578,17 +552,17 @@ def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, ports
             if id_equip[i] != '' and id_ip[i] != '':
                 
                 if weight and priority:
-                    reals.append({'priority': priority[i] , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                    reals.append({'priority': priority[i] , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i] })
                 
                 else:
                 
                     if not weight and not priority:
-                        reals.append({'priority': '' , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                        reals.append({'priority': '' , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i] })
                     
                     elif not weight:
-                        reals.append({'priority': priority[i] , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                        reals.append({'priority': priority[i] , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i] })
                     else:
-                        reals.append({'priority': '' , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                        reals.append({'priority': '' , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i] })
 
         if status is not None:
             for i in range(0, len(reals)):
@@ -603,7 +577,7 @@ def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, ports
     return lists
 
 
-def reals_(id_equip, id_ip, equip, ip, ports_vip_reals, ports_real_reals):
+def reals_(id_equip, id_ip, equip, ip):
 
     reals = []
     
@@ -611,7 +585,7 @@ def reals_(id_equip, id_ip, equip, ip, ports_vip_reals, ports_real_reals):
         
         reals = []
         for i in range(0, len(id_equip)):
-            reals.append({"real_name": equip[i] , "real_ip": ip[i], "port_vip": ports_vip_reals[i], "id_ip" : id_ip[i], "port_real": ports_real_reals[i]})
+            reals.append({"real_name": equip[i] , "real_ip": ip[i] })
         
     return reals
 
@@ -651,10 +625,6 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
     #Real - data
     ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip')) if "ports_vip" in request.POST else None
     ports_real = valid_field_table_dynamic(request.POST.getlist('ports_real')) if "ports_real" in request.POST else None
-    
-    #Real - data TABLE REALS
-    ports_vip_reals  = valid_field_table_dynamic(request.POST.getlist('ports_vip_reals')) if "ports_vip_reals" in request.POST else None
-    ports_real_reals = valid_field_table_dynamic(request.POST.getlist('ports_real_reals')) if "ports_real_reals" in request.POST else None
     
     priority = valid_field_table_dynamic(request.POST.getlist('priority')) if "priority" in request.POST else None
     weight = valid_field_table_dynamic(request.POST.getlist('weight')) if "weight" in request.POST else None
@@ -713,14 +683,13 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
         ipv6_check = form_ip.cleaned_data["ipv6_check"]
         
         lists, is_valid_ports = valid_ports(lists, ports_vip, ports_real)
-        
-        lists, is_valid_reals = valid_reals(lists, balancing, id_equip, id_ip, weight, priority, ports_vip_reals, ports_real_reals)
+        lists, is_valid_reals = valid_reals(lists, balancing, id_equip, id_ip, weight, priority)
         
         if is_valid_ports and is_valid_reals:
             
             ports = ports_(ports_vip, ports_real)
             
-            reals = reals_(id_equip, id_ip, equip, ip, ports_vip_reals, ports_real_reals)
+            reals = reals_(id_equip, id_ip, equip, ip)
             
             ipv4 = None
             ipv6 = None
@@ -809,11 +778,7 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
     id_ip = request.POST.getlist('id_ip') if "id_ip" in request.POST else None
     ip = request.POST.getlist('ip') if "ip" in request.POST else None
     
-    #Real - data TABLE REALS
-    ports_vip_reals  = request.POST.getlist('ports_vip_reals') if "ports_vip_reals" in request.POST else None
-    ports_real_reals = request.POST.getlist('ports_real_reals') if "ports_real_reals" in request.POST else None
-    
-    lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, ports_vip_reals, ports_real_reals)
+    lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip)
     
     lists['form_inputs'] = form_inputs
     lists['form_environment'] = form_environment
@@ -1373,86 +1338,6 @@ def tab_maxcon(request, id_vip):
 @log
 @login_required
 @has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
-def tab_l7filter(request, id_vip):
-    
-    try:
-        # Get user
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-        
-        lists = dict()
-        lists['idt'] = id_vip
-        
-        vip = client_api.create_vip().get_by_id(id_vip).get("vip")
-        vip['equipamento'] = validates_dict(vip, 'equipamento')
-        vip['environments'] = validates_dict(vip, 'environments')
-        vip['balancing'] = str(vip.get("metodo_bal")).upper()
-        lists['vip'] = vip
-        
-        l7 = client_api.create_vip().get_l7_data(id_vip).get('vip')
-        filter_l7 =  l7.get('l7_filter')
-        filter_applied = l7.get('filter_applied')
-        filter_rollback = l7.get('filter_rollback')
-        filter_valid = l7.get('filter_valid')
-        
-        form_real = FilterL7Form(initial={"filter_applied": filter_applied, 
-                                          "filter_l7": filter_l7, 
-                                          "filter_rollback": filter_rollback})
-        lists['form_real'] = form_real
-        lists['date'] = l7.get('applied_l7_datetime')
-        
-        lists['applied_l7'] = filter_applied
-        lists['filter_l7'] = filter_l7
-        lists['valid'] = filter_valid
-        lists['rollback'] = filter_rollback
-        
-        #Already edited
-        if request.method == "POST":
-            
-            form_real = FilterL7Form(request.POST)
-            lists['form_real'] = form_real
-            
-            if form_real.is_valid():
-                filter_l7 = form_real.cleaned_data["filter_l7"]
-
-                try:
-                    
-                    client_api.create_vip().alter_filter(id_vip, filter_l7)
-                    l7 = client_api.create_vip().get_l7_data(id_vip).get('vip')
-                    filter_l7 =  l7.get('l7_filter')
-                    filter_applied = l7.get('filter_applied')
-                    filter_rollback = l7.get('filter_rollback')
-                    
-                    form_real = FilterL7Form(initial={"filter_applied": filter_applied, 
-                                                      "filter_l7": filter_l7, 
-                                                      "filter_rollback": filter_rollback})
-                    lists['form_real'] = form_real
-                    
-                    messages.add_message(request, messages.SUCCESS, request_vip_messages.get('success_l7_save'))
-                    return redirect('vip-request.tab.l7filter', id_vip)
-                    
-                except Exception, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
-                    
-            return redirect('vip-request.tab.l7filter', id_vip)
-        
-        
-        
-    except VipNaoExisteError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
-        return redirect('vip-request.form')
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-    
-    return render_to_response(VIPREQUEST_TAB_L7FILTER, lists, context_instance=RequestContext(request))
-
-@log
-@login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
 def status_real_server(request, id_vip, status):
 
     if request.method == 'POST':
@@ -1761,22 +1646,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
             
             id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip, False, False)
                 
-            port_vip_list = list()
-            port_real_list = list()
-            
-            if 'reals' in vip:
-                reals_list = vip['reals'].get('real')
-                if type(reals_list) is not list:
-                    port_vip_list.append(reals_list['port_vip'])
-                    port_real_list.append(reals_list['port_real'])
-                else:
-                    for real_l in reals_list:
-                        port_vip_list.append(real_l['port_vip'])
-                        port_real_list.append(real_l['port_real'])
-            
-            
-            
-            lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, port_vip_list, port_real_list)
+            lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip)
             
             lists['form_inputs'] = form_inputs
             lists['form_environment'] = form_environment
@@ -1945,8 +1815,7 @@ def model_ip_real_server_shared(request, client_api):
         ipv6 = validates_dict(ips, 'ipv6')
         
         #Valid is IP existing in table
-        #Sprint 36 - Is possible repeat the same IP
-        """for equi in equip_real:
+        for equi in equip_real:
             
             if equip_name == equi:
                 
@@ -1970,7 +1839,7 @@ def model_ip_real_server_shared(request, client_api):
                             if  ( i <= (len(ipv6)-1) )  :
                             
                                 if ipv6[i]['ip'] == str(ip_r).replace("%3A", ":"):
-                                    del ipv6[i]"""
+                                    del ipv6[i]
         
         
         ips['ipv4'] = ipv4
@@ -1993,102 +1862,3 @@ def model_ip_real_server_shared(request, client_api):
     
     # Returns Json
     return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, lists, context_instance=RequestContext(request)), status=status_code)
-
-
-@log
-@login_required
-@has_perm([{"permission": VIP_VALIDATION, "read": True},{"permission": VIP_VALIDATION, "write": True}])
-def validate_l7(request):
-    try:
-        # Get user
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-        
-        if request.method == 'POST':
-            id_vip = request.POST['id_vip']
-            
-            if id_vip is not None and not is_valid_int_param(id_vip):
-                raise Exception(error_messages.get("invalid_param") % "requestVip")
-            
-            #mudar flag l7_valid para true
-            try:
-                client_api.create_vip().validate_l7(id_vip)
-                messages.add_message(request, messages.SUCCESS, request_vip_messages.get('success_l7_validate'))
-            except Exception, e:
-                raise Exception(e)
-            
-            return redirect('vip-request.tab.l7filter', id_vip)
-    
-    except VipNaoExisteError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
-        return redirect('vip-request.form')
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        
-@log
-@login_required
-@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},{"permission": VIP_ALTER_SCRIPT, "write": True}])
-def apply_l7(request):
-    try:
-        # Get user
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-        
-        if request.method == 'POST':
-            id_vip = request.POST['id_vip']
-            
-            if id_vip is not None and not is_valid_int_param(id_vip):
-                raise Exception(error_messages.get("invalid_param") % "requestVip")
-            
-            try:
-                client_api.create_vip().apply_l7(id_vip)
-                messages.add_message(request, messages.SUCCESS, request_vip_messages.get('success_l7_alter'))
-            except Exception, e:
-                messages.add_message(request, messages.ERROR, e)
-            
-            return redirect('vip-request.tab.l7filter', id_vip)
-    
-    except VipNaoExisteError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
-        return redirect('vip-request.form')
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        
-@log
-@login_required
-@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},{"permission": VIP_ALTER_SCRIPT, "write": True}])
-def apply_rollback_l7(request):
-    try:
-        # Get user
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-        
-        if request.method == 'POST':
-            id_vip = request.POST['id_vip']
-            
-            if id_vip is not None and not is_valid_int_param(id_vip):
-                raise Exception(error_messages.get("invalid_param") % "requestVip")
-            
-            try:
-                client_api.create_vip().rollback_l7(id_vip)
-                messages.add_message(request, messages.SUCCESS, request_vip_messages.get('success_l7_rollback'))
-            except Exception, e:
-                messages.add_message(request, messages.ERROR, e)
-            
-            return redirect('vip-request.tab.l7filter', id_vip)
-            
-              
-    except VipNaoExisteError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
-        return redirect('vip-request.form')
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
