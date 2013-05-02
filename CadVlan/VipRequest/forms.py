@@ -209,3 +209,4 @@ class GenerateTokenForm(forms.Form):
     user = forms.CharField(required=True)
     requestVip = forms.CharField(required=False)
     p = forms.CharField(required=False)
+    is_ldap_user = forms.BooleanField(required=False)

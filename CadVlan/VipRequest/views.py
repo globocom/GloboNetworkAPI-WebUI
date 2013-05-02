@@ -17,10 +17,11 @@ from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs,
     RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
-    healthcheck_messages, equip_group_messages
+    healthcheck_messages, equip_group_messages, auth_messages
 from CadVlan.permissions import VIP_ADMINISTRATION, VIP_CREATE_SCRIPT,\
     VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST
-from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL
+from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL,\
+    NETWORK_API_USERNAME, NETWORK_API_PASSWORD
 from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, \
     AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, \
@@ -51,6 +52,10 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     RealServerPortError, RealParameterValueError, RealServerScriptError, EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError
 from time import strftime
 import logging
+
+from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
+import re
+import hashlib, base64
 
 logger = logging.getLogger(__name__)
 
@@ -1435,36 +1440,66 @@ def generate_token(request):
         
         if form.is_valid():
             
+            user_ldap_ass = ""
             user = str(form.cleaned_data['user'])
             idt  = None if not form.cleaned_data['requestVip'] else form.cleaned_data['requestVip'] 
             ttl  = ACCESS_EXTERNAL_TTL if not form.cleaned_data['p'] else form.cleaned_data['p']
             
+            #Login with LDAP
+            if form.cleaned_data['is_ldap_user']:
+                username_ldap, password_ldap = str(user).split("@")
+                try:
+                    user_ldap = Ldap("").get_user(username_ldap)
+                except LDAPNotFoundError, e:
+                    raise Exception(auth_messages.get("user_ldap_not_found"))
+
+                pwd_ldap = user_ldap['userPassword']
+                activate = user_ldap.get('nsaccountlock')
+                pwd = password_ldap
+                
+                if re.match("\{(MD|md)5\}.*", pwd_ldap, 0):
+                    pwd = base64.b64encode(hashlib.md5(pwd).digest())
+                    pwd_ldap = pwd_ldap[pwd_ldap.index("}")+1:]
+                    
+                if pwd == pwd_ldap and (activate is None or activate.upper() == 'FALSE'):
+                    #Valid User
+                    client, client_user = validate_user_networkapi(user, form.cleaned_data['is_ldap_user'])
+                    user_ldap_client = client_user.get('user')
+                    user_ldap_ass = user_ldap_client['user_ldap']
+                else:
+                    client_user = None
+            else:
+                #Valid User
+                client, client_user = validate_user_networkapi(user, form.cleaned_data['is_ldap_user'])
+            
+            
             #Valid User
-            client = validate_user_networkapi(user)
-            
-            #Valid idt
-            if idt is not None and not is_valid_int_param(idt):
-                raise Exception(error_messages.get("invalid_param") % "requestVip")
-            
-            #Valid ttl
-            if not is_valid_int_param(ttl):
-                raise Exception(error_messages.get("invalid_param") % "p")
-
-            if idt is not None:
-                client.create_vip().get_by_id(idt)
-
-            #Encrypt hash
-            user_hash = Encryption().Encrypt(user)
-            
-            #Generates token
-            key = "%s:%s:%s" % ( __name__, str(user) , str(strftime("%Y%m%d%H%M%S")))
-            token = sha1(key).hexdigest()
-            
-            # Set token in cache
-            cache.set(token, user_hash, int(ttl))
-            
-            lists["token"] = token
-            lists["url"] = reverse("vip-request.edit.external", args=[idt]) if idt is not None else reverse("vip-request.form.external")
+            if client_user is None:
+                raise UserNotAuthenticatedError("user_invalid")
+            else:
+                #Valid idt
+                if idt is not None and not is_valid_int_param(idt):
+                    raise Exception(error_messages.get("invalid_param") % "requestVip")
+                
+                #Valid ttl
+                if not is_valid_int_param(ttl):
+                    raise Exception(error_messages.get("invalid_param") % "p")
+    
+                if idt is not None:
+                    client.create_vip().get_by_id(idt)
+    
+                #Encrypt hash
+                user_hash = Encryption().Encrypt(user+"@"+str(user_ldap_ass))
+                
+                #Generates token
+                key = "%s:%s:%s" % ( __name__, str(user) , str(strftime("%Y%m%d%H%M%S")))
+                token = sha1(key).hexdigest()
+                
+                # Set token in cache
+                cache.set(token, user_hash, int(ttl))
+                
+                lists["token"] = token
+                lists["url"] = reverse("vip-request.edit.external", args=[idt]) if idt is not None else reverse("vip-request.form.external")
             
             
             return render_to_response(VIPREQUEST_TOKEN, lists, context_instance=RequestContext(request))
@@ -1478,25 +1513,26 @@ def generate_token(request):
         lists["error"] = request_vip_messages.get("invalid_vip")
     except Exception, e:
         logger.error(e)
-        lists["error"] = e
+        lists["error"] = e  
+
         
     return render_to_response(JSON_ERROR, lists, context_instance=RequestContext(request))
 
-def validate_user_networkapi(user_request):
+def validate_user_networkapi(user_request, is_ldap_user):
     
     try:
         
         username, password = str(user_request).split("@")
         
-        client = ClientFactory(NETWORK_API_URL, username, password)
+        client = ClientFactory(NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD)
             
-        client.create_usuario().authenticate(username, password)
+        client_user = client.create_usuario().authenticate(username, password, is_ldap_user)
         
     except Exception,  e:
         logger.error(e)
         raise UserNotAuthenticatedError(e)
         
-    return client
+    return client, client_user
 
 def add_form_shared(request, client_api, form_acess = "", external = False):
 

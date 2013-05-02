@@ -128,10 +128,12 @@ def access_external():
                     #Decrypt hash
                     user = Encryption().Decrypt(hash)
                     
-                    username, password = str(user).split("@")
+                    username, password, user_ldap = str(user).split("@")
                     
-                    client = ClientFactory(NETWORK_API_URL, username, password)
-                    
+                    if user_ldap == "":
+                        client = ClientFactory(NETWORK_API_URL, username, password)
+                    else:
+                        client = ClientFactory(NETWORK_API_URL, username, password, user_ldap)
                 else:
                     is_valid = False
             
