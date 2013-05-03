@@ -1490,7 +1490,7 @@ def validate_user_networkapi(user_request):
         
         client = ClientFactory(NETWORK_API_URL, username, password)
             
-        client.create_usuario().authenticate(username, password)
+        client.create_usuario().authenticate(username, password, False)
         
     except Exception,  e:
         logger.error(e)
