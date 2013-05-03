@@ -17,10 +17,11 @@ from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs,
     RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm, FilterL7Form
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
-    healthcheck_messages, equip_group_messages
+    healthcheck_messages, equip_group_messages, auth_messages
 from CadVlan.permissions import VIP_ADMINISTRATION, VIP_CREATE_SCRIPT,\
     VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST, VIP_ALTER_SCRIPT
-from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL
+from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL,\
+    NETWORK_API_USERNAME, NETWORK_API_PASSWORD
 from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, \
     AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, \
@@ -51,6 +52,11 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     RealServerPortError, RealParameterValueError, RealServerScriptError, EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError
 from time import strftime
 import logging
+from types import NoneType
+
+from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
+import re
+import hashlib, base64
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +65,7 @@ OPERATION = { 0 : 'DELETE' , 1: 'VALIDATE', 2: 'CREATE', 3: 'REMOVE'}
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},])
 def search_list(request): 
     try:
         
@@ -79,7 +85,7 @@ def search_list(request):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},])
 def ajax_list_vips(request):
     
     try:
@@ -195,14 +201,14 @@ def ajax_shared_view_vip(request,id_vip, lists):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},])
 def ajax_view_vip(request,id_vip):   
     lists= dict()
     return ajax_shared_view_vip(request, id_vip, lists)  
     
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},])
 def delete_validate_create_remove(request, operation):
     
     operation_text = OPERATION.get(int(operation))
@@ -346,7 +352,7 @@ def validate_vip(request):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "write": True}])
 def delete_vip(request):
     delete_validate_create_remove(request, 0)
     # Redirect to list_all action
@@ -355,7 +361,7 @@ def delete_vip(request):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def ajax_validate_create_remove(request,id_vip, operation):
     
     operation_text = OPERATION.get(int(operation))
@@ -368,6 +374,8 @@ def ajax_validate_create_remove(request,id_vip, operation):
     msg_type = ""
     changed = ""
     msg_error_call,msg_success_call = getErrorMessagesOne(operation_text)
+
+    #This method has a generic permission VIPS_REQUEST, but each of the operations has its own permission.
 
     try:
         
@@ -517,6 +525,11 @@ def valid_reals(lists, balancing, id_equip, id_ip, weight, priority, ports_vip_r
            
         invalid_port_vip = [i for i in ports_vip_reals if int(i) > 65535 or int(i) < 1 ]
         invalid_ports_real = [i for i in ports_real_reals if int(i) > 65535 or int(i) < 1 ]
+        invalid_priority = [i for i in priority if int(i) > 4294967295 or int(i) < 0 ]
+        
+        if invalid_priority:
+            lists['reals_error'] = request_vip_messages.get("invalid_priority")
+            is_valid = False
         
         if invalid_port_vip or invalid_ports_real:
             lists['reals_error'] = request_vip_messages.get("invalid_port")
@@ -525,9 +538,27 @@ def valid_reals(lists, balancing, id_equip, id_ip, weight, priority, ports_vip_r
         if len(ports_vip_reals) != len(ports_real_reals):
             lists['reals_error'] = request_vip_messages.get("error_reals")
             is_valid = False 
-                    
+        else:
+            duplicated = 0
+            for i in range(len(ports_real_reals)):
+                temp_real = ports_real_reals[i]
+                temp_ip   = id_ip[i]
+                if duplicated > 1:
+                    lists['reals_error'] = request_vip_messages.get("duplicated_value")
+                    is_valid = False
+                else:
+                    duplicated = 0
+                    for j in range(len(ports_real_reals)):
+                        if temp_real == ports_real_reals[j] and temp_ip == id_ip[j]:
+                            duplicated += 1
+               
         if str(balancing).upper() == "WEIGHTED":
-        
+            
+            invalid_weight = [i for i in weight if int(i) > 4294967295 or int(i) < 0 ]
+            if invalid_weight:
+                lists['reals_error'] = request_vip_messages.get("invalid_weight")
+                is_valid = False
+            
             if len(id_equip) != len(weight) or len(id_equip) != len(priority):
                 lists['reals_error'] = request_vip_messages.get("error_reals")
                 is_valid = False
@@ -577,18 +608,23 @@ def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, ports
             
             if id_equip[i] != '' and id_ip[i] != '':
                 
-                if weight and priority:
-                    reals.append({'priority': priority[i] , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
-                
-                else:
-                
-                    if not weight and not priority:
-                        reals.append({'priority': '' , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
-                    
-                    elif not weight:
-                        reals.append({'priority': priority[i] , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                if not ports_real_reals and not ports_vip_reals:
+                    if weight:
+                        reals.append({'priority': priority[i] , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i]})
                     else:
-                        reals.append({'priority': '' , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                        reals.append({'priority': priority[i] , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i]})
+                else:
+                    if weight and priority:
+                        reals.append({'priority': priority[i] , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                    
+                    else:
+                        if not weight and not priority:
+                            reals.append({'priority': '' , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                        
+                        elif not weight:
+                            reals.append({'priority': priority[i] , 'weight': '', 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
+                        else:
+                            reals.append({'priority': '' , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
 
         if status is not None:
             for i in range(0, len(reals)):
@@ -833,7 +869,7 @@ def add_form_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def add_form(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -847,7 +883,7 @@ def edit_form_external(request, id_vip, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def edit_form(request, id_vip):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -861,7 +897,7 @@ def ajax_popular_client_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def ajax_popular_client(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -875,7 +911,7 @@ def ajax_popular_environment_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def ajax_popular_environment(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -889,7 +925,7 @@ def ajax_popular_options_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def ajax_popular_options(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -903,7 +939,7 @@ def ajax_add_healthcheck_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def ajax_add_healthcheck(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -917,7 +953,7 @@ def ajax_model_ip_real_server_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
 def ajax_model_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -1015,7 +1051,7 @@ def parse_real_server(request, vip, client_api, id_vip, id_evip, is_status=False
 
 
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},])
 def tab_real_server_status(request, id_vip):
 
     try:
@@ -1042,7 +1078,7 @@ def tab_real_server_status(request, id_vip):
 
         id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, id_evip, True)
             
-        lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version, status)
+        lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, None, None, version, status)
     
     except EnvironmentVipNotFoundError, e:
         logger.error(e)
@@ -1056,7 +1092,7 @@ def tab_real_server_status(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},])
 def tab_real_server(request, id_vip):
     
     try:
@@ -1099,6 +1135,10 @@ def tab_real_server(request, id_vip):
         if request.method == "POST":
             try:
                 
+                #Real - data TABLE REALS    
+                ports_vip_reals  = valid_field_table_dynamic(request.POST.getlist('ports_vip_reals')) if "ports_vip_reals" in request.POST else None
+                ports_real_reals = valid_field_table_dynamic(request.POST.getlist('ports_real_reals')) if "ports_real_reals" in request.POST else None
+                
                 priority = valid_field_table_dynamic(request.POST.getlist('priority')) if "priority" in request.POST else None
                 weight = valid_field_table_dynamic(request.POST.getlist('weight')) if "weight" in request.POST else None
                 id_equip = valid_field_table_dynamic(request.POST.getlist('id_equip')) if "id_equip" in request.POST else None
@@ -1106,9 +1146,10 @@ def tab_real_server(request, id_vip):
                 id_ip = valid_field_table_dynamic(request.POST.getlist('id_ip')) if "id_ip" in request.POST else None
                 ip = valid_field_table_dynamic(request.POST.getlist('ip')) if "ip" in request.POST else None
                 
-                lists, is_valid_reals = valid_reals(lists, balancing, id_equip, id_ip, weight, priority)
+                lists, is_valid_reals = valid_reals(lists, balancing, id_equip, id_ip, weight, priority, ports_vip_reals, ports_real_reals)
+                
                 if is_valid_reals:
-                    reals = reals_(id_equip, id_ip, equip, ip)
+                    reals = reals_(id_equip, id_ip, equip, ip, ports_vip_reals, ports_real_reals)
                     client_api.create_vip().edit_reals(id_vip, balancing, reals, priority, weight)
                     
                     messages.add_message(request, messages.SUCCESS, request_vip_messages.get("tab_edit_success") % 'real server')
@@ -1151,8 +1192,43 @@ def tab_real_server(request, id_vip):
                 messages.add_message(request, messages.ERROR, e)
                 
         if parse is True:
+            ports = []
+            if "portas_servicos" in vip:
+                if type(vip['portas_servicos']) != NoneType:
+                    if type(vip['portas_servicos']['porta']) == unicode or  len(vip['portas_servicos']['porta']) == 1:
+                        vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
+                
+                    ports = vip.get("portas_servicos").get('porta')
+            
+            ports_vip = []
+            ports_real = []
+            for port in ports:
+                p = str(port).split(":")
+                ports_vip.append(p[0])
+                
+                if len(p) > 1:
+                    ports_real.append(p[1])
+                else:
+                    ports_real.append('')
+
+            lists = mount_table_ports(lists, ports_vip, ports_real)
+            
             id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip, True, False)
-            lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, version, status)
+                
+            port_vip_list = list()
+            port_real_list = list()
+            
+            if 'reals' in vip:
+                reals_list = vip['reals'].get('real')
+                if type(reals_list) is not list:
+                    port_vip_list.append(reals_list['port_vip'])
+                    port_real_list.append(reals_list['port_real'])
+                else:
+                    for real_l in reals_list:
+                        port_vip_list.append(real_l['port_vip'])
+                        port_real_list.append(real_l['port_real'])
+            
+            lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, port_vip_list, port_real_list, version, status)
     
     except VipNaoExisteError, e:
         logger.error(e)
@@ -1170,7 +1246,7 @@ def tab_real_server(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},])
 def tab_healthcheck(request, id_vip):
     
     try:
@@ -1276,7 +1352,7 @@ def tab_healthcheck(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},])
 def tab_maxcon(request, id_vip):
     
     try:
@@ -1372,7 +1448,7 @@ def tab_maxcon(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},])
 def tab_l7filter(request, id_vip):
     
     try:
@@ -1452,7 +1528,7 @@ def tab_l7filter(request, id_vip):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ADMINISTRATION, "read": True},{"permission": VIP_ADMINISTRATION, "write": True}])
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},])
 def status_real_server(request, id_vip, status):
 
     if request.method == 'POST':
@@ -1532,7 +1608,7 @@ def status_real_server(request, id_vip, status):
                 messages.add_message(request, messages.SUCCESS, request_vip_messages.get("success_real") % ('Habilitado' if enable else 'Desabilitado') )
 
             else:
-                messages.add_message(request, messages.SUCCESS, request_vip_messages.get("can_not_real") % ('Habilitar' if enable else 'Desabilitar') )
+                messages.add_message(request, messages.ERROR, request_vip_messages.get("can_not_real_all") % ( ('Habilitar' if enable else 'Desabilitar')))
 
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
@@ -1550,36 +1626,66 @@ def generate_token(request):
         
         if form.is_valid():
             
+            user_ldap_ass = ""
             user = str(form.cleaned_data['user'])
             idt  = None if not form.cleaned_data['requestVip'] else form.cleaned_data['requestVip'] 
             ttl  = ACCESS_EXTERNAL_TTL if not form.cleaned_data['p'] else form.cleaned_data['p']
             
+            #Login with LDAP
+            if form.cleaned_data['is_ldap_user']:
+                username_ldap, password_ldap = str(user).split("@")
+                try:
+                    user_ldap = Ldap("").get_user(username_ldap)
+                except LDAPNotFoundError, e:
+                    raise Exception(auth_messages.get("user_ldap_not_found"))
+
+                pwd_ldap = user_ldap['userPassword']
+                activate = user_ldap.get('nsaccountlock')
+                pwd = password_ldap
+                
+                if re.match("\{(MD|md)5\}.*", pwd_ldap, 0):
+                    pwd = base64.b64encode(hashlib.md5(pwd).digest())
+                    pwd_ldap = pwd_ldap[pwd_ldap.index("}")+1:]
+                    
+                if pwd == pwd_ldap and (activate is None or activate.upper() == 'FALSE'):
+                    #Valid User
+                    client, client_user = validate_user_networkapi(user, form.cleaned_data['is_ldap_user'])
+                    user_ldap_client = client_user.get('user')
+                    user_ldap_ass = user_ldap_client['user_ldap']
+                else:
+                    client_user = None
+            else:
+                #Valid User
+                client, client_user = validate_user_networkapi(user, form.cleaned_data['is_ldap_user'])
+            
+            
             #Valid User
-            client = validate_user_networkapi(user)
-            
-            #Valid idt
-            if idt is not None and not is_valid_int_param(idt):
-                raise Exception(error_messages.get("invalid_param") % "requestVip")
-            
-            #Valid ttl
-            if not is_valid_int_param(ttl):
-                raise Exception(error_messages.get("invalid_param") % "p")
-
-            if idt is not None:
-                client.create_vip().get_by_id(idt)
-
-            #Encrypt hash
-            user_hash = Encryption().Encrypt(user)
-            
-            #Generates token
-            key = "%s:%s:%s" % ( __name__, str(user) , str(strftime("%Y%m%d%H%M%S")))
-            token = sha1(key).hexdigest()
-            
-            # Set token in cache
-            cache.set(token, user_hash, int(ttl))
-            
-            lists["token"] = token
-            lists["url"] = reverse("vip-request.edit.external", args=[idt]) if idt is not None else reverse("vip-request.form.external")
+            if client_user is None:
+                raise UserNotAuthenticatedError("user_invalid")
+            else:
+                #Valid idt
+                if idt is not None and not is_valid_int_param(idt):
+                    raise Exception(error_messages.get("invalid_param") % "requestVip")
+                
+                #Valid ttl
+                if not is_valid_int_param(ttl):
+                    raise Exception(error_messages.get("invalid_param") % "p")
+    
+                if idt is not None:
+                    client.create_vip().get_by_id(idt)
+    
+                #Encrypt hash
+                user_hash = Encryption().Encrypt(user+"@"+str(user_ldap_ass))
+                
+                #Generates token
+                key = "%s:%s:%s" % ( __name__, str(user) , str(strftime("%Y%m%d%H%M%S")))
+                token = sha1(key).hexdigest()
+                
+                # Set token in cache
+                cache.set(token, user_hash, int(ttl))
+                
+                lists["token"] = token
+                lists["url"] = reverse("vip-request.edit.external", args=[idt]) if idt is not None else reverse("vip-request.form.external")
             
             
             return render_to_response(VIPREQUEST_TOKEN, lists, context_instance=RequestContext(request))
@@ -1593,25 +1699,26 @@ def generate_token(request):
         lists["error"] = request_vip_messages.get("invalid_vip")
     except Exception, e:
         logger.error(e)
-        lists["error"] = e
+        lists["error"] = e  
+
         
     return render_to_response(JSON_ERROR, lists, context_instance=RequestContext(request))
 
-def validate_user_networkapi(user_request):
+def validate_user_networkapi(user_request, is_ldap_user):
     
     try:
         
         username, password = str(user_request).split("@")
         
-        client = ClientFactory(NETWORK_API_URL, username, password)
+        client = ClientFactory(NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD)
             
-        client.create_usuario().authenticate(username, password)
+        client_user = client.create_usuario().authenticate(username, password, is_ldap_user)
         
     except Exception,  e:
         logger.error(e)
         raise UserNotAuthenticatedError(e)
         
-    return client
+    return client, client_user
 
 def add_form_shared(request, client_api, form_acess = "", external = False):
 
@@ -1741,10 +1848,11 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
             
             ports = []
             if "portas_servicos" in vip:
-                if type(vip['portas_servicos']['porta']) == unicode or  len(vip['portas_servicos']['porta']) == 1:
-                    vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
+                if type(vip['portas_servicos']) != NoneType:
+                    if type(vip['portas_servicos']['porta']) == unicode or  len(vip['portas_servicos']['porta']) == 1:
+                        vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
                 
-                ports = vip.get("portas_servicos").get('porta')
+                    ports = vip.get("portas_servicos").get('porta')
             
             ports_vip = []
             ports_real = []
@@ -1997,7 +2105,7 @@ def model_ip_real_server_shared(request, client_api):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_VALIDATION, "read": True},{"permission": VIP_VALIDATION, "write": True}])
+@has_perm([{"permission": VIP_VALIDATION, "write": True},])
 def validate_l7(request):
     try:
         # Get user

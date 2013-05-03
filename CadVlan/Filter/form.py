@@ -16,7 +16,7 @@ class FilterForm(forms.Form):
 
     id = forms.IntegerField(label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
     name = forms.CharField  (label=u'Nome', min_length=3, max_length=100 , required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    description = forms.CharField  (label=u'Descrição', min_length=3, max_length=200,  required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
+    description = forms.CharField  (label=u'Descrição', min_length=3, max_length=200,  required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     equip_type = forms.MultipleChoiceField(label=u'Tipos de equipamento', required=True, error_messages=error_messages, widget=forms.SelectMultiple(attrs={'style': "width: 310px"}))
     
     

@@ -22,9 +22,16 @@ $(document).ready(function() {
 	$(".maxcon_tab").attr("href", "{% url vip-request.tab.maxcon vip.id %}");
 	$(".l7-filter_tab").attr("href", "{% url vip-request.tab.l7filter vip.id %}");
 	
-	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	$("#btn_sav").button("disable");
+	
+	{% has_perm VIP_ALTER_SCRIPT True True %}
+	{% if has_perm %}
+	$("#btn_sav").button("enable");
+	$("#btn_sav").click(function(){
 		location.reload();
 	});
+	{% endif %}
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
 		location.href = "{% url vip-request.list %}";

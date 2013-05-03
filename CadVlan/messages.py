@@ -247,6 +247,9 @@ request_vip_messages = {
     'success_l7_rollback': u'Rollback aplicado com sucesso.',
     'duplicate_vip': u'O valor da Porta VIP deve ser único.',
     'invalid_port': u'O número da porta deve estar entre 1 e 65535.',
+    'invalid_weight': u'O valor do Peso do Real deve estar entre 0 e 4294967295.',
+    'invalid_priority': u'O valor da Prioridade deve estar entre 0 e 4294967295.',
+    'duplicated_value': u'Valores duplicados para Porta Real, Porta Vip e IP do Real na mesma Requisição VIP.',
 }
 
 access_type_messages = {

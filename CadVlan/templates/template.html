@@ -245,7 +245,7 @@
 							<li><a href="{% url healthcheck-expect.form %}">Healthcheck Expect para Ambiente</a></li>
 							{% endif %}
 							
-							{% has_perm VIP_ADMINISTRATION None True %}
+							{% has_perm VIPS_REQUEST True True %}
 							{% if has_perm %}
 							<li><a href="{% url vip-request.form %}">Requisições de VIP</a></li>
 							{% endif %}

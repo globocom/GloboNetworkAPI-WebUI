@@ -17,7 +17,7 @@
 
 	<table id="dados_comuns">
 		<tr>
-			<td  style="width: 175px"><label >Validado</label></td>
+			<td  style="width: 235px"><label >Validado</label></td>
 			<td>
 				<label style="width: 350px;color: blue;text-align: center;" >
 					{% ifequal 'True' vip.validado %}
@@ -90,7 +90,7 @@
 <h2>Variáveis</h2>
 	<table id="variaveis">
 				<tr>
-					<td style="width: 175px"><label for="finalidade">Finalidade</label></td>
+					<td style="width: 235px"><label for="finalidade">Finalidade</label></td>
 					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.finalidade}}</label></td>
 				</tr>
 				<tr>
@@ -157,8 +157,8 @@
 				{% for real in vip.reals.real %}
 				
 					<tr>
-						<td><label for="persistencia">Real(s) Name/Real(s) IP - {{forloop.counter}}</label></td>
-						<td><label style="width: 350px;color: blue;text-align: center;" >{{real.real_name}} <label style="color: red;">/</label>  {{real.real_ip}}</label></td>
+						<td><label for="persistencia">Porta(s) Serviço/Real(s) Name/Real(s) IP </label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;" >{{real.port_vip}}:{{real.port_real}}<label style="color: red;">/</label> {{real.real_name}} <label style="color: red;">/</label>  {{real.real_ip}}</label></td>
 					</tr>
 				
 				{% endfor %}
@@ -187,7 +187,7 @@ $(document).ready(function() {
 		},
 		buttons: {
 			
-			{% has_perm ADMINISTRATION True None %}
+			{% has_perm VIP_VALIDATION True None %}
 			{% if has_perm %}
 			
 				{% ifequal 'False' vip.validado %}
@@ -205,6 +205,11 @@ $(document).ready(function() {
 					}
 				},
 				{% endifequal %}
+			
+			{% endif %}
+			
+			{% has_perm VIP_CREATE_SCRIPT True None %}
+			{% if has_perm %}
 				
 				{% ifequal 'False' vip.vip_criado %}
 				"Criar VIP": function() {
@@ -220,7 +225,14 @@ $(document).ready(function() {
 						
 					}
 				},
-				{% else %}
+				{% endifequal %}
+				
+			{% endif %}
+			
+			{% has_perm VIP_REMOVE_SCRIPT True None %}
+			{% if has_perm %}
+			
+				{% ifequal 'True' vip.vip_criado %}
 				"Remover VIP": function() {
 					if (confirm('Os VIPs selecionados serão removidos dos seus respectivos equipamentos. Os serviços desses VIPs serão interrompidos. Tem certeza que deseja continuar ?')){ 
 						

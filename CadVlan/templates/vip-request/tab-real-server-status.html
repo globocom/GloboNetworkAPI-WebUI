@@ -36,6 +36,24 @@
 		$('.weighted').hide();
 	}
 	
+	$("#btn_enable").button({ icons: {primary: "ui-icon-disk"} });
+	$("#btn_enable").button("disable");
+	
+	$("#btn_disable").button({ icons: {primary: "ui-icon-disk"} });
+	$("#btn_disable").button("disable");
+	
+	{% has_perm VIP_ALTER_SCRIPT True True %}
+	{% if has_perm %}
+	$("#btn_enable").button("enable");
+	$("#btn_enable").click(function(){
+		location.reload();
+	});
+	$("#btn_disable").button("enable");
+	$("#btn_disable").click(function(){
+		location.reload();
+	});
+	{% endif %}
+	
 	$("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
 		if (confirm('Deseja realmente Habilitar os Real servers selecionados ?')){ 
 			var data = getSelectionData(oTable);

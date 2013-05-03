@@ -140,9 +140,16 @@
 					}
 				});
 			}
+			
+			if (element.val() == "" && port_vip != ""){
+				element.val(port_vip);
+				alert('Deve-se preencher todos os campos de portas.');
+				return false;
+			}
 				
 			
 			if (!is_valid){
+				element.val(port_vip);
 				alert('Porta Vip já cadastrada.');
 				return false;
 			}
@@ -152,18 +159,23 @@
 		return true;
 	}	
 	$('.numbersOnly').live("keydown", function(e){
-      	  if(e.keyCode == 9){
-      	  
+      	  if(e.keyCode == 9 || e.keyCode == 13){
+	
 			if (!check_port_vip($(this))){
+				
+				e.preventDefault();
+	    		label = $(this).parent().parent().parent().next().find('.editable');
+	      		label.click();
 				return false;
+			}else{
+	      	  	update_port_vips($(this));
+	      	  	
+	    		label = $(this).parent().parent().parent().next().find('.editable');
+	      		$(this).next().click();
+	      		label.click();
+	      		return false;
 			}
 			      	  	
-      	  	update_port_vips($(this));
-      	  	
-    		label = $(this).parent().parent().parent().next().find('.editable');
-      		$(this).next().click();
-      		label.click();
-      		return false;
       	  }
 	}).live("keyup", function(e){ 
           $(this).val($(this).val().replace(/[^0-9]+/g,''));
