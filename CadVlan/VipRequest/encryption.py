@@ -33,7 +33,8 @@ class Encryption():
         
         try:
             #Generates object AES
-            self.cipher = AES.new(MD5.new(SECRET_KEY).hexdigest(), AES.MODE_CBC)
+            #self.cipher = AES.new(MD5.new(SECRET_KEY).hexdigest(), AES.MODE_CBC)
+            self.cipher = AES.new(MD5.new(SECRET_KEY).hexdigest(), AES.MODE_ECB)
             
         except Exception, e:
             logger.error(e)
