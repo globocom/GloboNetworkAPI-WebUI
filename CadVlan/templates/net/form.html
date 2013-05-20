@@ -88,7 +88,67 @@ $(document).ready(function() {
 	
 	autocomplete("{% url vlan.autocomplete.ajax %}", false, "id_vlan_name", true);
 	
-	$("#search_form").submit(function() {
+	
+// 	$("#search_form").submit(function() {
+// 		var value = "";
+// 		if ($("#search_form input[name='ip_version']:checked").val() == 0) {
+// 			$(".ipv4").each(function() {
+// 				value = value + $(this).val() + $.trim($(this).next().text());
+// 			});
+// 			$("#id_networkv4").val(value);
+// 			$("#id_networkv6").val("");
+// 		} else {s
+// 			$("#network_ipv6 input").each(function() {
+// 				if ($(this).val() == ""){
+// 					if ($(this).is("#mask")){
+// 						value = value + "000" + $.trim($(this).next().text());
+// 					}
+// 					else value = value + "0000" + $.trim($(this).next().text());
+// 				}
+// 				else{
+// 					value = value + $(this).val() + $.trim($(this).next().text());
+// 				}
+// 			});
+// 			$("#id_networkv6").val(value);
+// 			$("#id_networkv4").val("");
+// 		}
+// 	});
+	
+	$("#btn_sav").click(function(){
+		
+		preparesForm();
+		
+		netipv4 = $('input[name=networkv4]');
+		netipv6 = $('input[name=networkv6]');
+		id_vlan = $('#id_vlan_name_id').val();
+		
+		if( id_vlan != '' && netipv4.val() != "" || netipv6.val() != ""){
+			$.ajax({
+				async: false,
+				data: { netipv4: netipv4.val(), netipv6: netipv6.val(), is_number : 0, id_vlan : id_vlan },
+				url: "{% url ajax.vlan.confirm %}",
+				dataType: 'text',
+				success: function(data) {
+					if (data != ""){
+						if(confirm(data)){
+							$("#search_form").submit();			
+						}else{
+							return false;
+						}
+					}
+					else{
+						$("#search_form").submit();
+					}
+				}
+			});
+			return false;
+		}else{
+			$("#search_form").submit();
+		}
+		
+	});
+	
+	function preparesForm(){
 		var value = "";
 		if ($("#search_form input[name='ip_version']:checked").val() == 0) {
 			$(".ipv4").each(function() {
@@ -111,7 +171,7 @@ $(document).ready(function() {
 			$("#id_networkv6").val(value);
 			$("#id_networkv4").val("");
 		}
-	});
+	}
 	
 });
 </script>

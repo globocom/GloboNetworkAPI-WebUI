@@ -45,13 +45,7 @@
 	{% has_perm VIP_ALTER_SCRIPT True True %}
 	{% if has_perm %}
 	$("#btn_enable").button("enable");
-	$("#btn_enable").click(function(){
-		location.reload();
-	});
 	$("#btn_disable").button("enable");
-	$("#btn_disable").click(function(){
-		location.reload();
-	});
 	{% endif %}
 	
 	$("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
@@ -103,6 +97,8 @@
 				<th><input id="checkAll" type="checkbox" /></th>
 				<th>Nome do Real</th>
 				<th>IP do Real</th>
+				<th>Porta Vip</th>
+				<th>Porta Real</th>
 				<th>Prioridade</th>
 				<th class='weighted'>Peso</th>
 				<th>Status</th>
@@ -111,9 +107,11 @@
 		<tbody>
 			{% for field in reals %}
 				<tr class="text_center">
-					<td style="width: 37px;"><input type="checkbox" name="selection" value="{{field.id_equip}}-{{field.id_ip}}-{{field.version}}" /></td>
+					<td style="width: 37px;"><input type="checkbox" name="selection" value="{{field.id_equip}}-{{field.id_ip}}-{{field.version}}-{{field.ports_vip}}-{{field.ports_real}}" /></td>
 					<td>{{field.equip}}</td>
 					<td>{{field.ip}}</td>
+					<td>{{field.ports_vip}}</td>
+					<td>{{field.ports_real}}</td>
 					<td>{{field.priority}}</td>
 					<td class='weighted' >{{field.weight}}</td>
 					<td style="width: 70px;">

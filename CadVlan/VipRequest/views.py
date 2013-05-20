@@ -1006,11 +1006,16 @@ def parse_real_server(request, vip, client_api, id_vip, id_evip, is_status=False
                 version.append(ip_aux.get("version"))
                 
                 try:
+                    port_vip = None
+                    port_real = None
+                    if 'port_vip' in reals[i] and 'port_real' in reals[i]:
+                        port_vip = reals[i].get("port_vip")
+                        port_real = reals[i].get("port_real")
                 
                     if ip_aux.get("version")  == IP_VERSION.IPv4[1]:
-                        code = client_api.create_vip().checar_real(id_vip, ip_aux.get("id"), equip_aux.get("id"))
+                        code = client_api.create_vip().checar_real(id_vip, ip_aux.get("id"), equip_aux.get("id"), port_vip, port_real)
                     else:
-                        code = client_api.create_vip().check_real_ipv6 (id_vip, ip_aux.get("id"), equip_aux.get("id"))
+                        code = client_api.create_vip().check_real_ipv6 (id_vip, ip_aux.get("id"), equip_aux.get("id"), port_vip, port_real)
                     
                     if code is not None and 'sucesso' in code:
                         
@@ -1078,7 +1083,20 @@ def tab_real_server_status(request, id_vip):
 
         id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, id_evip, True)
             
-        lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, None, None, version, status)
+        port_vip_list = list()
+        port_real_list = list()
+        
+        if 'reals' in vip:
+            reals_list = vip['reals'].get('real')
+            if type(reals_list) is not list:
+                port_vip_list.append(reals_list['port_vip'])
+                port_real_list.append(reals_list['port_real'])
+            else:
+                for real_l in reals_list:
+                    port_vip_list.append(real_l['port_vip'])
+                    port_real_list.append(real_l['port_real'])
+            
+        lists = mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, port_vip_list, port_real_list, version, status)
     
     except EnvironmentVipNotFoundError, e:
         logger.error(e)
@@ -1564,20 +1582,22 @@ def status_real_server(request, id_vip, status):
                     equip_id = idt_vector[0]
                     ip_id = idt_vector[1]
                     version = idt_vector[2]
+                    port_vip = idt_vector[3]
+                    port_real = idt_vector[4]
                     
                     if version == IP_VERSION.IPv4[1]:
                         
                         if enable:
-                            client_vip.habilitar_real(id_vip, ip_id, equip_id)
+                            client_vip.habilitar_real(id_vip, ip_id, equip_id, port_vip, port_real)
                         else:
-                            client_vip.desabilitar_real(id_vip, ip_id, equip_id)
+                            client_vip.desabilitar_real(id_vip, ip_id, equip_id, port_vip, port_real)
                     
                     elif version == IP_VERSION.IPv6[1]:
                         
                         if enable:
-                            client_vip.enable_real_ipv6(id_vip, ip_id, equip_id)
+                            client_vip.enable_real_ipv6(id_vip, ip_id, equip_id, port_vip, port_real)
                         else:
-                            client_vip.disable_real_ipv6(id_vip, ip_id, equip_id)
+                            client_vip.disable_real_ipv6(id_vip, ip_id, equip_id, port_vip, port_real)
 
                 except ScriptError, e:
                     logger.error(e)

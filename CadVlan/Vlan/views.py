@@ -16,7 +16,8 @@ from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT,\
     VLAN_CREATE_SCRIPT
 from CadVlan.forms import DeleteForm, CreateForm
-from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS, AJAX_VLAN_AUTOCOMPLETE, VLAN_FORM, VLAN_EDIT, AJAX_SUGGEST_NAME
+from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS, AJAX_VLAN_AUTOCOMPLETE, VLAN_FORM, VLAN_EDIT, AJAX_SUGGEST_NAME,\
+    AJAX_CONFIRM_VLAN
 from CadVlan.Vlan.forms import SearchVlanForm, VlanForm
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
 from CadVlan.Util.utility import DataTablePaginator, acl_key
@@ -87,7 +88,7 @@ def ajax_list_vlans(request):
                 
                 # Set params in simple Pagination class
                 pag = Pagination(dtp.start_record, dtp.end_record, dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
-                
+                '', False, None, None, None, 2, 0, False
                 # Call API passing all params
                 vlans = client.create_vlan().find_vlans(number, name, iexact, environment, net_type, network, ip_version, subnet, acl, pag)
                 
@@ -411,6 +412,99 @@ def ajax_acl_name_suggest(request):
         # Send response status with error
         response.status_code = 200
         return response
+    
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def ajax_confirm_vlan(request):
+    lists = dict()
+    try:    
+
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+            
+            is_number = int(request.GET['is_number'])
+            
+            network = None
+            ip_version = 2
+            number = None
+            subnet = 0
+            
+            # Check in vlan insert/update
+            if is_number == 1:
+                number = request.GET['number']
+                id_environment = request.GET['id_environment']
+                id_vlan = request.GET['id_vlan']
+            # Check in net insert
+            else:
+                netipv4 = request.GET['netipv4']
+                netipv6 = request.GET['netipv6']
+                id_vlan = request.GET['id_vlan']
+                
+                if netipv4 == '':
+                    ip_version = 1
+                    network = netipv6
+                else:
+                    ip_version = 0 
+                    network = netipv4
+                subnet = 1
+            
+            
+            """Filter vlans by number or network subnet"""
+            # Pagination
+            columnIndexNameMap = { 0: '', 1: '', 2: 'num_vlan', 3 : 'nome', 4: 'ambiente', 5: 'tipo_rede', 6: 'network', 7: '', 8: 'acl_file_name', 9: 'acl_file_name_v6'  }
+            dtp = DataTablePaginator(request, columnIndexNameMap)
+            
+            # Make params
+            dtp.build_server_side_list()
+            
+            # Set params in simple Pagination class
+            pag = Pagination(0, 100, dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
+            
+            # Call API passing all params
+            vlans = client.create_vlan().find_vlans(number, '', False, None, None, network, ip_version, subnet, False, pag)
+            """Filter end"""
+            
+            
+            if 'vlan' in vlans:
+                for vlan in vlans.get('vlan'):
+                    # Ignore the same Vlan
+                    if vlan['id'] != id_vlan:
+                        if is_number == 1:
+                                if int(vlan['ambiente']) != int(id_environment):
+                                
+                                    needs_confirmation = client.create_vlan().confirm_vlan(number, id_environment).get('needs_confirmation')
+                                    if needs_confirmation == 'True':
+                                        message_confirm = "A vlan de número " + str(number) + " já existe no ambiente " + str(vlan['ambiente_name']) +". Deseja criar essa vlan mesmo assim?"
+                                else:
+                                    message_confirm = ''
+                                    break
+                        else:
+                            network_confirm = network.replace('/', 'net_replace')
+                            needs_confirmation = client.create_vlan().confirm_vlan(network_confirm, id_vlan, ip_version).get('needs_confirmation')
+                            if needs_confirmation == 'True':
+                                message_confirm = "A rede compatível " + str(network) + " já existe no ambiente " + str(vlan['ambiente_name']) +". Deseja alocar essa rede mesmo assim?"
+                            else:
+                                message_confirm = ''
+                                break
+                            
+            lists['confirm_message'] = message_confirm
+            
+            # Returns HTML
+            response = HttpResponse(loader.render_to_string(AJAX_CONFIRM_VLAN, lists, context_instance=RequestContext(request)))
+            # Send response status with error
+            response.status_code = 200
+            return response
+            
+    except:
+        
+        lists['confirm_message'] = ''
+        # Returns HTML
+        response = HttpResponse(loader.render_to_string(AJAX_CONFIRM_VLAN, lists, context_instance=RequestContext(request)))
+        # Send response status with error
+        response.status_code = 200
+        return response
+    
     
 @log
 @login_required

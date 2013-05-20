@@ -10,7 +10,40 @@ $(document).ready(function() {
 	
 	$("#page_tab").tabs();
 	
-	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+		confirm_vlan();
+	});;
+	
+	
+	function confirm_vlan(){
+		id_vlan = "{{id_vlan}}"
+		number = $.trim($("#id_number").val())
+		id_environment = $.trim($("#id_environment").val())
+		if( number != "" && id_environment != ""){
+			$.ajax({
+				async: false,
+				data: { number: number, id_environment: id_environment, is_number : 1, id_vlan : id_vlan },
+				url: "{% url ajax.vlan.confirm %}",
+				dataType: 'text',
+				success: function(data) {
+					if (data != ""){
+						if(confirm(data)){
+							$("#add_form").submit();			
+						}else{
+							return false;
+						}
+					}
+					else{
+						$("#add_form").submit();
+					}
+				}
+			});
+			return false;
+		}else{
+			$("#add_form").submit();
+		}
+	}
+	
 	
 	$("#add_form").submit( function () {
 		$("#id_acl_file").removeAttr("disabled");
@@ -21,7 +54,7 @@ $(document).ready(function() {
 	
 	$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
 		$("#id_apply_vlan").val('1');
-		$("#add_form").submit();
+		confirm_vlan();
 	});
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
@@ -258,7 +291,7 @@ $(document).ready(function() {
 			
 			<div class="buttons-l ui-widget-header">
 				<button id="btn_apply" type="button">Aplicar</button>
-				<button id="btn_sav" type="Submit">Gravar</button>
+				<button id="btn_sav" type="button">Gravar</button>
 				<button id="btn_can" type="button">Cancelar</button>
 			</div>
 		</form>
