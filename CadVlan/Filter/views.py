@@ -10,7 +10,8 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import error_messages, filter_messages
-from CadVlan.permissions import ADMINISTRATION
+from CadVlan.permissions import ADMINISTRATION, ENVIRONMENT_MANAGEMENT,\
+    VLAN_MANAGEMENT
 from CadVlan.templates import FILTER_LIST, FILTER_FORM, FILTER_EDIT
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}])
 def list_all(request):
 
     try:
@@ -59,7 +60,7 @@ def list_all(request):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "write": True}, {"permission": VLAN_MANAGEMENT, "write": True}])
 def delete_all(request):
 
     if request.method == 'POST':
@@ -123,7 +124,7 @@ def delete_all(request):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "write": True}, {"permission": VLAN_MANAGEMENT, "write": True}])
 def add_form(request):
 
     try:
@@ -171,7 +172,7 @@ def add_form(request):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "write": True}, {"permission": VLAN_MANAGEMENT, "write": True}])
 def edit_form(request, id_filter):
 
     try:

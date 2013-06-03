@@ -82,29 +82,33 @@ class RequestVipFormOptions(forms.Form):
             if timeouts is not None:
                 self.fields['timeout'].choices = [(st['timeout_opt'], st['timeout_opt']) for st in timeouts]
             else:
-                timeout = kwargs.get('initial').get('timeout') if "timeout" in kwargs.get('initial') else ''
-                messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_timeout") % timeout)
+                if 'initial' in kwargs:
+                    timeout = kwargs.get('initial').get('timeout') if "timeout" in kwargs.get('initial') else ''
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_timeout") % timeout)
             
             gcaches = validates_dict(client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
             if timeouts is not None:
                 self.fields['caches'].choices = [(st['grupocache_opt'], st['grupocache_opt']) for st in gcaches]
             else:
-                caches = kwargs.get('initial').get('caches') if "caches" in kwargs.get('initial') else ''
-                messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_cache") % caches)
+                if 'initial' in kwargs:
+                    caches = kwargs.get('initial').get('caches') if "caches" in kwargs.get('initial') else ''
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_cache") % caches)
 
             persistences = validates_dict(client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
             if persistences is not None:
                 self.fields['persistence'].choices = [(st['persistencia_opt'], st['persistencia_opt']) for st in persistences]
             else:
-                persistence = kwargs.get('initial').get('persistence') if "persistence" in kwargs.get('initial') else ''
-                messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_persistence") % persistence)
+                if 'initial' in kwargs:
+                    persistence = kwargs.get('initial').get('persistence') if "persistence" in kwargs.get('initial') else ''
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_persistence") % persistence)
 
             balancings = validates_dict(client_ovip.buscar_balanceamento_opcvip(environment_vip), 'balanceamento_opt')
             if balancings is not None:
                 self.fields['balancing'].choices = [(st['balanceamento_opt'], st['balanceamento_opt']) for st in balancings]
             else:
-                balancing = kwargs.get('initial').get('balancing') if "balancing" in kwargs.get('initial') else ''
-                messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_balancing") % balancing)
+                if 'initial' in kwargs:
+                    balancing = kwargs.get('initial').get('balancing') if "balancing" in kwargs.get('initial') else ''
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_balancing") % balancing)
     
     timeout = forms.ChoiceField(label="Timeout", required=True, error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     caches = forms.ChoiceField(label="Grupos de caches", required=True, error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))

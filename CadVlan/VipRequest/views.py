@@ -1153,6 +1153,8 @@ def tab_real_server(request, id_vip):
         if request.method == "POST":
             try:
                 
+                alter_priority = request.POST.getlist('alter_priority')
+                
                 #Real - data TABLE REALS    
                 ports_vip_reals  = valid_field_table_dynamic(request.POST.getlist('ports_vip_reals')) if "ports_vip_reals" in request.POST else None
                 ports_real_reals = valid_field_table_dynamic(request.POST.getlist('ports_real_reals')) if "ports_real_reals" in request.POST else None
@@ -1168,7 +1170,7 @@ def tab_real_server(request, id_vip):
                 
                 if is_valid_reals:
                     reals = reals_(id_equip, id_ip, equip, ip, ports_vip_reals, ports_real_reals)
-                    client_api.create_vip().edit_reals(id_vip, balancing, reals, priority, weight)
+                    client_api.create_vip().edit_reals(id_vip, balancing, reals, priority, weight, alter_priority)
                     
                     messages.add_message(request, messages.SUCCESS, request_vip_messages.get("tab_edit_success") % 'real server')
                 else:

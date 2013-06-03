@@ -855,11 +855,13 @@ def delete_ip4(request, id_net):
                         return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
                 
                 error_list = list()
+                success_count = 0
                 
                 #remove ip equipment associations, and ip if its the last ip-equipment
                 try:
                     for i in range(0, len(ids)):
                         equip_client.remover_ip(eq_ids[i], ids[i])
+                        success_count += 1
                 
                 except (VipIpError, IpEquipCantDissociateFromVip), e:
                     logger.error(e)
@@ -875,11 +877,16 @@ def delete_ip4(request, id_net):
                 
                 elif len(error_list) > 0:
                             msg = ""
+                            
+                            if success_count > 0:
+                                messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_delete_sucess"))
+                                
                             for id_error in error_list:
                                 msg = msg + id_error + ", "
                                 msg = error_messages.get("can_not_remove") % msg[:-2]
                                 messages.add_message(request, messages.WARNING, msg)
                                 return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+                            
                 
                 else:
                     messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_delete_sucess")) 
@@ -949,11 +956,12 @@ def delete_ip6(request, id_net):
                         return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
                 
                 error_list = list()
-                
+                success_count = 0
                 #remove ip equipment associations, and ip if its the last ip-equipment
                 try:
                     for i in range(0, len(ids)):
                         equip_client.remove_ipv6(eq_ids[i], ids[i])
+                        success_count += 1
                 
                 except VipIpError, e:
                     logger.error(e)
@@ -969,6 +977,10 @@ def delete_ip6(request, id_net):
                     
                 elif len(error_list) > 0:
                     msg = ""
+                    
+                    if success_count > 0:
+                        messages.add_message(request, messages.SUCCESS, network_ip_messages.get("ip_delete_sucess"))
+                    
                     for id_error in error_list:
                         msg = msg + id_error + ", "
                         msg = error_messages.get("can_not_remove") % msg[:-2]

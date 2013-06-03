@@ -44,6 +44,17 @@
 	{% endif %}
 	
 	$("#btn_sav_rs").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
+		
+		$("#alter_priority").val(0)
+		$("input[id^=old_priority_]").each(function(){
+			old_priority = $(this).val();
+			new_priority = $(this).prev().val();
+			
+			if (old_priority != new_priority){
+				$("#alter_priority").val(1);
+			}
+		});
+	
 		var data = $('#add_form').serialize()
 		$.ajax({
 			data: data,
@@ -117,6 +128,7 @@
 		
 		<input type="hidden" name="balancing" value="{{ balancing }}" id="id_balancing" />
 		<input type="hidden" name="environment_vip" value="{{ environment_vip }}" id="id_environment_vip" />	
+		<input type="hidden" name="alter_priority" id="alter_priority" value="0" />
 		
 		<table style="display: none">
 			<tbody>
@@ -188,6 +200,7 @@
 									<td>
 										<label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
 										<input type='hidden' name='priority' value='{{field.priority}}'>
+										<input type='hidden' id='old_priority_{{forloop.counter}}' value='{{field.priority}}'>
 									</td>
 									<td class='weighted'>
 										<label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>

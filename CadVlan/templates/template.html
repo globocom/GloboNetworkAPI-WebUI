@@ -164,6 +164,14 @@
 							<li><a href="{% url vip-request.list %}">Requisições de VIP</a></li>
 							{% endif %}
 							
+							{% has_perm ENVIRONMENT_MANAGEMENT None True %}
+							{% if has_perm %}
+								{% has_perm VLAN_MANAGEMENT None True %}
+								{% if has_perm %}
+									<li><a href="{% url filter.list %}">Filtros</a></li>
+								{% endif %}
+							{% endif %}
+							
 						</ul>
 					</li>
 					{% endif %}
@@ -250,6 +258,14 @@
 							<li><a href="{% url vip-request.form %}">Requisições de VIP</a></li>
 							{% endif %}
 							
+							{% has_perm ENVIRONMENT_MANAGEMENT True None %}
+							{% if has_perm %}
+								{% has_perm VLAN_MANAGEMENT True None %}
+								{% if has_perm %}
+									<li><a href="{% url filter.form %}">Filtros</a></li>
+								{% endif %}
+							{% endif %}
+							
 						</ul>
 					</li>
 					{% endif %}
@@ -283,7 +299,6 @@
 					<li>
 						<a href="#" class="adm">Administração</a>
 						<ul class="sub_menu">
-							<li><a href="{% url filter.list %}">Filtros</a></li>
 							<li><a href="{% url group-equip.list %}">Grupos de equipamentos</a></li>
 							<li><a href="{% url group-user.list %}">Grupos de Usuários</a></li>
 							<li><a href="{% url user.list 0 0 %}">Usuários</a></li>
