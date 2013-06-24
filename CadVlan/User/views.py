@@ -188,6 +188,8 @@ def create_form_user(id_user,auth,groups, edit, ldap_grps=None):
     if edit:
         user = auth.get_clientFactory().create_usuario().get_by_id(id_user).get('usuario')
         
+        if type(user['grupos']) == unicode:
+            user['grupos'] = list([user['grupos'], 'one_group']) 
         #Get LDAP user and the first group associated
         is_ldap = False
         usr_list = None
@@ -205,7 +207,7 @@ def create_form_user(id_user,auth,groups, edit, ldap_grps=None):
                     usr_list = ldap.get_users_group(ini_grp)
                     is_ldap = True
                     break
-                    
+                        
         
         form_user = UserForm(groups, ldap_group_list=ldap_grps, ldap_user_list=usr_list, initial = {"name":user['nome'],"email":user['email'],"user":user['user'],"groups":user['grupos'],"password":user['pwd'],"active":user['ativo'], "is_ldap":is_ldap, "ldap_group":ini_grp, "ldap_user":user['user_ldap']})
         #action = "user.edit %s 1" % (str(id_user))
@@ -255,6 +257,9 @@ def edit_user(form,client,id_user):
     user_ldap = form.cleaned_data['ldap_user'] if form.cleaned_data['is_ldap'] else None
     
     groups = client.create_usuario().get_by_id(id_user).get('usuario')['grupos']
+    
+    if type(groups) == unicode:
+        groups = list([groups,]) 
     
     client.create_usuario().alterar(id_user, user.upper(), pwd, name, ativo, email, user_ldap)
     
@@ -330,7 +335,13 @@ def delete_all(request):
     return redirect('user.list',0,0)
 
 def diff(old, new):
+    
+    if old == None:
+        old = []
         
+    if new == None:
+        new = []
+    
     to_add = list(set(new) - set(old))
     to_rem = list(set(old) - set(new))
     

@@ -17,7 +17,7 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
-CADVLAN_VERSION = 5
+CADVLAN_VERSION = 6
 
 MANAGERS = ADMINS
 
@@ -237,7 +237,7 @@ LOGGING = {
             'filename': LOG_FILE,
             'mode': 'a', #append+create
         },
-            'handlers-view': {
+        'handlers-view': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
