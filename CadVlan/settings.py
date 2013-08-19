@@ -17,7 +17,7 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
-CADVLAN_VERSION = 6
+CADVLAN_VERSION = 7
 
 MANAGERS = ADMINS
 
@@ -311,6 +311,9 @@ LOGGING = {
             'handlers': ['handlers-view'],
         },
         'CadVlan.EventLog': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.Vlan': {
             'handlers': ['handlers-view'],
         },
     }

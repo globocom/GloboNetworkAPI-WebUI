@@ -8,7 +8,8 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.converters.util import split_to_array
-from CadVlan.templates import ENVIRONMENT_LIST, ENVIRONMENT_FORM
+from CadVlan.templates import ENVIRONMENT_LIST, ENVIRONMENT_FORM,\
+    AJAX_AUTOCOMPLETE_LIST
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
@@ -19,10 +20,12 @@ from CadVlan.forms import DeleteForm
 from CadVlan.Environment.forms import AmbienteLogicoForm,DivisaoDCForm,Grupol3Form, AmbienteForm
 from CadVlan.messages import environment_messages, vlan_messages
 from django.core.urlresolvers import reverse
-from CadVlan.Acl.acl import mkdir_divison_dc, deleteAclCvs, checkAclCvs
+from CadVlan.Acl.acl import mkdir_divison_dc, deleteAclCvs, checkAclCvs,\
+    get_templates
 from CadVlan.Util.cvs import CVSCommandError, CVSError
 from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.Util.utility import acl_key
+from CadVlan.Util.shortcuts import render_to_response_ajax
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +180,30 @@ def remove_environment(request):
     # Redirect to list_all action
     return redirect('environment.list')
     
+@log
+@login_required
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+def ajax_autocomplete_acl_path(request):
+    
+    try:
+        
+        # Get user auth
+        auth = AuthSession(request.session)
+        environment = auth.get_clientFactory().create_ambiente()
+        
+        path_list = {}
+        paths = environment.list_acl_path().get("acl_paths") if environment.list_acl_path() else list()
+        path_list['list'] = paths
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_LIST, path_list, context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -195,9 +222,12 @@ def insert_ambiente(request):
         division_dc = client.create_divisao_dc().listar()
         group_l3 = client.create_grupo_l3().listar()
         filters = client.create_filter().list_all()
+        templates = get_templates(auth.get_user(), True)
+        ipv4 = templates["ipv4"]
+        ipv6 = templates["ipv6"]
         
         # Forms
-        lists['ambiente'] = AmbienteForm(env_logic, division_dc, group_l3, filters)
+        lists['ambiente'] = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6)
         lists['divisaodc_form'] = DivisaoDCForm()
         lists['grupol3_form'] = Grupol3Form()
         lists['ambientelogico_form'] = AmbienteLogicoForm()
@@ -207,7 +237,10 @@ def insert_ambiente(request):
         if request.method == 'POST':
             
             # Set data in form
-            ambiente_form = AmbienteForm(env_logic, division_dc, group_l3, filters, request.POST)
+            ambiente_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6, request.POST)
+            
+            # Return data to form in case of error
+            lists['ambiente'] = ambiente_form
             
             # Validate
             if ambiente_form.is_valid():
@@ -219,9 +252,17 @@ def insert_ambiente(request):
                 if str(filter_) == str(None):
                     filter_ = None
                 link = ambiente_form.cleaned_data['link']
+                acl_path = ambiente_form.cleaned_data['acl_path']
+                
+                ipv4_template = ambiente_form.cleaned_data['ipv4_template']
+                ipv4_template = ipv4_template if ipv4_template else None
+                
+                ipv6_template = ambiente_form.cleaned_data['ipv6_template']
+                ipv6_template = ipv6_template if ipv6_template else None
                 
                 # Business
-                client.create_ambiente().inserir(grupo_l3, ambiente_logico, divisao_dc, link, filter_)
+                client.create_ambiente().inserir(grupo_l3, ambiente_logico, divisao_dc, link, filter_, 
+                                                 acl_path, ipv4_template, ipv6_template)
                 messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
                 
                 return redirect('environment.list')
@@ -253,6 +294,9 @@ def edit(request, id_environment):
         division_dc = client.create_divisao_dc().listar()
         group_l3 = client.create_grupo_l3().listar()
         filters = client.create_filter().list_all()
+        templates = get_templates(auth.get_user(), True)
+        ipv4 = templates["ipv4"]
+        ipv6 = templates["ipv6"]
         
         try:
             env = client.create_ambiente().buscar_por_id(id_environment)
@@ -267,8 +311,10 @@ def edit(request, id_environment):
                    "ambiente_logico": env.get("id_ambiente_logico"),
                    "grupol3": env.get("id_grupo_l3"),
                    "filter": env.get("id_filter"),
-                   "link": env.get("link")}
-        env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, initial=initial)
+                   "acl_path": env.get("acl_path"),
+                   "ipv4_template": env.get("ipv4_template"),
+                   "ipv6_template": env.get("ipv6_template")}
+        env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
         
         # Forms
         lists['ambiente'] = env_form
@@ -281,7 +327,10 @@ def edit(request, id_environment):
         if request.method == 'POST':
             
             # Set data in form
-            ambiente_form = AmbienteForm(env_logic, division_dc, group_l3, filters, request.POST)
+            ambiente_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6, request.POST)
+
+            # Return data to form in case of error
+            lists['ambiente'] = ambiente_form
             
             # Validate
             if ambiente_form.is_valid():
@@ -294,9 +343,17 @@ def edit(request, id_environment):
                 if str(filter_) == str(None):
                     filter_ = None
                 link = ambiente_form.cleaned_data['link']
+                acl_path = ambiente_form.cleaned_data['acl_path']
+                
+                ipv4_template = ambiente_form.cleaned_data['ipv4_template']
+                ipv4_template = ipv4_template if ipv4_template else None
+                
+                ipv6_template = ambiente_form.cleaned_data['ipv6_template']
+                ipv6_template = ipv6_template if ipv6_template else None
                 
                 # Business
-                client.create_ambiente().alterar(id_env, grupo_l3, ambiente_logico, divisao_dc, link, filter_)
+                client.create_ambiente().alterar(id_env, grupo_l3, ambiente_logico, divisao_dc, 
+                                                 link, filter_, acl_path, ipv4_template, ipv6_template)
                 messages.add_message(request, messages.SUCCESS, environment_messages.get("success_edit"))
                 
                 return redirect('environment.list')
@@ -308,7 +365,8 @@ def edit(request, id_environment):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        
+    
+    
     return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
 
 @log
@@ -357,9 +415,11 @@ def insert_grupo_l3(request):
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
-            
+            templates = get_templates(auth.get_user(), True)
+            ipv4 = templates["ipv4"]
+            ipv6 = templates["ipv6"]
             # Forms
-            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters)
+            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6)
             div_form = DivisaoDCForm()
             amb_form = AmbienteLogicoForm()
             action = reverse("environment.form")
@@ -375,7 +435,7 @@ def insert_grupo_l3(request):
                            "grupol3": env.get("id_grupo_l3"),
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
-                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, initial=initial)
+                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -443,9 +503,12 @@ def insert_divisao_dc(request):
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
-            
+            templates = get_templates(auth.get_user(), True)
+            ipv4 = templates["ipv4"]
+            ipv6 = templates["ipv6"]
+                        
             # Forms
-            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters)
+            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6)
             gro_form = Grupol3Form()
             amb_form = AmbienteLogicoForm()
             action = reverse("environment.form")
@@ -461,7 +524,7 @@ def insert_divisao_dc(request):
                            "grupol3": env.get("id_grupo_l3"),
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
-                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, initial=initial)
+                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -527,9 +590,12 @@ def insert_ambiente_logico(request):
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
-            
+            templates = get_templates(auth.get_user(), True)
+            ipv4 = templates["ipv4"]
+            ipv6 = templates["ipv6"]
+                        
             # Forms
-            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters)
+            env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6)
             div_form = DivisaoDCForm()
             gro_form = Grupol3Form()
             action = reverse("environment.form")
@@ -545,7 +611,7 @@ def insert_ambiente_logico(request):
                            "grupol3": env.get("id_grupo_l3"),
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
-                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, initial=initial)
+                env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])

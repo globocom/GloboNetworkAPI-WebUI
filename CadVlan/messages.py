@@ -196,6 +196,13 @@ acl_messages = {
     'success_validate':  u'ACL IP%s validado com sucesso.',
     'error_apply':     u'Não foi possível aplicar ACL a nenhum dos equipamentos selecionados.',
     'error_acl_not_exist': u'Acl não foi criada',
+    
+    'success_template_edit': u'Template alterado com sucesso.',
+    'success_template_edit': u'Template criado com sucesso.',
+    'field_required': u'Nome do template e Template são obrigatórios.',
+    'field_duplicated': u'O arquivo %s já existe.',
+    'invalid_template': u'Template inválido',
+    'success_remove': u'Todas os Templates selecionados foram excluídos com sucesso.',
 }
 
 request_vip_messages = {

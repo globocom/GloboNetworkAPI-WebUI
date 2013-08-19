@@ -42,17 +42,40 @@ class AmbienteLogicoForm(forms.Form):
     
 class AmbienteForm(forms.Form):
     
-    def __init__(self, env_logic, division_dc, group_l3, filters, *args, **kwargs):
+    def __init__(self, env_logic, division_dc, group_l3, filters, ipv4, ipv6, *args, **kwargs):
         super(AmbienteForm, self).__init__(*args, **kwargs)
         self.fields['divisao'].choices = [(div['id'], div['nome']) for div in division_dc["division_dc"]]
         self.fields['ambiente_logico'].choices = [(amb_log['id'], amb_log['nome']) for amb_log in env_logic["logical_environment"]]
         self.fields['grupol3'].choices = [(grupo['id'], grupo['nome']) for grupo in group_l3["group_l3"]]
         self.fields['filter'].choices = [(filter_['id'], filter_['name']) for filter_ in filters["filter"]]
         self.fields['filter'].choices.insert(0, (None,'--------'))
+        self.fields['ipv4_template'].choices = [(template['name'], template['name']) for template in ipv4]
+        self.fields['ipv4_template'].choices.insert(0, ('','--------'))
+        self.fields['ipv6_template'].choices = [(template['name'], template['name']) for template in ipv6]
+        self.fields['ipv6_template'].choices.insert(0, ('','--------'))
         
     id_env = forms.IntegerField(label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
     divisao = forms.ChoiceField(label="Divisão DC",choices=[(0, 'Selecione')] ,required=True,widget=forms.Select(attrs={'style': "width: 160px"}), error_messages=error_messages)
     ambiente_logico = forms.ChoiceField(label="Ambiente Lógico",required=True,choices=[(0, 'Selecione')] ,widget=forms.Select(attrs={'style': "width: 210px"}), error_messages=error_messages)
     grupol3 = forms.ChoiceField(label="Grupo Layer3",choices=[(0, 'Selecione')],required=True,widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
     filter = forms.ChoiceField(label="Filtro",choices=[(None, '--------')],required=False,widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
+    acl_path = forms.CharField(label=u'Path ACL', max_length=250, required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 280px", 'autocomplete': "off"}))
+    ipv4_template = forms.ChoiceField(label="Template ACL IPV4",choices=[('', '--------')],required=False,widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
+    ipv6_template = forms.ChoiceField(label="Template ACL IPV6",choices=[('', '--------')],required=False,widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
     link = forms.CharField(label=u'Link', max_length=200, required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 280px"}))
+
+    def clean_acl_path(self):
+        if check_regex(self.cleaned_data['acl_path'], r'^.*[\\\\:*?"<>|].*$'):
+            raise forms.ValidationError('Caracteres inválidos.')
+        
+        path = self.cleaned_data['acl_path']
+        try:
+            while path[0] == "/":
+                path = path[1:]
+            
+            while path[-1] == "/":
+                path = path[:-1]
+        except IndexError:
+            raise forms.ValidationError('Path inválido')
+        
+        return self.cleaned_data['acl_path']

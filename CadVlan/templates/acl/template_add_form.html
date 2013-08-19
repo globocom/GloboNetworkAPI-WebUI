@@ -1,0 +1,225 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Template - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	{% block tab_select %}
+		$("#page_tab_lists").tabs();
+	{% endblock tab_select %}
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url acl.template.list %}";
+	});
+	
+	$("#id_nome").keyup(function() {
+        var valor = $(this).val().replace(/[^a-zA-Z0-9- ]+/g,'');
+        $(this).val(valor);
+ 	}); 
+	
+	 $("#id_nome").mouseover(function() {
+    	 $("#id_nome").attr("title","Somente letras , números, ' ' (espaço) e o caracter '-' (hífen) são permitidos.");
+    });
+	 
+	 
+	$("#btn_suggest_v4").button().click(function() {
+		env_text = $("#id_environment").find(":selected").text();
+		env_val  = $("#id_environment").find(":selected").val();
+		
+		if (env_val == 0){
+			alert('Selecione um ambiente.');
+		}else{
+			env_text_array = env_text.split(' - ');
+			dividion_dc = $.trim(env_text_array[0])
+			logical_env = $.trim(env_text_array[1])
+			$("#id_name").val('ACL_PADRAO_V4_'+dividion_dc+'_'+logical_env+'.txt');
+		}
+	});
+	
+	$("#btn_suggest_v6").button().click(function() {
+		env_text = $("#id_environment").find(":selected").text();
+		env_val  = $("#id_environment").find(":selected").val();
+		
+		if (env_val == 0){
+			alert('Selecione um ambiente.');
+		}else{
+			env_text_array = env_text.split(' - ');
+			dividion_dc = $.trim(env_text_array[0])
+			logical_env = $.trim(env_text_array[1])
+			$("#id_name_ipv6").val('ACL_PADRAO_V6_'+dividion_dc+'_'+logical_env+'.txt');
+		}
+	});
+	 
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de template</a></li>
+	</ul>
+	
+	<div id="dialog-ip" title="Selecionar IP do Real Server">
+		<div id="ip-view">
+		</div>
+	</div>
+	
+	<div id="tabs-1">
+
+		<form id="add_form" method="post" action="{% url acl.template.add %}">
+		{% csrf_token %}
+	
+			<div id="fields" class="ui-widget-content">
+					
+					<div>
+						<div><label for="{{ form.environment.auto_id }}">{{ form.environment.label_tag }}{% if form.environment.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+						{{ form.environment }}
+						<p id="error">
+						{% if form.environment.errors %} 
+							{% for error in form.environment.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
+						</p>
+					</div>
+			
+			</div>
+			
+			<div class="separator spacer"></div>
+			
+			
+			<div id="page_tab_lists">
+				<ul>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-1" class="ipv4">IPv4</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-2" class="ipv6">IPv6</a></li>
+					
+				</ul>
+				
+				<div id="tabs-1">
+					<div id="fields" class="ui-widget-content">
+					
+						<div>
+							<div><label for="{{ form.name.field.auto_id }}">{{ form.name.label_tag }}{% if form.name.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+							{{ form.name }}
+							 
+							<button id="btn_suggest_v4" type="button">Sugerir nome do template</button>
+							
+							<p id="error">
+							{% if form.name.errors %} 
+								{% for error in form.name.errors %}
+									{{ error|escape }}
+								{% endfor %}
+							{% endif %}
+							</p>
+						</div>
+					
+						<div style="width:1200px;height:350px">
+							<div style="width:100px"><label for="{{ form.content.field.auto_id }}">{{ form.content.label_tag }}{% if form.content.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+							<div style="width:600px;float:left">
+								{{ form.content }}
+								<p id="error">
+								{% if form.content.errors %} 
+									{% for error in form.content.errors %}
+										{{ error|escape }}
+									{% endfor %}
+								{% endif %}
+								</p>
+							</div>
+							<div style="float:left;width:570px;height:350px;margin-left:20px">
+								<label for="id_acl">
+									Dicionário
+								</label>
+								<p>
+									<br>
+									%ACL => Nome da ACL <br>
+									%NUMERO => Número da Vlan <br>
+									%REDE => Ip da Rede <br>
+									%BLOCO => Quantidade de Bits da Rede <br>
+									%WMASC => Máscara de Rede <br>
+									%ESPECIAL1 => Especial 1 <br>
+									%ESPECIAL2 => Especial 2 <br>
+								</p>
+							</div>
+						</div>
+						
+					</div>
+					
+				</div>
+				
+				<div id="tabs-2">
+					<div id="fields" class="ui-widget-content">
+						<div>
+							<div><label for="{{ form.name_ipv6.field.auto_id }}">{{ form.name_ipv6.label_tag }}{% if form.name_ipv6.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+							{{ form.name_ipv6 }}
+							
+							<button id="btn_suggest_v6" type="button">Sugerir nome do template</button>
+							
+							<p id="error">
+							{% if form.name_ipv6.errors %} 
+								{% for error in form.name_ipv6.errors %}
+									{{ error|escape }}
+								{% endfor %}
+							{% endif %}
+							</p>
+						</div>
+					
+					
+						<div style="width:1200px;height:350px">
+							<div style="width:100px"><label for="{{ form.content_ipv6.field.auto_id }}">{{ form.content_ipv6.label_tag }}{% if form.content_ipv6.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+							<div style="width:600px;float:left">
+								{{ form.content_ipv6 }}
+								<p id="error">
+								{% if form.content_ipv6.errors %} 
+									{% for error in form.content_ipv6.errors %}
+										{{ error|escape }}
+									{% endfor %}
+								{% endif %}
+								</p>
+							</div>
+							
+							<div style="float:left;width:570px;height:350px;margin-left:20px">
+								<label for="id_acl">
+									Dicionário
+								</label>
+								<p>
+									<br>
+									%ACL => Nome da ACL <br>
+									%NUMERO => Número da Vlan <br>
+									%REDE => Ip da Rede <br>
+									%BLOCO => Quantidade de Bits da Rede <br>
+									%WMASC => Máscara de Rede <br>
+									%ESPECIAL1 => Especial 1 <br>
+									%ESPECIAL2 => Especial 2 <br>
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+					
+			</div>
+				
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+						
+		</form>
+	</div>	
+		
+</div>
+
+{% endblock %}

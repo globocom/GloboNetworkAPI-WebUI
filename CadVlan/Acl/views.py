@@ -5,25 +5,31 @@ Author: masilva / S2it
 Copyright: ( c )  2012 globo.com todos os direitos reservados.
 '''
 
-from CadVlan.Acl.acl import alterAclCvs, deleteAclCvs, getAclCvs, createAclCvs, scriptAclCvs, script_template, applyAcl
-from CadVlan.Acl.forms import AclForm
+from CadVlan.Acl.acl import alterAclCvs, deleteAclCvs, getAclCvs, createAclCvs, scriptAclCvs, script_template, applyAcl,\
+    PATH_ACL_TEMPLATES, get_templates, get_template_edit, alter_template,\
+    create_template, check_template, delete_template
+from CadVlan.Acl.forms import AclForm, TemplateForm, TemplateAddForm
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.Util.converters.util import split_to_array, replace_id_to_name
-from CadVlan.Util.cvs import CVSError
-from CadVlan.Util.utility import validates_dict, clone, acl_key
+from CadVlan.Util.cvs import CVSError, Cvs
+from CadVlan.Util.utility import validates_dict, clone, acl_key, IP_VERSION
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import acl_messages, error_messages
 from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT
-from CadVlan.templates import ACL_FORM, ACL_APPLY_LIST, ACL_APPLY_RESULT
+from CadVlan.templates import ACL_FORM, ACL_APPLY_LIST, ACL_APPLY_RESULT,\
+    ACL_TEMPLATE, ACL_TEMPLATE_EDIT_FORM,\
+    ACL_TEMPLATE_ADD_FORM
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError
 import logging
+from CadVlan.settings import PATH_ACL
+import urllib
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +113,12 @@ def script(request, id_vlan, network):
             messages.add_message(request, messages.ERROR, acl_messages.get("error_acl_not_exist"))
             return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
         
-        scriptAclCvs(vlan.get(key_acl), vlan, environment, network, AuthSession(request.session).get_user())
+        if network == NETWORK_TYPES.v4:
+            template_name = environment['ipv4_template']
+        else:
+            template_name = environment['ipv6_template']
+        
+        scriptAclCvs(vlan.get(key_acl), vlan, environment, network, AuthSession(request.session).get_user(), template_name)
         
     except (NetworkAPIClientError, CVSError, ValueError), e:
         logger.error(e)
@@ -135,6 +146,11 @@ def edit(request, id_vlan, network):
         vlan = client.create_vlan().get(id_vlan).get("vlan")
         environment =  client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
         
+        if network == NETWORK_TYPES.v4:
+            template_name = environment['ipv4_template']
+        else:
+            template_name = environment['ipv6_template']
+            
         key_acl =  acl_key(network)
         
         if vlan.get(key_acl) is None:
@@ -172,7 +188,7 @@ def edit(request, id_vlan, network):
             lists['form'] = AclForm(initial={'acl':content, 'comments': ''})
             
             if content is None or content == "":
-                lists['script'] = script_template(environment.get("nome_ambiente_logico"), environment.get("nome_divisao"), environment.get("nome_grupo_l3"))
+                lists['script'] = script_template(environment.get("nome_ambiente_logico"), environment.get("nome_divisao"), environment.get("nome_grupo_l3"), template_name)
                 
         list_ips = []
         if len(vlan["redeipv4"]) > 0 and network == NETWORK_TYPES.v4:
@@ -358,3 +374,190 @@ def validate(request, id_vlan, network):
         messages.add_message(request, messages.ERROR, e)
 
     return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+
+""" --- TEMPLATES --- """
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}])
+def template_list(request):
+    try:
+        
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        lists = dict()
+
+        # Get user
+        user = AuthSession(request.session).get_user()
+        
+        templates = get_templates(user)
+        lists['templates'] = list()
+        lists["delete_form"] = DeleteForm()
+        
+        for template in templates:
+            envs = client.create_ambiente().get_environment_template(template['name'], template['network'])
+            if envs:
+                envs = envs['ambiente'] if not isinstance(envs['ambiente'], unicode) else [envs['ambiente'], ]  
+            lists['templates'].append({'name': template['name'], 'network': template['network'], 'envs': envs})
+            
+    
+    except (NetworkAPIClientError, CVSError, ValueError), e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)  
+    
+    return render_to_response(ACL_TEMPLATE, lists, context_instance=RequestContext(request))    
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def template_add(request):
+    
+    try:
+        
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        # Get user
+        user = AuthSession(request.session).get_user()
+
+        environment = client.create_ambiente().list_all()
+                
+        lists = dict()
+        
+        lists['form'] = TemplateAddForm(environment)
+        
+        if request.method == 'POST':
+            
+            form = TemplateAddForm(environment, request.POST)
+
+            lists['form'] = form
+            
+            name_ipv4    = request.POST['name']
+            content_ipv4 = request.POST['content']
+            name_ipv6    = request.POST['name_ipv6']
+            content_ipv6 = request.POST['content_ipv6']
+            environment  = request.POST['environment']
+            
+            if form.is_valid() and __valid_add_form(request, name_ipv4, content_ipv4, name_ipv6, content_ipv6):
+
+                duplicate = False
+                                
+                if name_ipv4 and content_ipv4:
+                    if check_template(name_ipv4, IP_VERSION.IPv4[1], user):
+                        duplicate = True
+                        messages.add_message(request, messages.ERROR, acl_messages.get("field_duplicated") % name_ipv4)
+                    else:
+                        create_template(name_ipv4, IP_VERSION.IPv4[1], content_ipv4, user)
+                        
+                        if int(environment) != 0:
+                            client.create_ambiente().set_template(environment, name_ipv4, IP_VERSION.IPv4[1])
+                
+                if name_ipv6 and content_ipv6:
+                    if check_template(name_ipv6, IP_VERSION.IPv6[1], user):
+                        duplicate = True
+                        messages.add_message(request, messages.ERROR, acl_messages.get("field_duplicated") % name_ipv6)
+                    else:
+                        create_template(name_ipv6, IP_VERSION.IPv6[1], content_ipv6, user)
+                        
+                        if int(environment) != 0:
+                            client.create_ambiente().set_template(environment, name_ipv6, IP_VERSION.IPv6[1])
+                
+                if not duplicate:
+                    messages.add_message(request, messages.SUCCESS, acl_messages.get("success_template_edit"))
+                    return redirect('acl.template.list')
+            
+    except (NetworkAPIClientError, CVSError, ValueError), e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+            
+    return render_to_response(ACL_TEMPLATE_ADD_FORM, lists, context_instance=RequestContext(request))
+
+def __valid_add_form(request, name_ipv4, content_ipv4, name_ipv6, content_ipv6):
+    
+    if not name_ipv4 and not content_ipv4 and not name_ipv6 and not content_ipv6:
+        messages.add_message(request, messages.ERROR, acl_messages.get('field_required'))
+        return False 
+    elif (not name_ipv4 and content_ipv4) or (name_ipv4 and not content_ipv4):
+        messages.add_message(request, messages.ERROR, acl_messages.get('field_required'))
+        return False
+    elif (not name_ipv6 and content_ipv6) or (name_ipv6 and not content_ipv6):
+        messages.add_message(request, messages.ERROR, acl_messages.get('field_required'))
+        return False  
+    
+    return True
+    
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}])
+def template_edit(request, template_name, network):
+    
+    try:
+        
+        # Get user
+        user = AuthSession(request.session).get_user()
+        
+        lists = dict()
+        
+        lists['template_name'] = template_name
+        lists['network'] = network
+        
+        if check_template(template_name, network, user):
+            content = get_template_edit(template_name, network, user)
+        else:
+            messages.add_message(request, messages.ERROR, acl_messages.get("invalid_template"))
+            return redirect('acl.template.list')
+        
+        lists['form'] = TemplateForm(True, initial={'name':template_name, 'content':content})
+        
+        if request.method == 'POST':
+            form = TemplateForm(True, request.POST)
+            lists['form'] = form
+            
+            if form.is_valid():
+                alter_template(template_name, network, form.cleaned_data['content'], user)
+                
+                messages.add_message(request, messages.SUCCESS, acl_messages.get("success_template_edit"))
+                
+                return redirect('acl.template.list')
+    except (NetworkAPIClientError, CVSError, ValueError), e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+            
+    return render_to_response(ACL_TEMPLATE_EDIT_FORM, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}])
+def template_delete(request):
+     
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    
+    if request.method == 'POST':
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+            
+            # Get user
+            user = AuthSession(request.session).get_user()
+
+            # All ids to be deleted
+            ids = split_to_array(form.cleaned_data['ids'])
+            
+            for id in ids:
+                id_split = id.split('+')
+                template_name = id_split[0]
+                template_name = urllib.unquote_plus(str(template_name))
+                network = id_split[1]
+                
+                if check_template(template_name, network, user):
+                    client.create_ambiente().set_template(0, template_name, network)
+                    delete_template(template_name, network, user)
+            
+            messages.add_message(request, messages.SUCCESS, acl_messages.get("success_remove"))
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            
+    return HttpResponseRedirect(reverse('acl.template.list'))            

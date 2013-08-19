@@ -13,6 +13,9 @@ import logging
 import os
 from time import strftime
 import commands
+from os import listdir
+from os.path import isfile, join
+from CadVlan.Util.utility import IP_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +36,7 @@ PREFIX_TEMPLATES = "ACL_PADRAO_"
 hexa = lambda x: hex(x)[2:]
 
 
-def mkdir_divison_dc(divison_dc, user):
+def mkdir_divison_dc(divison_dc, user, acl_path=None):
     '''Creates the directory division dc in cvs
     
     @param divison_dc: division dc to be created
@@ -43,13 +46,17 @@ def mkdir_divison_dc(divison_dc, user):
     '''
     try:
         
-        
         divison_dc = str(divison_dc).upper()
         
         os.chdir(PATH_ACL)
         
         if divison_dc ==  DIVISON_DC.BORDA:
             divison_dc = "Borda"
+        
+        directory = divison_dc
+        
+        if acl_path:
+            directory = acl_path
         
         Cvs.synchronization()
         
@@ -61,45 +68,55 @@ def mkdir_divison_dc(divison_dc, user):
         for path in list_path:
 
             os.chdir(path)
-            if not os.path.exists(divison_dc):
-                
-                os.mkdir(divison_dc)
-                
-                Cvs.add(divison_dc)
-                
-                Cvs.commit(divison_dc, "Criação do diretório de divisão dc %s/%s pelo usuário: %s" % ( path, divison_dc, user.get_username()))
-                
-                logger.info("%s criou no CVS o diretório: %s/%s" % (user.get_username(), path, divison_dc) )
+
+            folders = directory.split("/")
+            
+            for folder in folders:
+                if folder:
+                    if not os.path.exists(folder):
+                        os.mkdir(folder)
+                        Cvs.add(folder)
+                        Cvs.commit(folder, "Criação do diretório de divisão dc %s/%s pelo usuário: %s" % ( path, folder, user.get_username()))
+                        logger.info("%s criou no CVS o diretório: %s/%s" % (user.get_username(), path, folder) )
+                        Cvs.synchronization()
+            
+                    path = "%s/%s" % (path, folder)
+                    os.chdir(path)
+
         
     except Exception, e:
-        logger.error("Erro quando o usuário %s tentou criar o diretório: %s no Cvs" % (user.get_username(), divison_dc))
+        logger.error("Erro quando o usuário %s tentou criar o diretório: %s no Cvs" % (user.get_username(), dir))
         logger.error(e)
         raise CVSCommandError(e)
 
-def script_template(environment_logical, divison_dc, group_l3):
+def script_template(environment_logical, divison_dc, group_l3, template_name):
     '''Validates that can use a script to create the ACL.
     
     @param environment_logical: environment logical
     @param divison_dc: divison dc
     @param group_l3: group l3
+    @param template_name: Template name
     '''
     script = False
     
-    if divison_dc == DIVISON_DC.FE:
+    if template_name:
+        script = True
+    else:
+        if divison_dc == DIVISON_DC.FE:
+            
+            if environment_logical == ENVIRONMENT_LOGICAL.APLICATIVOS or environment_logical == ENVIRONMENT_LOGICAL.PORTAL or environment_logical == ENVIRONMENT_LOGICAL.HOMOLOGACAO:
+                
+                if group_l3 == "CORE/DENSIDADE":
+                    
+                    script = True
+                    
+        elif divison_dc == DIVISON_DC.BE:
         
-        if environment_logical == ENVIRONMENT_LOGICAL.APLICATIVOS or environment_logical == ENVIRONMENT_LOGICAL.PORTAL or environment_logical == ENVIRONMENT_LOGICAL.HOMOLOGACAO:
-            
-            if group_l3 == "CORE/DENSIDADE":
+            if environment_logical == ENVIRONMENT_LOGICAL.PRODUCAO or environment_logical == ENVIRONMENT_LOGICAL.HOMOLOGACAO:
                 
-                script = True
-                
-    elif divison_dc == DIVISON_DC.BE:
-    
-        if environment_logical == ENVIRONMENT_LOGICAL.PRODUCAO or environment_logical == ENVIRONMENT_LOGICAL.HOMOLOGACAO:
-            
-            if group_l3 == "CORE/DENSIDADE":
-                
-                script = True
+                if group_l3 == "CORE/DENSIDADE":
+                    
+                    script = True
                 
     return script
     
@@ -158,7 +175,7 @@ def check_name_file_bkp(acl_file_name):
         
     return acl + "_bkp_" + strftime("%Y%m%d%H%M%S") + EXTENTION_FILE
 
-def path_acl(environment_logical, divison_dc):
+def path_acl(environment_logical, divison_dc, acl_path=None):
     '''Creates the path depending on the parameters of environment 
     
     @param environment_logical: environment logical
@@ -193,6 +210,9 @@ def path_acl(environment_logical, divison_dc):
     if path ==  DIVISON_DC.BORDA:
         path = "Borda"
     
+    if acl_path:
+        path = acl_path
+    
     return path
 
 def replace_to_correct(value):
@@ -214,9 +234,10 @@ def checkAclCvs(acl_file_name, environment, network, user):
         
         acl = check_name_file(acl_file_name)
         
-        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
+        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"], 
+                        environment["acl_path"])
         
-        mkdir_divison_dc(environment["nome_divisao"], user)
+        mkdir_divison_dc(environment["nome_divisao"], user, environment["acl_path"])
         
         chdir(PATH_TYPES.ACL, network, path)
         
@@ -248,9 +269,10 @@ def getAclCvs(acl_file_name, environment, network, user):
         
         acl = check_name_file(acl_file_name)
         
-        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
+        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"], 
+                        environment["acl_path"])
         
-        mkdir_divison_dc(environment["nome_divisao"], user)
+        mkdir_divison_dc(environment["nome_divisao"], user, environment["acl_path"])
         
         chdir(PATH_TYPES.ACL, network, path)
         
@@ -281,7 +303,8 @@ def alterAclCvs(acl_name, acl_content, environment,comment,  network, user):
         
         acl = check_name_file(acl_name)
         
-        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
+        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"], 
+                        environment["acl_path"])
         
         chdir(PATH_TYPES.ACL, network, path)
             
@@ -312,9 +335,10 @@ def createAclCvs(acl_name, environment, network, user):
         
         acl = check_name_file(acl_name)
         
-        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
+        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"], 
+                        environment["acl_path"])
         
-        mkdir_divison_dc(environment["nome_divisao"], user)
+        mkdir_divison_dc(environment["nome_divisao"], user, environment["acl_path"])
         
         chdir(PATH_TYPES.ACL, network, path)
         
@@ -347,7 +371,8 @@ def deleteAclCvs(acl_name, environment, network, user):
         
         acl = check_name_file(acl_name)
         
-        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
+        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"], 
+                        environment["acl_path"])
         
         chdir(PATH_TYPES.ACL, network, path)
         
@@ -402,7 +427,8 @@ def applyAcl(equipments, vlan, environment, network, user):
         
         acl = check_name_file(vlan[key_acl])
         
-        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"])
+        path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"], 
+                        environment["acl_path"])
         
         if path ==  DIVISON_DC.BORDA:
             path = "Borda"
@@ -433,7 +459,7 @@ def applyAcl(equipments, vlan, environment, network, user):
         logger.error(e)
         raise Exception(e)
 
-def scriptAclCvs(acl_name, vlan, environment, network, user):
+def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
     '''Generates the acl based on a template
     
     @param acl_name: acl name
@@ -441,6 +467,7 @@ def scriptAclCvs(acl_name, vlan, environment, network, user):
     @param environment: Environment
     @param network: v4 or v6
     @param user: user
+    @param temple_name: Template Name
     
     @raise CVSCommandError:  Failed to execute command
     '''
@@ -449,9 +476,11 @@ def scriptAclCvs(acl_name, vlan, environment, network, user):
         acl = check_name_file(acl_name)
         acl_name = check_name_file(acl_name, extention = False)
         
-        if ((environment["nome_divisao"] == "BE") and (environment["nome_ambiente_logico"] == "PRODUCAO") and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
+        if template_name:
             
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.BE)
+            path_env = environment['acl_path'] if environment['acl_path'] else environment['nome_divisao']  
+                
+            chdir(PATH_TYPES.ACL, network, path_env)
             
             Cvs.synchronization()
             
@@ -459,13 +488,13 @@ def scriptAclCvs(acl_name, vlan, environment, network, user):
             
             chdir(PATH_TYPES.TEMPLATE, network)
             
-            file_template = open(PREFIX_TEMPLATES + TEMPLATES.BE + EXTENTION_FILE, "r")
+            file_template = open(template_name, "r")
             
             content_template = file_template.read()
             
             nova_acl = replace_template(acl_name, vlan, content_template, network)
             
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.BE)
+            chdir(PATH_TYPES.ACL, network, path_env)
             
             arquivo.write("%s" % nova_acl)
             arquivo.close()
@@ -475,113 +504,150 @@ def scriptAclCvs(acl_name, vlan, environment, network, user):
             
             logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl) )
             
-        if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.HOMOLOGACAO) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
+        else:
+            if ((environment["nome_divisao"] == "BE") and (environment["nome_ambiente_logico"] == "PRODUCAO") and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
+                
+                path_env = environment['acl_path'] if environment['acl_path'] else DIVISON_DC.BE  
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                Cvs.synchronization()
+                
+                arquivo = open("./%s" % acl , "w")
+                
+                chdir(PATH_TYPES.TEMPLATE, network)
+                
+                file_template = open(PREFIX_TEMPLATES + TEMPLATES.BE + EXTENTION_FILE, "r")
+                
+                content_template = file_template.read()
+                
+                nova_acl = replace_template(acl_name, vlan, content_template, network)
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                arquivo.write("%s" % nova_acl)
+                arquivo.close()
+                file_template.close()
+                
+                Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl ) )
+                
+                logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl) )
+                
+            if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.HOMOLOGACAO) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
+                
+                path_env = environment['acl_path'] if environment['acl_path'] else DIVISON_DC.DEV_QA_FE  
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                Cvs.synchronization()
+                
+                arquivo = open("./%s" % acl, "w")
+                
+                chdir(PATH_TYPES.TEMPLATE,  network)
+                
+                file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_DEV_QA + EXTENTION_FILE, "r")
+                
+                content_template = file_template.read()
+                
+                nova_acl = replace_template(acl_name, vlan, content_template, network)
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                arquivo.write("%s" % nova_acl)
+                arquivo.close()
+                file_template.close()
+                
+                Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl) )
+                
+                logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl ))
             
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.DEV_QA_FE)
+            if ((environment["nome_divisao"] ==  DIVISON_DC.FE ) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.PORTAL) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
+                
+                path_env = environment['acl_path'] if environment['acl_path'] else DIVISON_DC.FE  
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                Cvs.synchronization()
+                
+                arquivo = open("./%s" % acl, "w")
+                
+                chdir(PATH_TYPES.TEMPLATE, network)
+                
+                if "staging" in acl.lower():
+                    file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_STAGING + EXTENTION_FILE, "r")
+                else:
+                    file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_PORTAL + EXTENTION_FILE, "r")
+    
+                
+                content_template = file_template.read()
+                
+                nova_acl = replace_template(acl_name, vlan, content_template, network)
+    
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                arquivo.write("%s" % nova_acl)
+                arquivo.close()
+                file_template.close()
+                
+                Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl) )
+                
+                logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl) )
             
-            Cvs.synchronization()
+            if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.APLICATIVOS) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
+                
+                path_env = environment['acl_path'] if environment['acl_path'] else DIVISON_DC.FE  
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                Cvs.synchronization()
+                
+                arquivo = open("./%s" % acl, "w")
+                
+                chdir(PATH_TYPES.TEMPLATE, network)
+                
+                file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_APLICATIVOS + EXTENTION_FILE, "r")
+                
+                content_template = file_template.read()
+                
+                nova_acl = replace_template(acl_name, vlan, content_template, network)
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                arquivo.write("%s" % nova_acl)
+                arquivo.close()
+                file_template.close()
+                
+                Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl ) )
+                
+                logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl) )
             
-            arquivo = open("./%s" % acl, "w")
-            
-            chdir(PATH_TYPES.TEMPLATE,  network)
-            
-            file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_DEV_QA + EXTENTION_FILE, "r")
-            
-            content_template = file_template.read()
-            
-            nova_acl = replace_template(acl_name, vlan, content_template, network)
-            
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.DEV_QA_FE)
-            
-            arquivo.write("%s" % nova_acl)
-            arquivo.close()
-            file_template.close()
-            
-            Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl) )
-            
-            logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl ))
-        
-        if ((environment["nome_divisao"] ==  DIVISON_DC.FE ) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.PORTAL) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
-            
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.FE)
-            
-            Cvs.synchronization()
-            
-            arquivo = open("./%s" % acl, "w")
-            
-            chdir(PATH_TYPES.TEMPLATE, network)
-            
-            if "staging" in acl.lower():
-                file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_STAGING + EXTENTION_FILE, "r")
-            else:
-                file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_PORTAL + EXTENTION_FILE, "r")
-
-            
-            content_template = file_template.read()
-            
-            nova_acl = replace_template(acl_name, vlan, content_template, network)
-
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.FE)
-            
-            arquivo.write("%s" % nova_acl)
-            arquivo.close()
-            file_template.close()
-            
-            Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl) )
-            
-            logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl) )
-        
-        if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.APLICATIVOS) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
-            
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.FE)
-            
-            Cvs.synchronization()
-            
-            arquivo = open("./%s" % acl, "w")
-            
-            chdir(PATH_TYPES.TEMPLATE, network)
-            
-            file_template = open(PREFIX_TEMPLATES + TEMPLATES.FE_APLICATIVOS + EXTENTION_FILE, "r")
-            
-            content_template = file_template.read()
-            
-            nova_acl = replace_template(acl_name, vlan, content_template, network)
-            
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.FE)
-            
-            arquivo.write("%s" % nova_acl)
-            arquivo.close()
-            file_template.close()
-            
-            Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl ) )
-            
-            logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl) )
-        
-        if ((environment["nome_divisao"] == DIVISON_DC.BE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.HOMOLOGACAO) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
-            
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.DEV_QA)
-            
-            Cvs.synchronization()
-            
-            arquivo = open("./%s" % acl, "w")
-            
-            chdir(PATH_TYPES.TEMPLATE, network)
-            
-            file_template = open(PREFIX_TEMPLATES + TEMPLATES.BEHO + EXTENTION_FILE, "r")
-            
-            content_template = file_template.read()
-            
-            nova_acl = replace_template(acl_name, vlan, content_template, network)
-            
-            chdir(PATH_TYPES.ACL, network, DIVISON_DC.BE)
-            
-            arquivo.write("%s" % nova_acl)
-            arquivo.close()
-            file_template.close()
-            
-            Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl ) )
-            
-            logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl) )
+            if ((environment["nome_divisao"] == DIVISON_DC.BE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.HOMOLOGACAO) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
+                
+                path_env = environment['acl_path'] if environment['acl_path'] else DIVISON_DC.DEV_QA  
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                Cvs.synchronization()
+                
+                arquivo = open("./%s" % acl, "w")
+                
+                chdir(PATH_TYPES.TEMPLATE, network)
+                
+                file_template = open(PREFIX_TEMPLATES + TEMPLATES.BEHO + EXTENTION_FILE, "r")
+                
+                content_template = file_template.read()
+                
+                nova_acl = replace_template(acl_name, vlan, content_template, network)
+                
+                chdir(PATH_TYPES.ACL, network, path_env)
+                
+                arquivo.write("%s" % nova_acl)
+                arquivo.close()
+                file_template.close()
+                
+                Cvs.commit(acl, "%s gerou Script para a acl %s" % ( user.get_username(), acl ) )
+                
+                logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), acl) )
         
     except (CVSCommandError, FileError, Exception), e:
         logger.error("Erro quando o usuário %s tentou gerar o arquivo: %s no Cvs" % (user.get_username(), acl) )
@@ -691,3 +757,208 @@ def block_ipv6(param, wmasc):
         param = '0000'
     
     return param
+
+def get_templates(user, return_as_dict=False):
+    """
+    Get acl templates for list
+    
+    @param user: Instance of current user
+    @param return_as_dict: If the method will return a dictionary or a list
+    
+    @return: list or dict of templates. 
+             list: [{'name': < template_name >, 'network': < template_network >},...]
+             dict: {
+                     "ipv4": [{'name': < template_name >, 'network': < template_network >},...],
+                     "ipv6": [{'name': < template_name >, 'network': < template_network >},...]
+                   }
+    
+    @raise CVSCommandError:  Failed to execute command
+    """
+    try:
+        os.chdir(PATH_ACL)
+            
+        Cvs.synchronization()
+    
+        templates = list()
+        path_v4 = "%s%s/%s" % ( PATH_ACL, IP_VERSION.IPv4[0], PATH_ACL_TEMPLATES )
+        path_v6 = "%s%s/%s" % ( PATH_ACL, IP_VERSION.IPv6[0], PATH_ACL_TEMPLATES )
+        
+        templates += [ {'name' : f, 'network' : IP_VERSION.IPv4[1]} for f in listdir(path_v4) if isfile(join(path_v4, f)) ]
+        if return_as_dict:
+            aux = {}
+            aux['ipv4'] = templates
+            templates = []
+            
+        templates += [ {'name' : f, 'network' : IP_VERSION.IPv6[1]} for f in listdir(path_v6) if isfile(join(path_v6, f)) ]
+        if return_as_dict:
+            aux['ipv6'] = templates
+            templates = []
+            templates = aux
+            
+        return templates
+    
+    except (CVSCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou sincronizar no Cvs" % (user.get_username()) )
+        logger.error(e)
+        raise CVSCommandError(e)
+    
+def get_template_edit(template_name, network, user):
+    '''Retrieves the contents of the file template.
+    
+    @param template_name: template name
+    @param network: IPv4 or IPv6
+    @param user: user
+    
+    @raise CVSCommandError:  Failed to execute command
+    '''
+
+    try:       
+        ip_version = IP_VERSION.IPv4[0] if network == IP_VERSION.IPv4[1] else IP_VERSION.IPv6[0]
+        path = "%s%s/%s%s" % ( PATH_ACL, ip_version, PATH_ACL_TEMPLATES, template_name)
+       
+        chdir(PATH_TYPES.TEMPLATE, ip_version, path)
+       
+        Cvs.synchronization()
+       
+        content = File.read(template_name)
+       
+        return content
+    
+    except (CVSCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou sincronizar no Cvs" % (user.get_username()) )
+        logger.error(e)
+        raise CVSCommandError(e)
+   
+def alter_template(template_name, network, content, user):
+    '''Change the contents of the file acl.
+    
+    @param template_name: template name
+    @param network: IPv4 or IPv6
+    @param content: content
+    @param user: user
+    
+    @raise CVSCommandError:  Failed to execute command
+    '''
+    
+    try:
+        ip_version = IP_VERSION.IPv4[0] if network == IP_VERSION.IPv4[1] else IP_VERSION.IPv6[0]
+        
+        path = "%s%s/%s%s" % ( PATH_ACL, ip_version, PATH_ACL_TEMPLATES, template_name)
+        
+        chdir(PATH_TYPES.TEMPLATE, ip_version, path)
+            
+        Cvs.synchronization()
+        
+        File.write(template_name, content)
+        
+        Cvs.commit(template_name, "%s alterou o arquivo %s" % ( user.get_username(), template_name))
+        
+        logger.info("%s alterou no CVS o arquivo: %s" % (user.get_username(), (path + template_name)) )
+    
+    except (CVSCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou atualizar o arquivo: %s no Cvs" % (user.get_username(), (path + template_name)))
+        logger.error(e)
+        raise CVSCommandError(e)     
+    
+def create_template(template_name, network, content, user):
+    '''Create the file template.
+    
+    @param template_name: template name
+    @param network: IPv4 or IPv6
+    @param content: content
+    @param user: user
+    
+    @raise CVSCommandError:  Failed to execute command
+    '''
+    try:
+        
+        ip_version = IP_VERSION.IPv4[0] if network == IP_VERSION.IPv4[1] else IP_VERSION.IPv6[0]
+        
+        path = "%s%s/%s%s" % ( PATH_ACL, ip_version, PATH_ACL_TEMPLATES, template_name)
+        
+        chdir(PATH_TYPES.TEMPLATE, ip_version, path)
+            
+        Cvs.synchronization()
+        
+        File.create(template_name)
+        
+        
+        Cvs.add(template_name)
+        
+        Cvs.commit(template_name, "Criação do Arquivo %s pelo usuário: %s" % ( template_name, user.get_username()))
+        
+        logger.info("%s criou no CVS o arquivo: %s" % (user.get_username(), (path + template_name)) )
+
+        alter_template(template_name, network, content, user)
+    
+    except (CVSCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou criar o arquivo: %s no Cvs" % (user.get_username(), (path + template_name)))
+        logger.error(e)
+        raise CVSCommandError(e)   
+    
+def check_template(template_name, network, user):
+    '''Validates if the file is created template.
+    
+    @param template_name: template name
+    @param network: IPv4 or IPv6
+    @param user: user
+    
+    @raise CVSCommandError:  Failed to execute command
+    
+    @return: True case created
+    '''
+    try:
+        
+        ip_version = IP_VERSION.IPv4[0] if network == IP_VERSION.IPv4[1] else IP_VERSION.IPv6[0]
+        
+        path = "%s%s/%s%s" % ( PATH_ACL, ip_version, PATH_ACL_TEMPLATES, template_name)
+        
+        chdir(PATH_TYPES.TEMPLATE, ip_version, path)
+            
+        Cvs.synchronization()
+        
+        File.read(template_name)
+        
+        return True
+    
+    except FileError, e:
+        return False
+    
+    except (CVSCommandError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou sincronizar no Cvs" % (user.get_username()) )
+        logger.error(e)
+        raise CVSCommandError(e)
+    
+def delete_template(template_name, network, user):
+    '''Delete template file
+    
+    @param template_name: template name
+    @param network: IPv4 or IPv6
+    @param user: user
+    
+    @raise CVSCommandError:  Failed to execute command
+    '''
+    try:
+        
+        ip_version = IP_VERSION.IPv4[0] if network == IP_VERSION.IPv4[1] else IP_VERSION.IPv6[0]
+        
+        path = "%s%s/%s%s" % ( PATH_ACL, ip_version, PATH_ACL_TEMPLATES, template_name)
+        
+        chdir(PATH_TYPES.TEMPLATE, ip_version, path)
+            
+        Cvs.synchronization()
+        
+        File.remove(template_name)
+        
+        Cvs.remove(template_name)
+        
+        Cvs.commit(template_name, "Exclusão do Arquivo %s pelo usuário:%s" % ( template_name, user.get_username()))
+        
+        Cvs.synchronization()
+        
+        logger.info("%s excluiu no CVS o arquivo: %s" % (user.get_username(), (path + template_name)) )
+        
+    except (CVSCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou excluiu o arquivo: %s no Cvs" % (user.get_username(), (path + template_name)))
+        logger.error(e)
+        raise CVSCommandError(e)

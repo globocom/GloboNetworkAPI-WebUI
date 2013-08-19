@@ -22,6 +22,8 @@ $(document).ready(function() {
 	$("#btn_sav_al").button({ icons: {primary: "ui-icon-plus"}, text: false });
 	$("#btn_sav_l3").button({ icons: {primary: "ui-icon-plus"}, text: false });
 	
+	autocomplete("{% url acl_path.autocomplete %}", true, "id_acl_path", false);
+	
 });
 </script>
 {% endblock %}

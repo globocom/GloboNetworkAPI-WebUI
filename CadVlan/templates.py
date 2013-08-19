@@ -137,6 +137,9 @@ USERGROUP_LIST = 'user-group/list.html'
 ACL_FORM = 'acl/form.html'
 ACL_APPLY_LIST = 'acl/apply.html'
 ACL_APPLY_RESULT = 'acl/result.html'
+ACL_TEMPLATE = 'acl/template_acl.html'
+ACL_TEMPLATE_ADD_FORM = 'acl/template_add_form.html'
+ACL_TEMPLATE_EDIT_FORM = 'acl/template_edit_form.html'
 
 # VipRequest 
 VIPREQUEST_SEARCH_LIST = 'vip-request/search-list.html'

@@ -98,6 +98,7 @@ urlpatterns += patterns('CadVlan.Environment.views',
     url('^environment/divisao-dc[/]?$', 'insert_divisao_dc', name='environment.insert.divisao.dc',),
     url('^environment/form[/]?$', 'insert_ambiente', name='environment.form',),
     url('^environment/form/(?P<id_environment>\d+)[/]?$', 'edit', name='environment.edit',),
+    url('^environment/acl_paths[/]$', 'ajax_autocomplete_acl_path', name='acl_path.autocomplete',),
 )
 
 # URL's Vlans
@@ -217,6 +218,11 @@ urlpatterns += patterns('CadVlan.Acl.views',
     url('^acl/script/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'script', name='acl.script',),
     url('^acl/apply/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'apply_acl', name='acl.apply',),
     url('^acl/validate/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$','validate',name='acl.validate',),
+    url('^acl/template[/]?$', 'template_list', name='acl.template.list',),
+    url('^acl/template/add/[/]?$', 'template_add', name='acl.template.add',),
+    url('^acl/template/edit/(?P<template_name>.+)/(?P<network>IPv4|IPv6)[/]?$', 'template_edit', name='acl.template.edit',),
+    url('^acl/template/delete[/]?$','template_delete', name='acl.template.delete',),
+    
 )
 
 # URL's Vip Requests
