@@ -86,6 +86,10 @@ urlpatterns += patterns('CadVlan.Equipment.views',
     url('^equipment/modelo-form[/]?$', 'modelo_form', name='equipment.modelo.form',),
     url('^equipment/marca-form[/]?$', 'marca_form', name='equipment.marca.form',),
     url('^equipment/delete[/]?$','delete_all', name='equipment.delete',),
+    url('^equipment/ajax_view/(?P<id_equip>\d+)[/]?$', 'ajax_view_real', name='equip.view.real',),
+    url('^equipment/ajax_remove_real/(?P<id_vip>\d+)[/]?$', 'ajax_remove_real', name='equip.remove.real',),
+    url('^equipment/delete_equipment/(?P<id_equip>\d+)[/]?$', 'delete_equipment', name='equip.delete.id',),
+    url('^equipment/ajax_check_real/(?P<id_vip>\d+)[/]?$', 'ajax_check_real', name='equip.check.real',),
     
 )
 

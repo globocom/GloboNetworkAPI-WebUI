@@ -14,8 +14,8 @@ REGEX_TEXT = r"^[0-9a-zA-Z\\-_\\\-\\ ]*$"
 class OptionVipForm(forms.Form):
 
     id_option = forms.IntegerField(label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
-    name_option = forms.CharField  (label=u'Nome', min_length=3, max_length=50 , required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    type_option = forms.CharField  (label=u'Tipo', min_length=3, max_length=50,  required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
+    name_option = forms.CharField  (label=u'Nome', max_length=50 , required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
+    type_option = forms.CharField  (label=u'Tipo', max_length=50,  required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
 
     def clean_name_option(self):
         if not check_regex(self.cleaned_data['name_option'], REGEX_TEXT):

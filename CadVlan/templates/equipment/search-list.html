@@ -157,6 +157,21 @@ $(document).ready(function() {
 		location.reload();
 	});
 	
+	
+	$("#btn_search_reals").live("click", function(e) {
+		
+		url = $(this).attr('url_equipment');
+		$.ajax({
+			url: url,
+			success: function(data) {
+				$("#equip-view").html(data);
+				$("#dialog-real").dialog("open");
+				$('.ui-dialog :button').blur();
+			}
+		});
+	});
+	
+	
 })
 </script>
 <style>
@@ -180,6 +195,12 @@ input {
 
 {% block content %}
 <div id="page_tab">
+
+	<div id="dialog-real" title="Reals do equipamento">
+		<div id="equip-view">
+		</div>
+	</div>
+	
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Equipamentos</a></li>
 	</ul>

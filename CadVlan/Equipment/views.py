@@ -7,13 +7,15 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
-from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT, BRAND_MANAGEMENT
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT, BRAND_MANAGEMENT,\
+    VIP_ALTER_SCRIPT
 from networkapiclient.exception import NetworkAPIClientError, EquipamentoError, UserNotAuthorizedError
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Equipment.business import cache_list_equipment
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO, EQUIPMENT_EDIT, EQUIPMENT_MARCAMODELO_FORM, EQUIPMENT_MARCA
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO, EQUIPMENT_EDIT, EQUIPMENT_MARCAMODELO_FORM, EQUIPMENT_MARCA,\
+    EQUIPMENT_VIEW_AJAX
 from django.template.context import RequestContext
 from CadVlan.forms import DeleteForm
 from CadVlan.Equipment.forms import SearchEquipmentForm, EquipForm, MarcaForm, ModeloForm
@@ -23,10 +25,152 @@ from django.http import HttpResponseServerError, HttpResponse
 from django.shortcuts import render_to_response, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.template import loader
-from CadVlan.messages import equip_messages, error_messages
+from CadVlan.messages import equip_messages, error_messages,\
+    request_vip_messages
 from CadVlan.Util.converters.util import split_to_array
+import json
 
 logger = logging.getLogger(__name__)
+
+@log
+@login_required
+def ajax_check_real(request, id_vip):
+
+    try:
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        # Get reals related
+        vip = client.create_vip().get_by_id(id_vip).get("vip")        
+        reals = [vip.get('reals')['real'],] if type(vip.get('reals')['real']) is dict else vip.get('reals')['real']
+        
+        response_data = {}
+        response_data['count'] = len(reals)
+            
+        return HttpResponse(json.dumps(response_data), content_type="application/json")
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        return HttpResponse(json.dumps(e), content_type="application/json")
+        
+
+@log
+@login_required
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "write": True},])
+def ajax_view_real(request, id_equip):
+    
+    lists= dict()
+    return ajax_view_real_shared(request, id_equip, lists)
+    
+
+def ajax_view_real_shared(request, id_equip, lists):
+    
+    try:
+        
+        lists['equip_id'] = id_equip
+        
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        # Get reals related
+        vips_reals = client.create_equipamento().get_real_related(id_equip)
+        lists['vips'] = [vips_reals.get('vips'),] if type(vips_reals.get('vips')) is dict else vips_reals.get('vips')
+        lists['equip_name'] = vips_reals.get('equip_name')
+        
+        # Returns HTML
+        response = HttpResponse(loader.render_to_string(EQUIPMENT_VIEW_AJAX, lists, context_instance=RequestContext(request)))
+        response.status_code = 200
+        return response
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+         
+    # Returns HTML
+    response = HttpResponse(loader.render_to_string(EQUIPMENT_VIEW_AJAX, lists, context_instance=RequestContext(request)))
+    # Send response status with error
+    response.status_code = 412
+    return response  
+
+@log
+@login_required
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "write": True},])
+def ajax_remove_real(request, id_vip):
+    
+    try:
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        
+        lists = dict()
+        
+        ip        = request.GET['ip']
+        port_vip  = request.GET['port_vip']
+        port_real = request.GET['port_real']
+        equip_id  = request.GET['equip_id']
+        real_name = request.GET['real_name']
+    
+        # Remove all reals related
+        if id_vip == '0':
+            vips_reals = client.create_equipamento().get_real_related(equip_id).get('vips')
+            vips_reals = [vips_reals,] if type(vips_reals) is dict else vips_reals
+            vip_ids = list()
+            for vip in vips_reals:
+                vip_ids.append(vip['id_vip'])
+            
+            vip_ids = set(vip_ids)
+            
+            for id in vip_ids:
+                lists = remove_reals_from_equip(client, id, lists, ip, port_vip, port_real, real_name, True)
+            
+        else:
+            lists = remove_reals_from_equip(client, id_vip, lists, ip, port_vip, port_real, real_name)
+        
+        return ajax_view_real_shared(request, equip_id, lists)
+    
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+def remove_reals_from_equip(client, id_vip, lists, ip = '', port_vip = '', port_real = '', real_name = '', remove_all = False):
+    try:
+        vip = client.create_vip().get_by_id(id_vip).get("vip")        
+    
+        reals    = [vip.get('reals')['real'],] if type(vip.get('reals')['real']) is dict else vip.get('reals')['real']
+        priority = [vip.get('reals_prioritys')['reals_priority'],] if type(vip.get('reals_prioritys')['reals_priority']) is unicode else vip.get('reals_prioritys')['reals_priority']
+        weight   = [vip.get('reals_weights')['reals_weight'],] if type(vip.get('reals_weights')['reals_weight']) is unicode else vip.get('reals_weights')['reals_weight']
+        
+        index_to_remove = list()
+        
+        if remove_all:
+            for i in range(len(reals)):
+                if reals[i]['real_name'] == real_name:
+                    index_to_remove.append(i)
+        else:
+            for i in range(len(reals)):
+                if reals[i]['real_ip'] == ip and reals[i]['port_vip'] == port_vip and reals[i]['port_real'] == port_real and reals[i]['real_name'] == real_name:
+                    index_to_remove.append(i)
+        
+        for index in reversed(index_to_remove):
+            del reals[index]
+            del priority[index]
+            del weight[index]
+            
+        
+        client.create_vip().edit_reals(id_vip, 'method_bal', reals, priority, weight, 0)
+        
+        lists['message'] = request_vip_messages.get('real_remove')
+        lists['msg_type'] = 'success'
+    
+    except Exception, e:
+        lists['msg_type'] = 'error'
+        lists['message'] = e
+    
+    
+    return lists
 
 @log
 @login_required
@@ -652,12 +796,14 @@ def modelo_form(request):
         messages.add_message(request, messages.ERROR, e)
         
     return render_to_response(EQUIPMENT_MARCAMODELO_FORM,lists,context_instance=RequestContext(request))
+    
+
         
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
 def delete_all(request):
-
+    
     if request.method == 'POST':
 
         form = DeleteForm(request.POST)
@@ -670,52 +816,71 @@ def delete_all(request):
 
             # All ids to be deleted
             ids = split_to_array(form.cleaned_data['ids'])
-
-            # All messages to display
-            error_list = list()
-
-            # Control others exceptions
-            have_errors = False
-
-            # For each equip selected to remove
-            for id_equip in ids:
-                try:
-
-                    # Execute in NetworkAPI
-                    client_equip.remover(id_equip);
-                    
-                except EquipamentoError, e:
-                    error_list.append(id_equip)
-
-                except NetworkAPIClientError, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
-                    have_errors = True
-                    break
-
-            # If cant remove nothing
-            if len(error_list) == len(ids):
-                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
-
-            # If cant remove someones
-            elif len(error_list) > 0:
-                msg = ""
-                for id_error in error_list:
-                    msg = msg + id_error + ", "
-
-                msg = error_messages.get("can_not_remove") % msg[:-2]
-
-                messages.add_message(request, messages.WARNING, msg)
-
-            # If all has ben removed
-            elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, equip_messages.get("success_remove"))
-
-            else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
-
+            
+            delete_equipments_shared(request, client_equip, ids)
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    # Redirect to list_all action
+    return redirect('equipment.search.list')
+
+def delete_equipments_shared(request, client_equip, ids):
+    # All messages to display
+    error_list = list()
+
+    # Control others exceptions
+    have_errors = False
+
+    # For each equip selected to remove
+    for id_equip in ids:
+        try:
+
+            # Execute in NetworkAPI
+            client_equip.remover(id_equip);
+            
+        except EquipamentoError, e:
+            error_list.append(id_equip)
+
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            have_errors = True
+            break
+
+    # If cant remove nothing
+    if len(error_list) == len(ids):
+        messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+
+    # If cant remove someones
+    elif len(error_list) > 0:
+        msg = ""
+        for id_error in error_list:
+            msg = msg + id_error + ", "
+
+        msg = error_messages.get("can_not_remove") % msg[:-2]
+
+        messages.add_message(request, messages.WARNING, msg)
+
+    # If all has ben removed
+    elif have_errors == False:
+        messages.add_message(request, messages.SUCCESS, equip_messages.get("success_remove"))
+
+    else:
+        messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+def delete_equipment(request, id_equip):
+    """
+    Method called from modal of equipment's reals
+    """
+    
+    # Get user
+    auth = AuthSession(request.session)
+    client_equip = auth.get_clientFactory().create_equipamento()
+    
+    delete_equipments_shared(request, client_equip, [id_equip,])
 
     # Redirect to list_all action
     return redirect('equipment.search.list')

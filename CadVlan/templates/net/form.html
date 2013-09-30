@@ -124,7 +124,7 @@ $(document).ready(function() {
 		
 		if( id_vlan != '' && netipv4.val() != "" || netipv6.val() != ""){
 			$.ajax({
-				async: false,
+				//async: false,
 				data: { netipv4: netipv4.val(), netipv6: netipv6.val(), is_number : 0, id_vlan : id_vlan },
 				url: "{% url ajax.vlan.confirm %}",
 				dataType: 'text',

@@ -1,0 +1,142 @@
+{% load util %}
+
+<div id="page_tab_model">
+
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes do Equipamento: {{equip_name}}</a></li>
+	</ul>
+	<div id="tabs-1">
+	
+		{% if message %}
+		<table>
+			<tr>
+				<td class="ui-widget error-messages-view">
+					<div class="{% ifequal msg_type 'error' %} ui-state-error {% else %} ui-state-highlight success {% endifequal %} ui-corner-all">
+						{{ message }}
+					</div>
+				</td>
+			</tr>
+		</table>
+		{% endif %}
+	
+		<div>
+			
+			<table id="table_real_ips">
+				<thead>
+					<tr>
+						<th>ID do VIP</th>
+						<th>Nome do VIP (Host FQDN) </th>
+						<th>ip</th>
+						<th>Porta Vip</th>
+						<th>Porta Real</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+				{% for real in vips %}
+					<tr>
+						<td class="text_center">{{ real.id_vip }}</td>
+						<td class="text_center">{{ real.host_name }}</td>
+						<td class="text_center">{{ real.ip }}</td>
+						<td class="text_center">{{ real.port_vip }}</td>
+						<td class="text_center">{{ real.port_real }}</td>
+						{% has_perm VIP_ALTER_SCRIPT True True %}
+						{% if has_perm %}
+						<td class="text_center"><span class="ui-icon ui-icon-closethick" style="cursor: pointer;margin-left: 35%;" onclick="javascript:check_and_remove_real('{% url equip.remove.real real.id_vip %}', '{{real.ip}}', '{{real.port_vip}}', '{{real.port_real}}', '{% url equip.check.real real.id_vip %}');"></span></td>
+						{% endif %}
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#dialog-real").dialog({
+		height: 650,
+		width: 1000,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: false,
+		buttons: {
+			{% has_perm EQUIPMENT_MANAGEMENT True None %}
+			{% if has_perm and not vips|length %}
+			"Remover Equipamento": function() {
+				if (confirm('Deseja realmente excluir este equipamento?'))
+					window.location.href = '{% url equip.delete.id equip_id %}'; 
+			},
+			{% endif %}
+			{% has_perm VIP_ALTER_SCRIPT True True %}
+			{% if has_perm and vips|length%}
+			"Remover todos os Reals": function() {
+				check_and_remove_real('{% url equip.remove.real 0 %}', '', '', '', '')
+			},
+			{% endif %}
+			"Cancelar": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	oTableReals = $("#table_real_ips").dataTable({
+			"aaSorting": [],
+			"bJQueryUI": true,
+			"sPaginationType": "full_numbers",
+			"iDisplayLength": 25,
+			"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 2, 3, 4, 5 ] }]
+	});
+	
+	$("#page_tab_model").tabs();
+	$("#page_tab_lists").tabs();
+	
+})
+
+
+function check_and_remove_real(url, ip, port_vip, port_real, url_check){
+	// Check if real is the last of the vip request. If return = 1 
+	// call to user that is the last 'real', else just confirm the request.
+	// After check, remove all reals or just one real.
+	
+	if (url_check != ''){
+		msg = 'Deseja realmente remover este real?';
+		$.ajax({
+			url: url_check,
+			success: function(data){
+				if(data.count == 1)
+					msg = 'Você está removendo o único servidor do pool. Isto interromperá o funcionamento do VIP, continuar?';
+				remove_real(url, ip, port_vip, port_real, msg);					
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}
+		})
+	}
+	else{
+		msg = 'Deseja realmente remover todos os reals relacionados a esse equipamento? Isto poderá interromper o funcionamento do VIP, continuar?';
+		remove_real(url, ip, port_vip, port_real, msg);
+	}
+}
+
+function remove_real(url, ip, port_vip, port_real, msg){
+	if (confirm(msg)){
+		$.ajax({
+			data: {ip : ip, port_vip : port_vip, port_real : port_real, real_name : '{{equip_name}}', equip_id : '{{equip_id}}'},
+			url: url,
+			success: function(data) {
+				$("#equip-view").html(data);
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}	
+		});
+	}
+}
+
+
+
+
+</script>

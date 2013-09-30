@@ -74,6 +74,7 @@ EQUIPMENT_MARCA = 'equipment/marca.html'
 EQUIPMENT_MODELO_AJAX = 'ajax/select-modelo.html'
 EQUIPMENT_EDIT = 'equipment/equip-edit.html'
 EQUIPMENT_MARCAMODELO_FORM = 'equipment/marca-modelo-form.html'
+EQUIPMENT_VIEW_AJAX = 'equipment/view-real.html'
 
 #Vlans
 VLAN_SEARCH_LIST = 'vlan/search-list.html'

@@ -18,7 +18,7 @@ $(document).ready(function() {
 		id_environment = $.trim($("#id_environment").val())
 		if( number != "" && id_environment != ""){
 			$.ajax({
-				async: false,
+				//async: false,
 				data: { number: number, id_environment: id_environment, is_number : 1, id_vlan : false },
 				url: "{% url ajax.vlan.confirm %}",
 				dataType: 'text',

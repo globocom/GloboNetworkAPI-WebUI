@@ -1,3 +1,4 @@
+{% load util %}
 {
     "sEcho": {{ sEcho|escapejs }},
     "iTotalRecords": {{ iTotalRecords|escapejs }},
@@ -12,7 +13,7 @@
 		"<div class='text_center'>{% ifequal equip.is_more "True" %}<div class='expandable expandable_{{ equip.id|escapejs }}'>{% endifequal %}<table style='width: 100%;'>{% for ip in equip.ips %}<tr><td>{{ ip.ip|escapejs }}</td></tr>{% endfor %}</table></div>{% ifequal equip.is_more "True" %}<div class='expand' lang='{{ equip.id|escapejs }}'></div></div>{% endifequal %}</div>",
 		"<div class='text_center'>{% ifequal equip.is_more "True" %}<div class='expandable expandable_{{ equip.id|escapejs }}'>{% endifequal %}<table style='width: 100%;'>{% for ip in equip.ips %}<tr><td>{{ ip.vlan|escapejs }}</td></tr>{% endfor %}</table></div>{% ifequal equip.is_more "True" %}<div class='expand' lang='{{ equip.id|escapejs }}'></div></div>{% endifequal %}</div>",
 		"<div class='text_center'>{% ifequal equip.is_more "True" %}<div class='expandable expandable_{{ equip.id|escapejs }}'>{% endifequal %}<table style='width: 100%;'>{% for ip in equip.ips %}<tr><td>{{ ip.ambiente|escapejs }}</td></tr>{% endfor %}</table></div>{% ifequal equip.is_more "True" %}<div class='expand' lang='{{ equip.id|escapejs }}'></div></div>{% endifequal %}</div>",
-		"<div class='text_center'><a href='{% url equipment.edit.by.id equip.id %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a></div>"
+		"<div class='text_center'><a href='{% url equipment.edit.by.id equip.id %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a>{% has_perm VIPS_REQUEST True False %}{% if has_perm %}<a href='javascript:;' style='width: 20px; height: 20px;' id='btn_search_reals' url_equipment='{% url equip.view.real equip.id %}' class='btn_edit_create'>Visualizar Real</a>{%endif%}</div>"
 	]
     {% if not forloop.last %}
     ,
