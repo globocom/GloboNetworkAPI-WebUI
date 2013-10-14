@@ -626,12 +626,12 @@ def mount_table_reals(lists, id_equip, id_ip, weight, priority, equip, ip, ports
                         else:
                             reals.append({'priority': '' , 'weight': weight[i], 'id_equip': id_equip[i] , 'equip': equip[i], 'id_ip': id_ip[i] , 'ip': ip[i], 'ports_vip': ports_vip_reals[i], 'ports_real': ports_real_reals[i] })
 
-        if status is not None:
+        if status is not None and status != []:
             for i in range(0, len(reals)):
                 reals[i]['status'] = status[i]
 
-        if version is not None:
-            for i in range(0, len(reals)):
+        if version is not None and version != []:
+            for i in range(0, len(reals)):  
                 reals[i]['version'] = version[i]
         
         lists['reals'] = reals
@@ -1233,7 +1233,7 @@ def tab_real_server(request, id_vip):
 
             lists = mount_table_ports(lists, ports_vip, ports_real)
             
-            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip, True, False)
+            id_equip, id_ip, weight, priority, equip, ip, status, version = parse_real_server(request, vip, client_api, id_vip, environment_vip, False, False)
                 
             port_vip_list = list()
             port_real_list = list()
