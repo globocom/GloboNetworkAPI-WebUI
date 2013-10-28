@@ -17,7 +17,7 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
-CADVLAN_VERSION = 8.1
+CADVLAN_VERSION = 9
 
 MANAGERS = ADMINS
 
@@ -152,6 +152,7 @@ INSTALLED_APPS = (
     'CadVlan.HealthcheckExpect',
     'CadVlan.Ldap',
     'CadVlan.EventLog',
+    'CadVlan.BlockRules',
     
 )
 
@@ -316,5 +317,8 @@ LOGGING = {
         'CadVlan.Vlan': {
             'handlers': ['handlers-view'],
         },
+        'CadVlan.BlockRules': {
+            'handlers': ['handlers-view'],
+        },                
     }
 }

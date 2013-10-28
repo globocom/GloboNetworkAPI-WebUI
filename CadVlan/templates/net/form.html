@@ -88,6 +88,19 @@ $(document).ready(function() {
 	
 	autocomplete("{% url vlan.autocomplete.ajax %}", false, "id_vlan_name", true);
 	
+	$("#id_vlan_name_id").change(function(){
+		// reload environment vip select 
+		var id_vlan = $("#id_vlan_name_id").val();
+		$.ajax({
+			url: "{% url network.available.evips %}",
+			dataType: "html",
+			data: { id_vlan: id_vlan },
+			success: function(data){
+				$("select#id_env_vip").html(data);
+			}
+		});
+	});
+	
 	
 // 	$("#search_form").submit(function() {
 // 		var value = "";

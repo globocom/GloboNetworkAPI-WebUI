@@ -42,20 +42,85 @@ $(document).ready(function() {
 			
 			<div id="fields" class="ui-widget-content">
 
-			{% for field in form_inputs %}
-				<div>
-					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-					{{ field }}
-					<p id="error">
-					{% if field.errors %} 
-						{% for error in field.errors %}
-							{{ error|escape }}
-						{% endfor %}
-					{% endif %}
-					</p>
-				</div>
-			{% endfor %}
+			<!-- FORM INPUTS -->
+			<div>
+				<div><label for="{{ form_inputs.business.auto_id }}">{{ form_inputs.business.label_tag }}{% if form_inputs.business.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.business }}
+				<p id="error">
+				{% if form_inputs.business.errors %} 
+					{% for error in form_inputs.business.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
 			
+			<div>
+				<div><label for="{{ form_inputs.service.auto_id }}">{{ form_inputs.service.label_tag }}{% if form_inputs.service.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.service }}
+				<p id="error">
+				{% if form_inputs.service.errors %} 
+					{% for error in form_inputs.service.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			
+			<div>
+				<div><label for="{{ form_inputs.name.auto_id }}">{{ form_inputs.name.label_tag }}{% if form_inputs.name.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.name }}
+				<p id="error">
+				{% if form_inputs.name.errors %} 
+					{% for error in form_inputs.name.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>	
+			
+			<div>
+				<div><label for="{{ form_inputs.created.auto_id }}">{{ form_inputs.created.label_tag }}{% if form_inputs.created.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.created }}
+				<p id="error">
+				{% if form_inputs.created.errors %} 
+					{% for error in form_inputs.created.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>	
+			
+			<div>
+				<div><label for="{{ form_inputs.validated.auto_id }}">{{ form_inputs.validated.label_tag }}{% if form_inputs.validated.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.validated }}
+				<p id="error">
+				{% if form_inputs.validated.errors %} 
+					{% for error in form_inputs.validated.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>														
+
+			<!--   ENDFORM INPUTS -->
+
+			<!-- 
+			{% for field in form_inputs %}
+			<div>
+				<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ field }}
+				<p id="error">
+				{% if field.errors %} 
+					{% for error in field.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			
+			{% endfor %}
+			-->
 			
 			{% for field in form_environment %}
 				<div>
@@ -101,6 +166,19 @@ $(document).ready(function() {
 			</table>
 			
 			<br>
+			
+			<!--  FILTER L7 -->	
+			<div>
+				<div><label for="{{ form_inputs.filter_l7.auto_id }}">{{ form_inputs.filter_l7.label_tag }}{% if form_inputs.filter_l7.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.filter_l7 }}
+				<p id="error">
+				{% if form_inputs.filter_l7.errors %} 
+					{% for error in form_inputs.filter_l7.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>	
 			
 			<div>
 				<div><label for="{{ form_healthcheck.healthcheck_type.auto_id }}">{{ form_healthcheck.healthcheck_type.label_tag }}{% if form_healthcheck.healthcheck_type.required %}<span style="color: red;">*</span>{% endif %}</label></div>

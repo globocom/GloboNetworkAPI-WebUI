@@ -109,11 +109,20 @@ class RequestVipFormOptions(forms.Form):
                 if 'initial' in kwargs:
                     balancing = kwargs.get('initial').get('balancing') if "balancing" in kwargs.get('initial') else ''
                     messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_balancing") % balancing)
+                    
+            rules = validates_dict(client_ovip.buscar_rules(environment_vip), 'name_rule_opt')
+            if rules is not None:
+                self.fields['rules'].choices = [(st['id'] if st['id'] != None else '', st['name_rule_opt'] if st['name_rule_opt'] != None else '') for st in rules]
+            else:
+                if 'initial' in kwargs:
+                    rules = kwargs.get('initial').get('rules') if "rules" in kwargs.get('initial') else ''
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_balancing") % balancing)                    
     
     timeout = forms.ChoiceField(label="Timeout", required=True, error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     caches = forms.ChoiceField(label="Grupos de caches", required=True, error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     persistence = forms.ChoiceField(label="Persistência", required=True, error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     balancing = forms.ChoiceField(label=u'Método de balanceamento',  required=True, error_messages=error_messages,  widget=forms.Select(attrs={"style": "width: 300px"}))
+    rules = forms.ChoiceField(label=u'Regras',  required=False, error_messages=error_messages,  widget=forms.Select(attrs={"style": "width: 300px"}))
 
 @autostrip
 class RequestVipFormHealthcheck(forms.Form):
@@ -230,3 +239,12 @@ class FilterL7Form(forms.Form):
                                 required=False, error_messages=error_messages, 
                                 widget=forms.Textarea(attrs={'style': "width: 300px",
                                                              'rows': 10, 'disabled':'disabled'}))
+
+@autostrip
+class RuleForm(forms.Form):
+    
+    def __init__(self, rules, *args, **kwargs):
+        super(RuleForm, self).__init__(*args, **kwargs)
+        self.fields['rules'].choices = [(st['id'] if st['id'] != None else '', st['name_rule_opt'] if st['name_rule_opt'] != None else '') for st in rules]
+    
+    rules = forms.ChoiceField(label=u'Regras',  required=False, error_messages=error_messages,  widget=forms.Select(attrs={"style": "width: 300px"}))

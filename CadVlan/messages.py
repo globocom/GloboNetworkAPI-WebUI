@@ -13,7 +13,7 @@ error_messages = {
     'invalid_choice':       u'Opção inválida selecionada.',
     'can_not_remove_all':   u'Não foi possível excluir nenhum dos itens selecionados.',
     'can_not_remove':       u'Não foi possível excluir alguns dos itens selecionados: %s.',
-    'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluído.',
+    'can_not_remove_error': u'A exclusão dos itens selecionados não foi concluída.',
     'select_one':           u'Nenhum item foi selecionado.',
     'invalid_param':        u'Valor do %s nulo ou inválido.',
     'vlan_select_one':      u'Vlan já criada, selecione ao menos uma Rede',
@@ -92,6 +92,10 @@ network_ip_messages = {
     'net_create_success':   u'Rede(s) criada(s) com sucesso.',
     'networks_activated':   u'Alguma(s) rede(s) selecionada(s) já está(ão) criada(s).'
     
+}
+
+network_messages = {
+    'invalid_environment_vip': u'O ambiente Vip selecionado não está no mesmo Ambiente ou não é válido.',
 }
 
 environment_messages = {
@@ -311,4 +315,16 @@ filter_messages = {
     'success_remove': u'Todos os filtros selecionados foram excluídos com sucesso.',
     'success_insert': u'Filtro incluído com sucesso.',
     'success_edit':   u'Filtro atualizado com sucesso.',
+}
+
+block_messages = {
+    'required' : 'Existem campos obrigatórios não preenchidos.',
+    'success_insert' : 'Blocos incluídos com sucesso.',
+    'success_edit' : 'Blocos atualizados com sucesso.',
+}
+
+rule_messages = {
+    'success_insert' : u'Regra incluída com sucesso.',
+    'success_edit' : u'Regra atualizada com sucesso.',
+    'success_remove': u'Todas as regras selecionadas foram excluídas com sucesso.',
 }

@@ -28,3 +28,14 @@ def render_to_response_ajax(*args, **kwargs):
     
     else:
         return HttpResponse(json.dumps(kwargs.get(JSON)))
+
+
+def render_json(*args, **kwargs):
+    """
+    Returns a HttpResponse whose content is filled with the result of calling
+    django.template.loader.render_to_string() with the passed arguments.
+    """
+    httpresponse_kwargs = {'content_type': kwargs.pop('content_type', None)}
+    httpresponse_kwargs['content_type'] = "application/json"
+
+    return HttpResponse(*args, **kwargs)

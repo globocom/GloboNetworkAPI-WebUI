@@ -1,0 +1,105 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		
+		load_blocks($("#id_envs").val());
+			
+		$("#id_envs").change(function(){
+			load_blocks($(this).val());
+		});
+		
+		$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+		
+		toggle_custom($("input[name='custom']:checked").val());
+		
+		$("input[name='custom']:radio").change(function(){
+			toggle_custom($(this).val(), true);
+		});
+		
+		$(".blocks").on('click', "input[type='checkbox']", function(){
+			var content = "";
+			$(".blocks input[type='checkbox']:checked").each(function(){
+				content += $(this).parent().find('textarea').val();
+				content += '\n\n';
+			});
+			$("#id_rule").val(content);
+		});
+		
+		function toggle_custom(change, force){
+			force = force || false;
+			if (change == 0) {
+				if (force){
+					$("#id_rule").removeAttr("value");
+				}
+				$("#id_rule").attr("readonly", true);
+				$("#id_rule").addClass("readonly");
+				$(".blocks input[type='checkbox']").attr("disabled", false);
+			}
+			else {
+				$("#id_rule").attr("readonly", false);
+				$("#id_rule").removeClass("readonly");
+				$(".blocks input[type='checkbox']").prop("checked", false);
+				$(".blocks input[type='checkbox']").attr("disabled", true);
+			}
+		}
+		
+		function load_blocks(id_env){
+			$.ajax({
+				url: "{% url block.ajax %}",
+				data: { id_env: id_env },
+				dataType: "json",
+				success: function(data) {
+					data = data.blocks;
+					$(".blocks > div").html("");
+					var content = $(".blocks > div");
+					$.each(data, function(i, val){
+						block  = "<div class='block'>";
+						block += "<input type='checkbox' value='"+ val.id +"' name='blocks'>";
+						block += "<textarea class='readonly' cols='40' rows='10' readonly=readonly>"+ val.content +"</textarea>";
+						block += "</div>";
+						content.append(block);
+					});
+					var blocks = new Array();
+					{% if selected_blocks %}
+						{% for id in selected_blocks %}
+							blocks.push('{{ id }}');
+						{% endfor %}
+					{% endif %}
+					$.each(blocks, function(i, val){
+						var obj = $(".block input[value='"+ val +"']")
+						obj.prop("checked", true);
+					});
+					{% if error %}
+						$("#id_rule").removeAttr("value");
+					{% endif %}
+					toggle_custom($("input[name='custom']:checked").val());
+				}
+			});
+		}
+	});
+</script>
+<style>
+	.half-screen {
+		width: 49%;
+		display: inline-block;
+		vertical-align: top;
+	}
+	.half-screen li {
+		list-style: none;
+	}
+	.block {
+		margin-bottom: 10px;
+	}
+	.block > * {
+		display: inline-block;
+		vertical-align: top;
+	}
+	.form-content {
+		padding: 10px;
+	}
+	.readonly {
+		background-color: #F9F9F9;
+	}
+	.readonly:focus {
+		border-color: #999;
+	}
+</style>

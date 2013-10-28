@@ -13,16 +13,19 @@ from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, VipIpError, IpEquipCantDissociateFromVip
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP, IPS
-from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, IP4ASSOC, IP6ASSOC, NET_FORM, NET6_EDIT, NET4_EDIT
+from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, IP4ASSOC, IP6ASSOC, NET_FORM, NET6_EDIT, NET4_EDIT,\
+    NET_EVIP_OPTIONS
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
 from CadVlan.Net.forms import IPForm, IPEditForm, IPAssocForm, NetworkForm, NetworkEditForm
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
 from CadVlan.messages import network_ip_messages
 from CadVlan.forms import DeleteForm
-from CadVlan.messages import error_messages
+from CadVlan.messages import error_messages, network_messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from CadVlan.OptionVip.forms import OptionVipNetForm
+from django.http import HttpResponse
+from django.template import loader
 
 
 logger = logging.getLogger(__name__)
@@ -42,16 +45,18 @@ def add_network_form(request):
         
         # Get all needs from NetworkAPI
         net_type_list = client.create_tipo_rede().listar()
-        env_vip_list = client.create_environment_vip().list_all()
+        env_vip_list = {"environment_vip": []}
         
         # Forms
         lists['form'] = NetworkForm(net_type_list, env_vip_list)
         
         # If form was submited
         if request.method == 'POST':
+            vlan_id = request.POST['vlan_name_id']
+            available_evips = client.create_environment_vip().list_all_available(vlan_id)
             
             # Set data in form
-            form = NetworkForm(net_type_list, env_vip_list, request.POST)
+            form = NetworkForm(net_type_list, available_evips, request.POST)
             
             # Validate
             if form.is_valid():
@@ -75,9 +80,9 @@ def add_network_form(request):
                 
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[vlan_id]))
             
-            else:
-                # If invalid, send all error messages in fields
-                lists['form'] = form
+            
+            # If invalid, send all error messages in fields
+            lists['form'] = form
                 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -124,6 +129,22 @@ def vlan_add_network_form(request, id_vlan):
         messages.add_message(request, messages.ERROR, e)
     
     return render_to_response(NET_FORM, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_VIP, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def available_evip(request):
+
+    lists = {}
+    id_vlan = request.GET['id_vlan']
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    lists['items'] = client.create_environment_vip().list_all_available(id_vlan).get('environment_vip')
+    
+    response = HttpResponse(loader.render_to_string(NET_EVIP_OPTIONS, lists, context_instance=RequestContext(request)))
+    response.status_code = 200
+    return response
 
 @log
 @login_required

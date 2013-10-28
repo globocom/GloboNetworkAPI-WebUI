@@ -1,0 +1,6 @@
+	<option>-</option>
+	{% if items %}
+		{% for option in items %}
+			<option value="{{ option.id }}">{{ option.finalidade_txt }} - {{ option.cliente_txt }} - {{ option.ambiente_p44_txt }}</option>
+		{% endfor %}
+	{% endif %}

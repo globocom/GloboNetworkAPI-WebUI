@@ -14,7 +14,8 @@ from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
 from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, \
     RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, \
-    RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm, FilterL7Form
+    RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm, FilterL7Form,\
+    RuleForm
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages
@@ -29,7 +30,8 @@ from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, \
     VIPREQUEST_TAB_REAL_SERVER, VIPREQUEST_TAB_REAL_SERVER_STATUS, \
     VIPREQUEST_TAB_HEALTHCHECK, VIPREQUEST_TAB_MAXCON, VIPREQUEST_FORM_EXTERNAL, \
-    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER
+    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER,\
+    AJAX_VIPREQUEST_RULE
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -741,6 +743,8 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
         persistence =  form_options.cleaned_data["persistence"]
         balancing =  form_options.cleaned_data["balancing"]
         
+        rule_id =  form_options.cleaned_data["rules"]
+        
         #Reals
         maxcom = form_real.cleaned_data["maxcom"]
         
@@ -799,11 +803,11 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
                 if not is_error:
                 
                     if edit:
-                        client_api.create_vip().alter(idt, ipv4, ipv6, excpect, '0', created, finality, client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
+                        client_api.create_vip().alter(idt, ipv4, ipv6, excpect, '0', created, finality, client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports, rule_id)
                         id_vip = idt
     
                     else:
-                        vip = client_api.create_vip().add(ipv4, ipv6, excpect, finality , client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports)
+                        vip = client_api.create_vip().add(ipv4, ipv6, excpect, finality , client, environment, caches, balancing, persistence, healthcheck_type, healthcheck, timeout, name, maxcom, business, service, filter_l7, reals, priority, weight, ports, rule_id)
                         id_vip = vip.get("requisicao_vip").get("id")
 
                 
@@ -930,6 +934,20 @@ def ajax_popular_options(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
     return popular_options_shared(request, client_api)
+
+@csrf_exempt
+@access_external()
+@log
+def ajax_popular_rule_external(request, form_acess, client):
+    return popular_rule_shared(request, client)
+
+@log
+@login_required
+@has_perm([{"permission": VIPS_REQUEST, "read": True},{"permission": VIPS_REQUEST, "write": True}])
+def ajax_popular_rule(request):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return popular_rule_shared(request, client_api)
 
 @csrf_exempt
 @access_external()
@@ -1490,6 +1508,7 @@ def tab_l7filter(request, id_vip):
         filter_applied = l7.get('filter_applied')
         filter_rollback = l7.get('filter_rollback')
         filter_valid = l7.get('filter_valid')
+        rule = vip.get('rule_id')        
         
         form_real = FilterL7Form(initial={"filter_applied": filter_applied, 
                                           "filter_l7": filter_l7, 
@@ -1501,19 +1520,33 @@ def tab_l7filter(request, id_vip):
         lists['filter_l7'] = filter_l7
         lists['valid'] = filter_valid
         lists['rollback'] = filter_rollback
+        try:
+            environment_vip = client_api.create_environment_vip().search(None, vip['finalidade'], vip['cliente'], vip['ambiente']).get("environment_vip").get("id")
+            rules = client_api.create_option_vip().buscar_rules(environment_vip).get('name_rule_opt')
+            
+            rules = rules if type(rules) is list else [rules,]
+            lists['form_rules'] = RuleForm(rules, initial={"rules": rule}) 
+        except Exception, e:
+            logger.error(e)
+            environment_vip = None
+            messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( vip['finalidade'], vip['cliente'], vip['ambiente'] ))
+        
         
         #Already edited
         if request.method == "POST":
             
             form_real = FilterL7Form(request.POST)
+            form_rules = RuleForm(rules, request.POST)
             lists['form_real'] = form_real
+            lists['form_rules'] = form_rules
             
-            if form_real.is_valid():
+            if form_real.is_valid() and form_rules.is_valid():
                 filter_l7 = form_real.cleaned_data["filter_l7"]
+                rule_id = form_rules.cleaned_data["rules"]
 
                 try:
                     
-                    client_api.create_vip().alter_filter(id_vip, filter_l7)
+                    client_api.create_vip().alter_filter(id_vip, filter_l7, rule_id)
                     l7 = client_api.create_vip().get_l7_data(id_vip).get('vip')
                     filter_l7 =  l7.get('l7_filter')
                     filter_applied = l7.get('filter_applied')
@@ -1531,8 +1564,7 @@ def tab_l7filter(request, id_vip):
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     
-            return redirect('vip-request.tab.l7filter', id_vip)
-        
+            #return redirect('vip-request.tab.l7filter', id_vip)
         
         
     except VipNaoExisteError, e:
@@ -1860,8 +1892,9 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
             caches = vip.get("cache")
             persistence = vip.get("persistencia")
             balancing = vip.get("metodo_bal")
+            rule = vip.get('rule_id')
             
-            form_options = RequestVipFormOptions(request, environment_vip, client_api, initial={"timeout": timeout, "caches": caches, "persistence": persistence, "balancing": balancing})
+            form_options = RequestVipFormOptions(request, environment_vip, client_api, initial={"timeout": timeout, "caches": caches, "persistence": persistence, "balancing": balancing, "rules": rule })
             
             id_ipv4 = vip.get("id_ip")
             id_ipv6 = vip.get("id_ipv6")
@@ -1982,6 +2015,27 @@ def popular_environment_shared(request, client_api):
     return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_ENVIRONMENT, lists, context_instance=RequestContext(request)), status=status_code)
 
 
+def popular_rule_shared(request, client_api):
+
+    lists = dict()
+    status_code = None
+
+    try:    
+        rule_id = get_param_in_request(request, 'rule_id')
+        if rule_id is None:
+            raise InvalidParameterError("Parâmetro inválido: O campo Ambiente Vip inválido ou não foi informado.")
+        
+        lists['rule'] = client_api.create_rule().get_rule_by_id(rule_id).get('rule')['content']
+        
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        status_code = 500
+        
+    # Returns Json
+    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_RULE, lists, context_instance=RequestContext(request)), status=status_code)
+
+
 def popular_options_shared(request, client_api):
 
     lists = dict()
@@ -1998,6 +2052,8 @@ def popular_options_shared(request, client_api):
         lists['balancing'] = validates_dict(client_ovip.buscar_balanceamento_opcvip(environment_vip), 'balanceamento_opt')
         lists['caches'] = validates_dict(client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
         lists['persistence'] = validates_dict(client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
+        lists['rules'] = validates_dict(client_ovip.buscar_rules(environment_vip), 'name_rule_opt')
+        #lists['rules'] = [{u'content': u''}, {u'content': u'haieie'}]
         
     except NetworkAPIClientError, e:
         logger.error(e)

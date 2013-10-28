@@ -1,0 +1,25 @@
+{% extends "block-rules/tabs-template.html" %}
+{% load util %}
+
+{% block tab_select %}
+	$("#page_tab_lists").tabs({selected:1});
+{% endblock %}
+
+{% block title %}[Ambiente - Regras]{% endblock %}
+
+{% block js %}
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url block.rules.list env.id %}";
+	});
+{% endblock %}
+
+{% block tab-data %}
+
+<div id="tabs-2">
+	<form method="POST" action="{{ action }}">
+		{% csrf_token %}
+		{% include "block-rules/rules-shared-form.html" %}
+	</form>
+	<input type="hidden" id="id_envs" value="{{ env.id }}">
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	{% block js %}
+		
+	{% endblock js %}
+	
+	$("#page_tab").tabs();
+	
+	{% block tab_select %}
+		$("#page_tab_lists").tabs();
+	{% endblock tab_select %}
+	
+	$(".block_tab").attr("href", "{% url block.edit.form env.id %}");
+	$(".rules_tab").attr("href", "{% url block.rules.list env.id %}");
+	
+
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Ambiente: {{env.nome_divisao}} - {{env.nome_ambiente_logico}} - {{env.nome_grupo_l3}}</a></li>
+	</ul>
+	
+	<div id="tabs-1">
+		
+		<div class="separator spacer"></div>
+		
+			<div id="page_tab_lists">
+				<ul>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-1" class="block_tab">Blocos</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-2" class="rules_tab">Regras</a></li>
+					
+				</ul>
+				
+				{% block tab-data %}
+					
+				{% endblock %}
+				
+			</div>
+				
+	</div>
+		
+</div>
+				
+{% endblock %}

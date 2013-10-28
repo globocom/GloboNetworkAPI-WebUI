@@ -1,0 +1,74 @@
+{% extends "block-rules/tabs-template.html" %}
+{% load util %}
+
+{% block tab_select %}
+	$("#page_tab_lists").tabs({selected:1});
+{% endblock %}
+
+{% block js %}
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url block.rules.form env.id %}";
+	});
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Deseja realmente excluir a(s) Regra(s) selecionada(s)?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	oTable = $("#rules_list").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 2 ] }]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+
+{% endblock %}
+
+{% block title %}[Ambiente - Regras]{% endblock %}
+
+{% block tab-data %}
+<div id="tabs-2">
+	<div class="buttons">
+		<span id="tool">
+			<button id="btn_new">Novo Registro</button>
+			<button id="btn_del">Excluir</button>
+		</span>
+	</div>
+	<form id="delete_form" method="post" action="{% url block.rules.remove env.id %}" style="visibility: hidden;">
+		{% csrf_token %}
+		{% for field in form %}
+			{{ field }}
+		{% endfor %}
+	</form>
+	<table id="rules_list">
+		<thead>
+			<tr>
+				<th style="width: 45px"><input id="checkAll" type="checkbox" /></th>
+				<th>Nome da regra</th>					
+				<th style="width: 45px"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for rule in rules %}
+			<tr>
+				<td class="text_center"><input type="checkbox" name="selection" value="{{ rule.id }}" /></td>
+				<td>{{ rule.name }}</td>
+				<td class="text_center">
+					<a href="{% url block.rules.edit env.id rule.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

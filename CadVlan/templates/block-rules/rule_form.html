@@ -1,0 +1,27 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Ambiente - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+	{% include "block-rules/form_shared.js" %}
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Blocos</a></li>
+	</ul>
+	<div id="tabs-1">
+		<form method="POST" action="{{ action }}">
+			{% csrf_token %}
+			{% include "block-rules/rules-shared-form.html" %}
+		</form>
+	</div>
+</div>
+{% endblock %}

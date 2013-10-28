@@ -1,0 +1,22 @@
+{% extends "block-rules/tabs-template.html" %}
+{% load util %}
+
+{% block tab_select %}
+	$("#page_tab_lists").tabs({selected:0});
+{% endblock %}
+
+{% block js %}
+
+	{% include "block-rules/form_shared.js" %}
+	
+{% endblock %}
+
+{% block title %}[Ambiente - Blocos]{% endblock %}
+
+{% block tab-data %}
+<div id="tabs-1">
+
+	{% include "block-rules/form_shared.html" %}
+		
+</div>
+{% endblock %}

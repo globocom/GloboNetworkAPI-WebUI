@@ -141,6 +141,7 @@ urlpatterns += patterns('CadVlan.Net.views',
     url('^network/insert/ip6byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip6_by_equip',name='network.insert.ip6.of.equip',),
     url('^network/assoc/ip4/(?P<id_net>\d+)/(?P<id_ip4>\d+)[/]?$','assoc_ip4',name='network.assoc.ip4',),
     url('^network/assoc/ip6/(?P<id_net>\d+)/(?P<id_ip6>\d+)[/]?$','assoc_ip6',name='network.assoc.ip6',),
+    url('^network/get-available-vip-environment[/]?$','available_evip',name='network.available.evips'),
 )
 
 # URL's Option Vip
@@ -269,6 +270,8 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/tab/healthcheck/(?P<id_vip>\d+)[/]?$', 'tab_healthcheck', name='vip-request.tab.healthcheck',),
     url('^vip-request/tab/maxcon/(?P<id_vip>\d+)[/]?$', 'tab_maxcon', name='vip-request.tab.maxcon',),
     url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$', 'tab_l7filter', name='vip-request.tab.l7filter',),
+    url('^vip-request/ajax_rule[/]?$', 'ajax_popular_rule', name='vip-request.rule.ajax',),
+    url('^vip-request/ajax_rule/external[/]?$', 'ajax_popular_rule_external', name='vip-request.rule.ajax.external',),
     
 )
 
@@ -326,3 +329,16 @@ urlpatterns += patterns('CadVlan.Filter.views',
     url('^filter/form/(?P<id_filter>\d+)[/]?$', 'edit_form', name='filter.edit',),
 
 )
+
+# URL's Block Rules'
+urlpatterns += patterns('CadVlan.BlockRules.views', 
+    url('^block/form[/]?$', 'add_form', name='block.form',),
+    url('^block/edit/(?P<id_env>\d+)[/]?$', 'edit_form', name='block.edit.form',),
+    url('^rules/list/(?P<id_env>\d+)[/]?$', 'rules_list', name='block.rules.list',),
+    url('^rules/form[/]?$', 'rule_form', name='rule.form',),
+    url('^rules/form/(?P<id_env>\d+)[/]?$', 'rule_add_form', name='block.rules.form',),
+    url('^rules/edit/(?P<id_env>\d+)/(?P<id_rule>\d+)[/]?$', 'rule_edit_form', name='block.rules.edit',),
+    url('^rules/remove/(?P<id_env>\d+)[/]?$', 'rule_remove', name='block.rules.remove',),
+    url('^block/ajax', 'block_ajax', name='block.ajax',),
+)
+

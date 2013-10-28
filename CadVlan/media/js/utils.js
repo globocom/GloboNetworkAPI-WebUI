@@ -70,7 +70,7 @@ function autocomplete(url, submit, id, hid) {
 					select: function(event, ui) {
 						$("#" + id).val(ui.item.label);
 						if (hid) {
-							$("#" + id + "_id").val(ui.item.aux)
+							$("#" + id + "_id").val(ui.item.aux).trigger('change');
 						}
 						if (submit) {
 							$("#search_form").submit()

@@ -1,0 +1,50 @@
+		{% include "block-rules/rules-js-css.html" %}
+		
+		<div class="ui-widget-content form-content">
+			<div class="half-screen">
+					{% for field in form_env %}
+				<div style="width: 300px">
+					<label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+				</div>
+				{{ field }}
+				<p id="error">
+				{% if field.errors %}
+					{% for error in field.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			{% endfor %}
+			
+				{% for field in form %}
+					<div>
+						<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+						{{ field }}
+						<p id="error">
+						{% if field.errors %} 
+							{% for error in field.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
+						</p>
+					</div>
+				{% endfor %}
+			</div>
+			<div class="half-screen blocks">
+				Blocos disponíveis:<br><br>
+				<div>
+					{% for block in blocks %}
+					<div class="block">
+						<input type="checkbox" value="{{ block.id }}" name="blocks">
+						<textarea class="readonly" cols="40" rows="10" readonly=readonly>{{ block.content }}</textarea>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+		<div class="separator spacer"></div>
+	
+		<div class="buttons-l ui-widget-header">
+			<button id="btn_sav" type="submit">Gravar</button>
+			<button id="btn_can" type="button">Cancelar</button>
+		</div>

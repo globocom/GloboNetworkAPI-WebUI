@@ -2,6 +2,6 @@
     "timeout": "{% for time in timeout %}<option value='{{time.timeout_opt}}'>{{time.timeout_opt}}</option>{% endfor %}",
     "balancing": "{% for bal in balancing %}<option value='{{bal.balanceamento_opt}}'>{{bal.balanceamento_opt}}</option>{% endfor %}",
     "caches": "{% for cache in caches %}<option value='{{cache.grupocache_opt}}'>{{cache.grupocache_opt}}</option>{% endfor %}",
-    "persistence": "{% for per in persistence %}<option value='{{per.persistencia_opt}}'>{{per.persistencia_opt}}</option>{% endfor %}"
-    
+    "persistence": "{% for per in persistence %}<option value='{{per.persistencia_opt}}'>{{per.persistencia_opt}}</option>{% endfor %}",
+    "rules": "{% for rul in rules %}<option value='{% if rul.id != None %}{{rul.id}}{% endif %}'>{% if rul.name_rule_opt != None %} {{rul.name_rule_opt}} {% endif %}</option>{% endfor %}"
 }

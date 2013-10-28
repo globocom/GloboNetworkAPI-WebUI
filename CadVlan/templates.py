@@ -25,6 +25,7 @@ VIPREQUEST_VIEW = 'ajax/view-vip.html'
 AJAX_VIPREQUEST_CLIENT = 'ajax/request-vip-client.html'
 AJAX_VIPREQUEST_ENVIRONMENT = 'ajax/request-vip-environment.html'
 AJAX_VIPREQUEST_OPTIONS = 'ajax/request-vip-options.json'
+AJAX_VIPREQUEST_RULE = 'ajax/request-vip-rule.json'
 AJAX_VIPREQUEST_HEALTHCHECK = 'ajax/request-vip-add-healthcheck.json'
 AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER = 'ajax/request-vip-model-ip-real-server.json'
 AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML = 'ajax/request-vip-model-ip-real-server.html'
@@ -89,6 +90,7 @@ NETIPV4 = 'net/netipv4.html'
 NETIPV6 = 'net/netipv6.html'
 NET4_EDIT = 'net/edit-net4.html'
 NET6_EDIT = 'net/edit-net6.html'
+NET_EVIP_OPTIONS = 'net/options.html'
 
 # Option Vip
 OPTIONVIP_LIST = 'option-vip/list.html'
@@ -184,3 +186,10 @@ FILTER_EDIT = 'filter/edit.html'
 
 # EventLog
 LOG_SEARCH_LIST = 'event_log/search-list.html'
+
+# Block rules
+BLOCK_FORM = 'block-rules/form.html'
+RULES_FORM = 'block-rules/rule_form.html'
+TAB_BLOCK_FORM = 'block-rules/tab-blocks.html'
+TAB_RULES_FORM = 'block-rules/tab-rules-form.html'
+TAB_RULES = 'block-rules/tab-rules.html'

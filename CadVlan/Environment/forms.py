@@ -69,13 +69,14 @@ class AmbienteForm(forms.Form):
             raise forms.ValidationError('Caracteres inválidos.')
         
         path = self.cleaned_data['acl_path']
-        try:
-            while path[0] == "/":
-                path = path[1:]
-            
-            while path[-1] == "/":
-                path = path[:-1]
-        except IndexError:
-            raise forms.ValidationError('Path inválido')
+        if path:
+            try:
+                while path[0] == "/":
+                    path = path[1:]
+                
+                while path[-1] == "/":
+                    path = path[:-1]
+            except IndexError:
+                raise forms.ValidationError('Path inválido')
         
         return self.cleaned_data['acl_path']
