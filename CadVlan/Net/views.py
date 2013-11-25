@@ -53,7 +53,7 @@ def add_network_form(request):
         # If form was submited
         if request.method == 'POST':
             vlan_id = request.POST['vlan_name_id']
-            available_evips = client.create_environment_vip().list_all_available(vlan_id)
+            available_evips = client.create_environment_vip().list_all_available(vlan_id) if vlan_id else {'environment_vip': []}
             
             # Set data in form
             form = NetworkForm(net_type_list, available_evips, request.POST)

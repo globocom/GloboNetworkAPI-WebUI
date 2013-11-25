@@ -100,6 +100,11 @@ def login(request):
                 except LDAPNotFoundError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, auth_messages.get("user_ldap_not_found") )
+                
+                except Exception, e:
+                    logger.error(e)
+                    user = {}
+                    messages.add_message(request, messages.ERROR, auth_messages.get("500") )
 
                 return render_to_response(templates.LOGIN, {'form': form ,'form_pass':form_pass,'modal':modal_auto_open}, context_instance=RequestContext(request))
 

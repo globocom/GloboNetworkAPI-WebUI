@@ -8,7 +8,7 @@ import  ldap, logging, commands
 from datetime import datetime
 from datetime import timedelta
 from ldap import modlist, SERVER_DOWN, NO_SUCH_OBJECT
-from CadVlan.settings import LDAP_INITIALIZE, LDAP_DC, LDAP_CREDENTIALS_USER, LDAP_CREDENTIALS_PWD, LDAP_MANAGER_PWD, LDAP_SSL, LDAP_PWD_DEFAULT_HASH,\
+from CadVlan.settings import LDAP_INITIALIZE, LDAP_DC, LDAP_CREDENTIALS_USER, LDAP_CREDENTIALS_PASSWORD, LDAP_MANAGER_PASSWORD, LDAP_SSL, LDAP_PASSWORD_DEFAULT_HASH,\
     LDAP_INITIALIZE_SSL, CACERTDIR
 
 class LDAPError(Exception):
@@ -84,7 +84,7 @@ class Ldap():
             conn = ldap.initialize("%s://%s" % (('ldaps' if LDAP_SSL else 'ldap'), (LDAP_INITIALIZE_SSL if LDAP_SSL else LDAP_INITIALIZE)) )
             
             conn.protocol_version = ldap.VERSION3
-            conn.simple_bind_s(self._get_str(LDAP_CREDENTIALS_USER, CN_TYPES.USER), LDAP_CREDENTIALS_PWD)
+            conn.simple_bind_s(self._get_str(LDAP_CREDENTIALS_USER, CN_TYPES.USER), LDAP_CREDENTIALS_PASSWORD)
             
             return conn
         
@@ -100,7 +100,7 @@ class Ldap():
         try:
             
             conn = self._get_conn()
-            conn.simple_bind_s(self._get_manager(), LDAP_MANAGER_PWD)
+            conn.simple_bind_s(self._get_manager(), LDAP_MANAGER_PASSWORD)
             
             return conn
 
@@ -292,7 +292,7 @@ class Ldap():
         """
         try:
             
-            cmd = """ldapsearch -x -h %s -D "%s" -b "%s" -w %s "cn=%s" %s""" % (LDAP_INITIALIZE, self._get_manager(), LDAP_DC, LDAP_MANAGER_PWD, cn,field)
+            cmd = """ldapsearch -x -h %s -D "%s" -b "%s" -w %s "cn=%s" %s""" % (LDAP_INITIALIZE, self._get_manager(), LDAP_DC, LDAP_MANAGER_PASSWORD, cn,field)
             
             resp = commands.getstatusoutput(cmd)
             
@@ -811,7 +811,7 @@ class Ldap():
             attrs['gidNumber'] = uidNumber
             attrs['homeDirectory'] = home
             attrs['loginShell'] = loginShell
-            attrs['userPassword'] = LDAP_PWD_DEFAULT_HASH
+            attrs['userPassword'] = LDAP_PASSWORD_DEFAULT_HASH
             attrs['shadowLastChange'] = shadowLastChange
             attrs['shadowMin'] = shadowMin
             attrs['shadowMax'] = shadowMax
@@ -992,7 +992,7 @@ class Ldap():
             
             user = self.get_user(cn)
             
-            mod_attrs = [(ldap.MOD_REPLACE, "userPassword", LDAP_PWD_DEFAULT_HASH ),(ldap.MOD_REPLACE, "shadowLastChange", "1")] #senha globocom em md5
+            mod_attrs = [(ldap.MOD_REPLACE, "userPassword", LDAP_PASSWORD_DEFAULT_HASH ),(ldap.MOD_REPLACE, "shadowLastChange", "1")] #senha globocom em md5
             
             conn.modify_ext_s(dn, mod_attrs)
             

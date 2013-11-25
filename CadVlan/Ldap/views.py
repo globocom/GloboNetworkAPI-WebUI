@@ -14,7 +14,7 @@ from CadVlan.forms import DeleteForm
 from CadVlan.messages import error_messages, ldap_messages
 from CadVlan.permissions import ADMINISTRATION
 from CadVlan.templates import LDAP_GROUP_LIST, LDAP_GROUP_FORM, LDAP_SUDOER_LIST, LDAP_SUDOER_FORM, LDAP_USER_LIST, LDAP_USER_FORM, AJAX_LDAP_RESET_PASSWORD
-from CadVlan.settings import  LDAP_PWD_DEFAULT
+from CadVlan.settings import  LDAP_PASSWORD_DEFAULT
 from django.contrib import messages
 from django.template import loader
 from django.core.urlresolvers import reverse
@@ -671,7 +671,7 @@ def ajax_reset_password_user(request):
     try:    
         cn = request.GET['cn']
         ldap.reset_pwd(cn)
-        lists["password"] = LDAP_PWD_DEFAULT
+        lists["password"] = LDAP_PASSWORD_DEFAULT
         status_code = 200
 
     except LDAPNotFoundError, e:

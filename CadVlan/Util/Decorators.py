@@ -100,6 +100,9 @@ def log(view_func):
 
         post_data = request.raw_post_data
         post_data = re.sub(r'password=(.*?)&', 'password=****&', post_data)
+        post_data = re.sub(r'new_pass=(.*?)&', 'new_pass=****&', post_data)
+        post_data = re.sub(r'confirm_new_password=(.*?)$', 'confirm_new_password=****', post_data)
+        
         logger.info(u'Start of the request[%s] for URL[%s] with DATA[%s].' % (request.method, request.path, post_data))
 
         return view_func(request,*args, **kwargs)

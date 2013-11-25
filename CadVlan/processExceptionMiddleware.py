@@ -12,6 +12,24 @@ class LoggingMiddleware(object):
             # Change PASSWORD value to '*'
             post_values['password'] = '******'
             request.POST = post_values;
+
+        if(post_values.has_key('new_pass')):
+            
+            # Change NEW_PASS value to '*'
+            post_values['new_pass'] = '******'
+            request.POST = post_values;
+            
+        if(post_values.has_key('confirm_new_password')):
+            
+            # Change CONFIRM_NEW_PASSWORD value to '*'
+            post_values['confirm_new_password'] = '******'
+            request.POST = post_values;
+            
+        if(post_values.has_key('second_password')):
+            
+            # Change SECOND_PASSWORD value to '*'
+            post_values['second_password'] = '******'
+            request.POST = post_values;                          
         
         # Get META value    
         meta_values = request.META.copy()

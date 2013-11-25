@@ -107,6 +107,76 @@ listar_healtchcheck_expect_distinct()
 	False
 	None
 
+Ambiente
+save_blocks()
+	validar_vip
+	Escrita
+	False
+	None
+	
+Ambiente
+update_blocks()
+	validar_vip
+	Escrita
+	False
+	None
+	
+Ambiente
+get_blocks()
+	validar_vip
+	Escrita
+	False
+	None
+	
+Ambiente
+list_no_blocks()
+	cadastro_de_ambiente
+	Leitura
+	False
+	None
+	
+Ambiente
+get_rule_by_pk()
+	requisicao_vips
+	Leitura
+	False
+	None
+	
+Ambiente
+save_rule()
+	validar_vip
+	Escrita
+	False
+	None
+	
+Ambiente
+update_rule()
+	validar_vip
+	Escrita
+	False
+	None
+	
+Ambiente
+delete_rule()
+	validar_vip
+	Escrita
+	False
+	None
+	
+Ambiente
+get_all_rules()
+	validar_vip
+	Escrita
+	False
+	None
+
+BlockRule
+get_rule_by_id()
+	requisicao_vips
+	Leitura
+	False
+	None
+		
 AmbienteLogico
 listar()
 	cadastro_de_ambiente
