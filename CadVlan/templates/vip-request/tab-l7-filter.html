@@ -15,7 +15,7 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
 	$("#btn_validate").button({ icons: {primary: "ui-icon-notice"} });
 	$("#btn_validate").button("disable");
 	
@@ -37,14 +37,16 @@ $(document).ready(function() {
 	
 	{% has_perm VIP_ALTER_SCRIPT True None %}
 	{% if has_perm %}
-		{% if valid == "1" and filter_l7 != applied_l7 %}
-		$("#btn_apply").button("enable");
-		$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
-			if (confirm('Deseja realmente aplicar o novo filtro L7?')){ 
-				$("#id_vip_apl").parent().submit();
-			}
-			else return false;
-		});
+		{% if filter_l7 != applied_l7 or rule_applied == 'None' or rule_applied != rule %}
+			{% if valid == "1"%}
+				$("#btn_apply").button("enable");
+				$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
+					if (confirm('Deseja realmente aplicar o novo filtro L7?')){ 
+						$("#id_vip_apl").parent().submit();
+					}
+					else return false;
+				});
+			{% endif %}
 		{% endif %}
 	{% endif %}
 	

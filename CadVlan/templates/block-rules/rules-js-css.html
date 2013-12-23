@@ -1,47 +1,131 @@
 <script type="text/javascript">
+	
 	$(document).ready(function(){
+		var new_block = $(".sorting").html();
+		var BLOCK_NO_VALUE = '<div class="sorting" id="no_value">'+new_block+'</div>'
+		
 		
 		load_blocks($("#id_envs").val());
-			
+		
+		$("#page_tab").tabs();
+		
 		$("#id_envs").change(function(){
 			load_blocks($(this).val());
+			$("#sortable").html('').append(BLOCK_NO_VALUE);
+			clear_field();
 		});
+		
 		
 		$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 		
-		toggle_custom($("input[name='custom']:checked").val());
-		
-		$("input[name='custom']:radio").change(function(){
-			toggle_custom($(this).val(), true);
+		$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+			
+			if ('{{id_env}}' != 0 )
+				location.href = "{% url block.rules.list id_env %}";
+			else
+				location.href = "{% url environment.list %}";
 		});
+		
+
+		$(".new_block_up").live('click', function(){
+			$($(this).parents('.sorting')).before(BLOCK_NO_VALUE);
+			clear_field();
+		});
+		
+		
+		$(".new_block_down").live('click', function(){
+			$($(this).parents('.sorting')).after(BLOCK_NO_VALUE);
+			clear_field();
+		});
+		 
+		
+		$(".remove_block").live('click', function(){
+			
+			if(confirm("Deseja realmente excluir o bloco?")){
+				if ($(".sorting").length == 1){
+					$(".new_block_down").click();
+				}
+				$(this).parents('.sorting').remove();
+				var value = $(this).parent().siblings('input').val();
+				$("input:checkbox[value="+value+"]").attr("checked", false);
+				
+			}
+		});
+		
 		
 		$(".blocks").on('click', "input[type='checkbox']", function(){
-			var content = "";
-			$(".blocks input[type='checkbox']:checked").each(function(){
-				content += $(this).parent().find('textarea').val();
-				content += '\n\n';
+			
+			var is_valid = true;
+			var value_block = $(this).val();
+			var block_in_content = new Array();
+			
+			$("input[name=rule_content]").each(function(){
+				value_block_content = $(this).val();
+				if (value_block == value_block_content){
+					is_valid = false;
+				}
+				if (value_block_content && $(this).attr('order') != '')
+					block_in_content.push($(this).attr('order'));
 			});
-			$("#id_rule").val(content);
+			
+			if (is_valid){
+				
+				var content_block = $(this).parent().find('textarea').val();
+				var order_block = $(this).attr('order');
+				
+				block_rule = '<div class="sorting" id="sorting_'+value_block+'">'+new_block+'</div>';
+				
+				var before_block; 
+				var after_block;
+				
+				for (i=0; i < block_in_content.length; i++)
+					if (order_block > block_in_content[i])
+						before_block = block_in_content[i];
+					else if (order_block < block_in_content[i] && !after_block)
+						after_block = block_in_content[i];
+				
+				if (!before_block && !after_block){
+					$("#sortable").append(block_rule);
+				}
+				else if (before_block){
+					$("input[order="+before_block+"]").parents('.sorting').after(block_rule);	
+				}
+				else if (after_block){
+					$("input[order="+after_block+"]").parents('.sorting').before(block_rule);	
+				}
+				
+				$('#sorting_'+value_block).find('textarea').val(content_block);
+				$('#sorting_'+value_block).find('input').val(value_block).attr('order', order_block);
+			}else{
+				alert('Esse bloco já está na regra.');
+				$(this).attr("checked", true);
+			}
+			
 		});
 		
-		function toggle_custom(change, force){
-			force = force || false;
-			if (change == 0) {
-				if (force){
-					$("#id_rule").removeAttr("value");
-				}
-				$("#id_rule").attr("readonly", true);
-				$("#id_rule").addClass("readonly");
-				$(".blocks input[type='checkbox']").attr("disabled", false);
-			}
-			else {
-				$("#id_rule").attr("readonly", false);
-				$("#id_rule").removeClass("readonly");
-				$(".blocks input[type='checkbox']").prop("checked", false);
-				$(".blocks input[type='checkbox']").attr("disabled", true);
-			}
-		}
 		
+		$("textarea[name=content]").live('keypress', function(){
+			
+			next_element = $(this).next();
+			
+			if (next_element.is("input")){
+				value = next_element.val();
+				$("input:checkbox[value="+value+"]").attr("checked", false);
+				if ($(next_element).val() != 0)
+					$(next_element).val(0);
+					$(next_element).attr('order', '');
+					$(this).parent().attr('id', '');
+			}
+		});
+		
+		
+		function clear_field(){
+			$("#no_value").find('textarea').val('');
+			$("#no_value").find('input').val(0).attr('order', '');
+			$("#no_value").attr('id', '');
+		}
+
+
 		function load_blocks(id_env){
 			$.ajax({
 				url: "{% url block.ajax %}",
@@ -53,7 +137,7 @@
 					var content = $(".blocks > div");
 					$.each(data, function(i, val){
 						block  = "<div class='block'>";
-						block += "<input type='checkbox' value='"+ val.id +"' name='blocks'>";
+						block += "<input order="+i+" type='checkbox' value='"+ val.id +"' name='blocks'>";
 						block += "<textarea class='readonly' cols='40' rows='10' readonly=readonly>"+ val.content +"</textarea>";
 						block += "</div>";
 						content.append(block);
@@ -71,35 +155,47 @@
 					{% if error %}
 						$("#id_rule").removeAttr("value");
 					{% endif %}
-					toggle_custom($("input[name='custom']:checked").val());
+					
+					$("input[name=rule_content]").each(function(){
+						if ($(this).val()){
+							$(this).attr('order', $("input:checkbox[value="+$(this).val()+"]").attr('order'));
+							$("input:checkbox[value="+$(this).val()+"]").attr('checked', true);
+						}
+					})
 				}
 			});
 		}
 	});
 </script>
 <style>
-	.half-screen {
-		width: 49%;
-		display: inline-block;
-		vertical-align: top;
-	}
-	.half-screen li {
-		list-style: none;
-	}
-	.block {
-		margin-bottom: 10px;
-	}
-	.block > * {
-		display: inline-block;
-		vertical-align: top;
-	}
-	.form-content {
-		padding: 10px;
-	}
-	.readonly {
-		background-color: #F9F9F9;
-	}
-	.readonly:focus {
-		border-color: #999;
-	}
+.half-screen {
+	width: 49%;
+	display: inline-block;
+	vertical-align: top;
+}
+
+.half-screen li {
+	list-style: none;
+}
+
+.block {
+	margin-bottom: 10px;
+}
+
+.block>* {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.form-content {
+	padding: 10px;
+}
+
+.readonly {
+	background-color: #F9F9F9;
+}
+
+.readonly:focus {
+	border-color: #999;
+}
 </style>

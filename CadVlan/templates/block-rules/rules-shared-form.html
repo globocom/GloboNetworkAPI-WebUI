@@ -29,6 +29,31 @@
 						</p>
 					</div>
 				{% endfor %}
+			
+		<div id="sortable">	
+			{% for content in contents %}
+				<div class="sorting">
+					<div style="width: 315px">
+						<label for="{{ field.auto_id }}">{{ content.content.label_tag }}{% if content.content.required %}<span style="color: red;">*</span>{% endif %}</label>
+						<a style="float:right" class="new_block_up" title="Adicionar em cima" href="javascript:;"><span class="ui-icon ui-icon-plus"></span></a>
+						<a style="float:right" class="remove_block" href="javascript:;"><span class="ui-icon ui-icon-trash"></span></a>
+					</div>
+					{{content.content}}
+					{{content.rule_content}}
+					<div style="width: 315px">
+						<a style="float:right" class="new_block_down" title="Adicionar em baixo" href="javascript:;"><span class="ui-icon ui-icon-plus"></span></a>
+					</div>
+					<p id="error">
+					{% if content.content.errors %}
+						{% for error in content.content.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				<br></div>
+			{% endfor %}
+		</div>
+				
 			</div>
 			<div class="half-screen blocks">
 				Blocos disponíveis:<br><br>

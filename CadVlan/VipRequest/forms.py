@@ -71,7 +71,7 @@ class RequestVipFormEnvironment(forms.Form):
 @autostrip
 class RequestVipFormOptions(forms.Form):
     
-    def __init__(self, request = None, environment_vip = None, client = None, *args, **kwargs):
+    def __init__(self, request = None, environment_vip = None, client = None, vip_id = None, *args, **kwargs):
         super(RequestVipFormOptions, self).__init__(*args, **kwargs)
             
         if environment_vip is not None and environment_vip != '':
@@ -110,7 +110,7 @@ class RequestVipFormOptions(forms.Form):
                     balancing = kwargs.get('initial').get('balancing') if "balancing" in kwargs.get('initial') else ''
                     messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_balancing") % balancing)
                     
-            rules = validates_dict(client_ovip.buscar_rules(environment_vip), 'name_rule_opt')
+            rules = validates_dict(client_ovip.buscar_rules(environment_vip, vip_id), 'name_rule_opt')
             if rules is not None:
                 self.fields['rules'].choices = [(st['id'] if st['id'] != None else '', st['name_rule_opt'] if st['name_rule_opt'] != None else '') for st in rules]
             else:

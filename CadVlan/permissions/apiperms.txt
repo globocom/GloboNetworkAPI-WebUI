@@ -1671,6 +1671,13 @@ valid_real_server()
 	False
 	None
 
+Vip
+add_block()
+	script_alterar_vip
+	Escrita
+	False
+	None
+
 Vlan
 invalidate()
 	validar_acl_vlans

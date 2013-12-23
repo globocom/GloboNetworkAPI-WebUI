@@ -327,4 +327,5 @@ rule_messages = {
     'success_insert' : u'Regra incluída com sucesso.',
     'success_edit' : u'Regra atualizada com sucesso.',
     'success_remove': u'Todas as regras selecionadas foram excluídas com sucesso.',
+    'required' : 'Existem campos obrigatórios não preenchidos.',
 }

@@ -1517,12 +1517,16 @@ def tab_l7filter(request, id_vip):
         lists['date'] = l7.get('applied_l7_datetime')
         
         lists['applied_l7'] = filter_applied
+        lists['rule_applied'] = l7.get('rule_applied')
         lists['filter_l7'] = filter_l7
+        lists['rule'] = l7.get('rule')
         lists['valid'] = filter_valid
         lists['rollback'] = filter_rollback
+        lists['rule_rollback'] = l7.get('rule_rollback')
+        
         try:
             environment_vip = client_api.create_environment_vip().search(None, vip['finalidade'], vip['cliente'], vip['ambiente']).get("environment_vip").get("id")
-            rules = client_api.create_option_vip().buscar_rules(environment_vip).get('name_rule_opt')
+            rules = client_api.create_option_vip().buscar_rules(environment_vip, id_vip).get('name_rule_opt')
             
             rules = rules if type(rules) is list else [rules,]
             lists['form_rules'] = RuleForm(rules, initial={"rules": rule}) 
@@ -1823,6 +1827,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
     try:
         
         lists = dict()
+        lists['id_vip'] = id_vip
         lists['ports'] = ''
         lists['ports_error'] = ''
         lists['idt'] = id_vip
@@ -1894,7 +1899,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
             balancing = vip.get("metodo_bal")
             rule = vip.get('rule_id')
             
-            form_options = RequestVipFormOptions(request, environment_vip, client_api, initial={"timeout": timeout, "caches": caches, "persistence": persistence, "balancing": balancing, "rules": rule })
+            form_options = RequestVipFormOptions(request, environment_vip, client_api, id_vip, initial={"timeout": timeout, "caches": caches, "persistence": persistence, "balancing": balancing, "rules": rule })
             
             id_ipv4 = vip.get("id_ip")
             id_ipv6 = vip.get("id_ipv6")
@@ -2025,7 +2030,9 @@ def popular_rule_shared(request, client_api):
         if rule_id is None:
             raise InvalidParameterError("Parâmetro inválido: O campo Ambiente Vip inválido ou não foi informado.")
         
-        lists['rule'] = client_api.create_rule().get_rule_by_id(rule_id).get('rule')['content']
+        rule = client_api.create_rule().get_rule_by_id(rule_id).get('rule')
+        
+        lists['rule'] = '\n'.join(rule['rule_contents']) 
         
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -2043,6 +2050,7 @@ def popular_options_shared(request, client_api):
 
     try:    
         environment_vip = get_param_in_request(request, 'environment_vip')
+        id_vip = get_param_in_request(request, 'id_vip')
         if environment_vip is None:
             raise InvalidParameterError("Parâmetro inválido: O campo Ambiente Vip inválido ou não foi informado.")
         
@@ -2052,7 +2060,7 @@ def popular_options_shared(request, client_api):
         lists['balancing'] = validates_dict(client_ovip.buscar_balanceamento_opcvip(environment_vip), 'balanceamento_opt')
         lists['caches'] = validates_dict(client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
         lists['persistence'] = validates_dict(client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
-        lists['rules'] = validates_dict(client_ovip.buscar_rules(environment_vip), 'name_rule_opt')
+        lists['rules'] = validates_dict(client_ovip.buscar_rules(environment_vip, id_vip), 'name_rule_opt')
         #lists['rules'] = [{u'content': u''}, {u'content': u'haieie'}]
         
     except NetworkAPIClientError, e:
