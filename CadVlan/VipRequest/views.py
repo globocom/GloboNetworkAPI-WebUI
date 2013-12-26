@@ -713,7 +713,8 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
     form_environment = RequestVipFormEnvironment(finality_list, finality, client, environment, client_api, request.POST)
     form_real = RequestVipFormReal(request.POST)
     form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, request.POST)
-    form_options = RequestVipFormOptions(request, environment_vip, client_api, request.POST)
+    id_vip_rule = idt if idt else ''
+    form_options = RequestVipFormOptions(request, environment_vip, client_api, id_vip_rule, request.POST)
     form_ip = RequestVipFormIP(request.POST)
     
     if form_inputs.is_valid() & form_environment.is_valid() & form_real.is_valid() & form_healthcheck.is_valid() & form_options.is_valid() & form_ip.is_valid():
