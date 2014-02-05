@@ -20,7 +20,8 @@ from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, S
     AJAX_CONFIRM_VLAN
 from CadVlan.Vlan.forms import SearchVlanForm, VlanForm
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
-from CadVlan.Util.utility import DataTablePaginator, acl_key
+from CadVlan.Util.utility import DataTablePaginator, acl_key,\
+    convert_string_to_boolean
 from django.http import HttpResponseServerError, HttpResponse,HttpResponseRedirect
 from django.template import loader
 from CadVlan.Vlan.business import montaIPRede , cache_list_vlans
@@ -475,7 +476,7 @@ def ajax_confirm_vlan(request):
                                 
                                     needs_confirmation = client.create_vlan().confirm_vlan(number, id_environment).get('needs_confirmation')
                                     if needs_confirmation == 'True':
-                                        message_confirm = "A vlan de número " + str(number) + " já existe no ambiente " + str(vlan['ambiente_name']) +". Deseja criar essa vlan mesmo assim?"
+                                        message_confirm = "A vlan de número " + str(number) + " já existe no ambiente " + str(vlan['ambiente_name']) +"."
                                 else:
                                     message_confirm = ''
                                     break
@@ -487,7 +488,20 @@ def ajax_confirm_vlan(request):
                             else:
                                 message_confirm = ''
                                 break
-                            
+            
+            message_confirm_numbers = ''
+            if is_number:      
+                has_numbers_availables = client.create_vlan().check_number_available(id_environment, number).get('has_numbers_availables')
+                has_numbers_availables = convert_string_to_boolean(has_numbers_availables)
+                if not has_numbers_availables:
+                    message_confirm_numbers = ' O número está fora do range definido.'
+                
+                        
+            message_confirm += message_confirm_numbers
+            
+            if is_number:
+                message_confirm += ' Deseja criar essa vlan mesmo assim?'
+            
             lists['confirm_message'] = message_confirm
             
             # Returns HTML

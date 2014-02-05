@@ -2,3 +2,4 @@
 *.orig
 *.log
 *.pyc
+.pydevproject
