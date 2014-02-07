@@ -2,7 +2,7 @@ var new_block;
 $(document).ready(function() {
 	
 	new_block = '<div class="sorting">'+$(".sorting").html()+'</div>';
-	
+
 	$("#page_tab").tabs();
 	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });

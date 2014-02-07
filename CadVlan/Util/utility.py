@@ -81,6 +81,9 @@ def convert_string_to_boolean(param):
     elif param == 'False':
         return False
     
+def upcase_first_letter(s):
+    return s[0].upper() + s[1:]
+    
 def convert_boolean_to_int(param):
     '''Convert the parameter of boolean to int.
 
