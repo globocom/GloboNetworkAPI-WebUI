@@ -254,15 +254,18 @@ def insert_ambiente(request):
                 link = ambiente_form.cleaned_data['link']
                 acl_path = ambiente_form.cleaned_data['acl_path']
                 
-                ipv4_template = ambiente_form.cleaned_data['ipv4_template']
-                ipv4_template = ipv4_template if ipv4_template else None
-                
-                ipv6_template = ambiente_form.cleaned_data['ipv6_template']
-                ipv6_template = ipv6_template if ipv6_template else None
-                
+                ipv4_template = ambiente_form.cleaned_data.get('ipv4_template', None)
+                ipv6_template = ambiente_form.cleaned_data.get('ipv6_template', None)
+
+                min_num_vlan_1 = ambiente_form.cleaned_data.get('min_num_vlan_1', None)
+                max_num_vlan_1 = ambiente_form.cleaned_data.get('max_num_vlan_1', None)
+                min_num_vlan_2 = ambiente_form.cleaned_data.get('min_num_vlan_2', None)
+                max_num_vlan_2 = ambiente_form.cleaned_data.get('max_num_vlan_2', None)
+
                 # Business
                 client.create_ambiente().inserir(grupo_l3, ambiente_logico, divisao_dc, link, filter_, 
-                                                 acl_path, ipv4_template, ipv6_template)
+                                                 acl_path, ipv4_template, ipv6_template, min_num_vlan_1,
+                                                 max_num_vlan_1, min_num_vlan_2, max_num_vlan_2)
                 messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
                 
                 return redirect('environment.list')
@@ -313,7 +316,11 @@ def edit(request, id_environment):
                    "filter": env.get("id_filter"),
                    "acl_path": env.get("acl_path"),
                    "ipv4_template": env.get("ipv4_template"),
-                   "ipv6_template": env.get("ipv6_template")}
+                   "ipv6_template": env.get("ipv6_template"),
+                   "min_num_vlan_1": env.get("min_num_vlan_1"),
+                   "max_num_vlan_1": env.get("max_num_vlan_1"),
+                   "min_num_vlan_2": env.get("min_num_vlan_2"),
+                   "max_num_vlan_2": env.get("max_num_vlan_2")}
         env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
         
         # Forms
@@ -345,15 +352,18 @@ def edit(request, id_environment):
                 link = ambiente_form.cleaned_data['link']
                 acl_path = ambiente_form.cleaned_data['acl_path']
                 
-                ipv4_template = ambiente_form.cleaned_data['ipv4_template']
-                ipv4_template = ipv4_template if ipv4_template else None
+                ipv4_template = ambiente_form.cleaned_data.get('ipv4_template', None)
+                ipv6_template = ambiente_form.cleaned_data.get('ipv6_template', None)
                 
-                ipv6_template = ambiente_form.cleaned_data['ipv6_template']
-                ipv6_template = ipv6_template if ipv6_template else None
+                min_num_vlan_1 = ambiente_form.cleaned_data.get('min_num_vlan_1', None)
+                max_num_vlan_1 = ambiente_form.cleaned_data.get('max_num_vlan_1', None)
+                min_num_vlan_2 = ambiente_form.cleaned_data.get('min_num_vlan_2', None)
+                max_num_vlan_2 = ambiente_form.cleaned_data.get('max_num_vlan_2', None)
                 
                 # Business
                 client.create_ambiente().alterar(id_env, grupo_l3, ambiente_logico, divisao_dc, 
-                                                 link, filter_, acl_path, ipv4_template, ipv6_template)
+                                                 link, filter_, acl_path, ipv4_template, ipv6_template, 
+                                                 min_num_vlan_1, max_num_vlan_1, min_num_vlan_2, max_num_vlan_2)
                 messages.add_message(request, messages.SUCCESS, environment_messages.get("success_edit"))
                 
                 return redirect('environment.list')

@@ -63,11 +63,57 @@ class AmbienteForm(forms.Form):
     ipv4_template = forms.ChoiceField(label="Template ACL IPV4",choices=[('', '--------')],required=False,widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
     ipv6_template = forms.ChoiceField(label="Template ACL IPV6",choices=[('', '--------')],required=False,widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
     link = forms.CharField(label=u'Link', max_length=200, required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 280px"}))
+    
+    max_num_vlan_1 = forms.CharField(label=u'Max Vlan 1', max_length=50, required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+    min_num_vlan_1 = forms.CharField(label=u'Min Vlan 1', max_length=50, required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+    max_num_vlan_2 = forms.CharField(label=u'Max Vlan 2', max_length=50, required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+    min_num_vlan_2 = forms.CharField(label=u'Min Vlan 2', max_length=50, required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+
+
+    def clean_min_num_vlan_1(self):
+        max_num_vlan_1 = self.cleaned_data['max_num_vlan_1']
+        min_num_vlan_1 = self.cleaned_data['min_num_vlan_1']
+
+        if (max_num_vlan_1 != '' and min_num_vlan_1 == '') or ( min_num_vlan_1 != '' and max_num_vlan_1 == ''):
+            raise forms.ValidationError('O valor máximo e mínimo devem ser preenchidos.')
+
+        if max_num_vlan_1 != '' and min_num_vlan_1 != '':
+            max_num_vlan_1 = int(max_num_vlan_1)
+            min_num_vlan_1 = int(min_num_vlan_1)
+
+            if max_num_vlan_1 < 1 or min_num_vlan_1 < 1:
+                raise forms.ValidationError('O valor preenchido deve ser maior que zero.')
+            if max_num_vlan_1 <= min_num_vlan_1:
+                raise forms.ValidationError('O valor máximo deve ser maior que o mínimo.')
+
+        return min_num_vlan_1
+
+
+    def clean_min_num_vlan_2(self):
+        max_num_vlan_2 = self.cleaned_data['max_num_vlan_2']
+        min_num_vlan_2 = self.cleaned_data['min_num_vlan_2']
+
+        if (max_num_vlan_2 != '' and min_num_vlan_2 == '') or ( min_num_vlan_2 != '' and max_num_vlan_2 == ''):
+            raise forms.ValidationError('O valor máximo e mínimo devem ser preenchidos.')
+
+        if max_num_vlan_2 != '' and min_num_vlan_2 != '':
+            max_num_vlan_2 = int(max_num_vlan_2)
+            min_num_vlan_2 = int(min_num_vlan_2)
+            
+            if max_num_vlan_2 < 1 or min_num_vlan_2 < 1:
+                raise forms.ValidationError('O valor preenchido deve ser maior que zero.')
+            
+            if max_num_vlan_2 <= min_num_vlan_2:
+                raise forms.ValidationError('O valor máximo deve ser maior que o mínimo.')
+
+        return min_num_vlan_2
+
 
     def clean_acl_path(self):
+        #valida acl_path
         if check_regex(self.cleaned_data['acl_path'], r'^.*[\\\\:*?"<>|].*$'):
             raise forms.ValidationError('Caracteres inválidos.')
-        
+            
         path = self.cleaned_data['acl_path']
         if path:
             try:
@@ -78,5 +124,6 @@ class AmbienteForm(forms.Form):
                     path = path[:-1]
             except IndexError:
                 raise forms.ValidationError('Path inválido')
-        
+        #valida acl_path
+
         return self.cleaned_data['acl_path']

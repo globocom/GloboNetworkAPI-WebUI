@@ -8,6 +8,36 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	
+	$("#id_max_num_vlan_1, #id_min_num_vlan_1, #id_max_num_vlan_2, #id_min_num_vlan_2").keyup(function() {
+		var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+		$(this).val(valor);
+	});
+	
+	$('#form_environment').submit(function(){
+		id_min_num_vlan_1 = $('#id_min_num_vlan_1').val();
+		id_max_num_vlan_1 = $('#id_max_num_vlan_1').val();
+		id_min_num_vlan_2 = $('#id_min_num_vlan_2').val();
+		id_max_num_vlan_2 = $('#id_max_num_vlan_2').val();
+
+		if((id_min_num_vlan_1 == '' && id_max_num_vlan_1 == '') && (id_min_num_vlan_2 != '' && id_max_num_vlan_2 != '')){
+			if(confirm('Os valores do campo "Min/Max VLAN 1" será preenchido com os valores de "Min/Max VLAN 2", deseja continuar ?')){
+				return true;
+			}else{
+				return false;	
+			}
+		}
+
+		if((id_min_num_vlan_2 == '' && id_max_num_vlan_2 == '') && (id_min_num_vlan_1 != '' && id_max_num_vlan_1 != '')){
+			if(confirm('Os valores do campo "Min/Max VLAN 2" será preenchido com os valores de "Min/Max VLAN 1", deseja continuar ?')){
+				return true;
+			}else{
+				return false;	
+			}
+		}
+
+		return true;
+	});
+	
 	$("#page_tab").tabs();
 	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
@@ -95,18 +125,57 @@ $(document).ready(function() {
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 				{% for field in ambiente %}
-				<div>
-					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-					{{ field }}
-					<p id="error">
-					{% if field.errors %}
-						{% for error in field.errors %}
-							{{ error|escape }}
-						{% endfor %}
+					{%if field.name != "max_num_vlan_1" and field.name != "min_num_vlan_1" and field.name != "max_num_vlan_2" and field.name != "min_num_vlan_2"%}
+						<div>
+							<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+							{{ field }}
+							<p id="error">
+							{% if field.errors %}
+								{% for error in field.errors %}
+									{{ error|escape }}
+								{% endfor %}
+							{% endif %}
+							</p>
+						</div>
+						
 					{% endif %}
+				{% endfor %}
+				
+				<div>
+					<div><label for="{{ ambiente.min_num_vlan_1.auto_id }}">Min/Max VLAN 1</label></div>
+					{{ ambiente.min_num_vlan_1 }}
+					{{ ambiente.max_num_vlan_1 }}
+					<p id="error">
+						{% if ambiente.min_num_vlan_1.errors %}
+							{% for error in ambiente.min_num_vlan_1.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
+						{% if ambiente.max_num_vlan_1.errors %}
+							{% for error in ambiente.max_num_vlan_1.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
 					</p>
 				</div>
-				{% endfor %}
+				
+				<div>
+					<div><label for="{{ ambiente.min_num_vlan_2.auto_id }}">Min/Max VLAN 2</label></div>
+					{{ ambiente.min_num_vlan_2 }}
+					{{ ambiente.max_num_vlan_2 }}
+					<p id="error">
+						{% if ambiente.max_num_vlan_2.errors %}
+							{% for error in ambiente.max_num_vlan_2.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
+						{% if ambiente.min_num_vlan_2.errors %}
+							{% for error in ambiente.min_num_vlan_2.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						{% endif %}
+					</p>
+				</div>
 			</div>
 			
 			<div class="separator spacer"></div>
