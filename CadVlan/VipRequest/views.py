@@ -1910,21 +1910,22 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
             ports = []
             if "portas_servicos" in vip:
                 if type(vip['portas_servicos']) != NoneType:
-                    if type(vip['portas_servicos']['porta']) == unicode or  len(vip['portas_servicos']['porta']) == 1:
+                    if type(vip['portas_servicos']['porta']) == unicode or (type(vip['portas_servicos']['porta']) != NoneType and len(vip['portas_servicos']['porta']) == 1):
                         vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
                 
                     ports = vip.get("portas_servicos").get('porta')
             
             ports_vip = []
             ports_real = []
-            for port in ports:
-                p = str(port).split(":")
-                ports_vip.append(p[0])
-                
-                if len(p) > 1:
-                    ports_real.append(p[1])
-                else:
-                    ports_real.append('')
+            if ports:
+                for port in ports:
+                    p = str(port).split(":")
+                    ports_vip.append(p[0])
+                    
+                    if len(p) > 1:
+                        ports_real.append(p[1])
+                    else:
+                        ports_real.append('')
 
             lists = mount_table_ports(lists, ports_vip, ports_real)
             
