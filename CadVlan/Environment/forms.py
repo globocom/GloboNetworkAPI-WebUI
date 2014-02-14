@@ -71,10 +71,10 @@ class AmbienteForm(forms.Form):
 
 
     def clean_min_num_vlan_1(self):
-        max_num_vlan_1 = self.cleaned_data['max_num_vlan_1']
-        min_num_vlan_1 = self.cleaned_data['min_num_vlan_1']
+        max_num_vlan_1 = self.cleaned_data.get('max_num_vlan_1')
+        min_num_vlan_1 = self.cleaned_data.get('min_num_vlan_1')
 
-        if (max_num_vlan_1 != '' and min_num_vlan_1 == '') or ( min_num_vlan_1 != '' and max_num_vlan_1 == ''):
+        if (max_num_vlan_1 != '' and min_num_vlan_1 == '') or (min_num_vlan_1 != '' and max_num_vlan_1 == '' ) or (not max_num_vlan_1 and min_num_vlan_1) or ( not min_num_vlan_1 and max_num_vlan_1):
             raise forms.ValidationError('O valor máximo e mínimo devem ser preenchidos.')
 
         if max_num_vlan_1 and max_num_vlan_1 != '' and min_num_vlan_1 and min_num_vlan_1 != '':
@@ -90,10 +90,10 @@ class AmbienteForm(forms.Form):
 
 
     def clean_min_num_vlan_2(self):
-        max_num_vlan_2 = self.cleaned_data['max_num_vlan_2']
-        min_num_vlan_2 = self.cleaned_data['min_num_vlan_2']
+        max_num_vlan_2 = self.cleaned_data.get('max_num_vlan_2')
+        min_num_vlan_2 = self.cleaned_data.get('min_num_vlan_2')
 
-        if (max_num_vlan_2 != '' and min_num_vlan_2 == '') or ( min_num_vlan_2 != '' and max_num_vlan_2 == ''):
+        if (max_num_vlan_2 != '' and min_num_vlan_2 == '') or ( min_num_vlan_2 != '' and max_num_vlan_2 == '') or  (not max_num_vlan_2 and min_num_vlan_2) or ( not min_num_vlan_2 and max_num_vlan_2):
             raise forms.ValidationError('O valor máximo e mínimo devem ser preenchidos.')
 
         if max_num_vlan_2 and max_num_vlan_2 != '' and min_num_vlan_2 and min_num_vlan_2 != '':
