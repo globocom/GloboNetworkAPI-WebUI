@@ -339,6 +339,8 @@ def equip_form(request):
     try:
         equip = None
         
+        roteadores = []
+        
         lists = dict()
         #Enviar listas para formar os Selects do formulário
         forms_aux = dict()
@@ -357,7 +359,8 @@ def equip_form(request):
         forms_aux['ambientes'] = client.create_ambiente().listar().get('ambiente')
         
         if request.method == 'POST':
-            
+            roteadores = request.POST.getlist('roteadores')
+                
             try:
                 marca = int(request.POST['marca'])
             except:
@@ -390,7 +393,8 @@ def equip_form(request):
                         client.create_grupo_equipamento().associa_equipamento(equip, g)
                         
                 for amb in ambientes:
-                    client.create_equipamento_ambiente().inserir(equip, amb)
+                    is_router = 1 if amb in roteadores else 0
+                    client.create_equipamento_ambiente().inserir(equip, amb, is_router)
                     
                 messages.add_message(request, messages.SUCCESS, equip_messages.get("equip_sucess"))
                 
@@ -399,10 +403,12 @@ def equip_form(request):
                 
             else:
                 lists['form'] = form
+                lists['roteadores'] = roteadores
         #get        
         else:
             #Set Form
             forms_aux['modelos'] = None
+            lists['roteadores'] = roteadores
             
             lists['form'] = EquipForm(forms_aux)
                 
@@ -498,6 +504,8 @@ def equip_edit(request,id_equip):
     lists = dict()
     lists['equip_id'] = id_equip
     
+    roteadores = []
+    
     # Get user
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
@@ -516,27 +524,25 @@ def equip_edit(request,id_equip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return redirect("equipment.search.list")
-    
+
     environments = client.create_ambiente().listar_por_equip(id_equip)
-    
-    if (environments is not None):
-        environments= validates_dict(environments, 'ambiente')
-    else:
-        environments = []      
-    
+    environments= validates_dict(environments, 'ambiente')
+    if (environments is None):
+        environments = []
+
     groups = client.create_grupo_equipamento().listar_por_equip(id_equip)
-    
-    if (groups is not None):
-        groups = validates_dict(groups, 'grupo')
-    else:
+    groups = validates_dict(groups, 'grupo')
+    if (groups is None):
         groups = []
-    
+
     list_groups = []
     list_environments = []
-      
+
     try:
         
         if request.method == 'POST':
+            
+            roteadores_chosen = request.POST.getlist('roteadores')
             
             try:
                 marca = int(request.POST['marca'])
@@ -567,34 +573,59 @@ def equip_edit(request,id_equip):
                 if str(orquestracao) in groups_chosen and int(type_equipment) != server_virtual:
                     messages.add_message(request, messages.ERROR, equip_messages.get("orquestracao_error"))
                     raise Exception
-                    
-                    
-                #diff environments
+
+                #Diff environments
                 environments_list = []
+                roteadores_list= []
                 for environment in environments:
                     environments_list.append(environment['id'])
-                    
+                    if environment['is_router'] == 'True':
+                        roteadores_list.append(environment['id'])
+
                 environments_rm = list( set(environments_list) - set(environments_chosen) )
                 environments_add = list( set(environments_chosen) - set(environments_list) )
                 
-                #Remove environment
+                #Remove environment equimpament
                 for env in environments_rm:
                     try:
+                        
                         client.create_equipamento_ambiente().remover(id_equip, env)
                     except NetworkAPIClientError, e:
                         logger.error(e)
                         is_error = True
                         messages.add_message(request, messages.ERROR, e)
               
-                #ADD environment
+                #ADD environment equimpament
                 for env in environments_add:
                     try:
                         client.create_equipamento_ambiente().inserir(id_equip, env)
                     except NetworkAPIClientError, e:
                         logger.error(e)
                         is_error = True
-                        messages.add_message(request, messages.ERROR, e)                    
-
+                        messages.add_message(request, messages.ERROR, e)
+                
+                #Diff roteadores
+                roteadores_rmv = list( (set(roteadores_list) - set(roteadores_chosen)) - set(environments_rm) ) 
+                roteadores_add = list( set(roteadores_chosen) - set(roteadores_list) )
+                
+                #Remove roteadores environment equimpament
+                for env in roteadores_rmv:
+                    try:
+                        client.create_equipamento_ambiente().update(id_equip, env, 0)
+                    except NetworkAPIClientError, e:
+                        logger.error(e)
+                        is_error = True
+                        messages.add_message(request, messages.ERROR, e)
+                
+                #add roteadores environment equimpament
+                for env in roteadores_add:
+                    try:
+                        client.create_equipamento_ambiente().update(id_equip, env, 1)
+                    except NetworkAPIClientError, e:
+                        logger.error(e)
+                        is_error = True
+                        messages.add_message(request, messages.ERROR, e)
+                
                 #diff groups
                 groups_list = []
                 for group in groups:
@@ -653,25 +684,29 @@ def equip_edit(request,id_equip):
             else:    
                 
                 lists = list_ips_edit_equip(lists, id_equip, client)
+                lists['roteadores'] = roteadores_chosen
                 
         #GET REQUEST
         else:
             try:
                 
                 lists = list_ips_edit_equip(lists, id_equip, client)
-           
+                
                 for group in groups:
                     list_groups.append(group['id'])
                 
-              
                 if (environments != None):
                     for environment in environments:
                         list_environments.append(environment['id'])
-                
+                        
+                        if environment['is_router'] == 'True':
+                            roteadores.append(environment['id'])
+
                 #Set Form
                 modelos = client.create_modelo().listar_por_marca(equip.get('id_marca'))
                 forms_aux['modelos'] = modelos.get('model')   
                 lists['form'] = EquipForm(forms_aux,initial={"nome":equip.get('nome'),"tipo_equipamento":equip.get('id_tipo_equipamento'),"marca":equip.get('id_marca'),"modelo":equip.get('id_modelo'),"grupo":list_groups, "ambiente":list_environments})
+                lists['roteadores'] = roteadores
         
             except NetworkAPIClientError, e:
                 logger.error(e)

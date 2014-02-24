@@ -30,7 +30,15 @@ $(document).ready(function() {
 	});
 	
 	$("#id_grupo").pickList();
-	$("#id_ambiente").pickList();
+	$("#id_ambiente").pickList({
+		afterAdd: function(param){add_checkboxs_routeador(param.target);},
+		afterAddAll: function(param){add_checkboxs_routeador(param.target);},
+		afterRemove: function(param){rmv_checkboxs_routeador(param.target);},
+		afterRemoveAll: function(param){rmv_checkboxs_routeador(param.target);}
+	});
+	
+	$("#id_ambiente").next().find('.pickList_targetListLabel').append('<div style="float:right;">Roteador<div>');
+	add_checkboxs_routeador($("#id_ambiente"), {{roteadores|jsonify}});
 	
 	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
 	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
@@ -40,7 +48,7 @@ $(document).ready(function() {
 	$("#id_nome").keyup(function() {
         var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
         $(this).val(valor);
- }); 
+ 	}); 
 	
 	$("#id_nome").mouseover(function() {
     	 $("#id_nome").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
@@ -75,6 +83,23 @@ $(document).ready(function() {
 	
 	
 })
+
+function add_checkboxs_routeador(target, arr_checked){
+	$(target).next().find('ul.pickList_targetList li').each(function(){
+		var obj = $(this);
+		var exist_check = obj.find('.chk_roteador').length
+		
+		if(!exist_check){
+			var value   = obj.attr('picklist:value');
+			var checked = ($.inArray(value, arr_checked) != -1) ? 'checked="checked"' : '';
+			obj.append('<div class="chk_roteador" style="float:right;"><input '+checked+' value="'+value+'" type="checkbox" name="roteadores" onclick="event.stopPropagation()" /><div>');
+		}
+	});
+}
+
+function rmv_checkboxs_routeador(target){
+	$(target).next().find('ul.pickList_sourceList li div.chk_roteador').remove();
+}
 </script>
 {% endblock %}
 

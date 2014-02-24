@@ -11,6 +11,10 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.models import Permission, PermissionMenu, SetVariable,\
     IncrementVarNode
 from CadVlan.settings import MAX_RESULT_DEFAULT
+from django.utils.safestring import mark_safe
+from django.db.models.query import QuerySet
+from django.core.serializers import serialize
+from django.utils import simplejson
 
 register = template.Library()
 
@@ -85,3 +89,9 @@ def increment_var(parser, token):
 @register.simple_tag
 def max_results():
     return MAX_RESULT_DEFAULT
+
+@register.filter
+def jsonify(json_object):
+    if isinstance(json_object, QuerySet):
+        return mark_safe(serialize('json', json_object))
+    return mark_safe(simplejson.dumps(json_object))
