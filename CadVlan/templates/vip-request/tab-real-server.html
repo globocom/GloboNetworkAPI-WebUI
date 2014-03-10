@@ -68,7 +68,7 @@
 				if (data != "")
 					$('#error').html(data);
 				else
-					location.reload();
+					location.reload(true);
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();

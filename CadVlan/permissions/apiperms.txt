@@ -1059,6 +1059,13 @@ remover()
 	None
 
 Network
+create_networks()
+	cadastro_de_vlans
+	Escrita
+	True
+	Escrita
+
+Network
 add_network()
 	cadastro_de_vlans
 	Escrita
@@ -1113,6 +1120,13 @@ deallocate_network_ipv6()
 	Escrita
 	False
 	None
+
+Network
+remove_networks()
+	cadastro_de_vlans
+	Escrita
+	True
+	Escrita
 
 OptionVIP
 add()
@@ -1735,6 +1749,13 @@ edit_vlan()
 	None
 
 Vlan
+create_vlan()
+	cadastro_de_vlans
+	Escrita
+	True
+	Escrita
+
+Vlan
 allocate_without_network()
 	cadastro_de_vlans
 	Escrita
@@ -1787,22 +1808,22 @@ Vlan
 criar()
 	cadastro_de_vlans
 	Escrita
-	False
-	None
+	True
+	Escrita
 
 Vlan
 create_ipv4()
 	cadastro_de_vlans
 	Escrita
-	False
-	None
+	True
+	Escrita
 
 Vlan
 create_ipv6()
 	cadastro_de_vlans
 	Escrita
-	False
-	None
+	True
+	Escrita
 
 Vlan
 validar()
@@ -1822,8 +1843,8 @@ Vlan
 remove()
 	cadastro_de_vlans
 	Escrita
-	False
-	None
+	True
+	Escrita
 
 Vlan
 deallocate()

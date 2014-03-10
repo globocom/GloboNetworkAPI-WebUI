@@ -775,5 +775,8 @@ def create_network(request, id_vlan):
     except VlanNaoExisteError, e:
         logger.error(e)
         return redirect('vlan.search.list')
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
 
     return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
