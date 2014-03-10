@@ -882,14 +882,14 @@ get_available_ip6()
 Ip
 get_available_ip6_for_vip()
 	ips
-	Leitura
+	Escrita
 	False
 	None
 
 Ip
 get_available_ip4_for_vip()
 	ips
-	Leitura
+	Escrita
 	False
 	None
 
