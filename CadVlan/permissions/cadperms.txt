@@ -2163,7 +2163,7 @@ Inserir requisição VIP
 	Ip
 	get_available_ip4_for_vip()
 		ips
-		Leitura
+		Escrita
 		False
 		None
 	Ip
@@ -2175,7 +2175,7 @@ Inserir requisição VIP
 	Ip
 	get_available_ip6_for_vip()
 		ips
-		Leitura
+		Escrita
 		False
 		None
 	Vip
@@ -2259,7 +2259,7 @@ Editar requisição VIP
 	Ip
 	get_available_ip4_for_vip()
 		ips
-		Leitura
+		Escrita
 		False
 		None
 	Ip
@@ -2271,7 +2271,7 @@ Editar requisição VIP
 	Ip
 	get_available_ip6_for_vip()
 		ips
-		Leitura
+		Escrita
 		False
 		None
 	Vip
