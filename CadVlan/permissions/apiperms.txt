@@ -1756,6 +1756,20 @@ create_vlan()
 	Escrita
 
 Vlan
+create_acl()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+	
+Vlan
+create_script_acl()
+	cadastro_de_vlans
+	Escrita
+	False
+	None
+
+Vlan
 allocate_without_network()
 	cadastro_de_vlans
 	Escrita
