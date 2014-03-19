@@ -3,3 +3,4 @@
 *.log
 *.pyc
 .pydevproject
+org.eclipse.core.resources.prefs
