@@ -40,9 +40,10 @@ class SearchVlanForm(forms.Form):
         networkv4 = cleaned_data.get("networkv4")
         networkv6 = cleaned_data.get("networkv6")
         
-        if len(networkv4) > 0 and len(networkv6) > 0:
-            # Only one must be filled
-            raise forms.ValidationError("Preencha apenas um: Rede IPv4 ou Rede IPv6")
+        if networkv4 is not None and networkv6 is not None:
+            if len(networkv4) > 0 and len(networkv6) > 0:
+                # Only one must be filled
+                raise forms.ValidationError("Preencha apenas um: Rede IPv4 ou Rede IPv6")
         
         return cleaned_data
     
