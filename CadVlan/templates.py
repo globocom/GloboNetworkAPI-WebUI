@@ -46,11 +46,12 @@ SCRIPT_FORM = 'script/form.html'
 SCRIPTTYPE_LIST = 'script-type/list.html'
 SCRIPTTYPE_FORM = 'script-type/form.html'
 
-#Environment
+# Environment
 ENVIRONMENT_LIST = 'environment/list.html'
 ENVIRONMENT_FORM = 'environment/form.html'
+ENVIRONMENT_CONFIGURATION_FORM = 'environment/configuration.html'
 
-#Equipment Access
+# Equipment Access
 EQUIPMENTACESS_SEARCH_LIST = 'equip-access/search-list.html'
 EQUIPMENTACESS_FORM = 'equip-access/form.html'
 EQUIPMENTACESS_EDIT = 'equip-access/edit.html'
@@ -77,14 +78,14 @@ EQUIPMENT_EDIT = 'equipment/equip-edit.html'
 EQUIPMENT_MARCAMODELO_FORM = 'equipment/marca-modelo-form.html'
 EQUIPMENT_VIEW_AJAX = 'equipment/view-real.html'
 
-#Vlans
+# Vlans
 VLAN_SEARCH_LIST = 'vlan/search-list.html'
 VLANS_DEETAIL = 'vlan/list-id.html'
 VLANS_DEETAIL = 'vlan/list-id.html'
 VLAN_FORM = 'vlan/vlan-form.html'
 VLAN_EDIT = 'vlan/vlan-edit.html'
 
-#Network
+# Network
 NET_FORM = 'net/form.html'
 NETIPV4 = 'net/netipv4.html'
 NETIPV6 = 'net/netipv6.html'
@@ -110,14 +111,14 @@ EQUIPMENT_GROUP_LIST = 'equip-group/list.html'
 EQUIPMENT_GROUP_FORM = 'equip-group/form.html'
 EQUIPMENT_USER_GROUP_FORM = 'equip-group/equip-user-group-form.html'
 
-#Mail
+# Mail
 MAIL_NEW_PASS = 'mail/mail.html'
 MAIL_NEW_USER = 'mail/user.html'
 
-#Errors
+# Errors
 SEARCH_FORM_ERRORS = 'ajax/search-form-errors.html'
 
-#IP
+# IP
 IP4 = 'ip/insert-ip4.html'
 IP6 = 'ip/insert-ip6.html'
 IP4EDIT = 'ip/edit-ip4.html'
@@ -126,11 +127,11 @@ IP6EDIT = 'ip/edit-ip6.html'
 IP4ASSOC = 'ip/assoc-ip4.html'
 IP6ASSOC = 'ip/assoc-ip6.html'
 
-#Group User
+# Group User
 GROUPUSER_LIST = 'group-user/list.html'
 GROUPUSER_FORM = 'group-user/form.html'
 
-#User
+# User
 USER_LIST = 'users/list.html'
 
 # User Group
@@ -144,7 +145,7 @@ ACL_TEMPLATE = 'acl/template_acl.html'
 ACL_TEMPLATE_ADD_FORM = 'acl/template_add_form.html'
 ACL_TEMPLATE_EDIT_FORM = 'acl/template_edit_form.html'
 
-# VipRequest 
+# VipRequest
 VIPREQUEST_SEARCH_LIST = 'vip-request/search-list.html'
 VIPREQUEST_VIEW_AJAX = 'vip-request/view-vip.html'
 VIPREQUEST_FORM = 'vip-request/form.html'

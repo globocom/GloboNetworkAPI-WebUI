@@ -17,7 +17,7 @@ error_messages = {
     'select_one':           u'Nenhum item foi selecionado.',
     'invalid_param':        u'Valor do %s nulo ou inválido.',
     'vlan_select_one':      u'Vlan já criada, selecione ao menos uma Rede',
-    
+
 }
 
 auth_messages = {
@@ -91,7 +91,7 @@ network_ip_messages = {
     'ip_assoc_success':     u'Ip associado ao equipamento com sucesso.',
     'net_create_success':   u'Rede(s) criada(s) com sucesso.',
     'networks_activated':   u'Alguma(s) rede(s) selecionada(s) já está(ão) criada(s).'
-    
+
 }
 
 network_messages = {
@@ -108,14 +108,19 @@ environment_messages = {
     'env_associated':       u'O(s) ambiente(s): %s tem algum equipamento ou vlan que não pode ser removido.',
     'invalid_id':           u'Valor do id nulo ou inválido.',
     'success_delete_all':   u'Remoção de ambiente realizada com sucesso.',
+    'invalid_network':      u'A rede informada está inválida.',
+    'invalid_prefix_ipv4':  u'O prefixo informado deve estar entre 0 e 32.',
+    'invalid_prefix_ipv6':  u'O prefixo informado deve estar entre 0 e 128.',
+    'success_configuration_insert':       u'Prefixo de ambiente incluído com sucesso.',
+    'success_configuration_remove':       u'Prefixo de ambiente excluído com sucesso.',
 }
 
 equip_messages = {
-    'equip_sucess':         u'Equipamento inserido com sucesso',    
-    'equip_edit_sucess':    u'Equipamento editado com sucesso',    
-    'success_remove':       u'Todos os equipamentos selecionados foram excluídos com sucesso.',  
-    'orquestracao_error':   u"Equipamentos que não sejam do tipo 'Servidor Virtual' não podem fazer parte do grupo 'Equipamentos Orquestração'.", 
-    'marca_sucess':         u'Nova marca inserida com sucesso.', 
+    'equip_sucess':         u'Equipamento inserido com sucesso',
+    'equip_edit_sucess':    u'Equipamento editado com sucesso',
+    'success_remove':       u'Todos os equipamentos selecionados foram excluídos com sucesso.',
+    'orquestracao_error':   u"Equipamentos que não sejam do tipo 'Servidor Virtual' não podem fazer parte do grupo 'Equipamentos Orquestração'.",
+    'marca_sucess':         u'Nova marca inserida com sucesso.',
     'modelo_sucess':        u'Novo modelo inserido com sucesso.',
     'modelo_sucess':        u'Novo modelo inserido com sucesso.',
     'error_associate_group': u'Grupo %s não pode ser associado ao equipamento pois seu grupo de usuário não tem permissão.',
@@ -127,7 +132,7 @@ vlan_messages = {
     'success_remove':       u'Todas as vlans selecionadas foram excluídas com sucesso.',
     'success_remove_network': u'Todas as redes selecionadas foram excluídas com sucesso.',
     'vlan_edit_sucess':     u'Vlan alterada com sucesso.',
-    'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',                 
+    'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',
     'vlan_cvs_error':       u'Vlan excluída com sucesso mas ocorreu um erro de CVS, contate o administrador.',
     'vlan_create_success':  u'Vlan criada com sucesso.',
 }
@@ -147,7 +152,7 @@ environment_vip_messages = {
     'sucess_edit':          u'Ambiente vip alterado com sucesso.',
 }
 
-group_equip_messages  = {
+group_equip_messages = {
     'success_remove':       u'Todos os grupos de equipamento foram excluídos com sucesso.',
     'success_insert':       u'Grupo de equipamento cadastrado com sucesso.',
     'invalid_group_equipament':   u'Grupo de equipamento inválido',
@@ -200,7 +205,7 @@ acl_messages = {
     'success_validate':  u'ACL IP%s validado com sucesso.',
     'error_apply':     u'Não foi possível aplicar ACL a nenhum dos equipamentos selecionados.',
     'error_acl_not_exist': u'Acl não foi criada',
-    
+
     'success_template_edit': u'Template alterado com sucesso.',
     'success_template_edit': u'Template criado com sucesso.',
     'field_required': u'Nome do template e Template são obrigatórios.',
@@ -265,19 +270,19 @@ request_vip_messages = {
 }
 
 access_type_messages = {
-    'success_create':        u'Tipo de Acesso cadastrado com sucesso.',  
+    'success_create':        u'Tipo de Acesso cadastrado com sucesso.',
 }
 
 type_network_messages = {
-    'success_create':        u'Tipo de Rede cadastrado com sucesso.',  
+    'success_create':        u'Tipo de Rede cadastrado com sucesso.',
 }
 
 equipment_type_messages = {
-    'success_create':        u'Tipo de Equipamento cadastrado com sucesso.',  
+    'success_create':        u'Tipo de Equipamento cadastrado com sucesso.',
 }
 
 healthcheck_messages = {
-    'success_create':        u'Healtcheck Expect cadastrado com sucesso.',  
+    'success_create':        u'Healtcheck Expect cadastrado com sucesso.',
 }
 
 
@@ -291,7 +296,7 @@ ldap_messages = {
     'error_duplicated_gidNumber_group':  u'Já existe um grupo cadastrado com gidNumber %s .',
     'error_duplicated_employeeNumber_group':  u'Já existe um grupo cadastrado com cargo %s .',
     'error_duplicated_mail_group':  u'Já existe um grupo cadastrado com E-mail %s .',
-    
+
     'success_remove_sudoer': u'Todos os sudoers selecionados foram excluídos com sucesso.',
     'success_insert_sudoer': u'Sudoer incluído com sucesso.',
     'success_edit_sudoer':   u'Sudoer atualizado com sucesso.',
@@ -303,12 +308,12 @@ ldap_messages = {
     'success_edit_user':   u'Usuário atualizado com sucesso.',
     'success_lock_user':   u'Usuário %s bloqueado com sucesso.',
     'success_unlock_user':   u'Usuário %s desbloqueado com sucesso.',
-    'invalid_user':        u'Usuário %s inválido ou não cadastrado.',    
+    'invalid_user':        u'Usuário %s inválido ou não cadastrado.',
     'error_range_out_user':      u'Este campo deve estar entre a faixa %s a %s.',
     'error_duplicated_name_user':  u'Já existe um usuário cadastrado com nome %s .',
     'error_duplicated_uidNumber_user':  u'Já existe um usuário cadastrado com uidNumber %s .',
-    
-    
+
+
 }
 
 filter_messages = {

@@ -7,7 +7,7 @@
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
 	$("#id_max_num_vlan_1, #id_min_num_vlan_1, #id_max_num_vlan_2, #id_min_num_vlan_2").keyup(function() {
 		var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
 		$(this).val(valor);
@@ -47,14 +47,16 @@ $(document).ready(function() {
 	});
 	
 	$("#accordion").accordion({ autoHeight: false });
-	
+
 	$("#btn_sav_dc").button({ icons: {primary: "ui-icon-plus"}, text: false });
 	$("#btn_sav_al").button({ icons: {primary: "ui-icon-plus"}, text: false });
 	$("#btn_sav_l3").button({ icons: {primary: "ui-icon-plus"}, text: false });
-	
+
 	autocomplete("{% url acl_path.autocomplete %}", true, "id_acl_path", false);
-	
+
 });
+
+
 </script>
 {% endblock %}
 
@@ -178,6 +180,60 @@ $(document).ready(function() {
 				</div>
 			</div>
 			
+			<div id="accordion" style="width:500px;">
+				<h3><a href="#"><b>Prefixos de Ambiente</b></a></h3>
+				<div id="row-configurations" class="ui-widget-content">	
+					<div style="margin-left: 4px;">
+						<a href="{% url environment.configuration.add id_environment %}" target="_blank">
+							<button type="button" 
+							class="btn_add4 ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-state-focus" 
+							role="button" 
+							aria-disabled="false" 
+							title="Adicionar Configuração">
+								<span class="ui-button-icon-primary ui-icon ui-icon-plus">
+									</span><span class="ui-button-text">
+										Adicionar Configuração
+									</span>
+							</button>
+						</a>
+					</div>
+				</div>
+				<!-- configurations -->
+				<div id="row-list-configurations" class="ui-widget-content" style="max-height:200px; overflow-y:auto;">
+					<table style="padding: 6px; text-align: center;">
+						<tbody>
+							<tr>			
+								<th style="max-width: 200px;width: 200px;">
+									<b>Rede</b>
+								</th>
+								<th style="max-width: 200px;width: 200px;">
+									<b>Prefixo</b>
+								</th>
+								<th style="max-width: 20px;width: 20px;">
+	
+								</th>			
+							</tr>
+							{% for configuration in configurations_prefix %}
+							<tr>
+								<td>{{ configuration.subnet }}</td>
+								<td>{{ configuration.new_prefix }}</td>
+								<td>
+									<a href="{% url environment.configuration.remove id_environment configuration.id %}">
+										<button onclick="return confirm('Deseja deletar a configuração de prefixo ?');" type="button" class="btn_del4 ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" id="btn_del" role="button" aria-disabled="false" title="Remover">
+											<span class="ui-button-icon-primary ui-icon ui-icon-close"></span>
+											<span class="ui-button-text">Remover</span>
+										</button>
+									</a>
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				<!-- /configurations -->
+			</div>
+
+						
 			<div class="separator spacer"></div>
 			
 			<div class="buttons-l ui-widget-header">

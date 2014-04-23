@@ -1,0 +1,149 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Prefixo de Ambiente - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url environment.list %}";
+	});
+	
+	toggleIpForm();
+	
+})
+
+function toggleIpForm(){
+
+	var formIpv4 = $('#network_ipv4');
+	var formIpv6 = $('#network_ipv6');
+
+	$('input:radio[name=ip_version]').each(function(){
+		
+		$(this).on('change', function(){
+	
+			var ipVersion = $(this).val();
+	
+			formIpv4.find('p[id=error]').empty();
+			formIpv6.find('p[id=error]').empty();
+			$('#prefix').find('p[id=error]').empty();
+			
+			$(':input', formIpv4).val('');
+			$(':input', formIpv6).val('');
+			formIpv4.hide();
+			formIpv6.hide();
+	
+			if (ipVersion == "v4"){
+				formIpv4.show('slow', function(){
+				});
+			}
+			else if (ipVersion == "v6"){
+				console.log('mostrar ipv6')
+				formIpv6.show('slow', function(){
+				});
+			}
+		});
+	});
+}
+
+
+</script>
+<style>
+ul{
+	list-style: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Prefixos de Ambiente</a></li>
+	</ul>
+	<div id="tabs-1">
+	
+		<form id="add_form" method="post" action="{{ action }}">
+			{% csrf_token %}
+
+			<div>
+				<div><label for="id_environment">Nome do Ambiente:</label></div>
+				<input type="text" id="id_enviroment" name="enviroment" value="{{ environment.nome_ambiente_logico }}" disabled="disabled">
+			</div>
+
+			<div>
+				<div><label for="{{ form.ip_version.auto_id }}">{{ form.ip_version.label_tag }}{% if form.ip_version.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form.ip_version }}
+				<p id="error">
+				{% if form.ip_version.errors %} 
+					{% for error in form.ip_version.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+
+			<div id="network_ipv4" style="margin-top: -10px; margin-bottom: 15px;{% if form.ip_version.value == 'v6' %} display: none;{% endif %}">
+				{{ form.v4oct1 }}<label> . </label>
+				{{ form.v4oct2 }}<label> . </label>
+				{{ form.v4oct3 }}<label> . </label>
+				{{ form.v4oct4 }}<label> / </label>
+				{{ form.v4oct5 }}<label></label>
+				<p id="error">
+				{% if form.network_validate.errors %} 
+					{% for error in form.network_validate.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+
+			<div id="network_ipv6" style="margin-top: -10px; margin-bottom: 15px;{% if form.ip_version.value == 'v4' %} display: none;{% endif %}">
+				{{ form.v6oct1 }}<label> : </label>
+				{{ form.v6oct2 }}<label> : </label>
+				{{ form.v6oct3 }}<label> : </label>
+				{{ form.v6oct4 }}<label> : </label>
+				{{ form.v6oct5 }}<label> : </label>
+				{{ form.v6oct6 }}<label> : </label>
+				{{ form.v6oct7 }}<label> : </label>
+				{{ form.v6oct8 }}<label> / </label>
+				{{ form.v6oct9 }}<label></label>
+				<p id="error">
+				{% if form.network_validate.errors %} 
+					{% for error in form.network_validate.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			
+			<div id="prefix" style="margin-top: -10px; margin-bottom: 15px;">
+				<div>
+					<label for="{{ form.prefix.auto_id }}">{{ form.prefix.label_tag }}{% if form.prefix.required %}<span style="color: red;">*</span>{% endif %}</label>
+				</div>
+				{{ form.prefix }}
+				<p id="error">
+				{% if form.prefix.errors %} 
+					{% for error in form.prefix.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+
+			<div class="separator spacer"></div>
+
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

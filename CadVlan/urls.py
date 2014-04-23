@@ -18,7 +18,7 @@ urlpatterns = patterns('',
 )
 
 # Healthcheck
-urlpatterns += patterns('', 
+urlpatterns += patterns('',
     url(r'^healthcheck$', lambda _: HttpResponse("WORKING")),
 )
 
@@ -28,8 +28,8 @@ urlpatterns += patterns('CadVlan.Auth.views',
     url('^login[/]?$', 'login', name='login',),
     url('^logout[/]?$', 'logout', name='logout',),
     url('^home[/]?$', 'home', name='home',),
-    url('^lost-pass[/]?$','lost_pass',name="home.lost.pass",),
-    url('^change-pass[/]?$','change_password',name="home.change.pass",),
+    url('^lost-pass[/]?$', 'lost_pass', name="home.lost.pass",),
+    url('^change-pass[/]?$', 'change_password', name="home.change.pass",),
 )
 
 # URL's Script
@@ -50,27 +50,27 @@ urlpatterns += patterns('CadVlan.ScriptType.views',
 urlpatterns += patterns('CadVlan.EquipAccess.views',
     url('^equip-access/search-list[/]?$', 'search_list', name='equip.access.search.list',),
     url('^equip-access/search-list/(?P<id_equip>\d+)[/]?$', 'search_list_param', name='equip.access.search.list.param',),
-    url('^equip-access/form[/]?$','add_form', name='equip.access.form',),
-    url('^equip-access/form/(?P<id_access>\d+)[/]?$','edit', name='equip.access.edit',),
-    url('^equip-access/delete[/]?$','delete', name='equip.access.delete',),
+    url('^equip-access/form[/]?$', 'add_form', name='equip.access.form',),
+    url('^equip-access/form/(?P<id_access>\d+)[/]?$', 'edit', name='equip.access.edit',),
+    url('^equip-access/delete[/]?$', 'delete', name='equip.access.delete',),
 )
 
 # URL's Equipment Script
 urlpatterns += patterns('CadVlan.EquipScript.views',
     url('^equip-script/list[/]?$', 'search_list', name='equip.script.search.list',),
-    url('^equip-script/delete[/]?$','delete_all', name='equip.script.delete',),
+    url('^equip-script/delete[/]?$', 'delete_all', name='equip.script.delete',),
     url('^equip-script/add[/]?$', 'ajax_add_form', name='equip.script.add.ajax',),
 )
 
 # URL's Equipment Interface
 urlpatterns += patterns('CadVlan.EquipInterface.views',
     url('^equip-interface/list[/]?$', 'search_list', name='equip.interface.search.list',),
-    url('^equip-interface/delete[/]?$','delete_all', name='equip.interface.delete',),
-    url('^equip-interface/add/(?P<equip_name>[^/]+)[/]?$','add_form', name='equip.interface.form',),
-    url('^equip-interface/edit/(?P<equip_name>[^/]+)/(?P<id_interface>\d+)[/]?$','edit_form', name='equip.interface.edit.form',),
-    url('^equip-interface/addseveral/(?P<equip_name>[^/]+)[/]?$','add_several_forms', name='equip.interface.several.form',),
-    url('^equip-interface/disconnect/(?P<id_interface>\d+)/(?P<back_or_front>\d+)/(?P<equip_name>[^/]+)/(?P<id_interf_edit>\d+)[/]?$','disconnect', name='equip.interface.disconnect',),
-    url('^equip-interface/connect/(?P<id_interface>\d+)/(?P<front_or_back>\d+)[/]?$','connect', name='equip.interface.connect',),
+    url('^equip-interface/delete[/]?$', 'delete_all', name='equip.interface.delete',),
+    url('^equip-interface/add/(?P<equip_name>[^/]+)[/]?$', 'add_form', name='equip.interface.form',),
+    url('^equip-interface/edit/(?P<equip_name>[^/]+)/(?P<id_interface>\d+)[/]?$', 'edit_form', name='equip.interface.edit.form',),
+    url('^equip-interface/addseveral/(?P<equip_name>[^/]+)[/]?$', 'add_several_forms', name='equip.interface.several.form',),
+    url('^equip-interface/disconnect/(?P<id_interface>\d+)/(?P<back_or_front>\d+)/(?P<equip_name>[^/]+)/(?P<id_interf_edit>\d+)[/]?$', 'disconnect', name='equip.interface.disconnect',),
+    url('^equip-interface/connect/(?P<id_interface>\d+)/(?P<front_or_back>\d+)[/]?$', 'connect', name='equip.interface.connect',),
 )
 
 # URL's Equipment
@@ -85,12 +85,12 @@ urlpatterns += patterns('CadVlan.Equipment.views',
     url('^equipment/marca[/]?$', 'ajax_marca_equip', name='equipment.modelo.ajax',),
     url('^equipment/modelo-form[/]?$', 'modelo_form', name='equipment.modelo.form',),
     url('^equipment/marca-form[/]?$', 'marca_form', name='equipment.marca.form',),
-    url('^equipment/delete[/]?$','delete_all', name='equipment.delete',),
+    url('^equipment/delete[/]?$', 'delete_all', name='equipment.delete',),
     url('^equipment/ajax_view/(?P<id_equip>\d+)[/]?$', 'ajax_view_real', name='equip.view.real',),
     url('^equipment/ajax_remove_real/(?P<id_vip>\d+)[/]?$', 'ajax_remove_real', name='equip.remove.real',),
     url('^equipment/delete_equipment/(?P<id_equip>\d+)[/]?$', 'delete_equipment', name='equip.delete.id',),
     url('^equipment/ajax_check_real/(?P<id_vip>\d+)[/]?$', 'ajax_check_real', name='equip.check.real',),
-    
+
 )
 
 # URL's Environment
@@ -103,20 +103,22 @@ urlpatterns += patterns('CadVlan.Environment.views',
     url('^environment/form[/]?$', 'insert_ambiente', name='environment.form',),
     url('^environment/form/(?P<id_environment>\d+)[/]?$', 'edit', name='environment.edit',),
     url('^environment/acl_paths[/]$', 'ajax_autocomplete_acl_path', name='acl_path.autocomplete',),
+    url('^environment/configuration/form/(?P<id_environment>\d+)[/]?$', 'add_configuration', name='environment.configuration.add',),
+    url('^environment/configuration/remove/(?P<environment_id>\d+)/(?P<configuration_id>\d+)/', 'remove_configuration', name='environment.configuration.remove',),
 )
 
 # URL's Vlans
 urlpatterns += patterns('CadVlan.Vlan.views',
     url('^vlan/autocomplete[/]?$', 'ajax_autocomplete_vlans', name='vlan.autocomplete.ajax',),
-    url('^vlan/get/(?P<id_vlan>\d+)[/]?$', 'list_by_id', name='vlan.list.by.id',), 
-    url('^vlan/list[/]?$','search_list', name='vlan.search.list',),
-    url('^vlan/find[/]?$','ajax_list_vlans', name='vlan.list.ajax',),
-    url('^vlan/form[/]?$','vlan_form',name='vlan.form',), 
+    url('^vlan/get/(?P<id_vlan>\d+)[/]?$', 'list_by_id', name='vlan.list.by.id',),
+    url('^vlan/list[/]?$', 'search_list', name='vlan.search.list',),
+    url('^vlan/find[/]?$', 'ajax_list_vlans', name='vlan.list.ajax',),
+    url('^vlan/form[/]?$', 'vlan_form', name='vlan.form',),
     url('^vlan/aclfilename[/]?$', 'ajax_acl_name_suggest', name='ajax.vlan.acl.file.name',),
     url('^vlan/confirmvlan[/]?$', 'ajax_confirm_vlan', name='ajax.vlan.confirm',),
-    url('^vlan/edit/(?P<id_vlan>\d+)[/]?$','vlan_edit',name='vlan.edit.by.id',),
-    url('^vlan/delete[/]?$','delete_all', name='vlan.delete',),
-    url('^vlan/delete/network/(?P<id_vlan>\d+)[/]?$','delete_all_network', name='vlan.network.delete',),
+    url('^vlan/edit/(?P<id_vlan>\d+)[/]?$', 'vlan_edit', name='vlan.edit.by.id',),
+    url('^vlan/delete[/]?$', 'delete_all', name='vlan.delete',),
+    url('^vlan/delete/network/(?P<id_vlan>\d+)[/]?$', 'delete_all_network', name='vlan.network.delete',),
     url('^vlan/create/(?P<id_vlan>\d+)[/]?$', 'create', name='vlan.create'),
     url('^vlan/create/network/(?P<id_vlan>\d+)[/]?$', 'create_network', name='vlan.create.network'),
 )
@@ -129,19 +131,19 @@ urlpatterns += patterns('CadVlan.Net.views',
     url('^network/form/(?P<id_vlan>\d+)[/]?$', 'vlan_add_network_form', name='network.form.vlan',),
     url('^network/get/ip4/(?P<id_net>\d+)[/]?$', 'list_netip4_by_id', name='network.ip4.list.by.id',),
     url('^network/get/ip6/(?P<id_net>\d+)[/]?$', 'list_netip6_by_id', name='network.ip6.list.by.id',),
-    url('^network/ip4/(?P<id_net>\d+)[/]?$','insert_ip4',name="network.insert.ip4",),
-    url('^network/ip6/(?P<id_net>\d+)[/]?$','insert_ip6',name="network.insert.ip6",),
-    url('^network/edit/ip4/(?P<id_net>\d+)/(?P<id_ip4>\d+)[/]?$','edit_ip4',name='network.edit.ip4',),
-    url('^network/edit/ip6/(?P<id_net>\d+)/(?P<id_ip6>\d+)[/]?$','edit_ip6',name='network.edit.ip6',),
-    url('^network/delete/(?P<id_net>\d+)/ip4[/]?$','delete_ip4',name='network.delete.ip4',),
-    url('^network/delete/ip6/(?P<id_net>\d+)[/]?$','delete_ip6',name='network.delete.ip6',),
-    url('^network/delete/ip6byequip/(?P<id_ip>\d+)/(?P<id_equip>\d+)[/]?$','delete_ip6_of_equip',name='network.delete.ip6.of.equip',),
-    url('^network/delete/ip4byequip/(?P<id_ip>\d+)/(?P<id_equip>\d+)[/]?$','delete_ip4_of_equip',name='network.delete.ip4.of.equip',),
-    url('^network/insert/ip4byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip4_by_equip',name='network.insert.ip4.of.equip',),
-    url('^network/insert/ip6byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$','insert_ip6_by_equip',name='network.insert.ip6.of.equip',),
-    url('^network/assoc/ip4/(?P<id_net>\d+)/(?P<id_ip4>\d+)[/]?$','assoc_ip4',name='network.assoc.ip4',),
-    url('^network/assoc/ip6/(?P<id_net>\d+)/(?P<id_ip6>\d+)[/]?$','assoc_ip6',name='network.assoc.ip6',),
-    url('^network/get-available-vip-environment[/]?$','available_evip',name='network.available.evips'),
+    url('^network/ip4/(?P<id_net>\d+)[/]?$', 'insert_ip4', name="network.insert.ip4",),
+    url('^network/ip6/(?P<id_net>\d+)[/]?$', 'insert_ip6', name="network.insert.ip6",),
+    url('^network/edit/ip4/(?P<id_net>\d+)/(?P<id_ip4>\d+)[/]?$', 'edit_ip4', name='network.edit.ip4',),
+    url('^network/edit/ip6/(?P<id_net>\d+)/(?P<id_ip6>\d+)[/]?$', 'edit_ip6', name='network.edit.ip6',),
+    url('^network/delete/(?P<id_net>\d+)/ip4[/]?$', 'delete_ip4', name='network.delete.ip4',),
+    url('^network/delete/ip6/(?P<id_net>\d+)[/]?$', 'delete_ip6', name='network.delete.ip6',),
+    url('^network/delete/ip6byequip/(?P<id_ip>\d+)/(?P<id_equip>\d+)[/]?$', 'delete_ip6_of_equip', name='network.delete.ip6.of.equip',),
+    url('^network/delete/ip4byequip/(?P<id_ip>\d+)/(?P<id_equip>\d+)[/]?$', 'delete_ip4_of_equip', name='network.delete.ip4.of.equip',),
+    url('^network/insert/ip4byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$', 'insert_ip4_by_equip', name='network.insert.ip4.of.equip',),
+    url('^network/insert/ip6byequip/(?P<id_net>\d+)/(?P<id_equip>\d+)[/]?$', 'insert_ip6_by_equip', name='network.insert.ip6.of.equip',),
+    url('^network/assoc/ip4/(?P<id_net>\d+)/(?P<id_ip4>\d+)[/]?$', 'assoc_ip4', name='network.assoc.ip4',),
+    url('^network/assoc/ip6/(?P<id_net>\d+)/(?P<id_ip6>\d+)[/]?$', 'assoc_ip6', name='network.assoc.ip6',),
+    url('^network/get-available-vip-environment[/]?$', 'available_evip', name='network.available.evips'),
 )
 
 # URL's Option Vip
@@ -150,8 +152,8 @@ urlpatterns += patterns('CadVlan.OptionVip.views',
     url('^option-vip/delete[/]?$', 'delete_all', name='option-vip.delete',),
     url('^option-vip/form[/]?$', 'add_form', name='option-vip.form',),
     url('^option-vip/form/(?P<id_optionvip>\d+)[/]?$', 'edit_form', name='option-vip.edit',),
-    url('^option-vip/associate4/(?P<id_net>\d+)[/]?$','option_vip_associate_net4', name='option-vip.associate.net4',),
-    url('^option-vip/associate6/(?P<id_net>\d+)[/]?$','option_vip_associate_net6', name='option-vip.associate.net6',),
+    url('^option-vip/associate4/(?P<id_net>\d+)[/]?$', 'option_vip_associate_net4', name='option-vip.associate.net4',),
+    url('^option-vip/associate6/(?P<id_net>\d+)[/]?$', 'option_vip_associate_net6', name='option-vip.associate.net6',),
 )
 
 # URL's Environment Vip
@@ -186,8 +188,8 @@ urlpatterns += patterns('CadVlan.GroupUser.views',
     url('^group-user/list[/]?$', 'list_all', name='group-user.list',),
     url('^group-user/delete[/]?$', 'delete_all', name='group-user.delete',),
     url('^group-user/form[/]?$', 'add_form', name='group-user.form',),
-    url('^group-user/form/(?P<id_group_user>\d+)[/]?$', 'edit_form', name='group-user.edit',),    
-    
+    url('^group-user/form/(?P<id_group_user>\d+)[/]?$', 'edit_form', name='group-user.edit',),
+
 )
 
 # URL's User
@@ -196,11 +198,11 @@ urlpatterns += patterns('CadVlan.User.views',
     url('^user/form/(?P<id_user>\d+)/(?P<status>\d+)[/]?$', 'list_all', name='user.form',),
     url('^user/edit/(?P<id_user>\d+)/(?P<status>\d+)[/]?$', 'list_all', name='user.edit',),
     url('^user/delete[/]?$', 'delete_all', name='user.delete',),
-    #Ajax for ldap users selection
+    # Ajax for ldap users selection
     url('ldap/usersbygroup/(?P<ldap_group>[^/]+)/(?P<id_user>[^/]+)[/]', 'ajax_ldap_users_by_group', name='ldap.userbygroup.ajax'),
     url('ldap/pop_ldap_user_mail/(?P<cn>[^/]+)[/]', 'ajax_ldap_pop_name_mail', name='ldap.pop_name_mail.ajax'),
-    
-    #Auto complete users in Logs
+
+    # Auto complete users in Logs
     url('^user/autocomplete[/]?$', 'ajax_autocomplete_users', name='user.autocomplete.ajax')
 
 )
@@ -222,33 +224,33 @@ urlpatterns += patterns('CadVlan.Acl.views',
     url('^acl/edit/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'edit', name='acl.edit',),
     url('^acl/script/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'script', name='acl.script',),
     url('^acl/apply/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'apply_acl', name='acl.apply',),
-    url('^acl/validate/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$','validate',name='acl.validate',),
+    url('^acl/validate/(?P<id_vlan>\d+)/(?P<network>v4|v6)[/]?$', 'validate', name='acl.validate',),
     url('^acl/template[/]?$', 'template_list', name='acl.template.list',),
     url('^acl/template/add/[/]?$', 'template_add', name='acl.template.add',),
     url('^acl/template/edit/(?P<template_name>.+)/(?P<network>IPv4|IPv6)[/]?$', 'template_edit', name='acl.template.edit',),
-    url('^acl/template/delete[/]?$','template_delete', name='acl.template.delete',),
-    
+    url('^acl/template/delete[/]?$', 'template_delete', name='acl.template.delete',),
+
 )
 
 # URL's Vip Requests
 urlpatterns += patterns('CadVlan.VipRequest.views',
-    url('^vip-request/token[/]?$', 'generate_token', name='vip-request.token',),                        
+    url('^vip-request/token[/]?$', 'generate_token', name='vip-request.token',),
     url('^vip-request/list[/]?$', 'search_list', name='vip-request.list',),
     url('^vip-request/find[/]?$', 'ajax_list_vips', name='vip-request.list.ajax',),
     url('^vip-request/ajax_view/(?P<id_vip>\d+)[/]?$', 'ajax_view_vip', name='vip.view.ajax',),
-    
-    
-    url('^vip-request/operation/delete?$', 'delete_vip',  name='vip.delete',),
+
+
+    url('^vip-request/operation/delete?$', 'delete_vip', name='vip.delete',),
     url('^vip-request/operation/valid?$', 'validate_vip', name='vip.valid',),
     url('^vip-request/operation/create?$', 'create_vip', name='vip.create',),
     url('^vip-request/operation/remove?$', 'remove_vip', name='vip.remove',),
-    
-    
+
+
     url('^vip-request/l7/operation/valid?$', 'validate_l7', name='l7.valid'),
     url('^vip-request/l7/operation/apply?$', 'apply_l7', name='l7.apply'),
     url('^vip-request/l7/operation/rollback?$', 'apply_rollback_l7', name='l7.rollback'),
-    
-    
+
+
     url('^vip-request/form[/]?$', 'add_form', name='vip-request.form',),
     url('^vip-request/form/external[/]?$', 'add_form_external', name='vip-request.form.external',),
     url('^vip-request/form/(?P<id_vip>\d+)[/]?$', 'edit_form', name='vip-request.edit',),
@@ -272,7 +274,7 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
     url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$', 'tab_l7filter', name='vip-request.tab.l7filter',),
     url('^vip-request/ajax_rule[/]?$', 'ajax_popular_rule', name='vip-request.rule.ajax',),
     url('^vip-request/ajax_rule/external[/]?$', 'ajax_popular_rule_external', name='vip-request.rule.ajax.external',),
-    
+
 )
 
 # URL's Event Log
@@ -331,7 +333,7 @@ urlpatterns += patterns('CadVlan.Filter.views',
 )
 
 # URL's Block Rules'
-urlpatterns += patterns('CadVlan.BlockRules.views', 
+urlpatterns += patterns('CadVlan.BlockRules.views',
     url('^block/form[/]?$', 'add_form', name='block.form',),
     url('^block/edit/(?P<id_env>\d+)[/]?$', 'edit_form', name='block.edit.form',),
     url('^rules/list/(?P<id_env>\d+)[/]?$', 'rules_list', name='block.rules.list',),
