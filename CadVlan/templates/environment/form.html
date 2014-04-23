@@ -213,6 +213,7 @@ $(document).ready(function() {
 	
 								</th>			
 							</tr>
+							{% if id_environment %}
 							{% for configuration in configurations_prefix %}
 							<tr>
 								<td>{{ configuration.subnet }}</td>
@@ -227,6 +228,7 @@ $(document).ready(function() {
 								</td>
 							</tr>
 							{% endfor %}
+							{% endif %}
 						</tbody>
 					</table>
 				</div>
