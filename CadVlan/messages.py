@@ -111,6 +111,7 @@ environment_messages = {
     'invalid_network':      u'A rede informada está inválida.',
     'invalid_prefix_ipv4':  u'O prefixo informado deve estar entre 0 e 32.',
     'invalid_prefix_ipv6':  u'O prefixo informado deve estar entre 0 e 128.',
+    'invalid_prefix':       u'O prefixo informado deve ser maior que o bloco da rede.',
     'success_configuration_insert':       u'Prefixo de ambiente incluído com sucesso.',
     'success_configuration_remove':       u'Prefixo de ambiente excluído com sucesso.',
 }

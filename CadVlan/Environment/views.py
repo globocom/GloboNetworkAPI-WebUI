@@ -418,7 +418,8 @@ def edit(request, id_environment):
                    "min_num_vlan_1": env.get("min_num_vlan_1"),
                    "max_num_vlan_1": env.get("max_num_vlan_1"),
                    "min_num_vlan_2": env.get("min_num_vlan_2"),
-                   "max_num_vlan_2": env.get("max_num_vlan_2")}
+                   "max_num_vlan_2": env.get("max_num_vlan_2"),
+                   'link': env.get('link')}
         env_form = AmbienteForm(env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
 
         # Forms

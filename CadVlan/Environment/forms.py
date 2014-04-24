@@ -262,6 +262,12 @@ class IpConfigForm(forms.Form):
                 v4oct4 = self.cleaned_data.get('v4oct4', '')
                 v4oct5 = self.cleaned_data.get('v4oct5', '')
 
+                try:
+                    if int(v4oct5) > int(prefix):
+                        self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix')])
+                except Exception:
+                    pass
+
                 network_ipv4 = v4oct1 + v4oct2 + v4oct3 + v4oct4 + v4oct5
                 self.cleaned_data['network_validate'] = v4oct1 + '.' + v4oct2 + '.' + v4oct3 + '.' + v4oct4 + '/' + v4oct5
 
@@ -282,6 +288,12 @@ class IpConfigForm(forms.Form):
                 v6oct8 = self.cleaned_data.get('v6oct8', '')
                 v6oct9 = self.cleaned_data.get('v6oct9', '')
 
+                try:
+                    if int(v6oct9) > int(prefix):
+                        self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix')])
+                except Exception:
+                    pass
+
                 network_ipv6 = v6oct1 + v6oct2 + v6oct3 + v6oct4 + v6oct5 + v6oct6 + v6oct7 + v6oct8 + v6oct9
                 self.cleaned_data['network_validate'] = v6oct1 + ':' + v6oct2 + ':' + v6oct3 + ':' + v6oct4 + ':' + v6oct5 + ':' + v6oct6 + ':' + v6oct7 + ':' + v6oct8 + '/' + v6oct9
 
@@ -289,4 +301,3 @@ class IpConfigForm(forms.Form):
                     self._errors['network_validate'] = self.error_class([environment_messages.get('invalid_network')])
 
             return self.cleaned_data
-
