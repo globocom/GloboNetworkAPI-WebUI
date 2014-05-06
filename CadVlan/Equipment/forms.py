@@ -65,7 +65,7 @@ class EquipForm(forms.Form):
             self.fields['modelo'].choices = ([(m['id'], m['nome']) for m in forms_aux["modelos"]])
        
         
-    nome = forms.CharField(label=u'Nome' , min_length=3, max_length=30, required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))   
+    nome = forms.CharField(label=u'Nome' , min_length=3, max_length=50, required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))   
     tipo_equipamento = forms.ChoiceField(label="Tipo equipamento",required=True,widget=forms.Select(attrs={'style': "width: 400px"}), error_messages=error_messages)
     marca = forms.ChoiceField(label="Marca" ,required=True, widget=forms.Select(attrs={'style': "width: 400px"}), error_messages=error_messages)
     modelo = forms.ChoiceField(label=u'Modelo' , required=True,  widget=forms.Select(attrs={'style': "width: 400px"}),error_messages=error_messages)
