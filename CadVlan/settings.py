@@ -17,7 +17,7 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
-CADVLAN_VERSION = '11.7'
+CADVLAN_VERSION = '11.8'
 
 MANAGERS = ADMINS
 
