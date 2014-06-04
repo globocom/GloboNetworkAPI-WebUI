@@ -680,7 +680,7 @@ def mount_ips(id_ipv4, id_ipv6, client_api):
     return form_ip
 
 
-def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client_api, edit = False, idt = False):
+def valid_form_and_submit(request, lists, finality_list, healthcheck_list, client_api, edit = False, idt = False):
     
     is_valid = True
     is_error = False
@@ -700,6 +700,14 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
     equip = valid_field_table_dynamic(request.POST.getlist('equip')) if "equip" in request.POST else None
     id_ip = valid_field_table_dynamic(request.POST.getlist('id_ip')) if "id_ip" in request.POST else None
     ip = valid_field_table_dynamic(request.POST.getlist('ip')) if "ip" in request.POST else None
+
+    environment_vip = request.POST["environment_vip"] if "environment_vip" in request.POST else None
+    healthcheck_options = []
+
+    if environment_vip:
+        client_ovip = client_api.create_option_vip()
+        healthcheck_options = client_ovip.buscar_healthchecks(int(environment_vip))
+        healthcheck_options = healthcheck_options.get('healthcheck_opt', [])
     
     #Environment - data
     finality = request.POST["finality"] if "finality" in request.POST else None
@@ -707,12 +715,11 @@ def valid_form_and_submit(request,lists, finality_list, healthcheck_list, client
     environment = request.POST["environment"] if "environment" in request.POST else None
     
     #Options - data
-    environment_vip = request.POST["environment_vip"] if "environment_vip" in request.POST else None
     
     form_inputs = RequestVipFormInputs(request.POST)
-    form_environment = RequestVipFormEnvironment(finality_list, finality, client, environment, client_api, request.POST)
+    form_environment    = RequestVipFormEnvironment(finality_list, finality, client, environment, client_api, request.POST)
     form_real = RequestVipFormReal(request.POST)
-    form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, request.POST)
+    form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, request.POST)
     id_vip_rule = idt if idt else ''
     form_options = RequestVipFormOptions(request, environment_vip, client_api, id_vip_rule, request.POST)
     form_ip = RequestVipFormIP(request.POST)
@@ -1283,60 +1290,67 @@ def tab_real_server(request, id_vip):
     else:
         return render_to_response(VIPREQUEST_TAB_REAL_SERVER, lists, context_instance=RequestContext(request))
 
+
 @log
 @login_required
 @has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True},])
 def tab_healthcheck(request, id_vip):
-    
+
     try:
         # Get user
         auth = AuthSession(request.session)
         client_api = auth.get_clientFactory()
-        
+
         lists = dict()
         lists['idt'] = id_vip
-        
+
         vip = client_api.create_vip().get_by_id(id_vip).get("vip")
+
+        finality = vip.get("finalidade")
+        client = vip.get("cliente")
+        environment = vip.get("ambiente")
+
+        environment_vip = client_api.create_environment_vip().search(None, finality, client, environment)
+        id_environment_vip = environment_vip.get('environment_vip').get('id')
+
+        client_ovip = client_api.create_option_vip()
+        healthcheck_options = client_ovip.buscar_healthchecks(int(id_environment_vip))
+        healthcheck_options = healthcheck_options.get('healthcheck_opt', [])
+
         vip['equipamento'] = validates_dict(vip, 'equipamento')
         vip['environments'] = validates_dict(vip, 'environments')
         vip['balancing'] = str(vip.get("metodo_bal")).upper()
         lists['vip'] = vip
-        
-        healthcheck_list =  client_api.create_ambiente().listar_healtchcheck_expect_distinct().get("healthcheck_expect")
-        
+
+        healthcheck_list = client_api.create_ambiente().listar_healtchcheck_expect_distinct().get("healthcheck_expect")
+
         #Already edited
         if request.method == "POST":
-            
-            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, request.POST)
+
+            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, request.POST)
             lists['form_healthcheck'] = form_healthcheck
-            
+
             if form_healthcheck.is_valid():
-                
-                healthcheck_type =  form_healthcheck.cleaned_data["healthcheck_type"]
-                healthcheck =  form_healthcheck.cleaned_data["healthcheck"]
-                excpect =  form_healthcheck.cleaned_data["excpect"]
-                
+
+                healthcheck_type = form_healthcheck.cleaned_data["healthcheck_type"]
+                healthcheck = form_healthcheck.cleaned_data["healthcheck"]
+                excpect = form_healthcheck.cleaned_data["excpect"]
+
                 if excpect is not None:
                     excpect = int(excpect)
-                
+
                 try:
-                    
-                    finality = vip.get("finalidade")
-                    client = vip.get("cliente")
-                    environment = vip.get("ambiente")
-                    
-                    environment_vip = client_api.create_environment_vip().search(None, finality, client, environment)
+
                     if environment_vip is None:
                         raise EnvironmentVipError(environment_vip)
-                    
-                    
+
                     client_api.create_vip().alter_healthcheck(id_vip, healthcheck_type, healthcheck, excpect)
                     messages.add_message(request, messages.SUCCESS, request_vip_messages.get("tab_edit_success") % 'healthcheck')
-                    
+
                 except (EnvironmentVipError, InvalidTimeoutValueError, InvalidBalMethodValueError, InvalidCacheValueError, InvalidPersistenceValueError, InvalidPriorityValueError, EquipamentoNaoExisteError, IpEquipmentError, IpError, RealServerPriorityError, RealServerWeightError, RealServerPortError, RealParameterValueError), e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, request_vip_messages.get("tab_edit_error") % 'healthcheck')
-                    
+
                     try:
                         raise e
                     except InvalidTimeoutValueError, e:
@@ -1350,11 +1364,10 @@ def tab_healthcheck(request, id_vip):
                     except InvalidPriorityValueError, e:
                         messages.add_message(request, messages.ERROR, request_vip_messages.get("error_priority"))
                     except EnvironmentVipError, e:
-                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") %( finality, client, environment ))
+                        messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_environment_vip") % (finality, client, environment))
                     except (EquipamentoNaoExisteError, IpEquipmentError, IpError, RealServerPriorityError, RealServerWeightError, RealServerPortError, RealParameterValueError), e:
                         messages.add_message(request, messages.ERROR, e)
-                    
-                    
+
                 except InvalidParameterError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
@@ -1364,19 +1377,17 @@ def tab_healthcheck(request, id_vip):
                 except Exception, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
-                    
-                    
+
         #Request to edit
         else:
             excpect = vip.get("id_healthcheck_expect")
             healthcheck_type = vip.get("healthcheck_type")
             healthcheck = vip.get("healthcheck")
-            
-            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, initial={"healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
-            
+
+            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, initial={"healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
+
             lists['form_healthcheck'] = form_healthcheck
-            
-        
+
     except VipNaoExisteError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, request_vip_messages.get("invalid_vip"))
@@ -1810,7 +1821,7 @@ def add_form_shared(request, client_api, form_acess = "", external = False):
             lists['form_inputs'] = RequestVipFormInputs()
             lists['form_environment'] = RequestVipFormEnvironment(finality_list)
             lists['form_real'] = RequestVipFormReal()
-            lists['form_healthcheck'] = RequestVipFormHealthcheck(healthcheck_list)
+            lists['form_healthcheck'] = RequestVipFormHealthcheck(healthcheck_list, [])
             lists['form_options'] = RequestVipFormOptions()
             lists['form_ip'] = RequestVipFormIP()
             
@@ -1889,9 +1900,13 @@ def edit_form_shared(request, id_vip, client_api, form_acess = "", external = Fa
             if id_healthcheck_expect is not None:
                 excpect =  client_api.create_ambiente().buscar_healthcheck_por_id(id_healthcheck_expect).get("healthcheck_expect").get("id")    
             
-            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, initial={"healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
+            client_ovip = client_api.create_option_vip()
+            healthcheck_options = client_ovip.buscar_healthchecks(int(environment_vip))
+            healthcheck_options = healthcheck_options.get('healthcheck_opt', [])
             
-            maxcon = vip.get("maxcon")            
+            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, initial={"healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
+            
+            maxcon = vip.get("maxcon")
             form_real = RequestVipFormReal(initial={"maxcom": maxcon})
             
             timeout = vip.get("timeout")
@@ -2040,7 +2055,7 @@ def popular_rule_shared(request, client_api):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         status_code = 500
-        
+
     # Returns Json
     return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_RULE, lists, context_instance=RequestContext(request)), status=status_code)
 
@@ -2050,28 +2065,41 @@ def popular_options_shared(request, client_api):
     lists = dict()
     status_code = None
 
-    try:    
+    try:
         environment_vip = get_param_in_request(request, 'environment_vip')
         id_vip = get_param_in_request(request, 'id_vip')
         if environment_vip is None:
             raise InvalidParameterError("Parâmetro inválido: O campo Ambiente Vip inválido ou não foi informado.")
-        
+
         client_ovip = client_api.create_option_vip()
-        
+
         lists['timeout'] = validates_dict(client_ovip.buscar_timeout_opcvip(environment_vip), 'timeout_opt')
         lists['balancing'] = validates_dict(client_ovip.buscar_balanceamento_opcvip(environment_vip), 'balanceamento_opt')
         lists['caches'] = validates_dict(client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
         lists['persistence'] = validates_dict(client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
         lists['rules'] = validates_dict(client_ovip.buscar_rules(environment_vip, id_vip), 'name_rule_opt')
         #lists['rules'] = [{u'content': u''}, {u'content': u'haieie'}]
-        
+
+#         healthcheck_list = client_api.create_ambiente().listar_healtchcheck_expect_distinct().get("healthcheck_expect")
+        healthcheck_options = client_ovip.buscar_healthchecks(environment_vip)
+        healthcheck_options_list = healthcheck_options.get('healthcheck_opt', [])
+
+        for index, healthcheck in enumerate(healthcheck_options_list):
+            healthcheck['checked'] = (index == 0)
+            healthcheck['index'] = index
+
+        lists['healthcheck_options_list'] = healthcheck_options_list
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         status_code = 500
-        
+
     # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_OPTIONS, lists, context_instance=RequestContext(request)), status=status_code)
+    try:
+        return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_OPTIONS, lists, context_instance=RequestContext(request)), status=status_code)
+    except Exception, e:
+        print e
 
 
 def popular_add_healthcheck_shared(request, client_api):

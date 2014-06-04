@@ -124,16 +124,16 @@ class RequestVipFormOptions(forms.Form):
     balancing = forms.ChoiceField(label=u'Método de balanceamento',  required=True, error_messages=error_messages,  widget=forms.Select(attrs={"style": "width: 300px"}))
     rules = forms.ChoiceField(label=u'Regras',  required=False, error_messages=error_messages,  widget=forms.Select(attrs={"style": "width: 300px"}))
 
+
 @autostrip
 class RequestVipFormHealthcheck(forms.Form):
-    
-    def __init__(self, healthcheck_list, *args, **kwargs):
+
+    def __init__(self, healthcheck_list, healthcheck_options, *args, **kwargs):
         super(RequestVipFormHealthcheck, self).__init__(*args, **kwargs)
         self.fields['excpect'].choices = [(st['id'], st['expect_string']) for st in healthcheck_list]
-    
-    CHOICES = (('TCP', 'TCP'), ('UDP', 'UDP'), ('HTTP', 'HTTP')) 
-    
-    healthcheck_type = forms.ChoiceField(label=u'Healthcheck',  required=True, error_messages=error_messages, choices=CHOICES,  initial='TCP',  widget=forms.RadioSelect(renderer=RadioCustomRenderer))
+        self.fields['healthcheck_type'].choices = [(healthcheck['name'], healthcheck['name']) for healthcheck in healthcheck_options]
+
+    healthcheck_type = forms.ChoiceField(label=u'Healthcheck',  required=True, error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
     healthcheck = forms.CharField(label=u'Healthcheck',  min_length=3, max_length=100, required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     excpect = forms.ChoiceField(label=u'HTTP Expect String',  required=True, error_messages=error_messages,  widget=forms.Select(attrs={"style": "width: 185px"}))
     excpect_new = forms.CharField(label=u'',required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 185px"}))
@@ -141,18 +141,17 @@ class RequestVipFormHealthcheck(forms.Form):
     def clean(self):
         cleaned_data = self.cleaned_data
 
-        healthcheck_type  = cleaned_data.get("healthcheck_type")
-        healthcheck  = cleaned_data.get("healthcheck")
+        healthcheck_type = cleaned_data.get("healthcheck_type")
+        healthcheck = cleaned_data.get("healthcheck")
 
-        if ( healthcheck_type == "HTTP" ):
-            
-            if ( healthcheck == "" ): 
+        if healthcheck_type == 'HTTP':
+            if healthcheck == "":
                 self._errors["healthcheck"] = self.error_class(["Este campo é obrigatório com a opção HTTP selecionada."])
-                
         else:
             cleaned_data["excpect"] = None
-                
+
         return cleaned_data
+
 
 @autostrip
 class HealthcheckForm(forms.Form):

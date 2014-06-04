@@ -233,6 +233,8 @@
 		$("#id_balancing").html('');
 		$("#id_environment_vip").val('');
 		$("#id_rules").html('');
+		$("#id_healthcheck_type_content").html('');
+		$("#table_healthcheck").hide();
 		
 		$("#id_filter_l7").removeAttr('disabled');
 		$("#id_equip_name").attr('disabled', 'disabled');
@@ -268,6 +270,8 @@
 		$("#id_balancing").html('');
 		$("#id_environment_vip").val('');
 		$("#id_rules").html('');
+		$("#id_healthcheck_type_content").html('');
+		$("#table_healthcheck").hide();
 		
 		$("#id_filter_l7").removeAttr('disabled');
 		$("#id_equip_name").attr('disabled', 'disabled');
@@ -297,6 +301,8 @@
 					$("#id_balancing").html(data.balancing);
 					$("#id_environment_vip").val(id_environment_vip);
 					$("#id_rules").html(data.rules);
+					$("#id_healthcheck_type_content").html(data.healthcheck_list);
+					$("#table_healthcheck").hide();
 					
 					$("#id_equip_name").removeAttr('disabled');
 					$("#btn_new_real").removeAttr('disabled');
@@ -362,7 +368,7 @@
 	// RULES END
 			
 	$("input[name=healthcheck_type]").live("change", function(){
-		if ( $(this).val() == "HTTP" ) {
+		if ($(this).val() == "HTTP") {
 			$("#table_healthcheck").show();
 		} else {
 			$("#table_healthcheck").hide();
