@@ -186,7 +186,7 @@ $(document).ready(function() {
 				{{ form_healthcheck.healthcheck_type }}
 				<p id="error">
 				{% if form_healthcheck.healthcheck_type.errors %} 
-					{% for error in field.errors %}
+					{% for error in form_healthcheck.healthcheck_type.errors %}
 						{{ error|escape }}
 					{% endfor %}
 				{% endif %}
