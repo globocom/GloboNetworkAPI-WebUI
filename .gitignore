@@ -4,3 +4,6 @@
 *.pyc
 .pydevproject
 org.eclipse.core.resources.prefs
+**/ACLS/*
+*.idea
+

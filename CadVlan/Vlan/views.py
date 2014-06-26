@@ -265,7 +265,8 @@ def vlan_form(request):
 
         if request.method == 'POST':
 
-            form = VlanForm(environment, request.POST)
+            add_form = True
+            form = VlanForm(environment, add_form, request.POST)
 
             lists['form'] = form
 
@@ -277,16 +278,19 @@ def vlan_form(request):
                 description = form.cleaned_data['description']
                 number = form.cleaned_data['number']
                 environment_id = form.cleaned_data['environment']
+                network_ipv4 = form.cleaned_data['network_ipv4']
+                network_ipv6 = form.cleaned_data['network_ipv6']
 
                 # Salva a Vlan
-                vlan = client.create_vlan().insert_vlan(environment_id, name, number, description, acl_file, acl_file_v6)
+                vlan = client.create_vlan().insert_vlan(environment_id, name, number, description, acl_file, acl_file_v6, network_ipv4, network_ipv6)
                 messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
                 id_vlan = vlan.get('vlan').get('id')
                 # redireciona para a listagem de vlans
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
         # Get
         if request.method == 'GET':
-            lists['form'] = VlanForm(environment)
+            add_form = True
+            lists['form'] = VlanForm(environment, add_form)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -307,6 +311,8 @@ def vlan_edit(request, id_vlan):
     lists['form_error'] = "False"
     vlan = None
 
+    add_form = False
+
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -323,12 +329,12 @@ def vlan_edit(request, id_vlan):
             environment = client.create_ambiente().list_all()
             vlan = vlan.get("vlan")
 
-            lists['form'] = VlanForm(environment, initial={'name': vlan.get('nome'), "number": vlan.get('num_vlan'), "environment": vlan.get("ambiente"), "description": vlan.get('descricao'), "acl_file": vlan.get('acl_file_name'), "acl_file_v6": vlan.get('acl_file_name_v6')})
+            lists['form'] = VlanForm(environment, add_form, initial={'name': vlan.get('nome'), "number": vlan.get('num_vlan'), "environment": vlan.get("ambiente"), "description": vlan.get('descricao'), "acl_file": vlan.get('acl_file_name'), "acl_file_v6": vlan.get('acl_file_name_v6')})
 
         if request.method == 'POST':
 
             environment = client.create_ambiente().list_all()
-            form = VlanForm(environment, request.POST)
+            form = VlanForm(environment, add_form, request.POST)
             lists['form'] = form
             vlan = vlan.get('vlan')
 

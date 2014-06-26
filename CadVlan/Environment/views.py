@@ -217,9 +217,13 @@ def add_configuration(request, id_environment):
 
     try:
 
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        net_type_list = client.create_tipo_rede().listar()
+
         context = dict()
 
-        form = IpConfigForm(request.POST or None)
+        form = IpConfigForm(net_type_list, request.POST or None)
 
         # Get user auth
         auth = AuthSession(request.session)
@@ -236,11 +240,12 @@ def add_configuration(request, id_environment):
 
             network = form.cleaned_data['network_validate']
             prefix = form.cleaned_data['prefix']
-            network_type = form.cleaned_data['ip_version']
+            ip_version = form.cleaned_data['ip_version']
+            network_type = form.cleaned_data['net_type']
 
-            environment_client.configuration_save(id_environment, network, prefix, network_type)
+            environment_client.configuration_save(id_environment, network, prefix, ip_version, network_type)
             messages.add_message(request, messages.SUCCESS, environment_messages.get("success_configuration_insert"))
-            context["form"] = IpConfigForm()
+            context["form"] = IpConfigForm(net_type_list)
 
     except AmbienteNaoExisteError, e:
         messages.add_message(request, messages.ERROR, e)
@@ -360,7 +365,11 @@ def insert_ambiente(request):
                 # If invalid, send all error messages in fields
                 lists['ambiente'] = ambiente_form
 
-        config_forms.append(IpConfigForm())
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        net_type_list = client.create_tipo_rede().listar()
+
+        config_forms.append(IpConfigForm(net_type_list))
 
         lists['config_forms'] = config_forms
 
