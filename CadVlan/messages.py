@@ -213,6 +213,10 @@ acl_messages = {
     'field_duplicated': u'O arquivo %s já existe.',
     'invalid_template': u'Template inválido',
     'success_remove': u'Todas os Templates selecionados foram excluídos com sucesso.',
+
+    'error_apply_ivalid_acl': u'Não foi possível aplicar ACL a nenhum dos equipamentos da(s) rede(s) %s, pois a ACL é inválida.',
+    'seccess_apply_valid_acl': u'Acl aplicada a todos os equipamentos da(s) rede(s) %s com sucesso.',
+    'error_apply_acl_for_network': u'Não foi possível aplicar ACL a nenhum dos equipamentos da(s) rede(s) %s.',
 }
 
 request_vip_messages = {

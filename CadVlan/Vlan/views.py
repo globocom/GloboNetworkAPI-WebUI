@@ -26,11 +26,13 @@ from django.http import HttpResponseServerError, HttpResponse, HttpResponseRedir
 from django.template import loader
 from CadVlan.Vlan.business import montaIPRede , cache_list_vlans
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.messages import vlan_messages, error_messages, network_ip_messages
+from CadVlan.messages import vlan_messages, error_messages, network_ip_messages, \
+    acl_messages
 from django.core.urlresolvers import reverse
 from CadVlan.Acl.acl import checkAclCvs, deleteAclCvs
 from CadVlan.Util.cvs import CVSCommandError, CVSError
 from CadVlan.Util.Enum import NETWORK_TYPES
+from __builtin__ import Exception
 
 logger = logging.getLogger(__name__)
 
@@ -734,10 +736,15 @@ def create_network(request, id_vlan):
             networks_activated = False
             networks_was_activated = True
 
+            equipments_ipv4 = list()
+            equipments_ipv6 = list()
+
             if form.is_valid():
 
                 # If vlan with parameter id_vlan  don't exist, VlanNaoExisteError exception will be called
                 vlan = client.create_vlan().get(id_vlan)
+
+                environment = client.create_ambiente().buscar_por_id(vlan['vlan']["ambiente"]).get("ambiente")
 
                 # All ids to be activated
                 ids = split_to_array(form.cleaned_data['ids_create'])
@@ -749,8 +756,10 @@ def create_network(request, id_vlan):
 
                     if network_type == 'v4':
                         net = client.create_network().get_network_ipv4(id_net)
+                        equipments_ipv4.extend(list_equipment_by_network_ip4(client, id_net))
                     else:
                         net = client.create_network().get_network_ipv6(id_net)
+                        equipments_ipv6.extend(list_equipment_by_network_ip6(client, id_net))
 
                     if net['network']['active'] == 'True':
                         networks_activated = True
@@ -759,6 +768,10 @@ def create_network(request, id_vlan):
 
                 # Create networks
                 client.create_network().create_networks(ids, id_vlan)
+
+                apply_acl_for_network_v4(request, client, equipments_ipv4, vlan, environment)
+
+                apply_acl_for_network_v6(request, client, equipments_ipv6, vlan, environment)
 
                 if networks_activated == True:
                     messages.add_message(request, messages.ERROR, network_ip_messages.get("networks_activated"))
@@ -772,6 +785,7 @@ def create_network(request, id_vlan):
                     messages.add_message(request, messages.ERROR, error_messages.get("vlan_select_one"))
                 else:
                     messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
     except VlanNaoExisteError, e:
         logger.error(e)
         return redirect('vlan.search.list')
@@ -780,3 +794,106 @@ def create_network(request, id_vlan):
         messages.add_message(request, messages.ERROR, e)
 
     return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
+
+
+def list_equipment_by_network_ip4(client, id_net):
+
+    equipments = []
+
+    ips = client.create_ip().find_ip4_by_network(id_net).get('ips')
+
+    for ip in ips:
+        if isinstance(ip.get('equipamento'), list):
+            for equip in ip.get('equipamento'):
+                new_ip = dict()
+                new_ip['equipamento'] = dict()
+                new_ip['equipamento']['oct1'] = ip['oct1']
+                new_ip['equipamento']['oct2'] = ip['oct2']
+                new_ip['equipamento']['oct3'] = ip['oct3']
+                new_ip['equipamento']['oct4'] = ip['oct4']
+                new_ip['equipamento']['descricao'] = ip['descricao']
+                new_ip['equipamento']['nome'] = equip.get('nome')
+                new_ip['equipamento']['id'] = equip.get('id')
+                equipments.append(new_ip)
+
+        else:
+            equipments.append(ip)
+
+    return equipments
+
+
+def list_equipment_by_network_ip6(client, id_net):
+
+    equipments = []
+
+    ips = client.create_ip().find_ip6_by_network(id_net).get('ips')
+
+    for ip in ips:
+        if isinstance(ip.get('equipamento'), list):
+            for equip in ip.get('equipamento'):
+                new_ip = dict()
+                new_ip['equipamento'] = dict()
+                new_ip['equipamento']['block1'] = ip['block1']
+                new_ip['equipamento']['block2'] = ip['block2']
+                new_ip['equipamento']['block3'] = ip['block3']
+                new_ip['equipamento']['block4'] = ip['block4']
+                new_ip['equipamento']['block5'] = ip['block5']
+                new_ip['equipamento']['block6'] = ip['block6']
+                new_ip['equipamento']['block7'] = ip['block7']
+                new_ip['equipamento']['block8'] = ip['block8']
+                new_ip['equipamento']['descricao'] = ip['descricao']
+                new_ip['equipamento']['equip_name'] = equip.get('nome')
+                new_ip['equipamento']['id'] = equip.get('id')
+                equipments.append(new_ip)
+
+        else:
+            equipments.append(ip)
+
+    return equipments
+
+
+def apply_acl_for_network_v4(request, client, equipments_v4, vlan, environment):
+
+    try:
+
+        if equipments_v4:
+            if vlan['vlan']['acl_valida'] == 'True':
+                apply_acl_for_network(request, client, equipments_v4, vlan, environment, 'v4')
+                messages.add_message(request, messages.SUCCESS, acl_messages.get("seccess_apply_valid_acl") % 'ipv4')
+            else:
+                messages.add_message(request, messages.WARNING, acl_messages.get("error_apply_ivalid_acl") % 'ipv4')
+
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, acl_messages.get("error_apply_acl_for_network") % 'ipv4')
+
+
+def apply_acl_for_network_v6(request, client, equipments_v6, vlan, environment):
+
+    try:
+
+        if equipments_v6:
+            if vlan['vlan']['acl_valida_v6'] == 'True':
+                apply_acl_for_network(request, client, equipments_v6, vlan, environment, 'v6')
+                messages.add_message(request, messages.SUCCESS, acl_messages.get("seccess_apply_valid_acl") % 'ipv6')
+            else:
+                messages.add_message(request, messages.WARNING, acl_messages.get("error_apply_ivalid_acl") % 'ipv6')
+
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, acl_messages.get("error_apply_acl_for_network") % 'ipv6')
+
+
+def apply_acl_for_network(request, client, equipments, vlan, environment, network_type):
+
+    try:
+
+        apply_result = client.create_vlan().apply_acl(equipments, vlan.get("vlan"), environment, network_type)
+
+        is_apply = apply_result.get('is_apply')
+
+        if is_apply != '0':
+            raise Exception('Não foi possível aplicar ACL aos equipamentos da rede')
+
+    except Exception, e:
+        raise e
