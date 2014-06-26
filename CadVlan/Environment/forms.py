@@ -168,6 +168,13 @@ class OctFieldV6(forms.CharField):
 
 class IpConfigForm(forms.Form):
 
+    def __init__(self, net_type_list, *args, **kwargs):
+        super(IpConfigForm, self).__init__(*args, **kwargs)
+        net_choices = [(net["id"], net["name"]) for net in net_type_list["net_type"]]
+        net_choices.insert(0, ('', '-'))
+
+        self.fields['net_type'].choices = net_choices
+
     ip_version = forms.ChoiceField(
 
         label="Rede IPv4/IPv6",
@@ -238,6 +245,13 @@ class IpConfigForm(forms.Form):
                 'style': "width: 26px"
             }
         )
+    )
+
+    net_type = forms.ChoiceField(
+        label="Tipo de Rede",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={"style": "width: 180px"})
     )
 
     network_validate = forms.CharField(
