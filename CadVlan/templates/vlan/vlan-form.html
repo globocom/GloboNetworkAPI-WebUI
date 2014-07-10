@@ -120,8 +120,55 @@ $(document).ready(function() {
    $("#id_acl_file_v6").mouseover(function() {
 	   $(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
    });
+
+   get_environment_configuration_available();
+   
+   $('#id_environment').change(function() {
+	   
+	   $('#id_network_ipv4').val($('option:first', this).val());
+	   $('#id_network_ipv6').val($('option:first', this).val());
+	   
+	   get_environment_configuration_available();
+	   
+	});
    
 })
+
+function get_environment_configuration_available() {
+	
+	var environment_id = $('#id_environment').val();
+	
+	$.ajax({
+		data: {environment_id: environment_id},
+		url: "{% url vlan.get.available.environment.configuration %}",
+		method: 'GET',
+		success: function(data) {
+			
+			data = $.parseJSON(data);
+			
+			var network_ipv4 = '';
+			var network_ipv6 = '';
+			
+			if (data.available_environment_config_ipv4 == true) {
+				$('#id_network_ipv4').parent().show();
+			} else {
+				$('#id_network_ipv4').parent().hide();
+			}
+			
+			if (data.available_environment_config_ipv6 == true) {
+				$('#id_network_ipv6').parent().show();
+			} else {
+				
+				$('#id_network_ipv6').parent().hide();
+			}
+		},
+		error: function(data) {
+			
+			console.log(data);
+		}
+	});
+}
+
 </script>
 {% endblock %}
 
@@ -163,8 +210,6 @@ $(document).ready(function() {
 					
 				</div>
 			{% endfor %}
-			
-			</div>
 			
 			<div class="separator spacer"></div>
 			

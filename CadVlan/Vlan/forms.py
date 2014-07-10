@@ -55,17 +55,13 @@ class VlanForm(forms.Form):
                         ('1', 'Sim'),
                       )
 
-    def __init__(self, environment_list, add_form, *args, **kwargs):
+    def __init__(self, environment_list, *args, **kwargs):
         super(VlanForm, self).__init__(*args, **kwargs)
 
         env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
         env_choices.insert(0, (0, "-"))
 
         self.fields['environment'].choices = env_choices
-
-        if not add_form:
-            del self.fields['network_ipv4']
-            del self.fields['network_ipv6']
 
     name = forms.CharField(label="Nome", required=True, min_length=3, max_length=50, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     number = forms.IntegerField(label="Número", required=True, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px", "maxlength":"9"}))
@@ -74,8 +70,8 @@ class VlanForm(forms.Form):
     acl_file_v6 = forms.CharField(label="Acl - IPv6", required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     description = forms.CharField(label="Descrição", required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     apply_vlan = forms.BooleanField(widget=forms.HiddenInput(), label='', required=False)
-    network_ipv4 = forms.ChoiceField(label='Adicionar rede IPv4 automaticamente', required=False, choices=CHOICES_NETWORK)
-    network_ipv6 = forms.ChoiceField(label='Adicionar rede IPv6 automaticamente', required=False, choices=CHOICES_NETWORK)
+    network_ipv4 = forms.ChoiceField(label='Adicionar rede IPv4 automaticamente', required=False, choices=CHOICES_NETWORK, widget=forms.Select())
+    network_ipv6 = forms.ChoiceField(label='Adicionar rede IPv6 automaticamente', required=False, choices=CHOICES_NETWORK, widget=forms.Select())
 
     def clean_environment(self):
         if int(self.cleaned_data['environment']) <= 0:

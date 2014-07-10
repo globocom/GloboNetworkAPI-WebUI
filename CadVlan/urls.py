@@ -121,6 +121,7 @@ urlpatterns += patterns('CadVlan.Vlan.views',
     url('^vlan/delete/network/(?P<id_vlan>\d+)[/]?$', 'delete_all_network', name='vlan.network.delete',),
     url('^vlan/create/(?P<id_vlan>\d+)[/]?$', 'create', name='vlan.create'),
     url('^vlan/create/network/(?P<id_vlan>\d+)[/]?$', 'create_network', name='vlan.create.network'),
+    url('^vlan/form/get/available/environment/configuration/by/environment/id[/]?$', 'ajax_get_available_ip_config_by_environment_id', name='vlan.get.available.environment.configuration'),
 )
 
 # URL's Network

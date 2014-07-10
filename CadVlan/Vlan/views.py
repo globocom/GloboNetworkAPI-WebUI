@@ -25,7 +25,7 @@ from CadVlan.Util.utility import DataTablePaginator, acl_key, \
 from django.http import HttpResponseServerError, HttpResponse, HttpResponseRedirect
 from django.template import loader
 from CadVlan.Vlan.business import montaIPRede , cache_list_vlans
-from CadVlan.Util.shortcuts import render_to_response_ajax
+from CadVlan.Util.shortcuts import render_to_response_ajax, render_json
 from CadVlan.messages import vlan_messages, error_messages, network_ip_messages, \
     acl_messages
 from django.core.urlresolvers import reverse
@@ -33,6 +33,7 @@ from CadVlan.Acl.acl import checkAclCvs, deleteAclCvs
 from CadVlan.Util.cvs import CVSCommandError, CVSError
 from CadVlan.Util.Enum import NETWORK_TYPES
 from __builtin__ import Exception
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -267,8 +268,7 @@ def vlan_form(request):
 
         if request.method == 'POST':
 
-            add_form = True
-            form = VlanForm(environment, add_form, request.POST)
+            form = VlanForm(environment, request.POST)
 
             lists['form'] = form
 
@@ -291,8 +291,7 @@ def vlan_form(request):
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
         # Get
         if request.method == 'GET':
-            add_form = True
-            lists['form'] = VlanForm(environment, add_form)
+            lists['form'] = VlanForm(environment)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -313,8 +312,6 @@ def vlan_edit(request, id_vlan):
     lists['form_error'] = "False"
     vlan = None
 
-    add_form = False
-
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -331,12 +328,12 @@ def vlan_edit(request, id_vlan):
             environment = client.create_ambiente().list_all()
             vlan = vlan.get("vlan")
 
-            lists['form'] = VlanForm(environment, add_form, initial={'name': vlan.get('nome'), "number": vlan.get('num_vlan'), "environment": vlan.get("ambiente"), "description": vlan.get('descricao'), "acl_file": vlan.get('acl_file_name'), "acl_file_v6": vlan.get('acl_file_name_v6')})
+            lists['form'] = VlanForm(environment, initial={'name': vlan.get('nome'), "number": vlan.get('num_vlan'), "environment": vlan.get("ambiente"), "description": vlan.get('descricao'), "acl_file": vlan.get('acl_file_name'), "acl_file_v6": vlan.get('acl_file_name_v6')})
 
         if request.method == 'POST':
 
             environment = client.create_ambiente().list_all()
-            form = VlanForm(environment, add_form, request.POST)
+            form = VlanForm(environment, request.POST)
             lists['form'] = form
             vlan = vlan.get('vlan')
 
@@ -903,3 +900,44 @@ def apply_acl_for_network(request, client, equipments, vlan, environment, networ
 
     except Exception, e:
         raise e
+
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def ajax_get_available_ip_config_by_environment_id(request):
+
+    if request.method == 'GET':
+        environment_id = request.GET.get('environment_id')
+
+        context = {}
+        available_environment_config_ipv4 = False
+        available_environment_config_ipv6 = False
+
+        if int(environment_id):
+
+            try:
+
+                auth = AuthSession(request.session)
+                client = auth.get_clientFactory()
+                env_list = client.create_ambiente().configuration_list_all(environment_id)
+
+                lists_configuration = env_list.get('lists_configuration')
+
+                for config in lists_configuration:
+                    if config.get('type', '').upper() == 'V4':
+                        available_environment_config_ipv4 = True
+                    if config.get('type', '').upper() == 'V6':
+                        available_environment_config_ipv6 = True
+
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+            except BaseException, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+
+    context['available_environment_config_ipv4'] = available_environment_config_ipv4
+    context['available_environment_config_ipv6'] = available_environment_config_ipv6
+
+    return render_json(json.dumps(context))
