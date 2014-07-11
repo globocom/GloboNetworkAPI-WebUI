@@ -282,11 +282,7 @@ class IpConfigForm(forms.Form):
                 except Exception:
                     pass
 
-                network_ipv4 = v4oct1 + v4oct2 + v4oct3 + v4oct4 + v4oct5
                 self.cleaned_data['network_validate'] = v4oct1 + '.' + v4oct2 + '.' + v4oct3 + '.' + v4oct4 + '/' + v4oct5
-
-                if len(network_ipv4) < 10:
-                    self._errors['network_validate'] = self.error_class([environment_messages.get('invalid_network')])
 
             else:
                 if prefix not in range(129):
@@ -308,10 +304,6 @@ class IpConfigForm(forms.Form):
                 except Exception:
                     pass
 
-                network_ipv6 = v6oct1 + v6oct2 + v6oct3 + v6oct4 + v6oct5 + v6oct6 + v6oct7 + v6oct8 + v6oct9
                 self.cleaned_data['network_validate'] = v6oct1 + ':' + v6oct2 + ':' + v6oct3 + ':' + v6oct4 + ':' + v6oct5 + ':' + v6oct6 + ':' + v6oct7 + ':' + v6oct8 + '/' + v6oct9
-
-                if len(network_ipv6) < 18:
-                    self._errors['network_validate'] = self.error_class([environment_messages.get('invalid_network')])
 
             return self.cleaned_data

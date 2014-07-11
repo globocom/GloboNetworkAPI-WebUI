@@ -40,7 +40,6 @@ def login(request):
 
         form = LoginForm(request.POST)
         form_pass = PassForm()
-        
 
         if form.is_valid():
 

@@ -45,27 +45,6 @@ class NetworkForm(forms.Form):
     net_type = forms.ChoiceField(label="Tipo de Rede", required=True, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 180px"}))
     env_vip = forms.ChoiceField(label="Ambiente VIP", required=False, choices=[(0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 340px"}))
     
-    def clean_networkv4(self):
-        vers = self.cleaned_data['ip_version']
-        net4 = self.cleaned_data['networkv4']
-        
-        if vers == "0":
-            if net4 == None or len(net4) < 10:
-                raise forms.ValidationError('A rede informada está inválida')
-            
-        return self.cleaned_data['networkv4']
-    
-    def clean_networkv6(self):
-        vers = self.cleaned_data['ip_version']
-        net6 = self.cleaned_data['networkv6']
-        
-        if vers == "1":
-            if net6 == None or len(net6) < 18:
-                raise forms.ValidationError('A rede informada está inválida')
-            
-        return self.cleaned_data['networkv6']
-    
-    
 class NetworkEditForm(forms.Form):
     
     def __init__(self, net_type_list, env_vip_list, *args, **kwargs):
