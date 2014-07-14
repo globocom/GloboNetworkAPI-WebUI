@@ -34,7 +34,7 @@ def get_users(ldap):
     """
     Returns all users from LDAP in parse form list
     
-    @param ldap: Ldap
+    :param ldap: Ldap
     """ 
     try:
     
@@ -57,10 +57,10 @@ def get_users_search(ldap, pattern, lock=False, policy=False):
     """
     Returns all users from LDAP in parse form list
     
-    @param ldap: Ldap
-    @param pattern: Type of User to be searched (PATTERN_TYPES)
-    @param lock: True or False, determines whether data will be fetched lock
-    @param policy: True or False, determines whether data will be fetched policies
+    :param ldap: Ldap
+    :param pattern: Type of User to be searched (PATTERN_TYPES)
+    :param lock: True or False, determines whether data will be fetched lock
+    :param policy: True or False, determines whether data will be fetched policies
     """ 
     try:
     
@@ -95,8 +95,8 @@ def get_groups(ldap, cn = None):
     """
     Returns all groups from LDAP in parse form list
     
-    @param ldap: Ldap
-    @param cn: cn of Group.
+    :param ldap: Ldap
+    :param cn: cn of Group.
     """ 
     try:
     
@@ -124,7 +124,7 @@ def get_policies(ldap):
     """
     Returns all policies from LDAP in parse form list
     
-    @param ldap: Ldap
+    :param ldap: Ldap
     """ 
     try:
     
@@ -147,7 +147,7 @@ def get_sudoers(ldap):
     """
     Returns all sudoers from LDAP in parse form list
     
-    @param ldap: Ldap
+    :param ldap: Ldap
     """ 
     try:
     
@@ -175,7 +175,7 @@ def gidNumber_suggest(ldap):
     """
     Suggested gidNumber
     
-    @param ldap: Ldap
+    :param ldap: Ldap
     """ 
     try:
         suggest = ''
@@ -197,8 +197,8 @@ def uidNumber_suggest(ldap, pattern):
     """
     Suggested uidNumber
     
-    @param ldap: Ldap
-    @param pattern: Type of User to be searched (PATTERN_TYPES)
+    :param ldap: Ldap
+    :param pattern: Type of User to be searched (PATTERN_TYPES)
     """ 
     try:
         suggest = ''

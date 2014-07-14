@@ -11,7 +11,7 @@ from CadVlan.Util.utility import check_regex
 def montaIPRede(listaIPS, ip4 = True):
     '''
     Recebe uma lista com as partes de IPV4 ou IPV6 e os concatena gerando uma unica string com o ip
-    @param listaIPS - lista com os ips
+    :param listaIPS - lista com os ips
     @ip4 - padrao true, para diferenciar se é uma lista com ip4 ou ip6
     '''
     

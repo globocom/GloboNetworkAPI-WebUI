@@ -27,9 +27,9 @@ class Cvs():
     def remove(cls, archive):
         '''Execute command remove in cvs
         
-        @param archive: file to be remove 
+        :param archive: file to be remove 
         
-        @raise CVSCommandError: Failed to execute command
+        :raise CVSCommandError: Failed to execute command
         '''
         try:
     
@@ -50,9 +50,9 @@ class Cvs():
     def add(cls, archive):
         '''Execute command add in cvs
         
-        @param archive: file to be add 
+        :param archive: file to be add 
         
-        @raise CVSCommandError: Failed to execute command
+        :raise CVSCommandError: Failed to execute command
         '''
         try:
     
@@ -72,10 +72,10 @@ class Cvs():
     def commit(cls, archive, comment):
         '''Execute command commit in cvs
         
-        @param archive: file to be committed
-        @param comment: comments
+        :param archive: file to be committed
+        :param comment: comments
         
-        @raise CVSCommandError: Failed to execute command
+        :raise CVSCommandError: Failed to execute command
         '''
         try:
     
@@ -95,7 +95,7 @@ class Cvs():
     def synchronization(cls):
         '''Execute command update in cvs
         
-        @raise CVSCommandError: Failed to execute command
+        :raise CVSCommandError: Failed to execute command
         '''
         try:
             (status, output) = commands.getstatusoutput("cvs update")

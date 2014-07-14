@@ -31,9 +31,9 @@ def check_regex(string, regex):
 def is_valid_uri(param):
     '''Checks if the parameter is a valid uri.
     
-    @param param: Value to be validated.
+    :param param: Value to be validated.
     
-    @return True if the parameter has a valid uri value, or False otherwise.  
+    :return True if the parameter has a valid uri value, or False otherwise.  
     '''    
     pattern = r"^[a-zA-Z0-9\\-_\\\-\\.!\\~\\*'\\(\\);/\\?:\\@\\&=\\{\\}\\#\\\[\\\]\\,]*$"
     return re.match(pattern, param)
@@ -41,9 +41,9 @@ def is_valid_uri(param):
 def is_valid_cn(param):
     '''Checks if the parameter is a valid cn.
     
-    @param param: Value to be validated.
+    :param param: Value to be validated.
     
-    @return True if the parameter has a valid cn value, or False otherwise.  
+    :return True if the parameter has a valid cn value, or False otherwise.  
     '''   
     pattern = r"^[a-zA-Z0-9\\-_\\\-]*$"
     return re.match(pattern, param)
@@ -51,9 +51,9 @@ def is_valid_cn(param):
 def is_valid_command(param):
     '''Check if the parameter is a valid command.
     
-    @param param: Value to be validated.
+    :param param: Value to be validated.
     
-    @return True if the parameter is a valid command, or False otherwise.
+    :return True if the parameter is a valid command, or False otherwise.
     '''
     pattern = r"^[a-zA-Z0-9\!\@\#\$\%\&\*\/\_\\\-\(\)\'\"\+\=\<\>\,\.\[\]\{\}\|\?\;\:\ ]*$"
     return re.match(pattern, param)
@@ -61,9 +61,9 @@ def is_valid_command(param):
 def is_valid_phone(param):
     '''Check if the parameter is a valid phone number.
     
-    @param param: Value to be validated.
+    :param param: Value to be validated.
     
-    @return True if the parameter is a valid phone number, or False otherwise.
+    :return True if the parameter is a valid phone number, or False otherwise.
     '''
     pattern = r"^[0-9\\\-\\(\\)]*$"
     return re.match(pattern, param)
@@ -71,9 +71,9 @@ def is_valid_phone(param):
 def convert_string_to_boolean(param):
     '''Convert the parameter of string to boolean.
 
-    @param param: parameter to be converted.
+    :param param: parameter to be converted.
 
-    @return Parameter converted.  
+    :return Parameter converted.  
     '''
     if param == 'True':
         return True
@@ -87,9 +87,9 @@ def upcase_first_letter(s):
 def convert_boolean_to_int(param):
     '''Convert the parameter of boolean to int.
 
-    @param param: parameter to be converted.
+    :param param: parameter to be converted.
 
-    @return Parameter converted.  
+    :return Parameter converted.  
     '''
     if param == True:
         return int(1)
@@ -100,9 +100,9 @@ def convert_boolean_to_int(param):
 def convert_int_to_boolean(param):
     '''Convert the parameter of int to boolean.
 
-    @param param: parameter to be converted.
+    :param param: parameter to be converted.
 
-    @return Parameter converted.  
+    :return Parameter converted.  
     '''
     param = int(param)
     if param == 1:
@@ -115,11 +115,11 @@ def convert_int_to_boolean(param):
 def validates_dict(param, key):
     '''Validates that the list is a dictionary and converts it to a vector
     
-    @param param: to be verified and converted.
+    :param param: to be verified and converted.
     
-    @param key: Key List.
+    :param key: Key List.
 
-    @return list.  
+    :return list.  
     '''
     if param is not None:
 
@@ -140,20 +140,20 @@ def make_random_password(length=8, allowed_chars='abcdefghijklmnopqrstuvwxyzABCD
 def clone(obj):
     '''Clone the object
 
-    @param obj: object to be cloned
+    :param obj: object to be cloned
 
-    @return object cloned.  
+    :return object cloned.  
     '''
     return copy.copy(obj)
 
 def acl_key(network):
     '''Convert the key of value acl.
 
-    @param network: v4 or v6.
+    :param network: v4 or v6.
 
-    @return value of key.  
+    :return value of key.  
     
-    @raise ValueError: Parameter null or blank
+    :raise ValueError: Parameter null or blank
     '''
     if network is None:
         raise ValueError("Parameter null or blank")
@@ -167,9 +167,9 @@ def acl_key(network):
 def is_valid_int_param(param, required=True):
     '''Checks if the parameter is a valid integer value.
     
-    @param param: Value to be validated.
+    :param param: Value to be validated.
     
-    @return True if the parameter has a valid integer value, or False otherwise.  
+    :return True if the parameter has a valid integer value, or False otherwise.  
     '''
     if param is None and not required:
         return True
@@ -185,10 +185,10 @@ def is_valid_int_param(param, required=True):
 def get_param_in_request(request, param):
     '''Get value of param in request
 
-    @param request: request.
-    @param param: param.
+    :param request: request.
+    :param param: param.
 
-    @return value of key.  
+    :return value of key.  
     '''
     if param in request.POST:
         value = str(request.POST[param])

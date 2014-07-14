@@ -58,9 +58,9 @@ class User(object):
     def has_perm(self, permission,  write = None, read = None):
         '''Validates that the user has access permission
 
-            @param permission: access permission to be validated
-            @param write: permission be write
-            @param read: permission be read
+            :param permission: access permission to be validated
+            :param write: permission be write
+            :param read: permission be read
         '''
         if self.__permission.has_key(permission):
 
@@ -81,8 +81,8 @@ class User(object):
     def has_perm_menu(self, write = None, read = None):
         '''Validates that the user has access permission in top menu
 
-            @param write: permission be write
-            @param read: permission be read
+            :param write: permission be write
+            :param read: permission be read
         '''
         for permission in self.__permission.keys():
             
