@@ -135,8 +135,8 @@ class Ldap():
         Returns CN of a cn_type existing in LDAP
         If cn_type is USER, aditional data will be searched
         
-        @param cn: String with CN to be searched
-        @param cn_type: Type of CN to be searched (CN_TYPES) 
+        :param cn: String with CN to be searched
+        :param cn_type: Type of CN to be searched (CN_TYPES) 
         """
         try:
             
@@ -180,7 +180,7 @@ class Ldap():
         """
         Assemble the list with information from User.
         
-        @param member_uid: List of identifiers of the Users of Group.
+        :param member_uid: List of identifiers of the Users of Group.
         """
         memberUid = []
         if member_uid:
@@ -201,8 +201,8 @@ class Ldap():
         """
         Assemble the two lists with information from Sudoer.
         
-        @param sudoUser: List of identifiers of the Group of Sudoer.
-        @param sudoCommand: List of commands.
+        :param sudoUser: List of identifiers of the Group of Sudoer.
+        :param sudoCommand: List of commands.
         """
         groups = []
         if sudoUser:
@@ -236,9 +236,9 @@ class Ldap():
         """
         Modifies a cn from a dictionary containing the fields to be changed.
         
-        @param cn: String with CN to be searched
-        @param cn_type: Type of CN to be searched (CN_TYPES)
-        @param dicNew: Dictionary containing the fields to be changed
+        :param cn: String with CN to be searched
+        :param cn_type: Type of CN to be searched (CN_TYPES)
+        :param dicNew: Dictionary containing the fields to be changed
         """
         try:
         
@@ -321,7 +321,7 @@ class Ldap():
         """
         Validates that the gidNumber is in the range of group numbers
         
-        @param gidNumber: Identifier of the Group.
+        :param gidNumber: Identifier of the Group.
         """
         is_valid = False
         if self.rangeGroups.count(int(gidNumber)) == 1:
@@ -333,7 +333,7 @@ class Ldap():
         """
         Validates that the uidNumber is in the range of user external numbers
         
-        @param uidNumber: Identifier of the User.
+        :param uidNumber: Identifier of the User.
         """
         is_valid = False
         if self.rangeUsersExternal.count(int(uidNumber)) == 1:
@@ -345,7 +345,7 @@ class Ldap():
         """
         Validates that the uidNumber is in the range of user internal numbers
         
-        @param uidNumber: Identifier of the User.
+        :param uidNumber: Identifier of the User.
         
         """
         is_valid = False
@@ -387,7 +387,7 @@ class Ldap():
         """
         Remove groups in LDAP
         
-        @param cn: cn of Group.
+        :param cn: cn of Group.
         """
         try:
             conn = self._get_conn_manager()
@@ -410,8 +410,8 @@ class Ldap():
         """
         Remove user of group in LDAP
         
-        @param cn: cn of User.
-        @param group: cn of Group.
+        :param cn: cn of User.
+        :param group: cn of Group.
         """
         try:
             dn  = self.get_group(group)
@@ -436,9 +436,9 @@ class Ldap():
         """
         Add new group in LDAP
         
-        @param cn: cn of Group.
-        @param gid_number: Identifier of the Group.
-        @param member_uid: List of identifiers of the Users of Group.
+        :param cn: cn of Group.
+        :param gid_number: Identifier of the Group.
+        :param member_uid: List of identifiers of the Users of Group.
         """
         try:
             conn = self._get_conn_manager()
@@ -477,9 +477,9 @@ class Ldap():
         """
         Edit group in LDAP
         
-        @param cn: cn of Group.
-        @param gid_number: Identifier of the Group.
-        @param member_uid: List of identifiers of the Users of Group.
+        :param cn: cn of Group.
+        :param gid_number: Identifier of the Group.
+        :param member_uid: List of identifiers of the Users of Group.
         """
         try:
             
@@ -502,8 +502,8 @@ class Ldap():
         """
         Returns all users from LDAP
         
-        @param lock: True or False, determines whether data will be fetched lock
-        @param policy: True or False, determines whether data will be fetched policies
+        :param lock: True or False, determines whether data will be fetched lock
+        :param policy: True or False, determines whether data will be fetched policies
         
         """
         try:
@@ -582,10 +582,10 @@ class Ldap():
         """
         Add new sudoer in LDAP
         
-        @param cn: cn of Sudoer.
-        @param sudoHost: Identifier of the Group.
-        @param sudoUser: List of identifiers of the Group of Sudoer.
-        @param sudoCommand: List of commands.
+        :param cn: cn of Sudoer.
+        :param sudoHost: Identifier of the Group.
+        :param sudoUser: List of identifiers of the Group of Sudoer.
+        :param sudoCommand: List of commands.
         """
         try:
             conn = self._get_conn_manager()
@@ -627,10 +627,10 @@ class Ldap():
         """
         Edit sudoer in LDAP
         
-        @param cn: cn of Sudoer.
-        @param sudoHost: Identifier of the Group.
-        @param sudoUser: List of identifiers of the Group of Sudoer.
-        @param sudoCommand:List of commands.
+        :param cn: cn of Sudoer.
+        :param sudoHost: Identifier of the Group.
+        :param sudoUser: List of identifiers of the Group of Sudoer.
+        :param sudoCommand:List of commands.
         """
         try:
             # A dict to help build the "body" of the object
@@ -659,7 +659,7 @@ class Ldap():
         """
         Remove sudoer in LDAP
         
-        @param cn: cn of Sudoer.
+        :param cn: cn of Sudoer.
         """
         try:
             conn = self._get_conn_manager()
@@ -707,7 +707,7 @@ class Ldap():
         """
         Returns all Groups by user from LDAP
         
-        @param cn: cn of User.
+        :param cn: cn of User.
         """
         try:
             gps = self.get_groups()
@@ -730,7 +730,7 @@ class Ldap():
         """
         Returns the users from the group from LDAP
         
-        @param gid: gidNumber of group.
+        :param gid: gidNumber of group.
         """
         try:
             gps = self.get_groups()
@@ -756,27 +756,27 @@ class Ldap():
         """
         Add new user in LDAP
         
-        @param cn: cn of Sudoer.
-        @param uidNumber: Identifier of the User.
-        @param groupPattern: groupPattern.
-        @param homeDirectory: homeDirectory.
-        @param givenName: givenName.
-        @param initials: initials.
-        @param sn: sn.
-        @param mail: mail.
-        @param homePhone: homePhone.
-        @param mobile: street.
-        @param street: street.
-        @param description: description.
-        @param employeeNumber: employeeNumber.
-        @param employeeType: employeeType.
-        @param loginShell: loginShell.
-        @param shadowLastChange: shadowLastChange.
-        @param shadowMin: shadowMin.
-        @param shadowMax: shadowMax.
-        @param shadowWarning: shadowWarning.
-        @param policy: List of identifiers of the Policies.
-        @param groups: List of identifiers of the Group.
+        :param cn: cn of Sudoer.
+        :param uidNumber: Identifier of the User.
+        :param groupPattern: groupPattern.
+        :param homeDirectory: homeDirectory.
+        :param givenName: givenName.
+        :param initials: initials.
+        :param sn: sn.
+        :param mail: mail.
+        :param homePhone: homePhone.
+        :param mobile: street.
+        :param street: street.
+        :param description: description.
+        :param employeeNumber: employeeNumber.
+        :param employeeType: employeeType.
+        :param loginShell: loginShell.
+        :param shadowLastChange: shadowLastChange.
+        :param shadowMin: shadowMin.
+        :param shadowMax: shadowMax.
+        :param shadowWarning: shadowWarning.
+        :param policy: List of identifiers of the Policies.
+        :param groups: List of identifiers of the Group.
         """
         try:
 
@@ -844,27 +844,27 @@ class Ldap():
         """
         Edit new user in LDAP
         
-        @param cn: cn of Sudoer.
-        @param uidNumber: Identifier of the User.
-        @param groupPattern: groupPattern.
-        @param homeDirectory: homeDirectory.
-        @param givenName: givenName.
-        @param initials: initials.
-        @param sn: sn.
-        @param mail: mail.
-        @param homePhone: homePhone.
-        @param mobile: street.
-        @param street: street.
-        @param description: description.
-        @param employeeNumber: employeeNumber.
-        @param employeeType: employeeType.
-        @param loginShell: loginShell.
-        @param shadowLastChange: shadowLastChange.
-        @param shadowMin: shadowMin.
-        @param shadowMax: shadowMax.
-        @param shadowWarning: shadowWarning.
-        @param policy: List of identifiers of the Policies.
-        @param groups: List of identifiers of the Group.
+        :param cn: cn of Sudoer.
+        :param uidNumber: Identifier of the User.
+        :param groupPattern: groupPattern.
+        :param homeDirectory: homeDirectory.
+        :param givenName: givenName.
+        :param initials: initials.
+        :param sn: sn.
+        :param mail: mail.
+        :param homePhone: homePhone.
+        :param mobile: street.
+        :param street: street.
+        :param description: description.
+        :param employeeNumber: employeeNumber.
+        :param employeeType: employeeType.
+        :param loginShell: loginShell.
+        :param shadowLastChange: shadowLastChange.
+        :param shadowMin: shadowMin.
+        :param shadowMax: shadowMax.
+        :param shadowWarning: shadowWarning.
+        :param policy: List of identifiers of the Policies.
+        :param groups: List of identifiers of the Group.
         """
         try:
 
@@ -920,8 +920,8 @@ class Ldap():
         """
         User join the group in LDAP
         
-        @param user: cn of User.
-        @param group: cn of Group.
+        :param user: cn of User.
+        :param group: cn of Group.
         
         """
         try:
@@ -952,7 +952,7 @@ class Ldap():
         """
         Remove user in LDAP
         
-        @param cn: cn of User.
+        :param cn: cn of User.
         
         """
         try:
@@ -983,7 +983,7 @@ class Ldap():
         """
         Reset the password for the User default password Globo.com
         
-        @param cn: cn of User.
+        :param cn: cn of User.
         """
         try:
             conn = self._get_conn_manager()
@@ -1015,7 +1015,7 @@ class Ldap():
         """
         Lock User in LDAP.
         
-        @param cn: cn of User.
+        :param cn: cn of User.
         """
         try:
             conn = self._get_conn_manager()
@@ -1044,7 +1044,7 @@ class Ldap():
         """
         Unlock User in LDAP.
         
-        @param cn: cn of User.
+        :param cn: cn of User.
         """
         try:
             conn = self._get_conn_manager()

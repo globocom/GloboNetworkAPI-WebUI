@@ -62,9 +62,9 @@ def has_perm(permission):
     '''
     Validates that the user has access permission
     
-    @param permission: access permission to be validated
-    @param write: permission be write
-    @param read: permission be read
+    :param permission: access permission to be validated
+    :param write: permission be write
+    :param read: permission be read
     '''
     def _decorated(view_func):
 
@@ -167,7 +167,7 @@ def cache_function(length):
     """
     Cache the result of function
     
-    @param length: time in seconds to stay in cache
+    :param length: time in seconds to stay in cache
     """
     def _decorated(func):
         

@@ -23,9 +23,9 @@ class File():
     def read(cls, file_name):
         '''Reading File
         
-        @param file_name: File name
+        :param file_name: File name
         
-        @raise FileError: Failed to reading file
+        :raise FileError: Failed to reading file
         '''
         try:
             
@@ -45,10 +45,10 @@ class File():
     def write(cls, file_name, content):
         '''Writing File
         
-        @param file_name: File name
-        @param content: File content
+        :param file_name: File name
+        :param content: File content
         
-        @raise FileError: Failed to writing file
+        :raise FileError: Failed to writing file
         '''
         try:
             
@@ -66,9 +66,9 @@ class File():
     def create(cls, file_name):
         '''Creating File
 
-        @param file_name: File name
+        :param file_name: File name
         
-        @raise FileError: Failed to creating file
+        :raise FileError: Failed to creating file
         '''
         try:
             
@@ -85,9 +85,9 @@ class File():
     def remove(cls, file_name):
         '''Removing File
 
-        @param file_name: File name
+        :param file_name: File name
         
-        @raise FileError: Failed to removing file
+        :raise FileError: Failed to removing file
         '''
         try:
             

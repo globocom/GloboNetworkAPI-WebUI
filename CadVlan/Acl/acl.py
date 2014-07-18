@@ -39,10 +39,10 @@ hexa = lambda x: hex(x)[2:]
 def mkdir_divison_dc(divison_dc, user, acl_path=None):
     '''Creates the directory division dc in cvs
 
-    @param divison_dc: division dc to be created
-    @param user: user
+    :param divison_dc: division dc to be created
+    :param user: user
 
-    @raise CVSCommandError: Failed to execute
+    :raise CVSCommandError: Failed to execute
     '''
     try:
 
@@ -93,10 +93,10 @@ def mkdir_divison_dc(divison_dc, user, acl_path=None):
 def script_template(environment_logical, divison_dc, group_l3, template_name):
     '''Validates that can use a script to create the ACL.
 
-    @param environment_logical: environment logical
-    @param divison_dc: divison dc
-    @param group_l3: group l3
-    @param template_name: Template name
+    :param environment_logical: environment logical
+    :param divison_dc: divison dc
+    :param group_l3: group l3
+    :param template_name: Template name
     '''
     script = False
 
@@ -125,11 +125,11 @@ def script_template(environment_logical, divison_dc, group_l3, template_name):
 def chdir(type_path, network, path=None):
     '''Change the current working directory to path.
 
-    @param type_path: type path
-    @param network: v4 or v6
-    @param path: path
+    :param type_path: type path
+    :param network: v4 or v6
+    :param path: path
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
     try:
 
@@ -149,8 +149,8 @@ def chdir(type_path, network, path=None):
 def check_name_file(acl_file_name, extention=True):
     '''Validates the filename do acl has point and space and adds extension
 
-    @param acl_file_name: name is validaded
-    @param extention: True case add extention
+    :param acl_file_name: name is validaded
+    :param extention: True case add extention
     '''
     acl = ""
     for caracter in acl_file_name:
@@ -168,7 +168,7 @@ def check_name_file(acl_file_name, extention=True):
 def check_name_file_bkp(acl_file_name):
     '''Validates the filename do acl has point and space and adds extension and suffix bkp
 
-    @param acl_file_name: name is validaded
+    :param acl_file_name: name is validaded
     '''
     acl = ""
     for caracter in acl_file_name:
@@ -183,8 +183,8 @@ def check_name_file_bkp(acl_file_name):
 def path_acl(environment_logical, divison_dc, acl_path=None):
     '''Creates the path depending on the parameters of environment
 
-    @param environment_logical: environment logical
-    @param divison_dc: divison dc
+    :param environment_logical: environment logical
+    :param divison_dc: divison dc
     '''
     path = divison_dc
 
@@ -228,14 +228,14 @@ def replace_to_correct(value):
 def checkAclCvs(acl_file_name, environment, network, user):
     '''Validates if the file is created acl.
 
-    @param acl_file_name: acl name
-    @param environment: Environment
-    @param network: v4 or v6
-    @param user: user
+    :param acl_file_name: acl name
+    :param environment: Environment
+    :param network: v4 or v6
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
 
-    @return: True case created
+    :return: True case created
     '''
     try:
 
@@ -266,12 +266,12 @@ def checkAclCvs(acl_file_name, environment, network, user):
 def getAclCvs(acl_file_name, environment, network, user):
     '''Retrieves the contents of the file acl.
 
-    @param acl_file_name: acl name
-    @param environment: Environment
-    @param network: v4 or v6
-    @param user: user
+    :param acl_file_name: acl name
+    :param environment: Environment
+    :param network: v4 or v6
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
     try:
 
@@ -299,14 +299,14 @@ def getAclCvs(acl_file_name, environment, network, user):
 def alterAclCvs(acl_name, acl_content, environment, comment, network, user):
     '''Change the contents of the file acl.
 
-    @param acl_name: acl name
-    @param acl_content: acl content
-    @param environment: Environment
-    @param comment: comments of user
-    @param network: v4 or v6
-    @param user: user
+    :param acl_name: acl name
+    :param acl_content: acl content
+    :param environment: Environment
+    :param comment: comments of user
+    :param network: v4 or v6
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
     try:
 
@@ -334,12 +334,12 @@ def alterAclCvs(acl_name, acl_content, environment, comment, network, user):
 def createAclCvs(acl_name, environment, network, user):
     '''Create the file acl.
 
-    @param acl_name: acl name
-    @param environment: Environment
-    @param network: v4 or v6
-    @param user: user
+    :param acl_name: acl name
+    :param environment: Environment
+    :param network: v4 or v6
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
     try:
 
@@ -371,12 +371,12 @@ def createAclCvs(acl_name, environment, network, user):
 def deleteAclCvs(acl_name, environment, network, user):
     '''Delete acl file and creates a backup file
 
-    @param acl_name: acl name
-    @param environment: Environment
-    @param network: v4 or v6
-    @param user: user
+    :param acl_name: acl name
+    :param environment: Environment
+    :param network: v4 or v6
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
     try:
 
@@ -423,15 +423,15 @@ def deleteAclCvs(acl_name, environment, network, user):
 def applyAcl(equipments, vlan, environment, network, user):
     '''Apply the file acl in equipments
 
-    @param equipments: list of equipments
-    @param vlan: Vvlan
-    @param environment: Environment
-    @param network: v4 or v6
-    @param user: user
+    :param equipments: list of equipments
+    :param vlan: Vvlan
+    :param environment: Environment
+    :param network: v4 or v6
+    :param user: user
 
-    @raise Exception: Failed to apply acl
+    :raise Exception: Failed to apply acl
 
-    @return: True case Apply and sysout of script
+    :return: True case Apply and sysout of script
     '''
     try:
 
@@ -475,14 +475,14 @@ def applyAcl(equipments, vlan, environment, network, user):
 def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
     '''Generates the acl based on a template
 
-    @param acl_name: acl name
-    @param vlan: Vvlan
-    @param environment: Environment
-    @param network: v4 or v6
-    @param user: user
-    @param temple_name: Template Name
+    :param acl_name: acl name
+    :param vlan: Vvlan
+    :param environment: Environment
+    :param network: v4 or v6
+    :param user: user
+    :param temple_name: Template Name
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
     try:
 
@@ -780,17 +780,20 @@ def get_templates(user, return_as_dict=False):
     """
     Get acl templates for list
 
-    @param user: Instance of current user
-    @param return_as_dict: If the method will return a dictionary or a list
+    :param user: Instance of current user
+    :param return_as_dict: If the method will return a dictionary or a list
 
-    @return: list or dict of templates.
-             list: [{'name': < template_name >, 'network': < template_network >},...]
-             dict: {
-                     "ipv4": [{'name': < template_name >, 'network': < template_network >},...],
-                     "ipv6": [{'name': < template_name >, 'network': < template_network >},...]
-                   }
+    :return: list or dict of templates.
 
-    @raise CVSCommandError:  Failed to execute command
+    ::
+
+        list: [{'name': < template_name >, 'network': < template_network >},...]
+        dict: {
+        "ipv4": [{'name': < template_name >, 'network': < template_network >},...],
+        "ipv6": [{'name': < template_name >, 'network': < template_network >},...]
+        }
+
+    :raise CVSCommandError:  Failed to execute command
     """
     try:
         os.chdir(PATH_ACL)
@@ -830,11 +833,11 @@ def get_templates(user, return_as_dict=False):
 def get_template_edit(template_name, network, user):
     '''Retrieves the contents of the file template.
 
-    @param template_name: template name
-    @param network: IPv4 or IPv6
-    @param user: user
+    :param template_name: template name
+    :param network: IPv4 or IPv6
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
 
     try:
@@ -858,12 +861,12 @@ def get_template_edit(template_name, network, user):
 def alter_template(template_name, network, content, user):
     '''Change the contents of the file acl.
 
-    @param template_name: template name
-    @param network: IPv4 or IPv6
-    @param content: content
-    @param user: user
+    :param template_name: template name
+    :param network: IPv4 or IPv6
+    :param content: content
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
 
     try:
@@ -890,12 +893,12 @@ def alter_template(template_name, network, content, user):
 def create_template(template_name, network, content, user):
     '''Create the file template.
 
-    @param template_name: template name
-    @param network: IPv4 or IPv6
-    @param content: content
-    @param user: user
+    :param template_name: template name
+    :param network: IPv4 or IPv6
+    :param content: content
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
     try:
 
@@ -927,13 +930,13 @@ def create_template(template_name, network, content, user):
 def check_template(template_name, network, user):
     '''Validates if the file is created template.
 
-    @param template_name: template name
-    @param network: IPv4 or IPv6
-    @param user: user
+    :param template_name: template name
+    :param network: IPv4 or IPv6
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
 
-    @return: True case created
+    :return: True case created
     '''
     try:
 
@@ -971,11 +974,11 @@ def check_template(template_name, network, user):
 def delete_template(template_name, network, user):
     '''Delete template file
 
-    @param template_name: template name
-    @param network: IPv4 or IPv6
-    @param user: user
+    :param template_name: template name
+    :param network: IPv4 or IPv6
+    :param user: user
 
-    @raise CVSCommandError:  Failed to execute command
+    :raise CVSCommandError:  Failed to execute command
     '''
     try:
 
