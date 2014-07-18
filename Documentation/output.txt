@@ -1,0 +1,36 @@
+sphinx-build -b html -d _build/doctrees   . _build/html
+Running Sphinx v1.2.2
+loading pickled environment... done
+building [html]: targets for 0 source files that are out of date
+updating environment: 0 added, 4 changed, 0 removed
+reading sources... [ 25%] CadVlan.Auth
+reading sources... [ 50%] CadVlan.Ldap
+reading sources... [ 75%] CadVlan.User
+reading sources... [100%] CadVlan.VipRequest
+
+/media/sf_home_mac/Documents/projetos_git/cadvlan/Documentation/CadVlan.Auth.rst:18: WARNING: autodoc: failed to import module u'CadVlan.Auth.business'; the following exception was raised:
+Traceback (most recent call last):
+  File "/home/marcus/Virtualenvs/networkapi_doc_env/local/lib/python2.7/site-packages/sphinx/ext/autodoc.py", line 335, in import_object
+    __import__(self.modname)
+  File "/media/sf_home_mac/Documents/projetos_git/cadvlan/CadVlan/Auth/business.py", line 1, in <module>
+    from whrandom import choice
+ImportError: No module named whrandom
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... done
+preparing documents... done
+writing output... [ 16%] CadVlan
+writing output... [ 33%] CadVlan.Auth
+writing output... [ 50%] CadVlan.Ldap
+writing output... [ 66%] CadVlan.User
+writing output... [ 83%] CadVlan.VipRequest
+writing output... [100%] index
+
+writing additional files... (63 module code pages) _modules/index genindex py-modindex search
+copying static files... done
+copying extra files... done
+dumping search index... done
+dumping object inventory... done
+build succeeded, 1 warning.
+
+Build finished. The HTML pages are in _build/html.
