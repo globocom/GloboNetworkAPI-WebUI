@@ -27,8 +27,16 @@ daemon = True
 #group="www-data"
 
 #IP and Port to listen
+<<<<<<< HEAD
 bind = "0.0.0.0:8000"
+=======
+bind = "0.0.0.0:8080"
+>>>>>>> 25f112b9aed951ce755bae831ad8c174a65c02d7
 
 backlog = 2048
 preload_app = True
 pidfile = PIDFILE
+<<<<<<< HEAD
+=======
+
+>>>>>>> 25f112b9aed951ce755bae831ad8c174a65c02d7
