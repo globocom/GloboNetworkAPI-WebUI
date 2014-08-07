@@ -22,13 +22,13 @@ Create a specific User/Group
 Download Code
 *************
 
-Download NetworkAPI code from `Globocom GitHub <https://github.com/globocomgithub/cadvlan>`_.
+Download GloboNetworkAPI code from `Globocom GitHub <https://github.com/globocom/GloboNetworkAPI-WebUI>`_.
 
 In this example we are downloading code to ``/opt/app/``::
 
 	sudo yum install git
 	cd /opt/app/
-	git clone https://github.com/globocomgithub/cadvlan
+	git clone https://github.com/globocom/GloboNetworkAPI-WebUI
 
 We are exporting this variable below to better document the install process::
 

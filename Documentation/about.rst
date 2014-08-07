@@ -1,11 +1,11 @@
-About CadVlan 
-#############
+About Globo NetworkAPI WebUI 
+############################
 
 
 Description
 ***********
 
-CadVlan is a Front End tool to manage and automate networking resources (routers, switches and load balancers) and document logical and physical networking.
+Globo NetworkAPI WebUI is a Front End tool to manage and automate networking resources (routers, switches and load balancers) and document logical and physical networking.
 
 They were created to be vendor agnostic and to support different orquestrators and environments without loosing the centralized view of all network resources allocated.
 
