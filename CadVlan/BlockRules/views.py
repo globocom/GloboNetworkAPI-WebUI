@@ -32,10 +32,12 @@ def rules_list(request, id_env):
     client = auth.get_clientFactory()
 
     try:
-        lists['env'] = client.create_ambiente().buscar_por_id(id_env).get('ambiente')
+        lists['env'] = client.create_ambiente().buscar_por_id(
+            id_env).get('ambiente')
         rules = client.create_ambiente().get_all_rules(id_env)
         lists['rules'] = rules.get('rules') if rules else []
-        lists['rules'] = lists['rules'] if type(lists['rules']) is list else [lists['rules'], ]
+        lists['rules'] = lists['rules'] if type(
+            lists['rules']) is list else [lists['rules'], ]
         lists['form'] = DeleteForm()
 
     except NetworkAPIClientError, e:
@@ -61,7 +63,8 @@ def rule_add_form(request, id_env):
         # Get User
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        lists['env'] = client.create_ambiente().buscar_por_id(id_env).get('ambiente')
+        lists['env'] = client.create_ambiente().buscar_por_id(
+            id_env).get('ambiente')
 
         blocks = client.create_ambiente().get_blocks(id_env)
         lists['blocks'] = blocks.get('blocks') if blocks else []
@@ -78,12 +81,14 @@ def rule_add_form(request, id_env):
                                                    contents,
                                                    rule_contents)
 
-                messages.add_message(request, messages.SUCCESS, rule_messages.get('success_insert'))
+                messages.add_message(
+                    request, messages.SUCCESS, rule_messages.get('success_insert'))
                 return redirect('block.rules.list', id_env)
 
             else:
                 lists['form'] = form
-                lists['contents'] = __mount_content_rules_form(contents, rule_contents)
+                lists['contents'] = __mount_content_rules_form(
+                    contents, rule_contents)
         else:
             lists['contents'].append(ContentRulesForm())
 
@@ -113,10 +118,12 @@ def rule_edit_form(request, id_env, id_rule):
         lists = {}
         lists['form'] = EnvironmentRules(initial=initial)
         lists['action'] = reverse("block.rules.edit", args=[id_env, id_rule])
-        lists['env'] = client.create_ambiente().buscar_por_id(id_env).get('ambiente')
+        lists['env'] = client.create_ambiente().buscar_por_id(
+            id_env).get('ambiente')
         blocks = client.create_ambiente().get_blocks(id_env)
         lists['blocks'] = blocks.get('blocks') if blocks else []
-        lists['contents'] = __mount_content_rules_form(rule['rule_contents'], rule['rule_blocks'])
+        lists['contents'] = __mount_content_rules_form(
+            rule['rule_contents'], rule['rule_blocks'])
         lists['id_env'] = id_env
 
         if request.method == "POST":
@@ -132,13 +139,15 @@ def rule_edit_form(request, id_env, id_rule):
                                                      rule_contents,
                                                      id_rule)
 
-                messages.add_message(request, messages.SUCCESS, rule_messages.get('success_edit'))
+                messages.add_message(
+                    request, messages.SUCCESS, rule_messages.get('success_edit'))
                 return redirect('block.rules.list', id_env)
 
             else:
                 # Return form with errors
                 lists['form'] = form
-                lists['contents'] = __mount_content_rules_form(contents, rule_contents)
+                lists['contents'] = __mount_content_rules_form(
+                    contents, rule_contents)
 
         return render_to_response(TAB_RULES_FORM, lists, context_instance=RequestContext(request))
 
@@ -186,7 +195,8 @@ def rule_remove(request, id_env):
 
                 # If cant remove nothing
                 if len(error_list) == len(ids):
-                    messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                    messages.add_message(
+                        request, messages.ERROR, error_messages.get("can_not_remove_all"))
 
                 # If cant remove someones
                 elif len(error_list) > 0:
@@ -200,13 +210,16 @@ def rule_remove(request, id_env):
 
                 # If all has ben removed
                 elif have_errors == False:
-                    messages.add_message(request, messages.SUCCESS, rule_messages.get("success_remove"))
+                    messages.add_message(
+                        request, messages.SUCCESS, rule_messages.get("success_remove"))
 
                 else:
-                    messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_error"))
+                    messages.add_message(
+                        request, messages.ERROR, error_messages.get("can_not_remove_error"))
 
             else:
-                messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+                messages.add_message(
+                    request, messages.ERROR, error_messages.get("select_one"))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -230,7 +243,8 @@ def edit_form(request, id_env):
         client = auth.get_clientFactory()
 
         try:
-            lists['env'] = client.create_ambiente().buscar_por_id(id_env).get('ambiente')
+            lists['env'] = client.create_ambiente().buscar_por_id(
+                id_env).get('ambiente')
         except NetworkAPIClientError, e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
@@ -242,7 +256,8 @@ def edit_form(request, id_env):
 
                 client.create_ambiente().update_blocks(id_env, blocks)
 
-                messages.add_message(request, messages.SUCCESS, block_messages.get('success_edit'))
+                messages.add_message(
+                    request, messages.SUCCESS, block_messages.get('success_edit'))
             else:
                 lists['error_message'] = block_messages.get('required')
 
@@ -297,15 +312,18 @@ def rule_form(request):
                 if form.is_valid() and __is_valid_contents(contents, request):
 
                     client.create_ambiente().save_rule(form.cleaned_data['name'],
-                                                       form_env.cleaned_data['envs'],
+                                                       form_env.cleaned_data[
+                                                           'envs'],
                                                        contents,
                                                        rule_contents)
 
-                    messages.add_message(request, messages.SUCCESS, rule_messages.get('success_insert'))
+                    messages.add_message(
+                        request, messages.SUCCESS, rule_messages.get('success_insert'))
                     return redirect('block.rules.list', env)
                 else:
                     lists['selected_blocks'] = blocks if blocks else []
-                    lists['contents'] = __mount_content_rules_form(contents, rule_contents)
+                    lists['contents'] = __mount_content_rules_form(
+                        contents, rule_contents)
             else:
                 lists['error'] = True
                 lists['selected_blocks'] = []
@@ -326,16 +344,18 @@ def rule_form(request):
 def __is_valid_contents(contents, request):
     for content in contents:
         if content.isspace() or content == '':
-            messages.add_message(request, messages.ERROR, rule_messages.get('required'))
+            messages.add_message(
+                request, messages.ERROR, rule_messages.get('required'))
             return False
     return True
 
 
 def __mount_content_rules_form(contents, rule_contents):
     contents = contents if type(contents) is list else [contents, ]
-    rule_contents = rule_contents if type(rule_contents) is list else [rule_contents, ]
+    rule_contents = rule_contents if type(
+        rule_contents) is list else [rule_contents, ]
 
-    return [ContentRulesForm(initial={'content':contents[i], 'rule_content':rule_contents[i]}) for i in range(len(contents))]
+    return [ContentRulesForm(initial={'content': contents[i], 'rule_content':rule_contents[i]}) for i in range(len(contents))]
 
 
 @log
@@ -398,7 +418,8 @@ def add_form(request):
 
                     client.create_ambiente().save_blocks(env, blocks)
 
-                    messages.add_message(request, messages.SUCCESS, block_messages.get('success_insert'))
+                    messages.add_message(
+                        request, messages.SUCCESS, block_messages.get('success_insert'))
 
                     return redirect('block.edit.form', env)
                 else:
@@ -424,4 +445,4 @@ def __valid_block(blocks):
 
 def __mount_block_form(blocks):
     blocks = blocks if type(blocks) is list else [blocks, ]
-    return [BlockRulesForm(initial={'content' : block}) for block in blocks]
+    return [BlockRulesForm(initial={'content': block}) for block in blocks]

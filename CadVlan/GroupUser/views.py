@@ -22,24 +22,26 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-PERMISSION = { True: 'S', False :'N'}
+PERMISSION = {True: 'S', False: 'N'}
+
 
 def get_permission(value):
     for key in PERMISSION.iterkeys():
         if value == PERMISSION.get(key):
             return key
-    
+
     return PERMISSION.get(False)
+
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
 def list_all(request):
-    
-    try:    
-            
+
+    try:
+
         lists = dict()
-        
+
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -48,8 +50,7 @@ def list_all(request):
         user_groups = client.create_grupo_usuario().listar()
         lists['form'] = DeleteForm()
         lists['grupos'] = user_groups.get("user_group")
-        
-        
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -59,7 +60,7 @@ def list_all(request):
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
 def delete_all(request):
 
     if request.method == 'POST':
@@ -86,7 +87,7 @@ def delete_all(request):
                 try:
 
                     # Execute in NetworkAPI
-                    client_group_user.remover(id_group_user);
+                    client_group_user.remover(id_group_user)
 
                 except NetworkAPIClientError, e:
                     logger.error(e)
@@ -96,7 +97,8 @@ def delete_all(request):
 
             # If cant remove nothing
             if len(error_list) == len(ids):
-                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                messages.add_message(
+                    request, messages.ERROR, error_messages.get("can_not_remove_all"))
 
             # If cant remove someones
             elif len(error_list) > 0:
@@ -110,20 +112,24 @@ def delete_all(request):
 
             # If all has ben removed
             elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, group_user_messages.get("success_remove"))
+                messages.add_message(
+                    request, messages.SUCCESS, group_user_messages.get("success_remove"))
 
             else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+                messages.add_message(
+                    request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
     return redirect('group-user.list')
 
+
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
 def add_form(request):
 
     try:
@@ -144,14 +150,16 @@ def add_form(request):
                 delete = PERMISSION.get(form.cleaned_data['delete'])
 
                 try:
-                    client.create_grupo_usuario().inserir(name, read, write, edition, delete)
-                    messages.add_message(request, messages.SUCCESS, group_user_messages.get("success_insert"))
+                    client.create_grupo_usuario().inserir(
+                        name, read, write, edition, delete)
+                    messages.add_message(
+                        request, messages.SUCCESS, group_user_messages.get("success_insert"))
 
                     return redirect('group-user.list')
 
                 except NetworkAPIClientError, e:
                     logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)                    
+                    messages.add_message(request, messages.ERROR, e)
 
         else:
 
@@ -163,25 +171,26 @@ def add_form(request):
 
     action = reverse("group-user.form")
 
-    return render_to_response(GROUPUSER_FORM, {'form': form, 'action': action }, context_instance=RequestContext(request))
+    return render_to_response(GROUPUSER_FORM, {'form': form, 'action': action}, context_instance=RequestContext(request))
+
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
 def edit_form(request, id_group_user):
 
     try:
         lists = dict()
         lists['form'] = GroupUserForm()
-        
+
         if request.method == 'POST':
 
             auth = AuthSession(request.session)
             client = auth.get_clientFactory()
 
-            id_group = int (id_group_user)
+            id_group = int(id_group_user)
 
-            form = GroupUserForm(request.POST) 
+            form = GroupUserForm(request.POST)
 
             lists['form'] = form
             lists['action'] = reverse("group-user.edit", args=[id_group])
@@ -195,8 +204,10 @@ def edit_form(request, id_group_user):
                 delete = PERMISSION.get(form.cleaned_data['delete'])
 
                 try:
-                    client.create_grupo_usuario().alterar(id_group_user, name, read, write, edition, delete)
-                    messages.add_message(request, messages.SUCCESS, group_user_messages.get("success_edit"))
+                    client.create_grupo_usuario().alterar(
+                        id_group_user, name, read, write, edition, delete)
+                    messages.add_message(
+                        request, messages.SUCCESS, group_user_messages.get("success_edit"))
                     return redirect('group-user.list')
 
                 except NetworkAPIClientError, e:
@@ -204,21 +215,23 @@ def edit_form(request, id_group_user):
 
             return render_to_response(GROUPUSER_FORM, lists, context_instance=RequestContext(request))
 
-        id_group = int(id_group_user) 
+        id_group = int(id_group_user)
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         group_user = client.create_grupo_usuario().search(id_group)
 
         if group_user is None:
-            messages.add_message(request, messages.ERROR, group_user_messages.get("invalid_group_user"))
-            return redirect('group-user.list') 
+            messages.add_message(
+                request, messages.ERROR, group_user_messages.get("invalid_group_user"))
+            return redirect('group-user.list')
 
         group_user = group_user.get('user_group')
-        
+
         # Set Group User data
-        initial = {'id_group_user':  group_user.get('id'), 'name':  group_user.get('nome'), 'read': get_permission(group_user.get('leitura')), 'write': get_permission(group_user.get('escrita')), 'edition': get_permission(group_user.get('edicao')),'delete': get_permission(group_user.get('exclusao'))}
+        initial = {'id_group_user':  group_user.get('id'), 'name':  group_user.get('nome'), 'read': get_permission(group_user.get('leitura')), 'write': get_permission(
+            group_user.get('escrita')), 'edition': get_permission(group_user.get('edicao')), 'delete': get_permission(group_user.get('exclusao'))}
         form = GroupUserForm(initial=initial)
 
         lists['form'] = form

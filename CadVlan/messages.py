@@ -328,14 +328,14 @@ filter_messages = {
 }
 
 block_messages = {
-    'required' : 'Existem campos obrigatórios não preenchidos.',
-    'success_insert' : 'Blocos incluídos com sucesso.',
-    'success_edit' : 'Blocos atualizados com sucesso.',
+    'required': 'Existem campos obrigatórios não preenchidos.',
+    'success_insert': 'Blocos incluídos com sucesso.',
+    'success_edit': 'Blocos atualizados com sucesso.',
 }
 
 rule_messages = {
-    'success_insert' : u'Regra incluída com sucesso.',
-    'success_edit' : u'Regra atualizada com sucesso.',
+    'success_insert': u'Regra incluída com sucesso.',
+    'success_edit': u'Regra atualizada com sucesso.',
     'success_remove': u'Todas as regras selecionadas foram excluídas com sucesso.',
-    'required' : 'Existem campos obrigatórios não preenchidos.',
+    'required': 'Existem campos obrigatórios não preenchidos.',
 }

@@ -7,6 +7,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 
 from CadVlan.permissions import USER_ADMINISTRATION
 
+
 class User(object):
 
     __id = None
@@ -51,11 +52,11 @@ class User(object):
 
     def get_user_ldap(self):
         return self.__user_ldap
-    
-    def set_password(self,password):
+
+    def set_password(self, password):
         self.__password = password
 
-    def has_perm(self, permission,  write = None, read = None):
+    def has_perm(self, permission,  write=None, read=None):
         '''Validates that the user has access permission
 
             :param permission: access permission to be validated
@@ -78,23 +79,23 @@ class User(object):
         else:
             return False
 
-    def has_perm_menu(self, write = None, read = None):
+    def has_perm_menu(self, write=None, read=None):
         '''Validates that the user has access permission in top menu
 
             :param write: permission be write
             :param read: permission be read
         '''
         for permission in self.__permission.keys():
-            
+
             if permission != USER_ADMINISTRATION:
 
                 if write is not None:
-    
+
                     if self.__permission.get(permission).get('write') == "True":
                         return True
-    
+
                 if read is not None:
-    
+
                     if self.__permission.get(permission).get('read') == "True":
                         return True
 

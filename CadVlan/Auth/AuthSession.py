@@ -8,6 +8,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 from networkapiclient.ClientFactory import ClientFactory
 from CadVlan.settings import NETWORK_API_URL, SESSION_EXPIRY_AGE
 
+
 class AuthSession:
 
     KEY = 'user'

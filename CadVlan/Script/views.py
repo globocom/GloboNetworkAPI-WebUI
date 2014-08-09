@@ -22,146 +22,156 @@ from django.template.defaultfilters import upper
 
 logger = logging.getLogger(__name__)
 
+
 @log
 @login_required
 @has_perm([{"permission": SCRIPT_MANAGEMENT, "read": True}])
 def list_all(request):
-    
+
     try:
-        
-        lists = dict();
-        
+
+        lists = dict()
+
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         # Get all scripts from NetworkAPI
         script_list = client.create_roteiro().listar()
         # Get all script_types from NetworkAPI
         script_type_list = client.create_tipo_roteiro().listar()
-        
+
         # Business
-        lists['scripts'] = replace_id_to_name(script_list["script"], script_type_list["script_type"], "tipo_roteiro", "id", "tipo")
+        lists['scripts'] = replace_id_to_name(
+            script_list["script"], script_type_list["script_type"], "tipo_roteiro", "id", "tipo")
         lists['form'] = DeleteForm()
-        
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        
+
     return render_to_response(SCRIPT_LIST, lists, context_instance=RequestContext(request))
+
 
 @log
 @login_required
 @has_perm([{"permission": SCRIPT_MANAGEMENT, "write": True}])
 def delete_all(request):
-    
+
     if request.method == 'POST':
-        
+
         form = DeleteForm(request.POST)
-        
+
         if form.is_valid():
-            
+
             # Get user
             auth = AuthSession(request.session)
             roteiro = auth.get_clientFactory().create_roteiro()
-            
+
             # All ids to be deleted
             ids = split_to_array(form.cleaned_data['ids'])
-            
+
             # All messages to display
             error_list = list()
-            
+
             # Control others exceptions
             have_errors = False
-            
+
             # For each script selected to remove
             for id_script in ids:
                 try:
-                    
+
                     # Execute in NetworkAPI
                     roteiro.remover(id_script)
-                    
+
                 except RoteiroError, e:
                     # If isnt possible, add in error list
                     error_list.append(id_script)
-                    
+
                 except NetworkAPIClientError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
                     break
-                    
+
             # If cant remove nothing
             if len(error_list) == len(ids):
-                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
-                
+                messages.add_message(
+                    request, messages.ERROR, error_messages.get("can_not_remove_all"))
+
             # If cant remove someones
             elif len(error_list) > 0:
                 msg = ""
                 for id_error in error_list:
                     msg = msg + id_error + ", "
-                
+
                 msg = error_messages.get("can_not_remove") % msg[:-2]
-                
+
                 messages.add_message(request, messages.WARNING, msg)
-                
+
             # If all has ben removed
             elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, script_messages.get("success_remove"))
-                
+                messages.add_message(
+                    request, messages.SUCCESS, script_messages.get("success_remove"))
+
             else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
-        
+                messages.add_message(
+                    request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
-            
+            messages.add_message(
+                request, messages.ERROR, error_messages.get("select_one"))
+
     # Redirect to list_all action
     return redirect("script.list")
+
 
 @log
 @login_required
 @has_perm([{"permission": SCRIPT_MANAGEMENT, "read": True, "write": True}])
 def add_form(request):
-    
+
     try:
-        
+
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         # If form was submited
         if request.method == 'POST':
-            
+
             # Get all script_types from NetworkAPI
             script_type_list = client.create_tipo_roteiro().listar()
             form = ScriptForm(script_type_list, request.POST)
-            
+
             if form.is_valid():
-                
+
                 # Data
                 name = upper(form.cleaned_data['name'])
                 script_type = form.cleaned_data['script_type']
                 description = form.cleaned_data['description']
-                
+
                 try:
                     # Business
-                    client.create_roteiro().inserir(script_type, name, description)
-                    messages.add_message(request, messages.SUCCESS, script_messages.get("success_insert"))
-                    
+                    client.create_roteiro().inserir(
+                        script_type, name, description)
+                    messages.add_message(
+                        request, messages.SUCCESS, script_messages.get("success_insert"))
+
                     return redirect('script.list')
                 except NomeRoteiroDuplicadoError, e:
                     messages.add_message(request, messages.ERROR, e)
-                    
+
         else:
-            
+
             # Get all script_types from NetworkAPI
             script_type_list = client.create_tipo_roteiro().listar()
-            
+
             # New form
             form = ScriptForm(script_type_list)
-            
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    
+
     return render_to_response(SCRIPT_FORM, {'form': form}, context_instance=RequestContext(request))

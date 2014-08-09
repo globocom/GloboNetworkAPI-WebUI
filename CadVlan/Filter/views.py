@@ -23,6 +23,7 @@ from CadVlan.Filter.form import FilterForm
 
 logger = logging.getLogger(__name__)
 
+
 @log
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}])
@@ -37,20 +38,19 @@ def list_all(request):
 
         # Get all filters from NetworkAPI
         filter_list = filter_client.list_all()
-        
+
         for filter_ in filter_list['filter']:
             filter_['is_more'] = str(False)
-            
+
             if filter_.get('equip_types') is not None:
                 if type(filter_['equip_types']) is dict:
-                    filter_['equip_types'] = [filter_['equip_types']]                
-                
+                    filter_['equip_types'] = [filter_['equip_types']]
+
                 if len(filter_['equip_types']) > 3:
                     filter_['is_more'] = str(True)
-               
-    
+
         filter_list['form'] = DeleteForm()
-        
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -97,7 +97,8 @@ def delete_all(request):
 
             # If cant remove nothing
             if len(error_list) == len(ids):
-                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                messages.add_message(
+                    request, messages.ERROR, error_messages.get("can_not_remove_all"))
 
             # If cant remove someones
             elif len(error_list) > 0:
@@ -111,16 +112,20 @@ def delete_all(request):
 
             # If all has ben removed
             elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, filter_messages.get("success_remove"))
+                messages.add_message(
+                    request, messages.SUCCESS, filter_messages.get("success_remove"))
 
             else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+                messages.add_message(
+                    request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
     return redirect('filter.list')
+
 
 @log
 @login_required
@@ -128,13 +133,13 @@ def delete_all(request):
 def add_form(request):
 
     try:
-        
+
         lists = dict()
         lists['action'] = reverse("filter.form")
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         equip_type = client.create_tipo_equipamento().listar()
 
         if request.method == "POST":
@@ -143,21 +148,21 @@ def add_form(request):
             lists['form'] = form
 
             if form.is_valid():
-                
+
                 name = form.cleaned_data['name']
                 description = form.cleaned_data['description']
                 equip_type = form.cleaned_data['equip_type']
 
-                
                 filter_client = client.create_filter()
-                filter_ =  filter_client.add(name, description)
-                    
+                filter_ = filter_client.add(name, description)
+
                 for et in equip_type:
                     filter_client.associate(et, filter_['filter']['id'])
-                    
-                messages.add_message(request, messages.SUCCESS, filter_messages.get("success_insert"))
 
-                return redirect('filter.list')                  
+                messages.add_message(
+                    request, messages.SUCCESS, filter_messages.get("success_insert"))
+
+                return redirect('filter.list')
 
         else:
 
@@ -176,22 +181,21 @@ def add_form(request):
 def edit_form(request, id_filter):
 
     try:
-        
+
         lists = dict()
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         lists['id_filter'] = id_filter
-        
+
         equip_type = client.create_tipo_equipamento().listar()
-        
+
         filter_ = client.create_filter().get(id_filter)
         filter_ = filter_.get("filter")
-        
+
         if type(filter_.get('equip_types')) is dict:
-                filter_['equip_types'] = [filter_['equip_types']]
-            
+            filter_['equip_types'] = [filter_['equip_types']]
 
         if request.method == "POST":
 
@@ -199,53 +203,54 @@ def edit_form(request, id_filter):
             lists['form'] = form
 
             if form.is_valid():
-                
-                name  = form.cleaned_data['name']
+
+                name = form.cleaned_data['name']
                 description = form.cleaned_data['description']
                 new_equip_type = form.cleaned_data['equip_type']
 
                 filter_client = client.create_filter()
                 filter_client.alter(id_filter, name, description)
-                
+
                 old_equip_type = list()
                 if filter_.get('equip_types') is not None:
                     for eqt in filter_.get('equip_types'):
                         old_equip_type.append(eqt['id'])
-                
-                #Make diff from old_equip_type and new_equip_type
+
+                # Make diff from old_equip_type and new_equip_type
                 to_add, to_rem = diff(old_equip_type, new_equip_type)
-                
+
                 for eqt_id in to_rem:
                     filter_client.dissociate(id_filter, eqt_id)
-                
+
                 for eqt_id in to_add:
                     filter_client.associate(eqt_id, id_filter)
-                    
-                messages.add_message(request, messages.SUCCESS, filter_messages.get("success_edit"))
 
-                return redirect('filter.list')                  
-        #GET
-        else: 
-            #Set form data for filter
+                messages.add_message(
+                    request, messages.SUCCESS, filter_messages.get("success_edit"))
+
+                return redirect('filter.list')
+        # GET
+        else:
+            # Set form data for filter
             equip_types = list()
             if filter_.get('equip_types') is not None:
                 for et in filter_.get('equip_types'):
                     equip_types.append(et['id'])
-                    
-            
-            lists['form'] = FilterForm(equip_type,initial={"id":filter_['id'],
-                                                           "name":filter_['name'],
-                                                           "description":filter_['description'],
-                                                           "equip_type": equip_types})
-    
+
+            lists['form'] = FilterForm(equip_type, initial={"id": filter_['id'],
+                                                            "name": filter_['name'],
+                                                            "description": filter_['description'],
+                                                            "equip_type": equip_types})
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(FILTER_EDIT, lists, context_instance=RequestContext(request))
 
-def diff(old, new):    
+
+def diff(old, new):
     to_add = list(set(new) - set(old))
     to_rem = list(set(old) - set(new))
-    
+
     return to_add, to_rem
