@@ -12,7 +12,7 @@ class Json(object):
     redirect = None
     uri = None
 
-    def __init__(self, content, redirect=None, uri=None):
+    def __init__(self, content, redirect = None, uri = None):
         self.content = content
         self.redirect = redirect
         self.uri = uri

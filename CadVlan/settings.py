@@ -22,7 +22,7 @@ CADVLAN_VERSION = '11.11'
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': {
+  'default': {
         'ENGINE': '',
         'NAME': '',
         'USER': '',
@@ -90,7 +90,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -100,10 +100,10 @@ SECRET_KEY = 'nx@6034rdr+jh!0_*0j4ueqzd9#=a3h87jzl!xc@9x2l-1n4nv'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    #     'django.template.loaders.eggs.Loader',
+#     'django.template.loaders.eggs.Loader',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
+TEMPLATE_CONTEXT_PROCESSORS =(
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
@@ -153,7 +153,7 @@ INSTALLED_APPS = (
     'CadVlan.Ldap',
     'CadVlan.EventLog',
     'CadVlan.BlockRules',
-
+    
 )
 
 SESSION_ENGINE = (
@@ -174,8 +174,8 @@ CACHES = {
     }
 }
 
-CACHE_EQUIPMENTS_TIMEOUT = 900  # Values in seconds
-CACHE_VLANS_TIMEOUT = 300  # Values in seconds
+CACHE_EQUIPMENTS_TIMEOUT = 900 # Values in seconds
+CACHE_VLANS_TIMEOUT = 300 # Values in seconds
 
 URL_LOGIN = '/login'
 URL_HOME = '/home'
@@ -192,7 +192,7 @@ EMAIL_HOST_USER = 'globo@s2it.com.br'
 EMAIL_HOST_PASSWORD = '123$mudar'
 EMAIL_USE_TLS = True
 
-MAX_RESULT_DEFAULT = 25  # Options-> 10, 25, 50, 100
+MAX_RESULT_DEFAULT = 25 # Options-> 10, 25, 50, 100
 
 PATCH_PANEL_ID = 8
 
@@ -200,7 +200,7 @@ PATH_ACL = os.path.join(PROJECT_ROOT_PATH, 'ACLS/')
 
 PATH_PERMLISTS = os.path.join(PROJECT_ROOT_PATH, 'permissions')
 
-CACERTDIR = '/etc/pki/globocom/'
+CACERTDIR='/etc/pki/globocom/'
 LDAP_DC = "dc=globoi,dc=com"
 LDAP_SSL = True
 LDAP_INITIALIZE = "192.168.24.14:389"
@@ -211,9 +211,9 @@ LDAP_MANAGER_PASSWORD = "senha"
 LDAP_PASSWORD_DEFAULT_HASH = "{MD5}a5FE2fqsjiUZ6q41LBDswQ=="
 LDAP_PASSWORD_DEFAULT = "globocom"
 
-ACCESS_EXTERNAL_TTL = 1800  # Values in seconds
+ACCESS_EXTERNAL_TTL = 1800 # Values in seconds
 
-SECRET_KEY = '12345678'  # Generates key encryption
+SECRET_KEY = '12345678' # Generates key encryption 
 
 LOG_FILE = PROJECT_ROOT_PATH + '/log.log'
 
@@ -229,28 +229,28 @@ LOGGING = {
             'format': '[%(levelname)s] %(asctime)s - M:%(module)s, P:%(process)d, T:%(thread)d, MSG:%(message)s',
             'datefmt': '%d/%b/%Y:%H:%M:%S %z',
         },
-    },
+    },    
     'handlers': {
         'handlers-request': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'simple',
             'filename': LOG_FILE,
-            'mode': 'a',  # append+create
+            'mode': 'a', #append+create
         },
         'handlers-view': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
             'filename': LOG_FILE,
-            'mode': 'a',  # append+create
+            'mode': 'a', #append+create
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['handlers-view'],
+            'handlers':['handlers-view'],
             'propagate': True,
-            'level': 'INFO',
+            'level':'INFO',
         },
         'django.request': {
             'handlers': ['handlers-view'],
@@ -319,6 +319,6 @@ LOGGING = {
         },
         'CadVlan.BlockRules': {
             'handlers': ['handlers-view'],
-        },
+        },                
     }
 }

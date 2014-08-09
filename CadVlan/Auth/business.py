@@ -1,7 +1,6 @@
 from whrandom import choice
 import string
 
-
 def GenPasswd():
     newpasswd = ''
     chars = string.letters + string.digits
