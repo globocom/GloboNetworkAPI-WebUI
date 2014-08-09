@@ -11,11 +11,19 @@ from CadVlan.Util.utility import check_regex
 
 
 class TipoAcessoForm(forms.Form):
-    
-    nome = forms.CharField(label=u'Nome', min_length=3, max_length=45,required=True, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
-    
+
+    nome = forms.CharField(
+        label=u'Nome',
+        min_length=3,
+        max_length=45,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                'style': "width: 200px"}))
+
     def clean_nome(self):
         if not check_regex(self.cleaned_data['nome'], r'^[- a-zA-Z0-9]+$'):
             raise forms.ValidationError('Caracteres inválidos.')
-        
+
         return self.cleaned_data['nome']

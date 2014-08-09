@@ -25,59 +25,78 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def load_list(request,lists,id_egroup,tab):
-    
+def load_list(request, lists, id_egroup, tab):
+
     try:
-        
+
         equipament_list = lists
 
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
-        equipament_list['equipments'] = validates_dict(client.create_equipamento().list_by_group(id_egroup), 'equipments')
+
+        equipament_list['equipments'] = validates_dict(
+            client.create_equipamento().list_by_group(id_egroup),
+            'equipments')
         equipament_list['form'] = DeleteForm()
-        equipament_list['egroup'] = client.create_grupo_equipamento().search(id_egroup)['group_equipament']
+        equipament_list['egroup'] = client.create_grupo_equipamento().search(
+            id_egroup)['group_equipament']
         equipament_list['tab'] = '0' if tab == '0' else '1'
-        
-        group_equipment_perm = client.create_direito_grupo_equipamento().listar_por_grupo_equipamento(id_egroup).get("direito_grupo_equipamento")
+
+        group_equipment_perm = client.create_direito_grupo_equipamento(
+        ).listar_por_grupo_equipamento(id_egroup).get("direito_grupo_equipamento")
         equipament_list['ugroups'] = group_equipment_perm
         equipament_list['form_ugroup'] = DeleteFormAux()
-        
+
         if not 'ugroup_form' in equipament_list:
             ugroups = client.create_grupo_usuario().listar()
-            egroup = client.create_grupo_equipamento().search(id_egroup)['group_equipament']
-            equipament_list['ugroup_form'] = UserEquipGroupForm(ugroups,initial={"id_egroup":id_egroup,"egroup":egroup.get('nome')})
-            
+            egroup = client.create_grupo_equipamento().search(
+                id_egroup)['group_equipament']
+            equipament_list['ugroup_form'] = UserEquipGroupForm(
+                ugroups,
+                initial={
+                    "id_egroup": id_egroup,
+                    "egroup": egroup.get('nome')})
+
         if not 'url_form' in equipament_list:
-            lists['url_form'] = reverse("equip-user-group.form",args=[id_egroup])
-            
+            lists['url_form'] = reverse(
+                "equip-user-group.form",
+                args=[id_egroup])
+
         if not 'open_form' in equipament_list:
             lists['open_form'] = 'False'
-            
+
         if not 'url_edit' in equipament_list:
             lists['edit'] = 'False'
         else:
             lists['edit'] = 'True'
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     return equipament_list
-    
+
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},
+           {"permission": ADMINISTRATION, "write": True}])
 def list_all(request, id_egroup, tab):
-    return render_to_response(EQUIPMENT_GROUP_LIST, load_list(request, dict(), id_egroup, tab) , context_instance=RequestContext(request))
-
+    return render_to_response(
+        EQUIPMENT_GROUP_LIST,
+        load_list(
+            request,
+            dict(),
+            id_egroup,
+            tab),
+        context_instance=RequestContext(request))
 
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},
+           {"permission": ADMINISTRATION, "write": True}])
 def delete_all(request, id_egroup):
 
     if request.method == 'POST':
@@ -105,12 +124,12 @@ def delete_all(request, id_egroup):
 
                     # Execute in NetworkAPI
                     client_equipament.remover_grupo(id_equip, id_egroup)
-                    
-                except EquipmentDontRemoveError, e:
+
+                except EquipmentDontRemoveError as e:
                     # If isn't possible, add in error list
                     error_list.append(id_equip)
 
-                except NetworkAPIClientError, e:
+                except NetworkAPIClientError as e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
@@ -118,14 +137,14 @@ def delete_all(request, id_egroup):
 
             # If can't remove some
             if len(error_list) > 0:
-                
+
                 list_equipment = cache_list_equipment_all(client_equipament)
-                
+
                 msg = ""
                 for id_error in error_list:
-                    
+
                     for equip in list_equipment:
-                        
+
                         if equip['id'] == id_error:
                             msg = msg + equip['nome'] + ", "
                             break
@@ -136,33 +155,45 @@ def delete_all(request, id_egroup):
 
             # If all have been removed
             elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, equip_group_messages.get("success_remove"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    equip_group_messages.get("success_remove"))
 
             else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    error_messages.get("can_not_remove_error"))
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one"))
 
     # Redirect to list_all action
     return redirect('equip-group.list', id_egroup, 0)
 
+
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},
+           {"permission": ADMINISTRATION, "write": True}])
 def add_form(request, id_egroup):
 
     try:
-        
+
         form = EquipGroupForm()
-        equipment = None        
-        
+        equipment = None
+
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         # Get Group Equipament by ID from NetworkAPI
-        egroup = client.create_grupo_equipamento().search(id_egroup)['group_equipament']
+        egroup = client.create_grupo_equipamento().search(
+            id_egroup)['group_equipament']
 
         if request.method == "POST":
 
@@ -171,156 +202,203 @@ def add_form(request, id_egroup):
             if form.is_valid():
                 id_egroup = form.cleaned_data['id_egroup']
                 equip_name = form.cleaned_data['equip_name']
-                
+
                 client_equip = client.create_equipamento()
-                
+
                 # Get equipment by name from NetworkAPI
-                equipment = client_equip.listar_por_nome(equip_name)['equipamento']
+                equipment = client_equip.listar_por_nome(
+                    equip_name)['equipamento']
 
                 try:
                     client_equip.associar_grupo(equipment['id'], id_egroup)
-                    messages.add_message(request, messages.SUCCESS, equip_group_messages.get("success_insert"))
-                    form = EquipGroupForm(initial={'id_egroup':  egroup['id'], 'egroup':  egroup['nome'] })
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        equip_group_messages.get("success_insert"))
+                    form = EquipGroupForm(
+                        initial={
+                            'id_egroup': egroup['id'],
+                            'egroup': egroup['nome']})
 
-                except NetworkAPIClientError, e:
+                except NetworkAPIClientError as e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
 
         else:
-            
-            form = EquipGroupForm(initial={'id_egroup':  egroup['id'], 'egroup':  egroup['nome'] })
 
-    except NetworkAPIClientError, e:
+            form = EquipGroupForm(
+                initial={
+                    'id_egroup': egroup['id'],
+                    'egroup': egroup['nome']})
+
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        
-    
 
-    return render_to_response(EQUIPMENT_GROUP_FORM, {'form': form,'id_egroup':id_egroup}, context_instance=RequestContext(request))
+    return render_to_response(
+        EQUIPMENT_GROUP_FORM, {
+            'form': form, 'id_egroup': id_egroup}, context_instance=RequestContext(request))
+
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},
+           {"permission": ADMINISTRATION, "write": True}])
 def add_right(request, id_egroup):
-   
+
     lists = dict()
     lists['id_egroup'] = id_egroup
-    
+
     try:
-        
+
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         user_group = client.create_grupo_usuario().listar()
-        
-        
+
         if request.method == 'POST':
-            
-            form = UserEquipGroupForm(user_group,request.POST)
+
+            form = UserEquipGroupForm(user_group, request.POST)
             lists['ugroup_form'] = form
-            
+
             if form.is_valid():
-               
+
                 id_ugroup = form.cleaned_data['ugroup']
                 id_egroup = form.cleaned_data['id_egroup']
-                update =  convert_boolean_to_int(form.cleaned_data['update'])
+                update = convert_boolean_to_int(form.cleaned_data['update'])
                 delete = convert_boolean_to_int(form.cleaned_data['delete'])
                 read = convert_boolean_to_int(form.cleaned_data['read'])
-                write =  convert_boolean_to_int(form.cleaned_data['write'])
-                
-                client.create_direito_grupo_equipamento().inserir(id_ugroup, id_egroup, read, write, update, delete)
-                messages.add_message(request, messages.SUCCESS, equip_group_messages.get("sucess_group_user_equip"))
+                write = convert_boolean_to_int(form.cleaned_data['write'])
+
+                client.create_direito_grupo_equipamento().inserir(
+                    id_ugroup,
+                    id_egroup,
+                    read,
+                    write,
+                    update,
+                    delete)
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    equip_group_messages.get("sucess_group_user_equip"))
                 # Redirect to list_all action
                 return redirect('equip-group.list', id_egroup, 1)
             else:
                 lists['open_form'] = "True"
-    
-    except DireitoGrupoEquipamentoDuplicadoError, e:
+
+    except DireitoGrupoEquipamentoDuplicadoError as e:
         logger.error(e)
         lists['open_form'] = "True"
-        messages.add_message(request, messages.ERROR, equip_group_messages.get("duplicated_error"))
-    except NetworkAPIClientError, e:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            equip_group_messages.get("duplicated_error"))
+    except NetworkAPIClientError as e:
         logger.error(e)
         lists['open_form'] = "True"
         messages.add_message(request, messages.ERROR, e)
-    
-        
-    
-    lists['url_form'] = reverse("equip-user-group.form",args=[id_egroup])
+
+    lists['url_form'] = reverse("equip-user-group.form", args=[id_egroup])
     lists = load_list(request, lists, id_egroup, 1)
-    
-    return render_to_response(EQUIPMENT_GROUP_LIST, lists, context_instance=RequestContext(request))
+
+    return render_to_response(
+        EQUIPMENT_GROUP_LIST,
+        lists,
+        context_instance=RequestContext(request))
+
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},
+           {"permission": ADMINISTRATION, "write": True}])
 def edit_right(request, id_egroup, id_right):
-   
+
     lists = dict()
     lists['id_egroup'] = id_egroup
-    
+
     try:
-        
+
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         user_group = client.create_grupo_usuario().listar()
-        
-        
+
         if request.method == 'POST':
-            
-            form = UserEquipGroupForm(user_group,request.POST)
+
+            form = UserEquipGroupForm(user_group, request.POST)
             lists['ugroup_form'] = form
-            
+
             if form.is_valid():
-                
-                update =  convert_boolean_to_int(form.cleaned_data['update'])
+
+                update = convert_boolean_to_int(form.cleaned_data['update'])
                 delete = convert_boolean_to_int(form.cleaned_data['delete'])
                 read = convert_boolean_to_int(form.cleaned_data['read'])
-                write =  convert_boolean_to_int(form.cleaned_data['write'])
-                
-                client.create_direito_grupo_equipamento().alterar(id_right, read, write, update, delete)
-                messages.add_message(request, messages.SUCCESS, equip_group_messages.get("sucess_group_user_equip_edit"))
+                write = convert_boolean_to_int(form.cleaned_data['write'])
+
+                client.create_direito_grupo_equipamento().alterar(
+                    id_right,
+                    read,
+                    write,
+                    update,
+                    delete)
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    equip_group_messages.get("sucess_group_user_equip_edit"))
                 # Redirect to list_all action
                 return redirect('equip-group.list', id_egroup, 1)
             else:
                 lists['open_form'] = "True"
-        
-        #Get Requisition    
+
+        # Get Requisition
         else:
-            
+
             # Get Group Equipament by ID from NetworkAPI
-            egroup = client.create_grupo_equipamento().search(id_egroup)['group_equipament']
-            
-            right = client.create_direito_grupo_equipamento().buscar_por_id(id_right).get('direito_grupo_equipamento')
+            egroup = client.create_grupo_equipamento().search(
+                id_egroup)['group_equipament']
+
+            right = client.create_direito_grupo_equipamento().buscar_por_id(
+                id_right).get('direito_grupo_equipamento')
             write = convert_int_to_boolean(right.get('escrita'))
             update = convert_int_to_boolean(right.get('alterar_config'))
             read = convert_int_to_boolean(right.get('leitura'))
             delete = convert_int_to_boolean(right.get('exclusao'))
-            
-            lists['ugroup_form'] = UserEquipGroupForm(user_group,initial={"id_egroup":id_egroup,
-                                                                          "egroup":egroup.get('nome'),
-                                                                          "delete":delete,
-                                                                          "update":update,
-                                                                          "write": write,
-                                                                          "read":read,
-                                                                          'ugroup':right.get("id_grupo_usuario")})
-            
-    except NetworkAPIClientError, e:
+
+            lists['ugroup_form'] = UserEquipGroupForm(
+                user_group,
+                initial={
+                    "id_egroup": id_egroup,
+                    "egroup": egroup.get('nome'),
+                    "delete": delete,
+                    "update": update,
+                    "write": write,
+                    "read": read,
+                    'ugroup': right.get("id_grupo_usuario")})
+
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    
-    lists['url_edit'] = reverse("equip-user-group.edit",args=[id_egroup,id_right])
+
+    lists['url_edit'] = reverse(
+        "equip-user-group.edit",
+        args=[
+            id_egroup,
+            id_right])
     lists = load_list(request, lists, id_egroup, 1)
     lists['open_form'] = 'True'
-    
-    return render_to_response(EQUIPMENT_GROUP_LIST, lists, context_instance=RequestContext(request))
+
+    return render_to_response(
+        EQUIPMENT_GROUP_LIST,
+        lists,
+        context_instance=RequestContext(request))
+
 
 @log
 @login_required
-@has_perm([{"permission": ADMINISTRATION, "read": True},{"permission": ADMINISTRATION, "write": True}])
+@has_perm([{"permission": ADMINISTRATION, "read": True},
+           {"permission": ADMINISTRATION, "write": True}])
 def delete_right(request, id_egroup):
     if request.method == 'POST':
 
@@ -330,7 +408,8 @@ def delete_right(request, id_egroup):
 
             # Get user
             auth = AuthSession(request.session)
-            client_equipament = auth.get_clientFactory().create_direito_grupo_equipamento()
+            client_equipament = auth.get_clientFactory(
+            ).create_direito_grupo_equipamento()
 
             # All ids to be deleted
             ids = split_to_array(form.cleaned_data['ids_aux'])
@@ -348,7 +427,7 @@ def delete_right(request, id_egroup):
                     # Execute in NetworkAPI
                     client_equipament.remover(id_right)
 
-                except NetworkAPIClientError, e:
+                except NetworkAPIClientError as e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
@@ -356,7 +435,10 @@ def delete_right(request, id_egroup):
 
             # If cant remove nothing
             if len(error_list) == len(ids):
-                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    error_messages.get("can_not_remove_all"))
 
             # If cant remove someones
             elif len(error_list) > 0:
@@ -370,13 +452,22 @@ def delete_right(request, id_egroup):
 
             # If all has ben removed
             elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, equip_group_messages.get("sucesso_user_equip_remove"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    equip_group_messages.get("sucesso_user_equip_remove"))
 
             else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    error_messages.get("can_not_remove_error"))
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one"))
 
     # Redirect to list_all action
     return redirect('equip-group.list', id_egroup, 1)

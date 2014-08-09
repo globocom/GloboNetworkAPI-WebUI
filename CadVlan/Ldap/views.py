@@ -14,7 +14,7 @@ from CadVlan.forms import DeleteForm
 from CadVlan.messages import error_messages, ldap_messages
 from CadVlan.permissions import ADMINISTRATION
 from CadVlan.templates import LDAP_GROUP_LIST, LDAP_GROUP_FORM, LDAP_SUDOER_LIST, LDAP_SUDOER_FORM, LDAP_USER_LIST, LDAP_USER_FORM, AJAX_LDAP_RESET_PASSWORD
-from CadVlan.settings import  LDAP_PASSWORD_DEFAULT
+from CadVlan.settings import LDAP_PASSWORD_DEFAULT
 from django.contrib import messages
 from django.template import loader
 from django.core.urlresolvers import reverse
@@ -26,219 +26,234 @@ from networkapiclient.exception import UsuarioNaoExisteError
 
 logger = logging.getLogger(__name__)
 
+
 class PATTERN_TYPES():
-    INTERNAL  = "interno"
-    EXTERNAL  = "externo"
+    INTERNAL = "interno"
+    EXTERNAL = "externo"
+
 
 def get_users(ldap):
     """
     Returns all users from LDAP in parse form list
-    
+
     :param ldap: Ldap
-    """ 
+    """
     try:
-    
+
         users = ldap.get_users()
-        users_list = []        
+        users_list = []
         for group in users:
             user_aux = {}
             user_aux['uidNumber'] = users.get(group).get('uidNumber')
             user_aux['cn'] = users.get(group).get('cn')
             users_list.append(user_aux)
-            
+
         return users_list
-            
-    except LDAPError, e:
+
+    except LDAPError as e:
         raise e
-    except Exception, e:
+    except Exception as e:
         raise LDAPMethodError(e)
-    
+
+
 def get_users_search(ldap, pattern, lock=False, policy=False):
     """
     Returns all users from LDAP in parse form list
-    
+
     :param ldap: Ldap
     :param pattern: Type of User to be searched (PATTERN_TYPES)
     :param lock: True or False, determines whether data will be fetched lock
     :param policy: True or False, determines whether data will be fetched policies
-    """ 
+    """
     try:
-    
+
         users = ldap.get_users(lock, policy)
-        users_list = []        
+        users_list = []
         for group in users:
-            
+
             is_valid = False
             if pattern == PATTERN_TYPES.EXTERNAL:
-                is_valid= ldap.valid_range_user_external(users.get(group).get('uidNumber'))
+                is_valid = ldap.valid_range_user_external(
+                    users.get(group).get('uidNumber'))
             else:
-                is_valid= ldap.valid_range_user_internal(users.get(group).get('uidNumber'))
-            
+                is_valid = ldap.valid_range_user_internal(
+                    users.get(group).get('uidNumber'))
+
             if is_valid:
                 user_aux = {}
-                user_aux['uidNumber'] =  users.get(group).get('uidNumber')
+                user_aux['uidNumber'] = users.get(group).get('uidNumber')
                 user_aux['cn'] = users.get(group).get('cn')
-                user_aux['name'] = "%s %s" % ( users.get(group).get('givenName'), users.get(group).get('sn')) 
-                if lock and users.get(group).get('pwdAccountLockedTime') is not None:
-                    user_aux['pwdAccountLockedTime'] = users.get(group).get('pwdAccountLockedTime')
-                
+                user_aux['name'] = "%s %s" % (
+                    users.get(group).get('givenName'), users.get(group).get('sn'))
+                if lock and users.get(group).get(
+                        'pwdAccountLockedTime') is not None:
+                    user_aux['pwdAccountLockedTime'] = users.get(
+                        group).get('pwdAccountLockedTime')
+
                 users_list.append(user_aux)
-            
+
         return users_list
-            
-    except LDAPError, e:
+
+    except LDAPError as e:
         raise e
-    except Exception, e:
+    except Exception as e:
         raise LDAPMethodError(e)
-    
-def get_groups(ldap, cn = None):
+
+
+def get_groups(ldap, cn=None):
     """
     Returns all groups from LDAP in parse form list
-    
+
     :param ldap: Ldap
     :param cn: cn of Group.
-    """ 
+    """
     try:
-    
-    
+
         if cn is None:
             groups = ldap.get_groups()
         else:
             groups = ldap.get_groups_user(cn)
-            
-        groups_list = []        
+
+        groups_list = []
         for group in groups:
             group_aux = {}
             group_aux['gidNumber'] = groups.get(group).get('gidNumber')
             group_aux['cn'] = groups.get(group).get('cn')
             groups_list.append(group_aux)
-            
+
         return groups_list
-            
-    except LDAPError, e:
+
+    except LDAPError as e:
         raise e
-    except Exception, e:
+    except Exception as e:
         raise LDAPMethodError(e)
-    
+
+
 def get_policies(ldap):
     """
     Returns all policies from LDAP in parse form list
-    
+
     :param ldap: Ldap
-    """ 
+    """
     try:
-    
+
         policies = ldap.get_policies()
-        policies_list = []        
+        policies_list = []
         for policy in policies:
             policy_aux = {}
             policy_aux['cn'] = policies.get(policy).get('cn')
             policies_list.append(policy_aux)
-            
+
         return policies_list
-            
-    except LDAPError, e:
+
+    except LDAPError as e:
         raise e
-    except Exception, e:
+    except Exception as e:
         raise LDAPMethodError(e)
-    
-    
+
+
 def get_sudoers(ldap):
     """
     Returns all sudoers from LDAP in parse form list
-    
+
     :param ldap: Ldap
-    """ 
+    """
     try:
-    
+
         sudoers = ldap.get_sudoers()
-        sudoers_list = []        
+        sudoers_list = []
         for sudoer in sudoers:
             sudoer_aux = {}
             sudoer_aux['sudoCommand'] = sudoers.get(sudoer).get('sudoCommand')
             sudoer_aux['cn'] = sudoers.get(sudoer).get('cn')
             sudoer_aux['is_more'] = False
-            
+
             if len(sudoer_aux['sudoCommand']) > 3:
                 sudoer_aux['is_more'] = True
-            
+
             sudoers_list.append(sudoer_aux)
-            
+
         return sudoers_list
-            
-    except LDAPError, e:
+
+    except LDAPError as e:
         raise e
-    except Exception, e:
+    except Exception as e:
         raise LDAPMethodError(e)
-    
+
+
 def gidNumber_suggest(ldap):
     """
     Suggested gidNumber
-    
+
     :param ldap: Ldap
-    """ 
+    """
     try:
         suggest = ''
         groups = ldap.get_groups()
         for i in ldap.rangeGroups:
-            
-            if not i in groups:
+
+            if i not in groups:
                 suggest = i
                 break
-        
+
         return suggest
-    
-    except LDAPError, e:
+
+    except LDAPError as e:
         raise e
-    except Exception, e:
+    except Exception as e:
         raise LDAPMethodError(e)
-    
+
+
 def uidNumber_suggest(ldap, pattern):
     """
     Suggested uidNumber
-    
+
     :param ldap: Ldap
     :param pattern: Type of User to be searched (PATTERN_TYPES)
-    """ 
+    """
     try:
         suggest = ''
         users = ldap.get_users()
-        
+
         if pattern == PATTERN_TYPES.INTERNAL:
             rangeUsers = ldap.rangeUsers
         else:
             rangeUsers = ldap.rangeUsersExternal
-        
+
         for i in rangeUsers:
-            
-            if not i in users:
+
+            if i not in users:
                 suggest = i
                 break
-        
+
         return suggest
-    
-    except LDAPError, e:
+
+    except LDAPError as e:
         raise e
-    except Exception, e:
+    except Exception as e:
         raise LDAPMethodError(e)
+
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "write": True, "read": True}])
 def list_all_group(request):
     try:
-        
+
         lists = dict()
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
-        
+
         lists['groups'] = get_groups(ldap)
         lists['form'] = DeleteForm()
-        
-    except LDAPError, e:
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(LDAP_GROUP_LIST, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_GROUP_LIST,
+        lists,
+        context_instance=RequestContext(request))
 
 
 @log
@@ -268,12 +283,12 @@ def delete_group_all(request):
                 try:
 
                     ldap.rem_group(gid)
-                    
-                except LDAPNotFoundError, e:
+
+                except LDAPNotFoundError as e:
                     error_list.append(gid)
                     have_errors = True
 
-                except LDAPError, e:
+                except LDAPError as e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
@@ -281,7 +296,10 @@ def delete_group_all(request):
 
             # If cant remove nothing
             if len(error_list) == len(ids):
-                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    error_messages.get("can_not_remove_all"))
 
             # If cant remove someones
             elif len(error_list) > 0:
@@ -295,13 +313,22 @@ def delete_group_all(request):
 
             # If all has ben removed
             elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_remove_group"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    ldap_messages.get("success_remove_group"))
 
             else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    error_messages.get("can_not_remove_error"))
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one"))
 
     return redirect('ldap.group.list')
 
@@ -312,10 +339,10 @@ def delete_group_all(request):
 def add_group_form(request):
 
     try:
-        
+
         lists = dict()
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
-        
+
         users_list = get_users(ldap)
 
         if request.method == "POST":
@@ -328,45 +355,62 @@ def add_group_form(request):
                 member_uid = form.cleaned_data['member_uid']
 
                 if valid_form_group(ldap, request, cn, gidNumber):
-                    
+
                     ldap.add_group(cn, gidNumber, member_uid)
 
-                    messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_insert_group"))
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        ldap_messages.get("success_insert_group"))
 
                     return redirect('ldap.group.list')
 
         else:
-            
-            form = GroupForm(users_list, initial = {'gidNumber': gidNumber_suggest(ldap) })
-                                                      
 
-    except LDAPError, e:
+            form = GroupForm(
+                users_list,
+                initial={
+                    'gidNumber': gidNumber_suggest(ldap)})
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     lists["form"] = form
     lists["action"] = reverse("ldap.group.form")
 
-    return render_to_response(LDAP_GROUP_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_GROUP_FORM,
+        lists,
+        context_instance=RequestContext(request))
+
 
 def valid_form_group(ldap, request, cn, gidNumber):
-    
-    #Valid
+
+    # Valid
     is_valid = True
-    
+
     try:
         ldap.get_group(cn)
         is_valid = False
-        messages.add_message(request, messages.WARNING, ldap_messages.get("error_duplicated_name_group") % cn)
+        messages.add_message(
+            request,
+            messages.WARNING,
+            ldap_messages.get("error_duplicated_name_group") %
+            cn)
     except LDAPError:
         pass
 
     for grp in get_groups(ldap):
-        
+
         if gidNumber == grp.get("gidNumber"):
             is_valid = False
-            messages.add_message(request, messages.WARNING, ldap_messages.get("error_duplicated_gidNumber_group") % gidNumber)
-        
+            messages.add_message(
+                request,
+                messages.WARNING,
+                ldap_messages.get("error_duplicated_gidNumber_group") %
+                gidNumber)
+
     return is_valid
 
 
@@ -375,46 +419,63 @@ def valid_form_group(ldap, request, cn, gidNumber):
 @has_perm([{"permission": ADMINISTRATION, "write": True, "read": True}])
 def edit_group_form(request, cn):
     try:
-        
+
         lists = dict()
         lists["edit"] = True
         lists["action"] = reverse("ldap.group.edit", args=[cn])
-        
+
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
-        
+
         users_list = get_users(ldap)
-            
-        form = GroupForm(users_list) 
-            
+
+        form = GroupForm(users_list)
+
         if request.method == "POST":
-            
+
             form = GroupForm(users_list, request.POST)
 
             if form.is_valid():
                 cn = str(form.cleaned_data['cn'])
                 gidNumber = str(form.cleaned_data['gidNumber'])
                 member_uid = form.cleaned_data['member_uid']
-                
+
                 ldap.edit_group(cn, gidNumber, member_uid)
-                
-                messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_edit_group"))
+
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    ldap_messages.get("success_edit_group"))
                 return redirect('ldap.group.list')
-        
+
         else:
             group = ldap.get_group(cn)
-            form = GroupForm(users_list, initial = {'cn': group.get("cn"), 'gidNumber': group.get("gidNumber"), 'member_uid': validates_dict(group,("memberUid")) })
-        
-    except LDAPNotFoundError, e:
-        messages.add_message(request, messages.ERROR, ldap_messages.get("invalid_group") % cn)
-        return redirect('ldap.group.form') 
-        
-    except LDAPError, e:
+            form = GroupForm(
+                users_list,
+                initial={
+                    'cn': group.get("cn"),
+                    'gidNumber': group.get("gidNumber"),
+                    'member_uid': validates_dict(
+                        group,
+                        ("memberUid"))})
+
+    except LDAPNotFoundError as e:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            ldap_messages.get("invalid_group") %
+            cn)
+        return redirect('ldap.group.form')
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        
+
     lists["form"] = form
 
-    return render_to_response(LDAP_GROUP_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_GROUP_FORM,
+        lists,
+        context_instance=RequestContext(request))
 
 
 @log
@@ -422,33 +483,38 @@ def edit_group_form(request, cn):
 @has_perm([{"permission": ADMINISTRATION, "write": True, "read": True}])
 def list_all_sudoer(request):
     try:
-        
+
         lists = dict()
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
-        
+
         lists['sudoers'] = get_sudoers(ldap)
         lists['form'] = DeleteForm()
-        
-    except LDAPError, e:
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(LDAP_SUDOER_LIST, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_SUDOER_LIST,
+        lists,
+        context_instance=RequestContext(request))
+
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "write": True, "read": True}])
 def add_sudoer_form(request):
     try:
-        
+
         lists = dict()
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
-        
+
         groups_list = get_groups(ldap)
 
         if request.method == "POST":
-            
-            commands_list = request.POST.getlist('commands') if "commands" in request.POST else []
+
+            commands_list = request.POST.getlist(
+                'commands') if "commands" in request.POST else []
 
             form = SudoerForm(groups_list, commands_list, request.POST)
 
@@ -457,55 +523,66 @@ def add_sudoer_form(request):
                 sudoHost = str(form.cleaned_data['host'])
                 sudoUser = form.cleaned_data['groups']
                 sudoCommand = form.cleaned_data['commands']
-                
+
                 try:
-                    #Valid cn
+                    # Valid cn
                     sudoer = None
                     sudoer = ldap.get_sudoer(cn)
-                except LDAPError, e:
+                except LDAPError as e:
                     pass
-                
+
                 if sudoer is None:
-                
+
                     ldap.add_sudoer(cn, sudoHost, sudoUser, sudoCommand)
-                    
-                    messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_insert_sudoer"))
+
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        ldap_messages.get("success_insert_sudoer"))
                     return redirect('ldap.sudoer.list')
 
                 else:
-                    messages.add_message(request, messages.WARNING, ldap_messages.get("error_duplicated_name_sudoer") % cn)
+                    messages.add_message(
+                        request,
+                        messages.WARNING,
+                        ldap_messages.get("error_duplicated_name_sudoer") %
+                        cn)
 
         else:
-            
-            form = SudoerForm(groups_list)
-                                                      
 
-    except LDAPError, e:
+            form = SudoerForm(groups_list)
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     lists["form"] = form
     lists["action"] = reverse("ldap.sudoer.form")
 
-    return render_to_response(LDAP_SUDOER_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_SUDOER_FORM,
+        lists,
+        context_instance=RequestContext(request))
+
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "write": True, "read": True}])
 def edit_sudoer_form(request, cn):
     try:
-        
+
         lists = dict()
         lists["edit"] = True
         lists["action"] = reverse("ldap.sudoer.edit", args=[cn])
-        
+
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
         groups_list = get_groups(ldap)
-            
+
         if request.method == "POST":
-            
-            commands_list = request.POST.getlist('commands') if "commands" in request.POST else []
-            
+
+            commands_list = request.POST.getlist(
+                'commands') if "commands" in request.POST else []
+
             form = SudoerForm(groups_list, commands_list, request.POST)
 
             if form.is_valid():
@@ -513,32 +590,54 @@ def edit_sudoer_form(request, cn):
                 sudoHost = str(form.cleaned_data['host'])
                 sudoUser = form.cleaned_data['groups']
                 sudoCommand = form.cleaned_data['commands']
-                
+
                 ldap.edit_sudoer(cn, sudoHost, sudoUser, sudoCommand)
-                
-                messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_edit_sudoer"))
+
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    ldap_messages.get("success_edit_sudoer"))
                 return redirect('ldap.sudoer.list')
         else:
-        
+
             sudoer = ldap.get_sudoer(cn)
-            
+
             groups = []
-            for grp in validates_dict(sudoer,("sudoUser")):
+            for grp in validates_dict(sudoer, ("sudoUser")):
                 groups.append(str(grp).replace("%", ""))
-            
-            form = SudoerForm(groups_list, validates_dict(sudoer,("sudoCommand")), initial = {'cn': sudoer.get("cn"), 'host': sudoer.get("sudoHost"), 'groups': groups, 'commands': validates_dict(sudoer,("sudoCommand")) })
-        
-    except LDAPNotFoundError, e:
-        messages.add_message(request, messages.ERROR, ldap_messages.get("invalid_sudoer") % cn)
+
+            form = SudoerForm(
+                groups_list,
+                validates_dict(
+                    sudoer,
+                    ("sudoCommand")),
+                initial={
+                    'cn': sudoer.get("cn"),
+                    'host': sudoer.get("sudoHost"),
+                    'groups': groups,
+                    'commands': validates_dict(
+                        sudoer,
+                        ("sudoCommand"))})
+
+    except LDAPNotFoundError as e:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            ldap_messages.get("invalid_sudoer") %
+            cn)
         return redirect('ldap.sudoer.form')
-        
-    except LDAPError, e:
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        
+
     lists["form"] = form
 
-    return render_to_response(LDAP_SUDOER_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_SUDOER_FORM,
+        lists,
+        context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -567,12 +666,12 @@ def delete_sudoer_all(request):
                 try:
 
                     ldap.rem_sudoer(cn)
-                    
-                except LDAPNotFoundError, e:
+
+                except LDAPNotFoundError as e:
                     error_list.append(cn)
                     have_errors = True
 
-                except LDAPError, e:
+                except LDAPError as e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
@@ -580,7 +679,10 @@ def delete_sudoer_all(request):
 
             # If cant remove nothing
             if len(error_list) == len(cns):
-                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    error_messages.get("can_not_remove_all"))
 
             # If cant remove someones
             elif len(error_list) > 0:
@@ -594,13 +696,22 @@ def delete_sudoer_all(request):
 
             # If all has ben removed
             elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_remove_sudoer"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    ldap_messages.get("success_remove_sudoer"))
 
             else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    error_messages.get("can_not_remove_error"))
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one"))
 
     return redirect('ldap.sudoer.list')
 
@@ -610,54 +721,59 @@ def delete_sudoer_all(request):
 @has_perm([{"permission": ADMINISTRATION, "write": True, "read": True}])
 def list_all_user(request, pattern):
     try:
-        
+
         lists = dict()
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
         formSearch = UserSearchForm()
-        
+
         if request.method == 'POST':
-            
+
             formSearch = UserSearchForm(request.POST)
-            
+
             if formSearch.is_valid():
-                
+
                 uidNumner = formSearch.cleaned_data['uidNumner']
                 cn = formSearch.cleaned_data['cn']
                 name = formSearch.cleaned_data['name']
                 lock = formSearch.cleaned_data['lock']
-                
+
                 users = []
                 for user in get_users_search(ldap, pattern, lock):
-                    
+
                     if uidNumner is not None:
                         if str(uidNumner) != user.get('uidNumber'):
                             continue
-                        
-                    if cn is not None and cn != "":        
+
+                    if cn is not None and cn != "":
                         if str(cn).upper() not in str(user.get('cn')).upper():
                             continue
-                            
-                    if name is not None and name != "":        
-                        if str(name).upper() not in str(user.get('name')).upper():
+
+                    if name is not None and name != "":
+                        if str(name).upper() not in str(
+                                user.get('name')).upper():
                             continue
-                        
+
                     users.append(user)
-                 
+
                 lists['users'] = users
-            
+
         else:
-            
-            lists['users'] = get_users_search(ldap, pattern)       
-        
-    except LDAPError, e:
+
+            lists['users'] = get_users_search(ldap, pattern)
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        
+
     lists['search_form'] = formSearch
     lists['form'] = DeleteForm()
     lists['pattern'] = pattern
 
-    return render_to_response(LDAP_USER_LIST, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_USER_LIST,
+        lists,
+        context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -668,21 +784,30 @@ def ajax_reset_password_user(request):
     ldap = Ldap(AuthSession(request.session).get_user().get_username())
     status_code = 500
 
-    try:    
+    try:
         cn = request.GET['cn']
         ldap.reset_pwd(cn)
         lists["password"] = LDAP_PASSWORD_DEFAULT
         status_code = 200
 
-    except LDAPNotFoundError, e:
-        messages.add_message(request, messages.ERROR, ldap_messages.get("invalid_user") % cn)
+    except LDAPNotFoundError as e:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            ldap_messages.get("invalid_user") %
+            cn)
 
-    except LDAPError, e:
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     # Returns HTML
-    return HttpResponse(loader.render_to_string(AJAX_LDAP_RESET_PASSWORD, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            AJAX_LDAP_RESET_PASSWORD,
+            lists,
+            context_instance=RequestContext(request)),
+        status=status_code)
 
 
 @log
@@ -712,21 +837,29 @@ def delete_user_all(request, pattern):
                 try:
 
                     ldap.rem_user(cn)
-                    
-                    client_user = AuthSession(request.session).get_clientFactory().create_usuario()
-                    
+
+                    client_user = AuthSession(
+                        request.session).get_clientFactory().create_usuario()
+
                     try:
                         local_user = client_user.get_by_user_ldap(cn)
                         local_user = local_user['usuario']
-                        client_user.alterar(local_user['id'], local_user['user'], local_user['pwd'], local_user['nome'], local_user['ativo'], local_user['email'], None)
+                        client_user.alterar(
+                            local_user['id'],
+                            local_user['user'],
+                            local_user['pwd'],
+                            local_user['nome'],
+                            local_user['ativo'],
+                            local_user['email'],
+                            None)
                     except UsuarioNaoExisteError:
                         pass
-                    
-                except LDAPMethodError, e:
+
+                except LDAPMethodError as e:
                     error_list.append(cn)
                     have_errors = True
 
-                except LDAPError, e:
+                except LDAPError as e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
@@ -734,7 +867,10 @@ def delete_user_all(request, pattern):
 
             # If cant remove nothing
             if len(error_list) == len(cns):
-                messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    error_messages.get("can_not_remove_all"))
 
             # If cant remove someones
             elif len(error_list) > 0:
@@ -748,13 +884,22 @@ def delete_user_all(request, pattern):
 
             # If all has ben removed
             elif have_errors == False:
-                messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_remove_user"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    ldap_messages.get("success_remove_user"))
 
             else:
-                messages.add_message(request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    error_messages.get("can_not_remove_error"))
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one"))
 
     return HttpResponseRedirect(reverse('ldap.user.list', args=[pattern]))
 
@@ -765,50 +910,104 @@ def delete_user_all(request, pattern):
 def add_user_form(request, pattern):
 
     try:
-        
+
         lists = dict()
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
-        
+
         group_list = get_groups(ldap)
         policy_list = get_policies(ldap)
-        
+
         if pattern == PATTERN_TYPES.INTERNAL:
             groupPattern = ldap.groupStandard
             usertype_list = CHOICES_GROUP
-            loginShell =  "/bin/bash"
-            
+            loginShell = "/bin/bash"
+
         elif pattern == PATTERN_TYPES.EXTERNAL:
             groupPattern = ldap.groupStandardExternal
-            usertype_list =  None
-            loginShell =  "/sbin/nologin"
-
+            usertype_list = None
+            loginShell = "/sbin/nologin"
 
         if request.method == "POST":
 
-            form = UserForm(group_list, policy_list, usertype_list, request.POST, initial = {'groupPattern' : groupPattern})
-            
+            form = UserForm(
+                group_list,
+                policy_list,
+                usertype_list,
+                request.POST,
+                initial={
+                    'groupPattern': groupPattern})
+
             if form.is_valid():
-                
+
                 data = form.cleaned_data
-                
+
                 for e in data.keys():
-                    if type(data[e]) == unicode or type(data[e]) == int:
+                    if isinstance(
+                            data[e],
+                            unicode) or isinstance(
+                            data[e],
+                            int):
                         data[e] = str(data[e])
-                
-                if valid_form_user(ldap, request, data['cn'], data['uidNumber'], data['employeeNumber'], data['mail']):
-                    
-                    ldap.add_user(data['cn'], data['uidNumber'], data['groupPattern'], data['homeDirectory'], data['givenName'], data['initials'], data['sn'], data['mail'], data['homePhone'], data['mobile'], data['street'], data['description'], data['employeeNumber'], data['employeeType'], data['loginShell'], data['shadowLastChange'], data['shadowMin'], data['shadowMax'], data['shadowWarning'], data['policy'], data['groups'])
-                    
-                    messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_insert_user"))
-                    
-                    return HttpResponseRedirect(reverse('ldap.user.list', args=[pattern])) 
+
+                if valid_form_user(
+                        ldap,
+                        request,
+                        data['cn'],
+                        data['uidNumber'],
+                        data['employeeNumber'],
+                        data['mail']):
+
+                    ldap.add_user(
+                        data['cn'],
+                        data['uidNumber'],
+                        data['groupPattern'],
+                        data['homeDirectory'],
+                        data['givenName'],
+                        data['initials'],
+                        data['sn'],
+                        data['mail'],
+                        data['homePhone'],
+                        data['mobile'],
+                        data['street'],
+                        data['description'],
+                        data['employeeNumber'],
+                        data['employeeType'],
+                        data['loginShell'],
+                        data['shadowLastChange'],
+                        data['shadowMin'],
+                        data['shadowMax'],
+                        data['shadowWarning'],
+                        data['policy'],
+                        data['groups'])
+
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        ldap_messages.get("success_insert_user"))
+
+                    return HttpResponseRedirect(
+                        reverse(
+                            'ldap.user.list',
+                            args=[pattern]))
 
         else:
-            
-            form = UserForm(group_list, policy_list, usertype_list, initial = {'uidNumber': uidNumber_suggest(ldap, pattern), 'groupPattern' : groupPattern, 'shadowMin' : 1, 'shadowMax' : 365, 'shadowWarning' : 335, 'shadowLastChange' : 1, 'loginShell': loginShell})
-                                                      
 
-    except LDAPError, e:
+            form = UserForm(
+                group_list,
+                policy_list,
+                usertype_list,
+                initial={
+                    'uidNumber': uidNumber_suggest(
+                        ldap,
+                        pattern),
+                    'groupPattern': groupPattern,
+                    'shadowMin': 1,
+                    'shadowMax': 365,
+                    'shadowWarning': 335,
+                    'shadowLastChange': 1,
+                    'loginShell': loginShell})
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -816,113 +1015,209 @@ def add_user_form(request, pattern):
     lists["pattern"] = pattern
     lists["action"] = reverse("ldap.user.form", args=[pattern])
 
-    return render_to_response(LDAP_USER_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_USER_FORM,
+        lists,
+        context_instance=RequestContext(request))
 
 
-def valid_form_user(ldap, request, cn, uidNumber, employeeNumber, mail, edit=False):
-    
-    #Valid
+def valid_form_user(
+        ldap,
+        request,
+        cn,
+        uidNumber,
+        employeeNumber,
+        mail,
+        edit=False):
+
+    # Valid
     is_valid = True
-    
+
     if not edit:
         try:
             ldap.get_user(cn)
             is_valid = False
-            messages.add_message(request, messages.WARNING, ldap_messages.get("error_duplicated_name_user") % cn)
+            messages.add_message(
+                request,
+                messages.WARNING,
+                ldap_messages.get("error_duplicated_name_user") %
+                cn)
         except LDAPError:
             pass
 
     for usr in get_users(ldap):
-        
+
         if edit and cn == usr.get("cn"):
             continue
 
         if uidNumber == usr.get("uidNumber"):
             is_valid = False
-            messages.add_message(request, messages.WARNING, ldap_messages.get("error_duplicated_uidNumber_user") % uidNumber)
-        
+            messages.add_message(
+                request,
+                messages.WARNING,
+                ldap_messages.get("error_duplicated_uidNumber_user") %
+                uidNumber)
+
         if employeeNumber == usr.get("employeeNumber"):
             is_valid = False
-            messages.add_message(request, messages.WARNING, ldap_messages.get("error_duplicated_employeeNumber_user") % employeeNumber)
+            messages.add_message(
+                request,
+                messages.WARNING,
+                ldap_messages.get("error_duplicated_employeeNumber_user") %
+                employeeNumber)
 
         if mail == usr.get("mail"):
             is_valid = False
-            messages.add_message(request, messages.WARNING, ldap_messages.get("error_duplicated_mail_user") % mail)
-        
+            messages.add_message(
+                request,
+                messages.WARNING,
+                ldap_messages.get("error_duplicated_mail_user") %
+                mail)
+
     return is_valid
+
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "write": True, "read": True}])
 def edit_user_form(request, pattern, cn):
     try:
-        
+
         lists = dict()
         lists["pattern"] = pattern
-        lists["action"] =  reverse("ldap.user.edit", kwargs={"pattern": pattern, "cn": cn})
+        lists["action"] = reverse(
+            "ldap.user.edit",
+            kwargs={
+                "pattern": pattern,
+                "cn": cn})
         lists["edit"] = True
-    
+
         ldap = Ldap(AuthSession(request.session).get_user().get_username())
-        
+
         group_list = get_groups(ldap)
         policy_list = get_policies(ldap)
-        
+
         if pattern == PATTERN_TYPES.INTERNAL:
             groupPattern = ldap.groupStandard
             usertype_list = CHOICES_GROUP
-            
+
         elif pattern == PATTERN_TYPES.EXTERNAL:
             groupPattern = ldap.groupStandardExternal
-            usertype_list =  None
-            
+            usertype_list = None
+
         if request.method == "POST":
-            
-            form = UserForm(group_list, policy_list, usertype_list, request.POST, initial = {'groupPattern' : groupPattern })
+
+            form = UserForm(
+                group_list,
+                policy_list,
+                usertype_list,
+                request.POST,
+                initial={
+                    'groupPattern': groupPattern})
 
             if form.is_valid():
-                
+
                 data = form.cleaned_data
-                
+
                 for e in data.keys():
-                    if type(data[e]) == unicode or type(data[e]) == int:
+                    if isinstance(
+                            data[e],
+                            unicode) or isinstance(
+                            data[e],
+                            int):
                         data[e] = str(data[e])
-                        
-                if valid_form_user(ldap, request, data['cn'], data['uidNumber'], data['employeeNumber'], data['mail'], edit=True):
-                
-                    ldap.edit_user(data['cn'], data['uidNumber'], data['groupPattern'], data['homeDirectory'], data['givenName'], data['initials'], data['sn'], data['mail'], data['homePhone'], data['mobile'], data['street'], data['description'], data['employeeNumber'], data['employeeType'], data['loginShell'], data['shadowLastChange'], data['shadowMin'], data['shadowMax'], data['shadowWarning'], data['policy'], data['groups'])
-                    
-                    client_user = AuthSession(request.session).get_clientFactory().create_usuario()
-                    
+
+                if valid_form_user(
+                        ldap,
+                        request,
+                        data['cn'],
+                        data['uidNumber'],
+                        data['employeeNumber'],
+                        data['mail'],
+                        edit=True):
+
+                    ldap.edit_user(
+                        data['cn'],
+                        data['uidNumber'],
+                        data['groupPattern'],
+                        data['homeDirectory'],
+                        data['givenName'],
+                        data['initials'],
+                        data['sn'],
+                        data['mail'],
+                        data['homePhone'],
+                        data['mobile'],
+                        data['street'],
+                        data['description'],
+                        data['employeeNumber'],
+                        data['employeeType'],
+                        data['loginShell'],
+                        data['shadowLastChange'],
+                        data['shadowMin'],
+                        data['shadowMax'],
+                        data['shadowWarning'],
+                        data['policy'],
+                        data['groups'])
+
+                    client_user = AuthSession(
+                        request.session).get_clientFactory().create_usuario()
+
                     try:
                         local_user = client_user.get_by_user_ldap(data['cn'])
                         local_user = local_user['usuario']
-                        name = data['givenName'] + ' ' + data['initials'] + ' ' + data['sn']
-                        client_user.alterar(local_user['id'], local_user['user'], local_user['pwd'], name, local_user['ativo'], data['mail'], local_user['user_ldap'])
+                        name = data['givenName'] + ' ' + \
+                            data['initials'] + ' ' + data['sn']
+                        client_user.alterar(
+                            local_user['id'],
+                            local_user['user'],
+                            local_user['pwd'],
+                            name,
+                            local_user['ativo'],
+                            data['mail'],
+                            local_user['user_ldap'])
                     except UsuarioNaoExisteError:
                         pass
-                    
-                    messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_edit_user"))
-                    return HttpResponseRedirect(reverse('ldap.user.list', args=[pattern]))
-        
+
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        ldap_messages.get("success_edit_user"))
+                    return HttpResponseRedirect(
+                        reverse(
+                            'ldap.user.list',
+                            args=[pattern]))
+
         else:
-            
+
             user = ldap.get_user(cn)
             user['groups'] = ldap.get_groups_user(cn)
             user['groupPattern'] = groupPattern
-            
-            form = UserForm(group_list, policy_list, usertype_list, initial=user)
-    
-    except LDAPNotFoundError, e:
-        messages.add_message(request, messages.ERROR, ldap_messages.get("invalid_user") % cn)
+
+            form = UserForm(
+                group_list,
+                policy_list,
+                usertype_list,
+                initial=user)
+
+    except LDAPNotFoundError as e:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            ldap_messages.get("invalid_user") %
+            cn)
         return HttpResponseRedirect(reverse('ldap.user.list', args=[pattern]))
-        
-    except LDAPError, e:
+
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        
+
     lists["form"] = form
 
-    return render_to_response(LDAP_USER_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        LDAP_USER_FORM,
+        lists,
+        context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -932,20 +1227,29 @@ def ajax_lock_user(request):
     ldap = Ldap(AuthSession(request.session).get_user().get_username())
     status_code = 500
 
-    try:    
+    try:
         cn = request.GET['cn']
         ldap.lock_user(cn)
         status_code = 200
-        messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_lock_user") % cn)
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            ldap_messages.get("success_lock_user") %
+            cn)
 
-    except LDAPNotFoundError, e:
-        messages.add_message(request, messages.ERROR, ldap_messages.get("invalid_user") % cn)
+    except LDAPNotFoundError as e:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            ldap_messages.get("invalid_user") %
+            cn)
 
-    except LDAPError, e:
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     return HttpResponse(status=status_code)
+
 
 @log
 @login_required
@@ -954,17 +1258,25 @@ def ajax_unlock_user(request):
 
     ldap = Ldap(AuthSession(request.session).get_user().get_username())
     status_code = 500
-    
-    try:    
+
+    try:
         cn = request.GET['cn']
         ldap.unlock_user(cn)
         status_code = 200
-        messages.add_message(request, messages.SUCCESS, ldap_messages.get("success_unlock_user") % cn)
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            ldap_messages.get("success_unlock_user") %
+            cn)
 
-    except LDAPNotFoundError, e:
-        messages.add_message(request, messages.ERROR, ldap_messages.get("invalid_user") % cn)
+    except LDAPNotFoundError as e:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            ldap_messages.get("invalid_user") %
+            cn)
 
-    except LDAPError, e:
+    except LDAPError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         status_code = 500

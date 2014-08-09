@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def autostrip(cls):
     """
     strip text fields before validation
@@ -20,12 +21,17 @@ def autostrip(cls):
         email = forms.EmailField()
 
     PersonForm = autostrip(PersonForm)
-    
+
     #or you can use @autostrip in python >= 2.6
 
     Author: nail.xx
     """
-    fields = [(key, value) for key, value in cls.base_fields.iteritems() if isinstance(value, CharField)]
+    fields = [
+        (key,
+         value) for key,
+        value in cls.base_fields.iteritems() if isinstance(
+            value,
+            CharField)]
     for field_name, field_object in fields:
         def get_clean_func(original_clean):
             return lambda value: original_clean(value and value.strip())

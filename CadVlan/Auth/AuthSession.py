@@ -8,6 +8,7 @@ Copyright: ( c )  2012 globo.com todos os direitos reservados.
 from networkapiclient.ClientFactory import ClientFactory
 from CadVlan.settings import NETWORK_API_URL, SESSION_EXPIRY_AGE
 
+
 class AuthSession:
 
     KEY = 'user'
@@ -16,20 +17,20 @@ class AuthSession:
         self.session = session
 
     def login(self, user):
-        '''Log in session user 
+        '''Log in session user
         '''
         self.session[self.KEY] = user
 
     def logout(self):
-        '''Log out session user 
+        '''Log out session user
         '''
-        if self.session.has_key(self.KEY):
+        if self.KEY in self.session:
             self.session[self.KEY] = None
 
     def is_authenticated(self):
         '''Validates that the user is authenticated
         '''
-        if self.session.has_key(self.KEY) and self.session[self.KEY] != None:
+        if self.KEY in self.session and self.session[self.KEY] is not None:
             self.session.set_expiry(SESSION_EXPIRY_AGE)
             return True
         else:
@@ -47,4 +48,8 @@ class AuthSession:
         '''Get clientFactory of NetworkAPI
         '''
         user = self.get_user()
-        return ClientFactory(NETWORK_API_URL, user.get_username(), user.get_password(), user.get_user_ldap())
+        return ClientFactory(
+            NETWORK_API_URL,
+            user.get_username(),
+            user.get_password(),
+            user.get_user_ldap())

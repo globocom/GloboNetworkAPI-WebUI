@@ -1,5 +1,6 @@
 import re
-                
+
+
 def is_valid_ipv4(ip):
     """Validates IPv4 addresses.
     """
@@ -39,17 +40,18 @@ def is_valid_ipv4(ip):
     """, re.VERBOSE | re.IGNORECASE)
     return pattern.match(ip) is not None
 
+
 def is_valid_ipv6(ip):
     """Validates IPv6 addresses.
     """
     aux = ip
-    
+
     aux = aux.split(":")
-    
+
     for item in aux:
         if item is None or item == "":
             return False
-    
+
     pattern = re.compile(r"""
         ^
         \s*                         # Leading whitespace
@@ -67,7 +69,7 @@ def is_valid_ipv6(ip):
              |  (?<!:)              #
              |  (?<=:) (?<!::) :    #
              )                      # OR
-         |                          #   A v4 address with NO leading zeros 
+         |                          #   A v4 address with NO leading zeros
             (?:25[0-4]|2[0-4]\d|1\d\d|[1-9]?\d)
             (?: \.
                 (?:25[0-4]|2[0-4]\d|1\d\d|[1-9]?\d)

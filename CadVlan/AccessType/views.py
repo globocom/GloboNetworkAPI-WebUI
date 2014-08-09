@@ -19,41 +19,44 @@ from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
+
 @log
 @login_required
-@has_perm([{'permission':ACCESS_TYPE_MANAGEMENT, "write": True}])
+@has_perm([{'permission': ACCESS_TYPE_MANAGEMENT, "write": True}])
 def access_type_form(request):
-    
+
     lists = dict()
-    
+
     try:
-        
+
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        
+
         if request.method == 'POST':
-            
-            form =  TipoAcessoForm(request.POST)
-            lists['form'] = form    
-            
+
+            form = TipoAcessoForm(request.POST)
+            lists['form'] = form
+
             if form.is_valid():
-                
+
                 protocolo = form.cleaned_data['nome']
-                
+
                 client.create_tipo_acesso().inserir(protocolo)
-                messages.add_message(request,messages.SUCCESS, access_type_messages.get('success_create'))
-                
-                lists['form'] =  TipoAcessoForm()    
-        #GET METHOD
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    access_type_messages.get('success_create'))
+
+                lists['form'] = TipoAcessoForm()
+        # GET METHOD
         else:
             lists['form'] = TipoAcessoForm()
-            
-    except NetworkAPIClientError, e:
+
+    except NetworkAPIClientError as e:
         logger.error(e)
-        messages.add_message(request,messages.ERROR, e)
-        
-    return render_to_response(ACCESSTYPE_FORM,lists,context_instance=RequestContext(request))
-    
-    
-        
-        
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(
+        ACCESSTYPE_FORM,
+        lists,
+        context_instance=RequestContext(request))
