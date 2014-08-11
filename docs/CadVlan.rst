@@ -1,4 +1,4 @@
-CadVlan package
+GloboNetworkAPI WebUI package
 ===============
 
 Subpackages
