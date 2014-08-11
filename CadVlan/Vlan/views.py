@@ -1,9 +1,20 @@
 # -*- coding:utf-8 -*-
-'''
-Created on 01/03/2012
-Author: avanzolin / S2it
-Copyright: ( c )  2012 globo.com todos os direitos reservados.
-'''
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 import logging
 from networkapiclient.Pagination import Pagination
@@ -24,7 +35,7 @@ from CadVlan.Util.utility import DataTablePaginator, acl_key, \
     convert_string_to_boolean, upcase_first_letter
 from django.http import HttpResponseServerError, HttpResponse, HttpResponseRedirect
 from django.template import loader
-from CadVlan.Vlan.business import montaIPRede , cache_list_vlans
+from CadVlan.Vlan.business import montaIPRede, cache_list_vlans
 from CadVlan.Util.shortcuts import render_to_response_ajax, render_json
 from CadVlan.messages import vlan_messages, error_messages, network_ip_messages, \
     acl_messages
@@ -85,17 +96,20 @@ def ajax_list_vlans(request):
                     network = None
 
                 # Pagination
-                columnIndexNameMap = {0: '', 1: '', 2: 'num_vlan', 3: 'nome', 4: 'ambiente', 5: 'tipo_rede', 6: 'network', 7: '', 8: 'acl_file_name', 9: 'acl_file_name_v6'}
+                columnIndexNameMap = {0: '', 1: '', 2: 'num_vlan', 3: 'nome', 4: 'ambiente',
+                                      5: 'tipo_rede', 6: 'network', 7: '', 8: 'acl_file_name', 9: 'acl_file_name_v6'}
                 dtp = DataTablePaginator(request, columnIndexNameMap)
 
                 # Make params
                 dtp.build_server_side_list()
 
                 # Set params in simple Pagination class
-                pag = Pagination(dtp.start_record, dtp.end_record, dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
+                pag = Pagination(dtp.start_record, dtp.end_record,
+                                 dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
                 '', False, None, None, None, 2, 0, False
                 # Call API passing all params
-                vlans = client.create_vlan().find_vlans(number, name, iexact, environment, net_type, network, ip_version, subnet, acl, pag)
+                vlans = client.create_vlan().find_vlans(
+                    number, name, iexact, environment, net_type, network, ip_version, subnet, acl, pag)
 
                 if not vlans.has_key("vlan"):
                     vlans["vlan"] = []
@@ -109,7 +123,8 @@ def ajax_list_vlans(request):
                 lists["search_form"] = search_form
 
                 # Returns HTML
-                response = HttpResponse(loader.render_to_string(SEARCH_FORM_ERRORS, lists, context_instance=RequestContext(request)))
+                response = HttpResponse(loader.render_to_string(
+                    SEARCH_FORM_ERRORS, lists, context_instance=RequestContext(request)))
                 # Send response status with error
                 response.status_code = 412
                 return response
@@ -201,7 +216,8 @@ def list_by_id(request, id_vlan):
 
         for ambiente in environment:
             if vlans.get('ambiente') == ambiente.get('id'):
-                vlans['ambiente'] = ambiente.get('nome_divisao') + ' - ' + ambiente.get('nome_ambiente_logico') + ' - ' + ambiente.get('nome_grupo_l3')
+                vlans['ambiente'] = ambiente.get('nome_divisao') + ' - ' + ambiente.get(
+                    'nome_ambiente_logico') + ' - ' + ambiente.get('nome_grupo_l3')
                 break
 
         # FE - PORTAL - CORE/DENSIDADE
@@ -219,7 +235,7 @@ def list_by_id(request, id_vlan):
             listaIps.append(montaIPRede(redesIPV4))
 
         redesIPV6 = vlans.get("redeipv6")
-        if  len(redesIPV6) > 0:
+        if len(redesIPV6) > 0:
             listaIps.append(montaIPRede(redesIPV6, False))
 
         # Show 'Criar Redes' button
@@ -234,7 +250,8 @@ def list_by_id(request, id_vlan):
 
         net_type = client.create_tipo_rede().listar()
 
-        lista = replace_id_to_name(lista, net_type['net_type'], "network_type", "id", "name")
+        lista = replace_id_to_name(
+            lista, net_type['net_type'], "network_type", "id", "name")
 
         lists['net_vlans'] = lista
 
@@ -284,8 +301,10 @@ def vlan_form(request):
                 network_ipv6 = form.cleaned_data['network_ipv6']
 
                 # Salva a Vlan
-                vlan = client.create_vlan().insert_vlan(environment_id, name, number, description, acl_file, acl_file_v6, network_ipv4, network_ipv6)
-                messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
+                vlan = client.create_vlan().insert_vlan(environment_id, name, number,
+                                                        description, acl_file, acl_file_v6, network_ipv4, network_ipv6)
+                messages.add_message(
+                    request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
                 id_vlan = vlan.get('vlan').get('id')
                 # redireciona para a listagem de vlans
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
@@ -328,7 +347,8 @@ def vlan_edit(request, id_vlan):
             environment = client.create_ambiente().list_all()
             vlan = vlan.get("vlan")
 
-            lists['form'] = VlanForm(environment, initial={'name': vlan.get('nome'), "number": vlan.get('num_vlan'), "environment": vlan.get("ambiente"), "description": vlan.get('descricao'), "acl_file": vlan.get('acl_file_name'), "acl_file_v6": vlan.get('acl_file_name_v6')})
+            lists['form'] = VlanForm(environment, initial={'name': vlan.get('nome'), "number": vlan.get('num_vlan'), "environment": vlan.get(
+                "ambiente"), "description": vlan.get('descricao'), "acl_file": vlan.get('acl_file_name'), "acl_file_v6": vlan.get('acl_file_name_v6')})
 
         if request.method == 'POST':
 
@@ -348,8 +368,10 @@ def vlan_edit(request, id_vlan):
                 apply_vlan = form.cleaned_data['apply_vlan']
 
                 # client.editar
-                client.create_vlan().edit_vlan(ambiente, nome, numero, descricao, acl_file, acl_file_v6, id_vlan)
-                messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_edit_sucess"))
+                client.create_vlan().edit_vlan(
+                    ambiente, nome, numero, descricao, acl_file, acl_file_v6, id_vlan)
+                messages.add_message(
+                    request, messages.SUCCESS, vlan_messages.get("vlan_edit_sucess"))
 
                 # If click apply
                 if apply_vlan == True:
@@ -369,19 +391,24 @@ def vlan_edit(request, id_vlan):
 
     try:
 
-        environment = client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+        environment = client.create_ambiente().buscar_por_id(
+            vlan.get("ambiente")).get("ambiente")
 
         if vlan.get('acl_file_name') is not None:
 
-            is_acl_created = checkAclCvs(vlan.get('acl_file_name'), environment, NETWORK_TYPES.v4, AuthSession(request.session).get_user())
+            is_acl_created = checkAclCvs(vlan.get(
+                'acl_file_name'), environment, NETWORK_TYPES.v4, AuthSession(request.session).get_user())
 
-            lists['acl_created_v4'] = "False" if is_acl_created == False else "True"
+            lists[
+                'acl_created_v4'] = "False" if is_acl_created == False else "True"
 
         if vlan.get('acl_file_name_v6') is not None:
 
-            is_acl_created = checkAclCvs(vlan.get('acl_file_name_v6'), environment, NETWORK_TYPES.v6, AuthSession(request.session).get_user())
+            is_acl_created = checkAclCvs(vlan.get(
+                'acl_file_name_v6'), environment, NETWORK_TYPES.v6, AuthSession(request.session).get_user())
 
-            lists['acl_created_v6'] = "False" if is_acl_created == False else "True"
+            lists[
+                'acl_created_v6'] = "False" if is_acl_created == False else "True"
 
     except CVSCommandError, e:
         logger.error(e)
@@ -397,28 +424,32 @@ def ajax_acl_name_suggest(request):
     lists = dict()
     try:
 
-            nome = request.GET['nome']
-            id_ambiente = request.GET['id_ambiente']
+        nome = request.GET['nome']
+        id_ambiente = request.GET['id_ambiente']
 
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
 
-            environment = client.create_ambiente().buscar_por_id(id_ambiente).get('ambiente')
+        environment = client.create_ambiente().buscar_por_id(
+            id_ambiente).get('ambiente')
 
-            suggest_name = str(nome + environment['nome_ambiente_logico']).replace(" ", "")
-            lists['suggest_name'] = suggest_name
+        suggest_name = str(
+            nome + environment['nome_ambiente_logico']).replace(" ", "")
+        lists['suggest_name'] = suggest_name
 
-            # Returns HTML
-            response = HttpResponse(loader.render_to_string(AJAX_SUGGEST_NAME, lists, context_instance=RequestContext(request)))
-            # Send response status with error
-            response.status_code = 200
-            return response
+        # Returns HTML
+        response = HttpResponse(loader.render_to_string(
+            AJAX_SUGGEST_NAME, lists, context_instance=RequestContext(request)))
+        # Send response status with error
+        response.status_code = 200
+        return response
 
     except:
 
         lists['suggest_name'] = ''
         # Returns HTML
-        response = HttpResponse(loader.render_to_string(AJAX_SUGGEST_NAME, lists, context_instance=RequestContext(request)))
+        response = HttpResponse(loader.render_to_string(
+            AJAX_SUGGEST_NAME, lists, context_instance=RequestContext(request)))
         # Send response status with error
         response.status_code = 200
         return response
@@ -431,106 +462,121 @@ def ajax_confirm_vlan(request):
     lists = dict()
     try:
 
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
-            message_confirm = ''
-            message_confirm_numbers = ''
-            is_number = int(request.GET['is_number'])
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        message_confirm = ''
+        message_confirm_numbers = ''
+        is_number = int(request.GET['is_number'])
 
-            network = None
-            ip_version = 2
-            number = None
-            subnet = 0
+        network = None
+        ip_version = 2
+        number = None
+        subnet = 0
 
-            # Check in vlan insert/update
-            if is_number == 1:
-                number = request.GET['number']
-                id_environment = request.GET['id_environment']
-                id_vlan = request.GET['id_vlan']
-            # Check in net insert
+        # Check in vlan insert/update
+        if is_number == 1:
+            number = request.GET['number']
+            id_environment = request.GET['id_environment']
+            id_vlan = request.GET['id_vlan']
+        # Check in net insert
+        else:
+            netipv4 = request.GET['netipv4']
+            netipv6 = request.GET['netipv6']
+            id_vlan = request.GET['id_vlan']
+
+            if netipv4 == '':
+                ip_version = 1
+                network = netipv6
             else:
-                netipv4 = request.GET['netipv4']
-                netipv6 = request.GET['netipv6']
-                id_vlan = request.GET['id_vlan']
+                ip_version = 0
+                network = netipv4
+            subnet = 1
 
-                if netipv4 == '':
-                    ip_version = 1
-                    network = netipv6
-                else:
-                    ip_version = 0
-                    network = netipv4
-                subnet = 1
+        """Filter vlans by number or network subnet"""
+        # Pagination
+        columnIndexNameMap = {0: '', 1: '', 2: 'num_vlan', 3: 'nome', 4: 'ambiente',
+                              5: 'tipo_rede', 6: 'network', 7: '', 8: 'acl_file_name', 9: 'acl_file_name_v6'}
+        dtp = DataTablePaginator(request, columnIndexNameMap)
 
-            """Filter vlans by number or network subnet"""
-            # Pagination
-            columnIndexNameMap = {0: '', 1: '', 2: 'num_vlan', 3: 'nome', 4: 'ambiente', 5: 'tipo_rede', 6: 'network', 7: '', 8: 'acl_file_name', 9: 'acl_file_name_v6'}
-            dtp = DataTablePaginator(request, columnIndexNameMap)
+        # Make params
+        dtp.build_server_side_list()
 
-            # Make params
-            dtp.build_server_side_list()
+        # Set params in simple Pagination class
+        pag = Pagination(
+            0, 100, dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
 
-            # Set params in simple Pagination class
-            pag = Pagination(0, 100, dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
+        # Call API passing all params
+        vlans = client.create_vlan().find_vlans(
+            number, '', False, None, None, network, ip_version, subnet, False, pag)
+        """Filter end"""
 
-            # Call API passing all params
-            vlans = client.create_vlan().find_vlans(number, '', False, None, None, network, ip_version, subnet, False, pag)
-            """Filter end"""
-
-            if 'vlan' in vlans:
-                for vlan in vlans.get('vlan'):
-                    # Ignore the same Vlan for validation
-                    if vlan['id'] != id_vlan:
-                        # is_number means that validation is with number vlan (number used in another environment)
-                        if is_number == 1:
-                            if int(vlan['ambiente']) != int(id_environment):
-                                needs_confirmation = client.create_vlan().confirm_vlan(number, id_environment).get('needs_confirmation')
-                                if needs_confirmation == 'True':
-                                    message_confirm = "a vlan de número " + str(number) + " já existe no ambiente " + str(vlan['ambiente_name'])
-                            else:
-                                message_confirm = ''
-                                break
-                        # else the validation is with network
-                        else:
-                            network_confirm = network.replace('/', 'net_replace')
-                            needs_confirmation = client.create_vlan().confirm_vlan(network_confirm, id_vlan, ip_version).get('needs_confirmation')
+        if 'vlan' in vlans:
+            for vlan in vlans.get('vlan'):
+                # Ignore the same Vlan for validation
+                if vlan['id'] != id_vlan:
+                    # is_number means that validation is with number vlan
+                    # (number used in another environment)
+                    if is_number == 1:
+                        if int(vlan['ambiente']) != int(id_environment):
+                            needs_confirmation = client.create_vlan().confirm_vlan(
+                                number, id_environment).get('needs_confirmation')
                             if needs_confirmation == 'True':
-                                message_confirm = "A rede compatível " + str(network) + " já existe no ambiente " + str(vlan['ambiente_name']) + ". Deseja alocar essa rede mesmo assim?"
-                            else:
-                                message_confirm = ''
-                                break
+                                message_confirm = "a vlan de número " + \
+                                    str(number) + " já existe no ambiente " + \
+                                    str(vlan['ambiente_name'])
+                        else:
+                            message_confirm = ''
+                            break
+                    # else the validation is with network
+                    else:
+                        network_confirm = network.replace('/', 'net_replace')
+                        needs_confirmation = client.create_vlan().confirm_vlan(
+                            network_confirm, id_vlan, ip_version).get('needs_confirmation')
+                        if needs_confirmation == 'True':
+                            message_confirm = "A rede compatível " + str(network) + " já existe no ambiente " + str(
+                                vlan['ambiente_name']) + ". Deseja alocar essa rede mesmo assim?"
+                        else:
+                            message_confirm = ''
+                            break
 
-            # also validate if the number is in valid range
-            if is_number:
-                has_numbers_availables = client.create_vlan().check_number_available(id_environment, number, id_vlan).get('has_numbers_availables')
-                has_numbers_availables = convert_string_to_boolean(has_numbers_availables)
-                if not has_numbers_availables:
-                    message_confirm_numbers = 'O número está fora do range definido'
+        # also validate if the number is in valid range
+        if is_number:
+            has_numbers_availables = client.create_vlan().check_number_available(
+                id_environment, number, id_vlan).get('has_numbers_availables')
+            has_numbers_availables = convert_string_to_boolean(
+                has_numbers_availables)
+            if not has_numbers_availables:
+                message_confirm_numbers = 'O número está fora do range definido'
 
-            # The number is in another environment and the number isn't in right range, so concatenate the messages
-            if message_confirm and message_confirm_numbers:
-                message_confirm = message_confirm_numbers + ' e a ' + message_confirm
-            # Only the number isn't in right range
-            elif not message_confirm and message_confirm_numbers:
-                message_confirm = message_confirm_numbers
+        # The number is in another environment and the number isn't in right
+        # range, so concatenate the messages
+        if message_confirm and message_confirm_numbers:
+            message_confirm = message_confirm_numbers + \
+                ' e a ' + message_confirm
+        # Only the number isn't in right range
+        elif not message_confirm and message_confirm_numbers:
+            message_confirm = message_confirm_numbers
 
-            # Concatenate the question in message
-            if is_number and message_confirm:
-                message_confirm += '. Deseja criar essa vlan mesmo assim?'
+        # Concatenate the question in message
+        if is_number and message_confirm:
+            message_confirm += '. Deseja criar essa vlan mesmo assim?'
 
-            # Upcase only first letter in message and add to dict
-            lists['confirm_message'] = upcase_first_letter(message_confirm)
+        # Upcase only first letter in message and add to dict
+        lists['confirm_message'] = upcase_first_letter(message_confirm)
 
-            # Returns HTML
-            response = HttpResponse(loader.render_to_string(AJAX_CONFIRM_VLAN, lists, context_instance=RequestContext(request)))
-            # Send response status with error
-            response.status_code = 200
-            return response
+        # Returns HTML
+        response = HttpResponse(loader.render_to_string(
+            AJAX_CONFIRM_VLAN, lists, context_instance=RequestContext(request)))
+        # Send response status with error
+        response.status_code = 200
+        return response
 
     except:
 
         lists['confirm_message'] = ''
         # Returns HTML
-        response = HttpResponse(loader.render_to_string(AJAX_CONFIRM_VLAN, lists, context_instance=RequestContext(request)))
+        response = HttpResponse(loader.render_to_string(
+            AJAX_CONFIRM_VLAN, lists, context_instance=RequestContext(request)))
         # Send response status with error
         response.status_code = 200
         return response
@@ -566,7 +612,8 @@ def delete_all(request):
                 try:
 
                     vlan = client_vlan.get(id_vlan).get("vlan")
-                    environment = client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+                    environment = client.create_ambiente().buscar_por_id(
+                        vlan.get("ambiente")).get("ambiente")
 
                     # Execute in NetworkAPI
                     client_vlan.deallocate(id_vlan)
@@ -578,14 +625,17 @@ def delete_all(request):
                     try:
                         if vlan.get(key_acl_v4) is not None:
                             if checkAclCvs(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user):
-                                deleteAclCvs(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
+                                deleteAclCvs(
+                                    vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
 
                         if vlan.get(key_acl_v6) is not None:
                             if checkAclCvs(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user):
-                                deleteAclCvs(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
+                                deleteAclCvs(
+                                    vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
 
                     except CVSError, e:
-                        messages.add_message(request, messages.WARNING, vlan_messages.get("vlan_cvs_error"))
+                        messages.add_message(
+                            request, messages.WARNING, vlan_messages.get("vlan_cvs_error"))
 
                 except VipIpError, e:
                     logger.error(e)
@@ -605,11 +655,13 @@ def delete_all(request):
 
             # If all has ben removed
             if have_errors == False:
-                messages.add_message(request, messages.SUCCESS, vlan_messages.get("success_remove"))
+                messages.add_message(
+                    request, messages.SUCCESS, vlan_messages.get("success_remove"))
 
             else:
                 if len(ids) == len(error_list):
-                    messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_error"))
+                    messages.add_message(
+                        request, messages.ERROR, error_messages.get("can_not_remove_error"))
                 else:
                     msg = ""
                     for id_error in error_list:
@@ -618,7 +670,8 @@ def delete_all(request):
                     messages.add_message(request, messages.WARNING, msg)
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
     return redirect('vlan.search.list')
@@ -647,7 +700,7 @@ def delete_all_network(request, id_vlan):
             error_list = list()
 
             # For each networks selected to remove
-            for value  in ids:
+            for value in ids:
                 try:
 
                     var = split_to_array(value, sep='-')
@@ -676,11 +729,13 @@ def delete_all_network(request, id_vlan):
 
             # If all has ben removed
             if have_errors == False:
-                messages.add_message(request, messages.SUCCESS, vlan_messages.get("success_remove_network"))
+                messages.add_message(
+                    request, messages.SUCCESS, vlan_messages.get("success_remove_network"))
 
             else:
                 if len(ids) == len(error_list):
-                    messages.add_message(request, messages.ERROR, error_messages.get("can_not_remove_error"))
+                    messages.add_message(
+                        request, messages.ERROR, error_messages.get("can_not_remove_error"))
                 else:
                     msg = ""
                     for id_error in error_list:
@@ -689,7 +744,8 @@ def delete_all_network(request, id_vlan):
                     messages.add_message(request, messages.WARNING, msg)
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(
+                request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
     return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
@@ -699,19 +755,20 @@ def delete_all_network(request, id_vlan):
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def create(request, id_vlan):
-
     """ Set column 'ativada = 1' """
 
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        # If vlan with parameter id_vlan  don't exist, VlanNaoExisteError exception will be called
+        # If vlan with parameter id_vlan  don't exist, VlanNaoExisteError
+        # exception will be called
         vlan = client.create_vlan().get(id_vlan)
 
         client.create_vlan().create_vlan(id_vlan)
 
-        messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_create_success"))
+        messages.add_message(
+            request, messages.SUCCESS, vlan_messages.get("vlan_create_success"))
 
     except VlanNaoExisteError, e:
         logger.error(e)
@@ -725,7 +782,6 @@ def create(request, id_vlan):
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def create_network(request, id_vlan):
-
     """ Set column 'active = 1' in tables  """
     try:
         if request.method == 'POST':
@@ -744,10 +800,12 @@ def create_network(request, id_vlan):
 
             if form.is_valid():
 
-                # If vlan with parameter id_vlan  don't exist, VlanNaoExisteError exception will be called
+                # If vlan with parameter id_vlan  don't exist,
+                # VlanNaoExisteError exception will be called
                 vlan = client.create_vlan().get(id_vlan)
 
-                environment = client.create_ambiente().buscar_por_id(vlan['vlan']["ambiente"]).get("ambiente")
+                environment = client.create_ambiente().buscar_por_id(
+                    vlan['vlan']["ambiente"]).get("ambiente")
 
                 # All ids to be activated
                 ids = split_to_array(form.cleaned_data['ids_create'])
@@ -759,10 +817,12 @@ def create_network(request, id_vlan):
 
                     if network_type == 'v4':
                         net = client.create_network().get_network_ipv4(id_net)
-                        equipments_ipv4.extend(list_equipment_by_network_ip4(client, id_net))
+                        equipments_ipv4.extend(
+                            list_equipment_by_network_ip4(client, id_net))
                     else:
                         net = client.create_network().get_network_ipv6(id_net)
-                        equipments_ipv6.extend(list_equipment_by_network_ip6(client, id_net))
+                        equipments_ipv6.extend(
+                            list_equipment_by_network_ip6(client, id_net))
 
                     if net['network']['active'] == 'True':
                         networks_activated = True
@@ -772,22 +832,28 @@ def create_network(request, id_vlan):
                 # Create networks
                 client.create_network().create_networks(ids, id_vlan)
 
-                apply_acl_for_network_v4(request, client, equipments_ipv4, vlan, environment)
+                apply_acl_for_network_v4(
+                    request, client, equipments_ipv4, vlan, environment)
 
-                apply_acl_for_network_v6(request, client, equipments_ipv6, vlan, environment)
+                apply_acl_for_network_v6(
+                    request, client, equipments_ipv6, vlan, environment)
 
                 if networks_activated == True:
-                    messages.add_message(request, messages.ERROR, network_ip_messages.get("networks_activated"))
+                    messages.add_message(
+                        request, messages.ERROR, network_ip_messages.get("networks_activated"))
 
                 if networks_was_activated == False:
-                    messages.add_message(request, messages.SUCCESS, network_ip_messages.get("net_create_success"))
+                    messages.add_message(
+                        request, messages.SUCCESS, network_ip_messages.get("net_create_success"))
 
             else:
                 vlan = client.create_vlan().get(id_vlan)
                 if vlan['vlan']['ativada'] == 'True':
-                    messages.add_message(request, messages.ERROR, error_messages.get("vlan_select_one"))
+                    messages.add_message(
+                        request, messages.ERROR, error_messages.get("vlan_select_one"))
                 else:
-                    messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+                    messages.add_message(
+                        request, messages.ERROR, error_messages.get("select_one"))
 
     except VlanNaoExisteError, e:
         logger.error(e)
@@ -861,14 +927,18 @@ def apply_acl_for_network_v4(request, client, equipments_v4, vlan, environment):
 
         if equipments_v4:
             if vlan['vlan']['acl_valida'] == 'True':
-                apply_acl_for_network(request, client, equipments_v4, vlan, environment, 'v4')
-                messages.add_message(request, messages.SUCCESS, acl_messages.get("seccess_apply_valid_acl") % 'ipv4')
+                apply_acl_for_network(
+                    request, client, equipments_v4, vlan, environment, 'v4')
+                messages.add_message(
+                    request, messages.SUCCESS, acl_messages.get("seccess_apply_valid_acl") % 'ipv4')
             else:
-                messages.add_message(request, messages.WARNING, acl_messages.get("error_apply_ivalid_acl") % 'ipv4')
+                messages.add_message(
+                    request, messages.WARNING, acl_messages.get("error_apply_ivalid_acl") % 'ipv4')
 
     except Exception, e:
         logger.error(e)
-        messages.add_message(request, messages.WARNING, acl_messages.get("error_apply_acl_for_network") % 'ipv4')
+        messages.add_message(request, messages.WARNING, acl_messages.get(
+            "error_apply_acl_for_network") % 'ipv4')
 
 
 def apply_acl_for_network_v6(request, client, equipments_v6, vlan, environment):
@@ -877,26 +947,32 @@ def apply_acl_for_network_v6(request, client, equipments_v6, vlan, environment):
 
         if equipments_v6:
             if vlan['vlan']['acl_valida_v6'] == 'True':
-                apply_acl_for_network(request, client, equipments_v6, vlan, environment, 'v6')
-                messages.add_message(request, messages.SUCCESS, acl_messages.get("seccess_apply_valid_acl") % 'ipv6')
+                apply_acl_for_network(
+                    request, client, equipments_v6, vlan, environment, 'v6')
+                messages.add_message(
+                    request, messages.SUCCESS, acl_messages.get("seccess_apply_valid_acl") % 'ipv6')
             else:
-                messages.add_message(request, messages.WARNING, acl_messages.get("error_apply_ivalid_acl") % 'ipv6')
+                messages.add_message(
+                    request, messages.WARNING, acl_messages.get("error_apply_ivalid_acl") % 'ipv6')
 
     except Exception, e:
         logger.error(e)
-        messages.add_message(request, messages.WARNING, acl_messages.get("error_apply_acl_for_network") % 'ipv6')
+        messages.add_message(request, messages.WARNING, acl_messages.get(
+            "error_apply_acl_for_network") % 'ipv6')
 
 
 def apply_acl_for_network(request, client, equipments, vlan, environment, network_type):
 
     try:
 
-        apply_result = client.create_vlan().apply_acl(equipments, vlan.get("vlan"), environment, network_type)
+        apply_result = client.create_vlan().apply_acl(
+            equipments, vlan.get("vlan"), environment, network_type)
 
         is_apply = apply_result.get('is_apply')
 
         if is_apply != '0':
-            raise Exception('Não foi possível aplicar ACL aos equipamentos da rede')
+            raise Exception(
+                'Não foi possível aplicar ACL aos equipamentos da rede')
 
     except Exception, e:
         raise e
@@ -920,7 +996,8 @@ def ajax_get_available_ip_config_by_environment_id(request):
 
                 auth = AuthSession(request.session)
                 client = auth.get_clientFactory()
-                env_list = client.create_ambiente().configuration_list_all(environment_id)
+                env_list = client.create_ambiente().configuration_list_all(
+                    environment_id)
 
                 lists_configuration = env_list.get('lists_configuration')
 
@@ -937,7 +1014,9 @@ def ajax_get_available_ip_config_by_environment_id(request):
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
 
-    context['available_environment_config_ipv4'] = available_environment_config_ipv4
-    context['available_environment_config_ipv6'] = available_environment_config_ipv6
+    context[
+        'available_environment_config_ipv4'] = available_environment_config_ipv4
+    context[
+        'available_environment_config_ipv6'] = available_environment_config_ipv6
 
     return render_json(json.dumps(context))

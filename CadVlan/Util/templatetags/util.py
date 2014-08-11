@@ -1,9 +1,20 @@
 # -*- coding:utf-8 -*-
-'''
-Title: CadVlan
-Author: masilva / S2it
-Copyright: ( c )  2012 globo.com todos os direitos reservados.
-'''
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 from django import template
 from django.template.defaultfilters import stringfilter
@@ -19,55 +30,63 @@ from django.utils import simplejson
 register = template.Library()
 
 # Constants
-MAX_SUBSTRING = 32;
+MAX_SUBSTRING = 32
 
 
 @register.simple_tag
 def bold(value):
     return '<b>%s</b>' % value
 
+
 @register.filter
 @stringfilter
 def substr(value):
-    if len(value) > MAX_SUBSTRING :
+    if len(value) > MAX_SUBSTRING:
         return value[0:MAX_SUBSTRING] + "..."
     else:
         return value
-    
+
+
 @register.simple_tag
 def user_name(request):
     auth = AuthSession(request.session)
     return auth.get_user().get_name()
+
 
 @register.filter
 def is_authenticated(request):
     auth = AuthSession(request.session)
     return auth.is_authenticated()
 
+
 @register.tag
 def has_perm(parser, token):
     '''Validates that the user has access permission in view
-    
+
         @Example: {% has_perm <permission> <write> <read> %}
     '''
     parts = token.split_contents()
     if len(parts) < 4:
-        raise template.TemplateSyntaxError("'has_perm' tag must be of the form:  {% has_perm <permission> <write> <read> %}")
+        raise template.TemplateSyntaxError(
+            "'has_perm' tag must be of the form:  {% has_perm <permission> <write> <read> %}")
     return Permission(parts[1], parts[2], parts[3])
+
 
 @register.tag
 def has_perm_menu(parser, token):
     '''Validates that the user has access permission in top menu
-    
+
         @Example: {% has_perm_menu <write> <read> %}
     '''
     parts = token.split_contents()
     if len(parts) < 3:
-        raise template.TemplateSyntaxError("'has_perm_menu' tag must be of the form:  {% has_perm_menu <write> <read> %}")
+        raise template.TemplateSyntaxError(
+            "'has_perm_menu' tag must be of the form:  {% has_perm_menu <write> <read> %}")
     return PermissionMenu(parts[1], parts[2])
 
+
 @register.tag(name='set')
-def set_var(parser,token):
+def set_var(parser, token):
     """
     Example:
         {% set category_list category.categories.all %}
@@ -76,19 +95,23 @@ def set_var(parser,token):
     """
     from re import split
     bits = split(r'\s+', token.contents, 2)
-    return SetVariable(bits[1],bits[2])
+    return SetVariable(bits[1], bits[2])
+
 
 @register.tag(name='++')
 def increment_var(parser, token):
 
     parts = token.split_contents()
     if len(parts) < 2:
-        raise template.TemplateSyntaxError("'increment' tag must be of the form:  {% increment <var_name> %}")
+        raise template.TemplateSyntaxError(
+            "'increment' tag must be of the form:  {% increment <var_name> %}")
     return IncrementVarNode(parts[1])
+
 
 @register.simple_tag
 def max_results():
     return MAX_RESULT_DEFAULT
+
 
 @register.filter
 def jsonify(json_object):

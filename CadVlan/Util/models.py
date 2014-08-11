@@ -1,9 +1,20 @@
 # -*- coding:utf-8 -*-
-'''
-Title: CadVlan
-Author: masilva / S2it
-Copyright: ( c )  2012 globo.com todos os direitos reservados.
-'''
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 from django import template
 from CadVlan.Auth.AuthSession import AuthSession
@@ -15,28 +26,32 @@ class IncrementVarNode(template.Node):
     def __init__(self, var_name):
         self.var_name = var_name
 
-    def render(self,context):
+    def render(self, context):
         try:
             value = context[self.var_name]
             context[self.var_name] = value + 1
             return u""
         except:
             raise template.TemplateSyntaxError("The variable does not exist.")
-        
+
+
 class SetVariable(template.Node):
-    def __init__(self,varname,value):
+
+    def __init__(self, varname, value):
         self.varname = varname
         self.value = value
-    
-    def render(self,context):
-        var = template.resolve_variable(self.value,context)
+
+    def render(self, context):
+        var = template.resolve_variable(self.value, context)
         if var:
             context[self.varname] = var
         else:
             context[self.varname] = context[self.value]
         return ''
 
+
 class Permission(template.Node):
+
     '''Validates that the user has access permission in view
     '''
 
@@ -44,7 +59,7 @@ class Permission(template.Node):
         self.permission = permission
         self.write = write
         self.read = read
- 
+
     def render(self, context):
         auth = AuthSession(context['request'].session)
         user = auth.get_user()
@@ -57,19 +72,21 @@ class Permission(template.Node):
 
         if user.has_perm(PERMISSIONS.get(self.permission), self.write, self.read):
             context["has_perm"] = True
-        else:    
+        else:
             context["has_perm"] = False
 
         return u""
 
+
 class PermissionMenu(template.Node):
+
     '''Validates that the user has access permission in top menu
     '''
 
     def __init__(self, write, read):
         self.write = write
         self.read = read
- 
+
     def render(self, context):
         auth = AuthSession(context['request'].session)
         user = auth.get_user()
@@ -82,7 +99,7 @@ class PermissionMenu(template.Node):
 
         if user.has_perm_menu(self.write, self.read):
             context["has_perm"] = True
-        else:    
+        else:
             context["has_perm"] = False
 
         return u""

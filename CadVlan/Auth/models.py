@@ -1,11 +1,23 @@
 # -*- coding:utf-8 -*-
-'''
-Title: CadVlan
-Author: masilva / S2it
-Copyright: ( c )  2012 globo.com todos os direitos reservados.
-'''
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 from CadVlan.permissions import USER_ADMINISTRATION
+
 
 class User(object):
 
@@ -51,11 +63,11 @@ class User(object):
 
     def get_user_ldap(self):
         return self.__user_ldap
-    
-    def set_password(self,password):
+
+    def set_password(self, password):
         self.__password = password
 
-    def has_perm(self, permission,  write = None, read = None):
+    def has_perm(self, permission,  write=None, read=None):
         '''Validates that the user has access permission
 
             :param permission: access permission to be validated
@@ -78,23 +90,23 @@ class User(object):
         else:
             return False
 
-    def has_perm_menu(self, write = None, read = None):
+    def has_perm_menu(self, write=None, read=None):
         '''Validates that the user has access permission in top menu
 
             :param write: permission be write
             :param read: permission be read
         '''
         for permission in self.__permission.keys():
-            
+
             if permission != USER_ADMINISTRATION:
 
                 if write is not None:
-    
+
                     if self.__permission.get(permission).get('write') == "True":
                         return True
-    
+
                 if read is not None:
-    
+
                     if self.__permission.get(permission).get('read') == "True":
                         return True
 

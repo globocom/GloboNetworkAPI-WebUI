@@ -1,26 +1,39 @@
 # -*- coding:utf-8 -*-
-'''
-Created on 01/03/2012
-Author: avanzolin / S2it
-Copyright: ( c )  2012 globo.com todos os direitos reservados.
-'''
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from django.forms import formsets
 
 
 class BaseFormSet(formsets.BaseFormSet):
+
     """
     Override of BaseFormSet to set parameters on form class creation
     """
-    
+
     def _construct_forms(self):
         # instantiate all the forms and put them in self.forms
         self.forms = []
-        
+
         qnt = xrange(self.total_form_count())
-        
+
         if len(self.params) != len(qnt):
-            raise AttributeError("'%s' object with attribute 'params' has different length of forms quantity" % self.__class__.__name__)
-        
+            raise AttributeError(
+                "'%s' object with attribute 'params' has different length of forms quantity" % self.__class__.__name__)
+
         for i in qnt:
             self.forms.append(self._construct_form(i))
 
@@ -41,10 +54,10 @@ class BaseFormSet(formsets.BaseFormSet):
         if i >= self.initial_form_count():
             defaults['empty_permitted'] = True
         defaults.update(kwargs)
-        form = self.form(self.params[len(self.params)-i-1], i, **defaults)
+        form = self.form(self.params[len(self.params) - i - 1], i, **defaults)
         self.add_fields(form, i)
         return form
-    
+
     def _get_empty_form(self, **kwargs):
         defaults = {
             'auto_id': self.auto_id,
@@ -56,8 +69,9 @@ class BaseFormSet(formsets.BaseFormSet):
         self.add_fields(form, None)
         return form
     empty_form = property(_get_empty_form)
-    
-def formset_factory(form, params=[], equip_types=[], up=[], down=[], front_or_back=[], 
+
+
+def formset_factory(form, params=[], equip_types=[], up=[], down=[], front_or_back=[],
                     formset=BaseFormSet, extra=1, can_order=False, can_delete=False, max_num=None):
     """Return a FormSet for the given form class with parameters."""
     attrs = {'form': form, 'extra': extra, 'max_num': max_num, 'can_order': can_order,

@@ -1,9 +1,20 @@
 # -*- coding:utf-8 -*-
-'''
-Title: CadVlan
-Author: masilva / S2it
-Copyright: ( c )  2012 globo.com todos os direitos reservados.
-'''
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.Json import Json
@@ -30,16 +41,17 @@ AJAX = 'AJAX'
 LOCK = 'LOCK'
 TOKEN = 'token'
 
+
 def login_required(view_func):
     '''
     Validates that the user is logged
     '''
     def _decorated(request, *args, **kwargs):
-        
+
         auth = AuthSession(request.session)
 
         if auth.is_authenticated():
-            return view_func(request,*args, **kwargs)
+            return view_func(request, *args, **kwargs)
         else:
 
             if request.is_ajax():
@@ -48,20 +60,21 @@ def login_required(view_func):
 
                 return response
 
-            ajax = request.META.get(AJAX) 
+            ajax = request.META.get(AJAX)
 
-            if ajax is not None and ajax == 1 :
+            if ajax is not None and ajax == 1:
                 return HttpResponse(json.dumps(Json(None, True, URL_LOGIN).__dict__))
 
             else:
-                return HttpResponseRedirect(URL_LOGIN + '?redirect=' + request.path )
+                return HttpResponseRedirect(URL_LOGIN + '?redirect=' + request.path)
 
     return _decorated
+
 
 def has_perm(permission):
     '''
     Validates that the user has access permission
-    
+
     :param permission: access permission to be validated
     :param write: permission be write
     :param read: permission be read
@@ -80,10 +93,11 @@ def has_perm(permission):
                     write = perm['write'] if perm.has_key("write") else None
                     read = perm['read'] if perm.has_key("read") else None
                     if not user.has_perm(perm['permission'], write, read):
-                        messages.add_message(request, messages.ERROR, auth_messages.get('user_not_authorized'))
+                        messages.add_message(
+                            request, messages.ERROR, auth_messages.get('user_not_authorized'))
                         return HttpResponseRedirect(URL_HOME)
 
-                return view_func(request,*args, **kwargs);
+                return view_func(request, *args, **kwargs)
 
             else:
                 return HttpResponseRedirect(URL_LOGIN)
@@ -91,6 +105,7 @@ def has_perm(permission):
         return _has_perm
 
     return _decorated
+
 
 def log(view_func):
     '''
@@ -101,13 +116,16 @@ def log(view_func):
         post_data = request.raw_post_data
         post_data = re.sub(r'password=(.*?)&', 'password=****&', post_data)
         post_data = re.sub(r'new_pass=(.*?)&', 'new_pass=****&', post_data)
-        post_data = re.sub(r'confirm_new_password=(.*?)$', 'confirm_new_password=****', post_data)
-        
-        logger.info(u'Start of the request[%s] for URL[%s] with DATA[%s].' % (request.method, request.path, post_data))
+        post_data = re.sub(
+            r'confirm_new_password=(.*?)$', 'confirm_new_password=****', post_data)
 
-        return view_func(request,*args, **kwargs)
+        logger.info(u'Start of the request[%s] for URL[%s] with DATA[%s].' % (
+            request.method, request.path, post_data))
+
+        return view_func(request, *args, **kwargs)
 
     return _decorated
+
 
 def access_external():
     '''
@@ -116,94 +134,97 @@ def access_external():
     def _decorated(func):
 
         def _control(request, *args, **kwargs):
-                    
+
             key = get_param_in_request(request, TOKEN)
-            
+
             is_valid = True
             if key is not None:
-                
+
                 # Search in cache if it exists
-                if cache.has_key(key): 
-                
+                if cache.has_key(key):
+
                     # Get hash in cache
                     hash = cache.get(key)
-                    
-                    #Decrypt hash
+
+                    # Decrypt hash
                     user = Encryption().Decrypt(hash)
-                    
+
                     username, password, user_ldap = str(user).split("@")
-                    
+
                     if user_ldap == "":
-                        client = ClientFactory(NETWORK_API_URL, username, password)
+                        client = ClientFactory(
+                            NETWORK_API_URL, username, password)
                     else:
-                        client = ClientFactory(NETWORK_API_URL, username, password, user_ldap)
+                        client = ClientFactory(
+                            NETWORK_API_URL, username, password, user_ldap)
                 else:
                     is_valid = False
-            
-            #If it is not valid  mount of return depending on the type of request
+
+            # If it is not valid  mount of return depending on the type of
+            # request
             if not is_valid:
-                
+
                 msg = auth_messages.get("token_invalid")
-               
+
                 if request.is_ajax():
                     return HttpResponse(msg, status=203)
-            
-                else :
-                    
-                    return HttpResponse(loader.render_to_string(TOKEN_INVALID ,{"error" : msg}), status=200)
-            
-            
-            kwargs["form_acess"] = ControlAcessForm(initial={"token":key})
+
+                else:
+
+                    return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": msg}), status=200)
+
+            kwargs["form_acess"] = ControlAcessForm(initial={"token": key})
             kwargs["client"] = client
-            
+
             # Execute method
             return func(request, *args, **kwargs)
-        
+
         return _control
-    
+
     return _decorated
+
 
 def cache_function(length):
     """
     Cache the result of function
-    
+
     :param length: time in seconds to stay in cache
     """
     def _decorated(func):
-        
+
         def _cache(*args, **kwargs):
-            
+
             key = sha1(str(func.__module__) + str(func.__name__)).hexdigest()
-            
+
             # Search in cache if it exists
             if cache.has_key(key):
-                
+
                 # Get value in cache
                 value = cache.get(key)
-                
+
                 # If was locked
                 if value == LOCK:
                     # Try until unlock
                     while value == LOCK:
                         time.sleep(1)
                         value = cache.get(key)
-                
+
                 # Return value of cache
                 return value
-            
+
             # If not exists in cache
             else:
                 # Function can be called several times before it finishes and is put into the cache,
                 # then lock it to others wait it finishes.
                 cache.set(key, LOCK, length)
-                
+
                 # Execute method
                 result = func(*args, **kwargs)
-                
+
                 # Set in cache the result of method
                 cache.set(key, result, length)
-                
+
                 return result
-            
+
         return _cache
     return _decorated
