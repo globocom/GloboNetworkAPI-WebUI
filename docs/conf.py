@@ -64,7 +64,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'CadVlan'
+project = u'GloboNetworkAPI WebUI'
 copyright = u'2000-2014 Globo Comunicação e Participações S.A.'
 
 # The version info for the project you're documenting, acts as replacement for
