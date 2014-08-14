@@ -33,3 +33,11 @@ Architecture
 
 .. image:: diagrams/architecture.png
 
+Related Projects
+****************
+
+`Globo NetworkAPI <https://github.com/globocom/GloboNetworkAPI>`_.
+
+`Globo NetworkAPI Python Client <https://github.com/globocom/GloboNetworkAPI-client-python>`_.
+
+`Globo NetworkAPI Python Java <https://github.com/globocom/GloboNetworkAPI-client-java>`_.
