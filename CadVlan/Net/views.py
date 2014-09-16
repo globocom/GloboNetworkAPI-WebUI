@@ -188,15 +188,8 @@ def list_netip4_by_id(request, id_net):
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
         lists['vlan_id'] = vlan['vlan']['id']
         
-	#--------------------------
 	lists['num_vlan'] = vlan['vlan']['num_vlan']
 	
-        #id_vlan = vlan['vlan']['id']
-        #vlans = client.create_vlan().get(id_vlan)
-        #vlans = vlans.get('vlan')
-        #lists['vlan'] =  vlans
-	#--------------------------
-
 	net['network']['vlan'] = vlan.get('vlan').get('nome')
 
         net_type = client.create_tipo_rede().listar()
@@ -316,9 +309,7 @@ def list_netip6_by_id(request, id_net):
         lists['vlan_id'] = vlan.get('vlan')['id']
 
         net['network']['vlan'] = vlan.get('vlan').get('nome')
- 	#------------------------------------------
 	lists['num_vlan'] = vlan['vlan']['num_vlan']
-	#-----------------------------------------
         net_type = client.create_tipo_rede().listar()
 
         id_vip = net.get('network').get("ambient_vip")
