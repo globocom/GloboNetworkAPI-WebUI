@@ -205,3 +205,7 @@ RULES_FORM = 'block-rules/rule_form.html'
 TAB_BLOCK_FORM = 'block-rules/tab-blocks.html'
 TAB_RULES_FORM = 'block-rules/tab-rules-form.html'
 TAB_RULES = 'block-rules/tab-rules.html'
+
+# Pool
+POOL_LIST = 'pool/list.html'
+POOL_FORM = 'pool/form.html'

@@ -550,3 +550,11 @@ urlpatterns += patterns('CadVlan.BlockRules.views',
                             'rule_remove', name='block.rules.remove',),
                         url('^block/ajax', 'block_ajax', name='block.ajax',),
                         )
+
+# URL's Pool
+urlpatterns += patterns('CadVlan.Pool.views',
+                        url('^pool/list[/]?$', 'list_all',
+                            name='pool.list',),
+                        url('^pool/form[/]?$', 'add_form',
+                            name='pool.form',),
+                        )

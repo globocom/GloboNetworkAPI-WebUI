@@ -350,3 +350,9 @@ rule_messages = {
     'success_remove': u'Todas as regras selecionadas foram excluídas com sucesso.',
     'required': 'Existem campos obrigatórios não preenchidos.',
 }
+
+pool_messages = {
+    'success_remove':       u'Todos os pools selecionados foram excluídos com sucesso.',
+    'success_insert':       u'Pool incluído com sucesso.',
+    'error_equal_name':     u'Pool com o nome %s já cadastrado.',
+}
