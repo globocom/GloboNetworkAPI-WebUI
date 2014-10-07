@@ -23,7 +23,7 @@ from CadVlan.templates import POOL_LIST, POOL_FORM
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, PoolError, NomeRoteiroDuplicadoError
+from networkapiclient.exception import NetworkAPIClientError, NomeRoteiroDuplicadoError
 from django.contrib import messages
 from CadVlan.messages import error_messages, pool_messages
 from CadVlan.Util.converters.util import split_to_array, replace_id_to_name
@@ -32,42 +32,8 @@ from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm
 from django.template.defaultfilters import upper
 
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-
 
 logger = logging.getLogger(__name__)
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def list_by_environment_and_equipment(request, id_equipment):
-
-    if request.method == 'GET':
-
-        try:
-            # Get user
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
-
-            # Get all scripts from NetworkAPI
-            ip_list = client.create_pool().listar_por_equipamento_e_ambiente(id_equipment)
-            data = {'lista': ip_list}
-            return Response(data)
-
-        except NetworkAPIClientError, e:
-            logger.error(e)
-            messages.add_message(request, messages.ERROR, e)
-
-    elif request.method == 'POST':
-
-        data = {'success': 'Post Data Success'}
-        return Response(data, status=status.HTTP_201_CREATED)
-
-
-
-
 
 
 @log
@@ -119,7 +85,7 @@ def add_form(request):
         choices_opvip = []
         choices_healthcheck = []
 
-        #get environments
+        # get environments
         for ambiente in ambient_list['environment_vip']:
             choices.append((ambiente['id'], ambiente['ambiente_p44_txt']))
 
@@ -127,9 +93,9 @@ def add_form(request):
                         " - " + env["grupo_l3_name"]) for env in env_list["ambiente"]])
         env_choices.insert(0, (0, "-"))
 
-        #get options_vip
+        # get options_vip
         for opvip in opvip_list['option_vip']:
-            #filtering to only Balanceamento
+            # filtering to only Balanceamento
             if opvip['tipo_opcao'] == 'Balanceamento':
                 choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
             elif opvip['tipo_opcao'] == 'HealthCheck':
