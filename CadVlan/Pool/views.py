@@ -18,6 +18,7 @@
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
+from CadVlan.VipRequest.forms import RequestVipFormReal
 from CadVlan.templates import POOL_LIST, POOL_FORM
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
@@ -31,7 +32,42 @@ from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm
 from django.template.defaultfilters import upper
 
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+
 logger = logging.getLogger(__name__)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def list_by_environment_and_equipment(request, id_equipment):
+
+    if request.method == 'GET':
+
+        try:
+            # Get user
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            # Get all scripts from NetworkAPI
+            ip_list = client.create_pool().listar_por_equipamento_e_ambiente(id_equipment)
+            data = {'lista': ip_list}
+            return Response(data)
+
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+
+    elif request.method == 'POST':
+
+        data = {'success': 'Post Data Success'}
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
+
+
 
 
 @log
@@ -52,7 +88,9 @@ def list_all(request):
 
         # Business
         lists['pools'] = pool_list["pool"]
-        lists['form'] = DeleteForm()
+
+
+
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -72,12 +110,35 @@ def add_form(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        # Get all script_types from NetworkAPI
+        ambient_list = client.create_environment_vip().list_all()
+        env_list = client.create_ambiente().list_all()
+        opvip_list = client.create_option_vip().get_all()
+
+        choices = []
+        choices_opvip = []
+        choices_healthcheck = []
+
+        #get environments
+        for ambiente in ambient_list['environment_vip']:
+            choices.append((ambiente['id'], ambiente['ambiente_p44_txt']))
+
+        env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
+                        " - " + env["grupo_l3_name"]) for env in env_list["ambiente"]])
+        env_choices.insert(0, (0, "-"))
+
+        #get options_vip
+        for opvip in opvip_list['option_vip']:
+            #filtering to only Balanceamento
+            if opvip['tipo_opcao'] == 'Balanceamento':
+                choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
+            elif opvip['tipo_opcao'] == 'HealthCheck':
+                choices_healthcheck.append((opvip['id'], opvip['nome_opcao_txt']))
+
         # If form was submited
         if request.method == 'POST':
 
-            # Get all script_types from NetworkAPI
-            script_type_list = client.create_tipo_roteiro().listar()
-            form = PoolForm(script_type_list, request.POST)
+            form = PoolForm(choices, request.POST)
 
             if form.is_valid():
 
@@ -98,15 +159,12 @@ def add_form(request):
                     messages.add_message(request, messages.ERROR, e)
 
         else:
-
-            # Get all script_types from NetworkAPI
-            script_type_list = client.create_tipo_roteiro().listar()
-
             # New form
-            form = PoolForm(script_type_list)
+            form = PoolForm(env_choices, choices_opvip, choices_healthcheck)
+            form_real = RequestVipFormReal()
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_FORM, {'form': form}, context_instance=RequestContext(request))
+    return render_to_response(POOL_FORM, {'form': form, 'form_real': form_real}, context_instance=RequestContext(request))
