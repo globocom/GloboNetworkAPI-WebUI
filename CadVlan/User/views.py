@@ -32,7 +32,7 @@ from CadVlan.templates import USER_LIST, MAIL_NEW_USER, AJAX_LDAP_USERS_BY_GROUP
 from django.http import HttpResponse
 from django.conf.urls.defaults import url
 from django.contrib import messages
-from django.core.mail import SMTPConnection
+from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail.message import EmailMessage
 from django.shortcuts import render_to_response, redirect
 from django.core.urlresolvers import reverse
@@ -275,7 +275,7 @@ def save_user(form, client):
             new_user.get('usuario')['id'], group)
 
     if user_ldap is None:
-        connection = SMTPConnection(
+        connection = EmailBackend(
             username=EMAIL_HOST_USER, password=EMAIL_HOST_PASSWORD)
         send_email = EmailMessage('Novo Usuário CadVlan-Globo.com',  loader.render_to_string(
             MAIL_NEW_USER, list_mail), EMAIL_FROM, [email], connection=connection)

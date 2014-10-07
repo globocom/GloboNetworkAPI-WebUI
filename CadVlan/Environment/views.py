@@ -56,6 +56,8 @@ def list_all(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        snippets = client.create_ambiente().snippets()
+
         # Get all environments from NetworkAPI
         environment = client.create_ambiente().listar()
 
