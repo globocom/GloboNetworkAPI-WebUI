@@ -552,10 +552,11 @@ urlpatterns += patterns('CadVlan.BlockRules.views',
                         )
 
 # URL's Pool
-urlpatterns += patterns('CadVlan.Pool.views',
+urlpatterns += patterns(
+    'CadVlan.Pool.views',
     url('^pool/list[/]?$', 'list_all', name='pool.list',),
+    url('^pool/datatable[/]?$', 'datatable', name='pool.datatable',),
     url('^pool/form[/]?$', 'add_form', name='pool.form',),
     url('^pool/ajax_modal_ips[/]?$', 'ajax_modal_ip_real_server', name='pool.modal.ips.ajax',),
     url('^pool/ajax_modal_ips/external[/]?$', 'ajax_modal_ip_real_server_external', name='pool.modal.ips.ajax.external',),
 )
-
