@@ -42,6 +42,7 @@ from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
 
 logger = logging.getLogger(__name__)
 
+
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
