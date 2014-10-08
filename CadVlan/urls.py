@@ -557,4 +557,4 @@ urlpatterns += patterns('CadVlan.Pool.views',
                             name='pool.list',),
                         url('^pool/form[/]?$', 'add_form',
                             name='pool.form',),
-                        ),
+                        )

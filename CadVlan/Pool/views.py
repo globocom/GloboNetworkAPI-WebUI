@@ -40,6 +40,7 @@ from rest_framework.permissions import IsAuthenticated
 
 logger = logging.getLogger(__name__)
 
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def list_by_environment_and_equipment(request, id_equipment):
@@ -64,10 +65,6 @@ def list_by_environment_and_equipment(request, id_equipment):
 
         data = {'success': 'Post Data Success'}
         return Response(data, status=status.HTTP_201_CREATED)
-
-
-
-
 
 
 @log
