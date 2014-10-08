@@ -25,7 +25,7 @@
 $(document).ready(function() {
 
     //Same as vip-request/form.html
-    {% include "vip-request/include_vip_js" %}
+    {% include "pool/include_vip_js.js" %}
     autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	$('.editable').editableTable();
 
@@ -49,6 +49,10 @@ $(document).ready(function() {
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Pool</a></li>
 	</ul>
+
+    <div id="dialog_ip">
+        <div id="content-ip"></div>
+    </div>
 	<div id="tabs-1">
 		<form id="add_form" method="post" action="">
 			{% csrf_token %}
@@ -72,6 +76,25 @@ $(document).ready(function() {
 			</div>
 
 
+            <table id="table_healthcheck" class="bordasimples" style="margin-top: -10px;width: 511px;">
+						<tr>
+							<td><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
+							<td style="padding-left: 5px;">{{ field }}</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td style="padding-left: 5px;"><p id="error">{% if field.errors %}{% for error in field.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+						</tr>
+
+						<tr id="add_new_healthcheck">
+							<td></td>
+							<td style="padding-left: 5px;">{{ field }}<input type="button" id="btn_new_excpect" value="Adicionar Novo" /></td>
+						</tr>
+				<tr id="msg_new_healthcheck">
+				</tr>
+			</table>
+
+
             <table  class="bordasimples" >
 				<tr>
 					<td colspan="3">Reals</td>
@@ -91,7 +114,6 @@ $(document).ready(function() {
 						<table id="table_real" class="bordasimplesReal">
 							<thead>
 								<tr>
-									<td>Porta Vip</td>
 									<td>Nome do Real</td>
 									<td>IP do Real</td>
 									<td>Prioridade</td>
@@ -105,10 +127,6 @@ $(document).ready(function() {
 							{% for field in reals %}
 
 								<tr class='remove_port'>
-									<td>
-										<label>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
-										<input type="hidden" value="{{field.ports_vip}}" name="ports_vip_reals">
-									</td>
 									<td>
 										<label>{% if field.equip != "-" %}{{field.equip}}{% endif %}</label>
 										<input type='hidden' name='equip' value='{{field.equip}}'>

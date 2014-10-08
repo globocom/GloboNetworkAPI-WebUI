@@ -17,10 +17,14 @@
 
 
 import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm
+from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.VipRequest.forms import RequestVipFormReal
-from CadVlan.templates import POOL_LIST, POOL_FORM
+from django.views.decorators.csrf import csrf_exempt
+from CadVlan.templates import POOL_LIST, POOL_FORM, AJAX_IPLIST_EQUIPMENT_REAL_SERVER, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML
 from django.shortcuts import render_to_response, redirect
+from django.http import HttpResponse
+from django.shortcuts import render_to_response, redirect
+from django.template import loader
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, PoolError, NomeRoteiroDuplicadoError
@@ -31,43 +35,12 @@ from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT
 from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm
 from django.template.defaultfilters import upper
+from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
+    get_param_in_request, IP_VERSION, is_valid_int_param
 
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
 
 logger = logging.getLogger(__name__)
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def list_by_environment_and_equipment(request, id_equipment):
-
-    if request.method == 'GET':
-
-        try:
-            # Get user
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
-
-            # Get all scripts from NetworkAPI
-            ip_list = client.create_pool().listar_por_equipamento_e_ambiente(id_equipment)
-            data = {'lista': ip_list}
-            return Response(data)
-
-        except NetworkAPIClientError, e:
-            logger.error(e)
-            messages.add_message(request, messages.ERROR, e)
-
-    elif request.method == 'POST':
-
-        data = {'success': 'Post Data Success'}
-        return Response(data, status=status.HTTP_201_CREATED)
-
-
-
-
 
 
 @log
@@ -168,3 +141,50 @@ def add_form(request):
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(POOL_FORM, {'form': form, 'form_real': form_real}, context_instance=RequestContext(request))
+
+
+@csrf_exempt
+@access_external()
+@log
+def ajax_modal_ip_real_server_external(request, form_acess, client):
+    return modal_ip_list_real(request, client)
+
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "read": True, "write": True}])
+def ajax_modal_ip_real_server(request):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return modal_ip_list_real(request, client_api)
+
+def modal_ip_list_real(request, client_api):
+
+    lists = dict()
+    lists['msg'] = ''
+    lists['ips'] = ''
+    ips = None
+    equip = None
+    status_code = None
+
+    try:
+
+        ambiente = get_param_in_request(request, 'id_environment')
+        equip_name = get_param_in_request(request, 'equip_name')
+
+        # Valid Equipament
+        equip = client_api.create_equipamento().listar_por_nome(equip_name).get("equipamento")
+
+        ips = client_api.create_equipamento().get_ips_by_equipment_and_environment(equip_name, ambiente)
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        status_code = 500
+
+    lists['ips'] = ips
+    lists['equip'] = equip
+
+    # Returns Json
+    return HttpResponse(loader.render_to_string(AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML,
+                        lists, context_instance=RequestContext(request)), status=status_code)

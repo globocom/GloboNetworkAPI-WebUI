@@ -26,7 +26,7 @@ class PoolForm(forms.Form):
         super(PoolForm, self).__init__(*args, **kwargs)
 
 
-        self.fields['environment_vip'].choices = env_choices
+        self.fields['environment'].choices = env_choices
         self.fields['balancing'].choices = choices_opvip
         self.fields['healthcheck'].choices = choices_healthcheck
 
@@ -34,7 +34,7 @@ class PoolForm(forms.Form):
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     default_port = forms.CharField(label=u'Default Port', min_length=3, max_length=5, required=True,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
-    environment_vip = forms.ChoiceField(label=u'Environment', choices=[], required=True,
+    environment = forms.ChoiceField(label=u'Environment', choices=[], required=True,
                                   error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
     balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
                               error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
