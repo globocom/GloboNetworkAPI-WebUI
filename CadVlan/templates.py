@@ -209,3 +209,4 @@ TAB_RULES = 'block-rules/tab-rules.html'
 # Pool
 POOL_LIST = 'pool/list.html'
 POOL_FORM = 'pool/form.html'
+POOL_DATATABLE = 'pool/datatable.json'

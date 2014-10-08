@@ -552,9 +552,9 @@ urlpatterns += patterns('CadVlan.BlockRules.views',
                         )
 
 # URL's Pool
-urlpatterns += patterns('CadVlan.Pool.views',
-                        url('^pool/list[/]?$', 'list_all',
-                            name='pool.list',),
-                        url('^pool/form[/]?$', 'add_form',
-                            name='pool.form',),
-                        )
+urlpatterns += patterns(
+    'CadVlan.Pool.views',
+    url('^pool/list[/]?$', 'list_all', name='pool.list',),
+    url('^pool/datatable[/]?$', 'datatable', name='pool.datatable',),
+    url('^pool/form[/]?$', 'add_form', name='pool.form',),
+)

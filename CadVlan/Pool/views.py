@@ -19,18 +19,19 @@
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.VipRequest.forms import RequestVipFormReal
-from CadVlan.templates import POOL_LIST, POOL_FORM
+from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_DATATABLE
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, NomeRoteiroDuplicadoError
 from django.contrib import messages
 from CadVlan.messages import error_messages, pool_messages
-from CadVlan.Util.converters.util import split_to_array, replace_id_to_name
 from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT
 from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm
 from django.template.defaultfilters import upper
+from CadVlan.Util.utility import DataTablePaginator
+from networkapiclient.Pagination import Pagination
 
 
 logger = logging.getLogger(__name__)
@@ -41,28 +42,50 @@ logger = logging.getLogger(__name__)
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
 def list_all(request):
 
+    return render_to_response(
+        POOL_LIST,
+        {'form': DeleteForm()},
+        context_instance=RequestContext(request)
+    )
+
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+def datatable(request):
+
     try:
 
-        lists = dict()
-
-        # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        # Get all scripts from NetworkAPI
-        pool_list = client.create_pool().listar()
+        columnIndexNameMap = {
+            0: '',
+            1: 'identifier',
+            2: 'default_port',
+            3: 'healthcheck',
+            4: ''
+        }
 
-        # Business
-        lists['pools'] = pool_list["pool"]
+        dtp = DataTablePaginator(request, columnIndexNameMap)
 
+        dtp.build_server_side_list()
 
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search
+        )
 
+        pools = client.create_pool().list_all(pagination)
+
+        return dtp.build_response(pools["pools"], pools["total"], POOL_DATATABLE, request)
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-
-    return render_to_response(POOL_LIST, lists, context_instance=RequestContext(request))
 
 
 @log
