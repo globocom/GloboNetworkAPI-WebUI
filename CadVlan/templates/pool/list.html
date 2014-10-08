@@ -23,13 +23,19 @@
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
 	oTable = $("#script_list").dataTable({
-		"aaSorting": [],
+		"sAjaxSource": "{% url pool.datatable %}",
+		"bServerSide": true,
+		"aaSorting": [[ 1, "asc" ]],
+		"bAutoWidth": false,
 		"bJQueryUI": true,
+		"bFilter": false,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }]
+		"aoColumnDefs": [
+		    { "bSortable": false, "aTargets": [ 0, 4] }
+		 ]
 	});
 	
 	$("#checkAll").click( function() {
@@ -97,22 +103,24 @@ $(document).ready(function() {
 			{% endfor %}
 		</form>
 		{% endif %}
+		
 		<table id="script_list">
+			<col width="3%" />
+			<col width="15%" />
+			<col width="20%" />
+			<col width="20%" />
+			<col width="8%" />
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th>Identificador</th>
 					<th>Porta Padrão</th>
+					<th>Heathcheck</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
-                {% for pool in pools %}
-				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ pool.id }}" /></td>
-					<td>{{ pool.identifier }}</td>
-					<td>{{ pool.default_port }}</td>
-				</tr>
-				{% endfor %}
+				
 			</tbody>
 		</table>
 	</div>
