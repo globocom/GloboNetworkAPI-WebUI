@@ -17,6 +17,7 @@
 
 
 import logging
+from django.core.urlresolvers import reverse
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.VipRequest.forms import RequestVipFormReal
 from django.views.decorators.csrf import csrf_exempt
@@ -131,21 +132,21 @@ def add_form(request):
         # If form was submited
         if request.method == 'POST':
 
-            form = PoolForm(choices, request.POST)
+            form = PoolForm(env_choices=env_choices, choices_opvip=choices_opvip, choices_healthcheck=choices_healthcheck, request.POST)
+            #realform = RequestVipFormReal(request.POST)
 
             if form.is_valid():
 
                 # Data
-                name = upper(form.cleaned_data['name'])
-                script_type = form.cleaned_data['script_type']
-                description = form.cleaned_data['description']
+                identifier = form.cleaned_data['identifier']
+                default_port = form.cleaned_data['default_port']
+                environment = form.cleaned_data['environment']
+                balancing = form.cleaned_data['balancing']
+                healthcheck = form.cleaned_data['healthcheck']
 
                 try:
                     # Business
-                    client.create_roteiro().inserir(
-                        script_type, name, description)
-                    messages.add_message(
-                        request, messages.SUCCESS, pool_messages.get("success_insert"))
+
 
                     return redirect('script.list')
                 except NomeRoteiroDuplicadoError, e:
@@ -155,12 +156,13 @@ def add_form(request):
             # New form
             form = PoolForm(env_choices, choices_opvip, choices_healthcheck)
             form_real = RequestVipFormReal()
+            action = reverse('pool.form')
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_FORM, {'form': form, 'form_real': form_real}, context_instance=RequestContext(request))
+    return render_to_response(POOL_FORM, {'form': form, 'form_real': form_real, 'action': action}, context_instance=RequestContext(request))
 
 
 @csrf_exempt
