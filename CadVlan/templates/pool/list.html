@@ -96,7 +96,7 @@ $(document).ready(function() {
 		</div>
 		{% has_perm SCRIPT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in form %}
 				{{ field }}
