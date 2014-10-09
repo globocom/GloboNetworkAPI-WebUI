@@ -54,7 +54,7 @@ $(document).ready(function() {
         <div id="content-ip"></div>
     </div>
 	<div id="tabs-1">
-		<form id="add_form" method="post" action="">
+		<form id="add_form" method="post" action="{{action}}">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
                 {% for field in form %}

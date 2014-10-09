@@ -28,6 +28,7 @@ from django.shortcuts import render_to_response, redirect
 from django.template import loader
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
+from networkapi.healthcheckexpect.models import Healthcheck
 from networkapiclient.exception import NetworkAPIClientError, NomeRoteiroDuplicadoError
 from django.contrib import messages
 from CadVlan.messages import error_messages, pool_messages
@@ -109,10 +110,14 @@ def add_form(request):
         ambient_list = client.create_environment_vip().list_all()
         env_list = client.create_ambiente().list_all()
         opvip_list = client.create_option_vip().get_all()
+        healthcheck_list = client.create_pool().list_healthchecks()
 
         choices = []
         choices_opvip = []
         choices_healthcheck = []
+
+        for healthcheck in healthcheck_list['healthchecks']:
+            choices_healthcheck.append((healthcheck['id'], healthcheck['identifier']))
 
         # get environments
         for ambiente in ambient_list['environment_vip']:
@@ -127,16 +132,23 @@ def add_form(request):
             # filtering to only Balanceamento
             if opvip['tipo_opcao'] == 'Balanceamento':
                 choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
-            elif opvip['tipo_opcao'] == 'HealthCheck':
-                choices_healthcheck.append((opvip['id'], opvip['nome_opcao_txt']))
 
         # If form was submited
         if request.method == 'POST':
 
-            form = PoolForm(env_choices=env_choices, choices_opvip=choices_opvip, choices_healthcheck=choices_healthcheck, request.POST)
-            #realform = RequestVipFormReal(request.POST)
+            form = PoolForm(env_choices, choices_opvip, choices_healthcheck, request.POST)
+            realform = RequestVipFormReal(request.POST)
 
-            if form.is_valid():
+            if form.is_valid() and realform.is_valid():
+
+                id_ips = request.POST.getlist('id_ip')
+                ips = request.POST.getlist('ip')
+
+                ip_list_full = list()
+
+
+                for i in range(len(ips)):
+                    ip_list_full.append({'id': id_ips[i], 'ip': ips[i]})
 
                 # Data
                 identifier = form.cleaned_data['identifier']
@@ -144,15 +156,19 @@ def add_form(request):
                 environment = form.cleaned_data['environment']
                 balancing = form.cleaned_data['balancing']
                 healthcheck = form.cleaned_data['healthcheck']
+                maxcom = realform.cleaned_data['maxcom']
 
-                try:
-                    # Business
+                id_equips = request.POST.getlist('id_equip')
+                priorities = request.POST.getlist('priority')
+                ports_reals = request.POST.getlist('ports_real_reals')
 
+                client.create_pool().inserir(identifier, default_port, environment,
+                                             balancing, healthcheck, maxcom, ip_list_full,
+                                             id_equips, priorities, ports_reals)
+            messages.add_message(
+                    request, messages.SUCCESS, pool_messages.get('success_insert'))
 
-                    return redirect('script.list')
-                except NomeRoteiroDuplicadoError, e:
-                    messages.add_message(request, messages.ERROR, e)
-
+            return redirect('pool.list')
         else:
             # New form
             form = PoolForm(env_choices, choices_opvip, choices_healthcheck)
