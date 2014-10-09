@@ -559,4 +559,5 @@ urlpatterns += patterns(
     url('^pool/form[/]?$', 'add_form', name='pool.form',),
     url('^pool/ajax_modal_ips[/]?$', 'ajax_modal_ip_real_server', name='pool.modal.ips.ajax',),
     url('^pool/ajax_modal_ips/external[/]?$', 'ajax_modal_ip_real_server_external', name='pool.modal.ips.ajax.external',),
+    url('^pool/delete[/]?$', 'delete', name='pool.delete',),
 )

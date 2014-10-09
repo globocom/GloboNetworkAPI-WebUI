@@ -20,7 +20,7 @@ import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.VipRequest.forms import RequestVipFormReal
 from django.views.decorators.csrf import csrf_exempt
-from CadVlan.templates import POOL_LIST, POOL_FORM, AJAX_IPLIST_EQUIPMENT_REAL_SERVER, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML,POOL_DATATABLE
+from CadVlan.templates import POOL_LIST, POOL_FORM, AJAX_IPLIST_EQUIPMENT_REAL_SERVER, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_DATATABLE
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, redirect
@@ -38,6 +38,7 @@ from CadVlan.Util.utility import DataTablePaginator
 from networkapiclient.Pagination import Pagination
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
     get_param_in_request, IP_VERSION, is_valid_int_param
+from CadVlan.Util.converters.util import split_to_array
 
 logger = logging.getLogger(__name__)
 
@@ -209,3 +210,40 @@ def modal_ip_list_real(request, client_api):
     # Returns Json
     return HttpResponse(loader.render_to_string(AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML,
                         lists, context_instance=RequestContext(request)), status=status_code)
+
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+def delete(request):
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            client.create_pool().delete(ids)
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                pool_messages.get('success_remove')
+            )
+
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one")
+            )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    request._messages
+    return redirect('pool.list')
