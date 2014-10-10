@@ -31,14 +31,14 @@ class PoolForm(forms.Form):
         self.fields['healthcheck'].choices = choices_healthcheck
 
     identifier = forms.CharField(label=u'Identifier', min_length=3, max_length=40, required=True,
-                           error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
+                                 error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     default_port = forms.CharField(label=u'Default Port', min_length=3, max_length=5, required=True,
-                           error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
     environment = forms.ChoiceField(label=u'Environment', choices=[], required=True,
-                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+                                    error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
     balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
-                              error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
     healthcheck = forms.ChoiceField(label=u'HealthCheck', choices=[], required=True,
-                              error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+                                    error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
 
 

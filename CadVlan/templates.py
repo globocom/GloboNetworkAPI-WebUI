@@ -209,6 +209,7 @@ TAB_RULES = 'block-rules/tab-rules.html'
 # Pool
 POOL_LIST = 'pool/list.html'
 POOL_FORM = 'pool/form.html'
+POOL_EDIT = 'pool/edit.html'
 AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML = 'ajax/request-ip-list-real-server.html'
 AJAX_IPLIST_EQUIPMENT_REAL_SERVER = 'ajax/request-ip-list-real-server.json'
 POOL_DATATABLE = 'pool/datatable.json'
