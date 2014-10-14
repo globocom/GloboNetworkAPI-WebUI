@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.VipRequest.forms import RequestVipFormReal
 from django.views.decorators.csrf import csrf_exempt
-from CadVlan.templates import POOL_LIST, POOL_FORM, AJAX_IPLIST_EQUIPMENT_REAL_SERVER, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_DATATABLE
+from CadVlan.templates import POOL_LIST, POOL_FORM, AJAX_IPLIST_EQUIPMENT_REAL_SERVER, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_DATATABLE, POOL_EDIT, POOL_SPM_DATATABLE
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, redirect
@@ -90,6 +90,49 @@ def datatable(request):
         pools = client.create_pool().list_all(pagination)
 
         return dtp.build_response(pools["pools"], pools["total"], POOL_DATATABLE, request)
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+def spm_datatable(request, id_server_pool):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+
+        columnIndexNameMap = {
+            0: '',
+            1: 'identifier',
+            2: 'ip',
+            3: 'priority',
+            4: 'port_real',
+            5: 'limit',
+            6: 'healthcheck',
+            7: ''
+        }
+
+        dtp = DataTablePaginator(request, columnIndexNameMap)
+
+        dtp.build_server_side_list()
+
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search
+        )
+
+        pools = client.create_pool().list_all_members_by_pool(id_server_pool, pagination)
+
+        return dtp.build_response(pools["server_pool_members"], pools["total"], POOL_SPM_DATATABLE, request)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -195,12 +238,6 @@ def edit_form(request, id_server_pool):
 
         # Get pool infos
         pool = client.create_pool().get_by_pk(id_server_pool)
-        current_environment = client.create_ambiente().buscar_por_id(pool['server_pool']['ambiente_id_ambiente'])
-
-        current_environment = (current_environment['ambiente']['id'],
-                               current_environment['ambiente']["nome_divisao"]
-                               + " - " + current_environment['ambiente']["nome_ambiente_logico"]
-                               + " - " + current_environment['ambiente']["nome_grupo_l3"])
 
         env_list = client.create_ambiente().list_all()
         opvip_list = client.create_option_vip().get_all()
@@ -213,8 +250,8 @@ def edit_form(request, id_server_pool):
             choices_healthcheck.append((healthcheck['id'], healthcheck['identifier']))
 
 
-        env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
-                        " - " + env["grupo_l3_name"]) for env in env_list["ambiente"]])
+        env_choices = ([(env['id'], env['divisao_dc_name'] + " - " + env['ambiente_logico_name'] +
+                        " - " + env['grupo_l3_name']) for env in env_list['ambiente']])
         env_choices.insert(0, (0, "-"))
 
         # get options_vip
@@ -251,16 +288,33 @@ def edit_form(request, id_server_pool):
                 priorities = request.POST.getlist('priority')
                 ports_reals = request.POST.getlist('ports_real_reals')
 
-                client.create_pool().inserir(identifier, default_port, environment,
+                client.create_pool().update(id_server_pool, identifier, default_port, environment,
                                              balancing, healthcheck, maxcom, ip_list_full,
                                              id_equips, priorities, ports_reals)
             messages.add_message(
-                    request, messages.SUCCESS, pool_messages.get('success_insert'))
+                    request, messages.SUCCESS, pool_messages.get('success_update'))
 
             return redirect('pool.list')
         else:
             # New form
-            form = PoolForm(env_choices, choices_opvip, choices_healthcheck, initial=pool['server_pool'])
+            server_pool = dict()
+            server_pool_members = dict()
+            server_pool = pool['server_pool']
+            server_pool_members = pool['server_pool_members']
+
+            for spm in server_pool_members:
+                nome_equipamento = client.create_pool().get_equip_by_ip(spm['ip']['id'])
+                spm.update({'equipamento': nome_equipamento})
+
+
+            poolform_initial = {
+                'identifier': server_pool.get('identifier'),
+                'default_port': server_pool.get('default_port'),
+                'environment': server_pool.get('environment')['id'],
+                'balancing': '',
+                'healthcheck': server_pool.get('healthcheck')['id'],
+            }
+            form = PoolForm(env_choices, choices_opvip, choices_healthcheck, initial=poolform_initial)
             form_real = RequestVipFormReal(initial={'maxcom': pool['server_pool_members'][0]['limit']})
             action = reverse('pool.edit.form', args=[id_server_pool])
 
@@ -268,7 +322,7 @@ def edit_form(request, id_server_pool):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_FORM, {'form': form, 'form_real': form_real, 'action': action}, context_instance=RequestContext(request))
+    return render_to_response(POOL_EDIT, {'form': form, 'form_real': form_real, 'action': action, 'reals': server_pool_members, 'id_server_pool': id_server_pool}, context_instance=RequestContext(request))
 
 @csrf_exempt
 @access_external()

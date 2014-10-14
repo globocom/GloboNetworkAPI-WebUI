@@ -355,4 +355,5 @@ pool_messages = {
     'success_remove':       u'Todos os pools selecionados foram excluídos com sucesso.',
     'success_insert':       u'Pool incluído com sucesso.',
     'error_equal_name':     u'Pool com o nome %s já cadastrado.',
+    'success_update':       u'Pool alterado com sucesso',
 }

@@ -37,8 +37,61 @@ $(document).ready(function() {
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
 		location.href = "{% url pool.list %}";
 	});
+
+	$("#btn_enable").button({ icons: {primary: "ui-icon-power"} });
+	$("#btn_disable").button({ icons: {primary: "ui-icon-notice"} });
 	
 	$("textarea").maxlength();
+
+
+	oTable = $("#script_list").dataTable({
+		"sAjaxSource": "{% url pool.spm_datatable id_server_pool%}",
+		"bServerSide": true,
+		"aaSorting": [[ 1, "asc" ]],
+		"bAutoWidth": false,
+		"bJQueryUI": true,
+		"bFilter": false,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [
+		    { "bSortable": false, "aTargets": [ 0, 4] }
+		 ]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$(":checkbox").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	
+	$("#tool").buttonset();
+	
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url pool.form %}";
+	});
+	
+	{% has_perm SCRIPT_MANAGEMENT True None %}
+	{% if has_perm %}
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Deseja realmente excluir o(s) Pool(s) selecionado(s)?')){
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
 	
 })
 </script>
@@ -47,14 +100,66 @@ $(document).ready(function() {
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Pool</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Pool - Status</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Edição de Pool</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3">Reals</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-4">Requisições VIP</a></li>
 	</ul>
 
     <div id="dialog_ip">
         <div id="content-ip"></div>
     </div>
-	<div id="tabs-1">
-		<form id="add_form" method="post" action="{{action}}">
+
+    <div id="tabs-1">
+		<div class="buttons">
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span id="tool">
+			<button id="btn_enable">Habilitar Real</button>
+			<button id="btn_disable">Desabilitar Real</button>
+			{% has_perm SCRIPT_MANAGEMENT True None %}
+			{% if has_perm %}
+			<button id="btn_del">Excluir</button>
+			{% endif %}
+			</span>
+		</div>
+		{% has_perm SCRIPT_MANAGEMENT True None %}
+		{% if has_perm %}
+		<form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden; height:0px;">
+			{% csrf_token %}
+			{% for field in reals %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		
+		<table id="script_list">
+			<col width="3%" />
+			<col width="15%" />
+			<col width="20%" />
+			<col width="20%" />
+			<col width="8%" />
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th>Identificador</th>
+					<th>Priority</th>
+					<th>Port Real</th>
+                    <th>Limit</th>
+                    <th>HealthCheck</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>
+		
+		
+    </div>
+
+    <form id="add_form" method="post" action="{{action}}">
+
+	<div id="tabs-2">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
                 {% for field in form %}
@@ -74,28 +179,9 @@ $(document).ready(function() {
 				</div>
 			{% endfor %}
 			</div>
-
-
-            <table id="table_healthcheck" class="bordasimples" style="margin-top: -10px;width: 511px;">
-						<tr>
-							<td><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
-							<td style="padding-left: 5px;">{{ field }}</td>
-						</tr>
-						<tr>
-							<td></td>
-							<td style="padding-left: 5px;"><p id="error">{% if field.errors %}{% for error in field.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
-						</tr>
-
-						<tr id="add_new_healthcheck">
-							<td></td>
-							<td style="padding-left: 5px;">{{ field }}<input type="button" id="btn_new_excpect" value="Adicionar Novo" /></td>
-						</tr>
-				<tr id="msg_new_healthcheck">
-				</tr>
-			</table>
-
-
-            <table  class="bordasimples" >
+	</div>
+	<div id="tabs-3">
+		<table class="bordasimples" >
 				<tr>
 					<td colspan="3">Reals</td>
 				</tr>
@@ -128,14 +214,14 @@ $(document).ready(function() {
 
 								<tr class='remove_port'>
 									<td>
-										<label>{% if field.equip != "-" %}{{field.equip}}{% endif %}</label>
-										<input type='hidden' name='equip' value='{{field.equip}}'>
-										<input type='hidden' name='id_equip' value='{{field.id_equip}}'>
+										<label>{% if field.equipamento.nome != "-" %}{{field.equipamento.equipamento.nome}}{% endif %}</label>
+										<input type='hidden' name='equip' value='{{field.equipamento.equipamento.nome}}'>
+										<input type='hidden' name='id_equip' value='{{field.equipamento.equipamento.id}}'>
 									</td>
 									<td>
-										<label>{% if field.ip != "-" %}{{field.ip}}{% endif %}</label>
-										<input type='hidden' name='ip' value='{{field.ip}}'>
-										<input type='hidden' name='id_ip' value='{{field.id_ip}}'>
+										<label>{% if field.ip != "-" %}{{field.ip.oct1}}.{{field.ip.oct2}}.{{field.ip.oct3}}.{{field.ip.oct4}}{% endif %}</label>
+										<input type='hidden' name='ip' value='{{field.ip.id}}'>
+										<input type='hidden' name='id_ip' value='{{field.ip.id}}'>
 									</td>
 									<td>
 										<label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
@@ -146,8 +232,8 @@ $(document).ready(function() {
 										<input type='hidden' name='weight' value='{{field.weight}}'>
 									</td>
 									<td>
-										<label class="editable" style="" title="Click para editar.">{% if field.ports_real != "-" %}{{field.ports_real}}{%endif%}</label>
-										<input type="hidden" value="{{field.ports_real}}" name="ports_real_reals">
+										<label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
+										<input type="hidden" value="{{field.port_real}}" name="ports_real_reals">
 									</td>
 									<td>
 										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
@@ -185,18 +271,20 @@ $(document).ready(function() {
 								<td style="padding-left: 5px;"><p id="error">{% if form_real.maxcom.errors %}{% for error in form_real.maxcom.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
 							</tr>
 						</table>
-
 					</td>
 				</tr>
 			</table>
-			
-			<div class="separator spacer"></div>
-			
-			<div class="buttons-l ui-widget-header">
-				<button id="btn_sav" type="submit">Gravar</button>
-				<button id="btn_can" type="button">Cancelar</button>
-			</div>
-		</form>
 	</div>
+
+	<div id="tabs-4">
+
+	</div>
+
+	<div class="buttons-l ui-widget-header">
+		<button id="btn_sav" type="submit">Gravar</button>
+		<button id="btn_can" type="button">Cancelar</button>
+	</div>
+
+	</form>
 </div>
 {% endblock %}
