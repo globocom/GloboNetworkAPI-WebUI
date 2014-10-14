@@ -165,6 +165,7 @@ INSTALLED_APPS = (
     'CadVlan.Ldap',
     'CadVlan.EventLog',
     'CadVlan.BlockRules',
+    'CadVlan.Pool',
 
 )
 
@@ -330,6 +331,9 @@ LOGGING = {
             'handlers': ['handlers-view'],
         },
         'CadVlan.BlockRules': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.Pool': {
             'handlers': ['handlers-view'],
         },
     }

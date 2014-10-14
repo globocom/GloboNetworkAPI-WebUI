@@ -24,18 +24,43 @@
 <script type="text/javascript">
 $(document).ready(function() {
 
-	oTable = $("#script_list").dataTable({
+	oTable = $("#poolDatatable").dataTable({
 		"sAjaxSource": "{% url pool.datatable %}",
 		"bServerSide": true,
 		"aaSorting": [[ 1, "asc" ]],
 		"bAutoWidth": false,
 		"bJQueryUI": true,
-		"bFilter": false,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
 		"aoColumnDefs": [
-		    { "bSortable": false, "aTargets": [ 0, 4] }
-		 ]
+		    { "bSortable": false, "aTargets": [ 0, 4, 6] }
+		 ],
+		"fnServerData": function ( sSource, aoData, fnCallback, oSettings ) {
+			
+			 aoData["pEnvironment"] = $("select#id_environment").val();
+
+			 oSettings.jqXHR = $.ajax({
+			   "dataType": 'json',
+			   "type": "GET",
+			   "url": sSource,
+			   "data": aoData,
+			   "success": fnCallback,
+			   "error": function(error){
+			   		message = jQuery.parseJSON(error.responseText);
+			   		addMessage(message);
+			   }
+			 }).done(function() {
+				 $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+				 $(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false });
+			 });
+	    }
+	
+	});
+	
+	
+	$("#btn_search").button({ icons: {primary: "ui-icon-search"} }).live("click", function(event){
+		event.preventDefault();
+		$("#poolDatatable").dataTable().fnDraw();
 	});
 	
 	$("#checkAll").click( function() {
@@ -56,15 +81,40 @@ $(document).ready(function() {
 	
 	$("#tool").buttonset();
 	
-	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url pool.form %}";
-	});
 	
-	{% has_perm SCRIPT_MANAGEMENT True None %}
+	{% has_perm POOL_MANAGEMENT True None %}
 	{% if has_perm %}
-	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Pool(s) selecionado(s)?')){
+	/** Bind Events With Pool Management Permissions */
+		$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+			location.href = "{% url pool.form %}";
+		});
+
+		$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+			if (confirm('Deseja realmente excluir o(s) Pool(s) selecionado(s)?')){
+				var data = getSelectionData(oTable);
+				$("#id_ids").val(data).parent().submit();
+			}
+		});
+	{% endif %}
+	
+	{% has_perm POOL_REMOVE_SCRIPT True None %}
+	{% if has_perm %}
+	/** Bind Events With Pool Script Remove Permissions */
+		$("#btn_remove").button({ icons: {primary: "ui-icon-circle-close"} }).click(function(){
+			if (confirm('Deseja realmente remover o(s) Pool(s) selecionado(s)?')){ 
+				var data = getSelectionData(oTable);
+				$('#delete_form').attr('action','{% url pool.remove %}');
+				$("#id_ids").val(data).parent().submit();
+			}
+		});
+	{% endif %}
+	
+	{% has_perm POOL_CREATE_SCRIPT True None %}
+	{% if has_perm %}
+	$("#btn_create").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+		if (confirm('Deseja realmente criar o(s) Pool(s) selecionado(s) ?')){
 			var data = getSelectionData(oTable);
+			$('#delete_form').attr('action','{% url pool.create %}');
 			$("#id_ids").val(data).parent().submit();
 		}
 	});
@@ -73,6 +123,8 @@ $(document).ready(function() {
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
 	});
+	
+	$("#accordion").accordion({ autoHeight: false });
 	
 })
 </script>
@@ -84,38 +136,67 @@ $(document).ready(function() {
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Pool</a></li>
 	</ul>
 	<div id="tabs-1">
+		
+		<div id="accordion">
+			<h3><a href="#">Filtro por Ambiente</a></h3>
+			<div>
+			<span class="tool">
+			{{ search_form.environment }}
+			<button id="btn_search" type="submit">Pesquisar</button>
+			</span>
+			</div>
+		</div>
+		
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
-			<button id="btn_new">Novo Registro</button>
-			{% has_perm SCRIPT_MANAGEMENT True None %}
-			{% if has_perm %}
-			<button id="btn_del">Excluir</button>
-			{% endif %}
+				{% has_perm POOL_MANAGEMENT True None %}
+				{% if has_perm %}
+					<button id="btn_new">Novo Registro</button>
+				{% endif %}
+				
+				{% has_perm POOL_CREATE_SCRIPT True None %}
+				{% if has_perm %}
+					<button id="btn_create">Criar Pool</button>
+				{% endif %}
+
+				{% has_perm POOL_REMOVE_SCRIPT True None %}
+				{% if has_perm %}
+					<button id="btn_remove">Remover Pool</button>
+				{% endif %}
+				
+				{% has_perm POOL_MANAGEMENT True None %}
+				{% if has_perm %}
+					<button id="btn_del">Excluir</button>
+				{% endif %}
 			</span>
+
 		</div>
-		{% has_perm SCRIPT_MANAGEMENT True None %}
-		{% if has_perm %}
+
 		<form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in form %}
 				{{ field }}
 			{% endfor %}
 		</form>
-		{% endif %}
+
 		
-		<table id="script_list">
+		<table id="poolDatatable">
 			<col width="3%" />
+			<col width="30%" />
+			<col width="10%" />
 			<col width="15%" />
-			<col width="20%" />
-			<col width="20%" />
-			<col width="8%" />
+			<col width="30%" />
+			<col width="5%" />
+			<col width="3%" />
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th>Identificador</th>
 					<th>Porta Padrão</th>
 					<th>Heathcheck</th>
+					<th>Ambiente</th>
+					<th>Criado</th>
 					<th></th>
 				</tr>
 			</thead>

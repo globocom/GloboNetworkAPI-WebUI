@@ -32,34 +32,55 @@ from networkapi.healthcheckexpect.models import Healthcheck
 from networkapiclient.exception import NetworkAPIClientError, NomeRoteiroDuplicadoError
 from django.contrib import messages
 from CadVlan.messages import error_messages, pool_messages
-from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT
+from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT,\
+    POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT
 from CadVlan.forms import DeleteForm
-from CadVlan.Pool.forms import PoolForm
+from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from django.template.defaultfilters import upper
 from CadVlan.Util.utility import DataTablePaginator
 from networkapiclient.Pagination import Pagination
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
     get_param_in_request, IP_VERSION, is_valid_int_param
 from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.shortcuts import render_message_json
 
 logger = logging.getLogger(__name__)
 
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def list_all(request):
 
-    return render_to_response(
-        POOL_LIST,
-        {'form': DeleteForm()},
-        context_instance=RequestContext(request)
-    )
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        environments = client.create_ambiente().list_all()
+
+        delete_form = DeleteForm()
+
+        search_form = SearchPoolForm(environments)
+
+        return render_to_response(
+            POOL_LIST,
+            {
+                'form': delete_form,
+                'search_form': search_form
+            },
+            context_instance=RequestContext(request)
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('home')
 
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def datatable(request):
 
     try:
@@ -67,17 +88,28 @@ def datatable(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        environment_id = int(request.GET.get('pEnvironment'))
+
         columnIndexNameMap = {
             0: '',
             1: 'identifier',
             2: 'default_port',
-            3: 'healthcheck',
-            4: ''
+            3: 'healthcheck__healthcheck_type',
+            4: 'environment',
+            5: 'pool_created',
+            6: ''
         }
 
         dtp = DataTablePaginator(request, columnIndexNameMap)
 
         dtp.build_server_side_list()
+
+        dtp.searchable_columns = [
+            'identifier',
+            'default_port',
+            'pool_created',
+            'healthcheck__healthcheck_type',
+        ]
 
         pagination = Pagination(
             dtp.start_record,
@@ -87,13 +119,18 @@ def datatable(request):
             dtp.custom_search
         )
 
-        pools = client.create_pool().list_all(pagination)
+        pools = client.create_pool().list_all(environment_id, pagination)
 
-        return dtp.build_response(pools["pools"], pools["total"], POOL_DATATABLE, request)
+        return dtp.build_response(
+            pools["pools"],
+            pools["total"],
+            POOL_DATATABLE,
+            request
+        )
 
     except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+        logger.error(e.error)
+        return render_message_json(e.error, messages.ERROR)
 
 
 @log
@@ -141,7 +178,7 @@ def spm_datatable(request, id_server_pool):
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True, "write": True}])
 def add_form(request):
 
     try:
@@ -375,7 +412,9 @@ def modal_ip_list_real(request, client_api):
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
 def delete(request):
-
+    """
+        Delete Pool Into Database
+    """
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -387,6 +426,45 @@ def delete(request):
             ids = split_to_array(form.cleaned_data['ids'])
 
             client.create_pool().delete(ids)
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                pool_messages.get('success_delete')
+            )
+
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one")
+            )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.list')
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_REMOVE_SCRIPT, "read": True}])
+def remove(request):
+    """
+        Remove Pool Running Script and Update to Not Created
+    """
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            client.create_pool().remove(ids)
 
             messages.add_message(
                 request,
@@ -404,5 +482,44 @@ def delete(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    request._messages
+
+    return redirect('pool.list')
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_CREATE_SCRIPT, "read": True}])
+def create(request):
+    """
+        Remove Pool Running Script and Update to Not Created
+    """
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            client.create_pool().create(ids)
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                pool_messages.get('success_create')
+            )
+
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one")
+            )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
     return redirect('pool.list')

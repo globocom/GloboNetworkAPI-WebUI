@@ -16,9 +16,11 @@
 # limitations under the License.
 
 
-from django.http import HttpResponse
-from django.template import loader
 import json
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.template import loader
+from django.contrib.messages.constants import DEFAULT_TAGS
+from django.contrib import messages
 
 JSON = 'json'
 
@@ -31,7 +33,7 @@ def render_to_response_ajax(*args, **kwargs):
 
     ou
 
-    return render_to_response_ajax( json = Json('', redirect, uri)) 
+    return render_to_response_ajax( json = Json('', redirect, uri))
 
     """
 
@@ -51,3 +53,16 @@ def render_json(*args, **kwargs):
     httpresponse_kwargs['content_type'] = "application/json"
 
     return HttpResponse(*args, **kwargs)
+
+
+def render_message_json(message, level=messages.SUCCESS, content_type="application/json"):
+    """
+    Returns a HttpResponse converted Python dict to message json
+    """
+
+    context = dict()
+
+    context["message"] = message
+    context["status"] = DEFAULT_TAGS.get(level)
+
+    return HttpResponseBadRequest(json.dumps(context), content_type=content_type)
