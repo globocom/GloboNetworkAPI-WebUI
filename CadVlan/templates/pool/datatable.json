@@ -8,8 +8,10 @@
 		"<div class='text_center'> <input type='checkbox' name='selection' value='{{ pool.id|escapejs }}' /></div>",
 		"<div class='text_center'> {{ pool.identifier|escapejs }} </div>",
 		"<div class='text_center'> {{ pool.default_port|escapejs }} </div>",
-		"<div class='text_center'> {{ pool.healthcheck|default:""|escapejs }} </div>",
-		"<div class='text_center'><a href='' style='width: 20px; height: 20px;' class='btn_edit_create' title='Editar'></div>"
+		"<div class='text_center'> {{ pool.healthcheck|escapejs }} </div>",
+		"<div class='text_center'> {{ pool.environment|default:""|escapejs }} </div>",
+		"<div class='text_center'>{% if pool.pool_created %} <span class='ui-icon ui-icon-check text_center' title='Sim'></span>{% else %}<span class='ui-icon ui-icon-close text_center' title='Não'></span>  {% endif %}</div>",
+		"<div class='text_center'>{% if pool.pool_created %}<a href='' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'>{% else %}<a href='' style='width: 20px; height: 20px;' class='btn_manager' title='Gerênciar'>{% endif %}</div>"
 		
 	]
     {% if not forloop.last %}

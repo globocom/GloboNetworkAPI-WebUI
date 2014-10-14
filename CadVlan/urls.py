@@ -560,4 +560,6 @@ urlpatterns += patterns(
     url('^pool/ajax_modal_ips[/]?$', 'ajax_modal_ip_real_server', name='pool.modal.ips.ajax',),
     url('^pool/ajax_modal_ips/external[/]?$', 'ajax_modal_ip_real_server_external', name='pool.modal.ips.ajax.external',),
     url('^pool/delete[/]?$', 'delete', name='pool.delete',),
+    url('^pool/remove[/]?$', 'remove', name='pool.remove',),
+    url('^pool/create[/]?$', 'create', name='pool.create',),
 )
