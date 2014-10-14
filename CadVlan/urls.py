@@ -562,4 +562,5 @@ urlpatterns += patterns(
     url('^pool/delete[/]?$', 'delete', name='pool.delete',),
     url('^pool/remove[/]?$', 'remove', name='pool.remove',),
     url('^pool/create[/]?$', 'create', name='pool.create',),
+    url('^pool/edit/(?P<id_server_pool>\d+)[/]?$', 'edit_form', name='pool.edit.form',),
 )
