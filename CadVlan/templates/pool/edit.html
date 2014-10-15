@@ -38,8 +38,22 @@ $(document).ready(function() {
 		location.href = "{% url pool.list %}";
 	});
 
-	$("#btn_enable").button({ icons: {primary: "ui-icon-power"} });
-	$("#btn_disable").button({ icons: {primary: "ui-icon-notice"} });
+	$("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+		if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+			var data = getSelectionData(oTable);
+			$('#delete_form').attr('action','{% url pool.enable id_server_pool %}');
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	
+	
+	$("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+		if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+			var data = getSelectionData(oTable);
+			$('#delete_form').attr('action','{% url pool.disable id_server_pool %}');
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
 	
 	$("textarea").maxlength();
 
@@ -126,9 +140,13 @@ $(document).ready(function() {
 		{% if has_perm %}
 		<form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden; height:0px;">
 			{% csrf_token %}
+
+			{{ selection_form.ids }}
+			
 			{% for field in reals %}
 				{{ field }}
 			{% endfor %}
+			
 		</form>
 		{% endif %}
 		

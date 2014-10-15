@@ -33,7 +33,7 @@ from django.contrib import messages
 from CadVlan.messages import request_vip_messages
 from CadVlan.messages import error_messages, pool_messages
 from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT, \
-    POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT
+    POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT
 from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from networkapiclient.Pagination import Pagination
@@ -42,6 +42,7 @@ from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.shortcuts import render_message_json
 
 logger = logging.getLogger(__name__)
+
 
 def valid_reals(id_equips, ports, priorities, id_ips, default_port):
 
@@ -75,16 +76,17 @@ def valid_reals(id_equips, ports, priorities, id_ips, default_port):
 
         for i in range(0, len(id_ips)):
             for j in range(0, len(id_ips)):
-                if i==j:
+                if i == j:
                     pass
                 elif ports[i] == ports[j] and id_ips[i] == id_ips[j]:
-                    invalid_ips+=1
+                    invalid_ips += 1
 
         if invalid_ips > 0:
             lists.append(pool_messages.get('error_same_port'))
             is_valid = False
 
     return is_valid, lists
+
 
 @log
 @login_required
@@ -291,8 +293,8 @@ def add_form(request):
                 ports_reals = request.POST.getlist('ports_real_reals')
 
 
-                #Rebuilding the reals list so we can display it again to the user
-                #if it raises an error
+                # Rebuilding the reals list so we can display it again to the user
+                # if it raises an error
                 if len(ports_reals) > 0 :
                     for i in range(0, len(ports_reals)):
                         nome_equipamento = client.create_equipamento().listar_por_id(id_equips[i])
@@ -475,7 +477,6 @@ def edit_form(request, id_server_pool):
                 }
             )
 
-
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -485,13 +486,13 @@ def edit_form(request, id_server_pool):
     else:
         url = POOL_FORM_EDIT_NOT_CREATED
 
-
     context_attrs = {
         'form': form,
         'form_real': form_real,
         'action': action,
         'reals': server_pool_members,
-        'id_server_pool': id_server_pool
+        'id_server_pool': id_server_pool,
+        'selection_form': DeleteForm()
     }
 
     return render_to_response(
@@ -668,3 +669,81 @@ def create(request):
         messages.add_message(request, messages.ERROR, e)
 
     return redirect('pool.list')
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_ALTER_SCRIPT, "read": True}])
+def enable(request, id_server_pool):
+    """
+        Enable Pool Member Running Script
+    """
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            client.create_pool().enable(ids)
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                pool_messages.get('success_enable')
+            )
+
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one")
+            )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.edit.form', id_server_pool)
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_ALTER_SCRIPT, "read": True}])
+def disable(request, id_server_pool):
+    """
+        Disable Pool Member Running Script
+    """
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            client.create_pool().disable(ids)
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                pool_messages.get('success_disable')
+            )
+
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                error_messages.get("select_one")
+            )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.edit.form', id_server_pool)
