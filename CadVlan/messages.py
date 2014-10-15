@@ -358,4 +358,6 @@ pool_messages = {
     'success_insert':       u'Pool incluído com sucesso.',
     'error_equal_name':     u'Pool com o nome %s já cadastrado.',
     'success_update':       u'Pool alterado com sucesso',
+    'error_port_missing':   u'Quantidade de portas e equipamento difere',
+    'error_same_port':      u'Ips com portas iguais',
 }

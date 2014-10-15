@@ -124,12 +124,12 @@ $(document).ready(function() {
 							</thead>
 							<tbody>
 
-							{% for field in reals %}
+							{% for field in pool_members %}
 
 								<tr class='remove_port'>
 									<td>
-										<label>{% if field.equip != "-" %}{{field.equip}}{% endif %}</label>
-										<input type='hidden' name='equip' value='{{field.equip}}'>
+										<label>{% if field.nome_equipamento != "-" %}{{field.nome_equipamento}}{% endif %}</label>
+										<input type='hidden' name='equip' value='{{field.nome_equipamento}}'>
 										<input type='hidden' name='id_equip' value='{{field.id_equip}}'>
 									</td>
 									<td>
@@ -146,8 +146,8 @@ $(document).ready(function() {
 										<input type='hidden' name='weight' value='{{field.weight}}'>
 									</td>
 									<td>
-										<label class="editable" style="" title="Click para editar.">{% if field.ports_real != "-" %}{{field.ports_real}}{%endif%}</label>
-										<input type="hidden" value="{{field.ports_real}}" name="ports_real_reals">
+										<label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
+										<input type="hidden" value="{{field.port_real}}" name="ports_real_reals">
 									</td>
 									<td>
 										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>

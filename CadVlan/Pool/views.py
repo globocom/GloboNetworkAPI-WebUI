@@ -31,7 +31,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from networkapi.healthcheckexpect.models import Healthcheck
 from networkapiclient.exception import NetworkAPIClientError, NomeRoteiroDuplicadoError
 from django.contrib import messages
-from CadVlan.messages import error_messages, pool_messages
+from CadVlan.messages import error_messages, pool_messages, request_vip_messages
 from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT,\
     POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT
 from CadVlan.forms import DeleteForm
@@ -46,6 +46,48 @@ from CadVlan.Util.shortcuts import render_message_json
 
 logger = logging.getLogger(__name__)
 
+def valid_reals(id_equips, ports, priorities, id_ips, default_port):
+
+    lists = list()
+    is_valid = True
+
+    if int(default_port) > 65535:
+        lists.append(request_vip_messages.get("invalid_port"))
+        is_valid = False
+
+    if id_equips is not None and id_ips is not None:
+
+        invalid_ports_real = [
+            i for i in ports if int(i) > 65535 or int(i) < 1]
+        invalid_priority = [
+            i for i in priorities if int(i) > 4294967295 or int(i) < 0]
+
+        if invalid_priority:
+            lists.append(request_vip_messages.get("invalid_priority"))
+            is_valid = False
+
+        if invalid_ports_real:
+            lists.append(request_vip_messages.get("invalid_port"))
+            is_valid = False
+
+        if len(id_equips) != len(id_ips):
+            lists.append(pool_messages.get("error_port_missing"))
+            is_valid = False
+
+        invalid_ips = 0
+
+        for i in range(0, len(id_ips)):
+            for j in range(0, len(id_ips)):
+                if i==j:
+                    pass
+                elif ports[i] == ports[j] and id_ips[i] == id_ips[j]:
+                    invalid_ips+=1
+
+        if invalid_ips > 0:
+            lists.append(pool_messages.get('error_same_port'))
+            is_valid = False
+
+    return is_valid, lists
 
 @log
 @login_required
@@ -214,13 +256,15 @@ def add_form(request):
             if opvip['tipo_opcao'] == 'Balanceamento':
                 choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
 
+        action = reverse('pool.form')
+        pool_members = list()
         # If form was submited
         if request.method == 'POST':
 
             form = PoolForm(env_choices, choices_opvip, choices_healthcheck, request.POST)
-            realform = RequestVipFormReal(request.POST)
+            form_real = RequestVipFormReal(request.POST)
 
-            if form.is_valid() and realform.is_valid():
+            if form.is_valid() and form_real.is_valid():
 
                 id_ips = request.POST.getlist('id_ip')
                 ips = request.POST.getlist('ip')
@@ -236,30 +280,50 @@ def add_form(request):
                 environment = form.cleaned_data['environment']
                 balancing = form.cleaned_data['balancing']
                 healthcheck = form.cleaned_data['healthcheck']
-                maxcom = realform.cleaned_data['maxcom']
+                maxcom = form_real.cleaned_data['maxcom']
 
                 id_equips = request.POST.getlist('id_equip')
                 priorities = request.POST.getlist('priority')
                 ports_reals = request.POST.getlist('ports_real_reals')
 
-                client.create_pool().inserir(identifier, default_port, environment,
+
+                #Rebuilding the reals list so we can display it again to the user
+                #if it raises an error
+                if len(ports_reals) > 0 :
+                    for i in range(0, len(ports_reals)):
+                        nome_equipamento = client.create_equipamento().listar_por_id(id_equips[i])
+                        pool_members.append({'id_equips': id_equips[i],
+                                             'nome_equipamento': nome_equipamento['equipamento']['nome'],
+                                             'priority': priorities[i],
+                                             'port_real': ports_reals[i],
+                                             'id_ip': id_ips[i],
+                                             'ip': ips[i]
+                                             })
+
+                is_valid, error_list = valid_reals(id_equips, ports_reals, priorities, id_ips, default_port)
+
+                if is_valid:
+                    client.create_pool().inserir(identifier, default_port, environment,
                                              balancing, healthcheck, maxcom, ip_list_full,
                                              id_equips, priorities, ports_reals)
-            messages.add_message(
-                    request, messages.SUCCESS, pool_messages.get('success_insert'))
+                    messages.add_message(
+                            request, messages.SUCCESS, pool_messages.get('success_insert'))
 
-            return redirect('pool.list')
+                    return redirect('pool.list')
+                else:
+                    messages.add_message(
+                            request, messages.ERROR, error_list[0])
+
         else:
             # New form
             form = PoolForm(env_choices, choices_opvip, choices_healthcheck)
             form_real = RequestVipFormReal()
-            action = reverse('pool.form')
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_FORM, {'form': form, 'form_real': form_real, 'action': action}, context_instance=RequestContext(request))
+    return render_to_response(POOL_FORM, {'form': form, 'form_real': form_real, 'action': action, 'pool_members': pool_members}, context_instance=RequestContext(request))
 
 
 @log
@@ -269,12 +333,38 @@ def edit_form(request, id_server_pool):
 
     try:
 
+        server_pool = dict()
+        server_pool_members = dict()
+        action = reverse('pool.edit.form', args=[id_server_pool])
         # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
         # Get pool infos
         pool = client.create_pool().get_by_pk(id_server_pool)
+
+        server_pool = pool['server_pool']
+        server_pool_members = pool['server_pool_members']
+
+        for spm in server_pool_members:
+            nome_equipamento = client.create_pool().get_equip_by_ip(spm['ip']['id'])
+            spm.update({'equipamento': nome_equipamento})
+            ip_formatado = ""
+
+            if spm['ip'] is not None:
+                ip_formatado = "{}.{}.{}.{}".format(spm['ip']['oct1'], spm['ip']['oct2'], spm['ip']['oct3'], spm['ip']['oct4'])
+            elif spm['ipv6'] is not None:
+                ip_formatado = "{}:{}:{}:{}:{}:{}:{}:{}".format(spm['ipv6']['bloco1'],
+                                                                spm['ipv6']['bloco2'],
+                                                                spm['ipv6']['bloco3'],
+                                                                spm['ipv6']['bloco4'],
+                                                                spm['ipv6']['bloco5'],
+                                                                spm['ipv6']['bloco6'],
+                                                                spm['ipv6']['bloco7'],
+                                                                spm['ipv6']['bloco8'],
+                                                                )
+            spm.update({'ip_formatado': ip_formatado})
+
 
         env_list = client.create_ambiente().list_all()
         opvip_list = client.create_option_vip().get_all()
@@ -301,9 +391,9 @@ def edit_form(request, id_server_pool):
         if request.method == 'POST':
 
             form = PoolForm(env_choices, choices_opvip, choices_healthcheck, request.POST)
-            realform = RequestVipFormReal(request.POST)
+            form_real = RequestVipFormReal(request.POST)
 
-            if form.is_valid() and realform.is_valid():
+            if form.is_valid() and form_real.is_valid():
 
                 id_ips = request.POST.getlist('id_ip')
                 ips = request.POST.getlist('ip')
@@ -319,31 +409,27 @@ def edit_form(request, id_server_pool):
                 environment = form.cleaned_data['environment']
                 balancing = form.cleaned_data['balancing']
                 healthcheck = form.cleaned_data['healthcheck']
-                maxcom = realform.cleaned_data['maxcom']
+                maxcom = form_real.cleaned_data['maxcom']
 
                 id_equips = request.POST.getlist('id_equip')
                 priorities = request.POST.getlist('priority')
                 ports_reals = request.POST.getlist('ports_real_reals')
 
-                client.create_pool().update(id_server_pool, identifier, default_port, environment,
-                                             balancing, healthcheck, maxcom, ip_list_full,
-                                             id_equips, priorities, ports_reals)
-            messages.add_message(
-                    request, messages.SUCCESS, pool_messages.get('success_update'))
+                is_valid, error_list = valid_reals(id_equips, ports_reals, priorities, id_ips, default_port)
 
-            return redirect('pool.list')
+                if is_valid:
+                    client.create_pool().update(id_server_pool, identifier, default_port, environment,
+                                                 balancing, healthcheck, maxcom, ip_list_full,
+                                                 id_equips, priorities, ports_reals)
+                    messages.add_message(
+                            request, messages.SUCCESS, pool_messages.get('success_update'))
+
+                    return redirect('pool.list')
+                else:
+                    messages.add_message(
+                            request, messages.ERROR, error_list[0])
         else:
             # New form
-            server_pool = dict()
-            server_pool_members = dict()
-            server_pool = pool['server_pool']
-            server_pool_members = pool['server_pool_members']
-
-            for spm in server_pool_members:
-                nome_equipamento = client.create_pool().get_equip_by_ip(spm['ip']['id'])
-                spm.update({'equipamento': nome_equipamento})
-
-
             poolform_initial = {
                 'identifier': server_pool.get('identifier'),
                 'default_port': server_pool.get('default_port'),
@@ -353,7 +439,7 @@ def edit_form(request, id_server_pool):
             }
             form = PoolForm(env_choices, choices_opvip, choices_healthcheck, initial=poolform_initial)
             form_real = RequestVipFormReal(initial={'maxcom': pool['server_pool_members'][0]['limit']})
-            action = reverse('pool.edit.form', args=[id_server_pool])
+
 
     except NetworkAPIClientError, e:
         logger.error(e)

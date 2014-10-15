@@ -219,7 +219,7 @@ $(document).ready(function() {
 										<input type='hidden' name='id_equip' value='{{field.equipamento.equipamento.id}}'>
 									</td>
 									<td>
-										<label>{% if field.ip != "-" %}{{field.ip.oct1}}.{{field.ip.oct2}}.{{field.ip.oct3}}.{{field.ip.oct4}}{% endif %}</label>
+										<label>{% if field.ip_formatado != "-" %}{{field.ip_formatado}}{% endif %}</label>
 										<input type='hidden' name='ip' value='{{field.ip.id}}'>
 										<input type='hidden' name='id_ip' value='{{field.ip.id}}'>
 									</td>
