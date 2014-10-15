@@ -21,26 +21,23 @@ from django.core.urlresolvers import reverse
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.VipRequest.forms import RequestVipFormReal
 from django.views.decorators.csrf import csrf_exempt
-from CadVlan.templates import POOL_LIST, POOL_FORM, AJAX_IPLIST_EQUIPMENT_REAL_SERVER, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_DATATABLE, POOL_EDIT, POOL_SPM_DATATABLE
+from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_EDIT, POOL_SPM_DATATABLE, \
+    POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse
-from django.shortcuts import render_to_response, redirect
 from django.template import loader
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
-from networkapi.healthcheckexpect.models import Healthcheck
-from networkapiclient.exception import NetworkAPIClientError, NomeRoteiroDuplicadoError
+from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
-from CadVlan.messages import error_messages, pool_messages, request_vip_messages
-from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT,\
+from CadVlan.messages import request_vip_messages
+from CadVlan.messages import error_messages, pool_messages
+from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT, \
     POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT
 from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm, SearchPoolForm
-from django.template.defaultfilters import upper
-from CadVlan.Util.utility import DataTablePaginator
 from networkapiclient.Pagination import Pagination
-from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
-    get_param_in_request, IP_VERSION, is_valid_int_param
+from CadVlan.Util.utility import DataTablePaginator, get_param_in_request
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.shortcuts import render_message_json
 
@@ -185,7 +182,6 @@ def spm_datatable(request, id_server_pool):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-
         columnIndexNameMap = {
             0: '',
             1: 'identifier',
@@ -209,9 +205,17 @@ def spm_datatable(request, id_server_pool):
             dtp.custom_search
         )
 
-        pools = client.create_pool().list_all_members_by_pool(id_server_pool, pagination)
+        pools = client.create_pool().list_all_members_by_pool(
+            id_server_pool,
+            pagination
+        )
 
-        return dtp.build_response(pools["server_pool_members"], pools["total"], POOL_SPM_DATATABLE, request)
+        return dtp.build_response(
+            pools["server_pool_members"],
+            pools["total"],
+            POOL_SPM_DATATABLE,
+            request
+        )
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -314,6 +318,20 @@ def add_form(request):
                     messages.add_message(
                             request, messages.ERROR, error_list[0])
 
+
+                client.create_pool().inserir(
+                    identifier, default_port, environment,
+                    balancing, healthcheck, maxcom, ip_list_full,
+                    id_equips, priorities, ports_reals
+                )
+
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    pool_messages.get('success_insert')
+                )
+
+                return redirect('pool.list')
         else:
             # New form
             form = PoolForm(env_choices, choices_opvip, choices_healthcheck)
@@ -429,7 +447,11 @@ def edit_form(request, id_server_pool):
                     messages.add_message(
                             request, messages.ERROR, error_list[0])
         else:
-            # New form
+
+            for spm in server_pool_members:
+                nome_equipamento = client.create_pool().get_equip_by_ip(spm['ip']['id'])
+                spm.update({'equipamento': nome_equipamento})
+
             poolform_initial = {
                 'identifier': server_pool.get('identifier'),
                 'default_port': server_pool.get('default_port'),
@@ -437,15 +459,40 @@ def edit_form(request, id_server_pool):
                 'balancing': '',
                 'healthcheck': server_pool.get('healthcheck')['id'],
             }
-            form = PoolForm(env_choices, choices_opvip, choices_healthcheck, initial=poolform_initial)
-            form_real = RequestVipFormReal(initial={'maxcom': pool['server_pool_members'][0]['limit']})
+
+
+            form = PoolForm(
+                env_choices,
+                choices_opvip,
+                choices_healthcheck,
+                initial=poolform_initial
+            )
+
+            form_real = RequestVipFormReal(
+                initial={
+                    'maxcom': pool['server_pool_members'][0]['limit']
+                }
+            )
 
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_EDIT, {'form': form, 'form_real': form_real, 'action': action, 'reals': server_pool_members, 'id_server_pool': id_server_pool}, context_instance=RequestContext(request))
+    context_attrs = {
+        'form': form,
+        'form_real': form_real,
+        'action': action,
+        'reals': server_pool_members,
+        'id_server_pool': id_server_pool
+    }
+
+    return render_to_response(
+        POOL_EDIT,
+        context_attrs,
+        context_instance=RequestContext(request)
+    )
+
 
 @csrf_exempt
 @access_external()
@@ -461,6 +508,7 @@ def ajax_modal_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
     return modal_ip_list_real(request, client_api)
+
 
 def modal_ip_list_real(request, client_api):
 
@@ -489,9 +537,13 @@ def modal_ip_list_real(request, client_api):
     lists['ips'] = ips
     lists['equip'] = equip
 
-    # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML,
-                        lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML,
+            lists,
+            context_instance=RequestContext(request)
+        ), status=status_code
+    )
 
 
 @log
