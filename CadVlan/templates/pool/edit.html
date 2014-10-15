@@ -37,24 +37,28 @@ $(document).ready(function() {
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
 		location.href = "{% url pool.list %}";
 	});
-
-	$("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
-		if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
-			var data = getSelectionData(oTable);
-			$('#delete_form').attr('action','{% url pool.enable id_server_pool %}');
-			$("#id_ids").val(data).parent().submit();
-		}
-	});
 	
+	{% has_perm POOL_ALTER_SCRIPT True None %}
+	{% if has_perm %}
+		$("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+			if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+				var data = getSelectionData(oTable);
+				$('#delete_form').attr('action','{% url pool.enable id_server_pool %}');
+				$("#id_ids").val(data).parent().submit();
+			}
+		});
+	{% endif %}
 	
-	$("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-		if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
-			var data = getSelectionData(oTable);
-			$('#delete_form').attr('action','{% url pool.disable id_server_pool %}');
-			$("#id_ids").val(data).parent().submit();
-		}
-	});
-	
+	{% has_perm POOL_ALTER_SCRIPT True None %}
+	{% if has_perm %}
+		$("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+			if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+				var data = getSelectionData(oTable);
+				$('#delete_form').attr('action','{% url pool.disable id_server_pool %}');
+				$("#id_ids").val(data).parent().submit();
+			}
+		});
+	{% endif %}
 	$("textarea").maxlength();
 
 
@@ -93,20 +97,6 @@ $(document).ready(function() {
 		location.href = "{% url pool.form %}";
 	});
 	
-	{% has_perm SCRIPT_MANAGEMENT True None %}
-	{% if has_perm %}
-	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Pool(s) selecionado(s)?')){
-			var data = getSelectionData(oTable);
-			$("#id_ids").val(data).parent().submit();
-		}
-	});
-	{% endif %}
-	
-	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		location.reload();
-	});
-	
 })
 </script>
 {% endblock %}
@@ -126,18 +116,15 @@ $(document).ready(function() {
 
     <div id="tabs-1">
 		<div class="buttons">
-			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
-			<button id="btn_enable">Habilitar Real</button>
-			<button id="btn_disable">Desabilitar Real</button>
-			{% has_perm SCRIPT_MANAGEMENT True None %}
+			{% has_perm POOL_ALTER_SCRIPT True None %}
 			{% if has_perm %}
-			<button id="btn_del">Excluir</button>
+				<button id="btn_enable">Habilitar Real</button>
+				<button id="btn_disable">Desabilitar Real</button>
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm SCRIPT_MANAGEMENT True None %}
-		{% if has_perm %}
+
 		<form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden; height:0px;">
 			{% csrf_token %}
 
@@ -148,7 +135,6 @@ $(document).ready(function() {
 			{% endfor %}
 			
 		</form>
-		{% endif %}
 		
 		<table id="script_list">
 			<col width="3%" />
