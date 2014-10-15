@@ -22,7 +22,7 @@ from CadVlan.Util.Decorators import log, login_required, has_perm, access_extern
 from CadVlan.VipRequest.forms import RequestVipFormReal
 from django.views.decorators.csrf import csrf_exempt
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_EDIT, POOL_SPM_DATATABLE, \
-    POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML
+    POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_FORM_EDIT_NOT_CREATED
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponse
 from django.template import loader
@@ -361,6 +361,7 @@ def edit_form(request, id_server_pool):
         # Get pool infos
         pool = client.create_pool().get_by_pk(id_server_pool)
 
+
         server_pool = pool['server_pool']
         server_pool_members = pool['server_pool_members']
 
@@ -455,9 +456,9 @@ def edit_form(request, id_server_pool):
             poolform_initial = {
                 'identifier': server_pool.get('identifier'),
                 'default_port': server_pool.get('default_port'),
-                'environment': server_pool.get('environment')['id'],
-                'balancing': '',
-                'healthcheck': server_pool.get('healthcheck')['id'],
+                'environment': server_pool.get('environment') and server_pool['environment']['id'],
+                'balancing': server_pool.get('balancing'),
+                'healthcheck': server_pool.get('healthcheck') and server_pool['healthcheck']['id'],
             }
 
 
@@ -479,6 +480,12 @@ def edit_form(request, id_server_pool):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
+    if server_pool.get('pool_created'):
+        url = POOL_EDIT
+    else:
+        url = POOL_FORM_EDIT_NOT_CREATED
+
+
     context_attrs = {
         'form': form,
         'form_real': form_real,
@@ -488,7 +495,7 @@ def edit_form(request, id_server_pool):
     }
 
     return render_to_response(
-        POOL_EDIT,
+        url,
         context_attrs,
         context_instance=RequestContext(request)
     )
