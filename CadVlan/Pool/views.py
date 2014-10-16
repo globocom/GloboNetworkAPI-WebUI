@@ -473,7 +473,7 @@ def edit_form(request, id_server_pool):
 
             form_real = RequestVipFormReal(
                 initial={
-                    'maxcom': pool['server_pool_members'][0]['limit']
+                    'maxcom': pool['server_pool_members'][0]['limit'] if pool.get('server_pool_members') else ""
                 }
             )
 
