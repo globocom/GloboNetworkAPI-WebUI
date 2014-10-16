@@ -80,15 +80,18 @@ $(document).ready(function() {
 	$("#page_tab").tabs();
 	
 	$("#tool").buttonset();
-	
-	
-	{% has_perm POOL_MANAGEMENT True None %}
-	{% if has_perm %}
-	/** Bind Events With Pool Management Permissions */
+
+	{% has_perm POOL_MANAGEMENT True None %}	
+	{% with has_perm as has_perm_pool_management_write %}
+
+	{% has_perm POOL_ALTER_SCRIPT True None %}
+	{% with has_perm as has_perm_pool_script_alter_write %}
+
+	{% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
 		$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 			location.href = "{% url pool.form %}";
 		});
-
+		
 		$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
 			if (confirm('Deseja realmente excluir o(s) Pool(s) selecionado(s)?')){
 				var data = getSelectionData(oTable);
@@ -96,6 +99,9 @@ $(document).ready(function() {
 			}
 		});
 	{% endif %}
+
+	{% endwith %}
+	{% endwith %}
 	
 	{% has_perm POOL_REMOVE_SCRIPT True None %}
 	{% if has_perm %}
@@ -150,11 +156,20 @@ $(document).ready(function() {
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">
-				{% has_perm POOL_MANAGEMENT True None %}
-				{% if has_perm %}
+				<!-- check permissions to render <Novo Registro> -->
+				{% has_perm POOL_MANAGEMENT True None %}	
+				{% with has_perm as has_perm_pool_management_write %}
+				{% has_perm POOL_ALTER_SCRIPT True None %}
+				{% with has_perm as has_perm_pool_script_alter_write %}
+				
+				{% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
 					<button id="btn_new">Novo Registro</button>
 				{% endif %}
 				
+				{% endwith %}
+				{% endwith %}
+				<!-- /check permissions to render <Novo Registro> -->
+
 				{% has_perm POOL_CREATE_SCRIPT True None %}
 				{% if has_perm %}
 					<button id="btn_create">Criar Pool</button>
@@ -165,10 +180,19 @@ $(document).ready(function() {
 					<button id="btn_remove">Remover Pool</button>
 				{% endif %}
 				
-				{% has_perm POOL_MANAGEMENT True None %}
-				{% if has_perm %}
+				<!-- check permissions to render button <Excluir> -->
+				{% has_perm POOL_MANAGEMENT True None %}	
+				{% with has_perm as has_perm_pool_management_write %}
+				{% has_perm POOL_ALTER_SCRIPT True None %}
+				{% with has_perm as has_perm_pool_script_alter_write %}
+				
+				{% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
 					<button id="btn_del">Excluir</button>
 				{% endif %}
+				
+				{% endwith %}
+				{% endwith %}
+				<!-- /check permissions to render button <Excluir> -->
 			</span>
 
 		</div>

@@ -226,7 +226,12 @@ def spm_datatable(request, id_server_pool):
 
 @log
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "read": True, "write": True}])
+@log
+@login_required
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True}]
+)
 def add_form(request):
 
     try:
@@ -348,7 +353,10 @@ def add_form(request):
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True}]
+)
 def edit_form(request, id_server_pool):
 
     try:
@@ -362,7 +370,6 @@ def edit_form(request, id_server_pool):
 
         # Get pool infos
         pool = client.create_pool().get_by_pk(id_server_pool)
-
 
         server_pool = pool['server_pool']
         server_pool_members = pool['server_pool_members']
@@ -463,7 +470,6 @@ def edit_form(request, id_server_pool):
                 'healthcheck': server_pool.get('healthcheck') and server_pool['healthcheck']['id'],
             }
 
-
             form = PoolForm(
                 env_choices,
                 choices_opvip,
@@ -556,7 +562,10 @@ def modal_ip_list_real(request, client_api):
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True}]
+)
 def delete(request):
     """
         Delete Pool Into Database
@@ -595,7 +604,7 @@ def delete(request):
 
 @log
 @login_required
-@has_perm([{"permission": POOL_REMOVE_SCRIPT, "read": True}])
+@has_perm([{"permission": POOL_REMOVE_SCRIPT, "write": True}])
 def remove(request):
     """
         Remove Pool Running Script and Update to Not Created
@@ -634,7 +643,7 @@ def remove(request):
 
 @log
 @login_required
-@has_perm([{"permission": POOL_CREATE_SCRIPT, "read": True}])
+@has_perm([{"permission": POOL_CREATE_SCRIPT, "write": True}])
 def create(request):
     """
         Remove Pool Running Script and Update to Not Created
@@ -673,7 +682,7 @@ def create(request):
 
 @log
 @login_required
-@has_perm([{"permission": POOL_ALTER_SCRIPT, "read": True}])
+@has_perm([{"permission": POOL_ALTER_SCRIPT, "write": True}])
 def enable(request, id_server_pool):
     """
         Enable Pool Member Running Script
@@ -712,7 +721,7 @@ def enable(request, id_server_pool):
 
 @log
 @login_required
-@has_perm([{"permission": POOL_ALTER_SCRIPT, "read": True}])
+@has_perm([{"permission": POOL_ALTER_SCRIPT, "write": True}])
 def disable(request, id_server_pool):
     """
         Disable Pool Member Running Script
