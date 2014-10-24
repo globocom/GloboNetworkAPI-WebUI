@@ -11,6 +11,7 @@
 		"<div class='text_center'> {{ server_pool_members.port_real|escapejs }} </div>",
 		"<div class='text_center'> {{ server_pool_members.limit|escapejs }} </div>",
 		"<div class='text_center'> {{ server_pool_members.healthcheck.healthcheck_type|escapejs }} </div>",
+		"<div class='text_center'> {% if server_pool_members.pool_enabled %} <span class='ui-icon ui-icon-check text_center' title='Sim'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='Não'></span> {% endif %} </div>",
 		"<div class='text_center'><a href='' style='width: 20px; height: 20px;' class='btn_edit_create' title='Editar'></div>"
 		
 	]

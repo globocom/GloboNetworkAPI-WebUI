@@ -557,6 +557,7 @@ urlpatterns += patterns(
     url('^pool/list[/]?$', 'list_all', name='pool.list',),
     url('^pool/datatable[/]?$', 'datatable', name='pool.datatable',),
     url('^pool/spm_datatable/(?P<id_server_pool>\d+)[/]?$', 'spm_datatable', name='pool.spm_datatable',),
+    url('^pool/reqvip_datatable/(?P<id_server_pool>\d+)[/]?$', 'reqvip_datatable', name='pool.reqvip_datatable',),
     url('^pool/form[/]?$', 'add_form', name='pool.form',),
     url('^pool/ajax_modal_ips[/]?$', 'ajax_modal_ip_real_server', name='pool.modal.ips.ajax',),
     url('^pool/ajax_modal_ips/external[/]?$', 'ajax_modal_ip_real_server_external', name='pool.modal.ips.ajax.external',),
@@ -566,4 +567,7 @@ urlpatterns += patterns(
     url('^pool/edit/(?P<id_server_pool>\d+)[/]?$', 'edit_form', name='pool.edit.form',),
     url('^pool/enable/(?P<id_server_pool>\d+)[/]?$', 'enable', name='pool.enable',),
     url('^pool/disable/(?P<id_server_pool>\d+)[/]?$', 'disable', name='pool.disable',),
+    url('^pool/disable/(?P<id_server_pool>\d+)[/]?$', 'disable', name='pool.disable',),
+    url('^pool/ajax_get_opcoes_pool_by_ambiente[/]?$', 'ajax_get_opcoes_pool_by_ambiente', name='pool.ajax.get.opcoes.pool.by.ambiente',),
+    url('^pool/add_healthcheck_expect[/]?$', 'add_healthcheck_expect', name='pool.add.healthcheck.expect',),
 )

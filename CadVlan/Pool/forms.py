@@ -22,13 +22,12 @@ from CadVlan.messages import error_messages
 
 class PoolForm(forms.Form):
 
-    def __init__(self, env_choices, choices_opvip, choices_healthcheck, *args, **kwargs):
+    def __init__(self, env_choices, choices_opvip, *args, **kwargs):
         super(PoolForm, self).__init__(*args, **kwargs)
 
 
         self.fields['environment'].choices = env_choices
         self.fields['balancing'].choices = choices_opvip
-        self.fields['healthcheck'].choices = choices_healthcheck
 
     identifier = forms.CharField(label=u'Identifier', min_length=3, max_length=40, required=True,
                                  error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
@@ -38,8 +37,7 @@ class PoolForm(forms.Form):
                                     error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
     balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
                                   error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
-    healthcheck = forms.ChoiceField(label=u'HealthCheck', choices=[], required=True,
-                                    error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+
 
 
 class SearchPoolForm(forms.Form):
@@ -60,3 +58,17 @@ class SearchPoolForm(forms.Form):
         error_messages=error_messages,
         widget=forms.Select(attrs={"style": "width: 300px"})
     )
+
+
+class PoolFormEdit(forms.Form):
+
+    def __init__(self, choices_opvip, *args, **kwargs):
+
+        super(PoolFormEdit, self).__init__(*args, **kwargs)
+
+        self.fields['balancing'].choices = choices_opvip
+
+    default_port = forms.CharField(label=u'Default Port', min_length=2, max_length=5, required=True,
+                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+    balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
+                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
