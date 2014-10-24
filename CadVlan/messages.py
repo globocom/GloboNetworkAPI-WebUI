@@ -299,6 +299,7 @@ equipment_type_messages = {
 
 healthcheck_messages = {
     'success_create':        u'Healtcheck Expect cadastrado com sucesso.',
+    'error_create':        u'Ocorreu um erro ao cadastrar um novo Healthcheck Expect.',
 }
 
 
@@ -362,4 +363,5 @@ pool_messages = {
     'success_update':       u'Pool alterado com sucesso',
     'error_port_missing':   u'Quantidade de portas e equipamento difere',
     'error_same_port':      u'Ips com portas iguais',
+    'error_update':         u'Erro ao alterar pool',
 }
