@@ -123,7 +123,7 @@ $(document).ready(function() {
 		location.href = "{% url pool.form %}";
 	});
 
-	$("#id_identifier").prop('disabled', true);
+	$("#id_identifier").prop('readonly', true);
 	$("#id_environment").prop('disabled', true);
 
 	$('#id_balancing').prepend('<option value="{{balanceamento}}">{{balanceamento}}</option>');
@@ -171,7 +171,7 @@ $(document).ready(function() {
             </table>
         </div>
     </div>
-<div class="separator spacer"></div>
+
 <div id="page_tab">
 	<ul>
         <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Requisições VIP</a></li>
@@ -240,6 +240,7 @@ $(document).ready(function() {
 	<div id="tabs-2">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
+                <input type="hidden" name="environment" value="{{ id_environment }}">
                 {% for field in form %}
 				<div>
 					<div><label for="{{ field.auto_id }}">{{ field.label }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
