@@ -39,34 +39,6 @@
 		
 	});
 	
-	$("#btn_new_real").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
-		
-		if ( $('#id_equip_name').val() != '' ) {
-			$.ajax({
-				data: { environment_vip: $('#id_environment_vip').val(), equip_name: $('#id_equip_name').val(), balancing: $('#id_balancing').val(), equip_real: getInputsData('input[name=equip]', 'equip'), ips_real: getInputsData('input[name=ip]', 'ip'),  token: $("#id_token").val() },
-				url: "{% if external %}{% url vip-request.modal.real.server.ajax.external %}{% else %}{% url vip-request.modal.real.server.ajax %}{% endif %}",
-				dataType: 'json',
-				success: function(data, textStatus, xhr) {
-					if (xhr.status == "278")
-						window.location = xhr.getResponseHeader('Location');
-
-					else if (xhr.status == "203")
-						alert(data);
-
-					else if ( data.msg == "" ) {
-						$("#ip-view").html(data.ips);
-						$("#dialog-ip").dialog("open");
-					} else {
-						$("#error_real_server").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
-						$("#error_real_server").html(data.msg);
-					}
-				},
-				error: function (xhr, error, thrown) {
-					location.reload();
-				}	
-			});
-		}
-	});
 	
 	$("#dialog-ip").dialog({
 		height: 600,
@@ -83,9 +55,126 @@
 	});
 	
 	
+	$("#dialog_pool").dialog({
+		height: 600,
+		width: 1000,
+		modal: true,
+		autoOpen: false,
+		draggable: false,
+		resizable: true,
+		buttons: {
+			"Gravar": function(ev){
+				
+				var $this = $(this);
+				var form =  $("#add_form_vip_pool");
+				var formData = form.serialize();
+
+				$.ajax({ 
+					type: "POST", 
+					url: form.attr('action'), 
+					data: formData, 
+					success: function(data){
+						$this.dialog("close");
+			   			addMessage(data);
+					} 
+				}).done(function(){
+				
+					var environmentVipId = $("input[name=environment]").attr('attr');
+	
+					$.ajax({
+						data: {environment_vip_id : environmentVipId},
+						url: "{% url vip-request.load.options.pool %}",
+						success: function(data) {
+							$("select#id_pools").html(data);
+						},
+						error: function (error) {
+							message = jQuery.parseJSON(error.responseText);
+						   	addMessage(message);
+						}	
+					});
+
+				});
+				
+				
+				
+			},
+			"Cancelar": function(error) {
+				var $this = $(this);
+				$this.dialog("close");
+				message = jQuery.parseJSON(error.responseText);
+			   	addMessage(message);
+			}
+		}
+	});
+	
+		
+	$("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", function(){
+		
+		var poolId = $("#id_pools").val();
+		
+		$.ajax({
+				data: { 
+					pool_id: poolId
+				},
+				url: "{% url vip-request.load.pool %}",
+				success: function(data) {
+
+					$("#content_pool").html(data);
+					$("#id_equip_name").removeAttr('disabled');
+					$("#btn_new_real").removeAttr('disabled');
+					$("#dialog_pool").dialog("open");		
+				},
+				error: function (error) {
+					console.log(errors);
+				}	
+		});
+		
+		
+	});
+	
+	$("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+
+		$.ajax({
+				url: "{% url vip-request.load.new.pool %}",
+				success: function(data) {
+
+					$("#content_pool").html(data);
+					$("#id_equip_name").removeAttr('disabled');
+					$("#btn_new_real").removeAttr('disabled');
+					$("#dialog_pool").dialog("open");		
+				},
+				error: function (error) {
+					console.log(error);
+				}
+		});
+	});
+	
+	$("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
+		
+		var poolId = $("#id_pools").val();
+		
+		$.ajax({
+				data: { 
+					pool_id: poolId
+				},
+				url: "{% url pool.members.items %}",
+				success: function(data) {
+					$(".tablesMembers").append(data);			
+				},
+				error: function (error) {
+					console.log(errors);
+				}	
+		});
+	});
+	
+	$("span[id^=removePool]").live("click", function(){
+	
+		var $this = $(this);
+		$this.parents("table:first").remove();
+	});
+	
 	if ( $("#id_environment_vip").val() == '' ) {
-		$("#id_equip_name").attr('disabled', 'disabled');
-		$("#btn_new_real").attr('disabled', 'disabled');
+		
 	}
 	
 	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
@@ -198,12 +287,6 @@
 		}
 	});
 	
-	$('#table_real tbody tr span').live("click", function(){  
-		if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){ 
-		$(this).parents(".remove_port").remove();
-		return false;
-		}
-	});
 	
 	$("input[name=finality]").change(function(){
 		$.ajax({
@@ -237,8 +320,6 @@
 		$("#table_healthcheck").hide();
 		
 		$("#id_filter_l7").removeAttr('disabled');
-		$("#id_equip_name").attr('disabled', 'disabled');
-		$("#btn_new_real").attr('disabled', 'disabled');
 		$("#table_real tbody tr").remove();
 		
 	});
@@ -274,14 +355,14 @@
 		$("#table_healthcheck").hide();
 		
 		$("#id_filter_l7").removeAttr('disabled');
-		$("#id_equip_name").attr('disabled', 'disabled');
-		$("#btn_new_real").attr('disabled', 'disabled');
 		$("#table_real tbody tr").remove();
 		
 	});
 	
 	$("input[name=environment]").live("change", function(){
 		var id_environment_vip = $('input:radio[name=environment]:checked').attr("attr");
+		var environmentVipId = $(this).attr('attr');
+
 		$.ajax({
 			data: { environment_vip: id_environment_vip, id_vip: '{{id_vip}}', token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.options.ajax.external %}{% else %}{% url vip-request.options.ajax %}{% endif %}",
@@ -304,9 +385,6 @@
 					$("#id_healthcheck_type_content").html(data.healthcheck_list);
 					$("#table_healthcheck").hide();
 					
-					$("#id_equip_name").removeAttr('disabled');
-					$("#btn_new_real").removeAttr('disabled');
-					
 					if ( $("#id_balancing").val() != null && $('#id_balancing').val().toLowerCase() == "weighted".toLowerCase())
 						$('.weighted').show();
 					else{
@@ -317,6 +395,18 @@
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
+			}	
+		});
+		
+		$.ajax({
+			data: {environment_vip_id : environmentVipId},
+			url: "{% url vip-request.load.options.pool %}",
+			success: function(data) {
+				$("select#id_pools").html(data);
+			},
+			error: function (error) {
+				message = jQuery.parseJSON(error.responseText);
+			   	addMessage(message);
 			}	
 		});
 	});
