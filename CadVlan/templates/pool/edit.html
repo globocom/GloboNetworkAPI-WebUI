@@ -128,7 +128,7 @@ $(document).ready(function() {
 
 	$('#id_balancing').prepend('<option value="{{balanceamento}}">{{balanceamento}}</option>');
     $('#id_balancing option:first-child').attr("selected", "selected");
-	
+
 })
 </script>
 {% endblock %}
@@ -199,13 +199,13 @@ $(document).ready(function() {
 			{% csrf_token %}
 
 			{{ selection_form.ids }}
-			
+
 			{% for field in reals %}
 				{{ field }}
 			{% endfor %}
-			
+
 		</form>
-		
+
 		<table id="script_list">
 			<col width="3%" />
 			<col width="15%" />
@@ -228,11 +228,11 @@ $(document).ready(function() {
 				</tr>
 			</thead>
 			<tbody>
-				
+
 			</tbody>
 		</table>
-		
-		
+
+
     </div>
 
     <form id="add_form" method="post" action="{{action}}">
