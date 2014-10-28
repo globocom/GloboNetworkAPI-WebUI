@@ -172,10 +172,15 @@ def add_form(request):
                 finality = form.cleaned_data['finality']
                 client_vip = form.cleaned_data['client']
                 environment_p44 = form.cleaned_data['environment_p44']
+                description = form.cleaned_data['description']
                 option_vip = form.cleaned_data['option_vip']
 
                 environment_vip = client.create_environment_vip().add(
-                    finality, client_vip, environment_p44)
+                    finality,
+                    client_vip,
+                    environment_p44,
+                    description
+                )
 
                 for opt in option_vip:
                     client.create_option_vip().associate(
@@ -231,10 +236,15 @@ def edit_form(request, id_environmentvip):
                 finality = form.cleaned_data['finality']
                 client_vip = form.cleaned_data['client']
                 environment_p44 = form.cleaned_data['environment_p44']
+                description = form.cleaned_data['description']
                 option_vip = form.cleaned_data['option_vip']
 
                 client.create_environment_vip().alter(
-                    id_environmentvip, finality, client_vip, environment_p44)
+                    id_environmentvip,
+                    finality,
+                    client_vip,
+                    environment_p44,
+                    description)
 
                 if options is not None:
                     for opt in options:
@@ -266,6 +276,7 @@ def edit_form(request, id_environmentvip):
                                                                      "finality": environment_vip.get("finalidade_txt"),
                                                                      "client": environment_vip.get("cliente_txt"),
                                                                      "environment_p44": environment_vip.get("ambiente_p44_txt"),
+                                                                     "description": environment_vip.get("description"),
                                                                      "option_vip": opts})
     except NetworkAPIClientError, e:
         logger.error(e)
