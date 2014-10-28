@@ -155,7 +155,11 @@
 		}
 	});
 	
-	$('#table_real tbody tr span').live("click", function(){  
+	
+	$('#table_real tbody tr span').die("click");
+	
+	$('#table_real tbody tr span').live("click", function(e){
+
 		if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){ 
 		$(this).parents(".remove_port").remove();
 		return false;

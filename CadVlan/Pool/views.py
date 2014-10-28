@@ -868,9 +868,6 @@ def add_healthcheck_expect(request):
                 lists['expect_string'] = expect_string
                 lists['mensagem'] = healthcheck_messages.get('success_create')
 
-                messages.add_message(
-                    request, messages.SUCCESS, healthcheck_messages.get('success_create'))
-
     except NetworkAPIClientError, e:
         logger.error(e)
         lists['mensagem'] = healthcheck_messages.get('error_create')

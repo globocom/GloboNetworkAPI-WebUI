@@ -3,6 +3,7 @@
 $(document).ready(function() {
 
     {% include "pool/include_vip_js.js" %}
+
     autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	$('.editable').editableTable();
 
@@ -108,10 +109,8 @@ $(document).ready(function() {
 							</tr>
 						</tbody>
 					</table>
-			</div>
-
-
-            <table  class="bordasimples" >
+				<br>	
+				<table  class="bordasimples" >
 				<tr>
 					<td colspan="3">Reals</td>
 				</tr>
@@ -133,7 +132,6 @@ $(document).ready(function() {
 									<td>Nome do Real</td>
 									<td>IP do Real</td>
 									<td>Prioridade</td>
-									<td class="weighted">Peso do Real</td>
 									<td>Porta Real</td>
 									<td style="width: 20px;"></td>
 								</tr>
@@ -156,10 +154,6 @@ $(document).ready(function() {
 									<td>
 										<label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
 										<input type='hidden' name='priority' value='{{field.priority}}'>
-									</td>
-									<td class='weighted'>
-										<label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>
-										<input type='hidden' name='weight' value='{{field.weight}}'>
 									</td>
 									<td>
 										<label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
@@ -205,6 +199,10 @@ $(document).ready(function() {
 					</td>
 				</tr>
 			</table>
+			</div>
+
+
+   
 		</form>
 	</div>
 </div>

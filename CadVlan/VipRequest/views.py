@@ -2535,6 +2535,8 @@ def load_pool_for_copy(request):
 
         pool = client.create_pool().get_by_pk(pool_id)
 
+        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
+
         server_pool = pool['server_pool']
         server_pool_members = pool['server_pool_members']
 
@@ -2609,7 +2611,8 @@ def load_pool_for_copy(request):
         'reals': server_pool_members,
         'id_server_pool': pool_id,
         'selection_form': DeleteForm(),
-        'environment_id': server_pool['environment']['id']
+        'environment_id': server_pool['environment']['id'],
+        'expect_strings': expect_string_list
     }
 
     return render_to_response(

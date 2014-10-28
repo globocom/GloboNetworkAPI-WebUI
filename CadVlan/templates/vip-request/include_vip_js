@@ -98,9 +98,7 @@
 					});
 
 				});
-				
-				
-				
+
 			},
 			"Cancelar": function(error) {
 				var $this = $(this);
@@ -108,30 +106,34 @@
 			}
 		}
 	});
-	
-		
-	$("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", function(){
-		
-		var poolId = $("#id_pools").val();
-		
-		$.ajax({
-				data: { 
-					pool_id: poolId
-				},
-				url: "{% url vip-request.load.pool %}",
-				success: function(data) {
 
-					$("#content_pool").html(data);
-					$("#id_equip_name").removeAttr('disabled');
-					$("#btn_new_real").removeAttr('disabled');
-					$("#dialog_pool").dialog("open");		
-				},
-				error: function (error) {
-					console.log(errors);
-				}	
-		});
-		
-		
+
+	$("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", function(){
+
+		var poolId = $("#id_pools").val();
+
+		if (poolId !=  0){
+
+			$.ajax({
+					data: { 
+						pool_id: poolId
+					},
+					url: "{% url vip-request.load.pool %}",
+					success: function(data) {
+						
+						$("#content_pool").empty();
+						$("#content_pool").html(data);
+						$("#id_equip_name").removeAttr('disabled');
+						$("#btn_new_real").removeAttr('disabled');
+						$("#dialog_pool").dialog("open");		
+					},
+					error: function (error) {
+						message = jQuery.parseJSON(error.responseText);
+			   			addMessage(message);
+					}	
+			});
+
+		}
 	});
 	
 	$("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(function(){
@@ -148,50 +150,55 @@
 					$("#dialog_pool").dialog("open");		
 				},
 				error: function (error) {
-					console.log(error);
+					message = jQuery.parseJSON(error.responseText);
+			   		addMessage(message);
 				}
 		});
 	});
 	
 	$("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
-		
+
 		var poolId = $("#id_pools").val();
-		
-		$.ajax({
-				data: { 
-					pool_id: poolId
-				},
-				url: "{% url pool.members.items %}",
-				success: function(data) {
-					$(".tablesMembers").append(data);			
-				},
-				error: function (error) {
-					console.log(errors);
-				}	
-		});
+
+		if (poolId !=  0){
+
+			$.ajax({
+					data: { 
+						pool_id: poolId
+					},
+					url: "{% url pool.members.items %}",
+					success: function(data) {
+						$(".tablesMembers").append(data);			
+					},
+					error: function (error) {
+						message = jQuery.parseJSON(error.responseText);
+				   		addMessage(message);
+					}
+			});
+		}
 	});
-	
+
 	$("span[id^=removePool]").live("click", function(){
-	
+
 		var $this = $(this);
 		$this.parents("table:first").remove();
 	});
-	
+
 	if ( $("#id_environment_vip").val() == '' ) {
-		
+
 	}
-	
+
 	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
 		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><label class='editable'></label> <input type='hidden' name='ports_real' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
 		$('.editable').editableTable();
 	});
-	
+
 	var port_vip;
-	
+
 	$(".numbersOnly").live('focus', function(){
 		port_vip = $(this).val();
 	});
-	
+
 	$(".numbersOnly").live('focusout', function(){
 
 		this_element = $(this); 
@@ -202,7 +209,7 @@
 			update_port_vips(this_element);
 		});
 	});
-	
+
 	// Update port vips values in table 'Reals'
 	function update_port_vips(element){
 		if(element.parent().parent().next().attr('name') == 'ports_vip'){
