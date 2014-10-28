@@ -176,7 +176,7 @@ def datatable(request):
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def spm_datatable(request, id_server_pool):
 
     try:
@@ -227,7 +227,7 @@ def spm_datatable(request, id_server_pool):
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def reqvip_datatable(request, id_server_pool):
 
     try:
@@ -471,9 +471,9 @@ def edit_form(request, id_server_pool):
                     ip_list_full.append({'id': id_ips[i], 'ip': ips[i]})
 
                 # Data
-                # identifier = form.cleaned_data['identifier']
-                default_port = formEdit.cleaned_data['default_port']
                 # environment = form.cleaned_data['environment']
+                default_port = formEdit.cleaned_data['default_port']
+
                 balancing = formEdit.cleaned_data['balancing']
                 maxcom = form_real.cleaned_data['maxcom']
 
@@ -500,7 +500,7 @@ def edit_form(request, id_server_pool):
                     messages.add_message(
                             request, messages.SUCCESS, pool_messages.get('success_update'))
 
-                    return redirect('pool.list')
+                    return redirect('pool.edit.form', id_server_pool)
                 else:
                     messages.add_message(
                             request, messages.ERROR, error_list[0])
@@ -548,7 +548,8 @@ def edit_form(request, id_server_pool):
         'expect_strings': expect_string_list,
         'selection_form': DeleteForm(),
         'nome_ambiente': nome_ambiente,
-        'balanceamento': server_pool['lb_method']
+        'balanceamento': server_pool['lb_method'],
+        'id_environment': server_pool['environment']['id']
     }
 
     return render_to_response(
@@ -567,13 +568,16 @@ def ajax_modal_ip_real_server_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True, "write": True}])
 def ajax_modal_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
     return modal_ip_list_real(request, client_api)
 
 
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True, "write": True}])
 def modal_ip_list_real(request, client_api):
 
     lists = dict()
@@ -614,13 +618,15 @@ def modal_ip_list_real(request, client_api):
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def ajax_get_opcoes_pool_by_ambiente(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
     return get_opcoes_pool_by_ambiente(request, client_api)
 
-
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def get_opcoes_pool_by_ambiente(request, client_api):
 
     import json
