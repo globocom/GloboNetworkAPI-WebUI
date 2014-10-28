@@ -341,11 +341,10 @@ class VipPoolForm(forms.Form):
 
 class ServerPoolForm(forms.Form):
 
-    def __init__(self, choices_opvip, choices_healthcheck, *args, **kwargs):
+    def __init__(self, choices_opvip, *args, **kwargs):
         super(ServerPoolForm, self).__init__(*args, **kwargs)
 
         self.fields['balancing'].choices = choices_opvip
-        self.fields['healthcheck'].choices = choices_healthcheck
 
     identifier = forms.CharField(
         label=u'Identifier',
@@ -371,16 +370,6 @@ class ServerPoolForm(forms.Form):
 
     balancing = forms.ChoiceField(
         label=u'Balanceamento',
-        choices=[],
-        required=True,
-        error_messages=error_messages,
-        widget=forms.Select(
-            attrs={'style': "width: 310px"}
-        )
-    )
-
-    healthcheck = forms.ChoiceField(
-        label=u'HealthCheck',
         choices=[],
         required=True,
         error_messages=error_messages,

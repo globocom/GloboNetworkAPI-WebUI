@@ -1,25 +1,29 @@
-	$.ajax({
-		data: { id_environment: $('#id_environment').val(), token: $("#id_token").val() },
-		url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
-		success: function(data, xhr) {
-			$('#id_healthcheck').html('');
+	
+	if ($('#id_environment').val() != 0 ){
 
-			$('#id_healthcheck').append('<option value="{{ healthcheck.healthcheck_type }}">{{ healthcheck.healthcheck_type }}</option>');
-			
-			if ($('#id_healthcheck').val() == 'HTTP' || $('#id_healthcheck').val() == 'HTTPS') {
-				$("#table_healthcheck").show();
-			} else {
-				$("#table_healthcheck").hide();
-			}
-
-			for (var i = 0; i < data.length; i++) {
-				$('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
+		$.ajax({
+			data: { id_environment: $('#id_environment').val(), token: $("#id_token").val() },
+			url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+			success: function(data, xhr) {
+				$('#id_healthcheck').html('');
+	
+				$('#id_healthcheck').append('<option value="{{ healthcheck.healthcheck_type }}">{{ healthcheck.healthcheck_type }}</option>');
+				
+				if ($('#id_healthcheck').val() == 'HTTP' || $('#id_healthcheck').val() == 'HTTPS') {
+					$("#table_healthcheck").show();
+				} else {
+					$("#table_healthcheck").hide();
+				}
+	
+				for (var i = 0; i < data.length; i++) {
+					$('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
+				}	
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
 			}	
-		},
-		error: function (xhr, error, thrown) {
-			location.reload();
-		}	
-	});
+		});
+	}
 
 	$("#page_tab").tabs();
 
@@ -181,22 +185,27 @@
 
 
 	$('#id_environment').live("change", function(){
-
-		$.ajax({
-				data: { id_environment: $('#id_environment').val(), token: $("#id_token").val() },
-				url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
-				success: function(data, xhr) {
-
-					$('#id_healthcheck').html('');
-
-					for (var i = 0; i < data.length; i++) {
-						$('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
+		
+		var environmentId = $('#id_environment').val();
+		
+		if (environmentId != 0){
+			
+			$.ajax({
+					data: { id_environment: environmentId},
+					url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+					success: function(data, xhr) {
+	
+						$('#id_healthcheck').html('');
+	
+						for (var i = 0; i < data.length; i++) {
+							$('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
+						}	
+					},
+					error: function (xhr, error, thrown) {
+						location.reload();
 					}	
-				},
-				error: function (xhr, error, thrown) {
-					location.reload();
-				}	
-			});
+				});
+		}
 
 	});
 			

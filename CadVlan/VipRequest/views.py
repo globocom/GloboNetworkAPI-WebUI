@@ -48,7 +48,8 @@ from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages, pool_messages
 from CadVlan.permissions import VIP_ADMINISTRATION, VIP_CREATE_SCRIPT, \
-    VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST, VIP_ALTER_SCRIPT
+    VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST, VIP_ALTER_SCRIPT, \
+    POOL_MANAGEMENT, POOL_ALTER_SCRIPT
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL, \
     NETWORK_API_USERNAME, NETWORK_API_PASSWORD
 from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
@@ -73,6 +74,7 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     IpEquipmentError, RealServerPriorityError, RealServerWeightError, \
     RealServerPortError, RealParameterValueError, RealServerScriptError, EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError
 from networkapiclient.exception import UserNotAuthenticatedError
+from CadVlan.Pool.forms import PoolForm
 
 
 logger = logging.getLogger(__name__)
@@ -825,7 +827,6 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                     messages.add_message(request, messages.ERROR, e)
 
             if not is_error:
-                # TODO: REMOVE PARAMETERS CLIENT
                 if edit:
                     validate = '0'
                     client_api.create_vip().alter(
@@ -2509,7 +2510,14 @@ def apply_rollback_l7(request):
         messages.add_message(request, messages.ERROR, e)
 
 
-# TODO: ADD PERMISSION
+@log
+@login_required
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True},
+    {"permission": VIPS_REQUEST, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+    {"permission": POOL_MANAGEMENT, "write": True},
+])
 def load_pool_for_copy(request):
 
     try:
@@ -2518,6 +2526,7 @@ def load_pool_for_copy(request):
 
         server_pool = dict()
         server_pool_members = dict()
+        choices_opvip = list()
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -2562,15 +2571,7 @@ def load_pool_for_copy(request):
             spm.update({'ip_formatado': ip_formatado})
 
         opvip_list = client.create_option_vip().get_all()
-        healthcheck_list = client.create_pool().list_healthchecks()
 
-        choices_opvip = []
-        choices_healthcheck = []
-
-        for healthcheck in healthcheck_list['healthchecks']:
-            choices_healthcheck.append((healthcheck['id'], healthcheck['identifier']))
-
-        # get options_vip
         for opvip in opvip_list['option_vip']:
             # filtering to only Balanceamento
             if opvip['tipo_opcao'] == 'Balanceamento':
@@ -2588,7 +2589,6 @@ def load_pool_for_copy(request):
 
         form = ServerPoolForm(
             choices_opvip,
-            choices_healthcheck,
             initial=poolform_initial
         )
 
@@ -2619,6 +2619,15 @@ def load_pool_for_copy(request):
     )
 
 
+@log
+@login_required
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True},
+    {"permission": VIPS_REQUEST, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+])
 def save_pool(request):
 
     try:
@@ -2626,6 +2635,8 @@ def save_pool(request):
         client = auth.get_clientFactory()
 
         pool_members = list()
+
+        error_list = list()
 
         opvip_list = client.create_option_vip().get_all()
         healthcheck_list = client.create_pool().list_healthchecks()
@@ -2644,7 +2655,6 @@ def save_pool(request):
 
             form = ServerPoolForm(
                 choices_opvip,
-                choices_healthcheck,
                 request.POST
             )
 
@@ -2666,7 +2676,6 @@ def save_pool(request):
                 identifier = form.cleaned_data['identifier']
                 default_port = form.cleaned_data['default_port']
                 balancing = form.cleaned_data['balancing']
-                healthcheck = form.cleaned_data['healthcheck']
                 maxcom = form_real.cleaned_data['maxcom']
 
                 id_equips = request.POST.getlist('id_equip')
@@ -2693,10 +2702,20 @@ def save_pool(request):
                     default_port
                 )
 
+                healthcheck_type = request.POST.get('healthcheck')
+                healthcheck_expect = request.POST.get('expect')
+                healthcheck_request = request.POST.get('healthcheck_request')
+
+                if healthcheck_type != 'HTTP' and healthcheck_type != 'HTTPS':
+                    healthcheck_expect = ''
+                    healthcheck_request = ''
+
                 if is_valid:
+                    healthcheck_old = ''
                     client.create_pool().inserir(
                         identifier, default_port, environment,
-                        balancing, healthcheck, maxcom, ip_list_full,
+                        balancing, healthcheck_type, healthcheck_expect,
+                        healthcheck_request, healthcheck_old, maxcom, ip_list_full,
                         id_equips, priorities, ports_reals
                     )
 
@@ -2704,14 +2723,36 @@ def save_pool(request):
                         pool_messages.get('success_insert')
                     )
 
-        return render_message_json('<br>'.join(error_list), messages.ERROR)
+        erros = _format_form_error([form, form_real])
 
-    except NetworkAPIClientError, e:
+        if error_list:
+            erros.extend(error_list)
+
+        return render_message_json('<br>'.join(erros), messages.ERROR)
+
+    except Exception, e:
         logger.error(e)
-        return render_message_json(str(e), messages.ERROR)
+        return render_message_json('Erro ao cadastrar Poll', messages.ERROR)
 
 
-# TODO: ADD PERMISSION
+def _format_form_error(forms):
+
+    errors = list()
+
+    for form in forms:
+        for field, error in form.errors.items():
+            errors.append('<b>%s</b>: %s' % (field, ', '.join(error)))
+
+    return errors
+
+@log
+@login_required
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True},
+    {"permission": VIPS_REQUEST, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+    {"permission": POOL_MANAGEMENT, "write": True},
+])
 def load_new_pool(request):
 
     try:
@@ -2719,12 +2760,24 @@ def load_new_pool(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        opvip_list = client.create_option_vip().get_all()
-        healthcheck_list = client.create_pool().list_healthchecks()
-
         choices_opvip = list()
         choices_healthcheck = list()
         pool_members = list()
+        choices_environment = list()
+
+        env_vip_id = request.GET.get('env_vip_id')
+
+        opvip_list = client.create_option_vip().get_all()
+        healthcheck_list = client.create_pool().list_healthchecks()
+        environments = client.create_api_vip_request().list_environment_by_environmet_vip(env_vip_id)
+
+        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
+
+        choices_environment.append((0, '-'))
+        for env in environments:
+            choices_environment.append(
+                (env['id'], env['name'])
+            )
 
         for healthcheck in healthcheck_list['healthchecks']:
             choices_healthcheck.append(
@@ -2733,11 +2786,9 @@ def load_new_pool(request):
 
         for opvip in opvip_list['option_vip']:
             if opvip['tipo_opcao'] == 'Balanceamento':
-                choices_opvip.append(
-                    (opvip['id'], opvip['nome_opcao_txt'])
-                )
+                choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
 
-        form = ServerPoolForm(choices_opvip, choices_healthcheck)
+        form = PoolForm(choices_environment, choices_opvip)
         form_real = RequestVipFormReal()
 
     except NetworkAPIClientError, e:
@@ -2751,12 +2802,18 @@ def load_new_pool(request):
             'form_real': form_real,
             'action': reverse('save.pool'),
             'pool_members': pool_members,
-            'environment_id': 4  # TODO: REMOVER MOK CRIAR COMBO COM AMBIENTES DO AMBIENTE VIP
+            'expect_strings': expect_string_list
         }
     )
 
 
-# TODO: ADD PERMISSION
+@log
+@login_required
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True},
+    {"permission": VIPS_REQUEST, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def load_options_pool(request):
 
     try:

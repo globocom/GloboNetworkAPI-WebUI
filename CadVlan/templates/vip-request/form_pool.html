@@ -14,14 +14,17 @@ $(document).ready(function() {
 </script>
 
 <div id="page_tab">
+	<div id="messagesModal">
 
+	</div>
     <div id="dialog_ip">
         <div id="content-ip"></div>
     </div>
 	<div id="tabs-1">
 		<form id="add_form_vip_pool" method="post" action="{{action}}">
-		
+			{% if environment_id %}
 			<input type="hidden" name="environment" id="id_environment" value="{{ environment_id }}">
+			{% endif %}
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
                 {% for field in form %}
@@ -40,26 +43,72 @@ $(document).ready(function() {
 
 				</div>
 				{% endfor %}
+				<div>
+					<div><label for="id_healthcheck">HealthCheck<span style="color: red;">*</span></label></div>
+	
+					<select style="width: 310px" name="healthcheck" id="id_healthcheck">
+					</select>
+	
+					<p id="error">
+						
+					</p>
+
+				</div>
+				<br>
+				<table id="table_healthcheck" class="bordasimples" style="margin-top: -10px; width: 511px; display: table;">
+						<tbody>
+							<tr>
+								<td>
+									<label for="id_healthcheck">Healthcheck</label>
+								</td>
+								<td style="padding-left: 5px;">
+									<input id="healthcheck_request" style="width: 300px" type="text" name="healthcheck_request" maxlength="100">
+								</td>
+							</tr>
+		
+							<tr>
+								<td></td>
+								<td style="padding-left: 5px;"><p id="error"></p></td>
+							</tr>
+		
+							<tr>
+								<td>
+									<label for="id_expect">
+										<label for="id_expect">HTTP Expect String</label>
+										<span style="color: red;">*</span>
+									</label>
+								</td>
+		
+								<td style="padding-left: 5px;">
+									<select style="width: 185px" name="expect" id="id_expect">
+				                		{% for exp_string in expect_strings.healthcheck_expect %}
+				                    	<option value="{{exp_string.expect_string}}">{{exp_string.expect_string}}</option>
+				                		{% endfor %}
+									</select>
+								</td>
+							</tr>
+		
+							<tr>
+								<td></td>
+								<td style="padding-left: 5px;"><p id="error"></p></td>
+							</tr>
+		
+		
+							<tr id="add_new_healthcheck">
+								<td></td>
+								<td style="padding-left: 5px;">
+									<input id="expect_string" type="text" name="expect_string" maxlength="100">
+									<input type="button" id="btn_new_expect" value="Adicionar Novo" />
+								</td>
+							</tr>
+		
+							<tr id="msg_new_healthcheck" style="display:none;">
+								<td></td>
+								<td style="color: #0073EA;font-weight: bold;padding-left: 5px;">Healtcheck Expect cadastrado com sucesso.</td>
+							</tr>
+						</tbody>
+					</table>
 			</div>
-
-
-            <table id="table_healthcheck" class="bordasimples" style="margin-top: -10px;width: 511px;">
-						<tr>
-							<td><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
-							<td style="padding-left: 5px;">{{ field }}</td>
-						</tr>
-						<tr>
-							<td></td>
-							<td style="padding-left: 5px;"><p id="error">{% if field.errors %}{% for error in field.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
-						</tr>
-
-						<tr id="add_new_healthcheck">
-							<td></td>
-							<td style="padding-left: 5px;">{{ field }}<input type="button" id="btn_new_excpect" value="Adicionar Novo" /></td>
-						</tr>
-				<tr id="msg_new_healthcheck">
-				</tr>
-			</table>
 
 
             <table  class="bordasimples" >
