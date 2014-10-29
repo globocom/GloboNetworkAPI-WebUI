@@ -75,6 +75,7 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     RealServerPortError, RealParameterValueError, RealServerScriptError, EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError
 from networkapiclient.exception import UserNotAuthenticatedError
 from CadVlan.Pool.forms import PoolForm
+from django.views.decorators.http import require_http_methods
 
 
 logger = logging.getLogger(__name__)
@@ -560,6 +561,18 @@ def valid_ports(lists, ports_vip, ports_real):
         is_valid = False
 
     return lists, is_valid
+
+
+def valid_realthcheck(healthcheck_type):
+
+    lists = list()
+    is_valid = True
+
+    if not healthcheck_type:
+        lists.append(request_vip_messages.get("required_healthcheck"))
+        is_valid = False
+
+    return is_valid, lists
 
 
 def valid_reals(id_equips, ports, priorities, id_ips, default_port):
@@ -2135,6 +2148,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             lists['form_options'] = form_options
             lists['form_ip'] = form_ip
             lists["pools"] = vip.get('pools')
+            lists["env_vip_id"] = environment_vip
 
     except VipNaoExisteError, e:
         logger.error(e)
@@ -2624,6 +2638,7 @@ def load_pool_for_copy(request):
 
 @log
 @login_required
+@require_http_methods(["POST"])
 @has_perm([
     {"permission": VIPS_REQUEST, "read": True},
     {"permission": VIPS_REQUEST, "write": True},
@@ -2638,14 +2653,23 @@ def save_pool(request):
         client = auth.get_clientFactory()
 
         pool_members = list()
+        choices_environment = list()
+        choices_opvip = list()
+        choices_healthcheck = list()
 
         error_list = list()
 
         opvip_list = client.create_option_vip().get_all()
         healthcheck_list = client.create_pool().list_healthchecks()
 
-        choices_opvip = []
-        choices_healthcheck = []
+        env_vip_id = request.POST.get('environment_vip')
+
+        environments = client.create_api_vip_request().list_environment_by_environmet_vip(env_vip_id)
+
+        for env in environments:
+            choices_environment.append(
+                (env['id'], env['name'])
+            )
 
         for healthcheck in healthcheck_list['healthchecks']:
             choices_healthcheck.append((healthcheck['id'], healthcheck['identifier']))
@@ -2654,77 +2678,81 @@ def save_pool(request):
             if opvip['tipo_opcao'] == 'Balanceamento':
                 choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
 
-        if request.method == 'POST':
+        form = PoolForm(
+            choices_environment,
+            choices_opvip,
+            request.POST
+        )
 
-            form = ServerPoolForm(
-                choices_opvip,
-                request.POST
+        form_real = RequestVipFormReal(request.POST)
+
+        if form.is_valid() and form_real.is_valid():
+
+            environment = request.POST.get('environment')
+
+            id_ips = request.POST.getlist('id_ip')
+            ips = request.POST.getlist('ip')
+
+            ip_list_full = list()
+
+            for i in range(len(ips)):
+                ip_list_full.append({'id': id_ips[i], 'ip': ips[i]})
+
+            identifier = form.cleaned_data['identifier']
+            default_port = form.cleaned_data['default_port']
+            balancing = form.cleaned_data['balancing']
+            maxcom = form_real.cleaned_data['maxcom']
+
+            id_equips = request.POST.getlist('id_equip')
+            priorities = request.POST.getlist('priority')
+            ports_reals = request.POST.getlist('ports_real_reals')
+
+            if len(ports_reals) > 0:
+                for i in range(0, len(ports_reals)):
+                    equipment = client.create_equipamento().listar_por_id(id_equips[i])
+                    pool_members.append({
+                        'id_equips': id_equips[i],
+                        'nome_equipamento': equipment['equipamento']['nome'],
+                        'priority': priorities[i],
+                        'port_real': ports_reals[i],
+                        'id_ip': id_ips[i],
+                        'ip': ips[i]
+                    })
+
+            is_valid, error_list = valid_reals(
+                id_equips,
+                ports_reals,
+                priorities,
+                id_ips,
+                default_port
             )
 
-            form_real = RequestVipFormReal(request.POST)
+            healthcheck_type = request.POST.get('healthcheck')
+            healthcheck_expect = request.POST.get('expect')
+            healthcheck_request = request.POST.get('healthcheck_request')
 
-            if form.is_valid() and form_real.is_valid():
+            is_valid_healthcheck, error_healthcheck = valid_realthcheck(
+                healthcheck_type
+            )
 
-                environment = request.POST.get('environment')
+            error_list.extend(error_healthcheck)
 
-                id_ips = request.POST.getlist('id_ip')
-                ips = request.POST.getlist('ip')
+            if healthcheck_type != 'HTTP' and healthcheck_type != 'HTTPS':
+                healthcheck_expect = ''
+                healthcheck_request = ''
 
-                ip_list_full = list()
-
-                for i in range(len(ips)):
-                    ip_list_full.append({'id': id_ips[i], 'ip': ips[i]})
-
-                # Data
-                identifier = form.cleaned_data['identifier']
-                default_port = form.cleaned_data['default_port']
-                balancing = form.cleaned_data['balancing']
-                maxcom = form_real.cleaned_data['maxcom']
-
-                id_equips = request.POST.getlist('id_equip')
-                priorities = request.POST.getlist('priority')
-                ports_reals = request.POST.getlist('ports_real_reals')
-
-                if len(ports_reals) > 0:
-                    for i in range(0, len(ports_reals)):
-                        equipment = client.create_equipamento().listar_por_id(id_equips[i])
-                        pool_members.append({
-                            'id_equips': id_equips[i],
-                            'nome_equipamento': equipment['equipamento']['nome'],
-                            'priority': priorities[i],
-                            'port_real': ports_reals[i],
-                            'id_ip': id_ips[i],
-                            'ip': ips[i]
-                        })
-
-                is_valid, error_list = valid_reals(
-                    id_equips,
-                    ports_reals,
-                    priorities,
-                    id_ips,
-                    default_port
+            if is_valid and is_valid_healthcheck:
+                healthcheck_old = ''
+                client.create_pool().inserir(
+                    identifier, default_port, environment,
+                    balancing, healthcheck_type, healthcheck_expect,
+                    healthcheck_request, healthcheck_old, maxcom, ip_list_full,
+                    id_equips, priorities, ports_reals
                 )
 
-                healthcheck_type = request.POST.get('healthcheck')
-                healthcheck_expect = request.POST.get('expect')
-                healthcheck_request = request.POST.get('healthcheck_request')
-
-                if healthcheck_type != 'HTTP' and healthcheck_type != 'HTTPS':
-                    healthcheck_expect = ''
-                    healthcheck_request = ''
-
-                if is_valid:
-                    healthcheck_old = ''
-                    client.create_pool().inserir(
-                        identifier, default_port, environment,
-                        balancing, healthcheck_type, healthcheck_expect,
-                        healthcheck_request, healthcheck_old, maxcom, ip_list_full,
-                        id_equips, priorities, ports_reals
-                    )
-
-                    return render_message_json(
-                        pool_messages.get('success_insert')
-                    )
+                return render_message_json(
+                    pool_messages.get('success_insert')
+                )
 
         erros = _format_form_error([form, form_real])
 

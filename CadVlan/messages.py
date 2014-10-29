@@ -283,6 +283,7 @@ request_vip_messages = {
     'invalid_priority': u'O valor da Prioridade deve estar entre 0 e 4294967295.',
     'duplicated_value': u'Valores duplicados para Porta Real, Porta Vip e IP do Real na mesma Requisição VIP.',
     'real_remove': u'Real(s) removido(s) com sucesso.',
+    'required_healthcheck': u'Healthcheck é obrigatório.'
 }
 
 access_type_messages = {
