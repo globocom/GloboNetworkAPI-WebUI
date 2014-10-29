@@ -6,9 +6,11 @@
 			url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
 			success: function(data, xhr) {
 				$('#id_healthcheck').html('');
-	
-				$('#id_healthcheck').append('<option value="{{ healthcheck.healthcheck_type }}">{{ healthcheck.healthcheck_type }}</option>');
 				
+				{% if healthcheck.healthcheck_type %}
+				$('#id_healthcheck').append('<option value="{{ healthcheck.healthcheck_type }}">{{ healthcheck.healthcheck_type }}</option>');
+				{% endif %}
+
 				if ($('#id_healthcheck').val() == 'HTTP' || $('#id_healthcheck').val() == 'HTTPS') {
 					$("#table_healthcheck").show();
 				} else {

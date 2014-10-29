@@ -76,6 +76,7 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
 from networkapiclient.exception import UserNotAuthenticatedError
 from CadVlan.Pool.forms import PoolForm
 from django.views.decorators.http import require_http_methods
+from django import forms
 
 
 logger = logging.getLogger(__name__)
@@ -2126,8 +2127,6 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                 }
             )
 
-            client_ovip = client_api.create_option_vip()
-
             form_options = RequestVipFormOptions(
                 request,
                 environment_vip,
@@ -2549,10 +2548,12 @@ def load_pool_for_copy(request):
 
         pool = client.create_pool().get_by_pk(pool_id)
 
-        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
-
         server_pool = pool['server_pool']
         server_pool_members = pool['server_pool_members']
+
+        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
+
+        env = client.create_ambiente().buscar_por_id(server_pool['environment']['id'])
 
         for spm in server_pool_members:
 
@@ -2593,10 +2594,6 @@ def load_pool_for_copy(request):
             if opvip['tipo_opcao'] == 'Balanceamento':
                 choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
 
-        for spm in server_pool_members:
-            nome_equipamento = client.create_pool().get_equip_by_ip(spm['ip']['id'])
-            spm.update({'equipamento': nome_equipamento})
-
         poolform_initial = {
             'default_port': server_pool.get('default_port'),
             'balancing': server_pool.get('balancing'),
@@ -2614,26 +2611,27 @@ def load_pool_for_copy(request):
             }
         )
 
+        context_attrs = {
+            'form': form,
+            'form_real': form_real,
+            'action': action,
+            'reals': server_pool_members,
+            'id_server_pool': pool_id,
+            'selection_form': DeleteForm(),
+            'environment_id': server_pool['environment']['id'],
+            'expect_strings': expect_string_list,
+            'env_name': env['ambiente']['ambiente_rede']
+        }
+
+        return render(
+            request,
+            VIPREQUEST_POOL_FORM,
+            context_attrs,
+        )
+
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    context_attrs = {
-        'form': form,
-        'form_real': form_real,
-        'action': action,
-        'reals': server_pool_members,
-        'id_server_pool': pool_id,
-        'selection_form': DeleteForm(),
-        'environment_id': server_pool['environment']['id'],
-        'expect_strings': expect_string_list
-    }
-
-    return render_to_response(
-        VIPREQUEST_POOL_FORM,
-        context_attrs,
-        context_instance=RequestContext(request)
-    )
+        return render_message_json(str(e), messages.ERROR)
 
 
 @log
@@ -2664,7 +2662,8 @@ def save_pool(request):
 
         env_vip_id = request.POST.get('environment_vip')
 
-        environments = client.create_api_vip_request().list_environment_by_environmet_vip(env_vip_id)
+        environments = client.create_api_vip_request()\
+            .list_environment_by_environmet_vip(env_vip_id)
 
         for env in environments:
             choices_environment.append(
@@ -2672,7 +2671,9 @@ def save_pool(request):
             )
 
         for healthcheck in healthcheck_list['healthchecks']:
-            choices_healthcheck.append((healthcheck['id'], healthcheck['identifier']))
+            choices_healthcheck.append(
+                (healthcheck['id'], healthcheck['identifier'])
+            )
 
         for opvip in opvip_list['option_vip']:
             if opvip['tipo_opcao'] == 'Balanceamento':
@@ -2709,7 +2710,8 @@ def save_pool(request):
 
             if len(ports_reals) > 0:
                 for i in range(0, len(ports_reals)):
-                    equipment = client.create_equipamento().listar_por_id(id_equips[i])
+                    equipment = client.create_equipamento()\
+                        .listar_por_id(id_equips[i])
                     pool_members.append({
                         'id_equips': id_equips[i],
                         'nome_equipamento': equipment['equipamento']['nome'],
@@ -2763,7 +2765,7 @@ def save_pool(request):
 
     except Exception, e:
         logger.error(e)
-        return render_message_json('Erro ao cadastrar Poll', messages.ERROR)
+        return render_message_json(str(e), messages.ERROR)
 
 
 def _format_form_error(forms):
@@ -2775,6 +2777,7 @@ def _format_form_error(forms):
             errors.append('<b>%s</b>: %s' % (field, ', '.join(error)))
 
     return errors
+
 
 @log
 @login_required
@@ -2800,9 +2803,12 @@ def load_new_pool(request):
 
         opvip_list = client.create_option_vip().get_all()
         healthcheck_list = client.create_pool().list_healthchecks()
-        environments = client.create_api_vip_request().list_environment_by_environmet_vip(env_vip_id)
 
-        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
+        environments = client.create_api_vip_request()\
+            .list_environment_by_environmet_vip(env_vip_id)
+
+        expect_string_list = client.create_ambiente()\
+            .listar_healtchcheck_expect_distinct()
 
         choices_environment.append((0, '-'))
         for env in environments:
@@ -2822,20 +2828,20 @@ def load_new_pool(request):
         form = PoolForm(choices_environment, choices_opvip)
         form_real = RequestVipFormReal()
 
+        return render(
+            request,
+            VIPREQUEST_POOL_FORM, {
+                'form': form,
+                'form_real': form_real,
+                'action': reverse('save.pool'),
+                'pool_members': pool_members,
+                'expect_strings': expect_string_list
+            }
+        )
+
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    return render(
-        request,
-        VIPREQUEST_POOL_FORM, {
-            'form': form,
-            'form_real': form_real,
-            'action': reverse('save.pool'),
-            'pool_members': pool_members,
-            'expect_strings': expect_string_list
-        }
-    )
+        return render_message_json(str(e), messages.ERROR)
 
 
 @log
@@ -2868,4 +2874,4 @@ def load_options_pool(request):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+        return render_message_json(str(e), messages.ERROR)

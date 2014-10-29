@@ -34,6 +34,7 @@ list-style-type: none;
 $(document).ready(function() {
 
 	{% include "vip-request/include_vip_js" %}
+	{% include "vip-request/vip_pool.js" %}
 	
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	
