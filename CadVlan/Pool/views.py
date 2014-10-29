@@ -471,9 +471,7 @@ def edit_form(request, id_server_pool):
                     ip_list_full.append({'id': id_ips[i], 'ip': ips[i]})
 
                 # Data
-                # environment = form.cleaned_data['environment']
                 default_port = formEdit.cleaned_data['default_port']
-
                 balancing = formEdit.cleaned_data['balancing']
                 maxcom = form_real.cleaned_data['maxcom']
 
