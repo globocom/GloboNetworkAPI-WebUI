@@ -64,10 +64,13 @@
 		resizable: true,
 		buttons: {
 			"Gravar": function(ev){
-				
+
+				var el = $('input:radio:checked[name=environment][attr],input:hidden[name=environment_vip]');				
+				var envVipId = el.attr('attr') == undefined ? el.val() : el.attr('attr');
+
 				var $this = $(this);
 				var form =  $("#add_form_vip_pool");
-				var formData = form.serialize();
+				var formData = form.serialize() + '&' + $.param({ 'environment_vip': envVipId });
 
 				$.ajax({ 
 					type: "POST", 
@@ -82,11 +85,13 @@
 					   	addMessageModal(message);
 					}
 				}).done(function(){
-				
-					var environmentVipId = $('input:radio[name=environment]:checked').attr("attr");
-	
+					
+					var envVipId = $('input:hidden[name=environment_vip]').val();
+					
+					console.log(envVipId);
+
 					$.ajax({
-						data: {environment_vip_id : environmentVipId},
+						data: {environment_vip_id : envVipId},
 						url: "{% url vip-request.load.options.pool %}",
 						success: function(data) {
 							$("select#id_pools").html(data);
@@ -138,7 +143,7 @@
 	
 	$("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 		
-		var envVipId = $('input:radio[name=environment]:checked').attr("attr");
+		var envVipId = $('input:hidden[name=environment_vip]').val();
 		
 		$.ajax({
 				data: {env_vip_id: envVipId},
@@ -400,29 +405,31 @@
 					else{
 						$('.weighted').hide();
 					}
-
 				}
-				
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
-			}	
-		});
-		
-		$.ajax({
-			data: {environment_vip_id : id_environment_vip},
-			url: "{% url vip-request.load.options.pool %}",
-			success: function(data) {
-				$("select#id_pools").html(data);
-			},
-			error: function (error) {
-				message = jQuery.parseJSON(error.responseText);
-			   	addMessage(message);
-			}	
+			}
+	
 		}).done(function(){
 			
-			$("#divPools").show();
-	
+			var envVipId = $('input:hidden[name=environment_vip]').val();
+
+			$.ajax({
+				data: {environment_vip_id : envVipId},
+				url: "{% url vip-request.load.options.pool %}",
+				success: function(data) {
+					$("select#id_pools").html(data);
+				},
+				error: function (error) {
+					message = jQuery.parseJSON(error.responseText);
+				   	addMessage(message);
+				}	
+			}).done(function(){
+
+				$("#divPools").show();
+
+			});
 		});
 	});
 	
