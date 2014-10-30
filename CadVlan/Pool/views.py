@@ -22,8 +22,8 @@ from CadVlan.Util.Decorators import log, login_required, has_perm, access_extern
 from CadVlan.VipRequest.forms import RequestVipFormReal, RequestVipFormHealthcheck
 from django.views.decorators.csrf import csrf_exempt
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_EDIT, POOL_SPM_DATATABLE, \
-    POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_FORM_EDIT_NOT_CREATED, POOL_REQVIP_DATATABLE
-from django.shortcuts import render_to_response, redirect
+    POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_FORM_EDIT_NOT_CREATED, POOL_REQVIP_DATATABLE, POOL_MEMBER_ITEMS
+from django.shortcuts import render_to_response, redirect, render
 from django.http import HttpResponse
 from django.template import loader
 from django.template.context import RequestContext
@@ -377,7 +377,7 @@ def add_form(request):
             # New form
             form = PoolForm(env_choices, choices_opvip)
             form_real = RequestVipFormReal()
-            #form_healthcheck = RequestVipFormHealthcheck()
+            # form_healthcheck = RequestVipFormHealthcheck()
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -847,6 +847,7 @@ def disable(request, id_server_pool):
 
     return redirect('pool.edit.form', id_server_pool)
 
+
 @log
 @login_required
 @has_perm([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
@@ -874,12 +875,35 @@ def add_healthcheck_expect(request):
                 lists['expect_string'] = expect_string
                 lists['mensagem'] = healthcheck_messages.get('success_create')
 
-                messages.add_message(
-                    request, messages.SUCCESS, healthcheck_messages.get('success_create'))
-
     except NetworkAPIClientError, e:
         logger.error(e)
         lists['mensagem'] = healthcheck_messages.get('error_create')
         messages.add_message(request, messages.ERROR, e)
 
     return HttpResponse(json.dumps(lists), content_type='application/json')
+
+
+@log
+@login_required
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, ])
+def pool_member_items(request):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client_api = auth.get_clientFactory()
+
+        pool_id = request.GET.get('pool_id')
+        pool_data = client_api.create_pool().get_by_pk(pool_id)
+
+        return render(
+            request,
+            POOL_MEMBER_ITEMS,
+            pool_data
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
