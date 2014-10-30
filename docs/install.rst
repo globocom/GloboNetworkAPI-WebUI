@@ -99,6 +99,41 @@ Edit ``$WEBUI_FOLDER/gunicorn.conf.py`` to use your log files location and `user
 	cd $WEBUI_FOLDER/
 	gunicorn cadvlan_wsgi:application
 
+Install CVS
+*****************
+
+You will need the JDK software in order to install CVS
+
+::
+
+	sudo yum install java-x-openjdk.x86_64
+
+Set the JAVA_HOME variable with the path to java folder
+
+::
+
+	JAVA_HOME=/etc/java-x-openjdk.x86_64	
+
+Download CVS software 
+
+::
+
+	sudo yum install cvs
+
+Uncomment and set the variable CVS_JAVA_HOME  in cvs.sh
+
+Run cvs
+
+Put the following command in .bashrc
+
+::
+
+	export CVSROOT=:pserver:<user>@<host>:/<path>
+
+Folder: ``GloboNetworkAPI-WebUI/Cadvlan/ACLS``::
+
+	cvs checkout <repo>/ACLS
+
 Test installation
 *****************
 

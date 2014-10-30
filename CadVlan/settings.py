@@ -120,15 +120,16 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     'django.core.context_processors.request',
+    "django.contrib.messages.context_processors.messages"
 )
 
 MIDDLEWARE_CLASSES = (
     'CadVlan.processExceptionMiddleware.LoggingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 ROOT_URLCONF = 'CadVlan.urls'
@@ -164,6 +165,7 @@ INSTALLED_APPS = (
     'CadVlan.Ldap',
     'CadVlan.EventLog',
     'CadVlan.BlockRules',
+    'CadVlan.Pool',
 
 )
 
@@ -192,8 +194,8 @@ URL_LOGIN = '/login'
 URL_HOME = '/home'
 
 NETWORK_API_URL = 'http://localhost:8000/'
-NETWORK_API_USERNAME = 'Admin'
-NETWORK_API_PASSWORD = 'default'
+NETWORK_API_USERNAME = 'CadVlan'
+NETWORK_API_PASSWORD = '12345678'
 
 # Configurações de Email
 EMAIL_FROM = 'globo@s2it.com.br'
@@ -329,6 +331,9 @@ LOGGING = {
             'handlers': ['handlers-view'],
         },
         'CadVlan.BlockRules': {
+            'handlers': ['handlers-view'],
+        },
+        'CadVlan.Pool': {
             'handlers': ['handlers-view'],
         },
     }

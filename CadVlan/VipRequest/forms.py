@@ -229,9 +229,9 @@ class RequestVipFormReal(forms.Form):
 
     equip_name = forms.CharField(label=u'Buscar novo', min_length=3, required=False, widget=forms.TextInput(
         attrs={'style': "width: 250px;", 'autocomplete': "off"}), error_messages=error_messages)
+
     maxcom = forms.IntegerField(label=u'Número máximo de conexões (maxconn)', required=True,
                                 error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
-
 
 @autostrip
 class RequestVipFormIP(forms.Form):

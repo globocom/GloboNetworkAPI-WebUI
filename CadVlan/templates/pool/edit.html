@@ -1,0 +1,294 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Pool - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+
+    //Same as vip-request/form.html
+    {% include "pool/include_vip_js.js" %}
+    autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
+	$('.editable').editableTable();
+
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url pool.list %}";
+	});
+	
+	{% has_perm POOL_ALTER_SCRIPT True None %}
+	{% if has_perm %}
+		$("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+			if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+				var data = getSelectionData(oTable);
+				$('#delete_form').attr('action','{% url pool.enable id_server_pool %}');
+				$("#id_ids").val(data).parent().submit();
+			}
+		});
+	{% endif %}
+	
+	{% has_perm POOL_ALTER_SCRIPT True None %}
+	{% if has_perm %}
+		$("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+			if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+				var data = getSelectionData(oTable);
+				$('#delete_form').attr('action','{% url pool.disable id_server_pool %}');
+				$("#id_ids").val(data).parent().submit();
+			}
+		});
+	{% endif %}
+	$("textarea").maxlength();
+
+
+	oTable = $("#script_list").dataTable({
+		"sAjaxSource": "{% url pool.spm_datatable id_server_pool%}",
+		"bServerSide": true,
+		"aaSorting": [[ 1, "asc" ]],
+		"bAutoWidth": false,
+		"bJQueryUI": true,
+		"bFilter": false,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [
+		    { "bSortable": false, "aTargets": [ 0, 4] }
+		 ]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$(":checkbox").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	
+	$("#tool").buttonset();
+	
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url pool.form %}";
+	});
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Pool - Status</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Edição de Pool</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3">Reals</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-4">Requisições VIP</a></li>
+	</ul>
+
+    <div id="dialog_ip">
+        <div id="content-ip"></div>
+    </div>
+
+    <div id="tabs-1">
+		<div class="buttons">
+			<span id="tool">
+			{% has_perm POOL_ALTER_SCRIPT True None %}
+			{% if has_perm %}
+				<button id="btn_enable">Habilitar Real</button>
+				<button id="btn_disable">Desabilitar Real</button>
+			{% endif %}
+			</span>
+		</div>
+
+		<form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden; height:0px;">
+			{% csrf_token %}
+
+			{{ selection_form.ids }}
+			
+			{% for field in reals %}
+				{{ field }}
+			{% endfor %}
+			
+		</form>
+		
+		<table id="script_list">
+			<col width="3%" />
+			<col width="15%" />
+			<col width="20%" />
+			<col width="20%" />
+			<col width="8%" />
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th>Identificador</th>
+					<th>Priority</th>
+					<th>Port Real</th>
+                    <th>Limit</th>
+                    <th>HealthCheck</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>
+		
+		
+    </div>
+
+    <form id="add_form" method="post" action="{{action}}">
+
+	<div id="tabs-2">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+                {% for field in form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+
+					{{ field }}
+
+					<p id="error">
+					{% if field.errors %}
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+
+				</div>
+			{% endfor %}
+			</div>
+	</div>
+	<div id="tabs-3">
+		<table class="bordasimples" >
+				<tr>
+					<td colspan="3">Reals</td>
+				</tr>
+				<tr>
+					<td>{{form_real.equip_name.label_tag}}</td>
+					<td style="padding-left: 5px;">{{form_real.equip_name}}</td>
+					<td><input type="button" id="btn_new_real" value="Adicionar Novo Real" /></td>
+				</tr>
+				<tr id="error_real_server">
+				</tr>
+				<tr>
+					<td colspan="3">&nbsp</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<table id="table_real" class="bordasimplesReal">
+							<thead>
+								<tr>
+									<td>Nome do Real</td>
+									<td>IP do Real</td>
+									<td>Prioridade</td>
+									<td class="weighted">Peso do Real</td>
+									<td>Porta Real</td>
+									<td style="width: 20px;"></td>
+								</tr>
+							</thead>
+							<tbody>
+
+							{% for field in reals %}
+
+								<tr class='remove_port'>
+									<td>
+										<label>{% if field.equipamento.nome != "-" %}{{field.equipamento.equipamento.nome}}{% endif %}</label>
+										<input type='hidden' name='equip' value='{{field.equipamento.equipamento.nome}}'>
+										<input type='hidden' name='id_equip' value='{{field.equipamento.equipamento.id}}'>
+									</td>
+									<td>
+										<label>{% if field.ip_formatado != "-" %}{{field.ip_formatado}}{% endif %}</label>
+										<input type='hidden' name='ip' value='{{field.ip.id}}'>
+										<input type='hidden' name='id_ip' value='{{field.ip.id}}'>
+									</td>
+									<td>
+										<label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
+										<input type='hidden' name='priority' value='{{field.priority}}'>
+									</td>
+									<td class='weighted'>
+										<label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>
+										<input type='hidden' name='weight' value='{{field.weight}}'>
+									</td>
+									<td>
+										<label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
+										<input type="hidden" value="{{field.port_real}}" name="ports_real_reals">
+									</td>
+									<td>
+										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
+									</td>
+								</tr>
+
+							{% endfor %}
+
+
+							</tbody>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<p id="error">{{reals_error}}</p>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">&nbsp</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+
+						<table>
+							<tr>
+								<td>
+									<label for="{{ form_real.maxcom.auto_id }}">{{ form_real.maxcom.label_tag }}{% if form_real.maxcom.field.required %}<span style="color: red;padding-right: 5px;">*</span>{% endif %}</label></td>
+								<td>
+									{{ form_real.maxcom }}
+								</td>
+							</tr>
+							<tr>
+							 	<td></td>
+								<td style="padding-left: 5px;"><p id="error">{% if form_real.maxcom.errors %}{% for error in form_real.maxcom.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+	</div>
+
+	<div id="tabs-4">
+
+	</div>
+
+	<div class="buttons-l ui-widget-header">
+		<button id="btn_sav" type="submit">Gravar</button>
+		<button id="btn_can" type="button">Cancelar</button>
+	</div>
+
+	</form>
+</div>
+{% endblock %}

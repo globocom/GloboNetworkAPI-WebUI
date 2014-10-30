@@ -205,3 +205,13 @@ RULES_FORM = 'block-rules/rule_form.html'
 TAB_BLOCK_FORM = 'block-rules/tab-blocks.html'
 TAB_RULES_FORM = 'block-rules/tab-rules-form.html'
 TAB_RULES = 'block-rules/tab-rules.html'
+
+# Pool
+POOL_LIST = 'pool/list.html'
+POOL_FORM = 'pool/form.html'
+POOL_EDIT = 'pool/edit.html'
+AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML = 'ajax/request-ip-list-real-server.html'
+AJAX_IPLIST_EQUIPMENT_REAL_SERVER = 'ajax/request-ip-list-real-server.json'
+POOL_DATATABLE = 'pool/datatable.json'
+POOL_SPM_DATATABLE = 'pool/spm_datatable.json'
+POOL_FORM_EDIT_NOT_CREATED  = 'pool/form_edit_not_created.html'
