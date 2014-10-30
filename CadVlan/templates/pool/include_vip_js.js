@@ -212,8 +212,16 @@
 		if ( $(this).val().toLowerCase() == "weighted".toLowerCase())
 			$('.weighted').show();
 		else{
-			$('input[name=weight]').val('-');
+			$('input[name=weight]').val('0');
 			$("label[for=weighted]").text('Click para editar.');
 			$('.weighted').hide();
 		}
 	});
+
+    function verifyWeight() {
+        if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+		    $('.weighted').show();
+        }else{
+            $('.weighted').hide();
+        }
+    }

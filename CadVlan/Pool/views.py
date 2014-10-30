@@ -190,10 +190,8 @@ def spm_datatable(request, id_server_pool):
             2: 'ip',
             3: 'priority',
             4: 'port_real',
-            5: 'limit',
-            6: 'healthcheck',
-            7: 'pool_enabled',
-            8: ''
+            6: 'pool_enabled',
+            7: ''
         }
 
         dtp = DataTablePaginator(request, columnIndexNameMap)
@@ -330,8 +328,10 @@ def add_form(request):
                 maxcom = form_real.cleaned_data['maxcom']
 
                 id_equips = request.POST.getlist('id_equip')
+                nome_equips = request.POST.getlist('equip')
                 priorities = request.POST.getlist('priority')
                 ports_reals = request.POST.getlist('ports_real_reals')
+                weight = request.POST.getlist('weight')
 
 
                 # Rebuilding the reals list so we can display it again to the user
@@ -343,6 +343,7 @@ def add_form(request):
                                              'nome_equipamento': nome_equipamento['equipamento']['nome'],
                                              'priority': priorities[i],
                                              'port_real': ports_reals[i],
+                                             'weight': weight[i],
                                              'id_ip': id_ips[i],
                                              'ip': ips[i]
                                              })
@@ -361,8 +362,8 @@ def add_form(request):
 
                     client.create_pool().inserir(identifier, default_port, environment,
                                              balancing, healthcheck_type, healthcheck_expect,
-                                             healthcheck_request, '', maxcom, ip_list_full,
-                                             id_equips, priorities, ports_reals)
+                                             healthcheck_request, '', maxcom, ip_list_full, nome_equips,
+                                             id_equips, priorities, weight, ports_reals)
                     messages.add_message(
                             request, messages.SUCCESS, pool_messages.get('success_insert'))
 
@@ -477,7 +478,9 @@ def edit_form(request, id_server_pool):
 
                 id_equips = request.POST.getlist('id_equip')
                 priorities = request.POST.getlist('priority')
+                nome_equips = request.POST.getlist('equip')
                 ports_reals = request.POST.getlist('ports_real_reals')
+                weight = request.POST.getlist('weight')
 
                 is_valid, error_list = valid_reals(id_equips, ports_reals, priorities, id_ips, default_port)
 
@@ -493,8 +496,8 @@ def edit_form(request, id_server_pool):
 
                     client.create_pool().update(id_server_pool, default_port,
                                                  balancing, healthcheck_type, healthcheck_expect,
-                                                 healthcheck_request, server_pool['healthcheck']['id'], maxcom, ip_list_full,
-                                                 id_equips, priorities, ports_reals)
+                                                 healthcheck_request, server_pool['healthcheck']['id'], maxcom, ip_list_full, nome_equips,
+                                                 id_equips, priorities, weight, ports_reals)
                     messages.add_message(
                             request, messages.SUCCESS, pool_messages.get('success_update'))
 

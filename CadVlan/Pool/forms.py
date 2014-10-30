@@ -28,6 +28,7 @@ class PoolForm(forms.Form):
 
         self.fields['environment'].choices = env_choices
         self.fields['balancing'].choices = choices_opvip
+        self.fields['balancing'].choices.insert(0, ('', ''))
 
     identifier = forms.CharField(label=u'Identifier', min_length=3, max_length=40, required=True,
                                  error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
@@ -67,6 +68,7 @@ class PoolFormEdit(forms.Form):
         super(PoolFormEdit, self).__init__(*args, **kwargs)
 
         self.fields['balancing'].choices = choices_opvip
+        self.fields['balancing'].choices.insert(0, ('',''))
 
     default_port = forms.CharField(label=u'Default Port', min_length=2, max_length=5, required=True,
                                    error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
