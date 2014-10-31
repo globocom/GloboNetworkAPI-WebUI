@@ -70,7 +70,6 @@ from django.shortcuts import render_to_response, redirect
 from django.template import loader
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_exempt
-from networkapi.requisicaovips.models import VipPortToPool
 from networkapiclient.exception import UserNotAuthenticatedError
 from hashlib import sha1
 import base64
