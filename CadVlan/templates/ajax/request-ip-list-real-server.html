@@ -93,11 +93,19 @@ $(document).ready(function() {
 	$("#page_tab_model").tabs();
 	$("#page_tab_lists").tabs();
 	
-})
+});
+
 
 
 function setIpReal(real_name, real_id, ip, id_ip) {
 		port_real_padrao = $('#id_default_port').val();
+
+		if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+            display = 'grid';
+        } else {
+            display = 'none';
+        }
+
 		html = "<tr class='remove_port'>" +
 					"<td>" +
 						"<label>" + real_name + "</label>" +
@@ -112,6 +120,10 @@ function setIpReal(real_name, real_id, ip, id_ip) {
 					"<td>" +
 						"<label class='editable'>0</label>" +
 						"<input type='hidden' name='priority' value='0'>" +
+					"</td>" +
+					"<td class='weighted' style='display: "+display+";'>" +
+						"<label class='editable' for='weighted'></label>" +
+						"<input type='hidden' name='weight' value='0'>" +
 					"</td>" +
 					"<td>" +
 						"<label class='editable'>" + port_real_padrao + "</label>" +

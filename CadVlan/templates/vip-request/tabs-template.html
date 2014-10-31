@@ -31,12 +31,11 @@ $(document).ready(function() {
 	{% block tab_select %}
 		$("#page_tab_lists").tabs();
 	{% endblock tab_select %}
-	
+
+	$(".pools_tab").attr("href", "{% url vip-request.tab.pools vip.id %}");
 	$(".realserver_status_tab").attr("href", "{% url vip-request.tab.real.server.status.edit vip.id %}");
-	$(".realserver_tab").attr("href", "{% url vip-request.tab.real.server vip.id %}");
-	$(".healthcheck_tab").attr("href", "{% url vip-request.tab.healthcheck vip.id %}");
-	$(".maxcon_tab").attr("href", "{% url vip-request.tab.maxcon vip.id %}");
 	$(".l7-filter_tab").attr("href", "{% url vip-request.tab.l7filter vip.id %}");
+
 	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 	$("#btn_sav").button("disable");
@@ -52,7 +51,6 @@ $(document).ready(function() {
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
 		location.href = "{% url vip-request.list %}";
 	});
-	
 
 })
 </script>
@@ -107,11 +105,9 @@ $(document).ready(function() {
 		
 			<div id="page_tab_lists">
 				<ul>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-1" class="realserver_status_tab">Reals Server - Status</a></li>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-2" class="realserver_tab">Reals Server</a></li>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3" class="healthcheck_tab">Healthcheck</a></li>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-4" class="maxcon_tab">Maxconn</a></li>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-5" class="l7-filter_tab">Filtro L7</a></li>
+                    <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-1" class="pools_tab">Pools</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-2" class="realserver_status_tab">Reals Server - Status</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3" class="l7-filter_tab">Filtro L7</a></li>
 					
 				</ul>
 				

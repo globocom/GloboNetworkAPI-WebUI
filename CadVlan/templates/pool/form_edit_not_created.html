@@ -42,6 +42,8 @@ $(document).ready(function() {
 
 	$('#id_balancing').prepend('<option value="{{balanceamento}}">{{balanceamento}}</option>');
     $('#id_balancing option:first-child').attr("selected", "selected");
+
+    verifyWeight();
 	
 })
 </script>
@@ -168,6 +170,7 @@ $(document).ready(function() {
 									<td>Nome do Real</td>
 									<td>IP do Real</td>
 									<td>Prioridade</td>
+                                    <td class="weighted">Peso do Real</td>
 									<td>Porta Real</td>
 									<td style="width: 20px;"></td>
 								</tr>
@@ -190,6 +193,10 @@ $(document).ready(function() {
 									<td>
 										<label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
 										<input type='hidden' name='priority' value='{{field.priority}}'>
+									</td>
+                                    <td class='weighted'>
+										<label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>
+										<input type='hidden' name='weight' value='{{field.weight}}'>
 									</td>
 									<td>
 										<label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
