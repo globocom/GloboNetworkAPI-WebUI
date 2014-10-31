@@ -410,8 +410,12 @@ def edit_form(request, id_server_pool):
         server_pool = pool['server_pool']
         server_pool_members = pool['server_pool_members']
 
-        ambiente = client.create_ambiente().buscar_por_id(server_pool['environment']['id'])
-        nome_ambiente = ambiente['ambiente']['nome_divisao'] + " - " + ambiente['ambiente']['nome_ambiente_logico'] + " - " + ambiente['ambiente']['nome_grupo_l3']
+        if server_pool['environment'] is not None:
+            ambiente = client.create_ambiente().buscar_por_id(server_pool['environment']['id'])
+            nome_ambiente = ambiente['ambiente']['nome_divisao'] + " - " + ambiente['ambiente']['nome_ambiente_logico'] + " - " + ambiente['ambiente']['nome_grupo_l3']
+        else:
+            ambiente = None
+            nome_ambiente = '-'
 
 
 
@@ -550,7 +554,7 @@ def edit_form(request, id_server_pool):
         'selection_form': DeleteForm(),
         'nome_ambiente': nome_ambiente,
         'balanceamento': server_pool['lb_method'],
-        'id_environment': server_pool['environment']['id']
+        'id_environment': server_pool.get('environment') and server_pool['environment']['id']
     }
 
     return render_to_response(
