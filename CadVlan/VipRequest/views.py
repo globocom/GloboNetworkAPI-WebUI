@@ -580,41 +580,47 @@ def valid_reals(id_equips, ports, priorities, id_ips, default_port):
     lists = list()
     is_valid = True
 
-    if int(default_port) > 65535:
-        lists.append(request_vip_messages.get("invalid_port"))
-        is_valid = False
-
-    if id_equips is not None and id_ips is not None:
-
-        invalid_ports_real = [
-            i for i in ports if int(i) > 65535 or int(i) < 1]
-        invalid_priority = [
-            i for i in priorities if int(i) > 4294967295 or int(i) < 0]
-
-        if invalid_priority:
-            lists.append(request_vip_messages.get("invalid_priority"))
-            is_valid = False
-
-        if invalid_ports_real:
+    try:
+        if int(default_port) > 65535:
             lists.append(request_vip_messages.get("invalid_port"))
             is_valid = False
 
-        if len(id_equips) != len(id_ips):
-            lists.append(pool_messages.get("error_port_missing"))
-            is_valid = False
+        if id_equips is not None and id_ips is not None:
 
-        invalid_ips = 0
+            invalid_ports_real = [
+                i for i in ports if int(i) > 65535 or int(i) < 1]
+            invalid_priority = [
+                i for i in priorities if int(i) > 4294967295 or int(i) < 0]
 
-        for i in range(0, len(id_ips)):
-            for j in range(0, len(id_ips)):
-                if i == j:
-                    pass
-                elif ports[i] == ports[j] and id_ips[i] == id_ips[j]:
-                    invalid_ips += 1
+            if invalid_priority:
+                lists.append(request_vip_messages.get("invalid_priority"))
+                is_valid = False
 
-        if invalid_ips > 0:
-            lists.append(pool_messages.get('error_same_port'))
-            is_valid = False
+            if invalid_ports_real:
+                lists.append(request_vip_messages.get("invalid_port"))
+                is_valid = False
+
+            if len(id_equips) != len(id_ips):
+                lists.append(pool_messages.get("error_port_missing"))
+                is_valid = False
+
+            invalid_ips = 0
+
+            for i in range(0, len(id_ips)):
+                for j in range(0, len(id_ips)):
+                    if i == j:
+                        pass
+                    elif ports[i] == ports[j] and id_ips[i] == id_ips[j]:
+                        invalid_ips += 1
+
+            if invalid_ips > 0:
+                lists.append(pool_messages.get('error_same_port'))
+                is_valid = False
+
+    except Exception, e:
+        logger.error(e)
+        lists.append(request_vip_messages.get("invalid_port"))
+        is_valid = False
 
     return is_valid, lists
 
