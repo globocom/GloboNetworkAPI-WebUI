@@ -207,11 +207,51 @@ $(document).ready(function() {
 					{% endfor %}
 				{% endif %}
 				</p>
-			</div>	
+			</div>
+			<br>
+			<table  class="bordasimples">
+				<tr>
+					<td colspan="3" style="text-align:left;">Portas</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<table id="table_ports" class="bordasimplesReal" style="margin-top: 10px;">
+							<thead>
+								<tr>
+									<td>Porta Vip</td>
+									<td style="width: 20px;"></td>
+								</tr>
+							</thead>
+							<tbody>
+							{% for field in ports %}
+								<tr class='remove_port'>
+									<td>
+										<label class='editable'>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
+										<input type='hidden' name='ports_vip' value='{{field.ports_vip}}'>
+									</td>
+									<td>
+										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
+									</td>
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3"><p id="error">{{ports_error}}</p></td>
+				</tr>
+				<tr>
+					<td colspan="3">&nbsp</td>
+				</tr>
+				<tr>
+					<td colspan="3" style="text-align:left;"><input type="button" id="btn_new_port" value="Adicionar Nova Porta" /></td>
+				</tr>
+			</table>
 	
 			<br>
 			
-			<div id="divPools" class="bordasimples" style="display: none;">
+			<div id="divPools" class="bordasimples">
 				<div>Pools</div>
 				{{ vip_pool_form.pools }}
 				<button id="btn_add_pool" type="button">Add Pool</button>
@@ -219,7 +259,10 @@ $(document).ready(function() {
 				<button id="btn_new_pool" type="button">Novo Pool</button>
 				<div>
 				</div>
+				{% if pools_error %}
+				<div colspan="3"><p id="error">{{pools_error}}</p></div>
 				<br>
+				{% endif %}
 			</div>
 				
 			
