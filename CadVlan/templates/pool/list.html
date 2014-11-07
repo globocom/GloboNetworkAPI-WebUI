@@ -94,7 +94,7 @@ $(document).ready(function() {
 
 	{% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
 		$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-			location.href = "{% url pool.form %}";
+			location.href = "{% url pool.add.form %}";
 		});
 		
 		$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
