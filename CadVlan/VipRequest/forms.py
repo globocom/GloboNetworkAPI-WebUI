@@ -54,9 +54,9 @@ class RequestVipFormInputs(forms.Form):
 
     business = forms.CharField(label=u'Área de negócio', min_length=3, max_length=100, required=True,
                                error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    service = forms.CharField(label=u'Nome do serviço',  min_length=3, max_length=100, required=True,
+    service = forms.CharField(label=u'Nome do serviço', min_length=3, max_length=100, required=True,
                               error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    name = forms.CharField(label=u'Nome do VIP (Host FQDN)',  min_length=3, max_length=100, required=True,
+    name = forms.CharField(label=u'Nome do VIP (Host FQDN)', min_length=3, max_length=100, required=True,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     filter_l7 = forms.CharField(label=u'Filtro L7', required=False, error_messages=error_messages, widget=forms.Textarea(
         attrs={'style': "width: 300px", 'rows': 10}))
@@ -91,11 +91,11 @@ class RequestVipFormEnvironment(forms.Form):
                     (st['ambiente_p44'], st['ambiente_p44']) for st in environments]
 
     finality = forms.ChoiceField(label=u'Finalidade', required=True,
-                                 error_messages=error_messages,   widget=forms.RadioSelect(renderer=RadioCustomRenderer))
-    client = forms.ChoiceField(label=u'Cliente',  required=True,
-                               error_messages=error_messages,  widget=forms.RadioSelect(renderer=RadioCustomRenderer))
+                                 error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
+    client = forms.ChoiceField(label=u'Cliente', required=True,
+                               error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
     environment = forms.ChoiceField(
-        label=u'Ambiente',  required=True, error_messages=error_messages,  widget=forms.RadioSelect(renderer=RadioCustomRenderer))
+        label=u'Ambiente', required=True, error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
     environment_vip = forms.IntegerField(
         label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
 
@@ -146,29 +146,18 @@ class RequestVipFormOptions(forms.Form):
                     messages.add_message(request, messages.ERROR, request_vip_messages.get(
                         "error_existing_persistence") % persistence)
 
-            balancings = validates_dict(
-                client_ovip.buscar_balanceamento_opcvip(environment_vip), 'balanceamento_opt')
-            if balancings is not None:
-                self.fields['balancing'].choices = [
-                    (st['balanceamento_opt'], st['balanceamento_opt']) for st in balancings]
-            else:
-                if 'initial' in kwargs:
-                    balancing = kwargs.get('initial').get(
-                        'balancing') if "balancing" in kwargs.get('initial') else ''
-                    messages.add_message(request, messages.ERROR, request_vip_messages.get(
-                        "error_existing_balancing") % balancing)
-
             rules = validates_dict(
-                client_ovip.buscar_rules(environment_vip, vip_id), 'name_rule_opt')
+                client_ovip.buscar_rules(environment_vip, vip_id),
+                'name_rule_opt'
+            )
+
             if rules is not None:
                 self.fields['rules'].choices = [(st['id'] if st['id'] != None else '', st[
                                                  'name_rule_opt'] if st['name_rule_opt'] != None else '') for st in rules]
             else:
                 if 'initial' in kwargs:
-                    rules = kwargs.get('initial').get(
-                        'rules') if "rules" in kwargs.get('initial') else ''
-                    messages.add_message(request, messages.ERROR, request_vip_messages.get(
-                        "error_existing_balancing") % balancing)
+                    rules = kwargs.get('initial').get('rules') if "rules" in kwargs.get('initial') else ''
+                    messages.add_message(request, messages.ERROR, "Existing Rule")
 
     timeout = forms.ChoiceField(label="Timeout", required=True, error_messages=error_messages, widget=forms.Select(
         attrs={"style": "width: 300px"}))
@@ -176,9 +165,8 @@ class RequestVipFormOptions(forms.Form):
                                error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     persistence = forms.ChoiceField(
         label="Persistência", required=True, error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
-    balancing = forms.ChoiceField(label=u'Método de balanceamento',  required=True,
-                                  error_messages=error_messages,  widget=forms.Select(attrs={"style": "width: 300px"}))
-    rules = forms.ChoiceField(label=u'Regras',  required=False, error_messages=error_messages,  widget=forms.Select(
+
+    rules = forms.ChoiceField(label=u'Regras', required=False, error_messages=error_messages, widget=forms.Select(
         attrs={"style": "width: 300px"}))
 
 
@@ -193,11 +181,11 @@ class RequestVipFormHealthcheck(forms.Form):
             (healthcheck['name'], healthcheck['name']) for healthcheck in healthcheck_options]
 
     healthcheck_type = forms.ChoiceField(
-        label=u'Healthcheck',  required=True, error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
-    healthcheck = forms.CharField(label=u'Healthcheck',  min_length=3, max_length=100, required=False,
+        label=u'Healthcheck', required=True, error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
+    healthcheck = forms.CharField(label=u'Healthcheck', min_length=3, max_length=100, required=False,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    excpect = forms.ChoiceField(label=u'HTTP Expect String',  required=True,
-                                error_messages=error_messages,  widget=forms.Select(attrs={"style": "width: 185px"}))
+    excpect = forms.ChoiceField(label=u'HTTP Expect String', required=True,
+                                error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 185px"}))
     excpect_new = forms.CharField(
         label=u'', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 185px"}))
 
@@ -241,14 +229,14 @@ class RequestVipFormIP(forms.Form):
     ipv4_check = forms.BooleanField(
         label=u'IPv4', required=False, error_messages=error_messages)
     ipv4_type = forms.ChoiceField(
-        label=u'',  required=False, error_messages=error_messages, choices=CHOICES, widget=forms.RadioSelect())
+        label=u'', required=False, error_messages=error_messages, choices=CHOICES, widget=forms.RadioSelect())
     ipv4_specific = forms.CharField(
         label=u'', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
 
     ipv6_check = forms.BooleanField(
         label=u'IPv6', required=False, error_messages=error_messages)
     ipv6_type = forms.ChoiceField(
-        label=u'',  required=False, error_messages=error_messages, choices=CHOICES,  widget=forms.RadioSelect())
+        label=u'', required=False, error_messages=error_messages, choices=CHOICES, widget=forms.RadioSelect())
     ipv6_specific = forms.CharField(
         label=u'', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
 
@@ -328,5 +316,64 @@ class RuleForm(forms.Form):
         self.fields['rules'].choices = [(st['id'] if st['id'] != None else '', st[
                                          'name_rule_opt'] if st['name_rule_opt'] != None else '') for st in rules]
 
-    rules = forms.ChoiceField(label=u'Regras',  required=False, error_messages=error_messages,  widget=forms.Select(
+    rules = forms.ChoiceField(label=u'Regras', required=False, error_messages=error_messages, widget=forms.Select(
         attrs={"style": "width: 300px"}))
+
+
+class VipPoolForm(forms.Form):
+
+    def __init__(self, pools_choice, *args, **kwargs):
+        super(VipPoolForm, self).__init__(*args, **kwargs)
+        pools_choice.insert(0, (0, "-"))
+        self.fields['pools'].choices = pools_choice
+
+    pools = forms.ChoiceField(
+        label=u'Pools',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 300px",
+            }
+        )
+    )
+
+
+class ServerPoolForm(forms.Form):
+
+    def __init__(self, choices_opvip, *args, **kwargs):
+        super(ServerPoolForm, self).__init__(*args, **kwargs)
+
+        self.fields['balancing'].choices = choices_opvip
+
+    identifier = forms.CharField(
+        label=u'Identifier',
+        min_length=3,
+        max_length=40,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 300px"}
+        )
+    )
+
+    default_port = forms.CharField(
+        label=u'Default Port',
+        min_length=2,
+        max_length=5,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 100px"}
+        )
+    )
+
+    balancing = forms.ChoiceField(
+        label=u'Balanceamento',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={'style': "width: 310px"}
+        )
+    )

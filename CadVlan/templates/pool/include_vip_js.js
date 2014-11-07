@@ -1,43 +1,43 @@
+	
+	if ($('#id_environment').val() != 0 ){
+
+		$.ajax({
+			data: { id_environment: $('#id_environment').val(), token: $("#id_token").val() },
+			url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+			success: function(data, xhr) {
+				$('#id_healthcheck').html('');
+				
+				{% if healthcheck.healthcheck_type %}
+				$('#id_healthcheck').append('<option value="{{ healthcheck.healthcheck_type }}">{{ healthcheck.healthcheck_type }}</option>');
+				{% endif %}
+
+				if ($('#id_healthcheck').val() == 'HTTP' || $('#id_healthcheck').val() == 'HTTPS') {
+					$("#table_healthcheck").show();
+				} else {
+					$("#table_healthcheck").hide();
+				}
+	
+				for (var i = 0; i < data.length; i++) {
+					$('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
+				}	
+			},
+			error: function (xhr, error, thrown) {
+				location.reload();
+			}	
+		});
+	}
+
 	$("#page_tab").tabs();
+
+	$("#table_healthcheck").hide();
 	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
 		location.href = "{% url vip-request.list %}";
 	});
-	
-	$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
-		
-		$("#err_new_healthcheck").html("");
-		
-		$.ajax({
-			data: { excpect_new:  $("#id_excpect_new").val(),  token: $("#id_token").val() },
-			url: "{% if external %}{% url vip-request.add.healthcheck.ajax.external %}{% else %}{% url vip-request.add.healthcheck.ajax %}{% endif %}",
-			dataType: "json",
-			success: function(data, textStatus, xhr) {
-			
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-					
-				else if (xhr.status == "203")
-					alert(data);
-				
-				else {
-				
-					$("#id_excpect").html(data.healthcheck);
-					$("#add_new_healthcheck").html(data.form);
-					$("#msg_new_healthcheck").html(data.msg);
-					$("#msg_new_healthcheck").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
-					$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} });
-					
-				}
-			},
-			error: function (xhr, error, thrown) {
-				location.reload();
-			}	
-		});
-		
-	});
+
+	$("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
 	
 	$("#btn_new_real").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
 		
@@ -69,12 +69,12 @@
 			}
 		}
 	});
-	
-	
+
 	if ( $("#id_environment_vip").val() == '' ) {
 		$("#id_equip_name").attr('disabled', 'disabled');
 		$("#btn_new_real").attr('disabled', 'disabled');
 	}
+	
 	
 	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
 		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><label class='editable'></label> <input type='hidden' name='ports_real' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
@@ -116,36 +116,7 @@
 		}
 	}
 	
-	// Check if port vip is duplicated
-	function check_port_vip(element){
-		if(element.parent().parent().next().attr('name') == 'ports_vip'){
-			is_valid = true;
-			
-			if (port_vip != element.val()){
-				$("input[name=ports_vip]").each(function(){
-					if ($(this).val() == element.val()){
-						is_valid = false;
-					}
-				});
-			}
-			
-			if (element.val() == "" && port_vip != ""){
-				element.val(port_vip);
-				alert('Deve-se preencher todos os campos de portas.');
-				return false;
-			}
-				
-			
-			if (!is_valid){
-				element.val(port_vip);
-				alert('Porta Vip já cadastrada.');
-				return false;
-			}
-			
-			return true;
-		}
-		return true;
-	}	
+	
 	$('.numbersOnly').live("keydown", function(e){
       	  if(e.keyCode == 9 || e.keyCode == 13){
 	
@@ -186,35 +157,72 @@
 		}
 	});
 	
-	$('#table_real tbody tr span').live("click", function(){  
+	
+	$('#table_real tbody tr span').die("click");
+	
+	$('#table_real tbody tr span').live("click", function(e){
+
 		if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){ 
 		$(this).parents(".remove_port").remove();
 		return false;
 		}
 	});
 
+
+	$('#btn_new_expect').click(function(){
+		$.ajax({
+				data: { 'expect_string': $('#expect_string').val(), 'id_environment': $('#id_environment').val(), token: $("#id_token").val() },
+				url: "{% url pool.add.healthcheck.expect %}",
+				success: function(data, xhr) {
+
+					$('#msg_new_healthcheck').fadeIn(1000);
+					$("#id_expect").append('<option value="'+data['expect_string']+'">'+data['expect_string']+'</option>');
+					$("#msg_new_healthcheck").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">'+data['mensagem']+'</td>');
+					$("#msg_new_healthcheck").delay(15000).fadeOut('slow');
+					$("#id_expect option:last").attr('selected', 'selected');
+					$("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
+
+				},
+				error: function (xhr, error, thrown) {
+					location.reload();
+				}	
+			});
+	});
+
+
+	$('#id_environment').live("change", function(){
+		
+		var environmentId = $('#id_environment').val();
+		
+		if (environmentId != 0){
 			
-	$("input[name=healthcheck_type]").live("change", function(){
-		if ($(this).val() == "HTTP") {
+			$.ajax({
+					data: { id_environment: environmentId},
+					url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+					success: function(data, xhr) {
+	
+						$('#id_healthcheck').html('');
+	
+						for (var i = 0; i < data.length; i++) {
+							$('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
+						}	
+					},
+					error: function (xhr, error, thrown) {
+						location.reload();
+					}	
+				});
+		}
+
+	});
+			
+	$("#id_healthcheck").live("change", function(){
+		if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
 			$("#table_healthcheck").show();
 		} else {
 			$("#table_healthcheck").hide();
 		}
 	});
-	
-	if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
-		$('.weighted').show();
-	}else{
-		
-		$('.weighted').hide();
-	}
-		
-	if ( $("input[name=healthcheck_type]:checked'").val() == "HTTP" ) {
-		$("#table_healthcheck").show();
-	} else {
-		$("#table_healthcheck").hide();
-	}
-	
+			
 	$("#id_balancing").live("change", function(){
 		if ( $(this).val().toLowerCase() == "weighted".toLowerCase())
 			$('.weighted').show();

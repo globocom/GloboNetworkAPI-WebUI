@@ -30,15 +30,20 @@ $(document).ready(function() {
 		"aaSorting": [[ 1, "asc" ]],
 		"bAutoWidth": false,
 		"bJQueryUI": true,
+		"bFilter": false,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
 		"aoColumnDefs": [
 		    { "bSortable": false, "aTargets": [ 0, 4, 6] }
 		 ],
 		"fnServerData": function ( sSource, aoData, fnCallback, oSettings ) {
-			
-			 aoData["pEnvironment"] = $("select#id_environment").val();
 
+			var filterPool = $("input[name^=filterPool]").val().trim();
+
+			 aoData["pEnvironment"] = $("select#id_environment").val();
+			 if (filterPool!==""){
+                aoData["sSearch"] = filterPool;
+               }
 			 oSettings.jqXHR = $.ajax({
 			   "dataType": 'json',
 			   "type": "GET",
@@ -134,6 +139,24 @@ $(document).ready(function() {
 	
 })
 </script>
+
+<style>
+input {
+	padding: 4px 0px !important;
+}
+#searchForm th {
+	padding: 2px;
+    text-align: center !important;
+    background: url("/media/css/globo/images/ui-bg_highlight-soft_80_dddddd_1x100.png") repeat-x scroll 50% 50% #DDDDDD;
+}
+#searchForm tbody td {
+    text-align: center !important;
+	background-color: #F6F6F6;
+}
+.ui-accordion .ui-accordion-content {
+	padding: 5px !important;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -146,10 +169,25 @@ $(document).ready(function() {
 		<div id="accordion">
 			<h3><a href="#">Filtro por Ambiente</a></h3>
 			<div>
-			<span class="tool">
-			{{ search_form.environment }}
-			<button id="btn_search" type="submit">Pesquisar</button>
-			</span>
+                <table id="searchForm" style="width: 100%">
+                    <thead>
+                    <tr>
+                        <th>Identificador - Porta Padrão - Healthcheck</th>
+                        <th>Ambiente</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input name="filterPool" type="text" style="width: 300px"></td>
+                            <td>{{ search_form.environment }}</td>
+                            <td><button id="btn_search" type="submit">Pesquisar</button></td>
+                        </tr>
+                    </tbody>
+
+
+                </table>
+
 			</div>
 		</div>
 		

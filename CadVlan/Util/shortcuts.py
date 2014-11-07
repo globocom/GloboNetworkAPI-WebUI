@@ -65,4 +65,7 @@ def render_message_json(message, level=messages.SUCCESS, content_type="applicati
     context["message"] = message
     context["status"] = DEFAULT_TAGS.get(level)
 
-    return HttpResponseBadRequest(json.dumps(context), content_type=content_type)
+    if level > messages.SUCCESS:
+        return HttpResponseBadRequest(json.dumps(context), content_type=content_type)
+
+    return HttpResponse(json.dumps(context), content_type=content_type)
