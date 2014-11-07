@@ -59,11 +59,22 @@ from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, \
     VIPREQUEST_TAB_REAL_SERVER, VIPREQUEST_TAB_REAL_SERVER_STATUS, \
     VIPREQUEST_TAB_HEALTHCHECK, VIPREQUEST_TAB_MAXCON, VIPREQUEST_FORM_EXTERNAL, \
-    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER, \
-    AJAX_VIPREQUEST_RULE, POOL_MEMBER_ITEMS, POOL_FORM_EDIT_NOT_CREATED, \
-    VIPREQUEST_POOL_FORM, VIPREQUEST_POOL_OPTIONS
+    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER,\
+    AJAX_VIPREQUEST_RULE, VIPREQUEST_TAB_POOLS, POOL_DATATABLE, VIPREQUEST_POOL_FORM, VIPREQUEST_POOL_OPTIONS
+from django.contrib import messages
+from django.core.cache import cache
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseServerError, \
+    HttpResponseRedirect
+from django.shortcuts import render_to_response, redirect
+from django.template import loader
+from django.template.context import RequestContext
+from django.views.decorators.csrf import csrf_exempt
+from networkapiclient.exception import UserNotAuthenticatedError
+from hashlib import sha1
 import base64
 import logging
+
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.Pagination import Pagination
 from networkapiclient.exception import NetworkAPIClientError, VipError, \
@@ -584,41 +595,47 @@ def valid_reals(id_equips, ports, priorities, id_ips, default_port):
     lists = list()
     is_valid = True
 
-    if int(default_port) > 65535:
-        lists.append(request_vip_messages.get("invalid_port"))
-        is_valid = False
-
-    if id_equips is not None and id_ips is not None:
-
-        invalid_ports_real = [
-            i for i in ports if int(i) > 65535 or int(i) < 1]
-        invalid_priority = [
-            i for i in priorities if int(i) > 4294967295 or int(i) < 0]
-
-        if invalid_priority:
-            lists.append(request_vip_messages.get("invalid_priority"))
-            is_valid = False
-
-        if invalid_ports_real:
+    try:
+        if int(default_port) > 65535:
             lists.append(request_vip_messages.get("invalid_port"))
             is_valid = False
 
-        if len(id_equips) != len(id_ips):
-            lists.append(pool_messages.get("error_port_missing"))
-            is_valid = False
+        if id_equips is not None and id_ips is not None:
 
-        invalid_ips = 0
+            invalid_ports_real = [
+                i for i in ports if int(i) > 65535 or int(i) < 1]
+            invalid_priority = [
+                i for i in priorities if int(i) > 4294967295 or int(i) < 0]
 
-        for i in range(0, len(id_ips)):
-            for j in range(0, len(id_ips)):
-                if i == j:
-                    pass
-                elif ports[i] == ports[j] and id_ips[i] == id_ips[j]:
-                    invalid_ips += 1
+            if invalid_priority:
+                lists.append(request_vip_messages.get("invalid_priority"))
+                is_valid = False
 
-        if invalid_ips > 0:
-            lists.append(pool_messages.get('error_same_port'))
-            is_valid = False
+            if invalid_ports_real:
+                lists.append(request_vip_messages.get("invalid_port"))
+                is_valid = False
+
+            if len(id_equips) != len(id_ips):
+                lists.append(pool_messages.get("error_port_missing"))
+                is_valid = False
+
+            invalid_ips = 0
+
+            for i in range(0, len(id_ips)):
+                for j in range(0, len(id_ips)):
+                    if i == j:
+                        pass
+                    elif ports[i] == ports[j] and id_ips[i] == id_ips[j]:
+                        invalid_ips += 1
+
+            if invalid_ips > 0:
+                lists.append(pool_messages.get('error_same_port'))
+                is_valid = False
+
+    except Exception, e:
+        logger.error(e)
+        lists.append(request_vip_messages.get("invalid_port"))
+        is_valid = False
 
     return is_valid, lists
 
@@ -1245,6 +1262,96 @@ def tab_real_server_status(request, id_vip):
 
     return render_to_response(VIPREQUEST_TAB_REAL_SERVER_STATUS, lists, context_instance=RequestContext(request))
 
+
+@login_required
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True}, ])
+def tab_pools(request, id_vip):
+
+    try:
+
+        lists = dict()
+        lists['idt'] = id_vip
+        lists['status_form'] = DeleteForm()
+
+        # Get user
+        auth = AuthSession(request.session)
+        client_api = auth.get_clientFactory()
+
+        vip = client_api.create_vip().get_by_id(id_vip).get("vip")
+        vip['equipamento'] = validates_dict(vip, 'equipamento')
+        vip['environments'] = validates_dict(vip, 'environments')
+        vip['balancing'] = str(vip.get("metodo_bal")).upper()
+        lists['vip'] = vip
+
+        finality = vip.get("finalidade")
+        client = vip.get("cliente")
+        environment = vip.get("ambiente")
+
+
+
+    except EnvironmentVipNotFoundError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, request_vip_messages.get(
+            "error_existing_environment_vip") % (finality, client, environment))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(VIPREQUEST_TAB_POOLS, lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True}])
+def pool_datatable(request, id_vip):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        columnIndexNameMap = {
+            0: '',
+            1: 'identifier',
+            2: 'default_port',
+            3: 'healthcheck__healthcheck_type',
+            4: 'environment',
+            5: 'pool_created',
+            6: ''
+        }
+
+        dtp = DataTablePaginator(request, columnIndexNameMap)
+
+        dtp.build_server_side_list()
+
+        dtp.searchable_columns = [
+            'identifier',
+            'default_port',
+            'pool_created',
+            'healthcheck__healthcheck_type',
+        ]
+
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search
+        )
+
+        pools = client.create_pool().list_all_by_reqvip(id_vip, pagination)
+
+        return dtp.build_response(
+            pools["pools"],
+            pools["total"],
+            POOL_DATATABLE,
+            request
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e.error)
+        return render_message_json(e.error, messages.ERROR)
 
 @log
 @login_required

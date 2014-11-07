@@ -201,7 +201,7 @@
 					url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
 					success: function(data, xhr) {
 	
-						$('#id_healthcheck').html('');
+						$('#id_healthcheck').html('<option value="">-</option>');
 	
 						for (var i = 0; i < data.length; i++) {
 							$('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
@@ -227,8 +227,16 @@
 		if ( $(this).val().toLowerCase() == "weighted".toLowerCase())
 			$('.weighted').show();
 		else{
-			$('input[name=weight]').val('-');
+			$('input[name=weight]').val('0');
 			$("label[for=weighted]").text('Click para editar.');
 			$('.weighted').hide();
 		}
 	});
+
+function verifyWeight() {
+    if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+        $('.weighted').show();
+    }else{
+        $('.weighted').hide();
+    }
+}

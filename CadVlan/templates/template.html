@@ -318,7 +318,7 @@
 
                             {% has_perm VLAN_MANAGEMENT None True %}
 							{% if has_perm %}
-							<li><a href="{% url pool.form %} ">Pool</a></li>
+							<li><a href="{% url pool.add.form %} ">Pool</a></li>
 							{% endif %}
 						</ul>
 					</li>
