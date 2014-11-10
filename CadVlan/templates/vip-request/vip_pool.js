@@ -84,20 +84,22 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
 
 	var envVipId = $('input:hidden[name=environment_vip]').val();
 
-	$.ajax({
-			data: {env_vip_id: envVipId},
-			url: "{% url vip-request.load.new.pool %}",
-			success: function(data) {
-				$("#content_pool").html(data);
-				$("#id_equip_name").removeAttr('disabled');
-				$("#btn_new_real").removeAttr('disabled');
-				$("#dialog_pool").dialog("open");		
-			},
-			error: function (error) {
-				message = jQuery.parseJSON(error.responseText);
-		   		addMessage(message);
-			}
-	});
+	if(envVipId && envVipId !=  0 && envVipId != null){
+		$.ajax({
+				data: {env_vip_id: envVipId},
+				url: "{% url vip-request.load.new.pool %}",
+				success: function(data) {
+					$("#content_pool").html(data);
+					$("#id_equip_name").removeAttr('disabled');
+					$("#btn_new_real").removeAttr('disabled');
+					$("#dialog_pool").dialog("open");		
+				},
+				error: function (error) {
+					message = jQuery.parseJSON(error.responseText);
+			   		addMessage(message);
+				}
+		});
+	}
 });
 
 $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
