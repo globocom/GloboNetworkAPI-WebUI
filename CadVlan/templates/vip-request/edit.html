@@ -34,6 +34,7 @@ list-style-type: none;
 $(document).ready(function() {
 
 	{% include "vip-request/include_vip_js" %}
+	{% include "vip-request/vip_pool.js" %}
 	
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	
@@ -214,6 +215,51 @@ $(document).ready(function() {
 				{% endif %}
 				</p>
 			</div>
+			<br>
+			<table  class="bordasimples">
+				<tr>
+					<td colspan="3" style="text-align:left;">Portas</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<table id="table_ports" class="bordasimplesReal" style="margin-top: 10px;">
+							<thead>
+								<tr>
+									<td>Porta Vip</td>
+									<td style="width: 20px;"></td>
+								</tr>
+							</thead>
+							<tbody>
+
+							{% for field in ports %}
+
+								<tr class='remove_port'>
+									<td>
+										<label class='editable'>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
+										<input type='hidden' name='ports_vip' value='{{field.ports_vip}}'>
+									</td>
+									<td>
+										{% if form_inputs.created.value == '0' %}
+											<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
+										{% endif %}
+									</td>
+								</tr>
+							{% endfor %}
+
+							</tbody>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3"><p id="error">{{ports_error}}</p></td>
+				</tr>
+				<tr>
+					<td colspan="3">&nbsp</td>
+				</tr>
+				<tr>
+					<td colspan="3" style="text-align:left;"><input type="button" id="btn_new_port" value="Adicionar Nova Porta" /></td>
+				</tr>
+			</table>
 			
 			<br>
 			

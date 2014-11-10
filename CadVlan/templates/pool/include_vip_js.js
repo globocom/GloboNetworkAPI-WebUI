@@ -6,9 +6,11 @@
 			url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
 			success: function(data, xhr) {
 				$('#id_healthcheck').html('');
-	
-				$('#id_healthcheck').append('<option value="{{ healthcheck.healthcheck_type }}">{{ healthcheck.healthcheck_type }}</option>');
 				
+				{% if healthcheck.healthcheck_type %}
+				$('#id_healthcheck').append('<option value="{{ healthcheck.healthcheck_type }}">{{ healthcheck.healthcheck_type }}</option>');
+				{% endif %}
+
 				if ($('#id_healthcheck').val() == 'HTTP' || $('#id_healthcheck').val() == 'HTTPS') {
 					$("#table_healthcheck").show();
 				} else {
@@ -199,7 +201,7 @@
 					url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
 					success: function(data, xhr) {
 	
-						$('#id_healthcheck').html('');
+						$('#id_healthcheck').html('<option value="">-</option>');
 	
 						for (var i = 0; i < data.length; i++) {
 							$('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
@@ -231,10 +233,10 @@
 		}
 	});
 
-    function verifyWeight() {
-        if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
-		    $('.weighted').show();
-        }else{
-            $('.weighted').hide();
-        }
+function verifyWeight() {
+    if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+        $('.weighted').show();
+    }else{
+        $('.weighted').hide();
     }
+}

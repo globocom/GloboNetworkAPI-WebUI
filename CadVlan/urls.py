@@ -570,16 +570,19 @@ urlpatterns += patterns('CadVlan.BlockRules.views',
 urlpatterns += patterns(
     'CadVlan.Pool.views',
     url('^pool/list[/]?$', 'list_all', name='pool.list',),
+    url('^pool/form[/]?$', 'add_form', name='pool.add.form',),
+    url('^pool/edit/(?P<id_server_pool>\d+)[/]?$', 'edit_form', name='pool.edit.form',),
+
     url('^pool/datatable[/]?$', 'datatable', name='pool.datatable',),
     url('^pool/spm_datatable/(?P<id_server_pool>\d+)[/]?$', 'spm_datatable', name='pool.spm_datatable',),
     url('^pool/reqvip_datatable/(?P<id_server_pool>\d+)[/]?$', 'reqvip_datatable', name='pool.reqvip_datatable',),
-    url('^pool/form[/]?$', 'add_form', name='pool.form',),
+
     url('^pool/ajax_modal_ips[/]?$', 'ajax_modal_ip_real_server', name='pool.modal.ips.ajax',),
     url('^pool/ajax_modal_ips/external[/]?$', 'ajax_modal_ip_real_server_external', name='pool.modal.ips.ajax.external',),
     url('^pool/delete[/]?$', 'delete', name='pool.delete',),
     url('^pool/remove[/]?$', 'remove', name='pool.remove',),
     url('^pool/create[/]?$', 'create', name='pool.create',),
-    url('^pool/edit/(?P<id_server_pool>\d+)[/]?$', 'edit_form', name='pool.edit.form',),
+
     url('^pool/enable/(?P<id_server_pool>\d+)[/]?$', 'enable', name='pool.enable',),
     url('^pool/disable/(?P<id_server_pool>\d+)[/]?$', 'disable', name='pool.disable',),
     url('^pool/disable/(?P<id_server_pool>\d+)[/]?$', 'disable', name='pool.disable',),
