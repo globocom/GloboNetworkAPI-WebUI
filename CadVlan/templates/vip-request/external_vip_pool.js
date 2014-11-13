@@ -13,7 +13,7 @@ $("#dialog_pool").dialog({
 
 				var $this = $(this);
 				var form =  $("#add_form_vip_pool");
-				var formData = form.serialize() + '&' + $.param({ 'environment_vip': envVipId });
+				var formData = form.serialize() + '&' + $.param({ 'environment_vip': envVipId, 'token': $("#id_token").val() });
 
 				$.ajax({ 
 					type: "POST", 
@@ -32,8 +32,8 @@ $("#dialog_pool").dialog({
 					var envVipId = $('input:hidden[name=environment_vip]').val();
 
 					$.ajax({
-						data: {environment_vip_id : envVipId},
-						url: "{% url vip-request.load.options.pool %}",
+						data: {environment_vip_id : envVipId, token: $("#id_token").val()},
+						url: "{% url vip-request.external.load.options.pool %}",
 						success: function(data) {
 							$("select#id_pools").html(data);
 						},
@@ -59,15 +59,16 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
 
 		$.ajax({
 				data: { 
-					pool_id: poolId
+					pool_id: poolId, token: $("#id_token").val()
 				},
-				url: "{% url vip-request.load.pool %}",
+				url: "{% url vip-request.external.load.pool %}",
 				success: function(data) {
-					
+													
 					$("#content_pool").empty();
 					$("#content_pool").html(data);
 					$("#id_equip_name").removeAttr('disabled');
 					$("#btn_new_real").removeAttr('disabled');
+					$("#add_form_vip_pool").append($("#id_token"));
 					$("#dialog_pool").dialog("open");		
 				},
 				error: function (error) {
@@ -86,12 +87,13 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
 
 	if(envVipId && envVipId !=  0 && envVipId != null){
 		$.ajax({
-				data: {env_vip_id: envVipId},
-				url: "{% url vip-request.load.new.pool %}",
+				data: {env_vip_id: envVipId, token: $("#id_token").val()},
+				url: "{% url vip-request.external.load.new.pool %}",
 				success: function(data) {
 					$("#content_pool").html(data);
 					$("#id_equip_name").removeAttr('disabled');
 					$("#btn_new_real").removeAttr('disabled');
+					$("#add_form_vip_pool").append($("#id_token"));
 					$("#dialog_pool").dialog("open");		
 				},
 				error: function (error) {
@@ -110,9 +112,9 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
 
 		$.ajax({
 			data: { 
-				pool_id: poolId
+				pool_id: poolId, token: $("#id_token").val()
 			},
-			url: "{% url vip-request.members.items %}",
+			url: "{% url vip-request.external.members.items %}",
 			success: function(data) {
 				$(".tablesMembers").append(data);			
 			},

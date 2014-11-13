@@ -76,6 +76,8 @@
 	}
 	
 	
+	$("#btn_new_port").die("click");
+	
 	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
 		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><label class='editable'></label> <input type='hidden' name='ports_real' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
 		$('.editable').editableTable();
@@ -140,6 +142,9 @@
           $(this).val($(this).val().replace(/[^0-9]+/g,''));
 	});
 	
+	
+	$('#table_ports tbody tr span').die("click");
+
 	$('#table_ports tbody tr span').live("click", function(){  
 		
 		port_vip_value = $(this).parents().find('input=[name=ports_vip]').val(); 

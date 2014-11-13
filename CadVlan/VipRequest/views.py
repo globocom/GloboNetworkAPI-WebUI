@@ -15,21 +15,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hashlib import sha1
 import hashlib
+import base64
+import logging
 import re
+from hashlib import sha1
 from time import strftime
 from types import NoneType
-
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseServerError, \
     HttpResponseRedirect
+
 from django.shortcuts import render_to_response, redirect, render
 from django.template import loader
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
@@ -43,7 +46,7 @@ from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, \
     RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, \
     RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm, FilterL7Form, \
-    RuleForm, VipPoolForm, ServerPoolForm
+    RuleForm, VipPoolForm, ServerPoolForm, PoolForm
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages, pool_messages
@@ -59,22 +62,9 @@ from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, \
     VIPREQUEST_TAB_REAL_SERVER, VIPREQUEST_TAB_REAL_SERVER_STATUS, \
     VIPREQUEST_TAB_HEALTHCHECK, VIPREQUEST_TAB_MAXCON, VIPREQUEST_FORM_EXTERNAL, \
-    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER,\
-    AJAX_VIPREQUEST_RULE, VIPREQUEST_TAB_POOLS, POOL_DATATABLE, VIPREQUEST_POOL_FORM, VIPREQUEST_POOL_OPTIONS
-from django.contrib import messages
-from django.core.cache import cache
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseServerError, \
-    HttpResponseRedirect
-from django.shortcuts import render_to_response, redirect
-from django.template import loader
-from django.template.context import RequestContext
-from django.views.decorators.csrf import csrf_exempt
-from networkapiclient.exception import UserNotAuthenticatedError
-from hashlib import sha1
-import base64
-import logging
-
+    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER, \
+    AJAX_VIPREQUEST_RULE, VIPREQUEST_TAB_POOLS, POOL_DATATABLE, VIPREQUEST_POOL_FORM, VIPREQUEST_POOL_OPTIONS, \
+    POOL_MEMBER_ITEMS
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.Pagination import Pagination
 from networkapiclient.exception import NetworkAPIClientError, VipError, \
@@ -85,9 +75,6 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     IpEquipmentError, RealServerPriorityError, RealServerWeightError, \
     RealServerPortError, RealParameterValueError, RealServerScriptError, EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError
 from networkapiclient.exception import UserNotAuthenticatedError
-from CadVlan.Pool.forms import PoolForm
-from django.views.decorators.http import require_http_methods
-from django import forms
 
 
 logger = logging.getLogger(__name__)
@@ -2129,7 +2116,7 @@ def add_form_shared(request, client_api, form_acess="", external=False):
                 if external:
                     return HttpResponseRedirect(
                         "%s?token=%s" % (
-                            reverse('vip-request.edit.external', args=[id_vip]),
+                            reverse('vip-request.form.external'),
                             form_acess.initial.get("token")
                         )
                     )
@@ -2714,6 +2701,19 @@ def apply_rollback_l7(request):
         messages.add_message(request, messages.ERROR, e)
 
 
+@csrf_exempt
+@log
+@access_external()
+def external_load_pool_for_copy(request, client, form_acess):
+
+    return shared_load_pool_for_copy(
+        request,
+        client,
+        form_acess,
+        external=True
+    )
+
+
 @log
 @login_required
 @has_perm([
@@ -2724,6 +2724,14 @@ def apply_rollback_l7(request):
 ])
 def load_pool_for_copy(request):
 
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    return shared_load_pool_for_copy(request, client)
+
+
+def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
+
     try:
 
         pool_id = request.GET.get('pool_id')
@@ -2732,10 +2740,7 @@ def load_pool_for_copy(request):
         server_pool_members = dict()
         choices_opvip = list()
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        action = reverse('save.pool')
+        action = reverse('external.save.pool') if external else reverse('save.pool')
 
         pool = client.create_pool().get_by_pk(pool_id)
 
@@ -2837,6 +2842,22 @@ def load_pool_for_copy(request):
 ])
 def save_pool(request):
 
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    return shared_save_pool(request, client)
+
+
+@csrf_exempt
+@log
+@access_external()
+def external_save_pool(request, client, form_acess):
+
+    return shared_save_pool(request, client, form_acess, external=True)
+
+
+def shared_save_pool(request, client, form_acess=None, external=False):
+
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -2844,14 +2865,22 @@ def save_pool(request):
         pool_members = list()
         choices_environment = list()
         choices_opvip = list()
-        choices_healthcheck = list()
+        choices_option_pool = list()
 
         error_list = list()
 
         opvip_list = client.create_option_vip().get_all()
-        healthcheck_list = client.create_pool().list_healthchecks()
+
+        environment_id = request.POST.get('environment')
 
         env_vip_id = request.POST.get('environment_vip')
+
+        if environment_id:
+            optionspools = client.create_pool().get_opcoes_pool_by_ambiente(
+                environment_id
+            )
+            for obj in optionspools['opcoes_pool']:
+                choices_option_pool.append((obj['opcao_pool']['description'], obj['opcao_pool']['description']))
 
         environments = client.create_api_vip_request()\
             .list_environment_by_environmet_vip(env_vip_id)
@@ -2861,11 +2890,6 @@ def save_pool(request):
                 (env['id'], env['name'])
             )
 
-        for healthcheck in healthcheck_list['healthchecks']:
-            choices_healthcheck.append(
-                (healthcheck['id'], healthcheck['identifier'])
-            )
-
         for opvip in opvip_list['option_vip']:
             if opvip['tipo_opcao'] == 'Balanceamento':
                 choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
@@ -2873,14 +2897,13 @@ def save_pool(request):
         form = PoolForm(
             choices_environment,
             choices_opvip,
+            choices_option_pool,
             request.POST
         )
 
         form_real = RequestVipFormReal(request.POST)
 
         if form.is_valid() and form_real.is_valid():
-
-            environment = request.POST.get('environment')
 
             id_ips = request.POST.getlist('id_ip')
             ips = request.POST.getlist('ip')
@@ -2935,9 +2958,10 @@ def save_pool(request):
                 healthcheck_request = ''
 
             if is_valid and is_valid_healthcheck:
+                # TODO: ALTERAR PARA FORMA NOVA SAVE/UPDATE
                 healthcheck_old = ''
                 client.create_pool().inserir(
-                    identifier, default_port, environment,
+                    identifier, default_port, environment_id,
                     balancing, healthcheck_type, healthcheck_expect,
                     healthcheck_request, healthcheck_old, maxcom, ip_list_full,
                     id_equips, priorities, ports_reals
@@ -2959,15 +2983,12 @@ def save_pool(request):
         return render_message_json(str(e), messages.ERROR)
 
 
-def _format_form_error(forms):
+@csrf_exempt
+@log
+@access_external()
+def external_load_new_pool(request, client, form_acess):
 
-    errors = list()
-
-    for form in forms:
-        for field, error in form.errors.items():
-            errors.append('<b>%s</b>: %s' % (field, ', '.join(error)))
-
-    return errors
+    return shared_load_new_pool(request, client, form_acess, external=True)
 
 
 @log
@@ -2980,10 +3001,15 @@ def _format_form_error(forms):
 ])
 def load_new_pool(request):
 
-    try:
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
+    return shared_load_new_pool(request, client)
+
+
+def shared_load_new_pool(request, client, form_acess=None, external=False):
+
+    try:
 
         choices_opvip = list()
         choices_healthcheck = list()
@@ -2991,6 +3017,8 @@ def load_new_pool(request):
         choices_environment = list()
 
         env_vip_id = request.GET.get('env_vip_id')
+
+        action = reverse('external.save.pool') if external else reverse('save.pool')
 
         opvip_list = client.create_option_vip().get_all()
         healthcheck_list = client.create_pool().list_healthchecks()
@@ -3024,7 +3052,7 @@ def load_new_pool(request):
             VIPREQUEST_POOL_FORM, {
                 'form': form,
                 'form_real': form_real,
-                'action': reverse('save.pool'),
+                'action': action,
                 'pool_members': pool_members,
                 'expect_strings': expect_string_list
             }
@@ -3035,6 +3063,14 @@ def load_new_pool(request):
         return render_message_json(str(e), messages.ERROR)
 
 
+@csrf_exempt
+@log
+@access_external()
+def external_load_options_pool(request, client, form_acess):
+
+    return shared_load_options_pool(request, client, form_acess, external=True)
+
+
 @log
 @login_required
 @has_perm([
@@ -3043,6 +3079,14 @@ def load_new_pool(request):
     {"permission": POOL_MANAGEMENT, "read": True},
 ])
 def load_options_pool(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    return shared_load_options_pool(request, client)
+
+
+def shared_load_options_pool(request, client, form_acess=None, external=False):
 
     try:
 
@@ -3066,3 +3110,56 @@ def load_options_pool(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         return render_message_json(str(e), messages.ERROR)
+
+
+@csrf_exempt
+@log
+@access_external()
+def external_pool_member_items(request, client, form_acess):
+
+    return shared_pool_member_items(
+        request,
+        client,
+        form_acess,
+        external=True
+    )
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, ])
+def pool_member_items(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    return shared_pool_member_items(request, client)
+
+
+def shared_pool_member_items(request, client_api, form_acess=None, external=False):
+
+    try:
+
+        pool_id = request.GET.get('pool_id')
+        pool_data = client_api.create_pool().get_by_pk(pool_id)
+
+        return render(
+            request,
+            POOL_MEMBER_ITEMS,
+            pool_data
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+
+def _format_form_error(forms):
+
+    errors = list()
+
+    for form in forms:
+        for field, error in form.errors.items():
+            errors.append('<b>%s</b>: %s' % (field, ', '.join(error)))
+
+    return errors

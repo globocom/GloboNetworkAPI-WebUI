@@ -162,7 +162,7 @@ def access_external():
 
             # If it is not valid  mount of return depending on the type of
             # request
-            if not is_valid:
+            if not is_valid or key is None:
 
                 msg = auth_messages.get("token_invalid")
 

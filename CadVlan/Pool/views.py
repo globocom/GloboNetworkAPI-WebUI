@@ -1057,29 +1057,3 @@ def add_healthcheck_expect(request):
         messages.add_message(request, messages.ERROR, e)
 
     return HttpResponse(json.dumps(lists), content_type='application/json')
-
-
-@log
-@login_required
-@log
-@login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, ])
-def pool_member_items(request):
-
-    try:
-
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-
-        pool_id = request.GET.get('pool_id')
-        pool_data = client_api.create_pool().get_by_pk(pool_id)
-
-        return render(
-            request,
-            POOL_MEMBER_ITEMS,
-            pool_data
-        )
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
