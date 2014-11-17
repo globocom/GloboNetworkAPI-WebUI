@@ -1,45 +1,11 @@
 	$("#page_tab").tabs();
-	
+
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
-	
+
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
 		location.href = "{% url vip-request.list %}";
 	});
-	
-	$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
-		
-		$("#err_new_healthcheck").html("");
-		
-		$.ajax({
-			data: { excpect_new:  $("#id_excpect_new").val(),  token: $("#id_token").val() },
-			url: "{% if external %}{% url vip-request.add.healthcheck.ajax.external %}{% else %}{% url vip-request.add.healthcheck.ajax %}{% endif %}",
-			dataType: "json",
-			success: function(data, textStatus, xhr) {
-			
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-					
-				else if (xhr.status == "203")
-					alert(data);
-				
-				else {
-				
-					$("#id_excpect").html(data.healthcheck);
-					$("#add_new_healthcheck").html(data.form);
-					$("#msg_new_healthcheck").html(data.msg);
-					$("#msg_new_healthcheck").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
-					$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} });
-					
-				}
-			},
-			error: function (xhr, error, thrown) {
-				location.reload();
-			}	
-		});
-		
-	});
-	
-	
+
 	$("#dialog-ip").dialog({
 		height: 600,
 		width: 1000,
@@ -54,156 +20,65 @@
 		}
 	});
 	
+
 	
-	$("#dialog_pool").dialog({
-		height: 600,
-		width: 1000,
-		modal: true,
-		autoOpen: false,
-		draggable: false,
-		resizable: true,
-		buttons: {
-			"Gravar": function(ev){
-
-				var el = $('input:radio:checked[name=environment][attr],input:hidden[name=environment_vip]');				
-				var envVipId = el.attr('attr') == undefined ? el.val() : el.attr('attr');
-
-				var $this = $(this);
-				var form =  $("#add_form_vip_pool");
-				var formData = form.serialize() + '&' + $.param({ 'environment_vip': envVipId });
-
-				$.ajax({ 
-					type: "POST", 
-					url: form.attr('action'), 
-					data: formData, 
-					success: function(data){
-						$this.dialog("close");
-			   			addMessage(data);
-					},
-					error: function (error) {
-						message = jQuery.parseJSON(error.responseText);
-					   	addMessageModal(message);
-					}
-				}).done(function(){
-					
-					var envVipId = $('input:hidden[name=environment_vip]').val();
-					
-					console.log(envVipId);
-
-					$.ajax({
-						data: {environment_vip_id : envVipId},
-						url: "{% url vip-request.load.options.pool %}",
-						success: function(data) {
-							$("select#id_pools").html(data);
-						},
-						error: function (error) {
-							message = jQuery.parseJSON(error.responseText);
-						   	addMessage(message);
-						}	
-					});
-
-				});
-
-			},
-			"Cancelar": function(error) {
-				var $this = $(this);
-				$this.dialog("close");
-			}
-		}
-	});
-
-
-	$("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", function(){
-
-		var poolId = $("#id_pools").val();
-
-		if (poolId !=  0){
-
-			$.ajax({
-					data: { 
-						pool_id: poolId
-					},
-					url: "{% url vip-request.load.pool %}",
-					success: function(data) {
-						
-						$("#content_pool").empty();
-						$("#content_pool").html(data);
-						$("#id_equip_name").removeAttr('disabled');
-						$("#btn_new_real").removeAttr('disabled');
-						$("#dialog_pool").dialog("open");		
-					},
-					error: function (error) {
-						message = jQuery.parseJSON(error.responseText);
-			   			addMessage(message);
-					}	
-			});
-
-		}
-	});
-	
-	$("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		
-		var envVipId = $('input:hidden[name=environment_vip]').val();
-		
-		$.ajax({
-				data: {env_vip_id: envVipId},
-				url: "{% url vip-request.load.new.pool %}",
-				success: function(data) {
-					$("#content_pool").html(data);
-					$("#id_equip_name").removeAttr('disabled');
-					$("#btn_new_real").removeAttr('disabled');
-					$("#dialog_pool").dialog("open");		
-				},
-				error: function (error) {
-					message = jQuery.parseJSON(error.responseText);
-			   		addMessage(message);
-				}
-		});
-	});
-	
-	$("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
-
-		var poolId = $("#id_pools").val();
-
-		if (poolId !=  0){
-
-			$.ajax({
-					data: { 
-						pool_id: poolId
-					},
-					url: "{% url pool.members.items %}",
-					success: function(data) {
-						$(".tablesMembers").append(data);			
-					},
-					error: function (error) {
-						message = jQuery.parseJSON(error.responseText);
-				   		addMessage(message);
-					}
-			});
-		}
-	});
-
-	$("span[id^=removePool]").live("click", function(){
-
-		var $this = $(this);
-		$this.parents("table:first").remove();
-	});
-
-	if ( $("#id_environment_vip").val() == '' ) {
-
-	}
-
 	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
-		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><label class='editable'></label> <input type='hidden' name='ports_real' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
+		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' class='ports_vip' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
+	$("#btn_new_port_vip").die("click");
+	$("#btn_new_port_vip").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
+		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
+
 		$('.editable').editableTable();
 	});
 
-	var port_vip;
+    /*
+    function remove_unused_elements() {
+        //Remove pools with inexistent vip ports
+        var vip_port_element = $('#table_ports').find('.remove_port');
+        var pools_element = $(".tablesMembers .tablePoolMembers");
 
+        var remove = false;
+
+        for (var x = 0;x < pools_element.size(); x++) {
+            porta_vip_do_pool = parseInt(pools_element.eq(x).find('.portVip').first().html());
+            console.log('X - Porta vip do pool: '+ porta_vip_do_pool);
+            for (var y = 0; y < vip_port_element.size(); y++) {
+                porta_vip = parseInt(vip_port_element.eq(y).find('.ports_vip').val());
+                console.log('Y - Porta Vip: '+ porta_vip);
+            }
+            console.log('\n');
+        }
+    }*/
+
+    function update_pools_new_vip(porta_vip) {
+        var size = $(".tablesMembers .tablePoolMembers").size();
+
+        for (var x = 0; x < size; x++) {
+            var tabela = $(".tablesMembers .tablePoolMembers").eq(x).clone();
+
+            old_port = parseInt(tabela.find('.portVip').html());
+            //Verify if the port already exist
+            if (old_port != porta_vip) {
+                //If not, append it to the ServerPools table
+                tabela.find('.portVip').html(porta_vip);
+                $(".tablesMembers").append(tabela);
+            }
+            else {
+                return false;
+            }
+
+        }
+
+        //remove_unused_elements();
+
+    }
+	
+	var port_vip;
+	
 	$(".numbersOnly").live('focus', function(){
 		port_vip = $(this).val();
 	});
-
+	
 	$(".numbersOnly").live('focusout', function(){
 
 		this_element = $(this); 
@@ -211,25 +86,20 @@
 			if (!check_port_vip(this_element)){
 				return false;
 			}
-			update_port_vips(this_element);
+
+            var porta_vip = update_port_vips(this_element);
+
+            update_pools_new_vip(porta_vip);
 		});
 	});
 
+
+
+	
 	// Update port vips values in table 'Reals'
 	function update_port_vips(element){
 		if(element.parent().parent().next().attr('name') == 'ports_vip'){
-			new_port_vip = element.val();
-			      	  
-			$("input[name=ports_vip_reals]").each(function(){
-	  			if ($(this).val() == port_vip){
-	  				if (new_port_vip == ''){
-		  				$(this).val('-');
-	  				}else{
-	  					$(this).val(new_port_vip);
-	  				}
-	  				$(this).parent().find('label').text(new_port_vip);
-	  			}
-	  		});		
+			return element.val();
 		}
 	}
 	
@@ -273,19 +143,23 @@
 	      		label.click();
 				return false;
 			}else{
-	      	  	update_port_vips($(this));
-	      	  	
+	      	  	var porta_vip = update_port_vips($(this));
+
 	    		label = $(this).parent().parent().parent().next().find('.editable');
 	      		$(this).next().click();
 	      		label.click();
+                update_pools_new_vip(porta_vip);
 	      		return false;
 			}
+
 			      	  	
       	  }
 	}).live("keyup", function(e){ 
           $(this).val($(this).val().replace(/[^0-9]+/g,''));
 	});
-	
+
+	$('#table_ports tbody tr span').die("click");
+
 	$('#table_ports tbody tr span').live("click", function(){  
 		
 		port_vip_value = $(this).parents().find('input=[name=ports_vip]').val(); 
@@ -302,6 +176,11 @@
 			return false;
 		}
 	});
+
+
+	if ( $("#id_environment_vip").val() == '' ) {
+
+	}
 	
 	
 	$("input[name=finality]").change(function(){
@@ -405,32 +284,16 @@
 					else{
 						$('.weighted').hide();
 					}
+
+					loadPools(id_environment_vip);
+
 				}
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
 			}
 	
-		}).done(function(){
-			
-			var envVipId = $('input:hidden[name=environment_vip]').val();
-
-			$.ajax({
-				data: {environment_vip_id : envVipId},
-				url: "{% url vip-request.load.options.pool %}",
-				success: function(data) {
-					$("select#id_pools").html(data);
-				},
-				error: function (error) {
-					message = jQuery.parseJSON(error.responseText);
-				   	addMessage(message);
-				}	
-			}).done(function(){
-
-				$("#divPools").show();
-
-			});
-		});
+		})
 	});
 	
 	// RULES
@@ -494,7 +357,7 @@
 		$('.weighted').hide();
 	}
 		
-	if ( $("input[name=healthcheck_type]:checked'").val() == "HTTP" ) {
+	if ( $("input[name=healthcheck_type]:checked").val() == "HTTP" ) {
 		$("#table_healthcheck").show();
 	} else {
 		$("#table_healthcheck").hide();
@@ -509,3 +372,26 @@
 			$('.weighted').hide();
 		}
 	});
+
+	function loadPools(envVipId){
+
+        $.ajax({
+
+            beforeSend: function(){
+                $(".loading").show();
+            },
+            data: {environment_vip_id : envVipId},
+            url: "{% url vip-request.load.options.pool %}",
+            success: function(data) {
+                $("select#id_pools").empty();
+                $("select#id_pools").html(data);
+            },
+            error: function (error) {
+                message = jQuery.parseJSON(error.responseText);
+                addMessage(message);
+            }
+        })
+        .done(function(){
+            $(".loading").hide();
+        });
+	}

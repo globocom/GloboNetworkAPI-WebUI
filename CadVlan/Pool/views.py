@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import json
 import logging
 from django.core.urlresolvers import reverse
 from CadVlan.Pool.facade import populate_enviroments_choices, populate_optionsvips_choices, \
@@ -35,10 +35,10 @@ from networkapiclient.exception import NetworkAPIClientError
 from django.contrib import messages
 from CadVlan.messages import healthcheck_messages
 from CadVlan.messages import error_messages, pool_messages
-from CadVlan.permissions import POOL_MANAGEMENT, VLAN_MANAGEMENT, \
-    POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, HEALTH_CHECK_EXPECT
+from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
+    HEALTH_CHECK_EXPECT
 from CadVlan.forms import DeleteForm
-from CadVlan.Pool.forms import PoolForm, SearchPoolForm, PoolFormEdit
+from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from networkapiclient.Pagination import Pagination
 from CadVlan.Util.utility import DataTablePaginator, get_param_in_request
 from CadVlan.Util.converters.util import split_to_array
@@ -677,12 +677,11 @@ def ajax_get_opcoes_pool_by_ambiente(request):
     client_api = auth.get_clientFactory()
     return get_opcoes_pool_by_ambiente(request, client_api)
 
+
 @log
 @login_required
 @has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def get_opcoes_pool_by_ambiente(request, client_api):
-
-    import json
 
     lists = dict()
     lists['opcoes_pool'] = ''
@@ -694,12 +693,8 @@ def get_opcoes_pool_by_ambiente(request, client_api):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        status_code = 500
-
 
     return HttpResponse(json.dumps(opcoes_pool['opcoes_pool']), content_type='application/json')
-
 
 
 @log
@@ -880,8 +875,6 @@ def disable(request):
 @login_required
 @has_perm([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
 def add_healthcheck_expect(request):
-
-    import json
 
     lists = dict()
 

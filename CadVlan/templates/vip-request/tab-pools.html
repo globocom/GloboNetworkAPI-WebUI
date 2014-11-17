@@ -36,6 +36,14 @@
 		]
 	});
 
+    $("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+
+	$(".voltar").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
+		location.href = "{% url vip-request.list %}";
+	});
+
     oTable.on('init', function() {
         $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
         $(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false });
@@ -58,8 +66,12 @@
 {% block tab-data %}
 <div id="tabs-1">
 
+    <div class="buttons">
+		<button title="voltar" class="voltar">Voltar</button>
+		<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+	</div>
+
 		<table id="poolDatatable">
-			<col width="3%" />
 			<col width="30%" />
 			<col width="10%" />
 			<col width="15%" />
@@ -68,7 +80,6 @@
 			<col width="3%" />
 			<thead>
 				<tr>
-					<th><input id="checkAll" type="checkbox" /></th>
 					<th>Identificador</th>
 					<th>Porta Padrão</th>
 					<th>Heathcheck</th>

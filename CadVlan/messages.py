@@ -358,11 +358,12 @@ pool_messages = {
     'success_delete':       u'Todos os pools selecionados foram excluídos com sucesso.',
     'success_create':       u'Todos os pools selecionados foram criados com sucesso.',
     'success_enable':       u'Todos os pools members selecionados foram habilitados com sucesso.',
-    'success_disable':       u'Todos os pools members selecionados foram desabilitados com sucesso.',
+    'success_disable':      u'Todos os pools members selecionados foram desabilitados com sucesso.',
     'success_insert':       u'Pool incluído com sucesso.',
     'success_update':       u'Pool alterado com sucesso',
     'error_equal_name':     u'Pool com o nome %s já cadastrado.',
     'error_port_missing':   u'Quantidade de portas e equipamento difere',
     'error_same_port':      u'Ips com portas iguais',
     'error_update':         u'Erro ao alterar pool',
+    'select_one':           u'Deve adicionar ao menos um pool '
 }

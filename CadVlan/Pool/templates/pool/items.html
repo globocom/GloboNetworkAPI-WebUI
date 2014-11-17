@@ -1,8 +1,8 @@
 {% load util %}
-<table id="tablePoolMembers" class="bordasimplesReal">
+<table id="tablePoolMembers" class="tablePoolMembers bordasimplesReal">
 <thead>
 	<tr>
-		<th colspan="5">
+		<th colspan="6">
 			<span id="removePool" class="ui-icon ui-icon-closethick" style="cursor: pointer; float: right;"></span>
 			<b>{{ server_pool.identifier }}</b>
 			<input name="idsPool" type="hidden" value="{{ server_pool.id }}"/>
@@ -16,6 +16,7 @@
 	<td>Port Real</td>
     <td>Limit</td>
     <td>HealthCheck</td>
+    <td>Porta VIP</td>
 </tr>
 {% for pool_member in server_pool_members %}
 <tr>
@@ -24,6 +25,7 @@
 	<td>{{ pool_member.port_real }}</td>
 	<td>{{ pool_member.limit }}</td>
 	<td>{{ pool_member.healthcheck.healthcheck_type|default:"" }}</td>
+    <td class="portVip"></td>
 </tr>
 {% endfor %}
 </tbody>

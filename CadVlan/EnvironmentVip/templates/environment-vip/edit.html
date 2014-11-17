@@ -18,7 +18,7 @@
 
 {% load util %}
 
-{% block title %}[Ambiente VIP - Alteração]{% endblock %}
+{% block title %}[Ambiente VIP - Edição]{% endblock %}
 
 {% block header %}
 <script type="text/javascript">
@@ -46,7 +46,7 @@ $(document).ready(function() {
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Alteração de Ambiente VIP</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Ambiente VIP</a></li>
 	</ul>
 	<div id="tabs-1">
 		<form id="add_form" method="post" action="{% url environment-vip.edit id_vip %}">

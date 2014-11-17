@@ -464,6 +464,35 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
                         url('^vip-request/load/options/pool[/]?$',
                             'load_options_pool', name='vip-request.load.options.pool',),
 
+                        # External Access
+                        url('^vip-request/external/load/pool[/]?$',
+                            'external_load_pool_for_copy', name='vip-request.external.load.pool',),
+
+                        url('^vip-request/external/save/pool[/]?$',
+                            'external_save_pool', name='external.save.pool',),
+
+                        url('^vip-request/external/load/new/pool[/]?$',
+                            'external_load_new_pool', name='vip-request.external.load.new.pool',),
+
+                        url(
+                            '^vip-request/external/load/options/pool[/]?$',
+                            'external_load_options_pool',
+                            name='vip-request.external.load.options.pool',
+                        ),
+
+
+                        url(
+                            '^vip-request/list/pool/members/items/$',
+                            'pool_member_items',
+                            name='vip-request.members.items',
+                        ),
+
+                        url(
+                            '^vip-request/external/list/pool/members/items/$',
+                            'external_pool_member_items',
+                            name='vip-request.external.members.items',
+                        ),
+
 )
 
 # URL's Event Log
@@ -590,5 +619,4 @@ urlpatterns += patterns(
     url('^pool/ajax_modal_ips/external[/]?$', 'ajax_modal_ip_real_server_external', name='pool.modal.ips.ajax.external',),
     url('^pool/ajax_get_opcoes_pool_by_ambiente[/]?$', 'ajax_get_opcoes_pool_by_ambiente', name='pool.ajax.get.opcoes.pool.by.ambiente',),
     url('^pool/add_healthcheck_expect[/]?$', 'add_healthcheck_expect', name='pool.add.healthcheck.expect',),
-    url('^pool/list/members/items/$', 'pool_member_items', name='pool.members.items',),
 )
