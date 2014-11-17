@@ -17,14 +17,23 @@
 
 import hashlib
 import re
-from time import strftime
 from types import NoneType
-
+from hashlib import sha1
+import base64
+import logging
 
 from django.shortcuts import render_to_response, redirect, render
-
 from django.views.decorators.http import require_http_methods
+from django.contrib import messages
+from django.core.cache import cache
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseServerError, \
+    HttpResponseRedirect
+from django.template import loader
+from django.template.context import RequestContext
+from django.views.decorators.csrf import csrf_exempt
 
+from time import strftime
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
 from CadVlan.Util.Decorators import log, login_required, has_perm, \
@@ -34,42 +43,16 @@ from CadVlan.Util.shortcuts import render_message_json
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
     get_param_in_request, IP_VERSION, is_valid_int_param
 from CadVlan.VipRequest.encryption import Encryption
-from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, \
-    RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, \
-    RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm, FilterL7Form, \
-    RuleForm, VipPoolForm, ServerPoolForm
+from CadVlan.VipRequest import forms
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages, pool_messages
-from CadVlan.permissions import VIP_ADMINISTRATION, VIP_CREATE_SCRIPT, \
+from CadVlan.permissions import VIP_CREATE_SCRIPT, \
     VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST, VIP_ALTER_SCRIPT, \
     POOL_MANAGEMENT, POOL_ALTER_SCRIPT
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL, \
     NETWORK_API_USERNAME, NETWORK_API_PASSWORD
-from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
-    AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, \
-    AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, \
-    AJAX_VIPREQUEST_HEALTHCHECK, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, \
-    AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, \
-    VIPREQUEST_TAB_REAL_SERVER, VIPREQUEST_TAB_REAL_SERVER_STATUS, \
-    VIPREQUEST_TAB_HEALTHCHECK, VIPREQUEST_TAB_MAXCON, VIPREQUEST_FORM_EXTERNAL, \
-    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER,\
-    AJAX_VIPREQUEST_RULE, VIPREQUEST_TAB_POOLS, POOL_DATATABLE, VIPREQUEST_POOL_FORM, VIPREQUEST_POOL_OPTIONS, \
-    VIPREQUEST_POOL_DATATABLE, POOL_MEMBER_ITEMS
-from django.contrib import messages
-from django.core.cache import cache
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseServerError, \
-    HttpResponseRedirect
-from django.shortcuts import render_to_response, redirect
-from django.template import loader
-from django.template.context import RequestContext
-from django.views.decorators.csrf import csrf_exempt
-from networkapiclient.exception import UserNotAuthenticatedError
-from hashlib import sha1
-import base64
-import logging
-
+from CadVlan import templates
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.Pagination import Pagination
 from networkapiclient.exception import NetworkAPIClientError, VipError, \
@@ -78,8 +61,8 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     InvalidTimeoutValueError, InvalidBalMethodValueError, InvalidCacheValueError, \
     InvalidPersistenceValueError, InvalidPriorityValueError, EnvironmentVipError, \
     IpEquipmentError, RealServerPriorityError, RealServerWeightError, \
-    RealServerPortError, RealParameterValueError, RealServerScriptError, EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError
-from networkapiclient.exception import UserNotAuthenticatedError
+    RealServerPortError, RealParameterValueError, RealServerScriptError, \
+    EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError, UserNotAuthenticatedError
 from CadVlan.Pool.forms import PoolForm
 
 
@@ -100,14 +83,18 @@ def search_list(request):
         lists["validate_form"] = ValidateForm()
         lists["create_form"] = CreateForm()
         lists["remove_form"] = RemoveForm()
-        lists["search_form"] = SearchVipRequestForm()
+        lists["search_form"] = forms.SearchVipRequestForm()
         lists['modal'] = 'false'
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_SEARCH_LIST, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_SEARCH_LIST,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -124,7 +111,7 @@ def ajax_list_vips(request):
             auth = AuthSession(request.session)
             client = auth.get_clientFactory()
 
-            search_form = SearchVipRequestForm(request.GET)
+            search_form = forms.SearchVipRequestForm(request.GET)
 
             if search_form.is_valid():
 
@@ -165,7 +152,12 @@ def ajax_list_vips(request):
                     vips['vips'] = [aux_vip]
 
                 # Returns JSON
-                return dtp.build_response(vips["vips"], vips["total"], AJAX_VIPREQUEST_LIST, request)
+                return dtp.build_response(
+                    vips["vips"],
+                    vips["total"],
+                    templates.AJAX_VIPREQUEST_LIST,
+                    request
+                )
 
             else:
                 # Remake search form
@@ -173,8 +165,13 @@ def ajax_list_vips(request):
                 lists["search_form"] = search_form
 
                 # Returns HTML
-                response = HttpResponse(loader.render_to_string(
-                    SEARCH_FORM_ERRORS, lists, context_instance=RequestContext(request)))
+                response = HttpResponse(
+                    loader.render_to_string(
+                        templates.SEARCH_FORM_ERRORS,
+                        lists,
+                        context_instance=RequestContext(request)
+                    )
+                )
                 # Send response status with error
                 response.status_code = 412
                 return response
@@ -217,8 +214,13 @@ def ajax_shared_view_vip(request, id_vip, lists):
         lists['len_equip'] = int(len(lists['vip']['equipamento']))
 
         # Returns HTML
-        response = HttpResponse(loader.render_to_string(
-            VIPREQUEST_VIEW_AJAX, lists, context_instance=RequestContext(request)))
+        response = HttpResponse(
+            loader.render_to_string(
+                templates.VIPREQUEST_VIEW_AJAX,
+                lists,
+                context_instance=RequestContext(request)
+            )
+        )
         response.status_code = 200
         return response
 
@@ -227,8 +229,13 @@ def ajax_shared_view_vip(request, id_vip, lists):
         messages.add_message(request, messages.ERROR, e)
 
     # Returns HTML
-    response = HttpResponse(loader.render_to_string(
-        VIPREQUEST_VIEW_AJAX, lists, context_instance=RequestContext(request)))
+    response = HttpResponse(
+        loader.render_to_string(
+            templates.VIPREQUEST_VIEW_AJAX,
+            lists,
+            context_instance=RequestContext(request)
+        )
+    )
     # Send response status with error
     response.status_code = 412
     return response
@@ -757,7 +764,7 @@ def mount_ips(id_ipv4, id_ipv6, client_api):
         ipv6_specific = "%s:%s:%s:%s:%s:%s:%s:%s" % (ipv6['block1'], ipv6['block2'], ipv6[
                                                      'block3'], ipv6['block4'], ipv6['block5'], ipv6['block6'], ipv6['block7'], ipv6['block8'])
 
-    form_ip = RequestVipFormIP(initial={"ipv4_check": ipv4_check, "ipv4_type": ipv4_type, "ipv4_specific":
+    form_ip = forms.RequestVipFormIP(initial={"ipv4_check": ipv4_check, "ipv4_type": ipv4_type, "ipv4_specific":
                                         ipv4_specific, "ipv6_check": ipv6_check, "ipv6_type": ipv6_type, "ipv6_specific": ipv6_specific})
 
     return form_ip
@@ -786,9 +793,9 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
     # Options - data
 
-    form_inputs = RequestVipFormInputs(request.POST)
+    form_inputs = forms.RequestVipFormInputs(request.POST)
 
-    form_environment = RequestVipFormEnvironment(
+    form_environment = forms.RequestVipFormEnvironment(
         finality_list,
         finality,
         client,
@@ -797,7 +804,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         request.POST
     )
 
-    form_options = RequestVipFormOptions(
+    form_options = forms.RequestVipFormOptions(
         request,
         environment_vip,
         client_api,
@@ -805,7 +812,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         request.POST
     )
 
-    form_ip = RequestVipFormIP(request.POST)
+    form_ip = forms.RequestVipFormIP(request.POST)
 
     lists, is_valid_ports = valid_ports(lists, ports_vip)
 
@@ -962,7 +969,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     lists['form_options'] = form_options
     lists['form_ip'] = form_ip
 
-    lists['vip_pool_form'] = VipPoolForm(
+    lists['vip_pool_form'] = forms.VipPoolForm(
         pool_choices,
         request.POST or None
     )
@@ -1253,7 +1260,11 @@ def tab_real_server_status(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_REAL_SERVER_STATUS, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_REAL_SERVER_STATUS,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @login_required
@@ -1280,8 +1291,6 @@ def tab_pools(request, id_vip):
         client = vip.get("cliente")
         environment = vip.get("ambiente")
 
-
-
     except EnvironmentVipNotFoundError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, request_vip_messages.get(
@@ -1291,7 +1300,11 @@ def tab_pools(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_POOLS, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_POOLS,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -1338,7 +1351,7 @@ def pool_datatable(request, id_vip):
         return dtp.build_response(
             pools["pools"],
             pools["total"],
-            VIPREQUEST_POOL_DATATABLE,
+            templates.VIPREQUEST_POOL_DATATABLE,
             request
         )
 
@@ -1384,7 +1397,7 @@ def tab_real_server(request, id_vip):
         balancing = vip.get("metodo_bal")
         lists['balancing'] = balancing
 
-        form_real = RequestVipFormReal(initial={"maxcom": maxcon})
+        form_real = forms.RequestVipFormReal(initial={"maxcom": maxcon})
         lists['form_real'] = form_real
 
         parse = True
@@ -1525,7 +1538,11 @@ def tab_real_server(request, id_vip):
     if request.method == "POST":
         return HttpResponse(content=html, status=200)
     else:
-        return render_to_response(VIPREQUEST_TAB_REAL_SERVER, lists, context_instance=RequestContext(request))
+        return render_to_response(
+            templates.VIPREQUEST_TAB_REAL_SERVER,
+            lists,
+            context_instance=RequestContext(request)
+        )
 
 
 @log
@@ -1567,7 +1584,7 @@ def tab_healthcheck(request, id_vip):
         # Already edited
         if request.method == "POST":
 
-            form_healthcheck = RequestVipFormHealthcheck(
+            form_healthcheck = forms.RequestVipFormHealthcheck(
                 healthcheck_list, healthcheck_options, request.POST)
             lists['form_healthcheck'] = form_healthcheck
 
@@ -1635,7 +1652,7 @@ def tab_healthcheck(request, id_vip):
             healthcheck_type = vip.get("healthcheck_type")
             healthcheck = vip.get("healthcheck")
 
-            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, initial={
+            form_healthcheck = forms.RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, initial={
                                                          "healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
 
             lists['form_healthcheck'] = form_healthcheck
@@ -1650,7 +1667,11 @@ def tab_healthcheck(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_HEALTHCHECK, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_HEALTHCHECK,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -1675,7 +1696,7 @@ def tab_maxcon(request, id_vip):
         # Already edited
         if request.method == "POST":
 
-            form_real = RequestVipFormReal(request.POST)
+            form_real = forms.RequestVipFormReal(request.POST)
             lists['form_real'] = form_real
 
             if form_real.is_valid():
@@ -1741,7 +1762,7 @@ def tab_maxcon(request, id_vip):
             maxcon = vip.get("maxcon")
             equip_name = vip.get("equip_name")
 
-            form_real = RequestVipFormReal(
+            form_real = forms.RequestVipFormReal(
                 initial={"equip_name": equip_name, "maxcom": maxcon})
             lists['form_real'] = form_real
 
@@ -1755,7 +1776,11 @@ def tab_maxcon(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_MAXCON, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_MAXCON,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -1784,7 +1809,7 @@ def tab_l7filter(request, id_vip):
         filter_valid = l7.get('filter_valid')
         rule = vip.get('rule_id')
 
-        form_real = FilterL7Form(initial={"filter_applied": filter_applied,
+        form_real = forms.FilterL7Form(initial={"filter_applied": filter_applied,
                                           "filter_l7": filter_l7,
                                           "filter_rollback": filter_rollback})
         lists['form_real'] = form_real
@@ -1805,7 +1830,7 @@ def tab_l7filter(request, id_vip):
                 environment_vip, id_vip).get('name_rule_opt')
 
             rules = rules if type(rules) is list else [rules, ]
-            lists['form_rules'] = RuleForm(rules, initial={"rules": rule})
+            lists['form_rules'] = forms.RuleForm(rules, initial={"rules": rule})
         except Exception, e:
             logger.error(e)
             environment_vip = None
@@ -1815,8 +1840,8 @@ def tab_l7filter(request, id_vip):
         # Already edited
         if request.method == "POST":
 
-            form_real = FilterL7Form(request.POST)
-            form_rules = RuleForm(rules, request.POST)
+            form_real = forms.FilterL7Form(request.POST)
+            form_rules = forms.RuleForm(rules, request.POST)
             lists['form_real'] = form_real
             lists['form_rules'] = form_rules
 
@@ -1833,7 +1858,7 @@ def tab_l7filter(request, id_vip):
                     filter_applied = l7.get('filter_applied')
                     filter_rollback = l7.get('filter_rollback')
 
-                    form_real = FilterL7Form(initial={"filter_applied": filter_applied,
+                    form_real = forms.FilterL7Form(initial={"filter_applied": filter_applied,
                                                       "filter_l7": filter_l7,
                                                       "filter_rollback": filter_rollback})
                     lists['form_real'] = form_real
@@ -1858,7 +1883,11 @@ def tab_l7filter(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_L7FILTER, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_L7FILTER,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -1970,8 +1999,8 @@ def generate_token(request):
 
         lists = {}
 
-        form = GenerateTokenForm(
-            request.POST) if request.method == 'POST' else GenerateTokenForm()
+        form = forms.GenerateTokenForm(
+            request.POST) if request.method == 'POST' else forms.GenerateTokenForm()
 
         if form.is_valid():
 
@@ -2043,7 +2072,11 @@ def generate_token(request):
                 lists["url"] = reverse(
                     "vip-request.edit.external", args=[idt]) if idt is not None else reverse("vip-request.form.external")
 
-            return render_to_response(VIPREQUEST_TOKEN, lists, context_instance=RequestContext(request))
+            return render_to_response(
+                templates.VIPREQUEST_TOKEN,
+                lists,
+                context_instance=RequestContext(request)
+            )
 
     except InvalidParameterError, e:
         logger.error(e)
@@ -2056,7 +2089,11 @@ def generate_token(request):
         logger.error(e)
         lists["error"] = e
 
-    return render_to_response(JSON_ERROR, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.JSON_ERROR,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 def validate_user_networkapi(user_request, is_ldap_user):
@@ -2092,7 +2129,7 @@ def add_form_shared(request, client_api, form_acess="", external=False):
         lists['form_acess'] = form_acess
         lists['external'] = True if external else False
 
-        lists['vip_pool_form'] = VipPoolForm(
+        lists['vip_pool_form'] = forms.VipPoolForm(
             pool_choices,
             request.POST or None
         )
@@ -2131,18 +2168,18 @@ def add_form_shared(request, client_api, form_acess="", external=False):
 
         else:
 
-            lists['form_inputs'] = RequestVipFormInputs()
-            lists['form_environment'] = RequestVipFormEnvironment(finality_list)
-            lists['form_real'] = RequestVipFormReal()
-            lists['form_healthcheck'] = RequestVipFormHealthcheck(healthcheck_list, [])
-            lists['form_options'] = RequestVipFormOptions()
-            lists['form_ip'] = RequestVipFormIP()
+            lists['form_inputs'] = forms.RequestVipFormInputs()
+            lists['form_environment'] = forms.RequestVipFormEnvironment(finality_list)
+            lists['form_real'] = forms.RequestVipFormReal()
+            lists['form_healthcheck'] = forms.RequestVipFormHealthcheck(healthcheck_list, [])
+            lists['form_options'] = forms.RequestVipFormOptions()
+            lists['form_ip'] = forms.RequestVipFormIP()
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    template = VIPREQUEST_FORM_EXTERNAL if external else VIPREQUEST_FORM
+    template = templates.VIPREQUEST_FORM_EXTERNAL if external else templates.VIPREQUEST_FORM
 
     return render_to_response(
         template,
@@ -2261,7 +2298,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             for pool in pools:
                 pool_choices.append((pool.get('id'), pool.get('identifier')))
 
-            lists['vip_pool_form'] = VipPoolForm(
+            lists['vip_pool_form'] = forms.VipPoolForm(
                 pool_choices,
                 request.POST or None
             )
@@ -2273,7 +2310,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     request_vip_messages.get("can_not_edit")
                 )
 
-            form_inputs = RequestVipFormInputs(
+            form_inputs = forms.RequestVipFormInputs(
                 initial={
                     "business": business,
                     "service": service,
@@ -2301,7 +2338,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     request_vip_messages.get("error_existing_environment_vip") % (finality, client, environment)
                 )
 
-            form_environment = RequestVipFormEnvironment(
+            form_environment = forms.RequestVipFormEnvironment(
                 finality_list,
                 finality,
                 client,
@@ -2315,7 +2352,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                 }
             )
 
-            form_options = RequestVipFormOptions(
+            form_options = forms.RequestVipFormOptions(
                 request,
                 environment_vip,
                 client_api,
@@ -2347,7 +2384,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    template = VIPREQUEST_EDIT_EXTERNAL if external else VIPREQUEST_EDIT
+    template = templates.VIPREQUEST_EDIT_EXTERNAL if external else templates.VIPREQUEST_EDIT
 
     return render_to_response(template, lists, context_instance=RequestContext(request))
 
@@ -2376,7 +2413,14 @@ def popular_client_shared(request, client_api):
         status_code = 500
 
     # Returns HTML
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_CLIENT, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_CLIENT,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 def popular_environment_shared(request, client_api):
@@ -2408,7 +2452,14 @@ def popular_environment_shared(request, client_api):
         status_code = 500
 
     # Returns HTML
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_ENVIRONMENT, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_ENVIRONMENT,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 def popular_rule_shared(request, client_api):
@@ -2432,7 +2483,14 @@ def popular_rule_shared(request, client_api):
         status_code = 500
 
     # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_RULE, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_RULE,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 def popular_options_shared(request, client_api):
@@ -2479,7 +2537,14 @@ def popular_options_shared(request, client_api):
 
     # Returns Json
     try:
-        return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_OPTIONS, lists, context_instance=RequestContext(request)), status=status_code)
+        return HttpResponse(
+            loader.render_to_string(
+                templates.AJAX_VIPREQUEST_OPTIONS,
+                lists,
+                context_instance=RequestContext(request)
+            ),
+            status=status_code
+        )
     except Exception, e:
         print e
 
@@ -2488,17 +2553,17 @@ def popular_add_healthcheck_shared(request, client_api):
 
     lists = dict()
     status_code = None
-    form = HealthcheckForm()
+    form = forms.HealthcheckForm()
 
     try:
 
         client = client_api.create_ambiente()
 
         if request.method == "GET":
-            form = HealthcheckForm(request.GET)
+            form = forms.HealthcheckForm(request.GET)
 
         else:
-            form = HealthcheckForm(request.POST)
+            form = forms.HealthcheckForm(request.POST)
 
         if form.is_valid():
 
@@ -2518,7 +2583,14 @@ def popular_add_healthcheck_shared(request, client_api):
         status_code = 500
 
     # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_HEALTHCHECK, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_HEALTHCHECK,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 def model_ip_real_server_shared(request, client_api):
@@ -2595,11 +2667,25 @@ def model_ip_real_server_shared(request, client_api):
         messages.add_message(request, messages.ERROR, e)
         status_code = 500
 
-    lists['ips'] = loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, {
-                                           'ips': ips, 'equip': equip, 'balancing': balancing}, context_instance=RequestContext(request))
+    lists['ips'] = loader.render_to_string(
+        templates.AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML,
+        {
+            'ips': ips,
+            'equip': equip,
+            'balancing': balancing
+        },
+        context_instance=RequestContext(request)
+    )
 
     # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 @log
@@ -2823,7 +2909,7 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
 
         return render(
             request,
-            VIPREQUEST_POOL_FORM,
+            templates.VIPREQUEST_POOL_FORM,
             context_attrs,
         )
 
@@ -3057,7 +3143,7 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
 
         return render(
             request,
-            VIPREQUEST_POOL_FORM, {
+            templates.VIPREQUEST_POOL_FORM, {
                 'form': form,
                 'action': action,
                 'pool_members': pool_members,
@@ -3111,7 +3197,7 @@ def shared_load_options_pool(request, client, form_acess=None, external=False):
 
         return render(
             request,
-            VIPREQUEST_POOL_OPTIONS,
+            templates.VIPREQUEST_POOL_OPTIONS,
             context_attrs
         )
 
@@ -3153,7 +3239,7 @@ def shared_pool_member_items(request, client_api, form_acess=None, external=Fals
 
         return render(
             request,
-            POOL_MEMBER_ITEMS,
+            templates.POOL_MEMBER_ITEMS,
             pool_data
         )
 
