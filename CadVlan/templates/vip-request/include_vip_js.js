@@ -1,3 +1,5 @@
+	var port_vip;
+
 	$("#page_tab").tabs();
 
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
@@ -21,13 +23,9 @@
 	});
 	
 
-	
-	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
-		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' class='ports_vip' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
 	$("#btn_new_port_vip").die("click");
 	$("#btn_new_port_vip").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
-		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
-
+		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' class='ports_vip' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
 		$('.editable').editableTable();
 	});
 
@@ -49,31 +47,6 @@
             console.log('\n');
         }
     }*/
-
-    function update_pools_new_vip(porta_vip) {
-        var size = $(".tablesMembers .tablePoolMembers").size();
-
-        for (var x = 0; x < size; x++) {
-            var tabela = $(".tablesMembers .tablePoolMembers").eq(x).clone();
-
-            old_port = parseInt(tabela.find('.portVip').html());
-            //Verify if the port already exist
-            if (old_port != porta_vip) {
-                //If not, append it to the ServerPools table
-                tabela.find('.portVip').html(porta_vip);
-                $(".tablesMembers").append(tabela);
-            }
-            else {
-                return false;
-            }
-
-        }
-
-        //remove_unused_elements();
-
-    }
-	
-	var port_vip;
 	
 	$(".numbersOnly").live('focus', function(){
 		port_vip = $(this).val();
@@ -132,7 +105,8 @@
 			return true;
 		}
 		return true;
-	}	
+	}
+
 	$('.numbersOnly').live("keydown", function(e){
       	  if(e.keyCode == 9 || e.keyCode == 13){
 	
@@ -395,3 +369,26 @@
             $(".loading").hide();
         });
 	}
+	
+	function update_pools_new_vip(porta_vip) {
+        var size = $(".tablesMembers .tablePoolMembers").size();
+
+        for (var x = 0; x < size; x++) {
+            var tabela = $(".tablesMembers .tablePoolMembers").eq(x).clone();
+
+            old_port = parseInt(tabela.find('.portVip').html());
+            //Verify if the port already exist
+            if (old_port != porta_vip) {
+                //If not, append it to the ServerPools table
+                tabela.find('.portVip').html(porta_vip);
+                $(".tablesMembers").append(tabela);
+            }
+            else {
+                return false;
+            }
+
+        }
+
+        //remove_unused_elements();
+
+    }
