@@ -32,7 +32,7 @@ list-style-type: none;
 </style>
 <script type="text/javascript">
 $(document).ready(function() {
-	{% include "vip-request/include_vip_js" %}
+	{% include "vip-request/include_vip_js.js" %}
 	{% include "vip-request/vip_pool.js" %}
 
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);

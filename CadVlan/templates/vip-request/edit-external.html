@@ -33,7 +33,7 @@ list-style-type: none;
 <script type="text/javascript">
 $(document).ready(function() {
 
-	{% include "vip-request/include_vip_js" %}
+	{% include "vip-request/include_vip_js.js" %}
 	{% include "vip-request/external_vip_pool.js" %}
 	
 	autocomplete_external("{% url equipment.autocomplete.ajax.external %}", true, "id_equip_name", false);
