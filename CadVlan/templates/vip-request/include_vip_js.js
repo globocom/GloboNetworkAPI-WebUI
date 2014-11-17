@@ -20,10 +20,14 @@
 		}
 	});
 	
-	
+
 	
 	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
 		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' class='ports_vip' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
+	$("#btn_new_port_vip").die("click");
+	$("#btn_new_port_vip").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
+		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
+
 		$('.editable').editableTable();
 	});
 
@@ -153,7 +157,9 @@
 	}).live("keyup", function(e){ 
           $(this).val($(this).val().replace(/[^0-9]+/g,''));
 	});
-	
+
+	$('#table_ports tbody tr span').die("click");
+
 	$('#table_ports tbody tr span').live("click", function(){  
 		
 		port_vip_value = $(this).parents().find('input=[name=ports_vip]').val(); 
@@ -278,33 +284,16 @@
 					else{
 						$('.weighted').hide();
 					}
+
+					loadPools(id_environment_vip);
+
 				}
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
 			}
 	
-		}).done(function(){
-			
-			var envVipId = $('input:hidden[name=environment_vip]').val();
-
-			$.ajax({
-				data: {environment_vip_id : envVipId},
-				url: "{% url vip-request.load.options.pool %}",
-				success: function(data) {
-					$("select#id_pools").empty();
-					$("select#id_pools").html(data);
-				},
-				error: function (error) {
-					message = jQuery.parseJSON(error.responseText);
-				   	addMessage(message);
-				}	
-			}).done(function(){
-
-				$("#divPools").show();
-
-			});
-		});
+		})
 	});
 	
 	// RULES
@@ -368,7 +357,7 @@
 		$('.weighted').hide();
 	}
 		
-	if ( $("input[name=healthcheck_type]:checked'").val() == "HTTP" ) {
+	if ( $("input[name=healthcheck_type]:checked").val() == "HTTP" ) {
 		$("#table_healthcheck").show();
 	} else {
 		$("#table_healthcheck").hide();
@@ -383,3 +372,26 @@
 			$('.weighted').hide();
 		}
 	});
+
+	function loadPools(envVipId){
+
+        $.ajax({
+
+            beforeSend: function(){
+                $(".loading").show();
+            },
+            data: {environment_vip_id : envVipId},
+            url: "{% url vip-request.load.options.pool %}",
+            success: function(data) {
+                $("select#id_pools").empty();
+                $("select#id_pools").html(data);
+            },
+            error: function (error) {
+                message = jQuery.parseJSON(error.responseText);
+                addMessage(message);
+            }
+        })
+        .done(function(){
+            $(".loading").hide();
+        });
+	}

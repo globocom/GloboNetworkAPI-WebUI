@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import json
 import logging
 from django.core.urlresolvers import reverse
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
@@ -801,12 +801,11 @@ def ajax_get_opcoes_pool_by_ambiente(request):
     client_api = auth.get_clientFactory()
     return get_opcoes_pool_by_ambiente(request, client_api)
 
+
 @log
 @login_required
 @has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def get_opcoes_pool_by_ambiente(request, client_api):
-
-    import json
 
     lists = dict()
     lists['opcoes_pool'] = ''
@@ -818,12 +817,8 @@ def get_opcoes_pool_by_ambiente(request, client_api):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        status_code = 500
-
 
     return HttpResponse(json.dumps(opcoes_pool['opcoes_pool']), content_type='application/json')
-
 
 
 @log
@@ -1029,8 +1024,6 @@ def disable(request, id_server_pool):
 @has_perm([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
 def add_healthcheck_expect(request):
 
-    import json
-
     lists = dict()
 
     try:
@@ -1057,29 +1050,3 @@ def add_healthcheck_expect(request):
         messages.add_message(request, messages.ERROR, e)
 
     return HttpResponse(json.dumps(lists), content_type='application/json')
-
-
-@log
-@login_required
-@log
-@login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, ])
-def pool_member_items(request):
-
-    try:
-
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-
-        pool_id = request.GET.get('pool_id')
-        pool_data = client_api.create_pool().get_by_pk(pool_id)
-
-        return render(
-            request,
-            POOL_MEMBER_ITEMS,
-            pool_data
-        )
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)

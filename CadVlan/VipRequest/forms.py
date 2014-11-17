@@ -377,3 +377,62 @@ class ServerPoolForm(forms.Form):
             attrs={'style': "width: 310px"}
         )
     )
+
+
+class PoolForm(forms.Form):
+
+    def __init__(self, enviroments_choices, optionsvips_choices, healthcheck_choices, *args, **kwargs):
+        super(PoolForm, self).__init__(*args, **kwargs)
+
+        self.fields['environment'].choices = enviroments_choices
+        self.fields['balancing'].choices = optionsvips_choices
+        self.fields['health_check'].choices = healthcheck_choices
+
+    identifier = forms.CharField(
+        label=u'Identifier',
+        min_length=3,
+        max_length=40,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"})
+    )
+
+    default_port = forms.CharField(
+        label=u'Default Port',
+        min_length=2,
+        max_length=5,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 100px"})
+    )
+
+    environment = forms.ChoiceField(
+        label=u'Environment',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={'style': "width: 310px"})
+    )
+
+    balancing = forms.ChoiceField(
+        label=u'Balanceamento',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={'style': "width: 310px"})
+    )
+
+    health_check = forms.ChoiceField(
+        label=u'HealthCheck',
+        choices=[],
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={'style': "width: 310px"})
+    )
+
+    maxcom = forms.IntegerField(
+        label=u'Número máximo de conexões (maxconn)',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 231px"})
+    )

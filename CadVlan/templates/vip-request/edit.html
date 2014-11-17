@@ -33,7 +33,7 @@ list-style-type: none;
 <script type="text/javascript">
 $(document).ready(function() {
 
-	{% include "vip-request/include_vip_js" %}
+	{% include "vip-request/include_vip_js.js" %}
 	{% include "vip-request/vip_pool.js" %}
 	
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
@@ -257,7 +257,7 @@ $(document).ready(function() {
 					<td colspan="3">&nbsp</td>
 				</tr>
 				<tr>
-					<td colspan="3" style="text-align:left;"><input type="button" id="btn_new_port" value="Adicionar Nova Porta" /></td>
+					<td colspan="3" style="text-align:left;"><input type="button" id="btn_new_port_vip" value="Adicionar Nova Porta" /></td>
 				</tr>
 			</table>
 			
