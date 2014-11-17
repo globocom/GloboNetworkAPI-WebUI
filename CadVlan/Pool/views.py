@@ -418,7 +418,7 @@ def edit_form(request, id_server_pool):
         messages.add_message(request, messages.ERROR, e)
 
     if pool_created:
-        redirect('pool.manage.tab1', args=[id_server_pool])
+        return redirect(reverse('pool.manage.tab1', args=[id_server_pool]))
 
     return render_to_response(POOL_FORM, {'form': form, 'action': action, 'pool_members': pool_members,
                                       'expect_strings': expectstring_choices, 'healthcheck_expect': healthcheck_expect,
@@ -773,7 +773,7 @@ def manage_tab1(request, id_server_pool):
 
         pool_created = pool['server_pool']['pool_created']
         if not pool_created:
-            redirect('pool.edit.form', args=[id_server_pool])
+            return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
         return render_to_response(POOL_MANAGE_TAB1, {'id_server_pool': id_server_pool, 'health_check': health_check,
                                                      'environment': environment_desc, 'identifier': identifier,
@@ -812,7 +812,7 @@ def manage_tab2(request, id_server_pool):
 
         pool_created = pool['server_pool']['pool_created']
         if not pool_created:
-            redirect('pool.edit.form', args=[id_server_pool])
+            return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
         return render_to_response(POOL_MANAGE_TAB2, {'id_server_pool': id_server_pool, 'health_check': health_check,
                                                      'environment': environment_desc, 'identifier': identifier,
@@ -844,7 +844,7 @@ def manage_tab3(request, id_server_pool):
 
         pool_created = pool['server_pool']['pool_created']
         if not pool_created:
-            redirect('pool.edit.form', args=[id_server_pool])
+            return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
         environment_desc = None
         if pool['server_pool']['environment']:
@@ -966,7 +966,7 @@ def manage_tab4(request, id_server_pool):
 
         pool_created = pool['server_pool']['pool_created']
         if not pool_created:
-            redirect('pool.edit.form', args=[id_server_pool])
+            return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
         environment_desc = None
         if pool['server_pool']['environment']:
