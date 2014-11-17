@@ -241,33 +241,16 @@
 					else{
 						$('.weighted').hide();
 					}
+
+					loadPools(id_environment_vip);
+
 				}
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
 			}
 	
-		}).done(function(){
-			
-			var envVipId = $('input:hidden[name=environment_vip]').val();
-
-			$.ajax({
-				data: {environment_vip_id : envVipId},
-				url: "{% url vip-request.load.options.pool %}",
-				success: function(data) {
-					$("select#id_pools").empty();
-					$("select#id_pools").html(data);
-				},
-				error: function (error) {
-					message = jQuery.parseJSON(error.responseText);
-				   	addMessage(message);
-				}	
-			}).done(function(){
-
-				$("#divPools").show();
-
-			});
-		});
+		})
 	});
 	
 	// RULES
@@ -346,3 +329,26 @@
 			$('.weighted').hide();
 		}
 	});
+
+	function loadPools(envVipId){
+
+        $.ajax({
+
+            beforeSend: function(){
+                $(".loading").show();
+            },
+            data: {environment_vip_id : envVipId},
+            url: "{% url vip-request.load.options.pool %}",
+            success: function(data) {
+                $("select#id_pools").empty();
+                $("select#id_pools").html(data);
+            },
+            error: function (error) {
+                message = jQuery.parseJSON(error.responseText);
+                addMessage(message);
+            }
+        })
+        .done(function(){
+            $(".loading").hide();
+        });
+	}
