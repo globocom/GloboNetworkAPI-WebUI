@@ -1,0 +1,130 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Pool - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+    var obj_btn_can = $("#btn_can");
+
+    obj_btn_can.button({icons: {primary: "ui-icon-cancel"}});
+
+    $("#page_tab_full").tabs();
+    $("#page_tab").tabs({selected:0});
+
+    $(".tab2").attr("href", "{%  url pool.manage.tab2 id_server_pool%}");
+    $(".tab3").attr("href", "{%  url pool.manage.tab3 id_server_pool%}");
+    $(".tab4").attr("href", "{%  url pool.manage.tab4 id_server_pool%}");
+
+    obj_btn_can.click(function(){
+        location.href = "{% url pool.list %}";
+    });
+
+    oTableReq = $("#requisicoes_list").dataTable({
+        "sAjaxSource": "{% url pool.reqvip_datatable id_server_pool%}",
+        "bServerSide": true,
+        "aaSorting": [[ 1, "asc" ]],
+        "bAutoWidth": false,
+        "bJQueryUI": true,
+        "bFilter": false,
+        "sPaginationType": "full_numbers",
+        "iDisplayLength": {% max_results %},
+        "aoColumnDefs": [
+            { "bSortable": false, "aTargets": [ 0, 4] }
+         ]
+    });
+
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div id="page_tab_full">
+    <ul>
+        <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-10">Detalhes do Server Pool</a></li>
+    </ul>
+    <div id="tabs-10">
+        <div id="fields" class="ui-widget-content">
+            <table border="5">
+                <tbody>
+                    <tr>
+                        <td style="width: 120px"><label>Id:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if id_server_pool %} {{ id_server_pool }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Identifier:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if identifier %} {{ identifier }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Default Port:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if default_port %} {{ default_port }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 120px"><label>Ambiente:</label></td>
+                        <td><label style="width: 350px;color:blue;text-align:center;" id="list_environment">{% if environment %} {{ environment }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Balanceamento:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;" id="list_balancing">{% if balancing %} {{ balancing }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Healthcheck:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if health_check %} {{ health_check }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Default Maxconn:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if max_con %} {{ max_con }} {% endif %}</label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="page_tab">
+        <ul>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab1" href="javascript:;">Requisições VIP</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab2" href="#tab2">Reals Server - Status</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab3" href="#tab3">Edição de Pool</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab4" href="#tab4">Reals Server</a></li>
+        </ul>
+
+        <div id="tabs-1">
+            <table id="requisicoes_list">
+                <col width="3%" />
+                <col width="12%" />
+                <col width="15%" />
+                <col width="15%" />
+                <col width="20%" />
+                <col width="6%" />
+                <col width="6%" />
+                <col width="2%" />
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>IP</th>
+                        <th>Descrição Ipv4</th>
+                        <th>Descrição Ipv6</th>
+                        <th>Ambiente VIP</th>
+                        <th>Validado</th>
+                        <th>Criado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="buttons-l ui-widget-header">
+            <button id="btn_can" type="button">Cancelar</button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
