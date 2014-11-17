@@ -23,9 +23,51 @@
 	
 	
 	$("#btn_new_port").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
-		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
+		$('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' class='ports_vip' name='ports_vip' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
 		$('.editable').editableTable();
 	});
+
+    /*
+    function remove_unused_elements() {
+        //Remove pools with inexistent vip ports
+        var vip_port_element = $('#table_ports').find('.remove_port');
+        var pools_element = $(".tablesMembers .tablePoolMembers");
+
+        var remove = false;
+
+        for (var x = 0;x < pools_element.size(); x++) {
+            porta_vip_do_pool = parseInt(pools_element.eq(x).find('.portVip').first().html());
+            console.log('X - Porta vip do pool: '+ porta_vip_do_pool);
+            for (var y = 0; y < vip_port_element.size(); y++) {
+                porta_vip = parseInt(vip_port_element.eq(y).find('.ports_vip').val());
+                console.log('Y - Porta Vip: '+ porta_vip);
+            }
+            console.log('\n');
+        }
+    }*/
+
+    function update_pools_new_vip(porta_vip) {
+        var size = $(".tablesMembers .tablePoolMembers").size();
+
+        for (var x = 0; x < size; x++) {
+            var tabela = $(".tablesMembers .tablePoolMembers").eq(x).clone();
+
+            old_port = parseInt(tabela.find('.portVip').html());
+            //Verify if the port already exist
+            if (old_port != porta_vip) {
+                //If not, append it to the ServerPools table
+                tabela.find('.portVip').html(porta_vip);
+                $(".tablesMembers").append(tabela);
+            }
+            else {
+                return false;
+            }
+
+        }
+
+        //remove_unused_elements();
+
+    }
 	
 	var port_vip;
 	
@@ -40,25 +82,20 @@
 			if (!check_port_vip(this_element)){
 				return false;
 			}
-			update_port_vips(this_element);
+
+            var porta_vip = update_port_vips(this_element);
+
+            update_pools_new_vip(porta_vip);
 		});
 	});
+
+
+
 	
 	// Update port vips values in table 'Reals'
 	function update_port_vips(element){
 		if(element.parent().parent().next().attr('name') == 'ports_vip'){
-			new_port_vip = element.val();
-			      	  
-			$("input[name=ports_vip_reals]").each(function(){
-	  			if ($(this).val() == port_vip){
-	  				if (new_port_vip == ''){
-		  				$(this).val('-');
-	  				}else{
-	  					$(this).val(new_port_vip);
-	  				}
-	  				$(this).parent().find('label').text(new_port_vip);
-	  			}
-	  		});		
+			return element.val();
 		}
 	}
 	
@@ -102,13 +139,15 @@
 	      		label.click();
 				return false;
 			}else{
-	      	  	update_port_vips($(this));
-	      	  	
+	      	  	var porta_vip = update_port_vips($(this));
+
 	    		label = $(this).parent().parent().parent().next().find('.editable');
 	      		$(this).next().click();
 	      		label.click();
+                update_pools_new_vip(porta_vip);
 	      		return false;
 			}
+
 			      	  	
       	  }
 	}).live("keyup", function(e){ 

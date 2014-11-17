@@ -60,7 +60,8 @@ from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
     VIPREQUEST_TAB_REAL_SERVER, VIPREQUEST_TAB_REAL_SERVER_STATUS, \
     VIPREQUEST_TAB_HEALTHCHECK, VIPREQUEST_TAB_MAXCON, VIPREQUEST_FORM_EXTERNAL, \
     VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER,\
-    AJAX_VIPREQUEST_RULE, VIPREQUEST_TAB_POOLS, POOL_DATATABLE, VIPREQUEST_POOL_FORM, VIPREQUEST_POOL_OPTIONS
+    AJAX_VIPREQUEST_RULE, VIPREQUEST_TAB_POOLS, POOL_DATATABLE, VIPREQUEST_POOL_FORM, VIPREQUEST_POOL_OPTIONS, \
+    VIPREQUEST_POOL_DATATABLE
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -1345,7 +1346,7 @@ def pool_datatable(request, id_vip):
         return dtp.build_response(
             pools["pools"],
             pools["total"],
-            POOL_DATATABLE,
+            VIPREQUEST_POOL_DATATABLE,
             request
         )
 

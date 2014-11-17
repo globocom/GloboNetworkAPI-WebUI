@@ -172,6 +172,7 @@ VIPREQUEST_TAB_L7FILTER = 'vip-request/tab-l7-filter.html'
 VIPREQUEST_TOKEN = 'vip-request/token.json'
 VIPREQUEST_POOL_FORM = 'vip-request/form_pool.html'
 VIPREQUEST_POOL_OPTIONS = 'vip-request/options_pool.html'
+VIPREQUEST_POOL_DATATABLE = 'vip-request/pool_datatable.json'
 
 # AccessTypeRequest
 ACCESSTYPE_FORM = 'access-type/form.html'

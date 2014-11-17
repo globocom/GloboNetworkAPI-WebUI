@@ -114,7 +114,13 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
 			},
 			url: "{% url pool.members.items %}",
 			success: function(data) {
-				$(".tablesMembers").append(data);			
+
+                for (var x = 0; x < $('.ports_vip').size(); x++) {
+                    $(".tablesMembers").append(data);
+                    $(".tablesMembers .tablePoolMembers:last-child .portVip").html($('.ports_vip').eq(x).val());
+                }
+
+                $('#id_pools').prop('selectedIndex', 0);
 			},
 			error: function (error) {
 				message = jQuery.parseJSON(error.responseText);
