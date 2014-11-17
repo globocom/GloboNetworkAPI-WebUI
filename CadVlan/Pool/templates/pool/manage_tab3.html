@@ -7,14 +7,6 @@
 {% block header %}
 <script type="text/javascript">
 
-function verifyWeight() {
-    if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
-        $('.weighted').show();
-    }else{
-        $('.weighted').hide();
-    }
-}
-
 $(document).ready(function() {
 
     var obj_btn_sav = $("#btn_sav");
@@ -32,11 +24,12 @@ $(document).ready(function() {
     $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
 
     $("#page_tab_full").tabs();
-    $("#page_tab").tabs();
-    $('.editable').editableTable();
+    $("#page_tab").tabs({selected:2});
     $("textarea").maxlength();
 
-    $('.editable').editableTable();
+    $(".tab1").attr("href", "{% url pool.manage.tab1 id_server_pool%}");
+    $(".tab2").attr("href", "{% url pool.manage.tab2 id_server_pool%}");
+    $(".tab4").attr("href", "{% url pool.manage.tab4 id_server_pool%}");
 
     obj_btn_can.click(function(){
         location.href = "{% url pool.list %}";
@@ -72,65 +65,6 @@ $(document).ready(function() {
             "Voltar": function() {
                 $(this).dialog("close");
             }
-        }
-    });
-
-    //var port_vip;
-    //$(".numbersOnly").live('focus', function(){
-        //port_vip = $(this).val();
-    //});
-
-    $(".numbersOnly").live('focusout', function(){
-        this_element = $(this);
-        $(this).next().click(function(){
-            if (!check_port_vip(this_element)){
-                return false;
-            }
-            update_port_vips(this_element);
-        });
-    });
-
-    $('.numbersOnly').live("keydown", function(e){
-        if(e.keyCode == 9 || e.keyCode == 13){
-            if (!check_port_vip($(this))){
-                e.preventDefault();
-                label = $(this).parent().parent().parent().next().find('.editable');
-                  label.click();
-                return false;
-            }else{
-                    update_port_vips($(this));
-                label = $(this).parent().parent().parent().next().find('.editable');
-                  $(this).next().click();
-                  label.click();
-                  return false;
-            }
-        }
-    }).live("keyup", function(e){
-          $(this).val($(this).val().replace(/[^0-9]+/g,''));
-    });
-
-    $('#table_ports tbody tr span').live("click", function(){
-
-        port_vip_value = $(this).parents().find('input=[name=ports_vip]').val();
-
-        if (confirm('Deseja realmente excluir a(s) Portas selecionada(s)?')){
-
-            $("input[name=ports_vip_reals]").each(function(){
-                if ($(this).val() == port_vip_value){
-                    $(this).parents(".remove_port").remove();
-                }
-            });
-
-            $(this).parents(".remove_port").remove();
-            return false;
-        }
-    });
-
-    $('#table_real tbody tr span').die("click");
-    $('#table_real tbody tr span').live("click", function(e){
-        if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){
-        $(this).parents(".remove_port").remove();
-        return false;
         }
     });
 
@@ -187,20 +121,9 @@ $(document).ready(function() {
         }
     });
 
-    $("#id_balancing").live("change", function(){
-        if ( $(this).val().toLowerCase() == "weighted".toLowerCase())
-            $('.weighted').show();
-        else{
-            $('input[name=weight]').val('0');
-            $("label[for=weighted]").text('Click para editar.');
-            $('.weighted').hide();
-        }
-    });
-
     var env_val = $("#id_environment").val();
     if (env_val != '' ){
         $("#id_equip_name, #btn_new_real").prop('disabled', '');
-        $('#list_environment').html($("#id_environment option:selected").text());
     }
 
     var health_check_val = $("#id_health_check").val();
@@ -209,101 +132,7 @@ $(document).ready(function() {
     }
 
     autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
-
-    verifyWeight();
-    
-    {% has_perm POOL_ALTER_SCRIPT True None %}
-    {% if has_perm %}
-        $("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
-            if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
-                var data = getSelectionData(oTableSpm);
-                console.log(data);
-                $('#delete_form').attr('action','{% url pool.enable id_server_pool %}');
-                $("#id_ids").val(data).parent().submit();
-            }
-        });
-    {% endif %}
-    
-    {% has_perm POOL_ALTER_SCRIPT True None %}
-    {% if has_perm %}
-        $("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-            if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
-                var data = getSelectionData(oTableSpm);
-                $('#delete_form').attr('action','{% url pool.disable id_server_pool %}');
-                $("#id_ids").val(data).parent().submit();
-            }
-        });
-    {% endif %}
-
-
-    oTableSpm = $("#script_list").dataTable({
-        "sAjaxSource": "{% url pool.spm_datatable id_server_pool%}",
-        "bServerSide": true,
-        "aaSorting": [[ 1, "asc" ]],
-        "bAutoWidth": false,
-        "bJQueryUI": true,
-        "bFilter": false,
-        "sPaginationType": "full_numbers",
-        "iDisplayLength": {% max_results %},
-        "aoColumnDefs": [
-            { "bSortable": false, "aTargets": [ 0, 4] }
-         ]
-    });
-    
-    $("#checkAll").click( function() {
-        if ($(this).attr('checked')) {
-            $(":checkbox").attr("checked", true);
-        } else {
-            $(":checkbox").attr("checked", false);
-        }
-    });
-
-    oTableReq = $("#requisicoes_list").dataTable({
-        "sAjaxSource": "{% url pool.reqvip_datatable id_server_pool%}",
-        "bServerSide": true,
-        "aaSorting": [[ 1, "asc" ]],
-        "bAutoWidth": false,
-        "bJQueryUI": true,
-        "bFilter": false,
-        "sPaginationType": "full_numbers",
-        "iDisplayLength": {% max_results %},
-        "aoColumnDefs": [
-            { "bSortable": false, "aTargets": [ 0, 4] }
-         ]
-    });
-
-    $("#checkAllRequisicoes").click( function() {
-        if ($(this).attr('checked')) {
-            $(":checkbox").attr("checked", true);
-        } else {
-            $(":checkbox").attr("checked", false);
-        }
-    });
-    
-    $(".fg-button").live("click", function(){
-        $(":checkbox").attr("checked", false);
-        $(":checkbox", oTableSpm.fnGetHiddenNodes()).attr("checked", false);
-        $("#checkAll").attr("checked", false);
-    });
-
-    $("#tool").buttonset();
-
-    $('#page_tab ul li a').click(function () {
-        location.hash = $(this).attr('href');
-        $( 'html, body' ).animate( { scrollTop: 0 }, 0 );
-    });
-
-    var pool_infos_error = $('.pool_infos_error').html();
-    var maxconn_error = $('.maxconn_error').html();
-
-    if ($.trim(maxconn_error) !== '') {
-        $( "#page_tab" ).tabs( {'selected': '4'} );
-        location.hash = 'tabs-4';
-    }else if ($.trim(pool_infos_error) !== '') {
-        $( "#page_tab" ).tabs( {'selected': '3'} );
-        location.hash = 'tabs-3';
-    }
-})
+});
 </script>
 {% endblock %}
 
@@ -323,27 +152,27 @@ $(document).ready(function() {
                     </tr>
                     <tr>
                         <td><label>Identifier:</label></td>
-                        <td><label style="width:350px;color:blue;text-align:center;">{% if form.identifier.value %} {{ form.identifier.value }} {% endif %}</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if identifier %} {{ identifier }} {% endif %}</label></td>
                     </tr>
                     <tr>
                         <td><label>Default Port:</label></td>
-                        <td><label style="width:350px;color:blue;text-align:center;">{% if form.default_port.value %} {{ form.default_port.value }} {% endif %}</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if default_port %} {{ default_port }} {% endif %}</label></td>
                     </tr>
                     <tr>
                         <td style="width: 120px"><label>Ambiente:</label></td>
-                        <td><label style="width: 350px;color:blue;text-align:center;" id="list_environment"></label></td>
+                        <td><label style="width: 350px;color:blue;text-align:center;" id="list_environment">{% if environment %} {{ environment }} {% endif %}</label></td>
                     </tr>
                     <tr>
                         <td><label>Balanceamento:</label></td>
-                        <td><label style="width:350px;color:blue;text-align:center;" id="list_balancing">{% if form.balancing.value %} {{ form.balancing.value }} {% endif %}</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;" id="list_balancing">{% if balancing %} {{ balancing }} {% endif %}</label></td>
                     </tr>
                     <tr>
                         <td><label>Healthcheck:</label></td>
-                        <td><label style="width:350px;color:blue;text-align:center;">{% if form.health_check.value %} {{ form.health_check.value }} {% endif %}</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if health_check %} {{ health_check }} {% endif %}</label></td>
                     </tr>
                     <tr>
                         <td><label>Default Maxconn:</label></td>
-                        <td><label style="width:350px;color:blue;text-align:center;">{% if form.max_con.value %} {{ form.max_con.value }} {% endif %}</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if max_con %} {{ max_con }} {% endif %}</label></td>
                     </tr>
                 </tbody>
             </table>
@@ -352,62 +181,15 @@ $(document).ready(function() {
 
     <div id="page_tab">
         <ul>
-            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Requisições VIP</a></li>
-            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Reals Server - Status</a></li>
-            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3">Edição de Pool</a></li>
-            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-4">Reals Server</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab1" href="#tab1">Requisições VIP</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab2" href="#tab2">Reals Server - Status</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab3" href="javascript:;">Edição de Pool</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab4" href="#tab4">Reals Server</a></li>
         </ul>
 
         <div id="dialog_ip">
             <div id="content-ip"></div>
         </div>
-
-        <div id="tabs-2">
-            <div class="buttons">
-                <span id="tool">
-                {% has_perm POOL_ALTER_SCRIPT True None %}
-                {% if has_perm %}
-                    <button id="btn_enable">Habilitar Real</button>
-                    <button id="btn_disable">Desabilitar Real</button>
-                {% endif %}
-                </span>
-            </div>
-
-            <form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden; height:0px;">
-
-                {% csrf_token %}
-
-                {{ selection_form.ids }}
-
-                {% for field in reals %}
-                    {{ field }}
-                {% endfor %}
-
-            </form>
-
-            <table id="script_list">
-                <col width="3%" />
-                <col width="19%" />
-                <col width="15%" />
-                <col width="5%" />
-                <col width="8%" />
-                <col width="8%" />
-                <thead>
-                    <tr>
-                        <th><input id="checkAll" type="checkbox" /></th>
-                        <th>Nome do Real</th>
-                        <th>IP do Real</th>
-                        <th>Porta Real</th>
-                        <th>Prioridade</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-
-
 
         <form id="add_form" method="post" action="{{action}}">
             <input type='hidden' name='pool_created' value='{{pool_created}}' />
@@ -522,7 +304,7 @@ $(document).ready(function() {
                                     </td>
                                     <td style="padding-left: 5px;">
                                         <select style="width: 185px" name="expect" id="id_expect">
-                                            {% for exp_string in expect_strings.healthcheck_expect %}
+                                            {% for exp_string in expectstring_choices.healthcheck_expect %}
                                                 {% if exp_string.expect_string == healthcheck_expect %}
                                                     <option selected="selected" value="{{exp_string.expect_string}}">{{exp_string.expect_string}}</option>
                                                 {% else %}
@@ -570,117 +352,10 @@ $(document).ready(function() {
                 </div>
             </div>
 
-            <div id="tabs-4">
-                <table  class="bordasimples" >
-                    <tr>
-                        <td>Buscar novo</td>
-                        <td style="margin-left: 5px;">
-                            <input id="id_equip_name" type="text" name="equip_name" maxlength="100" style="width:250px" />
-                        </td>
-                        <td>
-                            <input type="button" id="btn_new_real" value="Adicionar Novo Real" />
-                        </td>
-                    </tr>
-                    <tr id="error_real_server">
-                    </tr>
-                    <tr>
-                        <td colspan="3">&nbsp</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3">
-                            <table id="table_real" class="bordasimplesReal">
-                                <thead>
-                                    <tr>
-                                        <td>Nome do Real</td>
-                                        <td>IP do Real</td>
-                                        <td>Prioridade</td>
-                                        <td class="weighted">Peso do Real</td>
-                                        <td>Porta Real</td>
-                                        <td style="width: 20px;"></td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-
-                                {% for field in pool_members %}
-                                    <tr class='remove_port'>
-                                        <td>
-                                            <label>{% if field.nome_equipamento != "-" %}{{field.nome_equipamento}}{% endif %}</label>
-                                            <input type='hidden' name='equip' value='{{field.nome_equipamento}}' />
-                                            <input type='hidden' name='id_equip' value='{{field.id_equip}}' />
-                                        </td>
-                                        <td>
-                                            <label>{% if field.ip != "-" %}{{field.ip}}{% endif %}</label>
-                                            <input type='hidden' name='ip' value='{{field.ip}}'>
-                                            <input type='hidden' name='id_ip' value='{{field.id_ip}}'>
-                                        </td>
-                                        <td>
-                                            <label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
-                                            <input type='hidden' name='priority' value='{{field.priority}}'>
-                                        </td>
-                                        <td class='weighted'>
-                                            <label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>
-                                            <input type='hidden' name='weight' value='{{field.weight}}'>
-                                        </td>
-                                        <td>
-                                            <label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
-                                            <input type="hidden" value="{{field.port_real}}" name="ports_real_reals">
-                                            <input type='hidden' name='id_pool_member' value='{{field.id}}' />
-                                        </td>
-                                        <td>
-                                            <span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3">
-                            <p id="error">{{reals_error}}</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3">&nbsp</td>
-                    </tr>
-                </table>
+            <div class="buttons-l ui-widget-header">
+                <button id="btn_sav" type="submit">Gravar</button>
+                <button id="btn_can" type="button">Cancelar</button>
             </div>
-
-
-            <div id="tabs-1">
-                <table id="requisicoes_list">
-                    <col width="3%" />
-                    <col width="3%" />
-                    <col width="12%" />
-                    <col width="15%" />
-                    <col width="15%" />
-                    <col width="20%" />
-                    <col width="6%" />
-                    <col width="6%" />
-                    <col width="2%" />
-                    <thead>
-                        <tr>
-                            <th><input id="checkAllRequisicoes" type="checkbox" /></th>
-                            <th>Id</th>
-                            <th>IP</th>
-                            <th>Descrição Ipv4</th>
-                            <th>Descrição Ipv6</th>
-                            <th>Ambiente VIP</th>
-                            <th>Validado</th>
-                            <th>Criado</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
-
-                <div class="buttons-l ui-widget-header">
-                    <button id="btn_sav" type="submit">Gravar</button>
-                    <button id="btn_can" type="button">Cancelar</button>
-                </div>
 
         </form>
     </div>

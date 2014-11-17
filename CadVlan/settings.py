@@ -21,7 +21,7 @@
 import os
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -145,28 +145,35 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'CadVlan.Auth',
-    'CadVlan.Util',
-    'CadVlan.Script',
-    'CadVlan.ScriptType',
-    'CadVlan.EquipAccess',
-    'CadVlan.Vlan',
-    'CadVlan.OptionVip',
-    'CadVlan.EnvironmentVip',
-    'CadVlan.GroupEquip',
-    'CadVlan.EquipGroup',
-    'CadVlan.GroupUser',
-    'CadVlan.UserGroup',
-    'CadVlan.Acl',
     'CadVlan.AccessType',
+    'CadVlan.Acl',
+    'CadVlan.Auth',
+    'CadVlan.BlockRules',
+    'CadVlan.Environment',
+    'CadVlan.EnvironmentVip',
+    'CadVlan.EquipAccess',
+    'CadVlan.EquipGroup',
+    'CadVlan.EquipInterface',
+    'CadVlan.EquipScript',
+    'CadVlan.Equipment',
     'CadVlan.EquipmentType',
-    'CadVlan.NetworkType',
+    'CadVlan.EventLog',
+    'CadVlan.Filter',
+    'CadVlan.GroupEquip',
+    'CadVlan.GroupUser',
     'CadVlan.HealthcheckExpect',
     'CadVlan.Ldap',
-    'CadVlan.EventLog',
-    'CadVlan.BlockRules',
+    'CadVlan.Net',
+    'CadVlan.NetworkType',
+    'CadVlan.OptionVip',
     'CadVlan.Pool',
-
+    'CadVlan.Script',
+    'CadVlan.ScriptType',
+    'CadVlan.User',
+    'CadVlan.UserGroup',
+    'CadVlan.Util',
+    'CadVlan.VipRequest',
+    'CadVlan.Vlan',
 )
 
 SESSION_ENGINE = (
