@@ -1318,13 +1318,12 @@ def pool_datatable(request, id_vip):
         client = auth.get_clientFactory()
 
         columnIndexNameMap = {
-            0: '',
-            1: 'identifier',
-            2: 'default_port',
-            3: 'healthcheck__healthcheck_type',
-            4: 'environment',
-            5: 'pool_created',
-            6: ''
+            0: 'identifier',
+            1: 'default_port',
+            2: 'healthcheck__healthcheck_type',
+            3: 'environment',
+            4: 'pool_created',
+            5: ''
         }
 
         dtp = DataTablePaginator(request, columnIndexNameMap)
