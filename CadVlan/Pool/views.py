@@ -57,7 +57,7 @@ def list_all(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        environments = client.create_ambiente().list_all()
+        environments = client.create_pool().list_environments_with_pools()
 
         delete_form = DeleteForm()
 

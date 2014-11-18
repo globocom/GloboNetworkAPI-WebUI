@@ -78,7 +78,7 @@ $(document).ready(function() {
                     </tr>
                     <tr>
                         <td><label>Default Maxconn:</label></td>
-                        <td><label style="width:350px;color:blue;text-align:center;">{% if max_con %} {{ max_con }} {% endif %}</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if max_con != '' and max_con != None %} {{ max_con }} {% endif %}</label></td>
                     </tr>
                 </tbody>
             </table>
