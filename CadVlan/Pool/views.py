@@ -270,9 +270,9 @@ def add_form(request):
                 healthcheck_request = ''
 
             # Rebuilding the reals list so we can display it again to the user
-                # if it raises an error
-                pool_members, ip_list_full = populate_pool_members_by_lists(client, ports_reals, ips, id_ips, id_equips,
-                                                                   id_pool_member, priorities, weight)
+            # if it raises an error
+            pool_members, ip_list_full = populate_pool_members_by_lists(client, ports_reals, ips, id_ips, id_equips,
+                                                               id_pool_member, priorities, weight)
 
             optionspool_choices = populate_optionspool_choices(client, environment)
 
