@@ -15,6 +15,53 @@ function verifyWeight() {
     }
 }
 
+function check_port_vip(element){
+		if(element.parent().parent().next().attr('name') == 'ports_vip'){
+			is_valid = true;
+
+			if (port_vip != element.val()){
+				$("input[name=ports_vip]").each(function(){
+					if ($(this).val() == element.val()){
+						is_valid = false;
+					}
+				});
+			}
+
+			if (element.val() == "" && port_vip != ""){
+				element.val(port_vip);
+				alert('Deve-se preencher todos os campos de portas.');
+				return false;
+			}
+
+
+			if (!is_valid){
+				element.val(port_vip);
+				alert('Porta Vip já cadastrada.');
+				return false;
+			}
+
+			return true;
+		}
+		return true;
+	}
+
+	function update_port_vips(element){
+            if(element.parent().parent().next().attr('name') == 'ports_vip'){
+                new_port_vip = element.val();
+
+                $("input[name=ports_vip_reals]").each(function(){
+                      if ($(this).val() == port_vip){
+                          if (new_port_vip == ''){
+                              $(this).val('-');
+                          }else{
+                              $(this).val(new_port_vip);
+                          }
+                          $(this).parent().find('label').text(new_port_vip);
+                      }
+                  });
+            }
+    }
+
 $(document).ready(function() {
 
     var obj_btn_sav = $("#btn_sav");
