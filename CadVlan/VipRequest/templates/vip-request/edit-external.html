@@ -249,6 +249,7 @@ $(document).ready(function() {
 									<td>
 										<label class='editable'>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
 										<input type='hidden' name='ports_vip' value='{{field.ports_vip}}'>
+										<input type='hidden' name='vip_port_id' value='{{field.vip_port_id}}'>
 									</td>
 									<td>
 										{% if form_inputs.created.value == '0' %}

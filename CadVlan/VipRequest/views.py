@@ -41,7 +41,7 @@ from CadVlan.Util.Decorators import log, login_required, has_perm, \
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.shortcuts import render_message_json
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
-    get_param_in_request, IP_VERSION, is_valid_int_param
+    get_param_in_request, IP_VERSION, is_valid_int_param, safe_list_get
 from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.VipRequest import forms
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
@@ -650,7 +650,7 @@ def ports_(ports_vip, ports_real):
     return ports
 
 
-def mount_table_ports_vip(lists, ports_vip):
+def mount_table_ports_vip(lists, ports_vip, vip_port_ids=[]):
 
     if ports_vip is not None and ports_vip != '':
 
@@ -658,7 +658,11 @@ def mount_table_ports_vip(lists, ports_vip):
         for i in range(0, len(ports_vip)):
 
             if ports_vip[i] != '':
-                ports.append({'ports_vip': ports_vip[i]})
+                port_raw = dict()
+                port_raw['ports_vip'] = ports_vip[i]
+                if vip_port_ids:
+                    port_raw["vip_port_id"] = safe_list_get(vip_port_ids, i)
+                ports.append(port_raw)
 
         lists['ports'] = ports
 
@@ -783,6 +787,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     pool_ids = request.POST.getlist('idsPool')
 
     ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip'))
+    vip_port_ids = request.POST.getlist('vip_port_id')
 
     environment_vip = request.POST.get("environment_vip")
 
@@ -894,9 +899,13 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
                 vip_ports_to_pools = list()
 
-                for port_v in ports_vip:
+                for index in range(len(ports_vip)):
                     for pool_id in pool_ids:
-                        vip_ports_to_pools.append({'server_pool': pool_id, 'port_vip': port_v})
+                        vip_ports_to_pools.append({
+                            'server_pool': pool_id,
+                            'port_vip': safe_list_get(ports_vip, index),
+                            'id': safe_list_get(vip_port_ids, index)
+                        })
 
                 if edit:
                     vip = client_api.create_api_vip_request().save(
@@ -953,7 +962,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         for pool in pools:
             pool_choices.append((pool.get('id'), pool.get('identifier')))
 
-    lists = mount_table_ports_vip(lists, ports_vip)
+    lists = mount_table_ports_vip(lists, ports_vip, vip_port_ids)
 
     pools_add = list()
 
@@ -2260,28 +2269,17 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             id_ipv4 = vip.get("id_ip")
             id_ipv6 = vip.get("id_ipv6")
 
+            port_services = vip.get('portas_servicos')
+
             ports = []
 
-            if "portas_servicos" in vip:
-                if type(vip['portas_servicos']) is not NoneType:
-                    if type(vip['portas_servicos']['porta']) == unicode or (type(vip['portas_servicos']['porta']) is not NoneType and len(vip['portas_servicos']['porta']) == 1):
-                        vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
+            for vip_port_to_pool in port_services:
+                ports.append({
+                    'ports_vip': vip_port_to_pool.get('port'),
+                    'vip_port_id': vip_port_to_pool.get('vip_port_id')
+                })
 
-                    ports = vip.get("portas_servicos").get('porta')
-
-            ports_vip = []
-            ports_real = []
-            if ports:
-                for port in ports:
-                    p = str(port)
-                    ports_vip.append(p)
-
-                    if len(p) > 1:
-                        ports_real.append(p[1])
-                    else:
-                        ports_real.append('')
-
-            lists = mount_table_ports(lists, ports_vip, ports_real)
+            lists['ports'] = ports
 
             environment_vip = client_api.create_environment_vip().search(
                 None,
