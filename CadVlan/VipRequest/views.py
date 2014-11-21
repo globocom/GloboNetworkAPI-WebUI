@@ -15,35 +15,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from hashlib import sha1
 import hashlib
 import re
+from time import strftime
 from types import NoneType
-from hashlib import sha1
-import base64
-import logging
 
-from django.shortcuts import render_to_response, redirect, render
-from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseServerError, \
     HttpResponseRedirect
+from django.shortcuts import render_to_response, redirect, render
 from django.template import loader
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
-from time import strftime
+from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
+from CadVlan.Pool.forms import PoolForm
 from CadVlan.Util.Decorators import log, login_required, has_perm, \
     access_external
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.shortcuts import render_message_json
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
     get_param_in_request, IP_VERSION, is_valid_int_param, safe_list_get
-from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.VipRequest import forms
+from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages, pool_messages
@@ -52,7 +52,8 @@ from CadVlan.permissions import VIP_CREATE_SCRIPT, \
     POOL_MANAGEMENT, POOL_ALTER_SCRIPT
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL, \
     NETWORK_API_USERNAME, NETWORK_API_PASSWORD
-from CadVlan import templates
+import base64
+import logging
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.Pagination import Pagination
 from networkapiclient.exception import NetworkAPIClientError, VipError, \
@@ -63,7 +64,6 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     IpEquipmentError, RealServerPriorityError, RealServerWeightError, \
     RealServerPortError, RealParameterValueError, RealServerScriptError, \
     EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError, UserNotAuthenticatedError
-from CadVlan.Pool.forms import PoolForm
 
 
 logger = logging.getLogger(__name__)
@@ -3180,9 +3180,6 @@ def shared_load_options_pool(request, client, form_acess=None, external=False):
 
         context_attrs = dict()
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
         environment_vip_id = request.GET.get('environment_vip_id')
 
         pools = client.create_pool().list_by_environmet_vip(environment_vip_id)
@@ -3224,12 +3221,12 @@ def pool_member_items(request):
     return shared_pool_member_items(request, client)
 
 
-def shared_pool_member_items(request, client_api, form_acess=None, external=False):
+def shared_pool_member_items(request, client, form_acess=None, external=False):
 
     try:
 
         pool_id = request.GET.get('pool_id')
-        pool_data = client_api.create_pool().get_by_pk(pool_id)
+        pool_data = client.create_pool().get_by_pk(pool_id)
 
         return render(
             request,
