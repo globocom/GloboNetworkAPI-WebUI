@@ -78,9 +78,7 @@ $(document).ready(function() {
 		"bFilter": false,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [
-		                 { "bSortable": false, "aTargets": [ 0, 2, 3,4,5,6,7,8,9] }
-		     			]
+		"aoColumnDefs": [{"bSortable": false, "aTargets": [0,2,3,4,5,6,7,8,9]}]
 	});
 	
 	$("#checkAll").click( function() {
@@ -210,9 +208,9 @@ $(document).ready(function() {
 	});
 	
 	
-	$("#vip_list tbody tr").live("click", function(e) {
-		if (!(e.target.nodeName == 'A' || e.target.nodeName == 'SPAN' || e.target.nodeName == 'INPUT' || (e.target.nodeName == 'DIV' && e.target.className == 'expand'))) {
-			url = $(this).find(".table_id").attr("lang");
+	$("table#vip_list tbody > tr").live("click", function(e) {
+		url = $(this).find(".table_id").attr("lang");
+		if (url != undefined && !(e.target.nodeName == 'A' || e.target.nodeName == 'SPAN' || e.target.nodeName == 'INPUT' || (e.target.nodeName == 'DIV' && e.target.className == 'expand'))) {
 			$.ajax({
 				url: url,
 				success: function(data) {
@@ -223,7 +221,7 @@ $(document).ready(function() {
 			});
 		}
 	});
-		
+
 	
 })
 </script>
