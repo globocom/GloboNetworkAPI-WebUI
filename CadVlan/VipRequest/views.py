@@ -15,35 +15,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from hashlib import sha1
 import hashlib
 import re
+from time import strftime
 from types import NoneType
-from hashlib import sha1
-import base64
-import logging
 
-from django.shortcuts import render_to_response, redirect, render
-from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseServerError, \
     HttpResponseRedirect
+from django.shortcuts import render_to_response, redirect, render
 from django.template import loader
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
-from time import strftime
+from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
+from CadVlan.Pool.forms import PoolForm
 from CadVlan.Util.Decorators import log, login_required, has_perm, \
     access_external
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.shortcuts import render_message_json
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
-    get_param_in_request, IP_VERSION, is_valid_int_param
-from CadVlan.VipRequest.encryption import Encryption
+    get_param_in_request, IP_VERSION, is_valid_int_param, safe_list_get
 from CadVlan.VipRequest import forms
+from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages, pool_messages
@@ -52,7 +52,8 @@ from CadVlan.permissions import VIP_CREATE_SCRIPT, \
     POOL_MANAGEMENT, POOL_ALTER_SCRIPT
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL, \
     NETWORK_API_USERNAME, NETWORK_API_PASSWORD
-from CadVlan import templates
+import base64
+import logging
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.Pagination import Pagination
 from networkapiclient.exception import NetworkAPIClientError, VipError, \
@@ -63,7 +64,6 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     IpEquipmentError, RealServerPriorityError, RealServerWeightError, \
     RealServerPortError, RealParameterValueError, RealServerScriptError, \
     EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError, UserNotAuthenticatedError
-from CadVlan.Pool.forms import PoolForm
 
 
 logger = logging.getLogger(__name__)
@@ -650,7 +650,7 @@ def ports_(ports_vip, ports_real):
     return ports
 
 
-def mount_table_ports_vip(lists, ports_vip):
+def mount_table_ports_vip(lists, ports_vip, vip_port_ids=[]):
 
     if ports_vip is not None and ports_vip != '':
 
@@ -658,7 +658,11 @@ def mount_table_ports_vip(lists, ports_vip):
         for i in range(0, len(ports_vip)):
 
             if ports_vip[i] != '':
-                ports.append({'ports_vip': ports_vip[i]})
+                port_raw = dict()
+                port_raw['ports_vip'] = ports_vip[i]
+                if vip_port_ids:
+                    port_raw["vip_port_id"] = safe_list_get(vip_port_ids, i)
+                ports.append(port_raw)
 
         lists['ports'] = ports
 
@@ -783,6 +787,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     pool_ids = request.POST.getlist('idsPool')
 
     ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip'))
+    vip_port_ids = request.POST.getlist('vip_port_id')
 
     environment_vip = request.POST.get("environment_vip")
 
@@ -894,9 +899,13 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
                 vip_ports_to_pools = list()
 
-                for port_v in ports_vip:
+                for index in range(len(ports_vip)):
                     for pool_id in pool_ids:
-                        vip_ports_to_pools.append({'server_pool': pool_id, 'port_vip': port_v})
+                        vip_ports_to_pools.append({
+                            'server_pool': pool_id,
+                            'port_vip': safe_list_get(ports_vip, index),
+                            'id': safe_list_get(vip_port_ids, index)
+                        })
 
                 if edit:
                     vip = client_api.create_api_vip_request().save(
@@ -953,7 +962,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         for pool in pools:
             pool_choices.append((pool.get('id'), pool.get('identifier')))
 
-    lists = mount_table_ports_vip(lists, ports_vip)
+    lists = mount_table_ports_vip(lists, ports_vip, vip_port_ids)
 
     pools_add = list()
 
@@ -2260,28 +2269,17 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             id_ipv4 = vip.get("id_ip")
             id_ipv6 = vip.get("id_ipv6")
 
+            port_services = vip.get('portas_servicos')
+
             ports = []
 
-            if "portas_servicos" in vip:
-                if type(vip['portas_servicos']) is not NoneType:
-                    if type(vip['portas_servicos']['porta']) == unicode or (type(vip['portas_servicos']['porta']) is not NoneType and len(vip['portas_servicos']['porta']) == 1):
-                        vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
+            for vip_port_to_pool in port_services:
+                ports.append({
+                    'ports_vip': vip_port_to_pool.get('port'),
+                    'vip_port_id': vip_port_to_pool.get('vip_port_id')
+                })
 
-                    ports = vip.get("portas_servicos").get('porta')
-
-            ports_vip = []
-            ports_real = []
-            if ports:
-                for port in ports:
-                    p = str(port)
-                    ports_vip.append(p)
-
-                    if len(p) > 1:
-                        ports_real.append(p[1])
-                    else:
-                        ports_real.append('')
-
-            lists = mount_table_ports(lists, ports_vip, ports_real)
+            lists['ports'] = ports
 
             environment_vip = client_api.create_environment_vip().search(
                 None,
@@ -2799,7 +2797,7 @@ def apply_rollback_l7(request):
 @csrf_exempt
 @log
 @access_external()
-def external_load_pool_for_copy(request, client, form_acess):
+def external_load_pool_for_copy(request, form_acess, client):
 
     return shared_load_pool_for_copy(
         request,
@@ -2990,7 +2988,7 @@ def save_pool(request):
 @csrf_exempt
 @log
 @access_external()
-def external_save_pool(request, client, form_acess):
+def external_save_pool(request, form_acess, client):
 
     return shared_save_pool(request, client, form_acess, external=True)
 
@@ -3003,9 +3001,6 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         ip_list_full = list()
         HTTP_HEALTHCHECK = 'HTTP'
         HTTPS_HEALTHCHECK = 'HTTPS'
-
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
 
         env_vip_id = request.POST.get('environment_vip')
 
@@ -3097,7 +3092,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 @csrf_exempt
 @log
 @access_external()
-def external_load_new_pool(request, client, form_acess):
+def external_load_new_pool(request, form_acess, client):
 
     return shared_load_new_pool(request, client, form_acess, external=True)
 
@@ -3159,7 +3154,7 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
 @csrf_exempt
 @log
 @access_external()
-def external_load_options_pool(request, client, form_acess):
+def external_load_options_pool(request, form_acess, client):
 
     return shared_load_options_pool(request, client, form_acess, external=True)
 
@@ -3185,9 +3180,6 @@ def shared_load_options_pool(request, client, form_acess=None, external=False):
 
         context_attrs = dict()
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
         environment_vip_id = request.GET.get('environment_vip_id')
 
         pools = client.create_pool().list_by_environmet_vip(environment_vip_id)
@@ -3208,7 +3200,7 @@ def shared_load_options_pool(request, client, form_acess=None, external=False):
 @csrf_exempt
 @log
 @access_external()
-def external_pool_member_items(request, client, form_acess):
+def external_pool_member_items(request, form_acess, client):
 
     return shared_pool_member_items(
         request,
@@ -3229,12 +3221,12 @@ def pool_member_items(request):
     return shared_pool_member_items(request, client)
 
 
-def shared_pool_member_items(request, client_api, form_acess=None, external=False):
+def shared_pool_member_items(request, client, form_acess=None, external=False):
 
     try:
 
         pool_id = request.GET.get('pool_id')
-        pool_data = client_api.create_pool().get_by_pk(pool_id)
+        pool_data = client.create_pool().get_by_pk(pool_id)
 
         return render(
             request,
