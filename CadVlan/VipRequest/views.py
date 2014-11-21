@@ -2797,7 +2797,7 @@ def apply_rollback_l7(request):
 @csrf_exempt
 @log
 @access_external()
-def external_load_pool_for_copy(request, client, form_acess):
+def external_load_pool_for_copy(request, form_acess, client):
 
     return shared_load_pool_for_copy(
         request,
@@ -2988,7 +2988,7 @@ def save_pool(request):
 @csrf_exempt
 @log
 @access_external()
-def external_save_pool(request, client, form_acess):
+def external_save_pool(request, form_acess, client):
 
     return shared_save_pool(request, client, form_acess, external=True)
 
@@ -3095,7 +3095,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 @csrf_exempt
 @log
 @access_external()
-def external_load_new_pool(request, client, form_acess):
+def external_load_new_pool(request, form_acess, client):
 
     return shared_load_new_pool(request, client, form_acess, external=True)
 
@@ -3157,7 +3157,7 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
 @csrf_exempt
 @log
 @access_external()
-def external_load_options_pool(request, client, form_acess):
+def external_load_options_pool(request, form_acess, client):
 
     return shared_load_options_pool(request, client, form_acess, external=True)
 
@@ -3206,7 +3206,7 @@ def shared_load_options_pool(request, client, form_acess=None, external=False):
 @csrf_exempt
 @log
 @access_external()
-def external_pool_member_items(request, client, form_acess):
+def external_pool_member_items(request, form_acess, client):
 
     return shared_pool_member_items(
         request,
