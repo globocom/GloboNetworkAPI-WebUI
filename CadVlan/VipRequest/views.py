@@ -3002,9 +3002,6 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         HTTP_HEALTHCHECK = 'HTTP'
         HTTPS_HEALTHCHECK = 'HTTPS'
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
         env_vip_id = request.POST.get('environment_vip')
 
         # Get Data From Request Post To Save
