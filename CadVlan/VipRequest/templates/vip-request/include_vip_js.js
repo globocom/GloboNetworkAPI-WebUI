@@ -354,7 +354,7 @@
             beforeSend: function(){
                 $(".loading").show();
             },
-            data: {environment_vip_id : envVipId},
+            data: {environment_vip_id : envVipId, token: $("#id_token").val()},
             url: "{% if external %}{% url vip-request.external.load.options.pool %}{% else %}{% url vip-request.load.options.pool %}{% endif %}",
             success: function(data) {
                 $("select#id_pools").empty();
