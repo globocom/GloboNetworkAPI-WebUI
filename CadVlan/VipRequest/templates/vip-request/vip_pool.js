@@ -123,7 +123,7 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
                 	var port = $('.ports_vip').eq(x).val();
                 	
                 	if ($.isNumeric(port)){
-                		$(".tablesMembers").append(data);
+                		$("#divMembers").append(data);
                     
 	                    var table = $(".tablePoolMembers:last-child");
 
