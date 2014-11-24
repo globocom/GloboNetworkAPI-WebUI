@@ -6,6 +6,7 @@
 			<span id="removePool" class="ui-icon ui-icon-closethick" style="cursor: pointer; float: right;"></span>
 			<b>{{ server_pool.identifier }}</b>
 			<input name="idsPool" type="hidden" value="{{ server_pool.id }}"/>
+			<input name="portVipToPool" type="hidden" value="{% if server_pool.port_vip %}{{ server_pool.port_vip }} {% endif %}"/>
 		<th>
 	</tr>
 </thead>
@@ -25,7 +26,7 @@
 	<td>{{ pool_member.port_real }}</td>
 	<td>{{ pool_member.limit }}</td>
 	<td>{{ pool_member.healthcheck.healthcheck_type|default:"" }}</td>
-    <td class="portVip"></td>
+    <td class="portVip">{% if server_pool.port_vip %}{{ server_pool.port_vip }} {% endif %}</td>
 </tr>
 {% endfor %}
 </tbody>
