@@ -785,6 +785,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     pool_choices = list()
 
     pool_ids = request.POST.getlist('idsPool')
+    vip_ports_to_pool = request.POST.getlist('portVipToPool')
 
     ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip'))
     vip_port_ids = request.POST.getlist('vip_port_id')
@@ -899,13 +900,12 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
                 vip_ports_to_pools = list()
 
-                for index in range(len(ports_vip)):
-                    for pool_id in pool_ids:
-                        vip_ports_to_pools.append({
-                            'server_pool': pool_id,
-                            'port_vip': safe_list_get(ports_vip, index),
-                            'id': safe_list_get(vip_port_ids, index)
-                        })
+                for index in range(len(pool_ids)):
+                    vip_ports_to_pools.append({
+                        'server_pool': safe_list_get(pool_ids, index),
+                        'port_vip': safe_list_get(vip_ports_to_pool, index),
+                        'id': safe_list_get(vip_port_ids, index)
+                    })
 
                 if edit:
                     vip = client_api.create_api_vip_request().save(
@@ -966,8 +966,10 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
     pools_add = list()
 
-    for pool_id in pool_ids:
-        pools_add.append(client_api.create_pool().get_by_pk(pool_id))
+    for index in range(len(pool_ids)):
+        raw_server_pool = client_api.create_pool().get_by_pk(pool_ids[index])
+        raw_server_pool["server_pool"]["port_vip"] = vip_ports_to_pool[index]
+        pools_add.append(raw_server_pool)
 
     lists['pools_add'] = pools_add
 
@@ -2158,12 +2160,12 @@ def add_form_shared(request, client_api, form_acess="", external=False):
             )
 
             if is_valid:
+
                 messages.add_message(
                     request,
                     messages.SUCCESS,
                     request_vip_messages.get("success_insert")
                 )
-
                 if external:
                     return HttpResponseRedirect(
                         "%s?token=%s" % (

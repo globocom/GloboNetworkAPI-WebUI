@@ -236,7 +236,7 @@ $(document).ready(function() {
 								<tr class='remove_port'>
 									<td>
 										<label class='editable'>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
-										<input type='hidden' name='ports_vip' value='{{field.ports_vip}}'>
+										<input type='hidden' class="ports_vip" name='ports_vip' value='{{field.ports_vip}}'>
 										<input type='hidden' name='vip_port_id' value='{{field.vip_port_id}}'>
 									</td>
 									<td>
@@ -264,7 +264,7 @@ $(document).ready(function() {
 			
 			<br>
 			
-			<div  class="bordasimples">
+			<div id="divPools" class="bordasimples">
 				<div>Pools</div>
 				{{ vip_pool_form.pools }}
 				<button id="btn_add_pool" type="button">Add Pool</button>

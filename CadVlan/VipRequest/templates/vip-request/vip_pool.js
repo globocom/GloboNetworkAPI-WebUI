@@ -105,8 +105,11 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
 $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
 
 	var poolId = $("#id_pools").val();
-
-	if (poolId !=  0 && poolId != null){
+	var isInvalidPort = ($('.ports_vip:eq(0)').val() == undefined || $('.ports_vip:eq(0)').val() == "-");
+	
+	console.log(isInvalidPort);
+	
+	if (poolId !=  0 && poolId != null && !isInvalidPort){
 
 		$.ajax({
 			data: { 
@@ -116,8 +119,18 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
 			success: function(data) {
 
                 for (var x = 0; x < $('.ports_vip').size(); x++) {
-                    $(".tablesMembers").append(data);
-                    $(".tablesMembers .tablePoolMembers:last-child .portVip").html($('.ports_vip').eq(x).val());
+                	
+                	var port = $('.ports_vip').eq(x).val();
+                	
+                	if ($.isNumeric(port)){
+                		$(".tablesMembers").append(data);
+                    
+	                    var table = $(".tablePoolMembers:last-child");
+
+                    	$("input[name=portVipToPool]", table).val(port);
+                    	$(".tablePoolMembers:last-child .portVip").html(port);
+	                }
+
                 }
 
                 $('#id_pools').prop('selectedIndex', 0);
