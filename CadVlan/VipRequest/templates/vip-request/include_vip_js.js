@@ -389,7 +389,7 @@
                 //If not, append it to the ServerPools table
             	var port= parseInt(tabela.find('.portVip').html().trim());
             	if (port == oldPortVip){
-            		$("input[name=portVipToPool]", tabela).val(port);
+            		$("input[name=portVipToPool]", tabela).val(newPortVip);
             		tabela.find('.portVip').html(newPortVip);
             	}
             }
