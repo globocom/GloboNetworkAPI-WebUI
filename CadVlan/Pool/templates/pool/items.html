@@ -12,21 +12,19 @@
 </thead>
 <tbody>
 <tr>
-	<td>Identificador</td>
-	<td>Priority</td>
-	<td>Port Real</td>
-    <td>Limit</td>
-    <td>HealthCheck</td>
+	<td>Nome do Real</td>
+    <td>Ip do Real</td>
     <td>Porta VIP</td>
+	<td>Porta Real</td>
+	<td>Prioridade</td>
 </tr>
 {% for pool_member in server_pool_members %}
 <tr>
-	<td>{{ pool_member.identifier }}</td>
-	<td>{{ pool_member.priority }}</td>
-	<td>{{ pool_member.port_real }}</td>
-	<td>{{ pool_member.limit }}</td>
-	<td>{{ pool_member.healthcheck.healthcheck_type|default:"" }}</td>
+	<td>{{ pool_member.equipment_name }}</td>
+	<td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
     <td class="portVip">{% if server_pool.port_vip %}{{ server_pool.port_vip }} {% endif %}</td>
+	<td>{{ pool_member.port_real }}</td>
+	<td>{{ pool_member.priority }}</td>
 </tr>
 {% endfor %}
 </tbody>
