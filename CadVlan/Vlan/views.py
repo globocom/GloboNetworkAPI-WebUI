@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def ajax_list_vlans(request):
+def ajax_list_vlans(request, id_vlan="0"):
 
     try:
 
@@ -71,8 +71,9 @@ def ajax_list_vlans(request):
             search_form = SearchVlanForm(env_list, net_list, request.GET)
 
             if search_form.is_valid():
-
                 number = search_form.cleaned_data["number"]
+                if not (id_vlan=='0'):
+                    number = id_vlan
                 name = search_form.cleaned_data["name"]
                 iexact = search_form.cleaned_data["iexact"]
                 environment = search_form.cleaned_data["environment"]
@@ -165,7 +166,7 @@ def ajax_autocomplete_vlans(request):
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def search_list(request):
+def search_list(request, id_vlan='0'):
 
     try:
 
@@ -182,6 +183,8 @@ def search_list(request):
         net_list = client.create_tipo_rede().listar()
 
         lists["search_form"] = SearchVlanForm(env_list, net_list)
+        
+        lists['search_var'] = id_vlan
 
     except NetworkAPIClientError, e:
         logger.error(e)
