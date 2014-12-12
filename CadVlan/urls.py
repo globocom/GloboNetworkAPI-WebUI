@@ -444,12 +444,27 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
                             'tab_maxcon', name='vip-request.tab.maxcon',),
                         url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$',
                             'tab_l7filter', name='vip-request.tab.l7filter',),
+                        url('^vip-request/tab/pools/(?P<id_vip>\d+)[/]?$',
+                            'tab_pools', name='vip-request.tab.pools',),
+                        url('^vip-request/pool_datatable/(?P<id_vip>\d+)[/]?$', 'pool_datatable', name='vip-request.pool_datatable',),
                         url('^vip-request/ajax_rule[/]?$',
                             'ajax_popular_rule', name='vip-request.rule.ajax',),
                         url('^vip-request/ajax_rule/external[/]?$',
                             'ajax_popular_rule_external', name='vip-request.rule.ajax.external',),
 
-                        )
+                        url('^vip-request/load/pool[/]?$',
+                            'load_pool_for_copy', name='vip-request.load.pool',),
+
+                        url('^vip-request/save/pool[/]?$',
+                            'save_pool', name='save.pool',),
+
+                        url('^vip-request/load/new/pool[/]?$',
+                            'load_new_pool', name='vip-request.load.new.pool',),
+
+                        url('^vip-request/load/options/pool[/]?$',
+                            'load_options_pool', name='vip-request.load.options.pool',),
+
+)
 
 # URL's Event Log
 urlpatterns += patterns('CadVlan.EventLog.views',
@@ -550,3 +565,28 @@ urlpatterns += patterns('CadVlan.BlockRules.views',
                             'rule_remove', name='block.rules.remove',),
                         url('^block/ajax', 'block_ajax', name='block.ajax',),
                         )
+
+# URL's Pool
+urlpatterns += patterns(
+    'CadVlan.Pool.views',
+    url('^pool/list[/]?$', 'list_all', name='pool.list',),
+    url('^pool/form[/]?$', 'add_form', name='pool.add.form',),
+    url('^pool/edit/(?P<id_server_pool>\d+)[/]?$', 'edit_form', name='pool.edit.form',),
+
+    url('^pool/datatable[/]?$', 'datatable', name='pool.datatable',),
+    url('^pool/spm_datatable/(?P<id_server_pool>\d+)[/]?$', 'spm_datatable', name='pool.spm_datatable',),
+    url('^pool/reqvip_datatable/(?P<id_server_pool>\d+)[/]?$', 'reqvip_datatable', name='pool.reqvip_datatable',),
+
+    url('^pool/ajax_modal_ips[/]?$', 'ajax_modal_ip_real_server', name='pool.modal.ips.ajax',),
+    url('^pool/ajax_modal_ips/external[/]?$', 'ajax_modal_ip_real_server_external', name='pool.modal.ips.ajax.external',),
+    url('^pool/delete[/]?$', 'delete', name='pool.delete',),
+    url('^pool/remove[/]?$', 'remove', name='pool.remove',),
+    url('^pool/create[/]?$', 'create', name='pool.create',),
+
+    url('^pool/enable/(?P<id_server_pool>\d+)[/]?$', 'enable', name='pool.enable',),
+    url('^pool/disable/(?P<id_server_pool>\d+)[/]?$', 'disable', name='pool.disable',),
+    url('^pool/disable/(?P<id_server_pool>\d+)[/]?$', 'disable', name='pool.disable',),
+    url('^pool/ajax_get_opcoes_pool_by_ambiente[/]?$', 'ajax_get_opcoes_pool_by_ambiente', name='pool.ajax.get.opcoes.pool.by.ambiente',),
+    url('^pool/add_healthcheck_expect[/]?$', 'add_healthcheck_expect', name='pool.add.healthcheck.expect',),
+    url('^pool/list/members/items/$', 'pool_member_items', name='pool.members.items',),
+)

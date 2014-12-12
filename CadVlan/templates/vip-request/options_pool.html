@@ -1,0 +1,5 @@
+{% load util %}
+	<option value="">-</option>
+{% for pool in pool_choices %}
+	<option value="{{ pool.id }}">{{ pool.identifier }}</option>
+{% endfor %}

@@ -31,15 +31,16 @@ from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError
 from CadVlan.Util.utility import make_random_password
 from CadVlan.templates import MAIL_NEW_PASS, AJAX_NEW_PASS
-from django.core.mail import EmailMessage, SMTPConnection
+from django.core.mail import EmailMessage
 from django.template import loader
 import logging
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from smtplib import SMTPException
+
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
 import re
 import hashlib
 import base64
+from django.core.mail.backends.smtp import EmailBackend
 
 logger = logging.getLogger(__name__)
 
@@ -229,9 +230,9 @@ def lost_pass(request):
                                 lists['new_pass'] = pass_open
 
                                 # Montar Email com nova senha
-                                connection = SMTPConnection(
+                                connection = EmailBackend(
                                     username=EMAIL_HOST_USER, password=EMAIL_HOST_PASSWORD)
-                                send_email = EmailMessage('Solicitação de Nova Senha',  loader.render_to_string(
+                                send_email = EmailMessage('Solicitação de Nova Senha', loader.render_to_string(
                                     MAIL_NEW_PASS, lists), EMAIL_FROM, [email], connection=connection)
                                 send_email.content_subtype = "html"
                                 send_email.send()
@@ -258,10 +259,6 @@ def lost_pass(request):
                 modal_auto_open = 'false'
 
     except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        modal_auto_open = 'false'
-    except SMTPException, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         modal_auto_open = 'false'
