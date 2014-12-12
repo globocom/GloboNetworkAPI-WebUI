@@ -25,14 +25,23 @@
 ul {
 list-style-type: none;
 }
+#tablePoolMembers{
+	width: 600px;
+	margin-bottom: 1%;
+}
 </style>
 <script type="text/javascript">
 $(document).ready(function() {
 	{% include "vip-request/include_vip_js" %}
+	{% include "vip-request/vip_pool.js" %}
 	
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
-
+	
+	
+	
 	$('.editable').editableTable();
+	
+
 	
 })
 </script>
@@ -45,6 +54,10 @@ $(document).ready(function() {
 		<div id="ip-view">
 		</div>
 	</div>
+	
+	<div id="dialog_pool">
+        <div id="content_pool"></div>
+    </div>
 	
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Requisição VIP </a></li>
@@ -194,48 +207,8 @@ $(document).ready(function() {
 					{% endfor %}
 				{% endif %}
 				</p>
-			</div>	
-			
-			<div>
-				<div><label for="{{ form_healthcheck.healthcheck_type.auto_id }}">{{ form_healthcheck.healthcheck_type.label_tag }}{% if form_healthcheck.healthcheck_type.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-				{{ form_healthcheck.healthcheck_type }}
-				<p id="error">
-				{% if form_healthcheck.healthcheck_type.errors %} 
-					{% for error in form_healthcheck.healthcheck_type.errors %}
-						{{ error|escape }}
-					{% endfor %}
-				{% endif %}
-				</p>
 			</div>
-			
-			<table id="table_healthcheck" class="bordasimples" style="margin-top: -10px;width: 511px;">
-				{% for field in form_healthcheck %}
-
-					{% if field.name != "healthcheck_type"  and field.name != "excpect_new" %} 
-						<tr>
-							<td><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
-							<td style="padding-left: 5px;">{{ field }}</td>
-						</tr>
-						<tr>
-							<td></td>
-							<td style="padding-left: 5px;"><p id="error">{% if field.errors %}{% for error in field.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
-						</tr>
-					{% endif %}
-
-					{% if field.name == "excpect_new" %}
-						<tr id="add_new_healthcheck">
-							<td></td>
-							<td style="padding-left: 5px;">{{ field }}<input type="button" id="btn_new_excpect" value="Adicionar Novo" /></td>
-						</tr>
-					{% endif %}
-
-				{% endfor %}
-				<tr id="msg_new_healthcheck">
-				</tr>
-			</table>
-			
 			<br>
-			
 			<table  class="bordasimples">
 				<tr>
 					<td colspan="3" style="text-align:left;">Portas</td>
@@ -246,29 +219,21 @@ $(document).ready(function() {
 							<thead>
 								<tr>
 									<td>Porta Vip</td>
-									<td>Porta Real Padrão</td>
 									<td style="width: 20px;"></td>
 								</tr>
 							</thead>
 							<tbody>
-
 							{% for field in ports %}
-
 								<tr class='remove_port'>
 									<td>
 										<label class='editable'>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
-										<input type='hidden' name='ports_vip' value='{{field.ports_vip}}'></td>
-									<td>
-										<label class='editable'>{% if field.ports_real != "-" %}{{field.ports_real}}{% endif %}</label>
-										<input type='hidden' name='ports_real' value='{{field.ports_real}}'>
+										<input type='hidden' name='ports_vip' value='{{field.ports_vip}}'>
 									</td>
 									<td>
 										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
 									</td>
 								</tr>
-
 							{% endfor %}
-
 							</tbody>
 						</table>
 					</td>
@@ -283,124 +248,39 @@ $(document).ready(function() {
 					<td colspan="3" style="text-align:left;"><input type="button" id="btn_new_port" value="Adicionar Nova Porta" /></td>
 				</tr>
 			</table>
-				
+	
 			<br>
 			
-			<div>
-				<div><label for="{{ form_options.balancing.auto_id }}">{{ form_options.balancing.label_tag }}{% if form_options.balancing.required %}<span style="color: red;">*</span>{% endif %}</label>
-					{{ form_options.balancing }}
+			<div id="divPools" class="bordasimples">
+				<div>Pools</div>
+				{{ vip_pool_form.pools }}
+				<button id="btn_add_pool" type="button">Add Pool</button>
+				<button id="btn_copy" type="button">Copiar Pool</button>
+				<button id="btn_new_pool" type="button">Novo Pool</button>
+				<div>
 				</div>
-				<p id="error" style="padding-left: 150px;">
-				{% if form_options.balancing.errors %} 
-					{% for error in form_options.balancing.errors %}
-						{{ error|escape }}
-					{% endfor %}
+				{% if pools_error %}
+				<div colspan="3"><p id="error">{{pools_error}}</p></div>
+				<br>
 				{% endif %}
-				</p>
+				<br>
+			</div>
+				
+			
+			
+			<div  id="divMembers" class="bordasimples" >
+				<div class="tablesMembers"></div>
+				{% if pools_add %}
+				{% for pool in pools_add %}
+				{% include "pool/items.html" with server_pool=pool.server_pool server_pool_members=pool.server_pool_members %}
+				{% endfor %}
+				{% endif %}
+				<!-- Will add pool members -->
+				
 			</div>
 			
-			<table  class="bordasimples" >
-				<tr>
-					<td colspan="3">Reals</td>
-				</tr>
-				<tr>
-					<td>{{form_real.equip_name.label_tag}}</td>
-					<td style="padding-left: 5px;">{{form_real.equip_name}}</td>
-					<td><input type="button" id="btn_new_real" value="Adicionar Novo Real" /></td>
-				</tr>
-				<tr id="error_real_server">
-				</tr>
-				<tr>
-					<td colspan="3">&nbsp</td>
-				</tr>
-				<tr>
-					<td colspan="3">
-						<table id="table_real" class="bordasimplesReal">
-							<thead>
-								<tr>
-									<td>Porta Vip</td>
-									<td>Nome do Real</td>
-									<td>IP do Real</td>
-									<td>Prioridade</td>
-									<td class="weighted">Peso do Real</td>
-									<td>Porta Real</td>
-									<td style="width: 20px;"></td>
-								</tr>
-							</thead>
-							<tbody>
-
-							{% for field in reals %}
-
-								<tr class='remove_port'>
-									<td>
-										<label>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
-										<input type="hidden" value="{{field.ports_vip}}" name="ports_vip_reals">
-									</td>
-									<td>
-										<label>{% if field.equip != "-" %}{{field.equip}}{% endif %}</label>
-										<input type='hidden' name='equip' value='{{field.equip}}'>
-										<input type='hidden' name='id_equip' value='{{field.id_equip}}'>
-									</td>
-									<td>
-										<label>{% if field.ip != "-" %}{{field.ip}}{% endif %}</label>
-										<input type='hidden' name='ip' value='{{field.ip}}'>
-										<input type='hidden' name='id_ip' value='{{field.id_ip}}'>
-									</td>
-									<td>
-										<label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
-										<input type='hidden' name='priority' value='{{field.priority}}'>
-									</td>
-									<td class='weighted'>
-										<label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>
-										<input type='hidden' name='weight' value='{{field.weight}}'>
-									</td>
-									<td>
-										<label class="editable" style="" title="Click para editar.">{% if field.ports_real != "-" %}{{field.ports_real}}{%endif%}</label>
-										<input type="hidden" value="{{field.ports_real}}" name="ports_real_reals">
-									</td>
-									<td>
-										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
-									</td>
-								</tr>
-
-							{% endfor %}
-
-
-							</tbody>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="3">
-						<p id="error">{{reals_error}}</p>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="3">&nbsp</td>
-				</tr>
-				<tr>
-					<td colspan="3">
-					
-						<table>
-							<tr>
-								<td>
-									<label for="{{ form_real.maxcom.auto_id }}">{{ form_real.maxcom.label_tag }}{% if form_real.maxcom.field.required %}<span style="color: red;padding-right: 5px;">*</span>{% endif %}</label></td>
-								<td>
-									{{ form_real.maxcom }}
-								</td>
-							</tr>
-							<tr>
-							 	<td></td>
-								<td style="padding-left: 5px;"><p id="error">{% if form_real.maxcom.errors %}{% for error in form_real.maxcom.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
-							</tr>
-						</table>
-					
-					</td>
-				</tr>
-			</table>
-			
 			<br>
-			
+
 			<table>
 				<tr>
 					<td colspan="3" style="text-align:left;">IP do VIP</td>

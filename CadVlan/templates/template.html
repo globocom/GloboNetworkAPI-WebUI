@@ -196,7 +196,12 @@
 							{% if has_perm %}
 							<li><a href="{% url acl.template.list %} ">Template</a></li>
 							{% endif %}
-							
+
+                            {% has_perm VLAN_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="{% url pool.list %} ">Pool</a></li>
+							{% endif %}
+
 						</ul>
 					</li>
 					{% endif %}
@@ -313,6 +318,11 @@
 								{% if has_perm %}
 							<li><a href="{% url rule.form %}">Regra de L7 </a></li>
 								{% endif %}
+							{% endif %}
+
+                            {% has_perm VLAN_MANAGEMENT None True %}
+							{% if has_perm %}
+							<li><a href="{% url pool.add.form %} ">Pool</a></li>
 							{% endif %}
 						</ul>
 					</li>

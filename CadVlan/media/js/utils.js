@@ -282,3 +282,47 @@ function getInputsData(seletor, key) {
 	data = replaceAll(data, '&' + key + '=' , ';');
 	return data;
 }
+
+
+function addMessage(data) {
+	
+	var divMessage = '';
+	var classMessage = data.status === 'error' ? 'ui-state-error':'ui-state-highlight'
+		
+	divMessage += '<div class="ui-widget error-messages">';
+	divMessage += '<p></p>';
+	divMessage += '<div id="messagesError" class="'+classMessage+" ui-corner-all "+data.status+'">';
+	divMessage += '<span class="ui-icon"></span>';
+	divMessage += data.message;
+	divMessage += '</div>';
+	divMessage += '<p></p>';
+	divMessage += '</div>';
+	
+	$('div#messages').append(divMessage);
+	
+	$(".error-messages").last().each(function() {
+		$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+	});
+}
+
+
+function addMessageModal(data) {
+	
+	var divMessage = '';
+	var classMessage = data.status === 'error' ? 'ui-state-error':'ui-state-highlight'
+		
+	divMessage += '<div class="ui-widget error-messages">';
+	divMessage += '<p></p>';
+	divMessage += '<div id="messagesError" class="'+classMessage+" ui-corner-all>";
+	divMessage += '<span class="ui-icon"></span>';
+	divMessage += data.message;
+	divMessage += '</div>';
+	divMessage += '<p></p>';
+	divMessage += '</div>';
+	
+	$('div#messagesModal').append(divMessage);
+	
+	$(".error-messages").last().each(function() {
+		$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+	});
+}

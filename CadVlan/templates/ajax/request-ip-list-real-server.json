@@ -1,0 +1,4 @@
+{
+    "ips": "{{ips|escapejs}}",
+    "msg": {% if msg %}"<td></td><td colspan='2' style='color: red;padding-left: 5px;'>{{msg}}</td>"{% else %}""{% endif %}
+}

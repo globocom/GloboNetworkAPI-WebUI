@@ -18,7 +18,7 @@
 {% load util %}
 
 {% block tab_select %}
-	$("#page_tab_lists").tabs({selected:4});
+	$("#page_tab_lists").tabs({selected:2});
 {% endblock %}
 
 {% block js %}
@@ -141,7 +141,7 @@ $(document).ready(function() {
 })
 </script>
 
-<div id="tabs-5">
+<div id="tabs-3">
 	<form id="add_form" method="post" action="{% url vip-request.tab.l7filter vip.id %}">
 		{% csrf_token %}
 		
