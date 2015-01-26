@@ -74,7 +74,7 @@ $(document).ready(function() {
 	});
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url vlan.search.list %}";
+		location.href = "{% url vlan.search.list '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 	
     $("#id_name").keyup(function() {
@@ -222,7 +222,7 @@ $(document).ready(function() {
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Vlan</a></li>
 	</ul>
 	<div id="tabs-1">
-	<form id="add_form" method="post" action="{% url vlan.edit.by.id id_vlan %}">
+	<form id="add_form" method="post" action="{% url vlan.edit.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			{% for field in form %}

@@ -50,25 +50,27 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
-		location.href = "{% url vlan.list.by.id vlan_id %}";
+		location.href = "{% url vlan.list.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 	
 	$("#btn_new_2").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url network.insert.ip4 id %}";	
+		location.href = "{% url network.insert.ip4 id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";	
 	});
 	
 	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Caso o equipamento não tenha mais nenhum IP associado, será removida também sua associação com o Ambiente')){ 
+		if (confirm('Caso o equipamento não tenha mais nenhum IP associado, será removida também sua associação com o Ate')) { 
 			var data = getSelectionData(oTable);
-			$("#id_ids").val(data).parent().submit();
-		}
+			$("#id_ids").val(data).parent().submit(i);
+                        location.href = "{% url network.ip4.list.by.id id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+                }
+		
 	});
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		location.href = "{% url network.ip4.list.by.id id %}";	
+                location.reload();
 	});
 	
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
