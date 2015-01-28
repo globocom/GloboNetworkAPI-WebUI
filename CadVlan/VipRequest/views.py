@@ -30,51 +30,30 @@ from django.shortcuts import render_to_response, redirect, render
 from django.template import loader
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
+from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
+from CadVlan.Pool.forms import PoolForm
 from CadVlan.Util.Decorators import log, login_required, has_perm, \
     access_external
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.shortcuts import render_message_json
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
-    get_param_in_request, IP_VERSION, is_valid_int_param
+    get_param_in_request, IP_VERSION, is_valid_int_param, safe_list_get
+from CadVlan.VipRequest import forms
 from CadVlan.VipRequest.encryption import Encryption
-from CadVlan.VipRequest.forms import SearchVipRequestForm, RequestVipFormInputs, \
-    RequestVipFormEnvironment, RequestVipFormOptions, RequestVipFormHealthcheck, \
-    RequestVipFormReal, HealthcheckForm, RequestVipFormIP, GenerateTokenForm, FilterL7Form, \
-    RuleForm, VipPoolForm, ServerPoolForm
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages, pool_messages
-from CadVlan.permissions import VIP_ADMINISTRATION, VIP_CREATE_SCRIPT, \
+from CadVlan.permissions import VIP_CREATE_SCRIPT, \
     VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST, VIP_ALTER_SCRIPT, \
     POOL_MANAGEMENT, POOL_ALTER_SCRIPT
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL, \
     NETWORK_API_USERNAME, NETWORK_API_PASSWORD
-from CadVlan.templates import VIPREQUEST_SEARCH_LIST, SEARCH_FORM_ERRORS, \
-    AJAX_VIPREQUEST_LIST, VIPREQUEST_VIEW_AJAX, VIPREQUEST_FORM, \
-    AJAX_VIPREQUEST_CLIENT, AJAX_VIPREQUEST_ENVIRONMENT, AJAX_VIPREQUEST_OPTIONS, \
-    AJAX_VIPREQUEST_HEALTHCHECK, AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, \
-    AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, VIPREQUEST_EDIT, \
-    VIPREQUEST_TAB_REAL_SERVER, VIPREQUEST_TAB_REAL_SERVER_STATUS, \
-    VIPREQUEST_TAB_HEALTHCHECK, VIPREQUEST_TAB_MAXCON, VIPREQUEST_FORM_EXTERNAL, \
-    VIPREQUEST_EDIT_EXTERNAL, VIPREQUEST_TOKEN, JSON_ERROR, VIPREQUEST_TAB_L7FILTER,\
-    AJAX_VIPREQUEST_RULE, VIPREQUEST_TAB_POOLS, POOL_DATATABLE, VIPREQUEST_POOL_FORM, VIPREQUEST_POOL_OPTIONS
-from django.contrib import messages
-from django.core.cache import cache
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseServerError, \
-    HttpResponseRedirect
-from django.shortcuts import render_to_response, redirect
-from django.template import loader
-from django.template.context import RequestContext
-from django.views.decorators.csrf import csrf_exempt
-from networkapiclient.exception import UserNotAuthenticatedError
-from hashlib import sha1
 import base64
 import logging
-
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.Pagination import Pagination
 from networkapiclient.exception import NetworkAPIClientError, VipError, \
@@ -83,11 +62,8 @@ from networkapiclient.exception import NetworkAPIClientError, VipError, \
     InvalidTimeoutValueError, InvalidBalMethodValueError, InvalidCacheValueError, \
     InvalidPersistenceValueError, InvalidPriorityValueError, EnvironmentVipError, \
     IpEquipmentError, RealServerPriorityError, RealServerWeightError, \
-    RealServerPortError, RealParameterValueError, RealServerScriptError, EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError
-from networkapiclient.exception import UserNotAuthenticatedError
-from CadVlan.Pool.forms import PoolForm
-from django.views.decorators.http import require_http_methods
-from django import forms
+    RealServerPortError, RealParameterValueError, RealServerScriptError, \
+    EnvironmentVipNotFoundError, IpNotFoundByEquipAndVipError, UserNotAuthenticatedError
 
 
 logger = logging.getLogger(__name__)
@@ -107,14 +83,18 @@ def search_list(request):
         lists["validate_form"] = ValidateForm()
         lists["create_form"] = CreateForm()
         lists["remove_form"] = RemoveForm()
-        lists["search_form"] = SearchVipRequestForm()
+        lists["search_form"] = forms.SearchVipRequestForm()
         lists['modal'] = 'false'
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_SEARCH_LIST, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_SEARCH_LIST,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -131,7 +111,7 @@ def ajax_list_vips(request):
             auth = AuthSession(request.session)
             client = auth.get_clientFactory()
 
-            search_form = SearchVipRequestForm(request.GET)
+            search_form = forms.SearchVipRequestForm(request.GET)
 
             if search_form.is_valid():
 
@@ -172,7 +152,12 @@ def ajax_list_vips(request):
                     vips['vips'] = [aux_vip]
 
                 # Returns JSON
-                return dtp.build_response(vips["vips"], vips["total"], AJAX_VIPREQUEST_LIST, request)
+                return dtp.build_response(
+                    vips["vips"],
+                    vips["total"],
+                    templates.AJAX_VIPREQUEST_LIST,
+                    request
+                )
 
             else:
                 # Remake search form
@@ -180,8 +165,13 @@ def ajax_list_vips(request):
                 lists["search_form"] = search_form
 
                 # Returns HTML
-                response = HttpResponse(loader.render_to_string(
-                    SEARCH_FORM_ERRORS, lists, context_instance=RequestContext(request)))
+                response = HttpResponse(
+                    loader.render_to_string(
+                        templates.SEARCH_FORM_ERRORS,
+                        lists,
+                        context_instance=RequestContext(request)
+                    )
+                )
                 # Send response status with error
                 response.status_code = 412
                 return response
@@ -224,8 +214,13 @@ def ajax_shared_view_vip(request, id_vip, lists):
         lists['len_equip'] = int(len(lists['vip']['equipamento']))
 
         # Returns HTML
-        response = HttpResponse(loader.render_to_string(
-            VIPREQUEST_VIEW_AJAX, lists, context_instance=RequestContext(request)))
+        response = HttpResponse(
+            loader.render_to_string(
+                templates.VIPREQUEST_VIEW_AJAX,
+                lists,
+                context_instance=RequestContext(request)
+            )
+        )
         response.status_code = 200
         return response
 
@@ -234,8 +229,13 @@ def ajax_shared_view_vip(request, id_vip, lists):
         messages.add_message(request, messages.ERROR, e)
 
     # Returns HTML
-    response = HttpResponse(loader.render_to_string(
-        VIPREQUEST_VIEW_AJAX, lists, context_instance=RequestContext(request)))
+    response = HttpResponse(
+        loader.render_to_string(
+            templates.VIPREQUEST_VIEW_AJAX,
+            lists,
+            context_instance=RequestContext(request)
+        )
+    )
     # Send response status with error
     response.status_code = 412
     return response
@@ -650,7 +650,7 @@ def ports_(ports_vip, ports_real):
     return ports
 
 
-def mount_table_ports_vip(lists, ports_vip):
+def mount_table_ports_vip(lists, ports_vip, vip_port_ids=[]):
 
     if ports_vip is not None and ports_vip != '':
 
@@ -658,7 +658,11 @@ def mount_table_ports_vip(lists, ports_vip):
         for i in range(0, len(ports_vip)):
 
             if ports_vip[i] != '':
-                ports.append({'ports_vip': ports_vip[i]})
+                port_raw = dict()
+                port_raw['ports_vip'] = ports_vip[i]
+                if vip_port_ids:
+                    port_raw["vip_port_id"] = safe_list_get(vip_port_ids, i)
+                ports.append(port_raw)
 
         lists['ports'] = ports
 
@@ -764,7 +768,7 @@ def mount_ips(id_ipv4, id_ipv6, client_api):
         ipv6_specific = "%s:%s:%s:%s:%s:%s:%s:%s" % (ipv6['block1'], ipv6['block2'], ipv6[
                                                      'block3'], ipv6['block4'], ipv6['block5'], ipv6['block6'], ipv6['block7'], ipv6['block8'])
 
-    form_ip = RequestVipFormIP(initial={"ipv4_check": ipv4_check, "ipv4_type": ipv4_type, "ipv4_specific":
+    form_ip = forms.RequestVipFormIP(initial={"ipv4_check": ipv4_check, "ipv4_type": ipv4_type, "ipv4_specific":
                                         ipv4_specific, "ipv6_check": ipv6_check, "ipv6_type": ipv6_type, "ipv6_specific": ipv6_specific})
 
     return form_ip
@@ -781,8 +785,10 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     pool_choices = list()
 
     pool_ids = request.POST.getlist('idsPool')
+    vip_ports_to_pool = request.POST.getlist('portVipToPool')
 
     ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip'))
+    vip_port_ids = request.POST.getlist('vip_port_id')
 
     environment_vip = request.POST.get("environment_vip")
 
@@ -793,9 +799,9 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
     # Options - data
 
-    form_inputs = RequestVipFormInputs(request.POST)
+    form_inputs = forms.RequestVipFormInputs(request.POST)
 
-    form_environment = RequestVipFormEnvironment(
+    form_environment = forms.RequestVipFormEnvironment(
         finality_list,
         finality,
         client,
@@ -804,7 +810,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         request.POST
     )
 
-    form_options = RequestVipFormOptions(
+    form_options = forms.RequestVipFormOptions(
         request,
         environment_vip,
         client_api,
@@ -812,7 +818,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         request.POST
     )
 
-    form_ip = RequestVipFormIP(request.POST)
+    form_ip = forms.RequestVipFormIP(request.POST)
 
     lists, is_valid_ports = valid_ports(lists, ports_vip)
 
@@ -894,9 +900,12 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
                 vip_ports_to_pools = list()
 
-                for port_v in ports_vip:
-                    for pool_id in pool_ids:
-                        vip_ports_to_pools.append({'server_pool': pool_id, 'port_vip': port_v})
+                for index in range(len(pool_ids)):
+                    vip_ports_to_pools.append({
+                        'server_pool': safe_list_get(pool_ids, index),
+                        'port_vip': safe_list_get(vip_ports_to_pool, index),
+                        'id': safe_list_get(vip_port_ids, index)
+                    })
 
                 if edit:
                     vip = client_api.create_api_vip_request().save(
@@ -953,12 +962,14 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         for pool in pools:
             pool_choices.append((pool.get('id'), pool.get('identifier')))
 
-    lists = mount_table_ports_vip(lists, ports_vip)
+    lists = mount_table_ports_vip(lists, ports_vip, vip_port_ids)
 
     pools_add = list()
 
-    for pool_id in pool_ids:
-        pools_add.append(client_api.create_pool().get_by_pk(pool_id))
+    for index in range(len(pool_ids)):
+        raw_server_pool = client_api.create_pool().get_by_pk(pool_ids[index])
+        raw_server_pool["server_pool"]["port_vip"] = vip_ports_to_pool[index]
+        pools_add.append(raw_server_pool)
 
     lists['pools_add'] = pools_add
 
@@ -969,7 +980,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     lists['form_options'] = form_options
     lists['form_ip'] = form_ip
 
-    lists['vip_pool_form'] = VipPoolForm(
+    lists['vip_pool_form'] = forms.VipPoolForm(
         pool_choices,
         request.POST or None
     )
@@ -1260,7 +1271,11 @@ def tab_real_server_status(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_REAL_SERVER_STATUS, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_REAL_SERVER_STATUS,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @login_required
@@ -1287,8 +1302,6 @@ def tab_pools(request, id_vip):
         client = vip.get("cliente")
         environment = vip.get("ambiente")
 
-
-
     except EnvironmentVipNotFoundError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, request_vip_messages.get(
@@ -1298,7 +1311,11 @@ def tab_pools(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_POOLS, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_POOLS,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -1312,13 +1329,12 @@ def pool_datatable(request, id_vip):
         client = auth.get_clientFactory()
 
         columnIndexNameMap = {
-            0: '',
-            1: 'identifier',
-            2: 'default_port',
-            3: 'healthcheck__healthcheck_type',
-            4: 'environment',
-            5: 'pool_created',
-            6: ''
+            0: 'identifier',
+            1: 'default_port',
+            2: 'healthcheck__healthcheck_type',
+            3: 'environment',
+            4: 'pool_created',
+            5: ''
         }
 
         dtp = DataTablePaginator(request, columnIndexNameMap)
@@ -1345,7 +1361,7 @@ def pool_datatable(request, id_vip):
         return dtp.build_response(
             pools["pools"],
             pools["total"],
-            POOL_DATATABLE,
+            templates.VIPREQUEST_POOL_DATATABLE,
             request
         )
 
@@ -1391,7 +1407,7 @@ def tab_real_server(request, id_vip):
         balancing = vip.get("metodo_bal")
         lists['balancing'] = balancing
 
-        form_real = RequestVipFormReal(initial={"maxcom": maxcon})
+        form_real = forms.RequestVipFormReal(initial={"maxcom": maxcon})
         lists['form_real'] = form_real
 
         parse = True
@@ -1532,7 +1548,11 @@ def tab_real_server(request, id_vip):
     if request.method == "POST":
         return HttpResponse(content=html, status=200)
     else:
-        return render_to_response(VIPREQUEST_TAB_REAL_SERVER, lists, context_instance=RequestContext(request))
+        return render_to_response(
+            templates.VIPREQUEST_TAB_REAL_SERVER,
+            lists,
+            context_instance=RequestContext(request)
+        )
 
 
 @log
@@ -1574,7 +1594,7 @@ def tab_healthcheck(request, id_vip):
         # Already edited
         if request.method == "POST":
 
-            form_healthcheck = RequestVipFormHealthcheck(
+            form_healthcheck = forms.RequestVipFormHealthcheck(
                 healthcheck_list, healthcheck_options, request.POST)
             lists['form_healthcheck'] = form_healthcheck
 
@@ -1642,7 +1662,7 @@ def tab_healthcheck(request, id_vip):
             healthcheck_type = vip.get("healthcheck_type")
             healthcheck = vip.get("healthcheck")
 
-            form_healthcheck = RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, initial={
+            form_healthcheck = forms.RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, initial={
                                                          "healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
 
             lists['form_healthcheck'] = form_healthcheck
@@ -1657,7 +1677,11 @@ def tab_healthcheck(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_HEALTHCHECK, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_HEALTHCHECK,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -1682,7 +1706,7 @@ def tab_maxcon(request, id_vip):
         # Already edited
         if request.method == "POST":
 
-            form_real = RequestVipFormReal(request.POST)
+            form_real = forms.RequestVipFormReal(request.POST)
             lists['form_real'] = form_real
 
             if form_real.is_valid():
@@ -1748,7 +1772,7 @@ def tab_maxcon(request, id_vip):
             maxcon = vip.get("maxcon")
             equip_name = vip.get("equip_name")
 
-            form_real = RequestVipFormReal(
+            form_real = forms.RequestVipFormReal(
                 initial={"equip_name": equip_name, "maxcom": maxcon})
             lists['form_real'] = form_real
 
@@ -1762,7 +1786,11 @@ def tab_maxcon(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_MAXCON, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_MAXCON,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -1791,7 +1819,7 @@ def tab_l7filter(request, id_vip):
         filter_valid = l7.get('filter_valid')
         rule = vip.get('rule_id')
 
-        form_real = FilterL7Form(initial={"filter_applied": filter_applied,
+        form_real = forms.FilterL7Form(initial={"filter_applied": filter_applied,
                                           "filter_l7": filter_l7,
                                           "filter_rollback": filter_rollback})
         lists['form_real'] = form_real
@@ -1812,7 +1840,7 @@ def tab_l7filter(request, id_vip):
                 environment_vip, id_vip).get('name_rule_opt')
 
             rules = rules if type(rules) is list else [rules, ]
-            lists['form_rules'] = RuleForm(rules, initial={"rules": rule})
+            lists['form_rules'] = forms.RuleForm(rules, initial={"rules": rule})
         except Exception, e:
             logger.error(e)
             environment_vip = None
@@ -1822,8 +1850,8 @@ def tab_l7filter(request, id_vip):
         # Already edited
         if request.method == "POST":
 
-            form_real = FilterL7Form(request.POST)
-            form_rules = RuleForm(rules, request.POST)
+            form_real = forms.FilterL7Form(request.POST)
+            form_rules = forms.RuleForm(rules, request.POST)
             lists['form_real'] = form_real
             lists['form_rules'] = form_rules
 
@@ -1840,7 +1868,7 @@ def tab_l7filter(request, id_vip):
                     filter_applied = l7.get('filter_applied')
                     filter_rollback = l7.get('filter_rollback')
 
-                    form_real = FilterL7Form(initial={"filter_applied": filter_applied,
+                    form_real = forms.FilterL7Form(initial={"filter_applied": filter_applied,
                                                       "filter_l7": filter_l7,
                                                       "filter_rollback": filter_rollback})
                     lists['form_real'] = form_real
@@ -1865,7 +1893,11 @@ def tab_l7filter(request, id_vip):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(VIPREQUEST_TAB_L7FILTER, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.VIPREQUEST_TAB_L7FILTER,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 @log
@@ -1977,8 +2009,8 @@ def generate_token(request):
 
         lists = {}
 
-        form = GenerateTokenForm(
-            request.POST) if request.method == 'POST' else GenerateTokenForm()
+        form = forms.GenerateTokenForm(
+            request.POST) if request.method == 'POST' else forms.GenerateTokenForm()
 
         if form.is_valid():
 
@@ -2050,7 +2082,11 @@ def generate_token(request):
                 lists["url"] = reverse(
                     "vip-request.edit.external", args=[idt]) if idt is not None else reverse("vip-request.form.external")
 
-            return render_to_response(VIPREQUEST_TOKEN, lists, context_instance=RequestContext(request))
+            return render_to_response(
+                templates.VIPREQUEST_TOKEN,
+                lists,
+                context_instance=RequestContext(request)
+            )
 
     except InvalidParameterError, e:
         logger.error(e)
@@ -2063,7 +2099,11 @@ def generate_token(request):
         logger.error(e)
         lists["error"] = e
 
-    return render_to_response(JSON_ERROR, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        templates.JSON_ERROR,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 def validate_user_networkapi(user_request, is_ldap_user):
@@ -2099,7 +2139,7 @@ def add_form_shared(request, client_api, form_acess="", external=False):
         lists['form_acess'] = form_acess
         lists['external'] = True if external else False
 
-        lists['vip_pool_form'] = VipPoolForm(
+        lists['vip_pool_form'] = forms.VipPoolForm(
             pool_choices,
             request.POST or None
         )
@@ -2120,16 +2160,16 @@ def add_form_shared(request, client_api, form_acess="", external=False):
             )
 
             if is_valid:
+
                 messages.add_message(
                     request,
                     messages.SUCCESS,
                     request_vip_messages.get("success_insert")
                 )
-
                 if external:
                     return HttpResponseRedirect(
                         "%s?token=%s" % (
-                            reverse('vip-request.edit.external', args=[id_vip]),
+                            reverse('vip-request.form.external'),
                             form_acess.initial.get("token")
                         )
                     )
@@ -2138,20 +2178,24 @@ def add_form_shared(request, client_api, form_acess="", external=False):
 
         else:
 
-            lists['form_inputs'] = RequestVipFormInputs()
-            lists['form_environment'] = RequestVipFormEnvironment(finality_list)
-            lists['form_real'] = RequestVipFormReal()
-            lists['form_healthcheck'] = RequestVipFormHealthcheck(healthcheck_list, [])
-            lists['form_options'] = RequestVipFormOptions()
-            lists['form_ip'] = RequestVipFormIP()
+            lists['form_inputs'] = forms.RequestVipFormInputs()
+            lists['form_environment'] = forms.RequestVipFormEnvironment(finality_list)
+            lists['form_real'] = forms.RequestVipFormReal()
+            lists['form_healthcheck'] = forms.RequestVipFormHealthcheck(healthcheck_list, [])
+            lists['form_options'] = forms.RequestVipFormOptions()
+            lists['form_ip'] = forms.RequestVipFormIP()
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    template = VIPREQUEST_FORM_EXTERNAL if external else VIPREQUEST_FORM
+    template = templates.VIPREQUEST_FORM_EXTERNAL if external else templates.VIPREQUEST_FORM
 
-    return render_to_response(template, lists, context_instance=RequestContext(request))
+    return render_to_response(
+        template,
+        lists,
+        context_instance=RequestContext(request)
+    )
 
 
 def edit_form_shared(request, id_vip, client_api, form_acess="", external=False):
@@ -2227,28 +2271,17 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             id_ipv4 = vip.get("id_ip")
             id_ipv6 = vip.get("id_ipv6")
 
+            port_services = vip.get('portas_servicos')
+
             ports = []
 
-            if "portas_servicos" in vip:
-                if type(vip['portas_servicos']) is not NoneType:
-                    if type(vip['portas_servicos']['porta']) == unicode or (type(vip['portas_servicos']['porta']) is not NoneType and len(vip['portas_servicos']['porta']) == 1):
-                        vip['portas_servicos']['porta'] = [vip['portas_servicos']['porta']]
+            for vip_port_to_pool in port_services:
+                ports.append({
+                    'ports_vip': vip_port_to_pool.get('port'),
+                    'vip_port_id': vip_port_to_pool.get('vip_port_id')
+                })
 
-                    ports = vip.get("portas_servicos").get('porta')
-
-            ports_vip = []
-            ports_real = []
-            if ports:
-                for port in ports:
-                    p = str(port)
-                    ports_vip.append(p)
-
-                    if len(p) > 1:
-                        ports_real.append(p[1])
-                    else:
-                        ports_real.append('')
-
-            lists = mount_table_ports(lists, ports_vip, ports_real)
+            lists['ports'] = ports
 
             environment_vip = client_api.create_environment_vip().search(
                 None,
@@ -2264,7 +2297,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             for pool in pools:
                 pool_choices.append((pool.get('id'), pool.get('identifier')))
 
-            lists['vip_pool_form'] = VipPoolForm(
+            lists['vip_pool_form'] = forms.VipPoolForm(
                 pool_choices,
                 request.POST or None
             )
@@ -2276,7 +2309,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     request_vip_messages.get("can_not_edit")
                 )
 
-            form_inputs = RequestVipFormInputs(
+            form_inputs = forms.RequestVipFormInputs(
                 initial={
                     "business": business,
                     "service": service,
@@ -2304,7 +2337,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     request_vip_messages.get("error_existing_environment_vip") % (finality, client, environment)
                 )
 
-            form_environment = RequestVipFormEnvironment(
+            form_environment = forms.RequestVipFormEnvironment(
                 finality_list,
                 finality,
                 client,
@@ -2318,7 +2351,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                 }
             )
 
-            form_options = RequestVipFormOptions(
+            form_options = forms.RequestVipFormOptions(
                 request,
                 environment_vip,
                 client_api,
@@ -2350,7 +2383,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    template = VIPREQUEST_EDIT_EXTERNAL if external else VIPREQUEST_EDIT
+    template = templates.VIPREQUEST_EDIT_EXTERNAL if external else templates.VIPREQUEST_EDIT
 
     return render_to_response(template, lists, context_instance=RequestContext(request))
 
@@ -2379,7 +2412,14 @@ def popular_client_shared(request, client_api):
         status_code = 500
 
     # Returns HTML
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_CLIENT, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_CLIENT,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 def popular_environment_shared(request, client_api):
@@ -2411,7 +2451,14 @@ def popular_environment_shared(request, client_api):
         status_code = 500
 
     # Returns HTML
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_ENVIRONMENT, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_ENVIRONMENT,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 def popular_rule_shared(request, client_api):
@@ -2435,7 +2482,14 @@ def popular_rule_shared(request, client_api):
         status_code = 500
 
     # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_RULE, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_RULE,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 def popular_options_shared(request, client_api):
@@ -2482,7 +2536,14 @@ def popular_options_shared(request, client_api):
 
     # Returns Json
     try:
-        return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_OPTIONS, lists, context_instance=RequestContext(request)), status=status_code)
+        return HttpResponse(
+            loader.render_to_string(
+                templates.AJAX_VIPREQUEST_OPTIONS,
+                lists,
+                context_instance=RequestContext(request)
+            ),
+            status=status_code
+        )
     except Exception, e:
         print e
 
@@ -2491,17 +2552,17 @@ def popular_add_healthcheck_shared(request, client_api):
 
     lists = dict()
     status_code = None
-    form = HealthcheckForm()
+    form = forms.HealthcheckForm()
 
     try:
 
         client = client_api.create_ambiente()
 
         if request.method == "GET":
-            form = HealthcheckForm(request.GET)
+            form = forms.HealthcheckForm(request.GET)
 
         else:
-            form = HealthcheckForm(request.POST)
+            form = forms.HealthcheckForm(request.POST)
 
         if form.is_valid():
 
@@ -2521,7 +2582,14 @@ def popular_add_healthcheck_shared(request, client_api):
         status_code = 500
 
     # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_HEALTHCHECK, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_HEALTHCHECK,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 def model_ip_real_server_shared(request, client_api):
@@ -2598,11 +2666,25 @@ def model_ip_real_server_shared(request, client_api):
         messages.add_message(request, messages.ERROR, e)
         status_code = 500
 
-    lists['ips'] = loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML, {
-                                           'ips': ips, 'equip': equip, 'balancing': balancing}, context_instance=RequestContext(request))
+    lists['ips'] = loader.render_to_string(
+        templates.AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML,
+        {
+            'ips': ips,
+            'equip': equip,
+            'balancing': balancing
+        },
+        context_instance=RequestContext(request)
+    )
 
     # Returns Json
-    return HttpResponse(loader.render_to_string(AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER, lists, context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            templates.AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER,
+            lists,
+            context_instance=RequestContext(request)
+        ),
+        status=status_code
+    )
 
 
 @log
@@ -2714,6 +2796,19 @@ def apply_rollback_l7(request):
         messages.add_message(request, messages.ERROR, e)
 
 
+@csrf_exempt
+@log
+@access_external()
+def external_load_pool_for_copy(request, form_acess, client):
+
+    return shared_load_pool_for_copy(
+        request,
+        client,
+        form_acess,
+        external=True
+    )
+
+
 @log
 @login_required
 @has_perm([
@@ -2724,105 +2819,154 @@ def apply_rollback_l7(request):
 ])
 def load_pool_for_copy(request):
 
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    return shared_load_pool_for_copy(request, client)
+
+
+def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
+
     try:
+
+        server_pool_members = list()
 
         pool_id = request.GET.get('pool_id')
 
-        server_pool = dict()
-        server_pool_members = dict()
-        choices_opvip = list()
-
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        action = reverse('save.pool')
+        action = reverse('external.save.pool') if external else reverse('save.pool')
 
         pool = client.create_pool().get_by_pk(pool_id)
 
-        server_pool = pool['server_pool']
-        server_pool_members = pool['server_pool_members']
+        server_pool = pool.get('server_pool')
 
-        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
+        server_pool_members_raw = pool.get('server_pool_members')
 
-        env = client.create_ambiente().buscar_por_id(server_pool['environment']['id'])
+        expect_string_list = client.create_ambiente()\
+            .listar_healtchcheck_expect_distinct()
 
-        for spm in server_pool_members:
+        environment_id = server_pool['environment']['id']
 
-            equipment = client.create_pool().get_equip_by_ip(
-                spm['ip']['id']
-            )
+        env = client.create_ambiente()\
+            .buscar_por_id(environment_id)
 
-            spm.update({'equipamento': equipment})
+        options_environment_choices = list()
 
-            ip_formatado = ""
+        options_vip_choices = _create_options_vip(client)
 
-            if spm['ip'] is not None:
-                ip_formatado = "{}.{}.{}.{}".format(
-                    spm['ip']['oct1'],
-                    spm['ip']['oct2'],
-                    spm['ip']['oct3'],
-                    spm['ip']['oct4']
+        options_pool_as_healthcheck_choices = _create_options_pool_as_healthcheck(
+            client,
+            environment_id
+        )
+
+        if server_pool_members_raw:
+            for obj_member in server_pool_members_raw:
+
+                ipv4 = obj_member.get('ip')
+                ipv6 = obj_member.get('ipv6')
+                ip_obj = ipv4 or ipv6
+
+                equipment = client.create_pool().get_equip_by_ip(
+                    ip_obj.get('id')
                 )
 
-            elif spm['ipv6'] is not None:
-                ip_formatado = "{}:{}:{}:{}:{}:{}:{}:{}".format(
-                    spm['ipv6']['bloco1'],
-                    spm['ipv6']['bloco2'],
-                    spm['ipv6']['bloco3'],
-                    spm['ipv6']['bloco4'],
-                    spm['ipv6']['bloco5'],
-                    spm['ipv6']['bloco6'],
-                    spm['ipv6']['bloco7'],
-                    spm['ipv6']['bloco8'],
+                server_pool_members.append({
+                    'id': obj_member['id'],
+                    'id_equip': equipment['equipamento']['id'],
+                    'nome_equipamento': equipment['equipamento']['nome'],
+                    'priority': obj_member['priority'],
+                    'port_real': obj_member['port_real'],
+                    'weight': obj_member['weight'],
+                    'id_ip': obj_member['ip']['id'],
+                    'ip': ip_obj.get('ip_formated')}
                 )
 
-            spm.update({'ip_formatado': ip_formatado})
-
-        opvip_list = client.create_option_vip().get_all()
-
-        for opvip in opvip_list['option_vip']:
-            # filtering to only Balanceamento
-            if opvip['tipo_opcao'] == 'Balanceamento':
-                choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
-
-        poolform_initial = {
+        form_initial = {
             'default_port': server_pool.get('default_port'),
             'balancing': server_pool.get('balancing'),
             'healthcheck': server_pool.get('healthcheck') and server_pool['healthcheck']['id'],
+            'max_con': server_pool_members_raw[0]['limit'] if server_pool_members_raw else ""
         }
 
-        form = ServerPoolForm(
-            choices_opvip,
-            initial=poolform_initial
-        )
-
-        form_real = RequestVipFormReal(
-            initial={
-                'maxcom': pool['server_pool_members'][0]['limit'] if pool.get('server_pool_members') else ""
-            }
+        form = PoolForm(
+            options_environment_choices,
+            options_vip_choices,
+            options_pool_as_healthcheck_choices,
+            initial=form_initial
         )
 
         context_attrs = {
             'form': form,
-            'form_real': form_real,
             'action': action,
-            'reals': server_pool_members,
+            'pool_members': server_pool_members,
             'id_server_pool': pool_id,
             'selection_form': DeleteForm(),
-            'environment_id': server_pool['environment']['id'],
+            'environment_id': environment_id,
             'expect_strings': expect_string_list,
-            'env_name': env['ambiente']['ambiente_rede']
+            'env_name': env['ambiente']['ambiente_rede'],
+            'show_environment': False
         }
 
         return render(
             request,
-            VIPREQUEST_POOL_FORM,
+            templates.VIPREQUEST_POOL_FORM,
             context_attrs,
         )
 
     except NetworkAPIClientError, e:
         logger.error(e)
         return render_message_json(str(e), messages.ERROR)
+
+
+def _create_options_pool_as_healthcheck(client, environment_id):
+
+    options_pool_choices = [('', '-')]
+
+    if environment_id:
+
+        options_pool = client.create_pool().get_opcoes_pool_by_ambiente(
+            environment_id
+        ).get('opcoes_pool')
+
+        for obj_option in options_pool:
+            options_pool_choices.append((
+                obj_option['opcao_pool']['description'],
+                obj_option['opcao_pool']['description']
+            ))
+
+    return options_pool_choices
+
+
+def _create_options_vip(client):
+
+    default_balancing = 'Balanceamento'
+
+    options_vip_choices = [('', '-')]
+
+    options_vip = client.create_option_vip().get_all().get('option_vip')
+
+    for obj_option in options_vip:
+        if obj_option['tipo_opcao'] == default_balancing:
+            options_vip_choices.append((
+                obj_option['nome_opcao_txt'],
+                obj_option['nome_opcao_txt']
+            ))
+
+    return options_vip_choices
+
+
+def _create_options_environment(client, env_vip_id):
+
+    choices_environment = [(0, '-')]
+
+    environments = client.create_api_vip_request()\
+        .list_environment_by_environmet_vip(env_vip_id)
+
+    for env in environments:
+        choices_environment.append(
+            (env['id'], env['name'])
+        )
+
+    return choices_environment
 
 
 @log
@@ -2837,92 +2981,81 @@ def load_pool_for_copy(request):
 ])
 def save_pool(request):
 
-    try:
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
 
-        pool_members = list()
-        choices_environment = list()
-        choices_opvip = list()
-        choices_healthcheck = list()
+    return shared_save_pool(request, client)
+
+
+@csrf_exempt
+@log
+@access_external()
+def external_save_pool(request, form_acess, client):
+
+    return shared_save_pool(request, client, form_acess, external=True)
+
+
+def shared_save_pool(request, client, form_acess=None, external=False):
+
+    try:
 
         error_list = list()
-
-        opvip_list = client.create_option_vip().get_all()
-        healthcheck_list = client.create_pool().list_healthchecks()
+        ip_list_full = list()
+        HTTP_HEALTHCHECK = 'HTTP'
+        HTTPS_HEALTHCHECK = 'HTTPS'
 
         env_vip_id = request.POST.get('environment_vip')
 
-        environments = client.create_api_vip_request()\
-            .list_environment_by_environmet_vip(env_vip_id)
+        # Get Data From Request Post To Save
+        pool_member_ids = request.POST.getlist('id_pool_member')
+        equipment_ids = request.POST.getlist('id_equip')
+        equipment_names = request.POST.getlist('equip')
+        priorities = request.POST.getlist('priority')
+        ports_reals = request.POST.getlist('ports_real_reals')
+        weight = request.POST.getlist('weight')
+        id_ips = request.POST.getlist('id_ip')
+        ips = request.POST.getlist('ip')
+        environment_id = request.POST.get('environment')
+        healthcheck_type = request.POST.get('health_check')
+        healthcheck_expect = request.POST.get('expect')
+        healthcheck_request = request.POST.get('health_check_request')
 
-        for env in environments:
-            choices_environment.append(
-                (env['id'], env['name'])
-            )
+        if healthcheck_type != HTTP_HEALTHCHECK and healthcheck_type != HTTPS_HEALTHCHECK:
+            healthcheck_expect = ''
+            healthcheck_request = ''
 
-        for healthcheck in healthcheck_list['healthchecks']:
-            choices_healthcheck.append(
-                (healthcheck['id'], healthcheck['identifier'])
-            )
+        options_pool_choices = _create_options_pool_as_healthcheck(
+            client,
+            environment_id
+        )
 
-        for opvip in opvip_list['option_vip']:
-            if opvip['tipo_opcao'] == 'Balanceamento':
-                choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
+        options_environment = _create_options_environment(client, env_vip_id)
+
+        options_vip_choices = _create_options_vip(client)
 
         form = PoolForm(
-            choices_environment,
-            choices_opvip,
+            options_environment,
+            options_vip_choices,
+            options_pool_choices,
             request.POST
         )
 
-        form_real = RequestVipFormReal(request.POST)
-
-        if form.is_valid() and form_real.is_valid():
-
-            environment = request.POST.get('environment')
-
-            id_ips = request.POST.getlist('id_ip')
-            ips = request.POST.getlist('ip')
-
-            ip_list_full = list()
-
+        if form.is_valid():
             for i in range(len(ips)):
                 ip_list_full.append({'id': id_ips[i], 'ip': ips[i]})
 
             identifier = form.cleaned_data['identifier']
             default_port = form.cleaned_data['default_port']
             balancing = form.cleaned_data['balancing']
-            maxcom = form_real.cleaned_data['maxcom']
-
-            id_equips = request.POST.getlist('id_equip')
-            priorities = request.POST.getlist('priority')
-            ports_reals = request.POST.getlist('ports_real_reals')
-
-            if len(ports_reals) > 0:
-                for i in range(0, len(ports_reals)):
-                    equipment = client.create_equipamento()\
-                        .listar_por_id(id_equips[i])
-                    pool_members.append({
-                        'id_equips': id_equips[i],
-                        'nome_equipamento': equipment['equipamento']['nome'],
-                        'priority': priorities[i],
-                        'port_real': ports_reals[i],
-                        'id_ip': id_ips[i],
-                        'ip': ips[i]
-                    })
+            maxcom = form.cleaned_data['max_con']
 
             is_valid, error_list = valid_reals(
-                id_equips,
+                equipment_ids,
                 ports_reals,
                 priorities,
                 id_ips,
                 default_port
             )
-
-            healthcheck_type = request.POST.get('healthcheck')
-            healthcheck_expect = request.POST.get('expect')
-            healthcheck_request = request.POST.get('healthcheck_request')
 
             is_valid_healthcheck, error_healthcheck = valid_realthcheck(
                 healthcheck_type
@@ -2930,24 +3063,23 @@ def save_pool(request):
 
             error_list.extend(error_healthcheck)
 
-            if healthcheck_type != 'HTTP' and healthcheck_type != 'HTTPS':
-                healthcheck_expect = ''
-                healthcheck_request = ''
-
             if is_valid and is_valid_healthcheck:
-                healthcheck_old = ''
-                client.create_pool().inserir(
-                    identifier, default_port, environment,
-                    balancing, healthcheck_type, healthcheck_expect,
-                    healthcheck_request, healthcheck_old, maxcom, ip_list_full,
-                    id_equips, priorities, ports_reals
+
+                pool_id = None
+
+                client.create_pool().save(
+                    pool_id, identifier, default_port,
+                    environment_id, balancing, healthcheck_type,
+                    healthcheck_expect, healthcheck_request, maxcom,
+                    ip_list_full, equipment_names, equipment_ids,
+                    priorities, weight, ports_reals, pool_member_ids
                 )
 
                 return render_message_json(
                     pool_messages.get('success_insert')
                 )
 
-        erros = _format_form_error([form, form_real])
+        erros = _format_form_error([form])
 
         if error_list:
             erros.extend(error_list)
@@ -2959,15 +3091,12 @@ def save_pool(request):
         return render_message_json(str(e), messages.ERROR)
 
 
-def _format_form_error(forms):
+@csrf_exempt
+@log
+@access_external()
+def external_load_new_pool(request, form_acess, client):
 
-    errors = list()
-
-    for form in forms:
-        for field, error in form.errors.items():
-            errors.append('<b>%s</b>: %s' % (field, ', '.join(error)))
-
-    return errors
+    return shared_load_new_pool(request, client, form_acess, external=True)
 
 
 @log
@@ -2980,59 +3109,56 @@ def _format_form_error(forms):
 ])
 def load_new_pool(request):
 
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    return shared_load_new_pool(request, client)
+
+
+def shared_load_new_pool(request, client, form_acess=None, external=False):
+
     try:
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        choices_opvip = list()
-        choices_healthcheck = list()
         pool_members = list()
-        choices_environment = list()
 
         env_vip_id = request.GET.get('env_vip_id')
 
-        opvip_list = client.create_option_vip().get_all()
-        healthcheck_list = client.create_pool().list_healthchecks()
-
-        environments = client.create_api_vip_request()\
-            .list_environment_by_environmet_vip(env_vip_id)
+        action = reverse('external.save.pool') if external else reverse('save.pool')
 
         expect_string_list = client.create_ambiente()\
             .listar_healtchcheck_expect_distinct()
 
-        choices_environment.append((0, '-'))
-        for env in environments:
-            choices_environment.append(
-                (env['id'], env['name'])
-            )
+        options_vip_choices = _create_options_vip(client)
 
-        for healthcheck in healthcheck_list['healthchecks']:
-            choices_healthcheck.append(
-                (healthcheck['id'], healthcheck['identifier'])
-            )
+        choices_environment = _create_options_environment(
+            client,
+            env_vip_id
+        )
 
-        for opvip in opvip_list['option_vip']:
-            if opvip['tipo_opcao'] == 'Balanceamento':
-                choices_opvip.append((opvip['id'], opvip['nome_opcao_txt']))
-
-        form = PoolForm(choices_environment, choices_opvip)
-        form_real = RequestVipFormReal()
+        form = PoolForm(choices_environment, options_vip_choices)
 
         return render(
             request,
-            VIPREQUEST_POOL_FORM, {
+            templates.VIPREQUEST_POOL_FORM, {
                 'form': form,
-                'form_real': form_real,
-                'action': reverse('save.pool'),
+                'action': action,
                 'pool_members': pool_members,
-                'expect_strings': expect_string_list
+                'expect_strings': expect_string_list,
+                'show_environment': True
             }
         )
 
     except NetworkAPIClientError, e:
         logger.error(e)
         return render_message_json(str(e), messages.ERROR)
+
+
+@csrf_exempt
+@log
+@access_external()
+def external_load_options_pool(request, form_acess, client):
+
+    return shared_load_options_pool(request, client, form_acess, external=True)
 
 
 @log
@@ -3044,12 +3170,17 @@ def load_new_pool(request):
 ])
 def load_options_pool(request):
 
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    return shared_load_options_pool(request, client)
+
+
+def shared_load_options_pool(request, client, form_acess=None, external=False):
+
     try:
 
         context_attrs = dict()
-
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
 
         environment_vip_id = request.GET.get('environment_vip_id')
 
@@ -3059,10 +3190,63 @@ def load_options_pool(request):
 
         return render(
             request,
-            VIPREQUEST_POOL_OPTIONS,
+            templates.VIPREQUEST_POOL_OPTIONS,
             context_attrs
         )
 
     except NetworkAPIClientError, e:
         logger.error(e)
         return render_message_json(str(e), messages.ERROR)
+
+
+@csrf_exempt
+@log
+@access_external()
+def external_pool_member_items(request, form_acess, client):
+
+    return shared_pool_member_items(
+        request,
+        client,
+        form_acess,
+        external=True
+    )
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, ])
+def pool_member_items(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    return shared_pool_member_items(request, client)
+
+
+def shared_pool_member_items(request, client, form_acess=None, external=False):
+
+    try:
+
+        pool_id = request.GET.get('pool_id')
+        pool_data = client.create_pool().get_by_pk(pool_id)
+
+        return render(
+            request,
+            templates.POOL_MEMBER_ITEMS,
+            pool_data
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+
+def _format_form_error(forms):
+
+    errors = list()
+
+    for form in forms:
+        for field, error in form.errors.items():
+            errors.append('<b>%s</b>: %s' % (field, ', '.join(error)))
+
+    return errors

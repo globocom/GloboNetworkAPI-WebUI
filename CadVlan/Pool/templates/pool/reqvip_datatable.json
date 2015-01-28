@@ -1,0 +1,23 @@
+{
+    "sEcho": {{ sEcho|escapejs }},
+    "iTotalRecords": {{ iTotalRecords|escapejs }},
+    "iTotalDisplayRecords": {{ iTotalDisplayRecords|escapejs }},
+    "aaData":[
+    {% for requisicoes_vip in aaData %}
+    [
+		"<div class='{% if requisicoes_vip.requisicao_vip.vip_criado == 'True' %}{%if not requisicoes_vip.requisicao_vip.filter_valid or requisicoes_vip.requisicao_vip.filter_valid == 'False' %}text_red {% endif %}{% endif %} text_center'> {{ requisicoes_vip.requisicao_vip.id|escapejs }} </div>",
+		"<div class='{% if requisicoes_vip.requisicao_vip.vip_criado == 'True' %}{%if not requisicoes_vip.requisicao_vip.filter_valid or requisicoes_vip.requisicao_vip.filter_valid == 'False' %}text_red {% endif %}{% endif %} text_center'> {% if requisicoes_vip.requisicao_vip.ip.oct1 > 0 %} {{ requisicoes_vip.requisicao_vip.ip.oct1|escapejs }}.{{ requisicoes_vip.requisicao_vip.ip.oct2|escapejs }}.{{ requisicoes_vip.requisicao_vip.ip.oct3|escapejs }}.{{ requisicoes_vip.requisicao_vip.ip.oct4|escapejs }} {% else %} {{ requisicoes_vip.requisicao_vip.ipv6.bloco1|escapejs }}:{{ requisicoes_vip.requisicao_vip.ipv6.bloco2|escapejs }}:{{ requisicoes_vip.requisicao_vip.ipv6.bloco3|escapejs }}:{{ requisicoes_vip.requisicao_vip.ipv6.bloco4|escapejs }}:{{ requisicoes_vip.requisicao_vip.ipv6.bloco5|escapejs }}:{{ requisicoes_vip.requisicao_vip.ipv6.bloco6|escapejs }}:{{ requisicoes_vip.requisicao_vip.ipv6.bloco7|escapejs }}:{{ requisicoes_vip.requisicao_vip.ipv6.bloco8|escapejs }} {% endif %} </div>",
+		"<div class='{% if requisicoes_vip.requisicao_vip.vip_criado == 'True' %}{%if not requisicoes_vip.requisicao_vip.filter_valid or requisicoes_vip.requisicao_vip.filter_valid == 'False' %}text_red {% endif %}{% endif %} text_center'> {{ requisicoes_vip.requisicao_vip.ip.descricao|escapejs }} </div>",
+		"<div class='{% if requisicoes_vip.requisicao_vip.vip_criado == 'True' %}{%if not requisicoes_vip.requisicao_vip.filter_valid or requisicoes_vip.requisicao_vip.filter_valid == 'False' %}text_red {% endif %}{% endif %} text_center'> {{ requisicoes_vip.requisicao_vip.ipv6.descricao|escapejs }} </div>",
+		"<div class='{% if requisicoes_vip.requisicao_vip.vip_criado == 'True' %}{%if not requisicoes_vip.requisicao_vip.filter_valid or requisicoes_vip.requisicao_vip.filter_valid == 'False' %}text_red {% endif %}{% endif %} text_center'> {% if requisicoes_vip.environment_vip_ipv4 %} {{ requisicoes_vip.environment_vip_ipv4|escapejs }} {% else %} {{ requisicoes_vip.environment_vip_ipv6|escapejs }} {% endif %}</div>",
+		"<div class='{% if requisicoes_vip.requisicao_vip.vip_criado == 'True' %}{%if not requisicoes_vip.requisicao_vip.filter_valid or requisicoes_vip.requisicao_vip.filter_valid == 'False' %}text_red {% endif %}{% endif %} text_center'> {% ifequal requisicoes_vip.requisicao_vip.validado 1 %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %}</div>",
+		"<div class='{% if requisicoes_vip.requisicao_vip.vip_criado == 'True' %}{%if not requisicoes_vip.requisicao_vip.filter_valid or requisicoes_vip.requisicao_vip.filter_valid == 'False' %}text_red {% endif %}{% endif %} text_center'> {% ifequal requisicoes_vip.requisicao_vip.vip_criado 1 %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endifequal %} </div>",
+		"<div class='{% if requisicoes_vip.requisicao_vip.vip_criado == 'True' %}{%if not requisicoes_vip.requisicao_vip.filter_valid or requisicoes_vip.requisicao_vip.filter_valid == 'False' %}text_red {% endif %}{% endif %} text_center'> {% if requisicoes_vip.requisicao_vip.vip_criado %}<a href='{% url vip-request.tab.pools requisicoes_vip.requisicao_vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit_create'>Editar Vip Criado (Healthcheck,Portas, Maxconn, Real(s) Server(s))</a>{% else %} <a href='{% url vip-request.edit requisicoes_vip.requisicao_vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a> {% endif %}</div>"
+		
+	]
+    {% if not forloop.last %}
+    ,
+    {% endif %}
+    {% endfor %}
+    ]
+}
