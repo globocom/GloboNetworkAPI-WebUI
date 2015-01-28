@@ -45,9 +45,19 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_VIP, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def add_network_form(request):
+def add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     lists = dict()
+    lists['id_vlan'] = id_vlan
+    lists['sf_number'] = sf_number
+    lists['sf_name'] = sf_name
+    lists['sf_environment'] = sf_environment
+    lists['sf_nettype'] = sf_nettype
+    lists['sf_subnet'] = sf_subnet
+    lists['sf_ipversion'] = sf_ipversion
+    lists['sf_network'] = sf_network
+    lists['sf_iexact'] = sf_iexact
+    lists['sf_acl'] = sf_acl
 
     try:
 
@@ -93,7 +103,7 @@ def add_network_form(request):
                 messages.add_message(
                     request, messages.SUCCESS, network_ip_messages.get("success_insert"))
 
-                return HttpResponseRedirect(reverse('vlan.list.by.id', args=[vlan_id]))
+                return HttpResponseRedirect(reverse('vlan.list.by.id', args=[vlan_id, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
             # If invalid, send all error messages in fields
             lists['form'] = form
 
@@ -112,9 +122,19 @@ def add_network_form(request):
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_VIP, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def vlan_add_network_form(request, id_vlan):
+def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     lists = dict()
+    lists['id_vlan'] = id_vlan
+    lists['sf_number'] = sf_number
+    lists['sf_name'] = sf_name
+    lists['sf_environment'] = sf_environment
+    lists['sf_nettype'] = sf_nettype
+    lists['sf_subnet'] = sf_subnet
+    lists['sf_ipversion'] = sf_ipversion
+    lists['sf_network'] = sf_network
+    lists['sf_iexact'] = sf_iexact
+    lists['sf_acl'] = sf_acl
 
     try:
 
@@ -646,10 +666,24 @@ def insert_ip6(request, id_net='0', id_vlan='0', sf_number='0', sf_name='0', sf_
 @log
 @login_required
 @has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def edit_ip4(request, id_net, id_ip4):
+def edit_ip4(request, id_net, id_ip4, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
+    lists = dict()
+    lists['id_net'] = id_net
+    lists['id_vlan'] = id_vlan
+    lists['sf_number'] = sf_number
+    lists['sf_name'] = sf_name
+    lists['sf_environment'] = sf_environment
+    lists['sf_nettype'] = sf_nettype
+    lists['sf_subnet'] = sf_subnet
+    lists['sf_ipversion'] = sf_ipversion
+    lists['sf_network'] = sf_network
+    lists['sf_iexact'] = sf_iexact
+    lists['sf_acl'] = sf_acl
+
+
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         form = IPEditForm()
@@ -693,7 +727,7 @@ def edit_ip4(request, id_net, id_ip4):
                         client.create_ip().edit_ipv4(ip, descricao, id_ip4)
                         messages.add_message(
                             request, messages.SUCCESS, network_ip_messages.get("ip_edit_sucess"))
-                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
                     except NetworkAPIClientError, e:
                         logger.error(e)
@@ -754,16 +788,30 @@ def edit_ip4(request, id_net, id_ip4):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 
 @log
 @login_required
 @has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def edit_ip6(request, id_net, id_ip6):
+def edit_ip6(request, id_net, id_ip6, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
+    lists = dict()
+    lists['id_net'] = id_net
+    lists['id_vlan'] = id_vlan
+    lists['sf_number'] = sf_number
+    lists['sf_name'] = sf_name
+    lists['sf_environment'] = sf_environment
+    lists['sf_nettype'] = sf_nettype
+    lists['sf_subnet'] = sf_subnet
+    lists['sf_ipversion'] = sf_ipversion
+    lists['sf_network'] = sf_network
+    lists['sf_iexact'] = sf_iexact
+    lists['sf_acl'] = sf_acl
+
+
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         form = IPEditForm()
@@ -816,7 +864,7 @@ def edit_ip6(request, id_net, id_ip6):
                         client.create_ip().edit_ipv6(ip6, descricao, id_ip6)
                         messages.add_message(
                             request, messages.SUCCESS, network_ip_messages.get("ip_edit_sucess"))
-                        return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+                        return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
                     except NetworkAPIClientError, e:
                         logger.error(e)
@@ -894,13 +942,14 @@ def edit_ip6(request, id_net, id_ip6):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+    return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 
 @log
 @login_required
 @has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def delete_ip4(request, id_net):
+def delete_ip4(request, id_net, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
     try:
 
         auth = AuthSession(request.session)
@@ -928,7 +977,7 @@ def delete_ip4(request, id_net):
                 if ids is None or len(ids) <= 0:
                     messages.add_message(
                         request, messages.ERROR, error_messages.get("select_one"))
-                    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+                    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
                 ids_eqs = split_to_array(ids)
                 ids = []
@@ -952,7 +1001,7 @@ def delete_ip4(request, id_net):
                     if id not in listaIps:
                         messages.add_message(
                             request, messages.ERROR, network_ip_messages.get("not_ip_in_net") % (id, id_net))
-                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
                 error_list = list()
                 success_count = 0
@@ -988,12 +1037,12 @@ def delete_ip4(request, id_net):
                         msg = msg + id_error + ", "
                         msg = error_messages.get("can_not_remove") % msg[:-2]
                         messages.add_message(request, messages.WARNING, msg)
-                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
                 else:
                     messages.add_message(
                         request, messages.SUCCESS, network_ip_messages.get("ip_delete_sucess"))
-                    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+                    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
             else:
                 messages.add_message(
@@ -1003,7 +1052,7 @@ def delete_ip4(request, id_net):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 
 @log
@@ -1434,10 +1483,23 @@ def insert_ip4_by_equip(request, id_net, id_equip):
 @log
 @login_required
 @has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def assoc_ip4(request, id_net, id_ip4):
+def assoc_ip4(request, id_net, id_ip4, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
+    lists = dict()
+    lists['id_net'] = id_net
+    lists['id_vlan'] = id_vlan
+    lists['sf_number'] = sf_number
+    lists['sf_name'] = sf_name
+    lists['sf_environment'] = sf_environment
+    lists['sf_nettype'] = sf_nettype
+    lists['sf_subnet'] = sf_subnet
+    lists['sf_ipversion'] = sf_ipversion
+    lists['sf_network'] = sf_network
+    lists['sf_iexact'] = sf_iexact
+    lists['sf_acl'] = sf_acl
+
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         form = IPAssocForm()
@@ -1496,7 +1558,7 @@ def assoc_ip4(request, id_net, id_ip4):
                             id_ip4, equip_dict['equipamento']['id'], id_net)
                         messages.add_message(
                             request, messages.SUCCESS, network_ip_messages.get("ip_assoc_success"))
-                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
                     except NetworkAPIClientError, e:
                         logger.error(e)
@@ -1560,16 +1622,29 @@ def assoc_ip4(request, id_net, id_ip4):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net]))
+    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 
 @log
 @login_required
 @has_perm([{"permission": IPS, "write": True}, {"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": VLAN_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def assoc_ip6(request, id_net, id_ip6):
+def assoc_ip6(request, id_net, id_ip6, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
+    lists = dict()
+    lists['id_net'] = id_net
+    lists['id_vlan'] = id_vlan
+    lists['sf_number'] = sf_number
+    lists['sf_name'] = sf_name
+    lists['sf_environment'] = sf_environment
+    lists['sf_nettype'] = sf_nettype
+    lists['sf_subnet'] = sf_subnet
+    lists['sf_ipversion'] = sf_ipversion
+    lists['sf_network'] = sf_network
+    lists['sf_iexact'] = sf_iexact
+    lists['sf_acl'] = sf_acl
+
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         form = IPAssocForm()
@@ -1638,7 +1713,7 @@ def assoc_ip6(request, id_net, id_ip6):
                             id_ip6, equip_dict['equipamento']['id'], id_net)
                         messages.add_message(
                             request, messages.SUCCESS, network_ip_messages.get("ip_assoc_success"))
-                        return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+                        return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
                     except NetworkAPIClientError, e:
                         logger.error(e)
@@ -1715,4 +1790,4 @@ def assoc_ip6(request, id_net, id_ip6):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net]))
+    return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_net, id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))

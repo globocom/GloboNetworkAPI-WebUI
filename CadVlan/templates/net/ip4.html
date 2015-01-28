@@ -60,10 +60,9 @@ $(document).ready(function() {
 	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Caso o equipamento não tenha mais nenhum IP associado, será removida também sua associação com o Ate')) { 
+		if (confirm('Caso o equipamento não tenha mais nenhum IP associado, será removida também sua associação cAmbiente')) { 
 			var data = getSelectionData(oTable);
-			$("#id_ids").val(data).parent().submit(i);
-                        location.href = "{% url network.ip4.list.by.id id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+			$("#id_ids").val(data).parent().submit();
                 }
 		
 	});
@@ -101,7 +100,7 @@ $(document).ready(function() {
 		</div>
 		{% has_perm EQUIPMENT_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url network.delete.ip4 id%}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url network.delete.ip4 id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in delete_form %}
 				{{ field }}
@@ -129,7 +128,7 @@ $(document).ready(function() {
 						{{ ip.equip_name }}
 					</td>
 					<td>{% ifnotequal ip.descricao None %}{{ ip.descricao }}{% endifnotequal %}</td>
-					<td class="text_center" style="width: 50px;"><a href="{% url network.edit.ip4 id ip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a><a href="{% url network.assoc.ip4 id ip.id %}" style="width: 20px; height: 20px;" class="btn_assoc">Associar novo equipamento ao IP</a></td>
+					<td class="text_center" style="width: 50px;"><a href="{% url network.edit.ip4 id ip.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a><a href="{% url network.assoc.ip4 id ip.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="width: 20px; height: 20px;" class="btn_assoc">Associar novo equipamento ao IP</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

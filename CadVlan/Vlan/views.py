@@ -779,7 +779,7 @@ def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_netty
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def delete_all_network(request, id_vlan):
+def delete_all_network(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     if request.method == 'POST':
 
@@ -847,8 +847,7 @@ def delete_all_network(request, id_vlan):
                 request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
-    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
-
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 @log
 @login_required
@@ -880,7 +879,8 @@ def create(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0',
 @log
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def create_network(request, id_vlan):
+def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
     """ Set column 'active = 1' in tables  """
     try:
         if request.method == 'POST':
@@ -961,8 +961,7 @@ def create_network(request, id_vlan):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
-
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 def list_equipment_by_network_ip4(client, id_net):
 
