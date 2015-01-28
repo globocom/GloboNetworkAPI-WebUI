@@ -3239,6 +3239,7 @@ def shared_pool_member_items(request, client, form_acess=None, external=False):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        return render_message_json(str(e), messages.ERROR)
 
 
 def _format_form_error(forms):
