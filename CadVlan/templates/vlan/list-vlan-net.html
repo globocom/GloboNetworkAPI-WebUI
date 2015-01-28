@@ -44,7 +44,7 @@ $(document).ready(function() {
 	$("#page_tab_2").tabs();
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
-		location.href = "{% url vlan.search.list %}";
+		location.href = "{% url vlan.search.list vlan.num_vlan %}";
 	});
 	
 	///////////

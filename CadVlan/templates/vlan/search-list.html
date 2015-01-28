@@ -62,6 +62,7 @@ function teste(){
 	alert('dasds')
 }
 
+
 $(document).ready(function() {
 	setupAjaxForm();
 	
@@ -189,8 +190,8 @@ $(document).ready(function() {
 				$("#search_form input[name='networkv4']").val("");
 			}
 		}
-		
-		oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax %}";
+	        
+		oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax search_var %}";
 		oTable.fnSettings().bServerSide = true;
 		
 		$("#vlan_list_wrapper").show();
@@ -229,7 +230,10 @@ $(document).ready(function() {
 			location.href = $(this).find(".table_id").attr("lang");
 		}
 	});
-	
+
+        if(!({{search_var}}=='0')){
+            $("#btn_search")[0].click();
+        };	
 })
 </script>
 <style>

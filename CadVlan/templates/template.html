@@ -14,6 +14,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
+
+
+
 {% load util %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -132,7 +136,7 @@
 						<ul class="sub_menu">
 							{% has_perm VLAN_MANAGEMENT None True %}
 							{% if has_perm %}
-							<li><a href="{% url vlan.search.list %}">Vlans</a></li>
+							<li><a href="{% url vlan.search.list '0' %}">Vlans</a></li>
 							{% endif %}
 							
 							{% has_perm EQUIPMENT_MANAGEMENT None True %}
