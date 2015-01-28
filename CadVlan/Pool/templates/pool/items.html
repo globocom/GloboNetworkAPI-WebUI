@@ -1,0 +1,31 @@
+{% load util %}
+<table id="tablePoolMembers" class="tablePoolMembers bordasimplesReal">
+<thead>
+	<tr>
+		<th colspan="6">
+			<span id="removePool" class="ui-icon ui-icon-closethick" style="cursor: pointer; float: right;"></span>
+			<b>{{ server_pool.identifier }}</b>
+			<input name="idsPool" type="hidden" value="{{ server_pool.id }}"/>
+			<input name="portVipToPool" type="hidden" value="{% if server_pool.port_vip %}{{ server_pool.port_vip }} {% endif %}"/>
+		<th>
+	</tr>
+</thead>
+<tbody>
+<tr>
+	<td>Nome do Real</td>
+    <td>Ip do Real</td>
+    <td>Porta VIP</td>
+	<td>Porta Real</td>
+	<td>Prioridade</td>
+</tr>
+{% for pool_member in server_pool_members %}
+<tr>
+	<td>{{ pool_member.equipment_name }}</td>
+	<td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
+    <td class="portVip">{% if server_pool.port_vip %}{{ server_pool.port_vip }} {% endif %}</td>
+	<td>{{ pool_member.port_real }}</td>
+	<td>{{ pool_member.priority }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>

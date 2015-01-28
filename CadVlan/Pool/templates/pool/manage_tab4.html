@@ -1,0 +1,315 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Pool - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+function verifyWeight() {
+    if ( $("#id_balancing").val() != '' &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+        $('.weighted').show();
+    }else{
+        $('.weighted').hide();
+    }
+}
+
+function check_port_vip(element){
+		if(element.parent().parent().next().attr('name') == 'ports_vip'){
+			is_valid = true;
+
+			if (port_vip != element.val()){
+				$("input[name=ports_vip]").each(function(){
+					if ($(this).val() == element.val()){
+						is_valid = false;
+					}
+				});
+			}
+
+			if (element.val() == "" && port_vip != ""){
+				element.val(port_vip);
+				alert('Deve-se preencher todos os campos de portas.');
+				return false;
+			}
+
+
+			if (!is_valid){
+				element.val(port_vip);
+				alert('Porta Vip já cadastrada.');
+				return false;
+			}
+
+			return true;
+		}
+		return true;
+	}
+
+	function update_port_vips(element){
+            if(element.parent().parent().next().attr('name') == 'ports_vip'){
+                new_port_vip = element.val();
+
+                $("input[name=ports_vip_reals]").each(function(){
+                      if ($(this).val() == port_vip){
+                          if (new_port_vip == ''){
+                              $(this).val('-');
+                          }else{
+                              $(this).val(new_port_vip);
+                          }
+                          $(this).parent().find('label').text(new_port_vip);
+                      }
+                  });
+            }
+    }
+
+$(document).ready(function() {
+
+    var obj_btn_sav = $("#btn_sav");
+    var obj_btn_can = $("#btn_can");
+    var obj_btn_new_port = $("#btn_new_port");
+    var obj_btn_new_real = $("#btn_new_real");
+
+    obj_btn_sav.button({icons: {primary: "ui-icon-disk"}});
+    obj_btn_can.button({icons: {primary: "ui-icon-cancel"}});
+    obj_btn_new_real.button({icons: {primary: "ui-icon-disk"}});
+
+    if($('#environment').val() == ''){
+        $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
+    }
+
+    $("#page_tab_full").tabs();
+    $("#page_tab").tabs({selected:3});
+    $('.editable').editableTable();
+
+    $(".tab1").attr("href", "{% url pool.manage.tab1 id_server_pool%}");
+    $(".tab2").attr("href", "{% url pool.manage.tab2 id_server_pool%}");
+    $(".tab3").attr("href", "{% url pool.manage.tab3 id_server_pool%}");
+
+    obj_btn_can.click(function(){
+        location.href = "{% url pool.list %}";
+    });
+
+    obj_btn_new_real.live("click", function(){
+        var val_equip_name = $.trim($('#id_equip_name').val());
+        if ( val_equip_name != '' ) {
+            $.ajax({
+                data: { id_environment: $('#environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
+                url: "{% url pool.modal.ips.ajax %}",
+                success: function(data, textStatus, xhr) {
+                    $('#content-ip').html(data);
+                    $("#dialog_ip").dialog("open");
+                }
+            });
+        }
+    });
+
+    $("#dialog_ip").dialog({
+        height: 600,
+        width: 1000,
+        modal: true,
+        autoOpen: false,
+        draggable: false,
+        resizable: true,
+        buttons: {
+            "Voltar": function() {
+                $(this).dialog("close");
+            }
+        }
+    });
+
+    $(".numbersOnly").live('focusout', function(){
+        this_element = $(this);
+        $(this).next().click(function(){
+            if (!check_port_vip(this_element)){
+                return false;
+            }
+            update_port_vips(this_element);
+        });
+    });
+
+    $('.numbersOnly').live("keydown", function(e){
+        if(e.keyCode == 9 || e.keyCode == 13){
+            if (!check_port_vip($(this))){
+                e.preventDefault();
+                label = $(this).parent().parent().parent().next().find('.editable');
+                  label.click();
+                return false;
+            }else{
+                    update_port_vips($(this));
+                label = $(this).parent().parent().parent().next().find('.editable');
+                  $(this).next().click();
+                  label.click();
+                  return false;
+            }
+        }
+    }).live("keyup", function(e){
+          $(this).val($(this).val().replace(/[^0-9]+/g,''));
+    });
+
+    $('#table_real tbody tr span').die("click");
+    $('#table_real tbody tr span').live("click", function(e){
+        if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){
+        $(this).parents(".remove_port").remove();
+        return false;
+        }
+    });
+
+    autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
+
+    verifyWeight();
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div id="page_tab_full">
+    <ul>
+        <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-10">Detalhes do Server Pool</a></li>
+    </ul>
+    <div id="tabs-10">
+        <div id="fields" class="ui-widget-content">
+            <table border="5">
+                <tbody>
+                    <tr>
+                        <td style="width: 120px"><label>Id:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if id_server_pool %} {{ id_server_pool }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Identifier:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if identifier %} {{ identifier }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Default Port:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if default_port %} {{ default_port }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 120px"><label>Ambiente:</label></td>
+                        <td><label style="width: 350px;color:blue;text-align:center;" id="det_environment">{% if environment_desc %} {{ environment_desc }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Balanceamento:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;" id="det_balancing">{% if balancing %} {{ balancing }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Healthcheck:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if health_check %} {{ health_check }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Default Maxconn:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if max_con != '' and max_con != None %} {{ max_con }} {% endif %}</label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="page_tab">
+        <ul>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab1" href="#tab1">Requisições VIP</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab2" href="#tab2">Reals Server - Status</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab3" href="javascript:;">Edição de Pool</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab4" href="#tab4">Reals Server</a></li>
+        </ul>
+
+        <div id="dialog_ip">
+            <div id="content-ip"></div>
+        </div>
+
+        <form id="add_form" method="post" action="{{action}}">
+            <input type='hidden' name='pool_created' value='{{pool_created}}' />
+            <input type="hidden" name="environment" id="environment" value="{{ environment }}">
+            <input type="hidden" name="id_default_port" id="id_default_port" value="{{ default_port }}">
+            <input type="hidden" name="id_balancing" id="id_balancing" value="{{ balancing }}">
+
+            {{ form.id }}
+            {% csrf_token %}
+
+            <div id="tab4">
+                <div id="fields" class="ui-widget-content">
+                    <table  class="bordasimples" >
+                        <tr>
+                            <td>Buscar novo</td>
+                            <td style="margin-left: 5px;">
+                                <input id="id_equip_name" type="text" name="equip_name" maxlength="100" style="width:250px" />
+                            </td>
+                            <td>
+                                <input type="button" id="btn_new_real" value="Adicionar Novo Real" />
+                            </td>
+                        </tr>
+                        <tr id="error_real_server">
+                        </tr>
+                        <tr>
+                            <td colspan="3">&nbsp</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <table id="table_real" class="bordasimplesReal">
+                                    <thead>
+                                        <tr>
+                                            <td>Nome do Real</td>
+                                            <td>IP do Real</td>
+                                            <td>Prioridade</td>
+                                            <td class="weighted">Peso do Real</td>
+                                            <td>Porta Real</td>
+                                            <td style="width: 20px;"></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    {% for field in pool_members %}
+                                        <tr class='remove_port'>
+                                            <td>
+                                                <label>{% if field.nome_equipamento != "-" %}{{field.nome_equipamento}}{% endif %}</label>
+                                                <input type='hidden' name='equip' value='{{field.nome_equipamento}}' />
+                                                <input type='hidden' name='id_equip' value='{{field.id_equip}}' />
+                                            </td>
+                                            <td>
+                                                <label>{% if field.ip != "-" %}{{field.ip}}{% endif %}</label>
+                                                <input type='hidden' name='ip' value='{{field.ip}}'>
+                                                <input type='hidden' name='id_ip' value='{{field.id_ip}}'>
+                                            </td>
+                                            <td>
+                                                <label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
+                                                <input type='hidden' name='priority' value='{{field.priority}}'>
+                                            </td>
+                                            <td class='weighted'>
+                                                <label class='editable'>{% if field.weight != "-" %}{{field.weight}}{% endif %}</label>
+                                                <input type='hidden' name='weight' value='{{field.weight}}'>
+                                            </td>
+                                            <td>
+                                                <label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
+                                                <input type="hidden" value="{{field.port_real}}" name="ports_real_reals">
+                                                <input type='hidden' name='id_pool_member' value='{{field.id}}' />
+                                            </td>
+                                            <td>
+                                                <span class='ui-icon ui-icon-closethick' style="cursor:pointer;"></span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <p id="error">{{reals_error}}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">&nbsp</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="buttons-l ui-widget-header">
+                <button id="btn_sav" type="submit">Gravar</button>
+                <button id="btn_can" type="button">Cancelar</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}
