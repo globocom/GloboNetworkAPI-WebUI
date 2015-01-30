@@ -45,10 +45,10 @@ $(document).ready(function() {
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
 		value = $("#id_vlan_name_id").val();
 		if (value != "") {
-			location.href = "/vlan/get/" + value;
+                        location.href = "{% url vlan.list.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 		} else {
-			location.href = "{% url vlan.search.list %}";
-		}
+                        location.href = "{% url vlan.search.list '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";	
+        	}
 	});
 	
 	$("#btn_update").button({ icons: {primary: "ui-icon-arrowrefresh-1-w"}, text: false }).click(function() {
@@ -213,8 +213,9 @@ $(document).ready(function() {
 	</ul>
 	<div id="tabs-1">
 	
-		<form id="search_form" method="post" action="{% url network.form %}">
-			{% csrf_token %}
+		<form id="search_form" method="post" action="{% url network.form id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}"> 
+
+                        {% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			{% for field in form %}
 				{% if field.is_hidden %}

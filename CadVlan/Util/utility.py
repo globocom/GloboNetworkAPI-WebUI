@@ -309,11 +309,10 @@ class DataTablePaginator():
 
         self.sEcho = int(self.request.GET.get('sEcho', 0))
 
-    def build_response(self, data, total, json_template, request):
+    def build_response(self, request_var, data, total, json_template, request):
         """
         Build the response to ajax
         """
-
         # Build return json
         response_dict = dict()
         response_dict["aaData"] = data
@@ -321,6 +320,7 @@ class DataTablePaginator():
         response_dict["iTotalRecords"] = total
         response_dict["iTotalDisplayRecords"] = total
         response_dict["sColumns"] = self.sColumns
+        response_dict["requestVar"] = request_var
 
         response = HttpResponse(loader.render_to_string(
             json_template, response_dict, context_instance=RequestContext(request)), mimetype='application/javascript')

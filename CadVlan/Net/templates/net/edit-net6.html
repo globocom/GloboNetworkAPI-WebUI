@@ -43,7 +43,7 @@ $(document).ready(function() {
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url vlan.search.list %}";
+                location.href = "{% url vlan.list.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 	
 	$("#id_vlan_name").attr("readonly","readonly");
@@ -62,7 +62,7 @@ $(document).ready(function() {
 	</ul>
 	<div id="tabs-1">
 	
-		<form id="search_form" method="post" action="{% url network.edit.by.id.rede.ipv6 id_net %}">
+		<form id="search_form" method="post" action="{% url network.edit.by.id.rede.ipv6 id_net id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			{% for field in form %}

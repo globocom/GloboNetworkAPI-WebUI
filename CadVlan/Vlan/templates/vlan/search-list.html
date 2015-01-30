@@ -41,11 +41,6 @@ function setupAjaxForm() {
 		data: form
 	});
 	
-// 	$("th[id^='expandir_rede_']").each(function (){
-// 		id = $(this).attr('id').split('_')
-// 		console.log(id[2])
-// 		$("div[lang=" + id[2] + "]").css("background", "url(/media/img/min.png) transparent bottom center no-repeat");
-// 	});
 }
 
 
@@ -191,7 +186,7 @@ $(document).ready(function() {
 			}
 		}
 	        
-		oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax search_var %}";
+		oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '0' %}";
 		oTable.fnSettings().bServerSide = true;
 		
 		$("#vlan_list_wrapper").show();
@@ -222,7 +217,14 @@ $(document).ready(function() {
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		location.reload();
+
+            oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+            oTable.fnSettings().bServerSide = true;
+
+            $("#vlan_list_wrapper").show();
+
+            setupAjaxForm();
+            oTable.fnAjaxUpdate();
 	});
 	
 	$("#vlan_list tbody tr").live("click", function(e) {
@@ -231,8 +233,15 @@ $(document).ready(function() {
 		}
 	});
 
-        if(!({{search_var}}=='0')){
-            $("#btn_search")[0].click();
+        if({{search_var}}=='1'){
+        
+            oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+            oTable.fnSettings().bServerSide = true;
+                
+            $("#vlan_list_wrapper").show();
+                
+            setupAjaxForm();
+            oTable.fnAjaxUpdate();
         };	
 })
 </script>
@@ -321,12 +330,12 @@ input {
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url vlan.delete %}" style="visibility: hidden;">
+                <form id="delete_form" method="post" action="{% url vlan.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
-		</form>
+		   </form>
 		{% endif %}
 		<table id="vlan_list">
 			<col width="2%" />

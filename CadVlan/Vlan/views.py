@@ -52,8 +52,9 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def ajax_list_vlans(request, id_vlan="0"):
+def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
+    
     try:
 
         # If form was submited
@@ -72,8 +73,6 @@ def ajax_list_vlans(request, id_vlan="0"):
 
             if search_form.is_valid():
                 number = search_form.cleaned_data["number"]
-                if not (id_vlan=='0'):
-                    number = id_vlan
                 name = search_form.cleaned_data["name"]
                 iexact = search_form.cleaned_data["iexact"]
                 environment = search_form.cleaned_data["environment"]
@@ -83,18 +82,49 @@ def ajax_list_vlans(request, id_vlan="0"):
                 networkv6 = search_form.cleaned_data["networkv6"]
                 subnet = search_form.cleaned_data["subnet"]
                 acl = search_form.cleaned_data["acl"]
-
-                if environment == "0":
-                    environment = None
-                if net_type == "0":
-                    net_type = None
-
+ 
                 if len(networkv4) > 0:
                     network = networkv4
                 elif len(networkv6) > 0:
                     network = networkv6
                 else:
                     network = None
+
+                if id_vlan=='1':
+                    if not sf_number=='0':
+                        number =  sf_number 
+                    if not sf_name=='0':
+                        name =  sf_name
+                    if sf_iexact=='0':
+                        sf_iexact = False
+                    elif sf_iexact=='1':
+                        sf_iexact = True
+                    iexact = sf_iexact
+                    if not sf_environment=='0':
+                        environment = sf_environment 
+                    if not sf_nettype=='0':
+                        net_type = sf_nettype
+                    if not sf_ipversion=='0':
+                        ip_version = sf_ipversion
+                    if not sf_network=='0':
+                        if (sf_network.count('_') == 4): #ipv4
+                            sf_network = sf_network.replace("_", ".", 3)
+                        else: #ipv6
+                            sf_network = sf_network.replace("_", ":", 7)
+                        sf_network = sf_network.replace("_", "/")
+                        network =  sf_network
+                    if not sf_subnet=='0':
+                        subnet = sf_subnet
+                    if sf_acl=='0':
+                        sf_acl = False
+                    elif sf_acl=='1':
+                        sf_acl = True
+                    acl = search_form.cleaned_data["acl"]      
+
+                if environment == "0":
+                    environment = None
+                if net_type == "0":
+                    net_type = None
 
                 # Pagination
                 columnIndexNameMap = {0: '', 1: '', 2: 'num_vlan', 3: 'nome', 4: 'ambiente',
@@ -115,8 +145,46 @@ def ajax_list_vlans(request, id_vlan="0"):
                 if not vlans.has_key("vlan"):
                     vlans["vlan"] = []
 
+                request_var = dict()
+
+                if number==None:
+                    number = '0'
+                request_var["number"] = number
+                if name=='':
+                    name = '0'
+                request_var["name"] = name
+                if environment==None:
+                    environment = '0'
+                request_var["environment"] = environment
+                if net_type==None:
+                    net_type = '0'
+                request_var["nettype"] = net_type
+                if subnet==None:
+                    subnet = '0'
+                request_var["subnet"] = subnet
+                if ip_version==None:
+                    ip_version = '0'
+                request_var["ipversion"] = ip_version
+                if network==None:
+                    network = '0'
+                else:
+                    network = network.replace(".", "_")
+                    network = network.replace(":", "_")
+                    network = network.replace("/", "_")
+                request_var["network"] = network
+                if iexact==False:
+                    iexact = '0'
+                elif iexact==True:
+                    iexact = '1'
+                request_var["iexact"] = iexact
+                if acl==False:
+                    acl = '0'
+                elif acl==True:
+                    acl = '1'
+                request_var["acl"] = acl
+
                 # Returns JSON
-                return dtp.build_response(vlans["vlan"], vlans["total"], AJAX_VLAN_LIST, request)
+                return dtp.build_response(request_var, vlans["vlan"], vlans["total"], AJAX_VLAN_LIST, request)
 
             else:
                 # Remake search form
@@ -166,7 +234,7 @@ def ajax_autocomplete_vlans(request):
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def search_list(request, id_vlan='0'):
+def search_list(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     try:
 
@@ -185,6 +253,15 @@ def search_list(request, id_vlan='0'):
         lists["search_form"] = SearchVlanForm(env_list, net_list)
         
         lists['search_var'] = id_vlan
+        lists['sf_number'] = sf_number
+        lists['sf_name'] = sf_name
+        lists['sf_environment'] = sf_environment
+        lists['sf_nettype'] = sf_nettype
+        lists['sf_subnet'] = sf_subnet
+        lists['sf_ipversion'] = sf_ipversion
+        lists['sf_network'] = sf_network
+        lists['sf_iexact'] = sf_iexact
+        lists['sf_acl'] = sf_acl
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -195,14 +272,23 @@ def search_list(request, id_vlan='0'):
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
-def list_by_id(request, id_vlan):
+@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     lists = dict()
     listaIps = []
     lista = []
     lists["delete_form"] = DeleteForm()
     lists["create_form"] = CreateForm()
+    lists['sf_number'] = sf_number
+    lists['sf_name'] = sf_name
+    lists['sf_environment'] = sf_environment
+    lists['sf_nettype'] = sf_nettype
+    lists['sf_subnet'] = sf_subnet
+    lists['sf_ipversion'] = sf_ipversion
+    lists['sf_network'] = sf_network
+    lists['sf_iexact'] = sf_iexact
+    lists['sf_acl'] = sf_acl
 
     try:
 
@@ -210,6 +296,7 @@ def list_by_id(request, id_vlan):
         client = auth.get_clientFactory()
 
         # recuperando lista de vlans
+        
         vlans = client.create_vlan().get(id_vlan)
 
         # recuperando ambientes
@@ -225,7 +312,6 @@ def list_by_id(request, id_vlan):
 
         # FE - PORTAL - CORE/DENSIDADE
         lists['vlan'] = vlans
-        lists['idvlan'] = id_vlan
 
         vlans = None
 
@@ -325,13 +411,23 @@ def vlan_form(request):
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def vlan_edit(request, id_vlan):
+def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     lists = dict()
     lists['id_vlan'] = id_vlan
     lists['acl_created_v4'] = "False"
     lists['acl_created_v6'] = "False"
     lists['form_error'] = "False"
+    lists['sf_number'] = sf_number
+    lists['sf_name'] = sf_name
+    lists['sf_environment'] = sf_environment
+    lists['sf_nettype'] = sf_nettype
+    lists['sf_subnet'] = sf_subnet
+    lists['sf_ipversion'] = sf_ipversion
+    lists['sf_network'] = sf_network
+    lists['sf_iexact'] = sf_iexact
+    lists['sf_acl'] = sf_acl
+
     vlan = None
 
     try:
@@ -378,9 +474,9 @@ def vlan_edit(request, id_vlan):
 
                 # If click apply
                 if apply_vlan == True:
-                    return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+                    return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
-                return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
+                return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
             else:
                 lists['form_error'] = "True"
@@ -588,7 +684,7 @@ def ajax_confirm_vlan(request):
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def delete_all(request):
+def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     if request.method == 'POST':
 
@@ -678,12 +774,12 @@ def delete_all(request):
 
     # Redirect to list_all action
     return redirect('vlan.search.list')
-
+    #return HttpResponseRedirect(reverse('vlan.search.list', args=["1", sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def delete_all_network(request, id_vlan):
+def delete_all_network(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     if request.method == 'POST':
 
@@ -751,13 +847,12 @@ def delete_all_network(request, id_vlan):
                 request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
-    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
-
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 @log
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def create(request, id_vlan):
+def create(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
     """ Set column 'ativada = 1' """
 
     try:
@@ -778,13 +873,14 @@ def create(request, id_vlan):
         return redirect('vlan.search.list')
 
     # Redirect to list_all action
-    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 
 @log
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def create_network(request, id_vlan):
+def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
     """ Set column 'active = 1' in tables  """
     try:
         if request.method == 'POST':
@@ -865,8 +961,7 @@ def create_network(request, id_vlan):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
-
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
 def list_equipment_by_network_ip4(client, id_net):
 

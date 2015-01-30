@@ -49,11 +49,11 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url network.insert.ip6 id %}";
+		location.href = "{% url network.insert.ip6 id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
-		location.href = "{% url vlan.list.by.id vlan_id %}";
+              location.href = "{% url vlan.list.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 	
 	{% has_perm VLAN_MANAGEMENT True None %}
@@ -62,12 +62,13 @@ $(document).ready(function() {
 		if (confirm('Excluir um IP não removerá o equipamento do ambiente. Para remover também do ambiente, vá na edição do equipamento.')){ 
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
+                        location.href = "{% url network.ip6.list.by.id id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 		}
 	});
 	{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
-		location.href = "{% url network.ip6.list.by.id id %}";
+                location.reload();
 	});
 	
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });

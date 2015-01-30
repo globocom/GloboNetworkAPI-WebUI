@@ -136,7 +136,7 @@
 						<ul class="sub_menu">
 							{% has_perm VLAN_MANAGEMENT None True %}
 							{% if has_perm %}
-							<li><a href="{% url vlan.search.list '0' %}">Vlans</a></li>
+							<li><a href="{% url vlan.search.list %}">Vlans</a></li>
 							{% endif %}
 							
 							{% has_perm EQUIPMENT_MANAGEMENT None True %}

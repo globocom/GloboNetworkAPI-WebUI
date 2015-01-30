@@ -44,13 +44,13 @@ $(document).ready(function() {
 	$("#page_tab_2").tabs();
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
-		location.href = "{% url vlan.search.list vlan.num_vlan %}";
-	});
+	        location.href = "{% url vlan.search.list '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+        });
 	
 	///////////
 	$("#btn_create").button({ icons: {primary: "ui-icon-plus"} }).click(function(){
 		if (confirm('Deseja realmente criar a Vlan?')){ 
-			location.href = "{% url vlan.create vlan.id %}";
+			location.href = "{% url vlan.create vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 		}
 	});
 	$("#btn_create_networks").button({ icons: {primary: "ui-icon-plus"} }).click(function(){
@@ -65,13 +65,14 @@ $(document).ready(function() {
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url network.form.vlan vlan.id %}";
+                location.href = "{% url network.form.vlan vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 	
 	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
 		if (confirm('Deseja realmente excluir a(s) Rede(s) da Vlan selecionada(s)?')){ 
+                        var_btn = '1';
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
@@ -127,13 +128,13 @@ $(document).ready(function() {
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
-		<form id="delete_form" method="post" action="{% url vlan.network.delete vlan.id %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url vlan.network.delete vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
-		<form id="create_form" method="post" action="{% url vlan.create.network vlan.id %}" style="visibility: hidden;">
+		<form id="create_form" method="post" action="{% url vlan.create.network vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in create_form %}
 				{{ field }}
@@ -156,9 +157,9 @@ $(document).ready(function() {
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ net_vlan.id }}-{% if net_vlan.ip4 %}v4{% else %}v6{% endif %}" /></td>
 					{% if net_vlan.ip4 %}
-						<td lang="{% url network.ip4.list.by.id net_vlan.id %}" class="table_id">{{ net_vlan.net_ip_final }}</td>
+						<td lang="{% url network.ip4.list.by.id net_vlan.id vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" class="table_id">{{ net_vlan.net_ip_final }}</td>
 					{% else %}
-					 	<td lang="{% url network.ip6.list.by.id net_vlan.id %}" class="table_id">{{ net_vlan.net_ip_final }}</td>
+					 	<td lang="{% url network.ip6.list.by.id net_vlan.id vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" class="table_id">{{ net_vlan.net_ip_final }}</td>
 					{% endif %}
 					<td>{{ net_vlan.mask_ip_final }}</td>
 					<td class="text_center">{{ net_vlan.network_type }}</td>
@@ -173,9 +174,9 @@ $(document).ready(function() {
 					
 					
 					{% if net_vlan.ip4 %}
-					<td class="text_center"><a href="{% url network.edit.by.id.rede.ipv4 net_vlan.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center"><a href="{% url network.edit.by.id.rede.ipv4 net_vlan.id vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 					{% else %}
-					<td class="text_center"><a href="{% url network.edit.by.id.rede.ipv6 net_vlan.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center"><a href="{% url network.edit.by.id.rede.ipv6 net_vlan.id vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 					{% endif %}
 				</tr>
 				{% endfor %}
