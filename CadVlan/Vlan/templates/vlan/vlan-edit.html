@@ -74,7 +74,7 @@ $(document).ready(function() {
 	});
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url vlan.search.list %}";
+		location.href = "{% url vlan.search.list id_vlan %}";
 	});
 	
     $("#id_name").keyup(function() {
