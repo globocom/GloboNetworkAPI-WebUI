@@ -301,7 +301,13 @@ function addMessage(data) {
 	$('div#messages').append(divMessage);
 	
 	$(".error-messages").last().each(function() {
-		$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+		var $divMessage = $(this);
+
+		    $divMessage.click(function(){
+
+            $divMessage.animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+
+        });
 	});
 }
 
@@ -323,6 +329,12 @@ function addMessageModal(data) {
 	$('div#messagesModal').append(divMessage);
 	
 	$(".error-messages").last().each(function() {
-		$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+		var $divMessage = $(this);
+
+		$divMessage.click(function(){
+
+            $divMessage.animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+
+        });
 	});
 }

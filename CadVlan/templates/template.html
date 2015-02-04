@@ -42,7 +42,13 @@
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(".error-messages").each(function() {
-					$(this).delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+                    var $divMessage = $(this);
+
+					$divMessage.click(function(){
+
+                      $divMessage.animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+
+                    });
 				});
 				
 				$(".loading").ajaxStart(function() {
@@ -103,6 +109,12 @@
 				
 			})
 		</script>
+    <style type="text/css">
+        #messages{
+
+            cursor: pointer;
+        }
+    </style>
 		{% block header %}{% endblock %}
 	</head>
 {% autoescape on %}
