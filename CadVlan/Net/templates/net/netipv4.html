@@ -1,0 +1,178 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Detalhes da Rede IPv4]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("textarea").maxlength();
+	
+	$("#page_tab").tabs({ selected: {{aba}} });
+	
+	$("#id_option_vip").pickList();
+	
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	
+	
+		
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Rede</a></li>
+		{% has_perm ENVIRONMENT_VIP True None %}
+		{% if has_perm %}					
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3">Ambiente VIP</a></li>
+		{% endif %}
+	</ul>
+	<div id="tabs-1">
+		
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			<table>
+			
+			{% for n in net %}
+				
+					<tr>
+						<td style="width: 100px"><label for="nome_ambiente">Nome da Vlan</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;" >{{n.vlan}}</label></td>
+					</tr>
+<tr>
+						<td style="width: 100px"><label for="num_vlan">Numero da Vlan</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;" >{{num_vlan}}</label></td>
+					</tr>	
+					<tr>
+						<td><label for="nome_vlan">Tipo de Rede</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{n.network_type}}</label></td>
+					</tr>
+					<tr>
+						<td><label for="num_vlan">IP de rede</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{n.oct1}}.{{n.oct2}}.{{n.oct3}}.{{n.oct4}}</label></td>
+					</tr>
+					<tr>
+						<td><label for="acl_vlan">Bloco</label></td>
+						
+						<td><label  style="width: 350px;color: blue;text-align: center;">{{n.block}}</label></td>
+					</tr>
+					<tr>
+					
+						<td><label for="sit_vlan">Máscara</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;" >{{n.mask_oct1}}.{{n.mask_oct2}}.{{n.mask_oct3}}.{{n.mask_oct4}}</label></td>
+					</tr>
+					<tr>
+						<td><label for="desc_vlan">Broadcast</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;" >{{n.broadcast}}</label></td>
+					</tr>
+					<tr>
+						<td><label for="sit_rede">Situação</label></td>
+						<td>
+						{% if n.active == 'False' %} 
+							<label style="width: 350px;color: blue;text-align: center;" >NÃO ATIVADA</label>
+						{% else %} 
+							<label style="width: 350px;color: blue;text-align: center;" >ATIVADA</label>
+						{% endif %}
+						</td>
+					</tr>
+		
+			{% endfor %}
+		
+			</table>
+			</div>
+			
+			<div class="separator spacer"></div>
+			<div id="list_ip4">
+				{% include "net/ip4.html" %}
+			</div>
+		
+		
+	</div>
+	{% if has_perm %}	
+		<div id="tabs-3">
+		
+		
+		
+		<div id="fields" class="ui-widget-content">
+		
+		{% ifequal id_vip 0 %}
+		
+		 <p style="color:red">Não há Ambiente Vip associado com essa Rede</p>
+		
+		{% else %}
+		
+		{% if opt_form %}
+		
+			<form method="POST" action="{% url option-vip.associate.net4 id %}">
+				{% csrf_token %}
+				<table>
+					<tr>
+						<td style="width: 100px"><label>Finalidade</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{vip.finalidade_txt}}</label></td>
+					</tr>
+					<tr>
+						<td style="width: 100px"><label>Cliente</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{vip.cliente_txt}}</label></td>
+					</tr>
+					<tr>
+						<td style="width: 100px"><label>Ambiente P44</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;">{{vip.ambiente_p44_txt}}</label></td>
+					</tr>
+					 
+				</table>
+			
+			{% for field in opt_form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					{{ field }}
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				</div>
+			{% endfor %}
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+			</div>
+			
+			</form>
+		
+		{% endif %}
+		
+		{% endifequal %}
+		
+		
+	</div>
+	</div>
+	{% endif %}
+</div>
+{% endblock %}

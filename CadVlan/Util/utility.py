@@ -309,7 +309,7 @@ class DataTablePaginator():
 
         self.sEcho = int(self.request.GET.get('sEcho', 0))
 
-    def build_response(self, request_var, data, total, json_template, request):
+    def build_response(self, data, total, json_template, request, request_var = None):
         """
         Build the response to ajax
         """

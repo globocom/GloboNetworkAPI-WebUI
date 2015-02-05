@@ -1,0 +1,318 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Vlan - Edição]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	$("#page_tab").tabs();
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+		confirm_vlan();
+	});;
+	
+	
+	function confirm_vlan(){
+		id_vlan = "{{id_vlan}}"
+		number = $.trim($("#id_number").val())
+		id_environment = $.trim($("#id_environment").val())
+		if( number != "" && id_environment != ""){
+			$.ajax({
+				//async: false,
+				data: { number: number, id_environment: id_environment, is_number : 1, id_vlan : id_vlan },
+				url: "{% url ajax.vlan.confirm %}",
+				dataType: 'text',
+				success: function(data) {
+					if (data != ""){
+						if(confirm(data)){
+							$("#add_form").submit();			
+						}else{
+							return false;
+						}
+					}
+					else{
+						$("#add_form").submit();
+					}
+				}
+			});
+			return false;
+		}else{
+			$("#add_form").submit();
+		}
+	}
+	
+	
+	$("#add_form").submit( function () {
+		$("#id_acl_file").removeAttr("disabled");
+		$("#id_acl_file_v6").removeAttr("disabled");
+		$("#id_environment").removeAttr("disabled");
+		return true
+	} );
+	
+	$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
+		$("#id_apply_vlan").val('1');
+		confirm_vlan();
+	});
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url vlan.search.list '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+	});
+	
+    $("#id_name").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9A-Za-z_-]+/g,'');
+        $(this).val(valor);
+    });
+    
+    $("#id_name").mouseover(function() {
+    	$(this).attr("title","Somente letras maiúsculas e minúsculas, números, '-' e '_' são permitidos.");
+    });
+    
+    $("#id_acl_file").mouseover(function() {
+    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+   	});
+    
+    $("#id_acl_file_v6").mouseover(function() {
+    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
+   	});
+    
+    $("#id_acl_file").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+        $(this).val(valor);
+    });
+    
+	$("#id_acl_file_v6").keyup(function() {
+        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
+        $(this).val(valor);
+ 	}); 
+    
+	{% ifequal acl_created_v4 'False' %}
+	
+		$("#btn_create_acl_v4").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+			location.href = "{% url acl.create id_vlan 'v4' %}";
+		});
+		
+		$("#btn_suggest_v4").button().click(function() {
+			ajax = true
+			
+			if ($("#id_name").val() == ""){
+				
+				alert("Digite um nome para a Vlan");
+				ajax = false;
+				
+			}
+			else {
+				if ($("#id_environment").val() == 0){
+					
+					alert("Selecione um ambiente");
+					ajax = false;
+				}
+			}
+			
+			if (ajax){
+			
+			$.ajax({
+				data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
+				url: "{% url ajax.vlan.acl.file.name %}",
+				dataType: 'text',
+				success: function(data) {
+					data = data.toUpperCase();
+					$("#id_acl_file").val(data);
+				}
+			});
+		}
+		});
+	
+	
+	{% else %}
+	
+		$("#btn_remove_acl_v4").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+			location.href = "{% url acl.remove id_vlan 'v4' %}";
+		});
+	
+		$("#btn_edit_acl_v4").button({ icons: {primary: "ui-icon-pencil"} }).click(function(){
+			location.href = "{% url acl.edit id_vlan 'v4' %}";
+		});
+		
+		
+		$("#btn_validate_v4").button({ icons: {primary: "ui-icon-carat-1-s"} }).click(function() {
+			location.href = "{% url acl.validate id_vlan 'v4' %}";
+		});
+		
+	{% endifequal %}
+	
+	
+	
+	{% ifequal acl_created_v6 'False' %}
+	
+		$("#btn_create_acl_v6").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+			location.href = "{% url acl.create id_vlan 'v6' %}";
+		});
+		
+		$("#btn_suggest_v6").button().click(function() {
+			ajax = true
+			if ($("#id_name").val() == ""){
+				alert("Digite um nome para a Vlan");
+				ajax = false;
+			} else {
+				if ($("#id_environment").val() == 0){
+					alert("Selecione um ambiente");
+					ajax = false;
+				}
+			}
+			if (ajax){
+				$.ajax({
+					data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
+					url: "{% url ajax.vlan.acl.file.name %}",
+					dataType: 'text',
+					success: function(data) {
+						data = data.toUpperCase();
+						$("#id_acl_file_v6").val(data);
+					}
+				});
+			}
+		});
+
+
+	{% else %}
+	
+		$("#btn_remove_acl_v6").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+			location.href = "{% url acl.remove id_vlan 'v6' %}";
+		});
+	
+		$("#btn_edit_acl_v6").button({ icons: {primary: "ui-icon-pencil"} }).click(function(){
+			location.href = "{% url acl.edit id_vlan 'v6' %}";
+		});
+		
+		
+		$("#btn_validate_v6").button({ icons: {primary: "ui-icon-carat-1-s"} }).click(function() {
+			location.href = "{% url acl.validate id_vlan 'v6' %}";
+		});
+		
+	{% endifequal %}
+	
+	$('#id_network_ipv4').parent().remove();
+	$('#id_network_ipv6').parent().remove();
+	
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Vlan</a></li>
+	</ul>
+	<div id="tabs-1">
+	<form id="add_form" method="post" action="{% url vlan.edit.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}">
+			{% csrf_token %}
+			<div id="fields" class="ui-widget-content">
+			{% for field in form %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					
+					{{ field }}
+					
+					{% if field.name == 'acl_file' %}
+					
+						{% if field.value == None or acl_created_v4 == 'False' %}
+							<button id="btn_suggest_v4" type="button">Sugerir nome do arquivo ACL</button>
+							
+							{% if field.value != None and field.value != '' and form_error != 'True' %}
+								<button id="btn_create_acl_v4" type="button">Criar arquivo ACL</button>
+							{% endif %}
+							
+						{% else %}
+							
+							<script type="text/javascript">
+								$("#id_acl_file").attr("disabled", "disabled");
+								$("#id_environment").attr("disabled", "disabled").attr("title", "ACL depende do ambiente para poder alterá-lo é preciso excluir a ACL.");
+							</script>
+						
+							{% if acl_valida_v4 == 'False' %}
+								<button id="btn_validate_v4" type="button">Validar ACL</button>
+							{% endif %}
+							
+							
+							<button id="btn_edit_acl_v4" type="button">Editar ACL</button>
+							<button id="btn_remove_acl_v4" type="button">Excluir ACL</button>
+								
+							
+						{% endif %}
+					
+					
+					{% endif %}
+					
+					{% if field.name == 'acl_file_v6' %}
+					
+						{% if field.value == None or acl_created_v6 == 'False' %}
+							<button id="btn_suggest_v6" type="button">Sugerir nome do arquivo ACL</button>
+							
+							{% if field.value != None and field.value != '' and form_error != 'True' %}
+								<button id="btn_create_acl_v6" type="button">Criar arquivo ACL</button>
+							{% endif %}
+							
+						{% else %}
+							
+							<script type="text/javascript">
+								$("#id_acl_file_v6").attr("disabled", "disabled");
+								$("#id_environment").attr("disabled", "disabled").attr("title", "ACL depende do ambiente para poder alterá-lo é preciso excluir a ACL.");
+							</script>
+						
+							{% if acl_valida_v6 == 'False' %}
+								<button id="btn_validate_v6" type="button">Validar ACL</button>
+							{% endif %}
+							
+							
+							<button id="btn_edit_acl_v6" type="button">Editar ACL</button>
+							<button id="btn_remove_acl_v6" type="button">Excluir ACL</button>
+								
+							
+						{% endif %}
+					
+					
+					{% endif %}
+					
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+					
+				</div>
+			{% endfor %}
+			
+			</div>
+			
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_apply" type="button">Aplicar</button>
+				<button id="btn_sav" type="button">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	
+	</div>
+</div>
+{% endblock %}
