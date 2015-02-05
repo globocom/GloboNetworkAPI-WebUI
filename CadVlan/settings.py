@@ -35,9 +35,9 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': '',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD': '',
+        'NAME': 'telecom',
+        'USER': 'telecom',
+        'PASSWORD': 'Blink182#',
         'HOST': '',
         'PORT': '',
     }
@@ -167,6 +167,7 @@ INSTALLED_APPS = (
     'CadVlan.NetworkType',
     'CadVlan.OptionVip',
     'CadVlan.Pool',
+    'CadVlan.Rack',
     'CadVlan.Script',
     'CadVlan.ScriptType',
     'CadVlan.User',
@@ -200,9 +201,9 @@ CACHE_VLANS_TIMEOUT = 300  # Values in seconds
 URL_LOGIN = '/login'
 URL_HOME = '/home'
 
-NETWORK_API_URL = 'http://192.168.24.33/'
-NETWORK_API_USERNAME = 'CadVlan'
-NETWORK_API_PASSWORD = '12345678'
+NETWORK_API_URL = 'http://127.0.0.1:8000/'
+NETWORK_API_USERNAME = 'Admin'
+NETWORK_API_PASSWORD = 'default'
 
 # Configurações de Email
 EMAIL_FROM = 'globo@s2it.com.br'

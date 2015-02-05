@@ -660,3 +660,10 @@ urlpatterns += patterns(
     url('^pool/ajax_get_opcoes_pool_by_ambiente[/]?$', 'ajax_get_opcoes_pool_by_ambiente', name='pool.ajax.get.opcoes.pool.by.ambiente',),
     url('^pool/add_healthcheck_expect[/]?$', 'add_healthcheck_expect', name='pool.add.healthcheck.expect',),
 )
+
+# URL's Rack
+urlpatterns += patterns('CadVlan.Rack.views',
+                        url('^rack/form[/]?$', 'rack_form',
+                            name='rack.form',),
+                        )
+

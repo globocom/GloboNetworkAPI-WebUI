@@ -224,3 +224,6 @@ POOL_DATATABLE = 'pool/datatable.json'
 POOL_SPM_DATATABLE = 'pool/spm_datatable.json'
 POOL_REQVIP_DATATABLE = 'pool/reqvip_datatable.json'
 POOL_MEMBER_ITEMS = 'pool/items.html'
+
+#Rack
+RACK_FORM = 'rack/form.html'
