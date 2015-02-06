@@ -184,7 +184,7 @@ def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environ
                 request_var["acl"] = acl
 
                 # Returns JSON
-                return dtp.build_response(request_var, vlans["vlan"], vlans["total"], AJAX_VLAN_LIST, request)
+                return dtp.build_response(vlans["vlan"], vlans["total"], AJAX_VLAN_LIST, request, request_var)
 
             else:
                 # Remake search form
