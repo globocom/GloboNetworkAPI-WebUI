@@ -35,9 +35,9 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': '',
-        'NAME': 'telecom',
-        'USER': 'telecom',
-        'PASSWORD': 'Blink182#',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
         'HOST': '',
         'PORT': '',
     }
