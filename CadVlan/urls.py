@@ -667,3 +667,4 @@ urlpatterns += patterns('CadVlan.Rack.views',
                             name='rack.form',),
                         )
 
+

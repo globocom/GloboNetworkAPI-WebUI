@@ -57,6 +57,13 @@ script_type_messages = {
     'success_insert':       u'Tipo de Roteiro incluído com sucesso.',
 }
 
+rack_messages = {
+    'success_remove':       u'Todos os Racks selecionados foram excluídos com sucesso.',
+    'success_insert':       u'Rack incluído com sucesso.',
+    'error_equal_number':     u'Numero já cadastrado.',
+
+}
+
 equip_access_messages = {
     'success_remove':       u'Todos os acessos selecionados foram excluídos com sucesso.',
     'success_insert':       u'Acesso incluído com sucesso.',
