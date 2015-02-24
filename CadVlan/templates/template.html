@@ -209,10 +209,15 @@
 							<li><a href="{% url acl.template.list %} ">Template</a></li>
 							{% endif %}
 
-                            {% has_perm VLAN_MANAGEMENT None True %}
+                                                        {% has_perm VLAN_MANAGEMENT None True %}
 							{% if has_perm %}
 							<li><a href="{% url pool.list %} ">Pool</a></li>
 							{% endif %}
+
+                                                        {% has_perm EQUIPMENT_MANAGEMENT True None %}
+                                                        {% if has_perm %}
+                                                        <li><a href="{% url ajax.view.rack %}">Rack</a></li>
+                                                        {% endif %}
 
 						</ul>
 					</li>

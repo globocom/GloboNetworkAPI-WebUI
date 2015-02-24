@@ -63,6 +63,10 @@ $(document).ready(function() {
                 $(this).attr("title","Informe o nome do equipamento, se este estiver cadastrado.");
 
         });
+
+        $("#btn_listar").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
+                location.href = "{% url ajax.view.rack %}";
+        });
 })
 
 </script>
@@ -71,6 +75,9 @@ $(document).ready(function() {
 
 {% block content %}
 <div id="page_tab">
+	<div id="dialog-rack" title="Racks Cadastrados">
+                <div id="rack-view"></div>
+        </div>
         <ul>
                 <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Rack</a></li>
         </ul>
@@ -99,7 +106,7 @@ $(document).ready(function() {
                                         <tr>
                                                <td colspan="2" style="text-align:left;">{{ field }}</td>
                                                {% ifequal field.name 'mac_address_sw1' %}
-                                                    <td>{{ form.nome_sw1 }}<a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip1">Cadastrar Equipamento</button></a></td>
+                                                    <td>{{ form.nome_sw1 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip1">Cadastrar Equipamento</button></a></td>
                                                {% endifequal %}
                                         </tr>
                                 </table>
@@ -125,7 +132,7 @@ $(document).ready(function() {
                                         <tr>
                                                <td colspan="2" style="text-align:left;">{{ field }}</td>
                                                {% ifequal field.name 'mac_address_sw2' %}
-                                                    <td>{{ form.nome_sw2 }}<a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip2">Cadastrar Equipamento</button></a></td>
+                                                    <td>{{ form.nome_sw2 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip2">Cadastrar Equipamento</button></a></td>
                                                {% endifequal %}
                                         </tr>
                                 </table>
@@ -151,7 +158,7 @@ $(document).ready(function() {
                                         <tr>
                                                <td colspan="2" style="text-align:left;">{{ field }}</td>
                                                {% ifequal field.name 'mac_address_ilo' %}
-                                                    <td>{{ form.nome_ilo }}<a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip3">Cadastrar Equipamento</button></a></td>
+                                                    <td>{{ form.nome_ilo }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip3">Cadastrar Equipamento</button></a></td>
                                                {% endifequal %}
                                         </tr>
                                 </table>
@@ -161,7 +168,7 @@ $(document).ready(function() {
                                         <div><label for="{{ field.auto_id }}">
                                         {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
                                         </label></div>
-                                        {{ field }}
+                                        {{ field }}  <input id="btn_listar" type="button" value="Listar Racks"/>
 
                                         <p id="error">
                                         {% if field.errors %}

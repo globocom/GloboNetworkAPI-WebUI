@@ -665,6 +665,8 @@ urlpatterns += patterns(
 urlpatterns += patterns('CadVlan.Rack.views',
                         url('^rack/form[/]?$', 'rack_form',
                             name='rack.form',),
+                        url('^rack/ajax-view[/]?$', 'ajax_view',
+                            name='ajax.view.rack',),
                         )
 
 

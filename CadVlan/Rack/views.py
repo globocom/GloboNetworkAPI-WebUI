@@ -19,13 +19,13 @@
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError, UserNotAuthorizedError, NumeroRackDuplicadoError 
+from networkapiclient.exception import EnvironmentVipNotFoundError, InvalidParameterError, NetworkAPIClientError, UserNotAuthorizedError, NumeroRackDuplicadoError 
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.templates import RACK_FORM
+from CadVlan.templates import RACK_FORM, RACK_VIEW_AJAX
 from django.template.context import RequestContext
-from CadVlan.Rack.forms import RackForm
+from CadVlan.Rack.forms import RackForm, SearchRackForm
 from CadVlan.Util.utility import DataTablePaginator, validates_dict
 from networkapiclient.Pagination import Pagination
 from django.http import HttpResponseServerError, HttpResponse
@@ -115,4 +115,71 @@ def rack_form(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(RACK_FORM, {'form': form}, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def ajax_view(request):
+
+    # Get user
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+
+    return ajax_rack_view(request, client_api)
+
+
+def ajax_rack_view(request, client_api):
+
+    try:
+
+        racks = dict()
+
+        # Get all racks from NetworkAPI
+        racks = client_api.create_rack().find_racks()
+
+        if not racks.has_key("rack"):
+                    racks["rack"] = []
+
+        rack = racks.get('rack')
+
+        for var in rack:
+            id_equip1 = var.get("id_sw1")
+            id_equip2 = var.get("id_sw2")
+            id_equip3 = var.get("id_ilo")
+            mac_1 = var.get("mac_sw1")           
+            mac_2 = var.get("mac_sw2")           
+            mac_3 = var.get("mac_ilo")
+           
+            if not id_equip1==None:
+                equip1 = client_api.create_equipamento().listar_por_id(id_equip1) 
+                equip1 = equip1.get('equipamento')
+                var['id_sw1'] = equip1.get('nome')
+            else:
+                var['id_sw1'] = ''
+            if not id_equip2==None:
+                equip2 = client_api.create_equipamento().listar_por_id(id_equip2)
+                equip2 = equip2.get('equipamento')
+                var['id_sw2'] = equip2.get('nome')    
+            else:
+                var['id_sw2'] = ''
+            if not id_equip3==None:
+                equip3 = client_api.create_equipamento().listar_por_id(id_equip3)
+                equip3 = equip3.get('equipamento')
+                var['id_ilo'] = equip3.get('nome')
+            else:
+                var['id_ilo'] = ''
+            if mac_1==None:
+                var['mac_sw1'] = ''
+            if mac_2==None:
+                var['mac_sw2'] = ''
+            if mac_3==None:
+                var['mac_ilo'] = ''
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(RACK_VIEW_AJAX, racks, context_instance=RequestContext(request))
+
 

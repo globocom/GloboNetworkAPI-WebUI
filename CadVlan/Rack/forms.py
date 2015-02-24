@@ -19,7 +19,6 @@
 from django import forms
 from CadVlan.messages import error_messages
 
-
 class RackForm(forms.Form):
 
     rack_number = forms.IntegerField(label='Numero do Rack', required=True, error_messages=error_messages, widget=forms.TextInput(

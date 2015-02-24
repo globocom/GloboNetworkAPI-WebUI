@@ -44,7 +44,6 @@ AJAX_LDAP_RESET_PASSWORD = 'ajax/ldap-reset-password.html'
 JSON_ERROR = "error.json"
 TOKEN_INVALID = "token_invalid.html"
 
-
 AJAX_LDAP_USERS_BY_GROUP = 'ajax/select-ldap-user.html'
 AJAX_LDAP_USER_POP_NAME_MAIL = 'ajax/pop_ldap_user_mail.json'
 
@@ -227,3 +226,4 @@ POOL_MEMBER_ITEMS = 'pool/items.html'
 
 #Rack
 RACK_FORM = 'rack/form.html'
+RACK_VIEW_AJAX = 'rack/view-rack.html'
