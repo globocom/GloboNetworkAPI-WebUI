@@ -25,7 +25,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.shortcuts import render_to_response_ajax
 from CadVlan.templates import RACK_FORM, RACK_VIEW_AJAX
 from django.template.context import RequestContext
-from CadVlan.Rack.forms import RackForm, SearchRackForm
+from CadVlan.Rack.forms import RackForm
 from CadVlan.Util.utility import DataTablePaginator, validates_dict
 from networkapiclient.Pagination import Pagination
 from django.http import HttpResponseServerError, HttpResponse
