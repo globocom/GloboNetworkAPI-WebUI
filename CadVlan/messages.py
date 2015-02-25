@@ -61,7 +61,7 @@ rack_messages = {
     'success_remove':       u'Todos os Racks selecionados foram excluídos com sucesso.',
     'success_insert':       u'Rack incluído com sucesso.',
     'error_equal_number':     u'Numero já cadastrado.',
-
+    'success_edit':         u'Rack alterado com sucesso.',
 }
 
 equip_access_messages = {

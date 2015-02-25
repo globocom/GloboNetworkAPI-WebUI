@@ -32,6 +32,14 @@
 
 $(document).ready(function() {
 
+        oTable = $("#rack_list").dataTable({
+                "aaSorting": [],
+                "bJQueryUI": true,
+                "sPaginationType": "full_numbers",
+                "iDisplayLength": {% max_results %},
+                "aoColumnDefs": [{ "bSortable": false, "aTargets": [0,2,3,4,5,6,7,8] }]
+        });
+
         $("#page_tab").tabs();
 
         $("textarea").maxlength();
@@ -44,13 +52,8 @@ $(document).ready(function() {
                 location.href = "{% url rack.form %}";
         });
 
-        oTable = $("#rack_list").dataTable({
-                "aaSorting": [],
-                "bJQueryUI": true,
-                "sPaginationType": "full_numbers",
-                "iDisplayLength": {% max_results %},
-                "aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 2, 3,4,5,6,7] }]
-        });
+        $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+        $(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 
         $("#checkAll").click( function() {
                 if ($(this).attr('checked')) {
@@ -88,13 +91,14 @@ $(document).ready(function() {
                 </div>
                 <table id="rack_list">
                         <col width="3%" />
-                        <col width="7%" />
+                        <col width="6%" />
                         <col width="15%" />
+                        <col width="14%" />
                         <col width="15%" />
+                        <col width="14" />
                         <col width="15%" />
-                        <col width="15" />
-                        <col width="15%" />
-                        <col width="15%" />
+                        <col width="14%" />
+                        <col width="4%" />
                         <thead>
                                 <tr>
                                         <th><input id="checkAll" type="checkbox" /></th>
@@ -105,6 +109,7 @@ $(document).ready(function() {
                                         <th>MAC 2</th>
                                         <th>Console/ Ilo</th>
                                         <th>MAC Ilo</th>
+                                        <th></th>
                                 </tr>
                         </thead>
                         <tbody>
@@ -118,6 +123,7 @@ $(document).ready(function() {
                                         <td>{{ var.mac_sw2 }}</td>
                                         <td>{{ var.id_ilo }}</td>
                                         <td>{{ var.mac_ilo }}</td>
+                                        <td><a href="{% url rack.edit var.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
                                 </tr>
                                 {% endfor %}                            
                         </tbody>

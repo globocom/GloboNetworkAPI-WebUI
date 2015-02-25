@@ -227,3 +227,4 @@ POOL_MEMBER_ITEMS = 'pool/items.html'
 #Rack
 RACK_FORM = 'rack/form.html'
 RACK_VIEW_AJAX = 'rack/view-rack.html'
+RACK_EDIT = 'rack/edit.html'
