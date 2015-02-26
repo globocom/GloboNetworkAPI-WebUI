@@ -669,6 +669,8 @@ urlpatterns += patterns('CadVlan.Rack.views',
                             name='ajax.view.rack',),
                         url('^rack/edit/(?P<id_rack>\d+)[/]?$', 'rack_edit',
                             name='rack.edit',),
+                        url('^rack/delete[/]?$', 'rack_delete',
+                            name='rack.delete',),
                         )
 
 

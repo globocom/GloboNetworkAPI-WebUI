@@ -19,7 +19,7 @@
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from networkapiclient.exception import EnvironmentVipNotFoundError, InvalidParameterError, NetworkAPIClientError, UserNotAuthorizedError, NumeroRackDuplicadoError 
+from networkapiclient.exception import RacksError, EnvironmentVipNotFoundError, InvalidParameterError, NetworkAPIClientError, UserNotAuthorizedError, NumeroRackDuplicadoError 
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.shortcuts import render_to_response_ajax
@@ -36,6 +36,7 @@ from django.core.context_processors import request
 from django.template.context import Context, RequestContext
 from CadVlan.messages import auth_messages, equip_messages, error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
+from CadVlan.forms import DeleteForm
 
 import json
 
@@ -163,6 +164,8 @@ def ajax_rack_view(request, client_api):
             if mac_3==None:
                 var['mac_ilo'] = ''
 
+        racks['form'] = DeleteForm()
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -235,3 +238,78 @@ def rack_edit(request, id_rack):
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(RACK_EDIT, lists, context_instance=RequestContext(request))
+
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def rack_delete (request):
+
+    if request.method == 'POST':
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+
+            # Get user
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            # All ids to be deleted
+            ids = split_to_array(form.cleaned_data['ids'])
+
+            # All messages to display
+            error_list = list()
+
+            # Control others exceptions
+            have_errors = False
+
+            # For each rack selected to remove
+            for id_rack in ids:
+                try:
+
+                    # Execute in NetworkAPI
+                    client.create_rack().remover(id_rack)
+
+                except RacksError, e:
+                    # If isnt possible, add in error list
+                    error_list.append(id_rack)
+
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    have_errors = True
+                    break
+
+            # If cant remove nothing
+            if len(error_list) == len(ids):
+                messages.add_message(
+                    request, messages.ERROR, error_messages.get("can_not_remove_all"))
+
+            # If cant remove someones
+            elif len(error_list) > 0:
+                msg = ""
+                for id_error in error_list:
+                    msg = msg + id_error + ", "
+
+                msg = error_messages.get("can_not_remove") % msg[:-2]
+
+                messages.add_message(request, messages.WARNING, msg)
+
+           # If all has ben removed
+            elif have_errors == False:
+                messages.add_message(
+                    request, messages.SUCCESS, rack_messages.get("success_remove"))
+
+            else:
+                messages.add_message(
+                    request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+
+        else:
+            messages.add_message(
+                request, messages.ERROR, error_messages.get("select_one"))
+
+    # Redirect to list_all action
+    return redirect("ajax.view.rack")
+
