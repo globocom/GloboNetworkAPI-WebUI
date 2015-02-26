@@ -56,15 +56,10 @@ def buscar_id_equip(client, nome):
                 
     id_equip = None
     if not nome=='':
-       # try:
             equip = client.create_equipamento().listar_por_nome(nome)
             equip = equip.get('equipamento')
             id_equip = equip['id']
             return (id_equip)
-        #except NetworkAPIClientError, e:
-         #   logger.error(e)
-          #  messages.add_message(request, messages.ERROR, e)
-            #raise InvalidParameterError(u'Equipamento nao esta cadastrado.')
     
 def buscar_nome_equip(client, rack, tipo):
     id_equip = rack.get(tipo)
@@ -75,6 +70,11 @@ def buscar_nome_equip(client, rack, tipo):
         rack[tipo] = nome_eq
     else:
         rack[tipo] = ''
+
+
+def valid_rack_number(rack_number):
+   if not rack_number < 120:
+      raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - 119') 
 
 
 @log
@@ -100,6 +100,9 @@ def rack_form(request):
                 nome_sw2 = form.cleaned_data['nome_sw2']
                 nome_ilo = form.cleaned_data['nome_ilo']
 
+                # validacao: Numero do Rack
+                valid_rack_number(rack_number)
+ 
                 # Validacao: MAC 
                 validar_mac(mac_sw1)
                 validar_mac(mac_sw2)
