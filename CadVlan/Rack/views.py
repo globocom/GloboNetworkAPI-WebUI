@@ -36,7 +36,7 @@ from django.core.context_processors import request
 from django.template.context import Context, RequestContext
 from CadVlan.messages import auth_messages, equip_messages, error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
-from CadVlan.forms import DeleteForm
+from CadVlan.forms import DeleteForm, ConfigForm
 
 import json
 
@@ -75,6 +75,75 @@ def buscar_nome_equip(client, rack, tipo):
 def valid_rack_number(rack_number):
    if not rack_number < 120:
       raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - 119') 
+
+
+def rack_config_delete (request, client, form, operation):
+
+        if form.is_valid():
+
+            id = 'ids' if operation == 'DELETE' else 'ids_config'
+
+            # All ids selected
+            ids = split_to_array(form.cleaned_data[id])
+
+            # All messages to display
+            error_list = list()
+            error_list_config = list()
+
+            # Control others exceptions
+            have_errors = False
+
+            # For each rack selected
+            for id_rack in ids:
+                try:
+                    if operation == 'DELETE':
+                        # Execute in NetworkAPI
+                        client.create_rack().remover(id_rack)
+                    elif operation == 'CONFIG':
+                        #client.create_rack().gerar_arq_config(id_rack)
+                        raise InvalidParameterError(u'Chamada Config')
+
+                except RacksError, e:
+                    # If isnt possible, add in error list
+                    error_list.append(id_rack)
+
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    have_errors = True
+                    break
+
+
+            # If cant remove nothing
+            if len(error_list) == len(ids):
+                messages.add_message(
+                    request, messages.ERROR, error_messages.get("can_not_remove_all"))
+
+            # If cant remove someones
+            elif len(error_list) > 0:
+                msg = ""
+                for id_error in error_list:
+                    msg = msg + id_error + ", "
+
+                msg = error_messages.get("can_not_remove") % msg[:-2]
+
+                messages.add_message(request, messages.WARNING, msg)
+
+           # If all has ben removed
+            elif have_errors == False:
+                messages.add_message(
+                    request, messages.SUCCESS, rack_messages.get("success_remove"))
+
+            #else:
+             #   messages.add_message(
+              #      request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+
+        else:
+            messages.add_message(
+                request, messages.ERROR, error_messages.get("select_one"))
+
+         # Redirect to list_all action
+        return redirect("ajax.view.rack")
 
 
 @log
@@ -167,7 +236,8 @@ def ajax_rack_view(request, client_api):
             if mac_3==None:
                 var['mac_ilo'] = ''
 
-        racks['form'] = DeleteForm()
+        racks['delete_form'] = DeleteForm()
+        racks['config_form'] = ConfigForm()
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -243,6 +313,22 @@ def rack_edit(request, id_rack):
     return render_to_response(RACK_EDIT, lists, context_instance=RequestContext(request))
 
 
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def rack_config (request):
+
+    if request.method == 'POST':
+
+        form = ConfigForm(request.POST)
+       
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        rack_config_delete (request, client, form, 'CONFIG')
+
+    return redirect("ajax.view.rack")
+
 
 @log
 @login_required
@@ -250,69 +336,14 @@ def rack_edit(request, id_rack):
 def rack_delete (request):
 
     if request.method == 'POST':
-
+        
         form = DeleteForm(request.POST)
 
-        if form.is_valid():
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
 
-            # Get user
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
+        rack_config_delete (request, client, form, 'DELETE')
 
-            # All ids to be deleted
-            ids = split_to_array(form.cleaned_data['ids'])
-
-            # All messages to display
-            error_list = list()
-
-            # Control others exceptions
-            have_errors = False
-
-            # For each rack selected to remove
-            for id_rack in ids:
-                try:
-
-                    # Execute in NetworkAPI
-                    client.create_rack().remover(id_rack)
-
-                except RacksError, e:
-                    # If isnt possible, add in error list
-                    error_list.append(id_rack)
-
-                except NetworkAPIClientError, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
-                    have_errors = True
-                    break
-
-            # If cant remove nothing
-            if len(error_list) == len(ids):
-                messages.add_message(
-                    request, messages.ERROR, error_messages.get("can_not_remove_all"))
-
-            # If cant remove someones
-            elif len(error_list) > 0:
-                msg = ""
-                for id_error in error_list:
-                    msg = msg + id_error + ", "
-
-                msg = error_messages.get("can_not_remove") % msg[:-2]
-
-                messages.add_message(request, messages.WARNING, msg)
-
-           # If all has ben removed
-            elif have_errors == False:
-                messages.add_message(
-                    request, messages.SUCCESS, rack_messages.get("success_remove"))
-
-            else:
-                messages.add_message(
-                    request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
-
-        else:
-            messages.add_message(
-                request, messages.ERROR, error_messages.get("select_one"))
-
-    # Redirect to list_all action
     return redirect("ajax.view.rack")
+
 

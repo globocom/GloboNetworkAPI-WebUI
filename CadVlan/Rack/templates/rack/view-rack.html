@@ -69,6 +69,16 @@ $(document).ready(function() {
         });
         {% endif %}
 
+        {% has_perm EQUIPMENT_MANAGEMENT True None %}
+        {% if has_perm %}
+        $("#btn_conf").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"} }).click(function(){
+                if (confirm('Gerar o arquivo de configuracao do(s) Rack(s) selecionado(s)?')){ 
+                        var data = getSelectionData(oTable);
+                        $("#id_ids_config").val(data).parent().submit();
+                }
+        });
+        {% endif %}
+
         $("#checkAll").click( function() {
                 if ($(this).attr('checked')) {
                         $("[name='selection']").attr("checked", true);
@@ -109,6 +119,10 @@ $(document).ready(function() {
                         {% if has_perm %}
                             <button id="btn_new">Novo Registro</button>
                         {% endif %}
+                        {% has_perm EQUIPMENT_MANAGEMENT True True %}
+                        {% if has_perm %}
+                            <button id="btn_conf">Gerar Configuracao</button>
+                        {% endif %}
                         <span id="tool">
                         {% has_perm EQUIPMENT_MANAGEMENT True None %}
                         {% if has_perm %}
@@ -116,11 +130,20 @@ $(document).ready(function() {
                         {% endif %}
                         </span>
                 </div>
-                {% has_perm SCRIPT_MANAGEMENT True None %}
+                {% has_perm EQUIPMENT_MANAGEMENT True None %}
                 {% if has_perm %}
                 <form id="delete_form" method="post" action="{% url rack.delete %}" style="visibility: hidden;">
                         {% csrf_token %}
-                        {% for field in form %}
+                        {% for field in delete_form %}
+                                {{ field }}
+                        {% endfor %}
+                </form>
+                {% endif %}
+                {% has_perm EQUIPMENT_MANAGEMENT True None %}
+                {% if has_perm %}
+                <form id="config_form" method="post" action="{% url rack.config %}" style="visibility: hidden;">
+                        {% csrf_token %}
+                        {% for field in config_form %}
                                 {{ field }}
                         {% endfor %}
                 </form>
