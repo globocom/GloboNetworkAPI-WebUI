@@ -114,7 +114,7 @@ def rack_form(request):
  
                 rack = client.create_rack().insert_rack(rack_number, mac_sw1, mac_sw2, mac_ilo, id_sw1, id_sw2, id_ilo)
                 messages.add_message(request, messages.SUCCESS, rack_messages.get("success_insert"))
-                return render_to_response(RACK_FORM, {'form': form}, context_instance=RequestContext(request))
+                return redirect('ajax.view.rack')
 
         else:
             form = RackForm()
