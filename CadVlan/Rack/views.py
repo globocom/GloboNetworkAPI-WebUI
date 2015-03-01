@@ -19,7 +19,7 @@
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from networkapiclient.exception import RacksError, EnvironmentVipNotFoundError, InvalidParameterError, NetworkAPIClientError, UserNotAuthorizedError, NumeroRackDuplicadoError 
+from networkapiclient.exception import RackAllreadyConfigError, RacksError, EnvironmentVipNotFoundError, InvalidParameterError, NetworkAPIClientError, UserNotAuthorizedError, NumeroRackDuplicadoError 
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.shortcuts import render_to_response_ajax
@@ -77,6 +77,51 @@ def valid_rack_number(rack_number):
       raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - 119') 
 
 
+def get_msg(request, var, id_rack):
+
+    conf1 = var.get('equip1')
+    conf2 = var.get('equip2')
+    conf3 = var.get('equip3')
+    msg = ''
+ 
+    if (conf1=='True'):
+        if (conf2=='True'):
+            if (conf3=='False'):#110
+                msg = 'Console do Rack ' + str(id_rack)
+                msg = rack_messages.get('can_not_create_config') % msg
+            else:#111
+                msg = str(id_rack)
+                msg = rack_messages.get('sucess_create_config') % msg
+                messages.add_message(request, messages.SUCCESS, msg)
+                return 0
+        else:
+            if (conf3=='True'):#101
+                msg = 'Switch 2 do Rack ' + str(id_rack)
+                msg = rack_messages.get('can_not_create_config') % msg
+            else:#100
+                msg = 'Switch 2 e Console do Rack ' + str(id_rack)
+                msg = rack_messages.get('can_not_create_config') % msg
+    elif (conf1=='False'):
+        if (conf2=='True'):
+            if (conf3=='True'):#011---errado
+                msg = 'Switch 1 do Rack ' + str(id_rack)
+                msg = rack_messages.get('can_not_create_config') % msg
+            else:#010---
+                msg = 'Switch 1 e Console do Rack ' + str(id_rack)
+                msg = rack_messages.get('can_not_create_config') % msg
+        else:
+            if (conf3=='True'):#001
+                msg = 'Switch 1 e Switch2 do Rack ' + str(id_rack)
+                msg = rack_messages.get('can_not_create_config') % msg
+            else:#000
+                msg = str(id_rack)
+                msg = rack_messages.get('can_not_create_all') % msg
+                messages.add_message(request, messages.ERROR, msg)
+                return 0
+ 
+    messages.add_message(request, messages.WARNING, msg)
+    return 0
+
 def rack_config_delete (request, client, form, operation):
 
         if form.is_valid():
@@ -89,6 +134,7 @@ def rack_config_delete (request, client, form, operation):
             # All messages to display
             error_list = list()
             error_list_config = list()
+            all_ready_msg_rack_error = False
 
             # Control others exceptions
             have_errors = False
@@ -97,29 +143,46 @@ def rack_config_delete (request, client, form, operation):
             for id_rack in ids:
                 try:
                     if operation == 'DELETE':
-                        # Execute in NetworkAPI
+                        msg_sucess = "success_remove"
                         client.create_rack().remover(id_rack)
                     elif operation == 'CONFIG':
-                        #client.create_rack().gerar_arq_config(id_rack)
-                        raise InvalidParameterError(u'Chamada Config')
-
+                        var = client.create_rack().gerar_arq_config(id_rack)
+                        var = var.get('sucesso')
+                        racks = client.create_rack().find_racks()
+                        racks = racks.get('rack')
+                        for ra in racks:
+                            if ra.get('id')==id_rack:
+                                rack = ra
+                        num_rack = rack.get('numero')
+                        get_msg(request, var, num_rack)
+                except RackAllreadyConfigError, e:
+                    logger.error(e)
+                    error_list_config.append(id_rack)
                 except RacksError, e:
-                    # If isnt possible, add in error list
+                    logger.error(e)
+                    if not all_ready_msg_rack_error:
+                        messages.add_message(request, messages.ERROR, e)
+                    all_ready_msg_rack_error = True
                     error_list.append(id_rack)
-
                 except NetworkAPIClientError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
                     break
 
+            if len(error_list_config) > 0:
 
-            # If cant remove nothing
+                msg = ""
+                for id_error in error_list_config:
+                    msg = msg + id_error + ','
+
+                messages.add_message(request, messages.WARNING, msg)
+                have_errors = True
+
             if len(error_list) == len(ids):
                 messages.add_message(
                     request, messages.ERROR, error_messages.get("can_not_remove_all"))
 
-            # If cant remove someones
             elif len(error_list) > 0:
                 msg = ""
                 for id_error in error_list:
@@ -129,14 +192,11 @@ def rack_config_delete (request, client, form, operation):
 
                 messages.add_message(request, messages.WARNING, msg)
 
-           # If all has ben removed
-            elif have_errors == False:
+            elif (not operation=='CONFIG') and (have_errors == False):
                 messages.add_message(
-                    request, messages.SUCCESS, rack_messages.get("success_remove"))
+                    request, messages.SUCCESS, rack_messages.get(msg_sucess))
 
-            #else:
-             #   messages.add_message(
-              #      request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+            return redirect("ajax.view.rack")
 
         else:
             messages.add_message(
@@ -278,7 +338,7 @@ def rack_edit(request, id_rack):
 
             lists['form'] = RackForm(initial={'rack_number': rack.get('numero'), "mac_address_sw1": rack.get('mac_sw1'), "mac_address_sw2": rack.get(
                 "mac_sw2"), "mac_address_ilo": rack.get('mac_ilo'), "nome_sw1": rack.get('id_sw1'), "nome_sw2": rack.get('id_sw2'), "nome_ilo": rack.get('id_ilo')})
-
+    
         if request.method == 'POST':
             form = RackForm(request.POST)
             lists['form'] = form
@@ -304,7 +364,7 @@ def rack_edit(request, id_rack):
                 rack = client.create_rack().edit_rack(id_rack, rack.get('numero'), mac_sw1, mac_sw2, mac_ilo, id_sw1, id_sw2, id_ilo)
                 messages.add_message(request, messages.SUCCESS, rack_messages.get("success_edit"))
 
-                return render_to_response(RACK_EDIT, lists, context_instance=RequestContext(request))
+                return redirect('ajax.view.rack')
 
     except NetworkAPIClientError, e:
         logger.error(e)
