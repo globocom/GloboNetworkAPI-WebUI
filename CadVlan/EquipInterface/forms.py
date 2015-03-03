@@ -91,7 +91,7 @@ class AddInterfaceForm(forms.Form):
             attrs["style"] = "width: 98px;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [
-                ("", "Selecione"), ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial")]
+                ("", "Selecione"), ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial"), ("Eth","Eth")]
         else:
             attrs["style"] = "display: none;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
@@ -103,15 +103,15 @@ class AddInterfaceForm(forms.Form):
 
         if marca == "0":
             self.regex = "^([a-zA-Z0-9-_/ ]+(:)?){1,6}$"
-        elif marca == "2":
-            self.regex = "^(Int)\s[0-9]+$"
-        elif marca == "3":
-            self.regex = "^(Fa|Gi|Te|Serial)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
-        elif marca == "4":
+        #elif marca == "2":
+         #   self.regex = "^(Int)\s[0-9]+$"
+        elif marca == "3":#Cisco - deixa
+            self.regex = "^(Fa|Gi|Te|Serial|Eth)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+        elif marca == "4":#f5 - arrumar
             self.regex = "^(interface)\s[0-9]+(.[0-9]+)?$"
-        elif marca == "5":
+        elif marca == "5":#Trocar pelo Brocade
             self.regex = "^(eth)[0-9]+(/[0-9]+)?$"
-        elif marca == "8":
+        elif marca == "8":#hp - deixa
             self.regex = "^[0-9]+$"
         else:
             self.regex = ""
