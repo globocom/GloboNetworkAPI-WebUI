@@ -108,7 +108,7 @@ class AddInterfaceForm(forms.Form):
         elif marca == "3":
             self.regex = "^(Fa|Gi|Te|Serial|Eth)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
         elif marca == "4":
-            self.regex = "^(interface)\s[0-9]+(/[0-9]+.[0-9]+)?$"
+            self.regex = "^(interface)\s[0-9a-zA-Z]+(/[0-9a-zA-Z])+([0-9a-zA-Z-.]+)?$"
         elif marca == "5":#Trocar pelo Brocade
             self.regex = "^(eth)[0-9]+(/[0-9]+)?$"
         elif marca == "8":
