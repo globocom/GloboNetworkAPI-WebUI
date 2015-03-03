@@ -154,12 +154,12 @@ class AddSeveralInterfaceForm(forms.Form):
             attrs["style"] = "width: 98px;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [
-                ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial")]
+                ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial"), ("Eth","Eth")]
             attrs['disabled'] = "disabled"
             self.fields['combo_aux'].widget = forms.Select(attrs=attrs)
             self.fields['combo_aux'].choices = [
-                ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial")]
-            self.regex = "^(Fa|Gi|Te|Serial)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+                ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial"), ("Eth","Eth")]
+            self.regex = "^(Fa|Gi|Te|Serial|Eth)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
             self.fields['campos'].choices = [
                 ("1", "1"), ("2", "2"), ("3", "3")]
 
