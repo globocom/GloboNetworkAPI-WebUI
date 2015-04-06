@@ -12,7 +12,7 @@
 		"<div class='text_center'> {{ pool.healthcheck|escapejs }} </div>",
 		"<div class='text_center'> {{ pool.environment|default:""|escapejs }} </div>",
 		"<div class='text_center'>{% if pool.pool_created %} <span class='ui-icon ui-icon-check text_center' title='Sim'></span>{% else %}<span class='ui-icon ui-icon-close text_center' title='Não'></span>  {% endif %}</div>",
-		"<div class='text_center'>{% has_perm POOL_MANAGEMENT True None %}{% if has_perm%}{% has_perm POOL_ALTER_SCRIPT True None %}{% if has_perm %}{% if pool.pool_created %} <a href='{% url pool.edit.form pool.id %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'>{% else %}<a href='{% url pool.edit.form pool.id %}' style='width: 20px; height: 20px;' class='btn_manager' title='Gerênciar'>{% endif %}{%endif%}{%endif%}</div>"
+		"<div class='text_center'>{% has_perm POOL_MANAGEMENT True None %}{% if has_perm%}{% has_perm POOL_ALTER_SCRIPT True None %}{% if has_perm %}{% if pool.pool_created %} <a href='{% url pool.edit.form pool.id %}' style='width: 20px; height: 20px;' class='btn_manager' title='Gerênciar'>{% else %}<a href='{% url pool.edit.form pool.id %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'>{% endif %}{%endif%}{%endif%}</div>"
 		
 	]
     {% if not forloop.last %}

@@ -213,6 +213,7 @@ class RequestVipFormHealthcheck(forms.Form):
                     ["Este campo é obrigatório com a opção HTTP selecionada."])
         else:
             cleaned_data["excpect"] = None
+            cleaned_data["healthcheck"] = None
 
         return cleaned_data
 
