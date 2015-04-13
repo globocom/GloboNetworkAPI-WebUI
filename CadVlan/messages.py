@@ -63,7 +63,7 @@ rack_messages = {
     'error_equal_number':     u'Numero já cadastrado.',
     'success_edit':         u'Rack alterado com sucesso.',
     'sucess_create_config':	u'Os arquivos de configuracao dos 3 equipamentos do rack %s foram criados com sucesso.',
-    'can_not_create_all':	u'Os arquivos de configuracao do rack %s NAO foram gerados.',
+    'can_not_create_all':	u'Os arquivos de configuracao do rack nao foram gerados. Erro: %s.',
     'can_not_create_config':       u'Os arquivos de configuracao do %s nao pode(m) ser gerado(s)',
 }
 

@@ -673,6 +673,8 @@ urlpatterns += patterns('CadVlan.Rack.views',
                             name='rack.delete',),
                         url('^rack/gerar-configuracao[/]?$', 'rack_config',
                             name='rack.config',),
+                        #url('^rack/gerar-vlan_amb[/]?$', 'rack_vlan_amb',
+                         #   name='rack.vlan_amb',),
                         )
 
 
