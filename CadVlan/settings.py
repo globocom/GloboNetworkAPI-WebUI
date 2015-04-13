@@ -21,7 +21,7 @@
 import os
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -193,7 +193,7 @@ CACHE_VLANS_TIMEOUT = 300  # Values in seconds
 URL_LOGIN = '/login'
 URL_HOME = '/home'
 
-NETWORK_API_URL = 'http://192.168.24.33/'
+NETWORK_API_URL = 'http://10.0.0.2:8000/'
 NETWORK_API_USERNAME = 'CadVlan'
 NETWORK_API_PASSWORD = '12345678'
 

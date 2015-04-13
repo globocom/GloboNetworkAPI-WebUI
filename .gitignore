@@ -7,4 +7,5 @@ org.eclipse.core.resources.prefs
 Documentation/_build/*
 **/ACLS/*
 *.idea
+.vagrant*
 
