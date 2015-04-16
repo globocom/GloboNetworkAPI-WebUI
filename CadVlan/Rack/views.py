@@ -104,18 +104,17 @@ def valid_rack_name(rack_name):
       raise InvalidParameterError('Nome inváildo. Ex: AA00')
 
 
-def get_msg(request, var, id_rack):
+def get_msg(request, var, nome):
 
     rack_conf = var.get('rack_conf')
+    rack_conf = str(rack_conf)
 
-    if rack_conf==None:
-        msg = str(id_rack)
-        msg = rack_messages.get('sucess_create_config') % msg    
-        messages.add_message(request, messages.WARNING, msg)
+    if rack_conf=="True":
+        msg = rack_messages.get('sucess_create_config') % nome 
+        messages.add_message(request, messages.SUCCESS, msg)
     else:
-        msg = rack_conf+str(id_rack)
-        msg = rack_messages.get('can_not_create_all') % msg    
-        messages.add_message(request, messages.WARNING, msg)
+        msg = rack_messages.get('can_not_create_all') % nome    
+        messages.add_message(request, messages.ERROR, msg)
 
 
 def rack_config_delete (request, client, form, operation):
@@ -149,8 +148,8 @@ def rack_config_delete (request, client, form, operation):
                         for ra in racks:
                             if ra.get('id')==id_rack:
                                 rack = ra
-                        num_rack = rack.get('numero')
-                        get_msg(request, var, num_rack)
+                        nome = rack.get('nome')
+                        get_msg(request, var, nome)
                 except RackAllreadyConfigError, e:
                     logger.error(e)
                     error_list_config.append(id_rack)
