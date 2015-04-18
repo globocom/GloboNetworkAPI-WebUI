@@ -1,0 +1,181 @@
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Pool - Cadastro]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+    var obj_btn_can = $("#btn_can");
+
+    obj_btn_can.button({icons: {primary: "ui-icon-cancel"}});
+
+    $("#page_tab_full").tabs();
+    $("#page_tab").tabs({selected:1});
+
+    obj_btn_can.click(function(){
+        location.href = "{% url pool.list %}";
+    });
+
+    $(".tab1").attr("href", "{%  url pool.manage.tab1 id_server_pool%}");
+    $(".tab3").attr("href", "{%  url pool.manage.tab3 id_server_pool%}");
+    $(".tab4").attr("href", "{%  url pool.manage.tab4 id_server_pool%}");
+
+    {% has_perm POOL_ALTER_SCRIPT True None %}
+    {% if has_perm %}
+        $("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+            if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+                var data = getSelectionData(oTableSpm);
+                $("#ids").val(data);
+
+                $('#delete_form').attr('action','{% url pool.enable %}').submit();
+            }
+        });
+    {% endif %}
+
+    {% has_perm POOL_ALTER_SCRIPT True None %}
+    {% if has_perm %}
+        $("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+            if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+                var data = getSelectionData(oTableSpm);
+                $("#ids").val(data);
+
+                $('#delete_form').attr('action','{% url pool.disable %}').submit();
+            }
+        });
+    {% endif %}
+
+    oTableSpm = $("#script_list").dataTable({
+        "sAjaxSource": "{% url pool.spm_datatable id_server_pool%}",
+        "bServerSide": true,
+        "aaSorting": [[ 1, "asc" ]],
+        "bAutoWidth": false,
+        "bJQueryUI": true,
+        "bFilter": false,
+        "sPaginationType": "full_numbers",
+        "iDisplayLength": {% max_results %},
+        "aoColumnDefs": [
+            { "bSortable": false, "aTargets": [ 0, 4] }
+         ]
+    });
+    
+    $("#checkAll").click( function() {
+        if ($(this).attr('checked')) {
+            $(":checkbox").attr("checked", true);
+        } else {
+            $(":checkbox").attr("checked", false);
+        }
+    });
+    
+    $(".fg-button").live("click", function(){
+        $(":checkbox").attr("checked", false);
+        $(":checkbox", oTableSpm.fnGetHiddenNodes()).attr("checked", false);
+        $("#checkAll").attr("checked", false);
+    });
+})
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div id="page_tab_full">
+    <ul>
+        <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-10">Detalhes do Server Pool</a></li>
+    </ul>
+    <div id="tabs-10">
+        <div id="fields" class="ui-widget-content">
+            <table border="5">
+                <tbody>
+                    <tr>
+                        <td style="width: 120px"><label>Id:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if id_server_pool %} {{ id_server_pool }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Identifier:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if identifier %} {{ identifier }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Default Port:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if default_port %} {{ default_port }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 120px"><label>Ambiente:</label></td>
+                        <td><label style="width: 350px;color:blue;text-align:center;" id="list_environment">{% if environment %} {{ environment }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Balanceamento:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;" id="list_balancing">{% if balancing %} {{ balancing }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Healthcheck:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if health_check %} {{ health_check }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
+                        <td><label>Default Maxconn:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if max_con != '' and max_con != None %} {{ max_con }} {% endif %}</label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="page_tab">
+        <ul>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab1" href="#tab1">Requisições VIP</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab2" href="javascript:;">Reals Server - Status</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab3" href="#tab3">Edição de Pool</a></li>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a class="tab4" href="#tab4">Reals Server</a></li>
+        </ul>
+
+        <div id="tabs-2">
+            <div class="buttons">
+                <span id="tool">
+                {% has_perm POOL_ALTER_SCRIPT True None %}
+                {% if has_perm %}
+                    <button id="btn_enable">Habilitar Real</button>
+                    <button id="btn_disable">Desabilitar Real</button>
+                {% endif %}
+                </span>
+            </div>
+
+            <form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden; height:0px;">
+                <input type='hidden' name='id_server_pool' value='{{id_server_pool}}' />
+                <input type='hidden' id="ids" name='ids' value='{{ids}}' />
+                {% csrf_token %}
+
+                {% for field in reals %}
+                    {{ field }}
+                {% endfor %}
+            </form>
+
+            <table id="script_list">
+                <col width="3%" />
+                <col width="19%" />
+                <col width="15%" />
+                <col width="5%" />
+                <col width="8%" />
+                <col width="8%" />
+                <thead>
+                    <tr>
+                        <th><input id="checkAll" type="checkbox" /></th>
+                        <th>Nome do Real</th>
+                        <th>IP do Real</th>
+                        <th>Porta Real</th>
+                        <th>Prioridade</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="buttons-l ui-widget-header">
+            <button id="btn_can" type="button">Cancelar</button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

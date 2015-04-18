@@ -48,7 +48,7 @@ def is_valid_uri(param):
 
     :param param: Value to be validated.
 
-    :return True if the parameter has a valid uri value, or False otherwise.  
+    :return True if the parameter has a valid uri value, or False otherwise.
     '''
     pattern = r"^[a-zA-Z0-9\\-_\\\-\\.!\\~\\*'\\(\\);/\\?:\\@\\&=\\{\\}\\#\\\[\\\]\\,]*$"
     return re.match(pattern, param)
@@ -59,7 +59,7 @@ def is_valid_cn(param):
 
     :param param: Value to be validated.
 
-    :return True if the parameter has a valid cn value, or False otherwise.  
+    :return True if the parameter has a valid cn value, or False otherwise.
     '''
     pattern = r"^[a-zA-Z0-9\\-_\\\-]*$"
     return re.match(pattern, param)
@@ -92,7 +92,7 @@ def convert_string_to_boolean(param):
 
     :param param: parameter to be converted.
 
-    :return Parameter converted.  
+    :return Parameter converted.
     '''
     if param == 'True':
         return True
@@ -110,7 +110,7 @@ def convert_boolean_to_int(param):
 
     :param param: parameter to be converted.
 
-    :return Parameter converted.  
+    :return Parameter converted.
     '''
     if param == True:
         return int(1)
@@ -124,7 +124,7 @@ def convert_int_to_boolean(param):
 
     :param param: parameter to be converted.
 
-    :return Parameter converted.  
+    :return Parameter converted.
     '''
     param = int(param)
     if param == 1:
@@ -141,7 +141,7 @@ def validates_dict(param, key):
 
     :param key: Key List.
 
-    :return list.  
+    :return list.
     '''
     if param is not None:
 
@@ -166,7 +166,7 @@ def clone(obj):
 
     :param obj: object to be cloned
 
-    :return object cloned.  
+    :return object cloned.
     '''
     return copy.copy(obj)
 
@@ -176,7 +176,7 @@ def acl_key(network):
 
     :param network: v4 or v6.
 
-    :return value of key.  
+    :return value of key.
 
     :raise ValueError: Parameter null or blank
     '''
@@ -195,7 +195,7 @@ def is_valid_int_param(param, required=True):
 
     :param param: Value to be validated.
 
-    :return True if the parameter has a valid integer value, or False otherwise.  
+    :return True if the parameter has a valid integer value, or False otherwise.
     '''
     if param is None and not required:
         return True
@@ -215,7 +215,7 @@ def get_param_in_request(request, param):
     :param request: request.
     :param param: param.
 
-    :return value of key.  
+    :return value of key.
     '''
     if param in request.POST:
         value = str(request.POST[param])
@@ -309,11 +309,10 @@ class DataTablePaginator():
 
         self.sEcho = int(self.request.GET.get('sEcho', 0))
 
-    def build_response(self, data, total, json_template, request):
+    def build_response(self, data, total, json_template, request, request_var = None):
         """
         Build the response to ajax
         """
-
         # Build return json
         response_dict = dict()
         response_dict["aaData"] = data
@@ -321,6 +320,7 @@ class DataTablePaginator():
         response_dict["iTotalRecords"] = total
         response_dict["iTotalDisplayRecords"] = total
         response_dict["sColumns"] = self.sColumns
+        response_dict["requestVar"] = request_var
 
         response = HttpResponse(loader.render_to_string(
             json_template, response_dict, context_instance=RequestContext(request)), mimetype='application/javascript')
@@ -331,3 +331,11 @@ class DataTablePaginator():
 
         # Returns JSON
         return response
+
+
+def safe_list_get(list_obj, index, default=None):
+
+    try:
+        return list_obj[index]
+    except IndexError:
+        return default

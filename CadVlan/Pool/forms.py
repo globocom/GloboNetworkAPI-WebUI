@@ -22,12 +22,14 @@ from CadVlan.messages import error_messages
 
 class PoolForm(forms.Form):
 
-    def __init__(self, env_choices, choices_opvip, *args, **kwargs):
+    def __init__(self, enviroments_choices, optionsvips_choices, healthcheck_choices=[('', '-')], *args, **kwargs):
         super(PoolForm, self).__init__(*args, **kwargs)
 
+        self.fields['environment'].choices = enviroments_choices
+        self.fields['balancing'].choices = optionsvips_choices
+        self.fields['health_check'].choices = healthcheck_choices
 
-        self.fields['environment'].choices = env_choices
-        self.fields['balancing'].choices = choices_opvip
+    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
 
     identifier = forms.CharField(label=u'Identifier', min_length=3, max_length=40, required=True,
                                  error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
@@ -37,6 +39,10 @@ class PoolForm(forms.Form):
                                     error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
     balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
                                   error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+    health_check = forms.ChoiceField(label=u'HealthCheck', choices=[], required=True,
+                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+    max_con = forms.IntegerField(label=u'Número máximo de conexões (maxconn)', required=True,
+                                error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
 
 
 
@@ -45,8 +51,7 @@ class SearchPoolForm(forms.Form):
     def __init__(self, environment_list, *args, **kwargs):
 
         super(SearchPoolForm, self).__init__(*args, **kwargs)
-        env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
-                         " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
+        env_choices = ([(env['id'], env["name"]) for env in environment_list])
         env_choices.insert(0, (0, "-"))
 
         self.fields['environment'].choices = env_choices
@@ -67,6 +72,7 @@ class PoolFormEdit(forms.Form):
         super(PoolFormEdit, self).__init__(*args, **kwargs)
 
         self.fields['balancing'].choices = choices_opvip
+        self.fields['balancing'].choices.insert(0, ('',''))
 
     default_port = forms.CharField(label=u'Default Port', min_length=2, max_length=5, required=True,
                                    error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))

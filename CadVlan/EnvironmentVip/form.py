@@ -28,12 +28,51 @@ class EnvironmentVipForm(forms.Form):
                                               'tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["option_vip"]]
 
     id = forms.IntegerField(
-        label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
-    finality = forms.CharField(label=u'Finalidade', min_length=3, max_length=50, required=True,
-                               error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    client = forms.CharField(label=u'Cliente', min_length=3, max_length=50,  required=True,
-                             error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    environment_p44 = forms.CharField(label=u'Ambiente P44', min_length=3, max_length=50,  required=True,
-                                      error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
+        label="",
+        required=False,
+        widget=forms.HiddenInput(),
+        error_messages=error_messages
+    )
+
+    finality = forms.CharField(
+        label=u'Finalidade',
+        min_length=3,
+        max_length=50,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"})
+    )
+
+    client = forms.CharField(
+        label=u'Cliente',
+        min_length=3,
+        max_length=50,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"})
+    )
+
+    environment_p44 = forms.CharField(
+        label=u'Ambiente P44',
+        min_length=3,
+        max_length=50,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"})
+    )
+
+    description = forms.CharField(
+        label=u'Descrição',
+        min_length=3,
+        max_length=50,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"})
+    )
+
     option_vip = forms.MultipleChoiceField(
-        label=u'Opções VIP', required=False, error_messages=error_messages, widget=forms.SelectMultiple(attrs={'style': "width: 310px"}))
+        label=u'Opções VIP',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.SelectMultiple(attrs={'style': "width: 310px"})
+    )

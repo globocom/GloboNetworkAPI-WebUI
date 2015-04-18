@@ -1,0 +1,371 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Vlan - Listagem]{% endblock %}
+
+{% block header %}
+<style>
+#search_form label {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript">
+
+function setupAjaxForm() {
+	form = {};
+	$("#search_form input[type^='text'], #search_form input[type='hidden'], #search_form select, #search_form input[name='subnet']:checked, #search_form input[name='ip_version']:checked").each(function() {
+		form[$(this).attr("name")] = $(this).val();
+	});
+	$("#search_form input[type='checkbox']").each(function() {
+		form[$(this).attr("name")] = $(this).is(":checked");
+	});
+	
+	$.ajaxSetup({
+		data: form
+	});
+	
+}
+
+
+function more_than_three(id){
+	retorno = false
+	$("th[id^='expandir_rede_"+ id +"']").each(function (){
+		if ($(this).attr('lenght') > 3)
+			retorno = true;
+	});
+	return retorno;
+}
+
+function teste(){
+	alert('dasds')
+}
+
+
+$(document).ready(function() {
+	setupAjaxForm();
+	
+	$(".expand").live("click", function() {
+		id = $(this).attr("lang");
+		lenght_equipment = $("#expandir_rede_" + id).attr('lenght')
+		lenght_redes	 = parseInt($("#expandir_rede_" + id).attr('lenght_rede')) + parseInt($("#expandir_rede_" + id).attr('lenght_rede_ipv6'))
+		if ($(".expandable_" + id).css("max-height") != "9999px") {
+			$(".expandable_" + id).css("max-height", "9999px");
+			$("div[lang=" + id + "]").css("background", "url(/media/img/min.png) transparent bottom center no-repeat");
+			
+			if(lenght_redes > 3 || (lenght_redes > 1 && more_than_three(id))){
+				$("#rede_" + id).css("background", "url(/media/img/min_red.png) transparent bottom center no-repeat");
+			}
+			
+			$("#expandir_tipo_" + id).attr('rowspan', $("#expandir_tipo_" + id).attr('lenght') );
+			$("#expandir_rede_" + id).attr('rowspan', $("#expandir_rede_" + id).attr('lenght') );
+			
+		} else {
+			$(".expandable_" + id).css("max-height", "52px");
+			$("div[lang=" + id + "]").css("background", "url(/media/img/max.png) transparent bottom center no-repeat");
+			
+			if(lenght_redes > 3 || (lenght_redes > 1 && more_than_three(id))){
+				$("#rede_" + id).css("background", "url(/media/img/max_red.png) transparent bottom center no-repeat");
+			}
+			
+			if(lenght_equipment > 3){
+				$("#expandir_tipo_" + id).attr('rowspan', 4);
+				$("#expandir_rede_" + id).attr('rowspan', 4);
+			}
+		}
+	});
+	
+	$("#ip_all").click(function() {
+		$("input.ipv4").val("");
+		$("input.ipv6").val("");
+		$(".ipv4").hide();
+		$(".ipv6").hide();
+		$("#subnet").hide();
+	});
+	
+	$("#ip_v4").click(function() {
+		$("input.ipv6").val("");
+		$(".ipv6").hide();
+		$(".ipv4").show();
+		$("#subnet").show();
+	});
+	
+	$("#ip_v6").click(function() {
+		$("input.ipv4").val("");
+		$(".ipv4").hide();
+		$(".ipv6").show();
+		$("#subnet").show();
+	});
+	
+	oTable = $("#vlan_list").dataTable({
+		"bServerSide": true,
+		"aaSorting": [],
+		"bAutoWidth": false,
+		"bJQueryUI": true,
+		"bFilter": false,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [
+		                 { "bSortable": false, "aTargets": [ 0, 1, 7 ] }
+		     			]
+	});
+	
+	$("#vlan_list_wrapper").hide();
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$("[name='selection']").attr("checked", true);
+		} else {
+			$("[name='selection']").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$("name['selection']").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	$("#page_tab").tabs();
+	
+	$("#accordion").accordion({ autoHeight: false });
+	
+	$("#btn_search").button({ icons: {primary: "ui-icon-search"} }).live("click", function(event){
+		event.preventDefault();
+		version = $("#search_form input[name='ip_version']:checked").val();
+		if (version == 0) {
+			version = "ipv4";
+			qnt = 4;
+		} else if (version == 1) {
+			version = "ipv6";
+			qnt = 8;
+		} else if (version != 2) {
+			return false;
+		}
+		
+		value = ""
+		$("input." + version).each(function(index) {
+			value = value + $(this).val();
+			if (index < qnt) {
+				if (version == "ipv4") {
+					value = value + $.trim($(this).next().text());
+				} else {
+					value = value + $.trim($(this).next().next().text());
+				}
+			}
+		});
+		
+		$("#search_form input[name='networkv6']").val("");
+		$("#search_form input[name='networkv4']").val("");
+		
+		if (version == "ipv4") {
+			if (value.length > 4) {
+				$("#search_form input[name='networkv4']").val(value);
+				$("#search_form input[name='networkv6']").val("");
+			}
+		} else if (version == "ipv6") {
+			if (value.length > 8) {
+				$("#search_form input[name='networkv6']").val(value);
+				$("#search_form input[name='networkv4']").val("");
+			}
+		}
+	        
+		oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '0' %}";
+		oTable.fnSettings().bServerSide = true;
+		
+		$("#vlan_list_wrapper").show();
+		
+		setupAjaxForm();
+		oTable.fnAjaxUpdate();
+		
+	});
+	
+	$("#btn_clear").button({ icons: {primary: "ui-icon-close"}, text: false }).click(function() {
+		$("#ip_v4").click();
+	});
+	
+	$(".tool").buttonset();
+	
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url vlan.form %}";
+	});
+	
+	{% has_perm VLAN_MANAGEMENT True None %}
+	{% if has_perm %}
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Deseja realmente excluir a(s) Vlan(s) selecionada(s)?')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+
+            oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+            oTable.fnSettings().bServerSide = true;
+
+            $("#vlan_list_wrapper").show();
+
+            setupAjaxForm();
+            oTable.fnAjaxUpdate();
+	});
+	
+	$("#vlan_list tbody tr").live("click", function(e) {
+		if (!(e.target.nodeName == 'A' || e.target.nodeName == 'SPAN' || e.target.nodeName == 'INPUT' || (e.target.nodeName == 'DIV' && e.target.className == 'expand'))) {
+			location.href = $(this).find(".table_id").attr("lang");
+		}
+	});
+
+        if({{search_var}}=='1'){
+        
+            oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+            oTable.fnSettings().bServerSide = true;
+                
+            $("#vlan_list_wrapper").show();
+                
+            setupAjaxForm();
+            oTable.fnAjaxUpdate();
+        };	
+})
+</script>
+<style>
+#vlan_list tbody tr {
+	cursor: pointer;
+}
+input {
+	padding: 4px 0px !important;
+}
+#search_form table th {
+	padding: 2px;
+    text-align: center !important;
+    background: url("/media/css/globo/images/ui-bg_highlight-soft_80_dddddd_1x100.png") repeat-x scroll 50% 50% #DDDDDD;
+}
+#search_form table td {
+    text-align: center !important;
+	background-color: #F6F6F6;
+}
+.ui-accordion .ui-accordion-content {
+	padding: 5px !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Vlans</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="accordion">
+			<h3><a href="#">Pesquisar</a></h3>
+			<div id="search">
+				<form id="search_form" method="post" action="">
+					{% csrf_token %}
+					{{ search_form.networkv4 }}{{ search_form.networkv6 }}
+					<table style="width: 100%">
+						<thead>
+							<tr>
+								<th>Número</th>
+								<th>Nome</th>
+								<th>Ambiente</th>
+								<th>Tipo</th>
+								<th>Rede <label for="ip_all"><input type="radio" id="ip_all" name="ip_version" value="2" />L2 + IPv4 + IPv6</label> <label for="ip_v4"><input type="radio" id="ip_v4" name="ip_version" checked="checked" value="0" />IPv4</label> <label for="ip_v6"><input type="radio" id="ip_v6" name="ip_version" value="1" />IPv6</label></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>{{ search_form.number }}</td>
+								<td>{{ search_form.name }}</td>
+								<td>{{ search_form.environment }}</td>
+								<td>{{ search_form.net_type }}</td>
+								<td><input type="text" class="ip_input ipv6 ipv4" name="oct1" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct2" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct3" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct4" onkeyup="changeInput(this, true)" /><label class="ipv4">/</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct5" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct6" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct7" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">/</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct9" onkeyup="changeInput(this, true)" /></td>
+								<td style="padding-top: 4px;"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>{{ search_form.iexact }}<label for="id_iexact"> Buscar nomes exatos</label></td>
+								<td></td>
+								<td></td>
+								<td><div id="subnet">{{ search_form.subnet }}</div></td>
+								<td>{{ search_form.acl }}<label for="id_acl"> Apenas Acls não validadas</label></td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+			</div>
+		</div>
+		<div class="buttons">
+			<div style=" color:#EE0000; float:left; margin-top: 6px; margin-left: 4px;">
+				<img border="0" src="/media/img/quadrado.gif"/> Redes ainda sem validação de Acl fornecida pela Equipe de Segurança.<br/>
+				<img style='float: left' border="0" src="/media/img/max_red_legend.png"/> <span style='float: left; padding-left: 3px;'> Clique para visualizar mais redes.</span>
+			
+			</div>
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span class="tool">
+			<button id="btn_new">Novo Registro</button>
+			{% has_perm VLAN_MANAGEMENT True None %}
+			{% if has_perm %}
+			<button id="btn_del">Excluir</button>
+			{% endif %}
+			</span>
+		</div>
+		{% has_perm VLAN_MANAGEMENT True None %}
+		{% if has_perm %}
+                <form id="delete_form" method="post" action="{% url vlan.delete %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in delete_form %}
+				{{ field }}
+			{% endfor %}
+		   </form>
+		{% endif %}
+		<table id="vlan_list">
+			<col width="2%" />
+			<col width="3%" />
+			<col width="6%" />
+			<col width="16%" />
+			<col width="16%" />
+			<col width="13%" />
+			<col width="12%" />
+			<col width="10%" />
+			<col width="11%" />
+			<col width="11%" />
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th></th>
+					<th>Número</th>
+					<th>Nome</th>
+					<th>Ambiente</th>
+					<th>Tipo Rede</th>
+					<th>Rede</th>
+					<th>Roteamento Em</th>
+					<th>ACL - IPv4</th>
+					<th>ACL - IPv6</th>
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

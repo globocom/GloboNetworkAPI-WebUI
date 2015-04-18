@@ -1,0 +1,361 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template-external.html" %}
+
+{% load util %}
+
+{% block title %}[Requisição VIP - Cadastro]{% endblock %}
+
+{% block header %}
+<style>
+ul {
+list-style-type: none;
+}
+#tablePoolMembers{
+	width: 600px;
+	margin-bottom: 1%;
+}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	{% include "vip-request/include_vip_js.js" %}
+	{% include "vip-request/external_vip_pool.js" %}
+
+	autocomplete("{% url equipment.autocomplete.ajax.external %}", true, "id_equip_name", false);
+
+	$('.editable').editableTable();
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+
+	<div id="dialog-ip" title="Selecionar IP do Real Server">
+		<div id="ip-view">
+		</div>
+	</div>
+	
+	<div id="dialog_pool">
+        <div id="content_pool"></div>
+    </div>
+	
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Requisição VIP </a></li>
+	</ul>
+	<div id="tabs-1">
+		<form id="add_form" method="post" action="{% url vip-request.form.external %}">
+			{% csrf_token %}
+			{% for field in form_acess %}
+				{{ field }}
+			{% endfor %}
+			
+			<div id="fields" class="ui-widget-content">
+
+			<!-- FORM INPUTS -->
+			<div>
+				<div><label for="{{ form_inputs.business.auto_id }}">{{ form_inputs.business.label_tag }}{% if form_inputs.business.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.business }}
+				<p id="error">
+				{% if form_inputs.business.errors %} 
+					{% for error in form_inputs.business.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			
+			<div>
+				<div><label for="{{ form_inputs.service.auto_id }}">{{ form_inputs.service.label_tag }}{% if form_inputs.service.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.service }}
+				<p id="error">
+				{% if form_inputs.service.errors %} 
+					{% for error in form_inputs.service.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			
+			<div>
+				<div><label for="{{ form_inputs.name.auto_id }}">{{ form_inputs.name.label_tag }}{% if form_inputs.name.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.name }}
+				<p id="error">
+				{% if form_inputs.name.errors %} 
+					{% for error in form_inputs.name.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>	
+			
+			<div>
+				<div><label for="{{ form_inputs.created.auto_id }}">{{ form_inputs.created.label_tag }}{% if form_inputs.created.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.created }}
+				<p id="error">
+				{% if form_inputs.created.errors %} 
+					{% for error in form_inputs.created.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>	
+			
+			<div>
+				<div><label for="{{ form_inputs.validated.auto_id }}">{{ form_inputs.validated.label_tag }}{% if form_inputs.validated.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.validated }}
+				<p id="error">
+				{% if form_inputs.validated.errors %} 
+					{% for error in form_inputs.validated.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>														
+
+			<!--   ENDFORM INPUTS -->
+
+			<!-- 
+			{% for field in form_inputs %}
+			<div>
+				<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ field }}
+				<p id="error">
+				{% if field.errors %} 
+					{% for error in field.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			
+			{% endfor %}
+			-->
+			
+			{% for field in form_environment %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					{{ field }}
+					<p id="error">
+					{% if field.errors %} 
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				</div>
+			{% endfor %}
+			
+			<table>
+				{% for field in form_options %}
+
+					{% if field.name != "balancing"%}
+
+						<tr>
+							<td>
+								<label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+							</td>
+							<td  style="padding-left: 5px;" align="right">
+								{{ field }}
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td id="error" style="padding-left: 5px;">
+								{% if field.errors %} 
+									{% for error in field.errors %}
+										{{ error|escape }}
+									{% endfor %}
+								{% endif %}
+							</td>
+						</tr>
+
+					{% endif %}
+
+				{% endfor %}
+			</table>
+			
+			<br>
+			
+			<!--  FILTER L7 -->	
+			<div>
+				<div><label for="{{ form_inputs.filter_l7.auto_id }}">{{ form_inputs.filter_l7.label_tag }}{% if form_inputs.filter_l7.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form_inputs.filter_l7 }}
+				<p id="error">
+				{% if form_inputs.filter_l7.errors %} 
+					{% for error in form_inputs.filter_l7.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			<br>
+			<table  class="bordasimples">
+				<tr>
+					<td colspan="3" style="text-align:left;">Portas</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<table id="table_ports" class="bordasimplesReal" style="margin-top: 10px;">
+							<thead>
+								<tr>
+									<td>Porta Vip</td>
+									<td style="width: 20px;"></td>
+								</tr>
+							</thead>
+							<tbody>
+							{% for field in ports %}
+								<tr class='remove_port'>
+									<td>
+										<label class='editable'>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
+										<input type='hidden' name='ports_vip' value='{{field.ports_vip}}'>
+									</td>
+									<td>
+										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
+									</td>
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3"><p id="error">{{ports_error}}</p></td>
+				</tr>
+				<tr>
+					<td colspan="3">&nbsp</td>
+				</tr>
+				<tr>
+					<td colspan="3" style="text-align:left;"><input type="button" id="btn_new_port_vip" value="Adicionar Nova Porta" /></td>
+				</tr>
+			</table>
+	
+			<br>
+			
+			<div id="divPools" class="bordasimples">
+				<div>Pools</div>
+				{{ vip_pool_form.pools }}
+				<button id="btn_add_pool" type="button">Add Pool</button>
+				<button id="btn_copy" type="button">Copiar Pool</button>
+				<button id="btn_new_pool" type="button">Novo Pool</button>
+				<div>
+				</div>
+				{% if pools_error %}
+				<div colspan="3"><p id="error">{{pools_error}}</p></div>
+				<br>
+				{% endif %}
+				<br>
+			</div>
+				
+			
+			
+			<div  id="divMembers" class="bordasimples" >
+				<div class="tablesMembers"></div>
+				{% if pools_add %}
+				{% for pool in pools_add %}
+				{% include "pool/items.html" with server_pool=pool.server_pool server_pool_members=pool.server_pool_members %}
+				{% endfor %}
+				{% endif %}
+				<!-- Will add pool members -->
+				
+			</div>
+			
+			<br>
+
+			<table>
+				<tr>
+					<td colspan="3" style="text-align:left;">IP do VIP</td>
+				</tr>
+				{% if form_ip.ipv4_check.errors %}
+					<tr>
+						<td  id="error" style="text-align:left;">
+							{% for error in form_ip.ipv4_check.errors %}
+								{{ error|escape }}
+							{% endfor %}
+						</td>
+					</tr>
+				{% endif %}
+				<tr>
+					<td colspan="3">{{form_ip.ipv4_check}}{{form_ip.ipv4_check.label_tag}}</td>
+				</tr>
+				<tr id="ipv4">
+					<td colspan="3">
+						<table class="bordasimplesIP">
+							<tr>
+								<td  style="text-align:left;">{{form_ip.ipv4_type}}</td>
+							</tr>
+							<tr id="input_ipv4">
+								<td  style="text-align:left;padding-left: 10px;">{{form_ip.ipv4_specific}}</td>
+							</tr>
+							<tr>
+								<td  style="text-align:left;padding-left: 10px;">
+									<p id="error">
+									{% if form_ip.ipv4_specific.errors %} 
+										{% for error in form_ip.ipv4_specific.errors %}
+											{{ error|escape }}
+										{% endfor %}
+									{% endif %}
+									</p>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">&nbsp</td>
+				</tr>
+				<tr>
+					<td colspan="3">{{form_ip.ipv6_check}}{{form_ip.ipv6_check.label_tag}}</td>
+				</tr>
+				<tr id="ipv6">
+					<td colspan="3">
+						<table class="bordasimplesIP">
+							<tr>
+								<td  style="text-align:left;">{{form_ip.ipv6_type}}</td>
+							</tr>
+							<tr id="input_ipv6">
+								<td  style="text-align:left;padding-left: 10px;">{{form_ip.ipv6_specific}}</td>
+							</tr>
+							<tr>
+								<td  style="text-align:left;padding-left: 10px;">
+									<p id="error">
+									{% if form_ip.ipv6_specific.errors %} 
+										{% for error in form_ip.ipv6_specific.errors %}
+											{{ error|escape }}
+										{% endfor %}
+									{% endif %}
+									</p>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				
+			</table>
+			
+			</div>
+			
+			<div class="separator spacer"></div>
+			
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

@@ -1,25 +1,12 @@
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 eclipse.preferences.version=1
+encoding//CadVlan/Acl/acl.py=utf-8
 encoding//CadVlan/Auth/AuthSession.py=utf-8
 encoding//CadVlan/Auth/forms.py=utf-8
 encoding//CadVlan/Auth/models.py=utf-8
 encoding//CadVlan/Auth/views.py=utf-8
 encoding//CadVlan/Environment/forms.py=utf-8
 encoding//CadVlan/Environment/views.py=utf-8
+encoding//CadVlan/EnvironmentVip/views.py=utf-8
 encoding//CadVlan/EquipAccess/views.py=utf-8
 encoding//CadVlan/EquipInterface/views.py=utf-8
 encoding//CadVlan/EquipScript/views.py=utf-8
@@ -28,6 +15,8 @@ encoding//CadVlan/Equipment/forms.py=utf-8
 encoding//CadVlan/Equipment/views.py=utf-8
 encoding//CadVlan/Net/forms.py=utf-8
 encoding//CadVlan/Net/views.py=utf-8
+encoding//CadVlan/Pool/forms.py=utf-8
+encoding//CadVlan/Pool/views.py=utf-8
 encoding//CadVlan/Script/forms.py=utf-8
 encoding//CadVlan/Script/views.py=utf-8
 encoding//CadVlan/ScriptType/forms.py=utf-8
@@ -35,8 +24,12 @@ encoding//CadVlan/ScriptType/views.py=utf-8
 encoding//CadVlan/Util/Decorators.py=utf-8
 encoding//CadVlan/Util/Json.py=utf-8
 encoding//CadVlan/Util/converters/util.py=utf-8
+encoding//CadVlan/Util/cvs.py=utf-8
+encoding//CadVlan/Util/models.py=utf-8
 encoding//CadVlan/Util/shortcuts.py=utf-8
 encoding//CadVlan/Util/templatetags/util.py=utf-8
+encoding//CadVlan/VipRequest/forms.py=utf-8
+encoding//CadVlan/VipRequest/views.py=utf-8
 encoding//CadVlan/Vlan/forms.py=utf-8
 encoding//CadVlan/Vlan/views.py=utf-8
 encoding//CadVlan/forms.py=utf-8

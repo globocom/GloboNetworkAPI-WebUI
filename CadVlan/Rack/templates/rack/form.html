@@ -1,0 +1,195 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Rack - Cadastro]{% endblock %}
+
+{% block header %}
+<style>
+#fields ul li {
+        list-style: none;
+        display: inline-block;
+}
+#mac_address_sw1 label {
+        vertical-align: middle;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+        $("#page_tab").tabs();
+
+        $("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+
+        $("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+                location.href = "{% url home %}";
+        });
+        $("textarea").maxlength();
+
+        $("#btn_equip1, #btn_equip2, #btn_equip3").button({ icons: {primary: "ui-icon-plus"}, text: false });
+
+        $("#btn_equip1, #btn_equip2, #btn_equip3").mouseover(function() {
+         $("#btn_equip1, #btn_equip2, #btn_equip3").attr("title","Cadastrar equipamento");
+        });
+
+        $("#id_mac_address_sw1, #id_mac_address_sw2, #id_mac_address_ilo").keyup(function() {
+                var valor = $(this).val().replace(/[^0-9A-Fa-f:]+/g,'');
+                $(this).val(valor);
+         });
+
+        $("#id_mac_address_sw1, #id_mac_address_sw2, #id_mac_address_ilo").mouseover(function() {
+                $(this).attr("title","Formato: FF:FF:FF:FF:FF:FF");
+
+        });
+
+        $("#id_nome_sw1, #id_nome_sw2, #id_nome_ilo").mouseover(function() {
+                $(this).attr("title","Informe o nome do equipamento, se este estiver cadastrado.");
+
+        });
+
+        $("#btn_listar").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
+                location.href = "{% url ajax.view.rack %}";
+        });
+})
+
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div id="page_tab">
+	<div id="dialog-rack" title="Racks Cadastrados">
+                <div id="rack-view"></div>
+        </div>
+        <ul>
+                <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Rack</a></li>
+        </ul>
+        <div id="tabs-1">
+                <form id="add_form" method="post" action="{% url rack.form %}">
+                        {% csrf_token %}
+                        <div id="fields" class="ui-widget-content">
+                        {% for field in form %}
+                                <div>
+                                {% ifequal field.name 'mac_address_sw1' %}
+                                <table  class="bordasimples">
+                                        <tr>
+                                               <td colspan="3" style="text-align:left;">LEAF 1</td>
+                                        </tr>
+                                        <tr>
+                                               <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
+                                               {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
+
+                                               {% ifequal field.name 'mac_address_sw1' %}
+                                                    <td><label for="{{ field.auto_id }}">
+                                                    {{ form.nome_sw1.label_tag }}{% if form.nome_sw1.required %}<span style="color: red;">*</span>{% endif %}
+                                                    </label></td>
+                                               {% endifequal %}
+                                        </tr>
+                                        <tr>
+                                               <td colspan="2" style="text-align:left;">{{ field }}</td>
+                                               {% ifequal field.name 'mac_address_sw1' %}
+                                                    <td>{{ form.nome_sw1 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip1">Cadastrar Equipamento</button></a></td>
+                                               {% endifequal %}
+                                        </tr>
+                                </table>
+                                <div class="separator spacer"></div>
+                                {% endifequal %}
+
+                                {% ifequal field.name 'mac_address_sw2' %}
+                                <table  class="bordasimples">
+                                        <tr>
+                                               <td colspan="3" style="text-align:left;">LEAF 2</td>
+                                        </tr>
+                                        <tr>
+                                               <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
+                                               {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
+
+                                               {% ifequal field.name 'mac_address_sw2' %}
+                                                    <td><label for="{{ field.auto_id }}">
+                                                    {{ form.nome_sw2.label_tag }}{% if form.nome_sw2.required %}<span style="color: red;">*</span>{% endif %}
+                                                    </label></td>
+                                               {% endifequal %}
+                                        </tr>
+                                        <tr>
+                                               <td colspan="2" style="text-align:left;">{{ field }}</td>
+                                               {% ifequal field.name 'mac_address_sw2' %}
+                                                    <td>{{ form.nome_sw2 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip2">Cadastrar Equipamento</button></a></td>
+                                               {% endifequal %}
+                                        </tr>
+                                </table>
+                                <div class="separator spacer"></div>
+                                {% endifequal %}
+
+                                {% ifequal field.name 'mac_address_ilo' %}
+                                <table  class="bordasimples">
+                                        <tr>
+                                               <td colspan="3" style="text-align:left;">CONSOLE/ILO</td>
+                                        </tr>
+                                        <tr>
+                                               <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
+                                               {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
+
+                                               {% ifequal field.name 'mac_address_ilo' %}
+                                                    <td><label for="{{ field.auto_id }}">
+                                                    {{ form.nome_ilo.label_tag }}{% if form.nome_ilo.required %}<span style="color: red;">*</span>{% endif %}
+                                                    </label></td>
+                                               {% endifequal %}
+                                        </tr>
+                                        <tr>
+                                               <td colspan="2" style="text-align:left;">{{ field }}</td>
+                                               {% ifequal field.name 'mac_address_ilo' %}
+                                                    <td>{{ form.nome_ilo }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip3">Cadastrar Equipamento</button></a></td>
+                                               {% endifequal %}
+                                        </tr>
+                                </table>
+                                {% endifequal %}
+
+                                {% ifequal field.name 'rack_number' %}
+                                        <div><label for="{{ field.auto_id }}">
+                                        {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                        </label></div>
+                                        {{ field }}  <input id="btn_listar" type="button" value="Listar Racks"/>
+
+                                        <p id="error">
+                                        {% if field.errors %}
+                                            {% for error in field.errors %}
+                                                 {{ error|escape }}
+                                            {% endfor %}
+                                        {% endif %}
+                                        </p>
+                                {% endifequal %}
+                                </div>
+                        {% endfor %}
+                        </div>
+
+                        <div class="separator spacer"></div>
+                        <div class="buttons-l ui-widget-header">
+                                <button id="btn_sav" type="submit">Gravar</button>
+                                <button id="btn_can" type="button">Cancelar</button>
+                        </div>
+                </form>
+        </div>
+</div>
+{% endblock %}
+
+

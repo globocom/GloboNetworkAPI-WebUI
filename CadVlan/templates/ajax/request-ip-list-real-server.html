@@ -1,19 +1,3 @@
-<!--
-  Licensed to the Apache Software Foundation (ASF) under one or more
-  contributor license agreements.  See the NOTICE file distributed with
-  this work for additional information regarding copyright ownership.
-  The ASF licenses this file to You under the Apache License, Version 2.0
-  (the "License"); you may not use this file except in compliance with
-  the License.  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 <div id="page_tab_model">
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes do Equipamento</a></li>
@@ -93,11 +77,19 @@ $(document).ready(function() {
 	$("#page_tab_model").tabs();
 	$("#page_tab_lists").tabs();
 	
-})
+});
+
 
 
 function setIpReal(real_name, real_id, ip, id_ip) {
 		port_real_padrao = $('#id_default_port').val();
+
+		if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+            display = 'grid';
+        } else {
+            display = 'none';
+        }
+
 		html = "<tr class='remove_port'>" +
 					"<td>" +
 						"<label>" + real_name + "</label>" +
@@ -113,9 +105,14 @@ function setIpReal(real_name, real_id, ip, id_ip) {
 						"<label class='editable'>0</label>" +
 						"<input type='hidden' name='priority' value='0'>" +
 					"</td>" +
+					"<td class='weighted' style='display: "+display+";'>" +
+						"<label class='editable' for='weighted'></label>" +
+						"<input type='hidden' name='weight' value='0'>" +
+					"</td>" +
 					"<td>" +
 						"<label class='editable'>" + port_real_padrao + "</label>" +
 						"<input type='hidden' name='ports_real_reals' value='" + port_real_padrao + "'>" +
+						"<input type='hidden' name='id_pool_member' value='' />" +
 					"</td>" +
 					"<td>" +
 						"<span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span>" +

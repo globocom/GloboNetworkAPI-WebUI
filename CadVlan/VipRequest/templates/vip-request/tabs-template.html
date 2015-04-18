@@ -1,0 +1,126 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	{% block js %}
+		
+	{%endblock js %}
+	
+	$("#page_tab").tabs();
+	
+	{% block tab_select %}
+		$("#page_tab_lists").tabs();
+	{% endblock tab_select %}
+
+	$(".pools_tab").attr("href", "{% url vip-request.tab.pools vip.id %}");
+	$(".realserver_status_tab").attr("href", "{% url vip-request.tab.real.server.status.edit vip.id %}");
+	$(".l7-filter_tab").attr("href", "{% url vip-request.tab.l7filter vip.id %}");
+
+	
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+	$("#btn_sav").button("disable");
+	
+	{% has_perm VIP_ALTER_SCRIPT True True %}
+	{% if has_perm %}
+	$("#btn_sav").button("enable");
+	$("#btn_sav").click(function(){
+		location.reload();
+	});
+	{% endif %}
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url vip-request.list %}";
+	});
+
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes do Requisição VIP</a></li>
+	</ul>
+	
+	<div id="dialog-ip" title="Selecionar IP do Real Server">
+		<div id="ip-view">
+		</div>
+	</div>
+	
+	<div id="tabs-1">
+		{% csrf_token %}
+
+		<div id="fields" class="ui-widget-content">
+			<table border="5">
+				<tr>
+					<td style="width: 120px"><label for="nome_ambiente">Id</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.id}}</label></td>
+				</tr>
+				<tr>
+					<td><label>Ip</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for ip in vip.ips %}{{ip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Descrição Ipv4</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv4_description %}{%else%}{{vip.ipv4_description}}{% endifequal %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Descrição Ipv6</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv6_description %}{%else%}{{vip.ipv6_description}}{% endifequal %}</label></td>
+				</tr>
+				<tr>
+					<td><label>Equipamento</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for equip in vip.equipamento %}{{equip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+				<tr>
+					<td style="width: 120px"><label>Ambiente</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% for environment in vip.environments %}{{environment}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="separator spacer"></div>
+		
+		<div>
+		
+			<div id="page_tab_lists">
+				<ul>
+                    <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-1" class="pools_tab">Pools</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-2" class="realserver_status_tab">Reals Server - Status</a></li>
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3" class="l7-filter_tab">Filtro L7</a></li>
+					
+				</ul>
+				
+				{% block tab-data %}
+					
+				{% endblock %}
+				
+			</div>
+				
+					
+		</div>
+	</div>
+		
+</div>
+				
+{% endblock %}
