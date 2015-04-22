@@ -36,7 +36,7 @@ from django.core.context_processors import request
 from django.template.context import Context, RequestContext
 from CadVlan.messages import auth_messages, equip_messages, error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
-from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm
+from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm
 
 import json
 
@@ -104,16 +104,22 @@ def valid_rack_name(rack_name):
       raise InvalidParameterError('Nome inváildo. Ex: AA00')
 
 
-def get_msg(request, var, nome):
+def get_msg(request, var, nome, operation):
 
-    rack_conf = var.get('rack_conf')
-    rack_conf = str(rack_conf)
+    var = var.get('rack_conf')
+    var = str(var)
 
-    if rack_conf=="True":
-        msg = rack_messages.get('sucess_create_config') % nome 
+    if var=="True":
+        if operation=='CONFIG':
+            msg = rack_messages.get('sucess_create_config') % nome 
+        elif operation=='APLICAR':
+            msg = rack_messages.get('sucess_aplicar_config') % nome
         messages.add_message(request, messages.SUCCESS, msg)
     else:
-        msg = rack_messages.get('can_not_create_all') % nome    
+        if operation=='CONFIG':
+            msg = rack_messages.get('can_not_create_all') % nome    
+        elif operation=='APLICAR':
+            msg = rack_messages.get('can_not_aplicar_config') % nome
         messages.add_message(request, messages.ERROR, msg)
 
 
@@ -121,7 +127,13 @@ def rack_config_delete (request, client, form, operation):
 
         if form.is_valid():
 
-            id = 'ids' if operation == 'DELETE' else 'ids_config'
+            if operation=='CONFIG':
+                id = 'ids_config'
+            elif operation == 'DELETE':
+                id = 'ids'
+            elif operation=='APLICAR':
+                id = 'ids_aplicar'
+
 
             # All ids selected
             ids = split_to_array(form.cleaned_data[id])
@@ -137,19 +149,23 @@ def rack_config_delete (request, client, form, operation):
             # For each rack selected
             for id_rack in ids:
                 try:
+                    racks = client.create_rack().find_racks()
+                    racks = racks.get('rack')
+                    for ra in racks:
+                        if ra.get('id')==id_rack:
+                            rack = ra
+                    nome = rack.get('nome')
                     if operation == 'DELETE':
                         msg_sucess = "success_remove"
                         client.create_rack().remover(id_rack)
                     elif operation == 'CONFIG':
                         var = client.create_rack().gerar_arq_config(id_rack)
                         var = var.get('sucesso')
-                        racks = client.create_rack().find_racks()
-                        racks = racks.get('rack')
-                        for ra in racks:
-                            if ra.get('id')==id_rack:
-                                rack = ra
-                        nome = rack.get('nome')
-                        get_msg(request, var, nome)
+                        get_msg(request, var, nome, operation)
+                    elif operation=='APLICAR':
+                        var = client.create_rack().aplicar_configuracao(id_rack)
+                        var = var.get('sucesso')
+                        get_msg(request, var, nome, operation)
                 except RackAllreadyConfigError, e:
                     logger.error(e)
                     error_list_config.append(id_rack)
@@ -187,7 +203,7 @@ def rack_config_delete (request, client, form, operation):
 
                 messages.add_message(request, messages.WARNING, msg)
 
-            elif (not operation=='CONFIG') and (have_errors == False):
+            elif (not operation=='CONFIG') and (not operation=='APLICAR') and (have_errors == False):
                 messages.add_message(
                     request, messages.SUCCESS, rack_messages.get(msg_sucess))
 
@@ -311,6 +327,7 @@ def ajax_rack_view(request, client_api):
 
         racks['delete_form'] = DeleteForm()
         racks['config_form'] = ConfigForm()
+        racks['aplicar_form'] = AplicarForm()
         racks['criar_vlan_amb_form'] = CriarVlanAmbForm()
 
 
@@ -418,6 +435,23 @@ def rack_delete (request):
         client = auth.get_clientFactory()
 
         rack_config_delete (request, client, form, 'DELETE')
+
+    return redirect("ajax.view.rack")
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def rack_aplicar_config(request):
+
+    if request.method == 'POST':
+
+        form = AplicarForm(request.POST)
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        rack_config_delete (request, client, form, 'APLICAR')
 
     return redirect("ajax.view.rack")
 

@@ -65,6 +65,10 @@ class ConfigForm(EquipForm):
     ids_config = forms.CharField(
         widget=forms.HiddenInput(), label='', required=True)
 
+class AplicarForm(EquipForm):
+    ids_aplicar = forms.CharField(
+        widget=forms.HiddenInput(), label='', required=True)
+
 class CriarVlanAmbForm(EquipForm):
     ids_config = forms.CharField(
         widget=forms.HiddenInput(), label='', required=True)

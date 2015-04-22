@@ -75,15 +75,15 @@ $(document).ready(function() {
         });
         {% endif %}
 
-        //{% has_perm EQUIPMENT_MANAGEMENT True None %}
-        //{% if has_perm %}
-//        $("#btn_aplicar").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-  //              if (confirm('Criar Vlans e Ambientes do(s) Rack(s) selecionado(s)?')){ 
-    //                    var data = getSelectionData(oTable);
-      //                  $("#id_ids_config").val(data).parent().submit();
-        //        }
-//        });
-  //      {% endif %}
+        {% has_perm EQUIPMENT_MANAGEMENT True None %}
+        {% if has_perm %}
+        $("#btn_aplicar").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+                if (confirm('Aplicar a configuracao no(s) Rack(s) selecionado(s)?')){ 
+                        var data = getSelectionData(oTable);
+                        $("#id_ids_aplicar").val(data).parent().submit();
+                }
+        });
+        {% endif %}
 
 
         $("#checkAll").click( function() {
@@ -131,10 +131,10 @@ $(document).ready(function() {
                         {% if has_perm %}
                             <button id="btn_conf">Gerar Configuracao</button>
                         {% endif %}
-                        <!--{% has_perm EQUIPMENT_MANAGEMENT True True %}
+                        {% has_perm EQUIPMENT_MANAGEMENT True True %}
                         {% if has_perm %}
-                            <button id="btn_aplicar">Criar Vlan/Amb</button>
-                        {% endif %}-->
+                            <button id="btn_aplicar">Aplicar Configuracao</button>
+                        {% endif %}
                         <span id="tool">
                         {% has_perm EQUIPMENT_MANAGEMENT True None %}
                         {% if has_perm %}
@@ -156,6 +156,14 @@ $(document).ready(function() {
                 <form id="config_form" method="post" action="{% url rack.config %}" style="visibility: hidden;">
                         {% csrf_token %}
                         {% for field in config_form %}
+                                {{ field }}
+                        {% endfor %}
+                </form>
+                {% endif %}
+                {% if has_perm %}
+                <form id="aplicar_form" method="post" action="{% url rack.aplicar_config %}" style="visibility: hidden;">
+                        {% csrf_token %}
+                        {% for field in aplicar_form %}
                                 {{ field }}
                         {% endfor %}
                 </form>
