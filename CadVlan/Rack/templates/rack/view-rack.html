@@ -169,18 +169,18 @@ $(document).ready(function() {
                 </form>
                 {% endif %}
                 <table id="rack_list">
-                        <col width="3%" />
-                        <col width="6%" />
-                        <col width="6%" />
+                        <col width="2%" />
+                        <col width="4%" />
+                        <col width="4%" />
                         <col width="12%" />
                         <col width="12%" />
                         <col width="12%" />
                         <col width="12" />
                         <col width="12%" />
                         <col width="12%" />
-                        <col width="10%" />
-                        <!--col width="8%" /-->
-                        <col width="3%" />
+                        <col width="8%" />
+                        <col width="8%" >
+                        <col width="2%" />
                         <thead>
                                 <tr>
                                         <th><input id="checkAll" type="checkbox" /></th>
@@ -192,8 +192,8 @@ $(document).ready(function() {
                                         <th>MAC 2</th>
                                         <th>Sw Gerencia</th>
                                         <th>MAC Sw Gerencia</th>
-                                        <th>Config Criada</th>
-                                        <!--th>Vlan/Amb</th-->
+                                        <th>Arq criado</th>
+                                        <th>Config Apl</th>
                                         <th></th>
                                 </tr>
                         </thead>
@@ -210,8 +210,7 @@ $(document).ready(function() {
                                         <td class='{% if var.config == "False" %} text_red {% endif %}'>{{ var.id_ilo }}</td>
                                         <td class='{% if var.config == "False" %} text_red {% endif %}'>{{ var.mac_ilo }}</td>
                                         <td class='text_center'>{% ifequal var.config 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NAO'></span> {% endifequal %}</td>
-                                        <!--td class='text_center'>{% ifequal var.create_vlan_amb 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NAO'></span> {% endifequal %}</td>
-                                        -->
+                                        <td class='text_center'>{% ifequal var.create_vlan_amb 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NAO'></span> {% endifequal %}</td>
                                         <td><a href="{% url rack.edit var.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
                                 </tr>
                                 {% endfor %}                            
