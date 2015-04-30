@@ -105,11 +105,27 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
 $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
 
 	var poolId = $("#id_pools").val();
-	var isInvalidPort = ($('.ports_vip:eq(0)').val() == undefined || $('.ports_vip:eq(0)').val() == "-");
+    var portVip = $("#idPort").val().trim();
+
+
+
+    if(isNaN(portVip)){
+        alert('Porta Vip deve ser um número.');
+        $("#idPort").val('');
+        return false;
+    }
+
+    if(portVip.length == 0){
+        alert('Deve-se preencher o campo de porta.');
+        return false;
+    }
+
+    if ($("input:hidden[value="+portVip+"]").length > 0){
+        alert('Porta Vip já cadastrada.');
+        return false;
+    }
 	
-	console.log(isInvalidPort);
-	
-	if (poolId !=  0 && poolId != null && !isInvalidPort){
+	if (poolId !=  0 && poolId != null){
 
 		$.ajax({
 			data: { 
@@ -118,21 +134,11 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
 			url: "{% url vip-request.members.items %}",
 			success: function(data) {
 
-                for (var x = 0; x < $('.ports_vip').size(); x++) {
-                	
-                	var port = $('.ports_vip').eq(x).val();
-                	
-                	if ($.isNumeric(port)){
-                		$("#divMembers").append(data);
-                    
-	                    var table = $(".tablePoolMembers:last-child");
-
-                    	$("input[name=portVipToPool]", table).val(port);
-                    	$(".tablePoolMembers:last-child .portVip").html(port);
-	                }
-
-                }
-
+                $("#divMembers").append(data);
+                $(".tablePoolMembers:last-child .portVip").html(portVip);
+                $(".tablePoolMembers:last-child .ports_vip").val(portVip);
+                $(".tablePoolMembers:last-child .portVip").editableTable();
+                $("#idPort").val('');
                 $('#id_pools').prop('selectedIndex', 0);
 			},
 			error: function (error) {
