@@ -204,62 +204,34 @@ $(document).ready(function() {
 				</p>
 			</div>
 			<br>
-			<table  class="bordasimples">
-				<tr>
-					<td colspan="3" style="text-align:left;">Portas</td>
-				</tr>
-				<tr>
-					<td colspan="3">
-						<table id="table_ports" class="bordasimplesReal" style="margin-top: 10px;">
-							<thead>
-								<tr>
-									<td>Porta Vip</td>
-									<td style="width: 20px;"></td>
-								</tr>
-							</thead>
-							<tbody>
-							{% for field in ports %}
-								<tr class='remove_port'>
-									<td>
-										<label class='editable'>{% if field.ports_vip != "-" %}{{field.ports_vip}}{% endif %}</label>
-										<input type='hidden' name='ports_vip' value='{{field.ports_vip}}'>
-									</td>
-									<td>
-										<span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
-									</td>
-								</tr>
-							{% endfor %}
-							</tbody>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="3"><p id="error">{{ports_error}}</p></td>
-				</tr>
-				<tr>
-					<td colspan="3">&nbsp</td>
-				</tr>
-				<tr>
-					<td colspan="3" style="text-align:left;"><input type="button" id="btn_new_port_vip" value="Adicionar Nova Porta" /></td>
-				</tr>
-			</table>
-	
-			<br>
-			
+
 			<div id="divPools" class="bordasimples">
-				<div>Pools</div>
-				{{ vip_pool_form.pools }}
-				<button id="btn_add_pool" type="button">Add Pool</button>
-				<button id="btn_copy" type="button">Copiar Pool</button>
-				<button id="btn_new_pool" type="button">Novo Pool</button>
-				<div>
-				</div>
+
+                <div style="float: left; width: 7%;">
+                    <label for="idPort">Porta Vip</label>
+                    <br>
+                    <input id="idPort" name="idPort" type="text" style="width: 60%"/>
+                </div>
+
+                <div style="float: left;">
+                    <label for="id_pools">Pools</label>
+                    <br>
+                    {{ vip_pool_form.pools }}
+                    <button id="btn_add_pool" type="button">Add Pool</button>
+                    <button id="btn_copy" type="button">Copiar Pool</button>
+                    <button id="btn_new_pool" type="button">Novo Pool</button>
+                </div>
+
+				<br>
+
 				{% if pools_error %}
 				<div colspan="3"><p id="error">{{pools_error}}</p></div>
 				<br>
 				{% endif %}
 				<br>
 			</div>
+		    <br>
+			<br>
 				
 			
 			
