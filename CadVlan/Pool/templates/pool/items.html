@@ -6,7 +6,8 @@
 			<span id="removePool" class="ui-icon ui-icon-closethick" style="cursor: pointer; float: right;"></span>
 			<b>{{ server_pool.identifier }}</b>
 			<input name="idsPool" type="hidden" value="{{ server_pool.id }}"/>
-			<input name="portVipToPool" type="hidden" value="{% if server_pool.port_vip %}{{ server_pool.port_vip }} {% endif %}"/>
+            <input type='hidden' class='ports_vip' name='ports_vip' value='{{ server_pool.port_vip }}'/>
+            <input type='hidden' name='vip_port_id' value='{{server_pool.port_vip_id}}'/>
 		<th>
 	</tr>
 </thead>
@@ -22,8 +23,16 @@
 <tr>
 	<td>{{ pool_member.equipment_name }}</td>
 	<td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
-    <td class="portVip">{% if server_pool.port_vip %}{{ server_pool.port_vip }} {% endif %}</td>
-	<td>{{ pool_member.port_real }}</td>
+    {% if server_pool.port_vip %}
+        <td>
+            <label class='portVip editable'>{{ server_pool.port_vip }}</label>
+        </td>
+    {% else %}
+        <td>
+            <label class='portVip editable'></label>
+        </td>
+    {% endif %}
+    <td>{{ pool_member.port_real }}</td>
 	<td>{{ pool_member.priority }}</td>
 </tr>
 {% endfor %}
