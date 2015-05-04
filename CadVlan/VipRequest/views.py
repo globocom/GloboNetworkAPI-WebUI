@@ -2210,7 +2210,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         lists['form_acess'] = form_acess
         lists['external'] = True if external else False
 
-        vip = client_api.create_vip().buscar(id_vip).get("vip")
+        vip = client_api.create_api_vip_request().get_by_pk(id_vip).get('vip')
 
         finality_list = client_api.create_environment_vip()\
             .buscar_finalidade().get("finalidade")
