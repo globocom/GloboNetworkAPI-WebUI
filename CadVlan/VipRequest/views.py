@@ -923,7 +923,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                         rule_id=rule_id
                     )
 
-                    id_vip_created = vip.get("id")
+                id_vip_created = vip.get("id")
 
         except NetworkAPIClientError, e:
             is_valid = False
