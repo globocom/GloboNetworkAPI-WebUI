@@ -961,9 +961,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         for pool in pools:
             pool_choices.append((pool.get('id'), pool.get('identifier')))
 
-    lists = mount_table_ports_vip(lists, ports_vip, vip_port_ids)
-
-    pools_add = list()
+    pools_add = []
 
     for index in range(len(pool_ids)):
         raw_server_pool = client_api.create_pool().get_by_pk(pool_ids[index])
@@ -2267,24 +2265,6 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
 
             id_ipv4 = vip.get("id_ip")
             id_ipv6 = vip.get("id_ipv6")
-
-            port_services = vip.get('portas_servicos')
-
-            ports = []
-
-            for vip_port_to_pool in port_services:
-
-                port_vip = vip_port_to_pool.get('porta')
-
-                if ":" in port_vip:
-                    port_vip = port_vip.split(":")[0]
-
-                ports.append({
-                    'ports_vip': port_vip,
-                    'vip_port_id': vip_port_to_pool.get('vip_port_id')
-                })
-
-            lists['ports'] = ports
 
             environment_vip = client_api.create_environment_vip().search(
                 None,
