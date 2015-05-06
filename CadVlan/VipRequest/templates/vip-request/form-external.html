@@ -223,18 +223,15 @@ $(document).ready(function() {
                 </div>
 
 				<br>
-
-				{% if pools_error %}
-				<div colspan="3"><p id="error">{{pools_error}}</p></div>
-				<br>
-				{% endif %}
 				<br>
 			</div>
 		    <br>
 			<br>
-				
-			
-			
+
+            {% if pools_error %}
+			<div><p id="error">{{pools_error}}</p></div>
+			{% endif %}
+
 			<div  id="divMembers" class="bordasimples" >
 				<div class="tablesMembers"></div>
 				{% if pools_add %}
