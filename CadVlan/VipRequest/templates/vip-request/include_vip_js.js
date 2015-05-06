@@ -31,8 +31,9 @@
 	});
 	
 	$(".numbersOnly").live('focusout', function(){
-        console.log("focusout");
-		this_element = $(this);
+
+		var this_element = $(this);
+        var tableEditing = this_element.parents("#tablePoolMembers");
 
 		$(this).next().click(function(){
 			if (!check_port_vip(this_element)){
@@ -41,13 +42,18 @@
 
             var newPortVIp = this_element.val();;
 
-            update_pools_new_vip(oldPortVip, newPortVIp);
+            update_pools_new_vip(tableEditing, oldPortVip, newPortVIp);
 		});
 	});
 	
 	$('.numbersOnly').live("keydown", function(e){
           console.log("keydown");
+
+
     	  if(e.keyCode == 9 || e.keyCode == 13){
+
+            var this_element = $(this);
+            var tableEditing = this_element.parents("#tablePoolMembers");
 
 			if (!check_port_vip($(this))){
 				
@@ -64,7 +70,7 @@
 
                 var newPortVIp = $(this).val();
 
-	      		update_pools_new_vip(oldPortVip, newPortVIp);
+	      		update_pools_new_vip(tableEditing, oldPortVip, newPortVIp);
 
 	      		return false;
 			}
@@ -321,15 +327,15 @@
         });
 	}
 	
-	function update_pools_new_vip(old_port_vip, porta_vip) {
+	function update_pools_new_vip(tableEditing, old_port_vip, porta_vip) {
 		
 		var oldPortVip = parseInt(old_port_vip);
 		var newPortVip = parseInt(porta_vip);
 
         if (oldPortVip != newPortVip) {
 
-            $("label:contains("+oldPortVip+")").html(newPortVip);
-            $("input:hidden[value="+oldPortVip+"]").val(newPortVip);
+            $("label:contains("+oldPortVip+")", tableEditing).html(newPortVip);
+            $("input:hidden[value="+oldPortVip+"]", tableEditing).val(newPortVip);
 
         }
         else {
