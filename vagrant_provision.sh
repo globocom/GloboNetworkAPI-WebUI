@@ -5,6 +5,7 @@ apt-get install python-ldap -y
 apt-get install memcached -y
 apt-get install python-pip -y
 apt-get install python-dev -y
+apt-get install cvs -y
 pip install -r /vagrant/requirements.txt
 pip install gunicorn
 
