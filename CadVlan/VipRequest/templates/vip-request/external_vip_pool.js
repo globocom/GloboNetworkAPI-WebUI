@@ -107,6 +107,25 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
 $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
 
 	var poolId = $("#id_pools").val();
+    var portVip = $("#idPort").val().trim();
+
+
+
+    if(isNaN(portVip)){
+        alert('Porta Vip deve ser um número.');
+        $("#idPort").val('');
+        return false;
+    }
+
+    if(portVip.length == 0){
+        alert('Deve-se preencher o campo de porta.');
+        return false;
+    }
+
+    if ($("input:hidden[value="+portVip+"]").length > 0){
+        alert('Porta Vip já cadastrada.');
+        return false;
+    }
 
 	if (poolId !=  0 && poolId != null){
 
@@ -116,7 +135,12 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
 			},
 			url: "{% url vip-request.external.members.items %}",
 			success: function(data) {
-				$(".tablesMembers").append(data);			
+				$("#divMembers").append(data);
+                $(".tablePoolMembers:last-child .portVip").html(portVip);
+                $(".tablePoolMembers:last-child .ports_vip").val(portVip);
+                $(".tablePoolMembers:last-child .portVip").editableTable();
+                $("#idPort").val('');
+                $('#id_pools').prop('selectedIndex', 0);
 			},
 			error: function (error) {
 				message = jQuery.parseJSON(error.responseText);

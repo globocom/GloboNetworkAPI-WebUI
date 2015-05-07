@@ -560,19 +560,19 @@ def valid_ports(lists, ports_vip):
             i for i in ports_vip if int(i) > 65535 or int(i) < 1]
 
         if invalid_port_vip:
-            lists['ports_error'] = request_vip_messages.get("invalid_port")
+            lists['pools_error'] = request_vip_messages.get("invalid_port")
             is_valid = False
 
         if len(ports_vip) != len(set(ports_vip)):
-            lists['ports_error'] = request_vip_messages.get("duplicate_vip")
+            lists['pools_error'] = request_vip_messages.get("duplicate_vip")
             is_valid = False
 
         if ports_vip is None or not ports_vip:
-            lists['ports_error'] = request_vip_messages.get("error_ports")
+            lists['pools_error'] = request_vip_messages.get("error_ports")
             is_valid = False
 
     else:
-        lists['ports_error'] = request_vip_messages.get("error_ports_required")
+        lists['pools_error'] = request_vip_messages.get("error_ports_required")
         is_valid = False
 
     return lists, is_valid
@@ -785,7 +785,6 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     pool_choices = list()
 
     pool_ids = request.POST.getlist('idsPool')
-    vip_ports_to_pool = request.POST.getlist('portVipToPool')
 
     ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip'))
     vip_port_ids = request.POST.getlist('vip_port_id')
@@ -903,8 +902,8 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                 for index in range(len(pool_ids)):
                     vip_ports_to_pools.append({
                         'server_pool': safe_list_get(pool_ids, index),
-                        'port_vip': safe_list_get(vip_ports_to_pool, index),
-                        'id': safe_list_get(vip_port_ids, index)
+                        'port_vip': safe_list_get(ports_vip, index),
+                        'id': safe_list_get(vip_port_ids, index) or None
                     })
 
                 if edit:
@@ -924,7 +923,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                         rule_id=rule_id
                     )
 
-                    id_vip_created = vip.get("id")
+                id_vip_created = vip.get("id")
 
         except NetworkAPIClientError, e:
             is_valid = False
@@ -962,21 +961,17 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         for pool in pools:
             pool_choices.append((pool.get('id'), pool.get('identifier')))
 
-    lists = mount_table_ports_vip(lists, ports_vip, vip_port_ids)
-
-    pools_add = list()
+    pools_add = []
 
     for index in range(len(pool_ids)):
         raw_server_pool = client_api.create_pool().get_by_pk(pool_ids[index])
-        raw_server_pool["server_pool"]["port_vip"] = vip_ports_to_pool[index]
+        raw_server_pool["server_pool"]["port_vip"] = safe_list_get(ports_vip, index)
+        raw_server_pool["server_pool"]["port_vip_id"] = safe_list_get(vip_port_ids, index)
         pools_add.append(raw_server_pool)
 
     lists['pools_add'] = pools_add
-
     lists['form_inputs'] = form_inputs
     lists['form_environment'] = form_environment
-    # lists['form_real'] = form_real
-    # lists['form_healthcheck'] = form_healthcheck
     lists['form_options'] = form_options
     lists['form_ip'] = form_ip
 
@@ -2213,7 +2208,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         lists['form_acess'] = form_acess
         lists['external'] = True if external else False
 
-        vip = client_api.create_vip().buscar(id_vip).get("vip")
+        vip = client_api.create_api_vip_request().get_by_pk(id_vip)
 
         finality_list = client_api.create_environment_vip()\
             .buscar_finalidade().get("finalidade")
@@ -2270,18 +2265,6 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
 
             id_ipv4 = vip.get("id_ip")
             id_ipv6 = vip.get("id_ipv6")
-
-            port_services = vip.get('portas_servicos')
-
-            ports = []
-
-            for vip_port_to_pool in port_services:
-                ports.append({
-                    'ports_vip': vip_port_to_pool.get('port'),
-                    'vip_port_id': vip_port_to_pool.get('vip_port_id')
-                })
-
-            lists['ports'] = ports
 
             environment_vip = client_api.create_environment_vip().search(
                 None,
