@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_VIP, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+def add_network_form(request):
 
     lists = dict()
     lists['id_vlan'] = id_vlan
