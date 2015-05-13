@@ -318,7 +318,7 @@ def ajax_rack_view(request, client_api):
             if mac_3==None:
                 var['mac_ilo'] = ''
 
-            var['config'] = var.get("config_sw1")
+            var['config'] = var.get("config")
 
             if var.get("rack_vlan_amb")=='True':
                 var['rack_vlan_amb'] = "True"
