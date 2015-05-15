@@ -27,7 +27,7 @@ from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
     POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_REQVIP_DATATABLE, POOL_MEMBER_ITEMS, POOL_MANAGE_TAB1, \
     POOL_MANAGE_TAB2, POOL_MANAGE_TAB3, POOL_MANAGE_TAB4
 from django.shortcuts import render_to_response, redirect, render
-from django.http import HttpResponse
+from django.http import HttpResponseServerError, HttpResponse
 from django.template import loader
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
@@ -180,6 +180,7 @@ def spm_datatable(request, id_server_pool):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        return HttpResponseServerError(e, mimetype='application/javascript')
 
 
 @log
@@ -221,6 +222,7 @@ def reqvip_datatable(request, id_server_pool):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        return HttpResponseServerError(e, mimetype='application/javascript')
 
 @log
 @login_required
