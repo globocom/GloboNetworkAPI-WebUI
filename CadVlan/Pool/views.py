@@ -149,7 +149,7 @@ def spm_datatable(request, id_server_pool):
             2: 'ip',
             3: 'priority',
             4: 'port_real',
-            6: 'pool_enabled',
+            6: 'member_status',
             7: ''
         }
 
