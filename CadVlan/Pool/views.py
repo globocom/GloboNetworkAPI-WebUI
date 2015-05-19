@@ -151,6 +151,7 @@ def spm_datatable(request, id_server_pool, checkstatus):
             4: 'priority',
             5: 'member_status',
             6: 'member_status',
+            7: 'last_status_update'
         }
 
         dtp = DataTablePaginator(request, columnIndexNameMap)
