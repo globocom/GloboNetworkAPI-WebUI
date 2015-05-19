@@ -136,7 +136,7 @@ def datatable(request):
 @log
 @login_required
 @has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
-def spm_datatable(request, id_server_pool):
+def spm_datatable(request, id_server_pool, checkstatus):
 
     try:
 
@@ -147,10 +147,10 @@ def spm_datatable(request, id_server_pool):
             0: '',
             1: 'identifier',
             2: 'ip',
-            3: 'priority',
-            4: 'port_real',
+            3: 'port_real',
+            4: 'priority',
+            5: 'member_status',
             6: 'member_status',
-            7: ''
         }
 
         dtp = DataTablePaginator(request, columnIndexNameMap)
@@ -167,6 +167,7 @@ def spm_datatable(request, id_server_pool):
 
         pools = client.create_pool().list_all_members_by_pool(
             id_server_pool,
+            bool(int(checkstatus)),
             pagination
         )
 

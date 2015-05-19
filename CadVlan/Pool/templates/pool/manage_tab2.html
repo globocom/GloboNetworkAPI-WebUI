@@ -24,6 +24,26 @@ $(document).ready(function() {
     $(".tab3").attr("href", "{%  url pool.manage.tab3 id_server_pool%}");
     $(".tab4").attr("href", "{%  url pool.manage.tab4 id_server_pool%}");
 
+    oTableSpm = $("#script_list").dataTable({
+        "sAjaxSource": "{% url pool.spm_datatable id_server_pool 0 %}",
+        "bServerSide": true,
+        "aaSorting": [[ 1, "asc" ]],
+        "bAutoWidth": false,
+        "bJQueryUI": true,
+        "bFilter": false,
+        "sPaginationType": "full_numbers",
+        "iDisplayLength": {% max_results %},
+        "aoColumnDefs": [
+            { "bSortable": false, "aTargets": [ 0, 4] }
+         ]
+    });
+
+    $("#btn_refresh").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+        oTableSpm.fnSettings().sAjaxSource = "{% url pool.spm_datatable id_server_pool 1%}";
+        oTableSpm.fnSettings().bServerSide = true;
+        oTableSpm.fnAjaxUpdate();
+    });
+
     {% has_perm POOL_ALTER_SCRIPT True None %}
     {% if has_perm %}
         $("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
@@ -47,20 +67,6 @@ $(document).ready(function() {
             }
         });
     {% endif %}
-
-    oTableSpm = $("#script_list").dataTable({
-        "sAjaxSource": "{% url pool.spm_datatable id_server_pool%}",
-        "bServerSide": true,
-        "aaSorting": [[ 1, "asc" ]],
-        "bAutoWidth": false,
-        "bJQueryUI": true,
-        "bFilter": false,
-        "sPaginationType": "full_numbers",
-        "iDisplayLength": {% max_results %},
-        "aoColumnDefs": [
-            { "bSortable": false, "aTargets": [ 0, 4] }
-         ]
-    });
     
     $("#checkAll").click( function() {
         if ($(this).attr('checked')) {
@@ -133,6 +139,7 @@ $(document).ready(function() {
         <div id="tabs-2">
             <div class="buttons">
                 <span id="tool">
+                    <button id="btn_refresh">Atualizar</button>
                 {% has_perm POOL_ALTER_SCRIPT True None %}
                 {% if has_perm %}
                     <button id="btn_enable">Habilitar Real</button>
@@ -158,6 +165,7 @@ $(document).ready(function() {
                 <col width="5%" />
                 <col width="8%" />
                 <col width="8%" />
+                <col width="8%" />
                 <thead>
                     <tr>
                         <th><input id="checkAll" type="checkbox" /></th>
@@ -165,7 +173,8 @@ $(document).ready(function() {
                         <th>IP do Real</th>
                         <th>Porta Real</th>
                         <th>Prioridade</th>
-                        <th>Status</th>
+                        <th>Habilitado</th>
+                        <th>Up/Down</th>
                     </tr>
                 </thead>
                 <tbody>
