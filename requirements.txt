@@ -1,5 +1,5 @@
 Django==1.4.15
-GloboNetworkAPI==0.4.0rc3
+GloboNetworkAPI==0.4.0
 pycrypto==2.6
 python-ldap==2.3.13
 python-memcached==1.48
