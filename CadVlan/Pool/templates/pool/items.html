@@ -8,6 +8,15 @@
 			<input name="idsPool" type="hidden" value="{{ server_pool.id }}"/>
             <input type='hidden' class='ports_vip' name='ports_vip' value='{{ server_pool.port_vip }}'/>
             <input type='hidden' name='vip_port_id' value='{{server_pool.port_vip_id}}'/>
+
+            <script type="text/javascript">
+$(document).ready(function() {
+
+                 $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+})
+</script>
+            {% has_perm POOL_MANAGEMENT True None %}{% if has_perm%}{% has_perm POOL_ALTER_SCRIPT True None %}{% if has_perm %}{% if not server_pool.pool_created %}<a href='{% url pool.edit.form server_pool.id %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'>{% endif %}{%endif%}{%endif%}
+
 		<th>
 	</tr>
 </thead>

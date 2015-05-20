@@ -2862,12 +2862,20 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
                     'id_ip': obj_member['ip']['id'],
                     'ip': ip_obj.get('ip_formated')}
                 )
+        health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
+            if pool['server_pool']['healthcheck'] else None
+
+        healthcheck_expect = pool['server_pool']['healthcheck']['healthcheck_expect'] \
+            if pool['server_pool']['healthcheck'] else ''
+
+        healthcheck_request = pool['server_pool']['healthcheck']['healthcheck_request'] \
+            if pool['server_pool']['healthcheck'] else ''
 
         form_initial = {
             'default_port': server_pool.get('default_port'),
-            'balancing': server_pool.get('balancing'),
-            'healthcheck': server_pool.get('healthcheck') and server_pool['healthcheck']['id'],
-            'max_con': server_pool_members_raw[0]['limit'] if server_pool_members_raw else ""
+            'balancing': server_pool.get('lb_method'),
+            'health_check': health_check,
+            'max_con': server_pool.get('default_limit')
         }
 
         form = PoolForm(
@@ -2885,6 +2893,8 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
             'selection_form': DeleteForm(),
             'environment_id': environment_id,
             'expect_strings': expect_string_list,
+            'healthcheck_request': healthcheck_request,
+            'healthcheck_expect': healthcheck_expect,
             'env_name': env['ambiente']['ambiente_rede'],
             'show_environment': False
         }
