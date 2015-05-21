@@ -29,7 +29,7 @@ $(document).ready(function() {
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url network.ip4.list.by.id id_net %}";
+		location.href = "{% url network.ip4.list.by.id id_net id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 	
 	$("textarea").maxlength();
@@ -45,7 +45,7 @@ $(document).ready(function() {
 	</ul>
 	<div id="tabs-1">
 	
-		<form id="add_form" method="post" action="{% url network.edit.ip4 id_net id_ip %}">
+		<form id="add_form" method="post" action="{% url network.edit.ip4 id_net id_ip id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			<label for="equipamentos">Equipamento(s)</label><br/>

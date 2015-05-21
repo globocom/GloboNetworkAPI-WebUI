@@ -17,7 +17,7 @@
 
 
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Util.Json import Json
+#from CadVlan.Util.Json import Json
 from CadVlan.Util.utility import get_param_in_request
 from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.forms import ControlAcessForm
@@ -162,7 +162,7 @@ def access_external():
 
             # If it is not valid  mount of return depending on the type of
             # request
-            if not is_valid:
+            if not is_valid or key is None:
 
                 msg = auth_messages.get("token_invalid")
 

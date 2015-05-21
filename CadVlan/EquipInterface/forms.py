@@ -91,7 +91,7 @@ class AddInterfaceForm(forms.Form):
             attrs["style"] = "width: 98px;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [
-                ("", "Selecione"), ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial")]
+                ("", "Selecione"), ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial"), ("Eth","Eth")]
         else:
             attrs["style"] = "display: none;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
@@ -106,10 +106,10 @@ class AddInterfaceForm(forms.Form):
         elif marca == "2":
             self.regex = "^(Int)\s[0-9]+$"
         elif marca == "3":
-            self.regex = "^(Fa|Gi|Te|Serial)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+            self.regex = "^(Fa|Gi|Te|Serial|Eth)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
         elif marca == "4":
-            self.regex = "^(interface)\s[0-9]+(.[0-9]+)?$"
-        elif marca == "5":
+            self.regex = "^(interface)\s[0-9a-zA-Z]+(/[0-9a-zA-Z])+([0-9a-zA-Z-.]+)?$"
+        elif marca == "5":#Trocar pelo Brocade
             self.regex = "^(eth)[0-9]+(/[0-9]+)?$"
         elif marca == "8":
             self.regex = "^[0-9]+$"
@@ -154,12 +154,12 @@ class AddSeveralInterfaceForm(forms.Form):
             attrs["style"] = "width: 98px;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [
-                ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial")]
+                ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial"), ("Eth","Eth")]
             attrs['disabled'] = "disabled"
             self.fields['combo_aux'].widget = forms.Select(attrs=attrs)
             self.fields['combo_aux'].choices = [
-                ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial")]
-            self.regex = "^(Fa|Gi|Te|Serial)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+                ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial"), ("Eth","Eth")]
+            self.regex = "^(Fa|Gi|Te|Serial|Eth)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
             self.fields['campos'].choices = [
                 ("1", "1"), ("2", "2"), ("3", "3")]
 

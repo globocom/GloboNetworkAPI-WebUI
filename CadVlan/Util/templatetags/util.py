@@ -118,3 +118,7 @@ def jsonify(json_object):
     if isinstance(json_object, QuerySet):
         return mark_safe(serialize('json', json_object))
     return mark_safe(simplejson.dumps(json_object))
+
+@register.filter
+def int_to_str(par_int):
+    return str(par_int)

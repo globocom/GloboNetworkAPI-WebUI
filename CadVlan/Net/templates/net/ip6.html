@@ -1,0 +1,138 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% load util %}
+
+{% block header %}
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	oTable = $("#script_list").dataTable({
+		"aaSorting": [[ 1, "asc" ]],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"bPaginate": false,
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 4 ] }],
+		"aoColumns": [null, { "sType": "ipv6" }, null, null, null ]
+	});
+	
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+	
+	$(".fg-button").live("click", function(){
+		$(":checkbox").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+	
+	$("#page_tab_2").tabs();
+	
+	$("#tool").buttonset();
+	
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url network.insert.ip6 id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+	});
+	
+	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
+              location.href = "{% url vlan.list.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+	});
+	
+	{% has_perm VLAN_MANAGEMENT True None %}
+	{% if has_perm %}
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('Excluir um IP não removerá o equipamento do ambiente. Para remover também do ambiente, vá na edição do equipamento.')){ 
+			var data = getSelectionData(oTable);
+			$("#id_ids").val(data).parent().submit();
+                        location.href = "{% url network.ip6.list.by.id id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+		}
+	});
+	{% endif %}
+	
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+                location.reload();
+	});
+	
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	
+	$("#btn_assoc").button({ icons: {primary: "ui-icon-plus"} });
+	$(".btn_assoc").button({ icons: {primary: "ui-icon-plus"}, text: false });
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab_2">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">IPs da Rede</a></li>
+	</ul>
+	<div id="tabs-2">
+		<div class="buttons">
+			<button id="btn_can" >Voltar</button>
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span id="tool">
+			<button id="btn_new">Novo Registro</button>
+			{% has_perm EQUIPMENT_MANAGEMENT True None %}
+			{% if has_perm %}
+			<button id="btn_del">Excluir</button>
+			{% endif %}
+			</span>
+		</div>
+		{% has_perm EQUIPMENT_MANAGEMENT True None %}
+		{% if has_perm %}
+		<form id="delete_form" method="post" action="{% url network.delete.ip6 id%}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in delete_form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		<table id="script_list">
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th>IP</th>					
+					<th>Nome do Equipamento</th>
+					<th>Descrição do IP</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for ip in ips %}
+				<tr>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ ip.id }}-{{ ip.equip_id }}" /></td>
+					<td>{{ip.block1}}:{{ip.block2}}:{{ip.block3}}:{{ip.block4}}:{{ip.block5}}:{{ip.block6}}:{{ip.block7}}:{{ip.block8}}</td>
+					<td>
+						{{ ip.equip_name }}<br/>
+					</td>
+					<td>{% ifnotequal ip.descricao None %}{{ ip.descricao }}{% endifnotequal %}</td>
+					<td class="text_center" style="width: 50px;"><a href="{% url network.edit.ip6 id ip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a><a href="{% url network.assoc.ip6 id ip.id %}" style="width: 20px; height: 20px;" class="btn_assoc">Associar novo equipamento ao IP</a></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+
+
+	
+</div>
+{% endblock %}

@@ -29,7 +29,7 @@ $(document).ready(function() {
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url network.ip6.list.by.id id %}";
+		location.href = "{% url network.ip6.list.by.id id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 	
 	autocomplete("{% url equipment.autocomplete.ajax %}", false, "id_equip_name", false);
@@ -47,7 +47,7 @@ $(document).ready(function() {
 	</ul>
 	<div id="tabs-1">
 	
-		<form id="add_form" method="post" action="{% url network.insert.ip6 id %}">
+		<form id="add_form" method="post" action="{% url network.insert.ip6 id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			{% for field in form %}

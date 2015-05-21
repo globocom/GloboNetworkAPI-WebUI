@@ -59,3 +59,8 @@ class SearchEquipForm(forms.Form):
 class ControlAcessForm(forms.Form):
     token = forms.CharField(
         widget=forms.HiddenInput(), label='', required=False)
+
+
+class ConfigForm(EquipForm):
+    ids_config = forms.CharField(
+        widget=forms.HiddenInput(), label='', required=True)

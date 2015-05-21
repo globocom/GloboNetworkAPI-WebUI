@@ -44,7 +44,6 @@ AJAX_LDAP_RESET_PASSWORD = 'ajax/ldap-reset-password.html'
 JSON_ERROR = "error.json"
 TOKEN_INVALID = "token_invalid.html"
 
-
 AJAX_LDAP_USERS_BY_GROUP = 'ajax/select-ldap-user.html'
 AJAX_LDAP_USER_POP_NAME_MAIL = 'ajax/pop_ldap_user_mail.json'
 
@@ -165,10 +164,14 @@ VIPREQUEST_EDIT = 'vip-request/edit.html'
 VIPREQUEST_EDIT_EXTERNAL = 'vip-request/edit-external.html'
 VIPREQUEST_TAB_REAL_SERVER = 'vip-request/tab-real-server.html'
 VIPREQUEST_TAB_REAL_SERVER_STATUS = 'vip-request/tab-real-server-status.html'
+VIPREQUEST_TAB_POOLS = 'vip-request/tab-pools.html'
 VIPREQUEST_TAB_HEALTHCHECK = 'vip-request/tab-healthcheck.html'
 VIPREQUEST_TAB_MAXCON = 'vip-request/tab-maxcon.html'
 VIPREQUEST_TAB_L7FILTER = 'vip-request/tab-l7-filter.html'
 VIPREQUEST_TOKEN = 'vip-request/token.json'
+VIPREQUEST_POOL_FORM = 'vip-request/form_pool.html'
+VIPREQUEST_POOL_OPTIONS = 'vip-request/options_pool.html'
+VIPREQUEST_POOL_DATATABLE = 'vip-request/pool_datatable.json'
 
 # AccessTypeRequest
 ACCESSTYPE_FORM = 'access-type/form.html'
@@ -209,10 +212,19 @@ TAB_RULES = 'block-rules/tab-rules.html'
 # Pool
 POOL_LIST = 'pool/list.html'
 POOL_FORM = 'pool/form.html'
-POOL_EDIT = 'pool/edit.html'
+POOL_MANAGE_TAB1 = 'pool/manage_tab1.html'
+POOL_MANAGE_TAB2 = 'pool/manage_tab2.html'
+POOL_MANAGE_TAB3 = 'pool/manage_tab3.html'
+POOL_MANAGE_TAB4 = 'pool/manage_tab4.html'
+
 AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML = 'ajax/request-ip-list-real-server.html'
 AJAX_IPLIST_EQUIPMENT_REAL_SERVER = 'ajax/request-ip-list-real-server.json'
 POOL_DATATABLE = 'pool/datatable.json'
 POOL_SPM_DATATABLE = 'pool/spm_datatable.json'
 POOL_REQVIP_DATATABLE = 'pool/reqvip_datatable.json'
-POOL_FORM_EDIT_NOT_CREATED  = 'pool/form_edit_not_created.html'
+POOL_MEMBER_ITEMS = 'pool/items.html'
+
+#Rack
+RACK_FORM = 'rack/form.html'
+RACK_VIEW_AJAX = 'rack/view-rack.html'
+RACK_EDIT = 'rack/edit.html'

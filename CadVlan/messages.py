@@ -57,6 +57,16 @@ script_type_messages = {
     'success_insert':       u'Tipo de Roteiro incluído com sucesso.',
 }
 
+rack_messages = {
+    'success_remove':       u'Todos os Racks selecionados foram excluídos com sucesso.',
+    'success_insert':       u'Rack incluído com sucesso.',
+    'error_equal_number':     u'Numero já cadastrado.',
+    'success_edit':         u'Rack alterado com sucesso.',
+    'sucess_create_config':	u'Os arquivos de configuracao dos 3 equipamentos do rack %s foram criados com sucesso.',
+    'can_not_create_all':	u'Os arquivos de configuracao do rack %s NAO foram gerados.',
+    'can_not_create_config':       u'Os arquivos de configuracao do %s nao pode(m) ser gerado(s)',
+}
+
 equip_access_messages = {
     'success_remove':       u'Todos os acessos selecionados foram excluídos com sucesso.',
     'success_insert':       u'Acesso incluído com sucesso.',
@@ -283,6 +293,7 @@ request_vip_messages = {
     'invalid_priority': u'O valor da Prioridade deve estar entre 0 e 4294967295.',
     'duplicated_value': u'Valores duplicados para Porta Real, Porta Vip e IP do Real na mesma Requisição VIP.',
     'real_remove': u'Real(s) removido(s) com sucesso.',
+    'required_healthcheck': u'Healthcheck é obrigatório.'
 }
 
 access_type_messages = {
@@ -357,11 +368,12 @@ pool_messages = {
     'success_delete':       u'Todos os pools selecionados foram excluídos com sucesso.',
     'success_create':       u'Todos os pools selecionados foram criados com sucesso.',
     'success_enable':       u'Todos os pools members selecionados foram habilitados com sucesso.',
-    'success_disable':       u'Todos os pools members selecionados foram desabilitados com sucesso.',
+    'success_disable':      u'Todos os pools members selecionados foram desabilitados com sucesso.',
     'success_insert':       u'Pool incluído com sucesso.',
-    'error_equal_name':     u'Pool com o nome %s já cadastrado.',
     'success_update':       u'Pool alterado com sucesso',
+    'error_equal_name':     u'Pool com o nome %s já cadastrado.',
     'error_port_missing':   u'Quantidade de portas e equipamento difere',
     'error_same_port':      u'Ips com portas iguais',
     'error_update':         u'Erro ao alterar pool',
+    'select_one':           u'Deve adicionar ao menos um pool '
 }
