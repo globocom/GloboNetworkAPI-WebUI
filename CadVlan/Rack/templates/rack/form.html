@@ -36,37 +36,51 @@ $(document).ready(function() {
 
         $("#page_tab").tabs();
 
+        $("textarea").maxlength();
+
         $("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 
         $("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-                location.href = "{% url home %}";
+                location.href = "{% url ajax.view.rack %}";
         });
-        $("textarea").maxlength();
 
         $("#btn_equip1, #btn_equip2, #btn_equip3").button({ icons: {primary: "ui-icon-plus"}, text: false });
 
         $("#btn_equip1, #btn_equip2, #btn_equip3").mouseover(function() {
-         $("#btn_equip1, #btn_equip2, #btn_equip3").attr("title","Cadastrar equipamento");
+                $("#btn_equip1, #btn_equip2, #btn_equip3").attr("title","Cadastrar equipamento");
         });
 
         $("#id_mac_address_sw1, #id_mac_address_sw2, #id_mac_address_ilo").keyup(function() {
                 var valor = $(this).val().replace(/[^0-9A-Fa-f:]+/g,'');
                 $(this).val(valor);
-         });
+        });
+
+        $("#id_rack_name").keyup(function() {
+                var valor = $(this).val().replace(/[^0-9A-Z:]+/g,'');
+                $(this).val(valor);
+        });
+
+        $("#id_rack_number").keyup(function() {
+                var valor = $(this).val().replace(/[^0-9:]+/g,'');
+                $(this).val(valor);
+        });
 
         $("#id_mac_address_sw1, #id_mac_address_sw2, #id_mac_address_ilo").mouseover(function() {
                 $(this).attr("title","Formato: FF:FF:FF:FF:FF:FF");
-
         });
 
         $("#id_nome_sw1, #id_nome_sw2, #id_nome_ilo").mouseover(function() {
                 $(this).attr("title","Informe o nome do equipamento, se este estiver cadastrado.");
-
         });
 
-        $("#btn_listar").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){
-                location.href = "{% url ajax.view.rack %}";
+        $("#id_rack_name").mouseover(function() {
+                $(this).attr("title","Nome do Rack: <Coluna><Linha>, Formato: AA00.");
         });
+
+        $("#id_rack_number").mouseover(function() {
+                $(this).attr("title","Numero do Rack: 0-119. O numero sugerido no campo eh o proximo id disponivel.");
+        });
+
 })
 
 </script>
@@ -75,12 +89,9 @@ $(document).ready(function() {
 
 {% block content %}
 <div id="page_tab">
-	<div id="dialog-rack" title="Racks Cadastrados">
-                <div id="rack-view"></div>
-        </div>
-        <ul>
-                <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Rack</a></li>
-        </ul>
+<ul>
+<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Rack</a></li>
+</ul>
         <div id="tabs-1">
                 <form id="add_form" method="post" action="{% url rack.form %}">
                         {% csrf_token %}
@@ -88,96 +99,145 @@ $(document).ready(function() {
                         {% for field in form %}
                                 <div>
                                 {% ifequal field.name 'mac_address_sw1' %}
-                                <table  class="bordasimples">
+                                <table  class="bordarack">
                                         <tr>
                                                <td colspan="3" style="text-align:left;">LEAF 1</td>
                                         </tr>
                                         <tr>
-                                               <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
-                                               {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ field.label_tag }} {% if field.field.required %}<span style="color: red;">*</span>{% endif %}
                                                </label></td>
-
-                                               {% ifequal field.name 'mac_address_sw1' %}
-                                                    <td><label for="{{ field.auto_id }}">
-                                                    {{ form.nome_sw1.label_tag }}{% if form.nome_sw1.required %}<span style="color: red;">*</span>{% endif %}
-                                                    </label></td>
-                                               {% endifequal %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ form.nome_sw1.label_tag }} {% if form.nome_sw1.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
                                         </tr>
                                         <tr>
-                                               <td colspan="2" style="text-align:left;">{{ field }}</td>
-                                               {% ifequal field.name 'mac_address_sw1' %}
-                                                    <td>{{ form.nome_sw1 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip1">Cadastrar Equipamento</button></a></td>
-                                               {% endifequal %}
+                                               <td>{{ field }}
+                                               <p id="error">
+                                               {% if field.errors %}
+                                                      {% for error in field.errors %}
+                                                             {{ error|escape }}
+                                                      {% endfor %}
+                                               {% endif %}
+                                               </p></td>
+                                               <td>{{ form.nome_sw1 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip1">Cadastrar Equipamento</button></a>
+                                               <p id="error">
+                                               {% if form.nome_sw1.errors %}
+                                                      {% for error in form.nome_sw1.errors %}
+                                                             {{ error|escape }}
+                                                      {% endfor %}
+                                               {% endif %}
+                                               </p></td>
                                         </tr>
                                 </table>
                                 <div class="separator spacer"></div>
                                 {% endifequal %}
 
                                 {% ifequal field.name 'mac_address_sw2' %}
-                                <table  class="bordasimples">
+                                <table  class="bordarack">
                                         <tr>
                                                <td colspan="3" style="text-align:left;">LEAF 2</td>
                                         </tr>
                                         <tr>
-                                               <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
-                                               {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ field.label_tag }} {% if field.field.required %}<span style="color: red;">*</span>{% endif %}
                                                </label></td>
-
-                                               {% ifequal field.name 'mac_address_sw2' %}
-                                                    <td><label for="{{ field.auto_id }}">
-                                                    {{ form.nome_sw2.label_tag }}{% if form.nome_sw2.required %}<span style="color: red;">*</span>{% endif %}
-                                                    </label></td>
-                                               {% endifequal %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ form.nome_sw2.label_tag }} {% if form.nome_sw2.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
                                         </tr>
                                         <tr>
-                                               <td colspan="2" style="text-align:left;">{{ field }}</td>
-                                               {% ifequal field.name 'mac_address_sw2' %}
-                                                    <td>{{ form.nome_sw2 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip2">Cadastrar Equipamento</button></a></td>
-                                               {% endifequal %}
+                                               <td>{{ field }}
+                                               <p id="error">
+                                               {% if field.errors %}
+                                                      {% for error in field.errors %}
+                                                             {{ error|escape }}
+                                                      {% endfor %}
+                                               {% endif %}
+                                               </p></td>
+                                               <td>{{ form.nome_sw2 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip2">Cadastrar Equipamento</button></a>
+                                               <p id="error">
+                                               {% if form.nome_sw2.errors %}
+                                                      {% for error in form.nome_sw2.errors %}
+                                                             {{ error|escape }}
+                                                      {% endfor %}
+                                               {% endif %}
+                                               </p></td>
                                         </tr>
                                 </table>
                                 <div class="separator spacer"></div>
                                 {% endifequal %}
 
                                 {% ifequal field.name 'mac_address_ilo' %}
-                                <table  class="bordasimples">
+                                <table  class="bordarack">
                                         <tr>
-                                               <td colspan="3" style="text-align:left;">CONSOLE/ILO</td>
+                                               <td colspan="3" style="text-align:left;">GERENCIA</td>
                                         </tr>
                                         <tr>
-                                               <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
-                                               {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ field.label_tag }} {% if field.field.required %}<span style="color: red;">*</span>{% endif %}
                                                </label></td>
-
-                                               {% ifequal field.name 'mac_address_ilo' %}
-                                                    <td><label for="{{ field.auto_id }}">
-                                                    {{ form.nome_ilo.label_tag }}{% if form.nome_ilo.required %}<span style="color: red;">*</span>{% endif %}
-                                                    </label></td>
-                                               {% endifequal %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ form.nome_ilo.label_tag }} {% if form.nome_ilo.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
                                         </tr>
                                         <tr>
-                                               <td colspan="2" style="text-align:left;">{{ field }}</td>
-                                               {% ifequal field.name 'mac_address_ilo' %}
-                                                    <td>{{ form.nome_ilo }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip3">Cadastrar Equipamento</button></a></td>
-                                               {% endifequal %}
+                                               <td>{{ field }}
+                                               <p id="error">
+                                               {% if field.errors %}
+                                                      {% for error in field.errors %}
+                                                             {{ error|escape }}
+                                                      {% endfor %}
+                                               {% endif %}
+                                               </p></td>
+                                               <td>{{ form.nome_ilo }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip3">Cadastrar Equipamento</button></a>
+                                               <p id="error">
+                                               {% if form.nome_ilo.errors %}
+                                                      {% for error in form.nome_ilo.errors %}
+                                                             {{ error|escape }}
+                                                      {% endfor %}
+                                               {% endif %}
+                                               </p></td>
                                         </tr>
                                 </table>
+                                <div class="separator spacer"></div>
                                 {% endifequal %}
 
                                 {% ifequal field.name 'rack_number' %}
-                                        <div><label for="{{ field.auto_id }}">
-                                        {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
-                                        </label></div>
-                                        {{ field }}  <input id="btn_listar" type="button" value="Listar Racks"/>
-
-                                        <p id="error">
-                                        {% if field.errors %}
-                                            {% for error in field.errors %}
-                                                 {{ error|escape }}
-                                            {% endfor %}
-                                        {% endif %}
-                                        </p>
+                                <table  class="bordarack">
+                                        <tr>
+                                               <td colspan="3" style="text-align:left;">RACK</td>
+                                        </tr>
+                                        <tr>
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ field.label_tag }} {% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ form.rack_name.label_tag }} {% if form.rack_name.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
+                                        </tr>
+                                        <tr>
+                                               <td>{{ field }}
+                                               <p id="error">
+                                               {% if field.errors %}
+                                                      {% for error in field.errors %}
+                                                             {{ error|escape }}
+                                                      {% endfor %}
+                                               {% endif %}
+                                               </p></td>
+                                               <td>{{ form.rack_name }}
+                                               <p id="error">
+                                               {% if form.rack_name.errors %}
+                                                      {% for error in form.rack_name.errors %}
+                                                             {{ error|escape }}
+                                                      {% endfor %}
+                                               {% endif %}
+                                               </td>
+                                        </tr>
+                                </table>
+                                <div class="separator spacer"></div>
                                 {% endifequal %}
+
                                 </div>
                         {% endfor %}
                         </div>

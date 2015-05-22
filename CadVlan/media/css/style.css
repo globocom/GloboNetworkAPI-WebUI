@@ -20,6 +20,13 @@
  * --- INTERFACE ---
  */
 
+
+table.bordarack {
+        width: 480px;
+        border:0px solid black;
+        padding: 15px 15px 15px 15px;
+}
+
 table.bordasimples {
 	width: 480px;
 	border:1px solid black;

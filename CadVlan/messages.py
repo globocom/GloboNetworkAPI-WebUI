@@ -62,9 +62,11 @@ rack_messages = {
     'success_insert':       u'Rack incluído com sucesso.',
     'error_equal_number':     u'Numero já cadastrado.',
     'success_edit':         u'Rack alterado com sucesso.',
-    'sucess_create_config':	u'Os arquivos de configuracao dos 3 equipamentos do rack %s foram criados com sucesso.',
-    'can_not_create_all':	u'Os arquivos de configuracao do rack %s NAO foram gerados.',
+    'sucess_create_config':	u'Os arquivos de configuracao do rack %s foram criados com sucesso.',
+    'sucess_aplicar_config':	 u'A configuracao do rack %s foi aplicada.',    
+    'can_not_create_all':	u'Os arquivos de configuracao do rack %s nao foram gerados.',
     'can_not_create_config':       u'Os arquivos de configuracao do %s nao pode(m) ser gerado(s)',
+    'can_not_aplicar_config':	u'A configuracao do rack %s nao pode ser aplicada.',
 }
 
 equip_access_messages = {

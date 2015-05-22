@@ -75,19 +75,6 @@ $(document).ready(function() {
         <ul>
                 <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Editar Equipamentos</a></li>
         </ul>
-        <div id="tabs-2">
-                {% csrf_token %}
-                <div id="fields1" class="ui-widget-content">
-                    <div class="separator spacer"></div> 
-                    <table border="5">
-                        <tr>
-                                <td style="width: 150px"><label for="num_rack">Numero do Rack</label></td>
-                                <td><label style="width: 350px;color: blue;text-align: center;" >{{ numero }}</label></td>
-                        </tr>
-                    </table>
-                    <div class="separator spacer"></div>
-                </div>
-        </div>
         <div id="detalhe" class="ui-widget-content">
                 <form id="add_form" method="post" action="{% url rack.edit id %}">
                         {% csrf_token %}
@@ -95,33 +82,28 @@ $(document).ready(function() {
                         {% for field in form %}
                                 <div>
                                 {% ifequal field.name 'mac_address_sw1' %}
-                                <table  class="bordasimples">
+                                <table  class="bordarack">
                                         <tr>
                                                <td colspan="3" style="text-align:left;">LEAF 1</td>
                                         </tr>
                                         <tr>
-                                               <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
+                                               <td><label for="{{ field.auto_id }}">
                                                {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
                                                </label></td>
-
-                                               {% ifequal field.name 'mac_address_sw1' %}
-                                                    <td><label for="{{ field.auto_id }}">
-                                                    {{ form.nome_sw1.label_tag }}{% if form.nome_sw1.required %}<span style="color: red;">*</span>{% endif %}
-                                                    </label></td>
-                                               {% endifequal %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ form.nome_sw1.label_tag }}{% if form.nome_sw1.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
                                         </tr>
                                         <tr>
-                                               <td colspan="2" style="text-align:left;">{{ field }}</td>
-                                               {% ifequal field.name 'mac_address_sw1' %}
-                                                    <td>{{ form.nome_sw1 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip1">Cadastrar Equipamento</button></a></td>
-                                               {% endifequal %}
+                                               <td>{{ field }}</td>
+                                               <td>{{ form.nome_sw1 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip1">Cadastrar Equipamento</button></a></td>
                                         </tr>
                                 </table>
                                 <div class="separator spacer"></div>
                                 {% endifequal %}
 
                                 {% ifequal field.name 'mac_address_sw2' %}
-                                <table  class="bordasimples">
+                                <table  class="bordarack">
                                         <tr>
                                                <td colspan="3" style="text-align:left;">LEAF 2</td>
                                         </tr>
@@ -129,62 +111,62 @@ $(document).ready(function() {
                                                <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
                                                {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
                                                </label></td>
-
-                                               {% ifequal field.name 'mac_address_sw2' %}
-                                                    <td><label for="{{ field.auto_id }}">
-                                                    {{ form.nome_sw2.label_tag }}{% if form.nome_sw2.required %}<span style="color: red;">*</span>{% endif %}
-                                                    </label></td>
-                                               {% endifequal %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ form.nome_sw2.label_tag }}{% if form.nome_sw2.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
                                         </tr>
                                         <tr>
                                                <td colspan="2" style="text-align:left;">{{ field }}</td>
-                                               {% ifequal field.name 'mac_address_sw2' %}
-                                                    <td>{{ form.nome_sw2 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip2">Cadastrar Equipamento</button></a></td>
-                                               {% endifequal %}
+                                               <td>{{ form.nome_sw2 }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip2">Cadastrar Equipamento</button></a></td>
                                         </tr>
                                 </table>
                                 <div class="separator spacer"></div>
                                 {% endifequal %}
 
                                 {% ifequal field.name 'mac_address_ilo' %}
-                                <table  class="bordasimples">
+                                <table  class="bordarack">
                                         <tr>
-                                               <td colspan="3" style="text-align:left;">CONSOLE/ILO</td>
+                                               <td colspan="3" style="text-align:left;">GERENCIA</td>
                                         </tr>
                                         <tr>
                                                <td colspan="2" style="text-align:left;"><label for="{{ field.auto_id }}">
                                                {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
                                                </label></td>
-
-                                               {% ifequal field.name 'mac_address_ilo' %}
-                                                    <td><label for="{{ field.auto_id }}">
-                                                    {{ form.nome_ilo.label_tag }}{% if form.nome_ilo.required %}<span style="color: red;">*</span>{% endif %}
-                                                    </label></td>
-                                               {% endifequal %}
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ form.nome_ilo.label_tag }}{% if form.nome_ilo.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
                                         </tr>
                                         <tr>
                                                <td colspan="2" style="text-align:left;">{{ field }}</td>
-                                               {% ifequal field.name 'mac_address_ilo' %}
-                                                    <td>{{ form.nome_ilo }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip3">Cadastrar Equipamento</button></a></td>
-                                               {% endifequal %}
+                                               <td>{{ form.nome_ilo }}  <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_equip3">Cadastrar Equipamento</button></a></td>
                                         </tr>
                                 </table>
+                                <div class="separator spacer"></div>
                                 {% endifequal %}
 
                                 {% ifequal field.name 'rack_number' %}
-                                <table border="5">
+                                <table  class="bordarack">
                                         <tr>
-                                                <td style="width: 150px"><label class="numero1" for="{{ field.auto_id }}">{{ field.label_tag }}</label></td>
-                                                <td><label class="numero" style="width: 350px;color: blue;text-align: center;" >{{ form.rack_number }}</label></td>
-
+                                               <td colspan="3" style="text-align:left;">RACK</td>
                                         </tr>
-                                </table>                                
+                                        <tr>
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ field.label_tag }} {% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
+                                               <td><label for="{{ field.auto_id }}">
+                                               {{ form.rack_name.label_tag }} {% if form.rack_name.field.required %}<span style="color: red;">*</span>{% endif %}
+                                               </label></td>
+                                        </tr>
+                                        <tr>
+                                               <td>{{ field }}</td>
+                                               <td>{{ form.rack_name }}</td>
+                                        </tr>
+                                </table>
                                 <div class="separator spacer"></div>
                                 {% endifequal %}
                                 </div>
                         {% endfor %}
                         </div>
-
                         <div class="separator spacer"></div>
                         <div class="buttons-l ui-widget-header">
                                 <button id="btn_sav" type="submit">Gravar</button>
