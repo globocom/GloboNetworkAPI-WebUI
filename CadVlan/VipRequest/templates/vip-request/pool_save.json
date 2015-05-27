@@ -1,0 +1,1 @@
+{"id": "{{ sp_id|escapejs }}", "message": "{{ message|escapejs }}"}

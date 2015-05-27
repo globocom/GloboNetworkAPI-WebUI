@@ -56,88 +56,107 @@ function changeInput(input, haveBlock) {
 	}
 }
 
-function autocomplete(url, submit, id, hid) {
-	$.ajax({
-		url: url,
-		dataType: "json",
-		success: function(data) {
-			if (data.errors.length > 0) {
-				alert(data.errors)
-			} else {
-				$("#" + id).autocomplete({
-					source: data.list,
-					minLength: 1,
-					select: function(event, ui) {
-						$("#" + id).val(ui.item.label);
-						if (hid) {
-							$("#" + id + "_id").val(ui.item.aux).trigger('change');
-						}
-						if (submit) {
-							$("#search_form").submit()
-						}
-					}
-				});
+
+function __autocomplete(data, submit, id, hid){
+
+	$("#" + id).autocomplete({
+		source: data,
+		minLength: 1,
+		select: function(event, ui) {
+			$("#" + id).val(ui.item.label);
+			if (hid) {
+				$("#" + id + "_id").val(ui.item.aux).trigger('change');
 			}
-		},
-		beforeSend: function() {
-			$(".loading").attr("style", "visibility: hidden;")
-			$("#loading-autocomplete").show();
-		},
-		complete: function() {
-			$("#loading-autocomplete").hide();
-			$(".loading").removeAttr("style")
+			if (submit) {
+				$("#search_form").submit();
+			}
 		}
 	});
+
 }
 
+var ajax_autocomplete_control = false;
+var ajax_autocomplete_cache = false;
+function autocomplete(url, submit, id, hid) {
+
+	if(ajax_autocomplete_control){
+		ajax_autocomplete_control.abort();
+	}
+
+	if(ajax_autocomplete_cache){
+		__autocomplete(ajax_autocomplete_cache, submit, id, hid);
+	}else{
+		ajax_autocomplete_control = $.ajax({
+			url: url,
+			dataType: "json",
+			success: function(data) {
+				if (data.errors.length > 0) {
+					alert(data.errors);
+				} else {
+					ajax_autocomplete_cache = data.list;
+					__autocomplete(ajax_autocomplete_cache, submit, id, hid);
+				}
+			},
+			beforeSend: function() {
+				$(".loading").attr("style", "visibility: hidden;")
+				$("#loading-autocomplete").show();
+			},
+			complete: function() {
+				$("#loading-autocomplete").hide();
+				$(".loading").removeAttr("style");
+				ajax_autocomplete_control = false;
+			}
+		});
+	}
+}
+
+var ajax_autocomplete_external_control = false;
+var ajax_autocomplete_external_cache = false;
 function autocomplete_external(url, submit, id, hid) {
-	$.ajax({
-		url: url,
-		data: { token: $("#id_token").val() },
-		dataType: "json",
-		success: function(data, textStatus, xhr) {
-			
-			if (xhr.status == "278")
-				window.location = xhr.getResponseHeader('Location');
-				
-			else if (xhr.status == "203")
-				alert(data);
-			
-			else {
-			
-				if ( data != null ) {
-				
-					if ( data != null && data.errors.length > 0) {
-						alert(data.errors)
-					} else {
-						
-						$("#" + id).autocomplete({
-							source: data.list,
-							minLength: 1,
-							select: function(event, ui) {
-								$("#" + id).val(ui.item.label);
-								if (hid) {
-									$("#" + id + "_id").val(ui.item.aux)
-								}
-								if (submit) {
-									$("#search_form").submit()
-								}
-							}
-						});
+
+	if(ajax_autocomplete_external_control){
+		ajax_autocomplete_external_control.abort();
+	}
+
+	if(ajax_autocomplete_external_cache){
+		__autocomplete(ajax_autocomplete_external_cache, submit, id, hid);
+	}else{
+		ajax_autocomplete_external_control = $.ajax({
+			url: url,
+			data: { token: $("#id_token").val() },
+			dataType: "json",
+			success: function(data, textStatus, xhr) {
+
+				if (xhr.status == "278")
+					window.location = xhr.getResponseHeader('Location');
+
+				else if (xhr.status == "203")
+					alert(data);
+				else {
+
+					if ( data != null ) {
+
+						if ( data != null && data.errors.length > 0) {
+							alert(data.errors)
+						} else {
+							ajax_autocomplete_external_cache = data.list;
+							__autocomplete(ajax_autocomplete_external_cache, submit, id, hid);
+						}
 					}
 				}
+
+			},
+			beforeSend: function() {
+				$(".loading").attr("style", "visibility: hidden;")
+				$("#loading-autocomplete").show();
+			},
+			complete: function() {
+				$("#loading-autocomplete").hide();
+				$(".loading").removeAttr("style");
+				ajax_autocomplete_external_control = false;
 			}
-				
-		},
-		beforeSend: function() {
-			$(".loading").attr("style", "visibility: hidden;")
-			$("#loading-autocomplete").show();
-		},
-		complete: function() {
-			$("#loading-autocomplete").hide();
-			$(".loading").removeAttr("style")
-		}
-	});
+		});
+	}
 }
 
 jQuery.fn.dataTableExt.oSort['ipv6-asc']  = function(a,b) {
