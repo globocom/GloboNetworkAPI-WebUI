@@ -69,6 +69,7 @@ def add_network_form(request):
         net_type_list = client.create_tipo_rede().listar()
         env_vip_list = {"environment_vip": []}
 
+
         # Forms
         lists['form'] = NetworkForm(net_type_list, env_vip_list)
 
@@ -137,10 +138,17 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
     lists['sf_acl'] = sf_acl
 
     try:
+        # Get User
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        # Get all needs from NetworkAPI
+        net_type_list = client.create_tipo_rede().listar()
 
         # If form was submited
         if request.method == 'POST':
             # Forms
+            env_vip_list = {"environment_vip": []}
             lists['form'] = NetworkForm(net_type_list, env_vip_list)
 
             vlan_id = request.POST['vlan_name_id']
@@ -177,16 +185,8 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
             lists['form'] = form
 
         if request.method == 'GET':
-
-            # Get User
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
-
-            # Get all needs from NetworkAPI
-            net_type_list = client.create_tipo_rede().listar()
             env_vip_list = client.create_environment_vip().list_all_available(
                 id_vlan)
-
             # Business
             vlan = client.create_vlan().get(id_vlan)
             vlan = vlan.get("vlan")
