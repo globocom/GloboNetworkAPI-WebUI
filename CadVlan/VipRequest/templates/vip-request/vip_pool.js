@@ -241,3 +241,7 @@ $('#id_environment').live("change", function(){
         $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
     }
 });
+
+$('#btn_can').live("click", function(){
+    location.href = "{% url pool.list %}";
+});
