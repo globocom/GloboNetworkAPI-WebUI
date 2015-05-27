@@ -435,7 +435,7 @@ def edit_form(request, id_server_pool):
 @access_external()
 @log
 def ajax_modal_ip_real_server_external(request, form_acess, client):
-    return modal_ip_list_real(request, client)
+    return __modal_ip_list_real(request, client)
 
 
 @log
@@ -444,13 +444,10 @@ def ajax_modal_ip_real_server_external(request, form_acess, client):
 def ajax_modal_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return modal_ip_list_real(request, client_api)
+    return __modal_ip_list_real(request, client_api)
 
 
-@log
-@login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "read": True, "write": True}])
-def modal_ip_list_real(request, client_api):
+def __modal_ip_list_real(request, client_api):
 
     lists = dict()
     lists['msg'] = ''
@@ -490,19 +487,23 @@ def modal_ip_list_real(request, client_api):
         ), status=status_code
     )
 
+@csrf_exempt
+@access_external()
+@log
+def ajax_get_opcoes_pool_by_ambiente_external(request, form_acess, client):
+    return __get_opcoes_pool_by_ambiente(request, client)
+
+
 @log
 @login_required
 @has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
 def ajax_get_opcoes_pool_by_ambiente(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return get_opcoes_pool_by_ambiente(request, client_api)
+    return __get_opcoes_pool_by_ambiente(request, client_api)
 
 
-@log
-@login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
-def get_opcoes_pool_by_ambiente(request, client_api):
+def __get_opcoes_pool_by_ambiente(request, client_api):
 
     lists = dict()
     lists['opcoes_pool'] = ''
@@ -691,19 +692,25 @@ def disable(request):
 
     return redirect(reverse('pool.manage.tab2', args=[id_server_pool]))
 
+@csrf_exempt
+@access_external()
+@log
+def add_healthcheck_expect_external(request, form_acess, client):
+    return __add_healthcheck_expect_shared(request, client)
 
 @log
 @login_required
 @has_perm([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
 def add_healthcheck_expect(request):
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
 
+    return __add_healthcheck_expect_shared(request, client)
+
+
+def __add_healthcheck_expect_shared(request, client):
     lists = dict()
-
     try:
-
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
         if request.method == 'GET':
 
             expect_string = request.GET.get("expect_string")

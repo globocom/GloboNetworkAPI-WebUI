@@ -34,12 +34,13 @@ from django.views.decorators.http import require_http_methods
 
 from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.Equipment.business import cache_list_equipment
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
 from CadVlan.Pool.forms import PoolForm
 from CadVlan.Util.Decorators import log, login_required, has_perm, \
     access_external
 from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.shortcuts import render_message_json
+from CadVlan.Util.shortcuts import render_message_json, render_json, render_to_response_ajax
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
     get_param_in_request, IP_VERSION, is_valid_int_param, safe_list_get
 from CadVlan.VipRequest import forms
@@ -2803,13 +2804,7 @@ def apply_rollback_l7(request):
 @log
 @access_external()
 def external_load_pool_for_copy(request, form_acess, client):
-
-    return shared_load_pool_for_copy(
-        request,
-        client,
-        form_acess,
-        external=True
-    )
+    return shared_load_pool(request, client, form_acess, external=True)
 
 
 @log
@@ -2821,46 +2816,24 @@ def external_load_pool_for_copy(request, form_acess, client):
     {"permission": POOL_MANAGEMENT, "write": True},
 ])
 def load_pool_for_copy(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
-    return shared_load_pool_for_copy(request, client)
+    return shared_load_pool(request, client)
 
 
-def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
+def shared_load_pool(request, client, form_acess=None, external=False):
 
     try:
-
-        server_pool_members = list()
-
+        is_copy = request.GET.get('is_copy', 1)
         pool_id = request.GET.get('pool_id')
 
-        action = reverse('external.save.pool') if external else reverse('save.pool')
-
         pool = client.create_pool().get_by_pk(pool_id)
-
         server_pool = pool.get('server_pool')
-
-        server_pool_members_raw = pool.get('server_pool_members')
-
-        expect_string_list = client.create_ambiente()\
-            .listar_healtchcheck_expect_distinct()
-
         environment_id = server_pool['environment']['id']
 
-        env = client.create_ambiente()\
-            .buscar_por_id(environment_id)
-
-        options_environment_choices = list()
-
-        options_vip_choices = _create_options_vip(client)
-
-        options_pool_as_healthcheck_choices = _create_options_pool_as_healthcheck(
-            client,
-            environment_id
-        )
-
+        server_pool_members = list()
+        server_pool_members_raw = pool.get('server_pool_members')
         if server_pool_members_raw:
             for obj_member in server_pool_members_raw:
 
@@ -2882,6 +2855,7 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
                     'id_ip': obj_member['ip']['id'],
                     'ip': ip_obj.get('ip_formated')}
                 )
+
         health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
             if pool['server_pool']['healthcheck'] else None
 
@@ -2892,31 +2866,44 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
             if pool['server_pool']['healthcheck'] else ''
 
         form_initial = {
+            'id': pool_id,
             'default_port': server_pool.get('default_port'),
             'balancing': server_pool.get('lb_method'),
             'health_check': health_check,
-            'max_con': server_pool.get('default_limit')
+            'max_con': server_pool.get('default_limit'),
+            'identifier': server_pool.get('identifier')
         }
 
+        options_vip_choices = _create_options_vip(client)
+        options_pool_as_healthcheck_choices = _create_options_pool_as_healthcheck(client, environment_id)
+
         form = PoolForm(
-            options_environment_choices,
+            list(),
             options_vip_choices,
             options_pool_as_healthcheck_choices,
             initial=form_initial
         )
 
+        env = client.create_ambiente().buscar_por_id(environment_id)
+        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
+
+        if external:
+            action = reverse('external.save.pool')
+        else:
+            action = reverse('save.pool')
+
         context_attrs = {
             'form': form,
             'action': action,
             'pool_members': server_pool_members,
-            'id_server_pool': pool_id,
             'selection_form': DeleteForm(),
             'environment_id': environment_id,
             'expect_strings': expect_string_list,
             'healthcheck_request': healthcheck_request,
             'healthcheck_expect': healthcheck_expect,
             'env_name': env['ambiente']['ambiente_rede'],
-            'show_environment': False
+            'show_environment': False,
+            'is_copy': bool(int(is_copy))
         }
 
         return render(
@@ -3020,6 +3007,12 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         env_vip_id = request.POST.get('environment_vip')
 
         # Get Data From Request Post To Save
+        pool_id = request.POST.get('id')
+        environment_id = request.POST.get('environment')
+        healthcheck_type = request.POST.get('health_check')
+        healthcheck_expect = request.POST.get('expect')
+        healthcheck_request = request.POST.get('health_check_request')
+
         pool_member_ids = request.POST.getlist('id_pool_member')
         equipment_ids = request.POST.getlist('id_equip')
         equipment_names = request.POST.getlist('equip')
@@ -3028,30 +3021,15 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         weight = request.POST.getlist('weight')
         id_ips = request.POST.getlist('id_ip')
         ips = request.POST.getlist('ip')
-        environment_id = request.POST.get('environment')
-        healthcheck_type = request.POST.get('health_check')
-        healthcheck_expect = request.POST.get('expect')
-        healthcheck_request = request.POST.get('health_check_request')
 
         if healthcheck_type != HTTP_HEALTHCHECK and healthcheck_type != HTTPS_HEALTHCHECK:
             healthcheck_expect = ''
             healthcheck_request = ''
 
-        options_pool_choices = _create_options_pool_as_healthcheck(
-            client,
-            environment_id
-        )
-
+        options_pool_choices = _create_options_pool_as_healthcheck(client, environment_id)
         options_environment = _create_options_environment(client, env_vip_id)
-
         options_vip_choices = _create_options_vip(client)
-
-        form = PoolForm(
-            options_environment,
-            options_vip_choices,
-            options_pool_choices,
-            request.POST
-        )
+        form = PoolForm(options_environment, options_vip_choices, options_pool_choices, request.POST)
 
         if form.is_valid():
             for i in range(len(ips)):
@@ -3062,35 +3040,28 @@ def shared_save_pool(request, client, form_acess=None, external=False):
             balancing = form.cleaned_data['balancing']
             maxcom = form.cleaned_data['max_con']
 
-            is_valid, error_list = valid_reals(
-                equipment_ids,
-                ports_reals,
-                priorities,
-                id_ips,
-                default_port
-            )
+            is_valid, error_list = valid_reals(equipment_ids, ports_reals, priorities, id_ips, default_port)
 
-            is_valid_healthcheck, error_healthcheck = valid_realthcheck(
-                healthcheck_type
-            )
+            is_valid_healthcheck, error_healthcheck = valid_realthcheck(healthcheck_type)
 
             error_list.extend(error_healthcheck)
 
             if is_valid and is_valid_healthcheck:
+                param_dic = {}
+                sp_id = client.create_pool().save(pool_id, identifier, default_port, environment_id, balancing,
+                                                  healthcheck_type, healthcheck_expect, healthcheck_request, maxcom,
+                                                  ip_list_full, equipment_names, equipment_ids, priorities, weight,
+                                                  ports_reals, pool_member_ids)
 
-                pool_id = None
+                if pool_id:
+                    param_dic['message'] = pool_messages.get('success_update')
+                    param_dic['id'] = None
+                else:
+                    param_dic['message'] = pool_messages.get('success_insert')
+                    param_dic['id'] = sp_id
 
-                client.create_pool().save(
-                    pool_id, identifier, default_port,
-                    environment_id, balancing, healthcheck_type,
-                    healthcheck_expect, healthcheck_request, maxcom,
-                    ip_list_full, equipment_names, equipment_ids,
-                    priorities, weight, ports_reals, pool_member_ids
-                )
-
-                return render_message_json(
-                    pool_messages.get('success_insert')
-                )
+                return render_to_response_ajax(templates.VIPREQUEST_POOL_SAVE, param_dic,
+                                               context_instance=RequestContext(request))
 
         erros = _format_form_error([form])
 
@@ -3150,16 +3121,11 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
 
         form = PoolForm(choices_environment, options_vip_choices)
 
-        return render(
-            request,
-            templates.VIPREQUEST_POOL_FORM, {
-                'form': form,
-                'action': action,
-                'pool_members': pool_members,
-                'expect_strings': expect_string_list,
-                'show_environment': True
-            }
-        )
+        return render(request, templates.VIPREQUEST_POOL_FORM, {'form': form,
+                                                                'action': action,
+                                                                'pool_members': pool_members,
+                                                                'expect_strings': expect_string_list,
+                                                                'show_environment': True})
 
     except NetworkAPIClientError, e:
         logger.error(e)
