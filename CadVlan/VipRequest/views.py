@@ -2062,26 +2062,32 @@ def generate_token(request):
                     client.create_vip().get_by_id(idt)
 
                 # Encrypt hash
-                user_hash = Encryption().Encrypt(
-                    user + "@" + str(user_ldap_ass))
+                user_hash = Encryption().Encrypt(user + "@" + str(user_ldap_ass))
+
+                #Get Authenticate User
+                authenticate_user = client_user.get('user')
+
+                #Get Permissions by Authenticate User
+                permissions = authenticate_user and authenticate_user.get('permission')
 
                 # Generates token
-                key = "%s:%s:%s" % (
-                    __name__, str(user), str(strftime("%Y%m%d%H%M%S")))
+                key = "%s:%s:%s" % (__name__, str(user), str(strftime("%Y%m%d%H%M%S")))
+
                 token = sha1(key).hexdigest()
 
+                data_to_cache = {"user_hash": user_hash, "permissions": permissions}
+
                 # Set token in cache
-                cache.set(token, user_hash, int(ttl))
+                cache.set(token, data_to_cache, int(ttl))
 
                 lists["token"] = token
-                lists["url"] = reverse(
-                    "vip-request.edit.external", args=[idt]) if idt is not None else reverse("vip-request.form.external")
 
-            return render_to_response(
-                templates.VIPREQUEST_TOKEN,
-                lists,
-                context_instance=RequestContext(request)
-            )
+                if idt is not None:
+                    lists["url"] = reverse("vip-request.edit.external", args=[idt])
+                else:
+                    lists["url"] = reverse("vip-request.form.external")
+
+            return render_to_response(templates.VIPREQUEST_TOKEN, lists, context_instance=RequestContext(request))
 
     except InvalidParameterError, e:
         logger.error(e)
@@ -2099,6 +2105,7 @@ def generate_token(request):
         lists,
         context_instance=RequestContext(request)
     )
+
 
 
 def validate_user_networkapi(user_request, is_ldap_user):
@@ -2161,7 +2168,11 @@ def add_form_shared(request, client_api, form_acess="", external=False):
                     messages.SUCCESS,
                     request_vip_messages.get("success_insert")
                 )
+
                 if external:
+
+                    lists['token'] = form_acess.initial.get("token")
+
                     return HttpResponseRedirect(
                         "%s?token=%s" % (
                             reverse('vip-request.form.external'),
@@ -2179,6 +2190,9 @@ def add_form_shared(request, client_api, form_acess="", external=False):
             lists['form_healthcheck'] = forms.RequestVipFormHealthcheck(healthcheck_list, [])
             lists['form_options'] = forms.RequestVipFormOptions()
             lists['form_ip'] = forms.RequestVipFormIP()
+
+            if external:
+                lists['token'] = form_acess.initial.get("token")
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -2236,6 +2250,9 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                 )
 
                 if external:
+
+                    lists['token'] = form_acess.initial.get("token")
+
                     return HttpResponseRedirect(
                         "%s?token=%s" % (
                             reverse('vip-request.edit.external', args=[id_vip]),
@@ -2355,6 +2372,9 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             lists['form_ip'] = form_ip
             lists["pools"] = vip.get('pools')
             lists["env_vip_id"] = environment_vip
+
+            if external:
+                lists['token'] = form_acess.initial.get("token")
 
     except VipNaoExisteError, e:
         logger.error(e)
