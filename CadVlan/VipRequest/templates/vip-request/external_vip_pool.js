@@ -1,6 +1,6 @@
 $("#dialog_pool").dialog({
 		height: 600,
-		width: 1000,
+		width: 700,
 		modal: true,
 		autoOpen: false,
 		draggable: false,
