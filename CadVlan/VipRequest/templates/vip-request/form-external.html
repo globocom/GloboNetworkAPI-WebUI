@@ -204,7 +204,8 @@ $(document).ready(function() {
 				</p>
 			</div>
 			<br>
-
+            {% has_external_perm POOL_MANAGEMENT True True token %}
+			{% if has_perm %}
 			<div id="divPools" class="bordasimples">
 
                 <div style="float: left; width: 7%;">
@@ -225,6 +226,8 @@ $(document).ready(function() {
 				<br>
 				<br>
 			</div>
+            {% endif %}
+
 		    <br>
 			<br>
 
