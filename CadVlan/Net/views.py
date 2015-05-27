@@ -138,6 +138,44 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
 
     try:
 
+        # If form was submited
+        if request.method == 'POST':
+            # Forms
+            lists['form'] = NetworkForm(net_type_list, env_vip_list)
+
+            vlan_id = request.POST['vlan_name_id']
+            available_evips = client.create_environment_vip().list_all_available(
+                vlan_id) if vlan_id else {'environment_vip': []}
+
+            # Set data in form
+            form = NetworkForm(net_type_list, available_evips, request.POST)
+
+            # Validate
+            if form.is_valid():
+
+                vlan_id = form.cleaned_data['vlan_name_id']
+                net_type = form.cleaned_data['net_type']
+                env_vip = form.cleaned_data['env_vip']
+                net_version = form.cleaned_data['ip_version']
+                networkv4 = form.cleaned_data['networkv4']
+                networkv6 = form.cleaned_data['networkv6']
+
+                if net_version == "0":
+                    network = networkv4
+                else:
+                    network = networkv6
+
+                # Business
+                client.create_vlan().get(vlan_id)
+                client.create_network().add_network(
+                    network, vlan_id, net_type, env_vip)
+                messages.add_message(
+                    request, messages.SUCCESS, network_ip_messages.get("success_insert"))
+
+                return HttpResponseRedirect(reverse('vlan.list.by.id', args=[vlan_id, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
+            # If invalid, send all error messages in fields
+            lists['form'] = form
+
         if request.method == 'GET':
 
             # Get User
@@ -165,6 +203,11 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        # If some api error occurred, try to send data to html
+        try:
+            lists['form'] = form
+        except NameError:
+            pass
 
     return render_to_response(NET_FORM, lists, context_instance=RequestContext(request))
 
