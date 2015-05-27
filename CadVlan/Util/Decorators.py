@@ -17,7 +17,7 @@
 
 
 from CadVlan.Auth.AuthSession import AuthSession
-#from CadVlan.Util.Json import Json
+from CadVlan.Util.Json import Json
 from CadVlan.Util.utility import get_param_in_request
 from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.forms import ControlAcessForm
@@ -34,6 +34,7 @@ import json
 import logging
 import time
 import re
+
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +145,9 @@ def access_external():
                 if cache.has_key(key):
 
                     # Get hash in cache
-                    hash = cache.get(key)
+                    data_from_cache = cache.get(key)
+
+                    hash = data_from_cache.get('user_hash')
 
                     # Decrypt hash
                     user = Encryption().Decrypt(hash)
