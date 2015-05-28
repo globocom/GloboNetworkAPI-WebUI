@@ -17,28 +17,19 @@
 
 
 import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
+
+from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from networkapiclient.exception import RackAllreadyConfigError, RacksError, EnvironmentVipNotFoundError, InvalidParameterError, NetworkAPIClientError, UserNotAuthorizedError, NumeroRackDuplicadoError 
+from networkapiclient.exception import RackAllreadyConfigError, RacksError, InvalidParameterError, NetworkAPIClientError
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Util.shortcuts import render_to_response_ajax
 from CadVlan.templates import RACK_EDIT, RACK_FORM, RACK_VIEW_AJAX
 from django.template.context import RequestContext
 from CadVlan.Rack.forms import RackForm
-from CadVlan.Util.utility import DataTablePaginator, validates_dict
-from networkapiclient.Pagination import Pagination
-from django.http import HttpResponseServerError, HttpResponse
 from django.shortcuts import render_to_response, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.template import loader
-from django.core.context_processors import request
-from django.template.context import Context, RequestContext
-from CadVlan.messages import auth_messages, equip_messages, error_messages, rack_messages
+from CadVlan.messages import error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.forms import DeleteForm, ConfigForm
-
-import json
 
 
 logger = logging.getLogger(__name__)
