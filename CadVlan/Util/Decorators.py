@@ -128,38 +128,71 @@ def log(view_func):
     return _decorated
 
 
-def access_external():
-    '''
-    Controls access external request vip form with token stored in memcached
-    '''
+def access_external(required_permissions=None):
+    """
+    Controls access external request vip form with token stored in memcached and
+    if has required permissions check each permission with option of partial
+    required checking if has read or write.
+
+    :param required_permissions:
+        [{"permission":"<name>", "read": <bool>, "write": <bool>},] or
+        [{"permission":"<name>", "read": <bool>},] or
+        [{"permission":"<name>", "write": <bool>},] or
+        [{"permission":"<name>", "partial_required": <bool>},]
+
+    :return: HttpResponse
+    """
     def _decorated(func):
 
         def _control(request, *args, **kwargs):
 
             key = get_param_in_request(request, TOKEN)
-
+            condition = "True"
             is_valid = True
+
             if key is not None:
 
                 # Search in cache if it exists
-                if cache.has_key(key):
+                if key in cache:
 
                     # Get hash in cache
                     data_from_cache = cache.get(key)
-
-                    hash = data_from_cache.get('user_hash')
+                    user_hash = data_from_cache.get('user_hash')
+                    permissions = data_from_cache.get('permissions')
 
                     # Decrypt hash
-                    user = Encryption().Decrypt(hash)
+                    user = Encryption().Decrypt(user_hash)
 
                     username, password, user_ldap = str(user).split("@")
 
+                    #Check Has Permission
+                    if required_permissions:
+                        for perm in required_permissions:
+
+                            write_required = perm.get('write', False)
+                            read_required = perm.get('read', False)
+                            partial_required = perm.get('partial_required', False)
+                            required_permission = perm.get('permission')
+
+                            permission = permissions.get(required_permission)
+                            write_permission = condition == permission.get('write')
+                            read_permission = condition == permission.get('read')
+
+                            partial_permission = write_permission or read_permission
+
+                            # If check partial validate and has partial permission
+                            if partial_required and partial_permission:
+                                continue
+
+                            if (write_required and not write_permission) or (read_required and not read_permission):
+                                context = {"error": auth_messages.get('user_not_authorized')}
+                                return HttpResponse(loader.render_to_string(TOKEN_INVALID, context))
+
                     if user_ldap == "":
-                        client = ClientFactory(
-                            NETWORK_API_URL, username, password)
+                        client = ClientFactory(NETWORK_API_URL, username, password)
                     else:
-                        client = ClientFactory(
-                            NETWORK_API_URL, username, password, user_ldap)
+                        client = ClientFactory(NETWORK_API_URL, username, password, user_ldap)
+
                 else:
                     is_valid = False
 
@@ -171,9 +204,7 @@ def access_external():
 
                 if request.is_ajax():
                     return HttpResponse(msg, status=203)
-
                 else:
-
                     return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": msg}), status=200)
 
             kwargs["form_acess"] = ControlAcessForm(initial={"token": key})
