@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 from CadVlan.Pool.facade import populate_enviroments_choices, populate_optionsvips_choices, \
     populate_expectstring_choices, populate_optionspool_choices, populate_pool_members_by_lists, \
     populate_pool_members_by_obj
-from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
+from CadVlan.Util.Decorators import log, login_required, has_perm, has_perm_external
 from django.views.decorators.csrf import csrf_exempt
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
     POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_REQVIP_DATATABLE, POOL_MEMBER_ITEMS, POOL_MANAGE_TAB1, \
@@ -432,7 +432,7 @@ def edit_form(request, id_server_pool):
 
 
 @csrf_exempt
-@access_external()
+@has_perm_external([{"permission": POOL_MANAGEMENT, "read": True}])
 @log
 def ajax_modal_ip_real_server_external(request, form_acess, client):
     return __modal_ip_list_real(request, client)
@@ -488,7 +488,7 @@ def __modal_ip_list_real(request, client_api):
     )
 
 @csrf_exempt
-@access_external()
+@has_perm_external([{"permission": POOL_MANAGEMENT, "read": True}])
 @log
 def ajax_get_opcoes_pool_by_ambiente_external(request, form_acess, client):
     return __get_opcoes_pool_by_ambiente(request, client)
@@ -692,9 +692,10 @@ def disable(request):
 
     return redirect(reverse('pool.manage.tab2', args=[id_server_pool]))
 
-@csrf_exempt
-@access_external()
+
 @log
+@csrf_exempt
+@has_perm_external([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
 def add_healthcheck_expect_external(request, form_acess, client):
     return __add_healthcheck_expect_shared(request, client)
 
