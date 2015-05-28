@@ -20,6 +20,8 @@ import hashlib
 import re
 from time import strftime
 from types import NoneType
+import base64
+import logging
 
 from django.contrib import messages
 from django.core.cache import cache
@@ -31,16 +33,14 @@ from django.template import loader
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-
 from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Equipment.business import cache_list_equipment
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
 from CadVlan.Pool.forms import PoolForm
 from CadVlan.Util.Decorators import log, login_required, has_perm, \
     access_external
 from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.shortcuts import render_message_json, render_json, render_to_response_ajax
+from CadVlan.Util.shortcuts import render_message_json, render_to_response_ajax
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
     get_param_in_request, IP_VERSION, is_valid_int_param, safe_list_get
 from CadVlan.VipRequest import forms
@@ -53,8 +53,6 @@ from CadVlan.permissions import VIP_CREATE_SCRIPT, \
     POOL_MANAGEMENT, POOL_ALTER_SCRIPT
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL, \
     NETWORK_API_USERNAME, NETWORK_API_PASSWORD
-import base64
-import logging
 from networkapiclient.ClientFactory import ClientFactory
 from networkapiclient.Pagination import Pagination
 from networkapiclient.exception import NetworkAPIClientError, VipError, \
