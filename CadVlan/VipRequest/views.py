@@ -38,7 +38,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
 from CadVlan.Pool.forms import PoolForm
 from CadVlan.Util.Decorators import log, login_required, has_perm, \
-    access_external
+    has_perm_external
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.shortcuts import render_message_json, render_to_response_ajax
 from CadVlan.Util.utility import DataTablePaginator, validates_dict, clone, \
@@ -989,7 +989,10 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
 @csrf_exempt
 @log
-@access_external([pool_read_permission, vip_all_permission])
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def add_form_external(request, form_acess, client):
     return add_form_shared(request, client, form_acess, True)
 
@@ -1005,7 +1008,10 @@ def add_form(request):
 
 @csrf_exempt
 @log
-@access_external([pool_read_permission, vip_all_permission])
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def edit_form_external(request, id_vip, form_acess, client):
     return edit_form_shared(request, id_vip, client, form_acess, True)
 
@@ -1019,9 +1025,12 @@ def edit_form(request, id_vip):
     return edit_form_shared(request, id_vip, client_api)
 
 
-@csrf_exempt
-@access_external()
 @log
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_popular_client_external(request, form_acess, client):
     return popular_client_shared(request, client)
 
@@ -1035,9 +1044,12 @@ def ajax_popular_client(request):
     return popular_client_shared(request, client_api)
 
 
-@csrf_exempt
-@access_external()
 @log
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_popular_environment_external(request, form_acess, client):
     return popular_environment_shared(request, client)
 
@@ -1051,9 +1063,12 @@ def ajax_popular_environment(request):
     return popular_environment_shared(request, client_api)
 
 
-@csrf_exempt
-@access_external()
 @log
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_popular_options_external(request, form_acess, client):
     return popular_options_shared(request, client)
 
@@ -1067,9 +1082,12 @@ def ajax_popular_options(request):
     return popular_options_shared(request, client_api)
 
 
-@csrf_exempt
-@access_external()
 @log
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_popular_rule_external(request, form_acess, client):
     return popular_rule_shared(request, client)
 
@@ -1083,9 +1101,12 @@ def ajax_popular_rule(request):
     return popular_rule_shared(request, client_api)
 
 
-@csrf_exempt
-@access_external()
 @log
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_add_healthcheck_external(request, form_acess, client):
     return popular_add_healthcheck_shared(request, client)
 
@@ -1099,9 +1120,12 @@ def ajax_add_healthcheck(request):
     return popular_add_healthcheck_shared(request, client_api)
 
 
-@csrf_exempt
-@access_external()
 @log
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_model_ip_real_server_external(request, form_acess, client):
     return model_ip_real_server_shared(request, client)
 
@@ -2803,9 +2827,12 @@ def apply_rollback_l7(request):
         messages.add_message(request, messages.ERROR, e)
 
 
-@csrf_exempt
 @log
-@access_external()
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def external_load_pool_for_copy(request, form_acess, client):
     return shared_load_pool(request, client, form_acess, external=True)
 
@@ -2816,7 +2843,6 @@ def external_load_pool_for_copy(request, form_acess, client):
     {"permission": VIPS_REQUEST, "read": True},
     {"permission": VIPS_REQUEST, "write": True},
     {"permission": POOL_MANAGEMENT, "read": True},
-    {"permission": POOL_MANAGEMENT, "write": True},
 ])
 def load_pool_for_copy(request):
     auth = AuthSession(request.session)
@@ -2978,7 +3004,6 @@ def _create_options_environment(client, env_vip_id):
 @has_perm([
     {"permission": VIPS_REQUEST, "read": True},
     {"permission": VIPS_REQUEST, "write": True},
-    {"permission": POOL_MANAGEMENT, "read": True},
     {"permission": POOL_MANAGEMENT, "write": True},
     {"permission": POOL_ALTER_SCRIPT, "write": True},
 ])
@@ -2992,7 +3017,11 @@ def save_pool(request):
 
 @csrf_exempt
 @log
-@access_external()
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+])
 def external_save_pool(request, form_acess, client):
 
     return shared_save_pool(request, client, form_acess, external=True)
@@ -3078,9 +3107,13 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         return render_message_json(str(e), messages.ERROR)
 
 
-@csrf_exempt
 @log
-@access_external()
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+])
 def external_load_new_pool(request, form_acess, client):
 
     return shared_load_new_pool(request, client, form_acess, external=True)
@@ -3134,10 +3167,12 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         logger.error(e)
         return render_message_json(str(e), messages.ERROR)
 
-
-@csrf_exempt
 @log
-@access_external()
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def external_load_options_pool(request, form_acess, client):
 
     return shared_load_options_pool(request, client, form_acess, external=True)
@@ -3146,8 +3181,7 @@ def external_load_options_pool(request, form_acess, client):
 @log
 @login_required
 @has_perm([
-    {"permission": VIPS_REQUEST, "read": True},
-    {"permission": VIPS_REQUEST, "write": True},
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
     {"permission": POOL_MANAGEMENT, "read": True},
 ])
 def load_options_pool(request):
@@ -3183,7 +3217,10 @@ def shared_load_options_pool(request, client, form_acess=None, external=False):
 
 @csrf_exempt
 @log
-@access_external()
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def external_pool_member_items(request, form_acess, client):
 
     return shared_pool_member_items(
@@ -3196,7 +3233,10 @@ def external_pool_member_items(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, ])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def pool_member_items(request):
 
     auth = AuthSession(request.session)
