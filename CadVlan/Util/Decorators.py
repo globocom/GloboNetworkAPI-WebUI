@@ -91,8 +91,8 @@ def has_perm(permission):
                 user = auth.get_user()
 
                 for perm in permission:
-                    write = perm['write'] if perm.has_key("write") else None
-                    read = perm['read'] if perm.has_key("read") else None
+                    write = perm.get("write")
+                    read = perm.get("read")
                     if not user.has_perm(perm['permission'], write, read):
                         messages.add_message(
                             request, messages.ERROR, auth_messages.get('user_not_authorized'))
@@ -128,17 +128,15 @@ def log(view_func):
     return _decorated
 
 
-def access_external(required_permissions=None):
+def has_perm_external(required_permissions=None):
     """
     Controls access external request vip form with token stored in memcached and
-    if has required permissions check each permission with option of partial
-    required checking if has read or write.
+    if has required permissions check each permission.
 
     :param required_permissions:
         [{"permission":"<name>", "read": <bool>, "write": <bool>},] or
         [{"permission":"<name>", "read": <bool>},] or
-        [{"permission":"<name>", "write": <bool>},] or
-        [{"permission":"<name>", "partial_required": <bool>},]
+        [{"permission":"<name>", "write": <bool>},]
 
     :return: HttpResponse
     """
@@ -171,18 +169,11 @@ def access_external(required_permissions=None):
 
                             write_required = perm.get('write', False)
                             read_required = perm.get('read', False)
-                            partial_required = perm.get('partial_required', False)
                             required_permission = perm.get('permission')
 
                             permission = permissions.get(required_permission)
                             write_permission = condition == permission.get('write')
                             read_permission = condition == permission.get('read')
-
-                            partial_permission = write_permission or read_permission
-
-                            # If check partial validate and has partial permission
-                            if partial_required and partial_permission:
-                                continue
 
                             if (write_required and not write_permission) or (read_required and not read_permission):
                                 context = {"error": auth_messages.get('user_not_authorized')}
