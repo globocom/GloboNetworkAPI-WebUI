@@ -218,26 +218,47 @@ $(document).ready(function() {
 
 			<br>
 
-			<div id="divPools" class="bordasimples">
 
-                <div style="float: left; width: 7%;">
-                    <label for="idPort">Porta Vip</label>
+            {% has_external_perm POOL_MANAGEMENT False True token %}
+            {% with has_external_perm as has_pool_read %}
+
+            {% has_external_perm POOL_MANAGEMENT True False token %}
+            {% with has_external_perm as has_pool_write %}
+
+			{% if has_pool_read or has_pool_write %}
+
+                <div id="divPools" class="bordasimples">
+
+                    {% if has_pool_read %}
+                        <div style="float: left; width: 7%;">
+                            <label for="idPort">Porta Vip</label>
+                            <br>
+                            <input id="idPort" name="idPort" type="text" style="width: 60%"/>
+                        </div>
+                    {% endif %}
+
+                    <div style="float: left;">
+                        {% if has_pool_read %}
+                            <label for="id_pools">Pools</label>
+                            <br>
+                            {{ vip_pool_form.pools }}
+                            <button id="btn_add_pool" type="button">Selecionar Pool</button>
+                        {% endif %}
+
+                        {% if has_pool_write %}
+                            <button id="btn_copy" type="button">Copiar Pool</button>
+                            <button id="btn_new_pool" type="button">Novo Pool</button>
+                        {% endif %}
+                    </div>
+
                     <br>
-                    <input id="idPort" name="idPort" type="text" style="width: 60%"/>
+                    <br>
                 </div>
 
-                <div style="float: left;">
-                    <label for="id_pools">Pools</label>
-                    <br>
-                    {{ vip_pool_form.pools }}
-                    <button id="btn_add_pool" type="button">Selecionar Pool</button>
-                    <button id="btn_copy" type="button">Copiar Pool</button>
-                    <button id="btn_new_pool" type="button">Novo Pool</button>
-                </div>
+            {% endif %}
+            {% endwith %}
+            {% endwith %}
 
-				<br>
-				<br>
-			</div>
 		    <br>
 			<br>
 
