@@ -112,7 +112,7 @@ class PermissionExternal(template.Node):
             if (not write_required or write_permission) and (not read_required or read_permission):
                 has_permission = True
 
-        context["has_perm"] = has_permission
+        context["has_external_perm"] = has_permission
 
         return u""
 
