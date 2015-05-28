@@ -6,11 +6,11 @@
 
             <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
 
-            {% if has_pool_write %}
+
                 {% if not server_pool.pool_created %}
                     <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
                 {%endif%}
-            {% endif %}
+
 
             <b>{{ server_pool.identifier }}</b>
             <input name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>

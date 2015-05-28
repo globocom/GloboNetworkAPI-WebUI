@@ -206,11 +206,11 @@ $(document).ready(function() {
 
 			<br>
 
-            {% has_external_perm POOL_MANAGEMENT False True token %}
-            {% with has_external_perm as has_pool_read %}
+            {% has_perm POOL_MANAGEMENT False True %}
+            {% with has_perm as has_pool_read %}
 
-            {% has_external_perm POOL_MANAGEMENT True False token %}
-            {% with has_external_perm as has_pool_write %}
+            {% has_perm POOL_MANAGEMENT True False %}
+            {% with has_perm as has_pool_write %}
 
 			{% if has_pool_read or has_pool_write %}
 
