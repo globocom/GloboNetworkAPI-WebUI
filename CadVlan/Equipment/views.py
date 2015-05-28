@@ -17,7 +17,7 @@
 
 
 import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
+from CadVlan.Util.Decorators import log, login_required, has_perm, has_perm_external
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT, BRAND_MANAGEMENT,\
     VIP_ALTER_SCRIPT
 from networkapiclient.exception import NetworkAPIClientError, EquipamentoError, UserNotAuthorizedError
@@ -223,7 +223,7 @@ def ajax_autocomplete_equips(request):
 
 
 @csrf_exempt
-@access_external()
+@has_perm_external()
 @log
 def ajax_autocomplete_equips_external(request, form_acess, client):
     try:
