@@ -368,7 +368,11 @@
                                         <td>
                                             <label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
                                             <input type="hidden" value="{{field.port_real}}" name="ports_real_reals">
-                                            <input type='hidden' name='id_pool_member' value='{{field.id}}' />
+                                                {% if not is_copy %}
+                                                    <input type='hidden' name='id_pool_member' value='{{field.id}}' />
+                                                {% else %}
+                                                    <input type='hidden' name='id_pool_member' value='' />
+                                                {% endif %}
                                         </td>
                                         <td>
                                             <span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>

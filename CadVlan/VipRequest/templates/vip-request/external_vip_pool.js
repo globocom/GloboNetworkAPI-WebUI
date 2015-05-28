@@ -10,10 +10,11 @@ $("#dialog_pool").dialog({
 
                 var el = $('input:radio:checked[name=environment][attr],input:hidden[name=environment_vip]');                
                 var envVipId = el.attr('attr') == undefined ? el.val() : el.attr('attr');
+                var idToken = $("#id_token").val();
 
                 var $this = $(this);
                 var form =  $("#add_form_vip_pool");
-                var formData = form.serialize() + '&' + $.param({ 'environment_vip': envVipId, 'token': $("#id_token").val() });
+                var formData = form.serialize() + '&' + $.param({'environment_vip': envVipId, 'token': idToken});
 
                 $.ajax({ 
                     type: "POST",
@@ -24,9 +25,11 @@ $("#dialog_pool").dialog({
 
                         var envVipId = $('input:hidden[name=environment_vip]').val();
                         $.ajax({
-                            data: {environment_vip_id : envVipId,
-                                   token: $("#id_token").val()},
                             url: "{% url vip-request.external.load.options.pool %}",
+                            data: {
+                                environment_vip_id : envVipId,
+                                token: $("#id_token").val()
+                            },
                             success: function(data) {
                                 $("select#id_pools").html(data);
                                 $("select#id_pools").val(data_json.id);
@@ -58,29 +61,25 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
     var poolId = $("#id_pools").val();
 
     if (poolId !=  0 && poolId != null){
-
+        var tokenId = $("#id_token").val();
         $.ajax({
+                url: "{% url vip-request.external.load.pool %}",
                 data: { 
                     pool_id: poolId,
                     is_copy: 1,
-                    token: $("#id_token").val()
+                    token: tokenId
                 },
-                url: "{% url vip-request.external.load.pool %}",
                 success: function(data) {
-                                                    
-                    $("#content_pool").empty();
                     $("#content_pool").html(data);
-                    $("#id_equip_name").removeAttr('disabled');
-                    $("#btn_new_real").removeAttr('disabled');
-                    $("#add_form_vip_pool").append($("#id_token"));
+                    $("#id_equip_name, #btn_new_real").removeAttr('disabled');
                     $("#dialog_pool").dialog("open");
 
                     autocomplete_external("{% url equipment.autocomplete.ajax.external %}", true, "id_equip_name", false);
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
-                       addMessage(message);
-                }    
+                    addMessage(message);
+                }
         });
 
     }
@@ -91,21 +90,22 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
     var envVipId = $('input:hidden[name=environment_vip]').val();
 
     if(envVipId && envVipId !=  0 && envVipId != null){
+        var tokenId = $("#id_token").val();
         $.ajax({
-                data: {env_vip_id: envVipId, token: $("#id_token").val()},
                 url: "{% url vip-request.external.load.new.pool %}",
+                data: {
+                    env_vip_id: envVipId,
+                    token: tokenId
+                },
                 success: function(data) {
                     $("#content_pool").html(data);
-                    $("#id_equip_name").removeAttr('disabled');
-                    $("#btn_new_real").removeAttr('disabled');
-                    $("#add_form_vip_pool").append($("#id_token"));
+                    $("#id_equip_name, #btn_new_real").removeAttr('disabled');
                     $("#dialog_pool").dialog("open");
-
                     autocomplete_external("{% url equipment.autocomplete.ajax.external %}", true, "id_equip_name", false);
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
-                       addMessage(message);
+                    addMessage(message);
                 }
         });
     }
@@ -115,8 +115,6 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
 
     var poolId = $("#id_pools").val();
     var portVip = $("#idPort").val().trim();
-
-
 
     if(isNaN(portVip)){
         alert('Porta Vip deve ser um número.');
@@ -135,19 +133,19 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
     }
 
     if (poolId !=  0 && poolId != null){
-
+        var tokenId = $("#id_token").val();
         $.ajax({
-            data: { 
-                pool_id: poolId, token: $("#id_token").val()
-            },
             url: "{% url vip-request.external.members.items %}",
+            data: { 
+                pool_id: poolId,
+                token: tokenId
+            },
             success: function(data) {
                 $("#divMembers").append(data);
                 $(".tablePoolMembers:last-child .portVip").html(portVip);
                 $(".tablePoolMembers:last-child .ports_vip").val(portVip);
                 $(".tablePoolMembers:last-child .portVip").editableTable();
-                $("#idPort").val('');
-                $('#id_pools').prop('selectedIndex', 0);
+                $("#idPort, #id_pools").val('');
             },
             error: function (error) {
                 message = jQuery.parseJSON(error.responseText);
@@ -163,19 +161,18 @@ $("span[id^=editPool]").live("click", function(){
     var poolId = obj.find("#idsPool").val();
 
     if (poolId !=  0 && poolId != null){
-
+        var tokenId = $("#id_token").val();
         $.ajax({
+                url: "{% url vip-request.external.load.pool %}",
                 data: {
                     pool_id: poolId,
                     is_copy: 0,
-                    token: $("#id_token").val()
+                    token: tokenId
                 },
-                url: "{% url vip-request.external.load.pool %}",
+
                 success: function(data) {
-                    $("#content_pool").empty();
                     $("#content_pool").html(data);
-                    $("#id_equip_name").removeAttr('disabled');
-                    $("#btn_new_real").removeAttr('disabled');
+                    $("#id_equip_name, #btn_new_real").removeAttr('disabled');
                     $("#dialog_pool").dialog("open");
                     autocomplete_external("{% url equipment.autocomplete.ajax.external %}", true, "id_equip_name", false);
                 },
@@ -189,16 +186,19 @@ $("span[id^=editPool]").live("click", function(){
 });
 
 $("span[id^=removePool]").live("click", function(){
-    var $this = $(this);
-    $this.parents("table:first").remove();
+    $(this).parents("table:first").remove();
 });
 
 $("#btn_new_real").live("click", function(){
     var val_equip_name = $.trim($('#id_equip_name').val());
     if ( val_equip_name != '' ) {
         $.ajax({
-            data: { id_environment: $('#id_environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
             url: "{% url pool.modal.ips.ajax.external %}",
+            data: {
+                id_environment: $('#id_environment').val(),
+                equip_name: val_equip_name,
+                token: $("#id_token").val()
+            },
             success: function(data, textStatus, xhr) {
                 $('#content-ip').html(data);
                 $("#dialog_ip").dialog("open");
@@ -212,13 +212,15 @@ $('#btn_new_expect').live("click", function(){
     var id_environment = $('#id_environment').val();
 
     if(expect_string) {
+        var tokenId = $("#id_token").val();
         $.ajax({
-                data: { 'expect_string': expect_string,
-                        'id_environment': id_environment,
-                        'token': $("#id_token").val() },
                 url: "{% url pool.add.healthcheck.expect.external %}",
+                data: {
+                    'expect_string': expect_string,
+                    'id_environment': id_environment,
+                    'token': tokenId
+                },
                 success: function(data, xhr) {
-
                     $('#msg_new_health_check').fadeIn(1000);
                     $("#id_expect").append('<option value="'+data['expect_string']+'">'+data['expect_string']+'</option>');
                     $("#msg_new_health_check").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">'+data['mensagem']+'</td>');
@@ -232,17 +234,19 @@ $('#btn_new_expect').live("click", function(){
 });
 
 $('#id_environment').live("change", function(){
-    $('#id_health_check').html('<option value="">-</option>');
+    $('#id_health_check').html('<option value=""> - </option>');
 
     var environmentId = this.value;
 
     if (environmentId != ''){
-        $("#id_equip_name, #btn_new_real").prop('disabled', '');
-
+        $("#id_equip_name, #btn_new_real").prop('disabled', false);
+        var tokenId = $("#id_token").val();
         $.ajax({
-                data: {'id_environment': environmentId,
-                       'token': $("#id_token").val()},
                 url: "{% url pool.ajax.get.opcoes.pool.by.ambiente.external %}",
+                data: {
+                    'id_environment': environmentId,
+                    'token': tokenId
+                },
                 success: function(data, xhr) {
                     for (var i = 0; i < data.length; i++) {
                         $('#id_health_check').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
@@ -250,6 +254,6 @@ $('#id_environment').live("change", function(){
                 }
             });
     }else{
-        $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
+        $("#id_equip_name, #btn_new_real").prop('disabled', true);
     }
 });
