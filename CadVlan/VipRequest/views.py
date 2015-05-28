@@ -72,6 +72,11 @@ logger = logging.getLogger(__name__)
 OPERATION = {0: 'DELETE', 1: 'VALIDATE', 2: 'CREATE', 3: 'REMOVE'}
 
 
+vip_all_permission = {"permission": VIPS_REQUEST, "read": True, "write": True}
+pool_all_permission = {"permission": POOL_MANAGEMENT, "read": True, "write": True}
+pool_read_permission = {"permission": POOL_MANAGEMENT, "read": True}
+
+
 @log
 @login_required
 @has_perm([{"permission": VIPS_REQUEST, "read": True}, ])
@@ -985,7 +990,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
 @csrf_exempt
 @log
-@access_external()
+@access_external([pool_read_permission, vip_all_permission])
 def add_form_external(request, form_acess, client):
     return add_form_shared(request, client, form_acess, True)
 
@@ -1001,7 +1006,7 @@ def add_form(request):
 
 @csrf_exempt
 @log
-@access_external()
+@access_external([pool_read_permission, vip_all_permission])
 def edit_form_external(request, id_vip, form_acess, client):
     return edit_form_shared(request, id_vip, client, form_acess, True)
 
