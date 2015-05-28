@@ -1,3 +1,5 @@
+var message_token_invalid = "O seu tempo de acesso expirou. Por favor, atualize a página.";
+
 $("#dialog_pool").dialog({
         height: 650,
         width: 580,
@@ -37,7 +39,7 @@ $("#dialog_pool").dialog({
                                 },
                                 statusCode: {
                                     203: function () {
-                                        window.location.reload()
+                                        alert(message_token_invalid);
                                    }
                                 },
                                 error: function (error) {
@@ -52,7 +54,7 @@ $("#dialog_pool").dialog({
                     },
                     statusCode: {
                         203: function () {
-                            window.location.reload()
+                            alert(message_token_invalid);
                        }
                     },
                     error: function (error) {
@@ -95,7 +97,7 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
                 },
                  statusCode: {
                     203: function () {
-                        window.location.reload()
+                        alert(message_token_invalid);
                    }
                 },
                 error: function (error) {
@@ -129,7 +131,7 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
                 },
                 statusCode: {
                     203: function () {
-                        window.location.reload()
+                        alert(message_token_invalid);
                    }
                 },
                 error: function (error) {
@@ -183,7 +185,7 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
             },
             statusCode: {
                203: function () {
-                    window.location.reload()
+                    alert(message_token_invalid);
                }
             },
             error: function (error) {
@@ -221,7 +223,7 @@ $("span[id^=editPool]").live("click", function(){
                 },
                 statusCode: {
                    203: function () {
-                        window.location.reload()
+                        alert(message_token_invalid);
                    }
                 },
                 error: function (error) {
@@ -252,7 +254,7 @@ $("#btn_new_real").live("click", function(){
             },
             statusCode: {
                203: function () {
-                    window.location.reload()
+                    alert(message_token_invalid);
                }
             }
         });
@@ -284,7 +286,7 @@ $('#btn_new_expect').live("click", function(){
                 },
                 statusCode: {
                    203: function () {
-                        window.location.reload()
+                        alert(message_token_invalid);
                    }
                 }
             });
@@ -312,7 +314,7 @@ $('#id_environment').live("change", function(){
                 },
                 statusCode: {
                    203: function () {
-                        window.location.reload()
+                        alert(message_token_invalid);
                    }
                 }
             });
