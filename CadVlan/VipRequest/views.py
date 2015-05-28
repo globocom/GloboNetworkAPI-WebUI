@@ -2164,7 +2164,8 @@ def add_form_shared(request, client_api, form_acess="", external=False):
                 if external:
                     return HttpResponseRedirect(
                         "%s?token=%s" % (
-                            reverse('vip-request.form.external'),
+                            reverse('vip-request.edit.external',
+                            args=[id_vip]),
                             form_acess.initial.get("token")
                         )
                     )
