@@ -8,20 +8,6 @@
 		location.href = "{% url vip-request.list %}";
 	});
 
-	$("#dialog-ip").dialog({
-		height: 600,
-		width: 1000,
-		modal: true,
-		autoOpen: false,
-		draggable: false,
-		resizable: true,
-		buttons: {
-			"Voltar": function() {
-				$(this).dialog("close");
-			}
-		}
-	});
-
     $("#idPort").live("keyup", function(e){
         $(this).val($(this).val().replace(/[^0-9]+/g,''));
 	});

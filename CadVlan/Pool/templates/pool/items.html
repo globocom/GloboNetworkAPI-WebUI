@@ -1,37 +1,35 @@
 {% load util %}
 <table id="tablePoolMembers" class="tablePoolMembers bordasimplesReal">
 <thead>
-	<tr>
-		<th colspan="6">
-			<span id="removePool" class="ui-icon ui-icon-closethick" style="cursor: pointer; float: right;"></span>
-			<b>{{ server_pool.identifier }}</b>
-			<input name="idsPool" type="hidden" value="{{ server_pool.id }}"/>
-            <input type='hidden' class='ports_vip' name='ports_vip' value='{{ server_pool.port_vip }}'/>
-            <input type='hidden' name='vip_port_id' value='{{server_pool.port_vip_id}}'/>
+    <tr>
+        <th colspan="6">
 
-            <script type="text/javascript">
-$(document).ready(function() {
+            <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
 
-                 $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
-})
-</script>
-            {% has_perm POOL_MANAGEMENT True None %}{% if has_perm%}{% has_perm POOL_ALTER_SCRIPT True None %}{% if has_perm %}{% if not server_pool.pool_created %}<a href='{% url pool.edit.form server_pool.id %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'>{% endif %}{%endif%}{%endif%}
+            {% if not server_pool.pool_created %}
+                <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
+            {%endif%}
 
-		<th>
-	</tr>
+            <b>{{ server_pool.identifier }}</b>
+            <input name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>
+            <input name="ports_vip" id="ports_vip" type="hidden" value='{{ server_pool.port_vip }}'/>
+            <input name="vip_port_id" id="vip_port_id" type="hidden" value='{{server_pool.port_vip_id}}'/>
+
+        </th>
+    </tr>
 </thead>
 <tbody>
 <tr>
-	<td>Nome do Real</td>
+    <td>Nome do Real</td>
     <td>Ip do Real</td>
     <td>Porta VIP</td>
-	<td>Porta Real</td>
-	<td>Prioridade</td>
+    <td>Porta Real</td>
+    <td>Prioridade</td>
 </tr>
 {% for pool_member in server_pool_members %}
 <tr>
-	<td>{{ pool_member.equipment_name }}</td>
-	<td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
+    <td>{{ pool_member.equipment_name }}</td>
+    <td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
     {% if server_pool.port_vip %}
         <td>
             <label class='portVip editable'>{{ server_pool.port_vip }}</label>
@@ -42,7 +40,7 @@ $(document).ready(function() {
         </td>
     {% endif %}
     <td>{{ pool_member.port_real }}</td>
-	<td>{{ pool_member.priority }}</td>
+    <td>{{ pool_member.priority }}</td>
 </tr>
 {% endfor %}
 </tbody>
