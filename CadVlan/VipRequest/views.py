@@ -17,6 +17,7 @@
 
 from hashlib import sha1
 import hashlib
+import json
 import re
 from time import strftime
 from types import NoneType
@@ -50,7 +51,7 @@ from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages, pool_messages
 from CadVlan.permissions import VIP_CREATE_SCRIPT, \
     VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST, VIP_ALTER_SCRIPT, \
-    POOL_MANAGEMENT, POOL_ALTER_SCRIPT
+    POOL_MANAGEMENT, POOL_ALTER_SCRIPT, POOL_CREATE_SCRIPT, POOL_REMOVE_SCRIPT
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_URL, \
     NETWORK_API_USERNAME, NETWORK_API_PASSWORD
 from networkapiclient.ClientFactory import ClientFactory
@@ -999,7 +1000,10 @@ def add_form_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, {"permission": VIPS_REQUEST, "write": True}])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def add_form(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -1018,7 +1022,10 @@ def edit_form_external(request, id_vip, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, {"permission": VIPS_REQUEST, "write": True}])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def edit_form(request, id_vip):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -1037,7 +1044,10 @@ def ajax_popular_client_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, {"permission": VIPS_REQUEST, "write": True}])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_popular_client(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -1056,7 +1066,10 @@ def ajax_popular_environment_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, {"permission": VIPS_REQUEST, "write": True}])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_popular_environment(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -1075,7 +1088,10 @@ def ajax_popular_options_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, {"permission": VIPS_REQUEST, "write": True}])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_popular_options(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -1094,7 +1110,10 @@ def ajax_popular_rule_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, {"permission": VIPS_REQUEST, "write": True}])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_popular_rule(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -1113,7 +1132,10 @@ def ajax_add_healthcheck_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, {"permission": VIPS_REQUEST, "write": True}])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_add_healthcheck(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -1132,7 +1154,10 @@ def ajax_model_ip_real_server_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, {"permission": VIPS_REQUEST, "write": True}])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
 def ajax_model_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -2835,8 +2860,7 @@ def external_load_pool_for_copy(request, form_acess, client):
 @log
 @login_required
 @has_perm([
-    {"permission": VIPS_REQUEST, "read": True},
-    {"permission": VIPS_REQUEST, "write": True},
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
     {"permission": POOL_MANAGEMENT, "read": True},
 ])
 def load_pool_for_copy(request):
@@ -2997,10 +3021,11 @@ def _create_options_environment(client, env_vip_id):
 @login_required
 @require_http_methods(["POST"])
 @has_perm([
-    {"permission": VIPS_REQUEST, "read": True},
-    {"permission": VIPS_REQUEST, "write": True},
-    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
     {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": POOL_CREATE_SCRIPT, "write": True},
+    {"permission": POOL_REMOVE_SCRIPT, "write": True},
 ])
 def save_pool(request):
 
@@ -3016,6 +3041,8 @@ def save_pool(request):
     {"permission": VIPS_REQUEST, "read": True, "write": True},
     {"permission": POOL_MANAGEMENT, "read": True, "write": True},
     {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": POOL_CREATE_SCRIPT, "write": True},
+    {"permission": POOL_REMOVE_SCRIPT, "write": True},
 ])
 def external_save_pool(request, form_acess, client):
 
@@ -3087,6 +3114,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 
                 param_dic['id'] = sp_id
 
+                return HttpResponse(json.dumps(param_dic), content_type="application/json")
                 return render_to_response_ajax(templates.VIPREQUEST_POOL_SAVE, param_dic,
                                                context_instance=RequestContext(request))
 
@@ -3106,8 +3134,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 @csrf_exempt
 @has_perm_external([
     {"permission": VIPS_REQUEST, "read": True, "write": True},
-    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
-    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
 ])
 def external_load_new_pool(request, form_acess, client):
 
@@ -3117,10 +3144,8 @@ def external_load_new_pool(request, form_acess, client):
 @log
 @login_required
 @has_perm([
-    {"permission": VIPS_REQUEST, "read": True},
-    {"permission": VIPS_REQUEST, "write": True},
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
     {"permission": POOL_MANAGEMENT, "read": True},
-    {"permission": POOL_MANAGEMENT, "write": True},
 ])
 def load_new_pool(request):
 

@@ -77,7 +77,7 @@ def has_external_perm(parser, token):
     """
     Validates that the user has access permission in view
 
-    @Example: {% has_perm <permission> <write> <read> %}
+    @Example: {% has_external_perm <permission> <write> <read> %}
 
     :param parser:
     :param token:

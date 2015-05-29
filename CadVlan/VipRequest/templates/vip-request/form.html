@@ -206,44 +206,41 @@ $(document).ready(function() {
 
 			<br>
 
-            {% has_perm POOL_MANAGEMENT None True %}
-            {% with has_perm as has_pool_read %}
-
-            {% has_perm POOL_MANAGEMENT True None %}
+            {% has_perm POOL_MANAGEMENT True False token %}
             {% with has_perm as has_pool_write %}
 
-			{% if has_pool_read or has_pool_write %}
+            {% has_perm POOL_CREATE_SCRIPT True False token %}
+            {% with has_perm as has_pool_script_create %}
+            {% has_perm POOL_ALTER_SCRIPT True False token %}
+            {% with has_perm as has_pool_script_alter %}
+            {% has_perm POOL_REMOVE_SCRIPT True False token %}
+            {% with has_perm as has_pool_script_remove %}
 
-                <div id="divPools" class="bordasimples">
+            <div id="divPools" class="bordasimples">
 
-                    {% if has_pool_read %}
-                        <div style="float: left; width: 7%;">
-                            <label for="idPort">Porta Vip</label>
-                            <br>
-                            <input id="idPort" name="idPort" type="text" style="width: 60%"/>
-                        </div>
-                    {% endif %}
-
-                    <div style="float: left;">
-                        {% if has_pool_read %}
-                            <label for="id_pools">Pools</label>
-                            <br>
-                            {{ vip_pool_form.pools }}
-                            <button id="btn_add_pool" type="button">Selecionar Pool</button>
-                        {% endif %}
-
-                        {% if has_pool_write %}
-                            <button id="btn_copy" type="button">Copiar Pool</button>
-                            <button id="btn_new_pool" type="button">Novo Pool</button>
-                        {% endif %}
-
-                    </div>
-
+                <div style="float: left; width: 7%;">
+                    <label for="idPort">Porta Vip</label>
                     <br>
-                    <br>
+                    <input id="idPort" name="idPort" type="text" style="width: 60%"/>
                 </div>
 
-            {% endif %}
+                <div style="float: left;">
+                    <label for="id_pools">Pools</label>
+                    <br>
+                    {{ vip_pool_form.pools }}
+                    <button id="btn_add_pool" type="button">Selecionar Pool</button>
+
+                    {% if has_pool_write and has_pool_script_create and has_pool_script_alter and has_pool_script_remove %}
+                        <button id="btn_copy" type="button">Copiar Pool</button>
+                        <button id="btn_new_pool" type="button">Novo Pool</button>
+                    {% endif %}
+                </div>
+
+                <br>
+                <br>
+            </div>
+            {% endwith %}
+            {% endwith %}
             {% endwith %}
             {% endwith %}
 

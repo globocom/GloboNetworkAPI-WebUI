@@ -8,19 +8,45 @@
 
             {% if external %}
                 {% if not server_pool.pool_created%}
-                    {% has_external_perm POOL_MANAGEMENT False True token %}
-                    {% if  has_external_perm %}
-                        <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
+                    {% has_external_perm POOL_MANAGEMENT True False token %}
+                    {% with has_external_perm as has_pool_write %}
+
+                    {% has_external_perm POOL_CREATE_SCRIPT True False token %}
+                    {% with has_external_perm as has_pool_script_create %}
+                    {% has_external_perm POOL_ALTER_SCRIPT True False token %}
+                    {% with has_external_perm as has_pool_script_alter %}
+                    {% has_external_perm POOL_REMOVE_SCRIPT True False token %}
+                    {% with has_external_perm as has_pool_script_remove %}
+
+                    {% if has_pool_write and has_pool_script_alter and has_pool_script_remove and has_pool_script_create %}
+                    <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
                     {% endif %}
-               {%endif%}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                {% endif %}
             {% else %}
-                {% if not server_pool.pool_created %}
-                    {% has_perm POOL_MANAGEMENT None True %}
-                    {% if has_perm %}
-                        <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
+                {% if not server_pool.pool_created%}
+                    {% has_perm POOL_MANAGEMENT True False token %}
+                    {% with has_perm as has_pool_write %}
+
+                    {% has_perm POOL_CREATE_SCRIPT True False token %}
+                    {% with has_perm as has_pool_script_create %}
+                    {% has_perm POOL_ALTER_SCRIPT True False token %}
+                    {% with has_perm as has_pool_script_alter %}
+                    {% has_perm POOL_REMOVE_SCRIPT True False token %}
+                    {% with has_perm as has_pool_script_remove %}
+
+                    {% if has_pool_write and has_pool_script_alter and has_pool_script_remove and has_pool_script_create %}
+                    <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
                     {% endif %}
-                {%endif%}
-            {% endif %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                {% endif %}
+           {%endif%}
 
             <b>{{ server_pool.identifier }}</b>
             <input name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>

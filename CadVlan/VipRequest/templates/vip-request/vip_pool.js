@@ -106,15 +106,11 @@ function openDialog(callback) {
                         data: formData,
                         success: function(data, textStatus, xhr){
                             if (xhr.status == 200) {
-                                var data_json = jQuery.parseJSON(data);
-                                var poolId = data_json.id;
-
                                 if (callback){
-                                    callback(poolId);
+                                    callback(data.id);
                                 }
-
                                 $this.dialog("close");
-                                alert(data_json.message);
+                                alert(data.message);
                             }else if(xhr.status == 203){
                                 alert(data);
                             }
