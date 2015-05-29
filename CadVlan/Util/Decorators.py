@@ -146,57 +146,50 @@ def has_perm_external(required_permissions=None):
 
             key = get_param_in_request(request, TOKEN)
             condition = "True"
-            is_valid = True
 
-            if key is not None:
-
-                # Search in cache if it exists
-                if key in cache:
-
-                    # Get hash in cache
-                    data_from_cache = cache.get(key)
-                    user_hash = data_from_cache.get('user_hash')
-                    permissions = data_from_cache.get('permissions')
-
-                    # Decrypt hash
-                    user = Encryption().Decrypt(user_hash)
-
-                    username, password, user_ldap = str(user).split("@")
-
-                    #Check Has Permission
-                    if required_permissions:
-                        for perm in required_permissions:
-
-                            write_required = perm.get('write', False)
-                            read_required = perm.get('read', False)
-                            required_permission = perm.get('permission')
-
-                            permission = permissions.get(required_permission)
-                            write_permission = condition == permission.get('write')
-                            read_permission = condition == permission.get('read')
-
-                            if (write_required and not write_permission) or (read_required and not read_permission):
-                                context = {"error": auth_messages.get('user_not_authorized')}
-                                return HttpResponse(loader.render_to_string(TOKEN_INVALID, context))
-
-                    if user_ldap == "":
-                        client = ClientFactory(NETWORK_API_URL, username, password)
-                    else:
-                        client = ClientFactory(NETWORK_API_URL, username, password, user_ldap)
-
-                else:
-                    is_valid = False
-
-            # If it is not valid  mount of return depending on the type of
-            # request
-            if not is_valid or key is None:
-
-                msg = auth_messages.get("token_invalid")
-
+            if not key:
+                message = auth_messages.get("token_required")
                 if request.is_ajax():
-                    return HttpResponse(msg, status=203)
-                else:
-                    return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": msg}), status=200)
+                    return HttpResponse(message, status=203)
+                return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": message}))
+
+            if key not in cache:
+                message = auth_messages.get("token_invalid")
+                if request.is_ajax():
+                    return HttpResponse(message, status=203)
+                return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": message}))
+
+            # Get hash in cache
+            data_from_cache = cache.get(key)
+            user_hash = data_from_cache.get('user_hash')
+            permissions = data_from_cache.get('permissions')
+
+            #Check Has Permission
+            if required_permissions:
+                for perm in required_permissions:
+
+                    write_required = perm.get('write', False)
+                    read_required = perm.get('read', False)
+                    required_permission = perm.get('permission')
+
+                    permission = permissions.get(required_permission)
+                    write_permission = condition == permission.get('write')
+                    read_permission = condition == permission.get('read')
+
+                    if (write_required and not write_permission) or (read_required and not read_permission):
+                        message = auth_messages.get('user_not_authorized')
+                        if request.is_ajax():
+                            return HttpResponse(message, status=2003)
+                        return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": message}))
+
+            # Decrypt hash
+            user = Encryption().Decrypt(user_hash)
+            username, password, user_ldap = str(user).split("@")
+
+            if user_ldap == "":
+                client = ClientFactory(NETWORK_API_URL, username, password)
+            else:
+                client = ClientFactory(NETWORK_API_URL, username, password, user_ldap)
 
             kwargs["form_acess"] = ControlAcessForm(initial={"token": key})
             kwargs["client"] = client
