@@ -13,12 +13,12 @@
 	});
 
 	$(".numbersOnly").live('focus', function(){
-        $(this).attr("style", "width: 14px; height: 14px;");
+        $(this).attr("style", "width: 35px; height: 14px;");
 		oldPortVip = $(this).val();
 	});
 	
 	$(".numbersOnly").live('focusout', function(){
-        $(this).attr("style", "width: 14px; height: 14px;");
+        $(this).attr("style", "width: 35px; height: 14px;");
 		var this_element = $(this);
         var tableEditing = this_element.parents("#tablePoolMembers");
 
@@ -37,7 +37,7 @@
 	
 	$('.numbersOnly').live("keydown", function(e){
 
-          $(this).attr("style", "width: 14px; height: 14px;");
+          $(this).attr("style", "width: 35px; height: 14px;");
 
     	  if(e.keyCode == 9 || e.keyCode == 13){
 
