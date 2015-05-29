@@ -10,10 +10,12 @@ function loadOptionsPool(envVipId, poolId){
             token: $("#id_token").val()
         },
         success: function (data) {
+
             $("select#id_pools").html(data);
             $("select#id_pools").val(poolId);
         },
         error: function (error) {
+
             message = jQuery.parseJSON(error.responseText);
             addMessage(message);
         }
@@ -51,7 +53,7 @@ $("#dialog_pool").dialog({
                     type: "POST",
                     url: form.attr('action'),
                     data: formData,
-                    loadOptionsPool: loadOptionsPool,
+                    thisLoadOptionsPool: loadOptionsPool,
                     success: function(data, textStatus, xhr){
 
                         if (xhr.status == 200) {
@@ -60,7 +62,7 @@ $("#dialog_pool").dialog({
                             var envVipId = $('input:hidden[name=environment_vip]').val();
                             var poolId = data_json.id;
 
-                            this.loadOptionsPool(envVipId, poolId);
+                            this.thisLoadOptionsPool(envVipId, poolId);
 
                             $this.dialog("close");
                             alert(data_json.message);
@@ -180,7 +182,6 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
                 pool_id: poolId,
                 token: tokenId
             },
-            url: "{% url vip-request.external.members.items %}",
             success: function(data, textStatus, xhr) {
 
                 if(xhr.status == 200) {
