@@ -13,11 +13,12 @@
 	});
 
 	$(".numbersOnly").live('focus', function(){
+        $(this).attr("style", "width: 35px; height: 14px;");
 		oldPortVip = $(this).val();
 	});
 	
 	$(".numbersOnly").live('focusout', function(){
-
+        $(this).attr("style", "width: 35px; height: 14px;");
 		var this_element = $(this);
         var tableEditing = this_element.parents("#tablePoolMembers");
 
@@ -26,15 +27,17 @@
 				return false;
 			}
 
-            var newPortVIp = this_element.val();;
+            var newPortVIp = this_element.val();
+
+            check_port_vip(this_element);
 
             update_pools_new_vip(tableEditing, oldPortVip, newPortVIp);
 		});
 	});
 	
 	$('.numbersOnly').live("keydown", function(e){
-          console.log("keydown");
 
+          $(this).attr("style", "width: 35px; height: 14px;");
 
     	  if(e.keyCode == 9 || e.keyCode == 13){
 
@@ -56,6 +59,8 @@
 
                 var newPortVIp = $(this).val();
 
+                check_port_vip(this_element);
+
 	      		update_pools_new_vip(tableEditing, oldPortVip, newPortVIp);
 
 	      		return false;
@@ -70,7 +75,9 @@
 	
 	// Check if port vip is duplicated
 	function check_port_vip(element){
-		if(element.parent().parent().next().attr('name') == 'ports_vip'){
+        var elementName = element.parent().parent().next().attr('name');
+		if( elementName == 'ports_vip' || element.hasClass("numbersOnly")){
+
 			is_valid = true;
 			
 			if (oldPortVip != element.val()){
@@ -332,6 +339,7 @@
 
             $("label:contains("+oldPortVip+")", tableEditing).html(newPortVip);
             $("input:hidden[value="+oldPortVip+"]", tableEditing).val(newPortVip);
+            $("strong:contains("+oldPortVip+")", tableEditing).html(newPortVip);
 
         }
         else {
