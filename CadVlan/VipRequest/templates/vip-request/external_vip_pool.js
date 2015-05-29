@@ -67,10 +67,8 @@ $("#dialog_pool").dialog({
                             $this.dialog("close");
                             alert(data_json.message);
                         }
-                    },
-                    statusCode: {
-                        203: function () {
-                            alert(message_token_invalid);
+                        else if(xhr.status == 203){
+                            alert(data);
                         }
                     },
                     error: function (error) {
@@ -106,11 +104,9 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
                     if (xhr.status == 200) {
                         this.thisBuildContentPool(data);
                     }
-                },
-                 statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
-                   }
+                    else if(xhr.status == 203){
+                        alert(data);
+                    }
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
@@ -139,11 +135,9 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
                     if (xhr.status == 200) {
                         this.thisBuildContentPool(data);
                     }
-                },
-                statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
-                   }
+                    else if(xhr.status == 203){
+                       alert(data);
+                    }
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
@@ -191,11 +185,10 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
                     $(".tablePoolMembers:last-child .portVip").editableTable();
                     $("#idPort, #id_pools").val('');
                 }
-            },
-            statusCode: {
-               203: function () {
-                    alert(message_token_invalid);
-               }
+                else if(xhr.status == 203){
+                   alert(data);
+                }
+
             },
             error: function (error) {
                 message = jQuery.parseJSON(error.responseText);
@@ -225,10 +218,8 @@ $("span[id^=editPool]").live("click", function(){
                     if(xhr.status == 200) {
                         this.thisBuildContentPool(data);
                     }
-                },
-                statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
+                    else if(xhr.status == 203){
+                       alert(data);
                     }
                 },
                 error: function (error) {
@@ -259,11 +250,9 @@ $("#btn_new_real").live("click", function(){
                     $('#content-ip').html(data);
                     $("#dialog_ip").dialog("open");
                 }
-            },
-            statusCode: {
-               203: function () {
-                    alert(message_token_invalid);
-               }
+                else if(xhr.status == 203){
+                   alert(data);
+                }
             }
         });
     }
@@ -293,10 +282,8 @@ $('#btn_new_expect').live("click", function(){
                         $("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
                         $("#expect_string").val('')
                     }
-                },
-                statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
+                    else if(xhr.status == 203){
+                       alert(data);
                     }
                 }
             });
@@ -319,16 +306,15 @@ $('#id_environment').live("change", function(){
                     'token': tokenId
                 },
                 success: function(data, textStatus, xhr) {
+                    alert(data);
                     if(xhr.status == 200) {
                         for (var i = 0; i < data.length; i++) {
                             $('#id_health_check').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
                         }
                     }
-                },
-                statusCode: {
-                   203: function () {
-                        alert(message_token_invalid);
-                   }
+                    else if(xhr.status == 203){
+                       alert(data);
+                    }
                 }
             });
     }else{
