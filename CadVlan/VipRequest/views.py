@@ -3087,10 +3087,10 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 
                 if pool_id:
                     param_dic['message'] = pool_messages.get('success_update')
-                    param_dic['id'] = None
                 else:
                     param_dic['message'] = pool_messages.get('success_insert')
-                    param_dic['id'] = sp_id
+
+                param_dic['id'] = sp_id
 
                 return render_to_response_ajax(templates.VIPREQUEST_POOL_SAVE, param_dic,
                                                context_instance=RequestContext(request))
