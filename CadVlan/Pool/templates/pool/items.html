@@ -6,28 +6,21 @@
 
             <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
 
-                {% if external %}
-
-                    {% has_external_perm POOL_MANAGEMENT True False token %}
+            {% if external %}
+                {% if not server_pool.pool_created%}
+                    {% has_external_perm POOL_MANAGEMENT False True token %}
                     {% if  has_external_perm %}
-
-                        {% if not server_pool.pool_created %}
-                            <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
-                        {%endif%}
-
+                        <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
                     {% endif %}
-                {% else %}
-                    {% has_perm POOL_MANAGEMENT True None %}
+               {%endif%}
+            {% else %}
+                {% if not server_pool.pool_created %}
+                    {% has_perm POOL_MANAGEMENT None True %}
                     {% if has_perm %}
-
-                        {% if not server_pool.pool_created %}
-                            <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
-                        {%endif%}
-
+                        <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
                     {% endif %}
-
-                {% endif %}
-
+                {%endif%}
+            {% endif %}
 
             <b>{{ server_pool.identifier }}</b>
             <input name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>
