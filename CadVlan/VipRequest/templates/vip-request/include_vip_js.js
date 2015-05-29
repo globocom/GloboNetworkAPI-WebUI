@@ -181,6 +181,7 @@
 			data: { environment_vip: id_environment_vip, id_vip: '{{id_vip}}', token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.options.ajax.external %}{% else %}{% url vip-request.options.ajax %}{% endif %}",
 			success: function(data, textStatus, xhr) {
+
 				if (xhr.status == 278) {
                     alert(xhr.status);
                     window.location = xhr.getResponseHeader('Location');
@@ -190,13 +191,15 @@
                 }
 				else {
 
-					$("#id_caches").html(data.caches);
-					$("#id_persistence").html(data.persistence);
-					$("#id_timeout").html(data.timeout);
-					$("#id_balancing").html(data.balancing);
+                    var data_json = jQuery.parseJSON(data);
+
+					$("#id_caches").html(data_json.caches);
+					$("#id_persistence").html(data_json.persistence);
+					$("#id_timeout").html(data_json.timeout);
+					$("#id_balancing").html(data_json.balancing);
 					$("#id_environment_vip").val(id_environment_vip);
-					$("#id_rules").html(data.rules);
-					$("#id_healthcheck_type_content").html(data.healthcheck_list);
+					$("#id_rules").html(data_json.rules);
+					$("#id_healthcheck_type_content").html(data_json.healthcheck_list);
 					$("#table_healthcheck").hide();
 					
 					if ( $("#id_balancing").val() != null && $('#id_balancing').val().toLowerCase() == "weighted".toLowerCase())
@@ -204,9 +207,7 @@
 					else{
 						$('.weighted').hide();
 					}
-
 					loadPools(id_environment_vip);
-
 				}
 			},
 			error: function (xhr, error, thrown) {

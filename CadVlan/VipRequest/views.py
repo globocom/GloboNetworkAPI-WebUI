@@ -2167,7 +2167,10 @@ def add_form_shared(request, client_api, form_acess="", external=False):
         lists['ports_error'] = ''
         lists['reals_error'] = ''
         lists['form_acess'] = form_acess
-        lists['external'] = True if external else False
+        lists['external'] = external
+
+        if external:
+            lists['token'] = form_acess.initial.get("token")
 
         lists['vip_pool_form'] = forms.VipPoolForm(
             pool_choices,
@@ -2198,9 +2201,6 @@ def add_form_shared(request, client_api, form_acess="", external=False):
                 )
 
                 if external:
-
-                    lists['token'] = form_acess.initial.get("token")
-
                     return HttpResponseRedirect(
                         "%s?token=%s" % (
                             reverse('vip-request.form.external'),
@@ -2218,9 +2218,6 @@ def add_form_shared(request, client_api, form_acess="", external=False):
             lists['form_healthcheck'] = forms.RequestVipFormHealthcheck(healthcheck_list, [])
             lists['form_options'] = forms.RequestVipFormOptions()
             lists['form_ip'] = forms.RequestVipFormIP()
-
-            if external:
-                lists['token'] = form_acess.initial.get("token")
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -2248,7 +2245,10 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         lists['ports_error'] = ''
         lists['idt'] = id_vip
         lists['form_acess'] = form_acess
-        lists['external'] = True if external else False
+        lists['external'] = external
+
+        if external:
+            lists['token'] = form_acess.initial.get("token")
 
         vip = client_api.create_api_vip_request().get_by_pk(id_vip)
 
@@ -2278,8 +2278,6 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                 )
 
                 if external:
-
-                    lists['token'] = form_acess.initial.get("token")
 
                     return HttpResponseRedirect(
                         "%s?token=%s" % (
@@ -2400,9 +2398,6 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             lists['form_ip'] = form_ip
             lists["pools"] = vip.get('pools')
             lists["env_vip_id"] = environment_vip
-
-            if external:
-                lists['token'] = form_acess.initial.get("token")
 
     except VipNaoExisteError, e:
         logger.error(e)
