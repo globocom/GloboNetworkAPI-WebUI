@@ -3252,11 +3252,7 @@ def shared_pool_member_items(request, client, form_acess=None, external=False):
         pool_id = request.GET.get('pool_id')
         pool_data = client.create_pool().get_by_pk(pool_id)
 
-        return render(
-            request,
-            templates.POOL_MEMBER_ITEMS,
-            pool_data
-        )
+        return render(request, templates.POOL_MEMBER_ITEMS, pool_data)
 
     except NetworkAPIClientError, e:
         logger.error(e)
