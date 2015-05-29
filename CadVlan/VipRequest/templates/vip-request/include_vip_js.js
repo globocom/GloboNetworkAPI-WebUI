@@ -107,14 +107,15 @@
 			dataType: 'text',
 			success: function(data, textStatus, xhr) {
 			
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-					
-				else if (xhr.status == "203")
-					alert(data);
-				
-				else
-					$("#id_client_content").html(data);
+				if (xhr.status == 278) {
+                    window.location = xhr.getResponseHeader('Location');
+                }
+				else if (xhr.status == 203) {
+                    alert(data);
+                }
+				else {
+                    $("#id_client_content").html(data);
+                }
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
@@ -143,14 +144,16 @@
 			url: "{% if external %}{% url vip-request.environment.ajax.external %}{% else %}{% url vip-request.environment.ajax %}{% endif %}",
 			dataType: 'text',
 			success: function(data, textStatus, xhr) {
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-					
-				else if (xhr.status == "203")
-					alert(data);
-				
-				else
-					$("#id_environment_content").html(data);
+				if (xhr.status == 278) {
+                    window.location = xhr.getResponseHeader('Location');
+                }
+				else if (xhr.status == 203) {
+                    alert(data);
+                }
+				else {
+                    $("#id_environment_content").html(data);
+
+                }
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
@@ -177,14 +180,14 @@
 		$.ajax({
 			data: { environment_vip: id_environment_vip, id_vip: '{{id_vip}}', token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.options.ajax.external %}{% else %}{% url vip-request.options.ajax %}{% endif %}",
-			dataType: 'json',
 			success: function(data, textStatus, xhr) {
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-					
-				else if (xhr.status == "203")
-					alert(data.msg);
-				
+				if (xhr.status == 278) {
+                    alert(xhr.status);
+                    window.location = xhr.getResponseHeader('Location');
+                }
+				else if (xhr.status == 203) {
+                    alert(data);
+                }
 				else {
 
 					$("#id_caches").html(data.caches);
@@ -222,12 +225,12 @@
 				url: "{% if external %}{% url vip-request.rule.ajax.external %}{% else %}{% url vip-request.rule.ajax %}{% endif %}",
 				dataType: 'json',
 				success: function(data, textStatus, xhr) {
-					if (xhr.status == "278")
-						window.location = xhr.getResponseHeader('Location');
-						
-					else if (xhr.status == "203")
-						alert(data.msg);
-					
+					if (xhr.status == 278) {
+                        window.location = xhr.getResponseHeader('Location');
+                    }
+					else if (xhr.status == 203) {
+                        alert(data);
+                    }
 					else {
 						$("#id_filter_l7").val(data.rule);
 					}
@@ -299,9 +302,15 @@
             },
             data: {environment_vip_id : envVipId, token: $("#id_token").val()},
             url: "{% if external %}{% url vip-request.external.load.options.pool %}{% else %}{% url vip-request.load.options.pool %}{% endif %}",
-            success: function(data) {
-                $("select#id_pools").empty();
-                $("select#id_pools").html(data);
+            success: function(data, textStatus, xhr) {
+                if (xhr.status == 200){
+                    $("select#id_pools").empty();
+                    $("select#id_pools").html(data);
+                }
+                else if (xhr.status == 203) {
+                    alert(data);
+                }
+
             },
             error: function (error) {
                 message = jQuery.parseJSON(error.responseText);
