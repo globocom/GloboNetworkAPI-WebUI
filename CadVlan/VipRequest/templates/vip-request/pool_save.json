@@ -1,1 +1,1 @@
-{"id": "{{ sp_id|escapejs }}", "message": "{{ message|escapejs }}"}
+{"id": "{{ id|escapejs }}", "message": "{{ message|escapejs }}"}

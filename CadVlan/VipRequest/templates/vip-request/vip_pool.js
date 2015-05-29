@@ -1,4 +1,3 @@
-var message_token_invalid = "O seu tempo de acesso expirou. Por favor, atualize a página.";
 
 $("#dialog_pool").dialog({
         height: 650,
@@ -21,41 +20,26 @@ $("#dialog_pool").dialog({
                     type: "POST",
                     url: form.attr('action'), 
                     data: formData, 
-                    success: function(data, textStatus, xhr){
 
-                        if (xhr.status == 200) {
-                            var data_json = jQuery.parseJSON(data);
+                    success: function(data){
+                        var data_json = jQuery.parseJSON(data);
+                        var envVipId = $('input:hidden[name=environment_vip]').val();
 
-                            var envVipId = $('input:hidden[name=environment_vip]').val();
-                            $.ajax({
-                                data: {environment_vip_id: envVipId},
-                                url: "{% url vip-request.load.options.pool %}",
-                                success: function (data, textStatus, xhr) {
+                        $.ajax({
+                            url: "{% url vip-request.load.options.pool %}",
+                            data: {environment_vip_id : envVipId},
+                            success: function(data) {
+                                $("select#id_pools").html(data);
+                                $("select#id_pools").val(data_json.id);
+                            },
+                            error: function (error) {
+                                message = jQuery.parseJSON(error.responseText);
+                                addMessage(message);
+                            }
+                        });
 
-                                    if (xhr.status == 200) {
-                                        $("select#id_pools").html(data);
-                                        $("select#id_pools").val(data_json.id);
-                                    }
-                                },
-                                statusCode: {
-                                    203: function () {
-                                        alert(message_token_invalid);
-                                    }
-                                },
-                                error: function (error) {
-                                    message = jQuery.parseJSON(error.responseText);
-                                    addMessage(message);
-                                }
-                            });
-
-                            $this.dialog("close");
-                            alert(data_json.message);
-                        }
-                    },
-                    statusCode: {
-                        203: function () {
-                            alert(message_token_invalid);
-                        }
+                        $this.dialog("close");
+                        alert(data_json.message);
                     },
                     error: function (error) {
                         message = jQuery.parseJSON(error.responseText);
@@ -75,31 +59,21 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
     var poolId = $("#id_pools").val();
 
     if (poolId !=  0 && poolId != null){
-
         $.ajax({
                 data: { 
                     pool_id: poolId,
                     is_copy: 1
                 },
                 url: "{% url vip-request.load.pool %}",
-                success: function(data, textStatus, xhr) {
-
-                    if(xhr.status == 200) {
-                        $("#content_pool").empty();
-                        $("#content_pool").html(data);
-                        $("#id_equip_name").removeAttr('disabled');
-                        $("#btn_new_real").removeAttr('disabled');
-                        $("#dialog_pool").dialog("open");
-                    }
-                },
-                statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
-                    }
+                success: function(data) {
+                    $("#content_pool").html(data);
+                    $("#id_equip_name, #btn_new_real").removeAttr('disabled');
+                    $("#dialog_pool").dialog("open");
+                    autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
-                       addMessage(message);
+                    addMessage(message);
                 }    
         });
 
@@ -112,21 +86,14 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
 
     if(envVipId && envVipId !=  0 && envVipId != null){
         $.ajax({
-                data: {env_vip_id: envVipId},
                 url: "{% url vip-request.load.new.pool %}",
-                success: function(data, textStatus, xhr) {
-
-                    if(xhr.status == 200) {
-                        $("#content_pool").html(data);
-                        $("#id_equip_name").removeAttr('disabled');
-                        $("#btn_new_real").removeAttr('disabled');
-                        $("#dialog_pool").dialog("open");
-                    }
-                },
-                statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
-                    }
+                data: {env_vip_id: envVipId},
+                success: function(data) {
+                    $("#content_pool").html(data);
+                    $("#id_equip_name").removeAttr('disabled');
+                    $("#btn_new_real").removeAttr('disabled');
+                    $("#dialog_pool").dialog("open");
+                    autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
@@ -158,31 +125,21 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
     }
     
     if (poolId !=  0 && poolId != null){
-
         $.ajax({
+            url: "{% url vip-request.members.items %}",
             data: { 
                 pool_id: poolId
             },
-            url: "{% url vip-request.members.items %}",
-            success: function(data, textStatus, xhr) {
-
-                if(xhr.status == 200) {
-                    $("#divMembers").append(data);
-                    $(".tablePoolMembers:last-child .portVip").html(portVip);
-                    $(".tablePoolMembers:last-child .ports_vip").val(portVip);
-                    $(".tablePoolMembers:last-child .portVip").editableTable();
-                    $("#idPort").val('');
-                    $('#id_pools').prop('selectedIndex', 0);
-                }
-            },
-            statusCode: {
-                203: function () {
-                    alert(message_token_invalid);
-                }
+            success: function(data) {
+                $("#divMembers").append(data);
+                $(".tablePoolMembers:last-child .portVip").html(portVip);
+                $(".tablePoolMembers:last-child .ports_vip").val(portVip);
+                $(".tablePoolMembers:last-child .portVip").editableTable();
+                $("#idPort, #id_pools").val('');
             },
             error: function (error) {
                 message = jQuery.parseJSON(error.responseText);
-                   addMessage(message);
+                addMessage(message);
             }
         });
     }
@@ -190,31 +147,19 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
 
 $("span[id^=editPool]").live("click", function(){
     var obj = $(this).parents();
-
     var poolId = obj.find("#idsPool").val();
 
     if (poolId !=  0 && poolId != null){
-
         $.ajax({
+                url: "{% url vip-request.load.pool %}",
                 data: {
                     pool_id: poolId,
                     is_copy: 0
                 },
-                url: "{% url vip-request.load.pool %}",
-                success: function(data, textStatus, xhr) {
-
-                    if(xhr.status == 200) {
-                        $("#content_pool").empty();
-                        $("#content_pool").html(data);
-                        $("#id_equip_name").removeAttr('disabled');
-                        $("#btn_new_real").removeAttr('disabled');
-                        $("#dialog_pool").dialog("open");
-                    }
-                },
-                statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
-                    }
+                success: function(data) {
+                    $("#content_pool").html(data);
+                    $("#id_equip_name, #btn_new_real").removeAttr('disabled');
+                    $("#dialog_pool").dialog("open");
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
@@ -226,16 +171,18 @@ $("span[id^=editPool]").live("click", function(){
 });
 
 $("span[id^=removePool]").live("click", function(){
-    var $this = $(this);
-    $this.parents("table:first").remove();
+    $(this).parents("table:first").remove();
 });
 
 $("#btn_new_real").live("click", function(){
     var val_equip_name = $.trim($('#id_equip_name').val());
     if ( val_equip_name != '' ) {
         $.ajax({
-            data: { id_environment: $('#id_environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
             url: "{% url pool.modal.ips.ajax %}",
+            data: {
+                id_environment: $('#id_environment').val(),
+                equip_name: val_equip_name
+            },
             success: function(data, textStatus, xhr) {
 
                 if(xhr.status == 200) {
@@ -258,25 +205,17 @@ $('#btn_new_expect').live("click", function(){
 
     if(expect_string) {
         $.ajax({
+                url: "{% url pool.add.healthcheck.expect %}",
                 data: { 'expect_string': expect_string,
                         'id_environment': id_environment },
-                url: "{% url pool.add.healthcheck.expect %}",
-                success: function(data, textStatus, xhr) {
-
-                    if(xhr.status == 200) {
-                        $('#msg_new_health_check').fadeIn(1000);
-                        $("#id_expect").append('<option value="' + data['expect_string'] + '">' + data['expect_string'] + '</option>');
-                        $("#msg_new_health_check").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">' + data['mensagem'] + '</td>');
-                        $("#msg_new_health_check").delay(15000).fadeOut('slow');
-                        $("#id_expect option:last").attr('selected', 'selected');
-                        $("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
-                        $("#expect_string").val('');
-                    }
-                },
-                statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
-                    }
+                success: function(data, xhr) {
+                    $('#msg_new_health_check').fadeIn(1000);
+                    $("#id_expect").append('<option value="'+data['expect_string']+'">'+data['expect_string']+'</option>');
+                    $("#msg_new_health_check").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">'+data['mensagem']+'</td>');
+                    $("#msg_new_health_check").delay(15000).fadeOut('slow');
+                    $("#id_expect option:last").attr('selected', 'selected');
+                    $("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
+                    $("#expect_string").val('');
                 }
             });
     }
@@ -288,27 +227,20 @@ $('#id_environment').live("change", function(){
     var environmentId = this.value;
 
     if (environmentId != ''){
-        $("#id_equip_name, #btn_new_real").prop('disabled', '');
+        $("#id_equip_name, #btn_new_real").prop('disabled', false);
 
         $.ajax({
-                data: { id_environment: environmentId},
                 url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
-                success: function(data, textStatus, xhr) {
+                data: { id_environment: environmentId},
+                success: function(data, xhr) {
+                    for (var i = 0; i < data.length; i++) {
+                        $('#id_health_check').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
 
-                    if (xhr.status == 200) {
-                        for (var i = 0; i < data.length; i++) {
-                            $('#id_health_check').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
-                        }
-                    }
-                },
-                statusCode: {
-                    203: function () {
-                        alert(message_token_invalid);
                     }
                 }
             });
     }else{
-        $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
+        $("#id_equip_name, #btn_new_real").prop('disabled', true);
     }
 });
 
