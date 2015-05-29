@@ -7,7 +7,7 @@
             <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
 
             {% if external %}
-                {% if not server_pool.pool_created%}
+                {% if not server_pool.pool_created %}
                     {% has_external_perm POOL_MANAGEMENT False True token %}
                     {% if  has_external_perm %}
                         <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
@@ -22,9 +22,9 @@
                 {%endif%}
             {% endif %}
 
-            <b>{{ server_pool.identifier }}</b>
+            <b>{{ server_pool.identifier }}</b> - <strong class="portVip" style="font-weight: bold;"> </strong>
             <input name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>
-            <input class="ports_vip" name="ports_vip" id="ports_vip" type="hidden" value='{{ server_pool.port_vip }}'/>
+            <input class="ports_vip" name="ports_vip" type="hidden" value='{{ server_pool.port_vip }}'/>
             <input name="vip_port_id" id="vip_port_id" type="hidden" value='{{server_pool.port_vip_id}}'/>
 
         </th>
