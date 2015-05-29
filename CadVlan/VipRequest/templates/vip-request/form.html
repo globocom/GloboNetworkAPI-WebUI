@@ -206,10 +206,10 @@ $(document).ready(function() {
 
 			<br>
 
-            {% has_perm POOL_MANAGEMENT False True %}
+            {% has_perm POOL_MANAGEMENT None True %}
             {% with has_perm as has_pool_read %}
 
-            {% has_perm POOL_MANAGEMENT True False %}
+            {% has_perm POOL_MANAGEMENT True None %}
             {% with has_perm as has_pool_write %}
 
 			{% if has_pool_read or has_pool_write %}
