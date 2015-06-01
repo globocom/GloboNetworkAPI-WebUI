@@ -2040,3 +2040,45 @@ list_environments_with_pools()
 	Leitura
 	False
 	None
+
+ApiVipRequest
+add_pools()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+ApiVipRequest
+delete()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+ApiVipRequest
+list_environment_by_environmet_vip()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+ApiVipRequest
+save()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+ApiVipRequest
+get_by_pk()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+Healthcheck
+inserir()
+	requisicao_vips
+	Leitura
+	False
+	None
