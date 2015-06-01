@@ -3494,7 +3494,7 @@ Listar regras
 		Escrita
 		False
 		None
-		
+
 Cadastrar regras no ambiente
 	validar_vip
 		False
@@ -3518,7 +3518,7 @@ Cadastrar regras no ambiente
 		Escrita
 		False
 		None
-		
+
 Editar regras
 	validar_vip
 		False
@@ -3548,7 +3548,7 @@ Editar regras
 		Leitura
 		False
 		None
-		
+
 Remover regras
 	validar_vip
 		False
@@ -3578,7 +3578,7 @@ Cadastrar blocos
 		Escrita
 		False
 		None
-		
+
 Editar blocos
 	validar_vip
 		False
@@ -3599,6 +3599,188 @@ Editar blocos
 	Ambiente
 	get_blocks()
 		validar_vip
+		Escrita
+		False
+		None
+
+Listar Pool
+	cadastro_de_pool
+		True
+		False
+	api:
+	Pool
+	list_environments_with_pools()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+	Pool
+	list_all()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+
+Listar Membros do Pool
+	cadastro_de_pool
+		True
+		False
+	api:
+	Pool
+	list_all_members_by_pool()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+
+Listar Requisições Vip por Pool
+	cadastro_de_pool
+		True
+		False
+	api:
+	Pool
+	get_requisicoes_vip_by_pool()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+
+Inserir Pool
+	cadastro_de_pool
+		False
+		True
+	script_alterar_pool
+		False
+		True
+	api:
+	Ambiente
+	listar_healtchcheck_expect_distinct()
+		healthcheck_expect
+		Leitura
+		False
+		None
+	Ambiente
+	list_all()
+		cadastro_de_ambiente
+		Leitura
+		False
+		None
+	OptionVIP
+	get_all()
+		opcao_vip
+		Leitura
+		False
+		None
+	Equipamento
+	listar_por_id()
+		cadastro_de_equipamentos
+		Leitura
+		True
+		Leitura
+	Pool
+	get_opcoes_pool_by_ambiente()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+	Pool
+	save()
+		cadastro_de_pool
+		Escrita
+		False
+		None
+		script_alterar_pool
+		Escrita
+		False
+		None
+
+Editar Pool
+	cadastro_de_pool
+		True
+		True
+	script_alterar_pool
+		False
+		True
+	api:
+	Pool
+	get_by_pk()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+	get_equip_by_ip()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+	Ambiente
+	listar_healtchcheck_expect_distinct()
+		healthcheck_expect
+		Leitura
+		False
+		None
+	Ambiente
+	list_all()
+		cadastro_de_ambiente
+		Leitura
+		False
+		None
+	OptionVIP
+	get_all()
+		opcao_vip
+		Leitura
+		False
+		None
+	Equipamento
+	listar_por_id()
+		cadastro_de_equipamentos
+		Leitura
+		True
+		Leitura
+	Pool
+	get_opcoes_pool_by_ambiente()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+	Pool
+	save()
+		cadastro_de_pool
+		Escrita
+		False
+		None
+		script_alterar_pool
+		Escrita
+		False
+		None
+
+Listar Opções Pool Por Ambiente
+	cadastro_de_pool
+		True
+		False
+	api:
+	Pool
+	get_opcoes_pool_by_ambiente()
+		cadastro_de_pool
+		Leitura
+		False
+		None
+
+Remover Pool
+	cadastro_de_pool
+		False
+		True
+	script_alterar_pool
+		False
+		True
+	api:
+	Pool
+	delete()
+		cadastro_de_pool
+		Escrita
+		False
+		None
+		script_alterar_pool
 		Escrita
 		False
 		None
