@@ -313,7 +313,7 @@ def add_form(request):
 @log
 @login_required
 @has_perm([
-    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_MANAGEMENT, "write": True, "read": True},
     {"permission": POOL_ALTER_SCRIPT, "write": True}]
 )
 def edit_form(request, id_server_pool):
