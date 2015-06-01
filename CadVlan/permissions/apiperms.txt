@@ -1936,7 +1936,7 @@ list_all_members_by_pool()
 	None
 
 Pool
-get_equipamento_by_ip()
+get_equip_by_ip()
 	cadastro_de_pool
 	Leitura
 	False
