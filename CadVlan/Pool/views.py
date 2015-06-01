@@ -36,7 +36,7 @@ from django.contrib import messages
 from CadVlan.messages import healthcheck_messages
 from CadVlan.messages import error_messages, pool_messages
 from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
-    HEALTH_CHECK_EXPECT
+    HEALTH_CHECK_EXPECT, EQUIPMENT_MANAGEMENT, VIPS_REQUEST, ENVIRONMENT_MANAGEMENT
 from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from networkapiclient.Pagination import Pagination
@@ -431,16 +431,22 @@ def edit_form(request, id_server_pool):
                               context_instance=RequestContext(request))
 
 
-@csrf_exempt
-@has_perm_external([{"permission": POOL_MANAGEMENT, "read": True}])
 @log
+@csrf_exempt
+@has_perm_external([
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
+    {"permission": EQUIPMENT_MANAGEMENT, "read": True, }
+])
 def ajax_modal_ip_real_server_external(request, form_acess, client):
     return __modal_ip_list_real(request, client)
 
 
 @log
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "read": True, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
+    {"permission": EQUIPMENT_MANAGEMENT, "read": True, }
+])
 def ajax_modal_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
@@ -487,9 +493,9 @@ def __modal_ip_list_real(request, client_api):
         ), status=status_code
     )
 
+@log
 @csrf_exempt
 @has_perm_external([{"permission": POOL_MANAGEMENT, "read": True}])
-@log
 def ajax_get_opcoes_pool_by_ambiente_external(request, form_acess, client):
     return __get_opcoes_pool_by_ambiente(request, client)
 
@@ -699,6 +705,7 @@ def disable(request):
 def add_healthcheck_expect_external(request, form_acess, client):
     return __add_healthcheck_expect_shared(request, client)
 
+
 @log
 @login_required
 @has_perm([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
@@ -761,7 +768,12 @@ def pool_member_items(request):
 @log
 @login_required
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True, "read": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": VIPS_REQUEST, "read": True},
+    {"permission": ENVIRONMENT_MANAGEMENT, "read": True}
+])
 def manage_tab1(request, id_server_pool):
 
     try:
@@ -801,7 +813,11 @@ def manage_tab1(request, id_server_pool):
 @log
 @login_required
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True, "read": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": ENVIRONMENT_MANAGEMENT, "read": True}
+])
 def manage_tab2(request, id_server_pool):
     try:
         auth = AuthSession(request.session)
@@ -840,7 +856,11 @@ def manage_tab2(request, id_server_pool):
 @log
 @login_required
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": ENVIRONMENT_MANAGEMENT, "read": True}
+])
 def manage_tab3(request, id_server_pool):
     try:
         auth = AuthSession(request.session)
@@ -966,7 +986,11 @@ def manage_tab3(request, id_server_pool):
 @log
 @login_required
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": ENVIRONMENT_MANAGEMENT, "read": True}
+])
 def manage_tab4(request, id_server_pool):
 
     try:
