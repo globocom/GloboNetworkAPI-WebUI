@@ -408,7 +408,10 @@ urlpatterns += patterns('CadVlan.Acl.views',
                         url('^acl/template/delete[/]?$',
                             'template_delete', name='acl.template.delete',),
 
-                        )
+                        url('^acl/save/draft$', 'save_draft', name='acl.save.draft',),
+                        url('^acl/remove/draft$', 'remove_draft', name='acl.remove.draft',),
+
+)
 
 # URL's Vip Requests
 urlpatterns += patterns('CadVlan.VipRequest.views',
