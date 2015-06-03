@@ -23,7 +23,10 @@
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
+    var typingTimer;
+    var doneTypingInterval = 1000;  //time in ms, 1 second
+
 	$("#page_tab").tabs();
 	$("#page_tab_lists").tabs();
 	
@@ -32,6 +35,53 @@ $(document).ready(function() {
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
 		location.href = "{% url vlan.edit.by.id id_vlan %}";
 	});
+
+    $('textarea#id_acl').keydown(function(){
+
+        clearTimeout(typingTimer);
+
+    }).keyup(function(){
+
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(saveAclDraft, doneTypingInterval);
+    });
+
+    function saveAclDraft () {
+        $.ajax({
+				data: {
+					id_vlan: {{ id_vlan }},
+                    type_acl: "{{ network }}",
+                    content_draft: $('textarea#id_acl').val(),
+                    csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
+				},
+                type: "POST",
+				url: "{% url acl.save.draft %}",
+                beforeSend: function(){
+                    $(".loading").hide();
+                },
+				success: function(data, textStatus, xhr) {
+                    if(xhr.status == 203){
+                        alert(data);
+                    }
+				}
+		});
+    }
+
+    function removeAclDraft(){
+        $.ajax({
+				data: {
+					id_vlan: {{ id_vlan }},
+                    type_acl: "{{ network }}"
+				},
+                type: "GET",
+				url: "{% url acl.remove.draft %}",
+				success: function(data, textStatus, xhr) {
+                    if(xhr.status == 203){
+                        alert(data);
+                    }
+				}
+		});
+    }
 	
 	{% if vlan.acl_valida == 'True' and network == 'v4' or vlan.acl_valida_v6 == 'True' and network == 'v6' %}
 	
@@ -57,13 +107,46 @@ $(document).ready(function() {
 		"iDisplayLength": {% max_results %},
 		"aoColumns": [{ "sType": "ip{{network}}" }, null, null]
 	});
-	
+
+     {% if vlan.acl_draft and network == "v4" or vlan.acl_draft_v6 and network == "v6" %}
+
+        $("#dialog-draft-acl").dialog({
+            resizable: false,
+            height:140,
+            width: 300,
+            modal: true,
+            buttons: {
+                "Recuperar": function() {
+
+                    if ("{{ network }}" == "v4") {
+                        var contentDraft = "{{ vlan.acl_draft }}";
+                    }else{
+                        var contentDraft = "{{ vlan.acl_draft_v6 }}";
+                    }
+
+                    $('textarea#id_acl').val(contentDraft);
+                    $( this ).dialog( "close" );
+                },
+                "Apagar": function() {
+                    if(confirm("Deseja realmente apagar o rascunho")){
+                        removeAclDraft();
+                        $( this ).dialog( "close" );
+                    }
+                },
+                Cancelar: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        });
+
+    {% endif %}
 	
 })
 </script>
 {% endblock %}
 
 {% block content %}
+
 <div id="page_tab">
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Vlan</a></li>
@@ -201,5 +284,7 @@ $(document).ready(function() {
 		</div>
 	</div>
 </div>
-
+    <div id="dialog-draft-acl" title="Você possui rascunho!" style="display: none;">
+        <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Você possui rascunho de acl que pode ser recuperado. O que deseja fazer?</p>
+    </div>
 {% endblock %}
