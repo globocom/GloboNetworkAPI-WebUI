@@ -202,6 +202,14 @@ def edit(request, id_vlan, network):
                 alterAclCvs(vlan.get(key_acl), acl, environment, comments, network, AuthSession(
                     request.session).get_user())
 
+                #Remove Draft
+                client.create_api_vlan().acl_remove_draft(id_vlan, network)
+
+                if network == NETWORK_TYPES.v4:
+                    vlan["acl_draft"] = None
+                else:
+                    vlan["acl_draft_v6"] = None
+
                 lists['form'] = AclForm(
                     initial={'acl': form.cleaned_data['acl'], 'comments': ''})
 
@@ -214,9 +222,15 @@ def edit(request, id_vlan, network):
 
         else:
 
-            content = getAclCvs(
-                vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
+            content = getAclCvs(vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
             lists['form'] = AclForm(initial={'acl': content, 'comments': ''})
+
+            if network == NETWORK_TYPES.v4:
+                if vlan["acl_draft"] == content:
+                    vlan["acl_draft"] = None
+            else:
+                if vlan["acl_draft_v6"] == content:
+                    vlan["acl_draft_v6"] = None
 
             if content is None or content == "":
                 lists['script'] = script_template(environment.get("nome_ambiente_logico"), environment.get(
