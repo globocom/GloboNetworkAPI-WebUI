@@ -91,7 +91,13 @@ class AddInterfaceForm(forms.Form):
             attrs["style"] = "width: 98px;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [
-                ("", "Selecione"), ("Fa", "Fa"), ("Gi", "Gi"), ("Te", "Te"), ("Serial", "Serial"), ("Eth","Eth")]
+                ("", "Selecione"), ("Eth","Eth"), ("Fa", "Fa"), ("Gi", "Gi"), ("mgmt", "mgmt"), ("Serial", "Serial"), ("Te", "Te")]
+        elif marca == "21":
+            attrs["onChange"] = "javascript:setMask(" + str(index) + ")"
+            attrs["style"] = "width: 98px;"
+            self.fields['combo'].widget = forms.Select(attrs=attrs)
+            self.fields['combo'].choices = [
+                ("", "Selecione"), ("GE","GE"), ("10GE", "10GE"), ("40GE", "40GE"), ("100GE", "100GE"), ("meth", "meth")]
         else:
             attrs["style"] = "display: none;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
@@ -106,13 +112,15 @@ class AddInterfaceForm(forms.Form):
         elif marca == "2":
             self.regex = "^(Int)\s[0-9]+$"
         elif marca == "3":
-            self.regex = "^(Fa|Gi|Te|Serial|Eth)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+            self.regex = "^(Fa|Gi|Te|Serial|Eth|mgmt)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
         elif marca == "4":
             self.regex = "^(interface)\s[0-9a-zA-Z]+(/[0-9a-zA-Z])+([0-9a-zA-Z-.]+)?$"
         elif marca == "5":#Trocar pelo Brocade
             self.regex = "^(eth)[0-9]+(/[0-9]+)?$"
         elif marca == "8":
             self.regex = "^[0-9]+$"
+        elif marca == "21":
+            self.regex = "^(GE|10GE|40GE|100GE|meth)[ ]+[0-9]+(/[0-9]+(/[0-9]+)?)?$"
         else:
             self.regex = ""
 
