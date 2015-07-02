@@ -120,7 +120,7 @@ class AddInterfaceForm(forms.Form):
         elif marca == "8":
             self.regex = "^[0-9]+$"
         elif marca == "21":
-            self.regex = "^(GE|10GE|40GE|100GE|meth)[ ]+[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+            self.regex = "^(GE|10GE|40GE|100GE|meth)\s+[0-9]+(/[0-9]+(/[0-9]+)?)?$"
         else:
             self.regex = ""
 
@@ -170,7 +170,7 @@ class AddSeveralInterfaceForm(forms.Form):
             self.regex = "^(Fa|Gi|Te|Serial|Eth)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
             self.fields['campos'].choices = [
                 ("1", "1"), ("2", "2"), ("3", "3")]
-
+  
         elif marca == "2":
             attrs["style"] = "width: 98px;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
@@ -198,6 +198,19 @@ class AddSeveralInterfaceForm(forms.Form):
             attrs['disabled'] = "disabled"
             self.fields['combo_aux'].widget = forms.Select(attrs=attrs)
             self.fields['combo_aux'].choices = [("eth", "eth")]
+
+        elif marca == "21":
+            attrs["style"] = "width: 98px;"
+            self.fields['combo'].widget = forms.Select(attrs=attrs)
+            self.fields['combo'].choices = [
+                ("GE","GE"), ("10GE", "10GE"), ("40GE", "40GE"), ("100GE", "100GE")]
+            attrs['disabled'] = "disabled"
+            self.fields['combo_aux'].widget = forms.Select(attrs=attrs)
+            self.fields['combo_aux'].choices = [
+                ("GE","GE"), ("10GE", "10GE"), ("40GE", "40GE"), ("100GE", "100GE")]
+            self.regex = "^(GE|10GE|40GE|100GE|meth)\s+[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+            self.fields['campos'].choices = [
+                ("1", "1"), ("2", "2"), ("3", "3")]
 
     campos = forms.ChoiceField(
         label="Campos", required=False, error_messages=error_messages)
