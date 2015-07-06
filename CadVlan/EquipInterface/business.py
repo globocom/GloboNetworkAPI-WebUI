@@ -87,13 +87,14 @@ def next_interface(interface, interfs, last_id, first_time):
         return None, interface['id'], False
 
 
-def make_initials_and_params(interfs):
+def make_initials_and_params(interfs, list=None):
     initials = []
     params = []
     equip_types = []
     up_list = []
     down_list = []
     front_or_back = []
+    int_type_list = []
 
     # First interface to show in edit form
     interface = find_first_interface(interfs)
@@ -121,6 +122,7 @@ def make_initials_and_params(interfs):
     # Add
     brand = interface['marca'] if interface['tipo_equip'] != "2" else "0"
     params.append(brand)
+    int_type_list.append(list)
     up_list.append(up)
     down_list.append(down)
     initials.append(get_initial(interface))
@@ -168,4 +170,4 @@ def make_initials_and_params(interfs):
     down_list.reverse()
     equip_types.reverse()
     front_or_back.reverse()
-    return initials, params, equip_types, up_list, down_list, front_or_back
+    return initials, params, equip_types, up_list, down_list, front_or_back, int_type_list

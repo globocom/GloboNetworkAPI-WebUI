@@ -18,8 +18,7 @@
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_SEVERAL_FORM,\
-    EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM
+from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
@@ -32,8 +31,7 @@ from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
-from CadVlan.EquipInterface.forms import AddInterfaceForm, AddSeveralInterfaceForm,\
-    ConnectForm
+from CadVlan.EquipInterface.forms import AddInterfaceForm, AddSeveralInterfaceForm, ConnectForm
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
 
@@ -174,18 +172,18 @@ def add_form(request, equip_name):
         return redirect('equip.interface.search.list')
 
     equip = equip.get('equipamento')
-
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
+    int_type_list = client.create_interface().list_all_interface_types()
 
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
-    lists['form'] = AddInterfaceForm(
-        brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id']})
+    lists['int_type'] = int_type_list
+    lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id']})
 
     # If form was submited
     if request.method == "POST":
 
-        form = AddInterfaceForm(brand, 0, request.POST)
+        form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
 
         try:
 
@@ -194,6 +192,7 @@ def add_form(request, equip_name):
                 name = form.cleaned_data['name']
                 description = form.cleaned_data['description']
                 protected = form.cleaned_data['protected']
+                int_type = form.cleaned_data['int_type']
 
                 client.create_interface().inserir(
                     name, protected, description, None, None, equip['id'])
@@ -397,6 +396,8 @@ def edit_form(request, equip_name, id_interface):
         if interface is None:
             raise InterfaceNaoExisteError("Interface não cadastrada")
 
+        int_type_list = client.create_interface().list_all_interface_types()
+
         # Get related interfaces
         related_list = client.create_interface().list_connections(
             interface["interface"], equip["id"])
@@ -404,6 +405,7 @@ def edit_form(request, equip_name, id_interface):
         # Join
         related_list = related_list['interfaces']
         related_list.append(interface)
+        #related_list.append(int_type_list)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -415,14 +417,15 @@ def edit_form(request, equip_name, id_interface):
             url_param = url_param + "?equip_name=" + equip_name
         return HttpResponseRedirect(url_param)
 
-    initials, params, equip_types, up, down, front_or_back = make_initials_and_params(
-        related_list)
+    initials, params, equip_types, up, down, front_or_back, int_types = make_initials_and_params(
+        related_list, int_type_list)
 
-    AddInterfaceFormSet = formset_factory(AddInterfaceForm, params=params, equip_types=equip_types,
+    AddInterfaceFormSet = formset_factory(AddInterfaceForm, params=params, equip_types=equip_types, int_types=int_type_list,
                                           up=up, down=down, front_or_back=front_or_back, extra=len(related_list), max_num=len(related_list))
 
     lists['equip_name'] = equip_name
     lists['id_interface'] = id_interface
+    lists['int_type'] = int_type_list
 
     if request.method == "POST":
 
@@ -454,7 +457,7 @@ def edit_form(request, equip_name, id_interface):
         else:
             lists['formset'] = form_set
     else:
-        lists['formset'] = AddInterfaceFormSet(initial=initials)
+        lists['formset'] = AddInterfaceFormSet(initial=initials, int_type_list=int_types)
 
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_FORM, lists, context_instance=RequestContext(request))
 

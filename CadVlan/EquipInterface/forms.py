@@ -82,7 +82,7 @@ class ConnectForm(forms.Form):
 
 class AddInterfaceForm(forms.Form):
 
-    def __init__(self, marca, index, *args, **kwargs):
+    def __init__(self, int_type_list, marca, index, *args, **kwargs):
         super(AddInterfaceForm, self).__init__(*args, **kwargs)
 
         attrs = dict()
@@ -116,6 +116,10 @@ class AddInterfaceForm(forms.Form):
         else:
             self.regex = ""
 
+        type_choices = [(tp["id"], tp["tipo"]) for tp in int_type_list["tipo_interface"]]
+        type_choices.insert(0, (0, "Selecione um tipo de interface"))
+        self.fields['int_type'].choices = type_choices
+
     combo = forms.ChoiceField(
         label="", required=False, error_messages=error_messages)
     name = forms.CharField(label="Nome da Interface", required=True,
@@ -124,12 +128,11 @@ class AddInterfaceForm(forms.Form):
         attrs={'style': "width: 250px; height: 34px;", 'rows': 2, 'data-maxlenght': 200}))
     protected = forms.ChoiceField(label="Protegido", required=True, choices=[(
         0, "Não"), (1, "Sim")], error_messages=error_messages, widget=forms.RadioSelect, initial=0)
-    equip_name = forms.CharField(
-        widget=forms.HiddenInput(), label='', required=False)
-    equip_id = forms.IntegerField(
-        widget=forms.HiddenInput(), label='', required=False)
-    inter_id = forms.IntegerField(
-        widget=forms.HiddenInput(), label='', required=False)
+    equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    int_type = forms.ChoiceField(label="Tipo de Interface", required=True, widget=forms.Select(
+        attrs={'style': "width: 400px"}), error_messages=error_messages)
 
     def clean_name(self):
         name = self.cleaned_data['name']
