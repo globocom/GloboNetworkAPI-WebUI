@@ -31,39 +31,39 @@ class DivisaoDCForm(forms.Form):
         label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
     nome = forms.CharField(label=u'Divisão do Data Center', min_length=2, max_length=100, required=True,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
-
+    """
     def clean_nome(self):
         if not check_regex(self.cleaned_data['nome'], r'^[-0-9a-zA-Z]+$'):
             raise forms.ValidationError('Caracteres inválidos.')
 
         return self.cleaned_data['nome']
-
+    """
 
 class Grupol3Form(forms.Form):
     id_env = forms.IntegerField(
         label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
     nome = forms.CharField(label=u'Grupo Layer3', min_length=2, max_length=80, required=True,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
-
+    """
     def clean_nome(self):
         if not check_regex(self.cleaned_data['nome'], r'^[-0-9a-zA-Z]+$'):
             raise forms.ValidationError('Caracteres inválidos.')
 
         return self.cleaned_data['nome']
-
+    """
 
 class AmbienteLogicoForm(forms.Form):
     id_env = forms.IntegerField(
         label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
     nome = forms.CharField(label=u'Ambiente Lógico', min_length=2, max_length=80, required=True,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
-
+    """
     def clean_nome(self):
         if not check_regex(self.cleaned_data['nome'], r'^[-0-9a-zA-Z]+$'):
             raise forms.ValidationError('Caracteres inválidos.')
 
         return self.cleaned_data['nome']
-
+    """
 
 class AmbienteForm(forms.Form):
 
