@@ -239,9 +239,9 @@ def add_several_forms(request, equip_name):
 
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     divisor = "/" if (brand == '3' or brand ==
-                      '5') else ":" if brand == "0" else "." if brand == '4' else ""
+                      '5' or brand == '21') else ":" if brand == "0" else "." if brand == '4' else ""
 
-    list_brands = [2, 3, 4, 5]
+    list_brands = [2, 3, 4, 5, 21, 25]
 
     if int(brand) not in list_brands:
         # Redirect to list_all action
@@ -300,7 +300,7 @@ def add_several_forms(request, equip_name):
                     name = ""
                 for x in range(0, length):
                     if (x == 0):
-                        if (int(brand) == 2 or int(brand) == 4):
+                        if (int(brand) == 2 or int(brand) == 4) or int(brand) == 21:
                             name = name + " " + str(name_aux[x])
                         else:
                             name = name + str(name_aux[x])
