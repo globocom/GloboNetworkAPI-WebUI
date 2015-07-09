@@ -140,7 +140,7 @@ class AddInterfaceForm(forms.Form):
     equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     int_type = forms.ChoiceField(label="Tipo de Interface", required=True, widget=forms.Select(
-        attrs={'style': "width: 400px"}), error_messages=error_messages)
+        attrs={'style': "width: 250px"}), error_messages=error_messages)
 
     def clean_name(self):
         name = self.cleaned_data['name']

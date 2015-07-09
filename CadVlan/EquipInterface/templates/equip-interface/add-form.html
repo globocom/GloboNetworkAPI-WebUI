@@ -21,42 +21,98 @@ $(document).ready(function() {
 });
 </script>
 <div style="position: relative; background-color: {% if rowcolors %}{{ rowcolors }}{% else %}#fefefe{% endif %};">
-	<div style="float: left; padding-top: 4px; padding-left: 6px; width: 290px;">
-	{% csrf_token %}
-	{% for field in form %}
-		{% if field.is_hidden %}
-			{{ field }}
-		{% else %}
-		<div style="{% if forloop.counter < 3 %}float: left;{% endif %}">
-			<div><label for="{{ field.auto_id }}">{% if forloop.first %}&nbsp;{% endif %}{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-			{{ field }}
-			<p id="error">
-			{% if field.errors %} 
-				{% for error in field.errors %}
-					{{ error|escape }}
-				{% endfor %}
-			{% endif %}
-			</p>
-		</div>
-		{% ifequal forloop.counter 2 %}<div style="clear: left;"></div>{% endifequal %}
-		{% endif %}
-	{% endfor %}
-	</div>{% ifequal equip_type '8' %}{% if formset %}{% set front_or_back formset.front_or_back.pop %}{% endif %}{% else %}{% set front_or_back 'front' %}{% endifequal %}{% ifequal front_or_back 'front' %}{% set f_b '1' %}{% else %}{% set f_b '0' %}{% endifequal%}
-	<div style="float: left; width: 166px; text-align: center;">
-	{% ifequal up 2 %}
-		<div style="margin-top: 12px; height: 53px;"><a href="{{ form.inter_id.value }}" lang="/{% if f_b %}{{ f_b }}{% endif %}" class="connect">Ligar</a></div>{% endifequal %}
-	{% ifequal up 1 %}
-		<a onclick="javascript: if(!confirm('Deseja realmente remover esta ligação ?')){return false;}" href="{% url equip.interface.disconnect form.inter_id.value f_b equip_name id_interface %}" class="btn_close ui-state-error" lang="{{ counter }}" style="width: 24px; height: 24px; margin-top: -12px;">Remover Ligação</a>{% endifequal %}
-	{% ifnotequal up 2 %}
-		<div class="line_{{ counter }}" style="height: {% ifequal equip_type '8' %}65{% else %}60{% endifequal %}px;{% ifequal up 1 %} width: 3px; margin: -12px auto 0px auto; background-color: black;{% endifequal %}"></div>{% endifnotequal %}
-	{% ifequal equip_type '8' %}{% if front_or_back %}{{ front_or_back }}<br>{% endif %}{% endifequal %}<img src="{{ MEDIA_URL }}/img/{% ifequal equip_type '8' %}patch{% else %}serv{% endifequal %}.png" style="height: {% ifequal equip_type '8' %}28{% else %}74{% endifequal %}px;">{% ifequal equip_type '8' %}{% if front_or_back %}<br>{% ifequal front_or_back "front"%}back{% else %}front{% endifequal %}{% endif %}{% endifequal %}
-	{% ifequal down 1 %}
-		<div class="line_{{ counter1 }}" style="height: {% ifequal equip_type '8' %}180{% else %}180{% endifequal %}px; width: 3px; margin: 0px auto -12px 82px; position: absolute; background-color: black;"></div>{% endifequal %}
-	{% ifequal down 2 %}
-		<div style="margin-top: 12px;"><a href="{{ form.inter_id.value }}" lang="/{% ifequal equip_type '8' %}{% if f_b %}{% ifequal f_b '0' %}1{% else %}0{% endifequal %}{% endif %}{% else %}1{% endifequal %}" class="connect">Ligar</a></div>{% endifequal %}
-	</div>
-	<div style="float: left; width: 190px; line-height: 190px;">
-		<a href="{% url equip.interface.search.list %}?equip_name={{ form.equip_name.value }}">{{ form.equip_name.value }}</a>
-	</div>
-	<div style="clear: left;"></div>
+
+               	<div style="float: left; padding-top: 4px; padding-left: 10px; width: 50%;">
+            	{% csrf_token %}
+	            {% for field in form %}
+        		    {% if field.is_hidden %}
+		        	    {{ field }}
+            		{% else %}
+                    <div style="{% if forloop.counter < 3 %}float: left;{% endif %}">
+        			    <div>
+                            <label for="{{ field.auto_id }}">
+                                {% if forloop.first %}&nbsp;{% endif %}
+                                {{ field.label_tag }}
+                                {% if field.field.required %}
+                                    <span style="color: red;">*</span>
+                                {% endif %}
+                            </label>
+                        </div>
+                        {{ field }}
+                        <p id="error">
+            			{% if field.errors %}
+	    	        		{% for error in field.errors %}
+		    		        	{{ error|escape }}
+        	    			{% endfor %}
+		            	{% endif %}
+			            </p>
+            		</div>
+                    {% ifequal forloop.counter 2 %}
+                        <div style="clear: left;">
+                        </div>
+                    {% endifequal %}
+    	        	{% endif %}
+            	{% endfor %}
+            	</div>
+	            {% ifequal equip_type '8' %}
+                    {% if formset %}
+                        {% set front_or_back formset.front_or_back.pop %}
+                    {% endif %}
+                {% else %}
+                    {% set front_or_back 'front' %}
+                {% endifequal %}
+                {% ifequal front_or_back 'front' %}
+                    {% set f_b '1' %}
+                {% else %}
+                    {% set f_b '0' %}
+                {% endifequal%}
+
+         	    <div style="float: left; width: 25%; text-align: center;">
+            	{% ifequal up 2 %}
+	            	<div style="margin-top: 12px; height: 53px;">
+                        <a href="{{ form.inter_id.value }}" lang="/{% if f_b %}{{ f_b }}{% endif %}" class="connect">Ligar</a>
+                    </div>
+                {% endifequal %}
+            	{% ifequal up 1 %}
+	            	<a onclick="javascript: if(!confirm('Deseja realmente remover esta ligação ?')){return false;}" href="{% url equip.interface.disconnect form.inter_id.value f_b equip_name id_interface %}" class="btn_close ui-state-error" lang="{{ counter }}" style="width: 24px; height: 24px; margin-top: -12px;">Remover Ligação</a>
+                {% endifequal %}
+    	        {% ifnotequal up 2 %}
+        	    	<div class="line_{{ counter }}" style="height: {% ifequal equip_type '8' %}65{% else %}60{% endifequal %}px;{% ifequal up 1 %} width: 3px; margin: -12px auto 0px auto; background-color: black;{% endifequal %}">
+                    </div>{% endifnotequal %}
+            	{% ifequal equip_type '8' %}
+                    {% if front_or_back %}
+                        {{ front_or_back }}<br>
+                    {% endif %}
+                {% endifequal %}
+                <img src="{{ MEDIA_URL }}/img/{% ifequal equip_type '8' %}patch{% else %}serv{% endifequal %}.png" style="height: {% ifequal equip_type '8' %}28{% else %}74{% endifequal %}px;">
+                {% ifequal equip_type '8' %}
+                    {% if front_or_back %}<br>
+                {% ifequal front_or_back "front"%}
+                    back
+                {% else %}
+                    front
+                {% endifequal %}
+                {% endif %}
+                {% endifequal %}
+        	    {% ifequal down 1 %}
+		            <div class="line_{{ counter1 }}" style="height: {% ifequal equip_type '8' %}180{% else %}180{% endifequal %}px; width: 3px; margin: 0px auto -12px 150px; position: absolute; background-color: black;">
+                   </div>
+                {% endifequal %}
+    	        {% ifequal down 2 %}
+        	    	<div style="margin-top: 12px;">
+                        <a href="{{ form.inter_id.value }}" lang="/{% ifequal equip_type '8' %}{% if f_b %}{% ifequal f_b '0' %}1{% else %}0{% endifequal %}{% endif %}{% else %}1{% endifequal %}" class="connect">
+                            Ligar
+                       </a>
+                    </div>
+                {% endifequal %}
+            	</div>
+
+                <div style="float: left; width: 160px; line-height: 190px;">
+            		<a href="{% url equip.interface.search.list %}?equip_name={{ form.equip_name.value }}">
+                        {{ form.equip_name.value }}
+                    </a>
+            	</div>
+        	    <div style="clear: left;">
+                </div>
+
 </div>
