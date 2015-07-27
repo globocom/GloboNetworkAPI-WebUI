@@ -82,7 +82,7 @@ class ConnectForm(forms.Form):
 
 class AddInterfaceForm(forms.Form):
 
-    def __init__(self, int_type_list, marca, index, *args, **kwargs):
+    def __init__(self, environment_list, int_type_list, marca, index, *args, **kwargs):
         super(AddInterfaceForm, self).__init__(*args, **kwargs)
 
         attrs = dict()
@@ -128,19 +128,23 @@ class AddInterfaceForm(forms.Form):
         type_choices.insert(0, (0, "Selecione um tipo de interface"))
         self.fields['int_type'].choices = type_choices
 
-    combo = forms.ChoiceField(
-        label="", required=False, error_messages=error_messages)
-    name = forms.CharField(label="Nome da Interface", required=True,
-                           min_length=1, max_length=20, error_messages=error_messages)
-    description = forms.CharField(label=u'Descrição', required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.Textarea(
-        attrs={'style': "width: 250px; height: 34px;", 'rows': 2, 'data-maxlenght': 200}))
-    protected = forms.ChoiceField(label="Protegido", required=True, choices=[(
-        0, "Não"), (1, "Sim")], error_messages=error_messages, widget=forms.RadioSelect, initial=0)
+        ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
+                         " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
+        self.fields['environment'].choices = ambiente_choice
+
+    combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
+    name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    description = forms.CharField(label=u'Descrição', required=False, min_length=3, max_length=200, error_messages=error_messages,
+                                  widget=forms.Textarea(attrs={'style': "width: 250px; height: 34px;", 'rows': 2, 'data-maxlenght': 200}))
+    protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
+                                  widget=forms.RadioSelect, initial=0)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
-    int_type = forms.ChoiceField(label="Tipo de Interface", required=True, widget=forms.Select(
-        attrs={'style': "width: 250px"}), error_messages=error_messages)
+    int_type = forms.ChoiceField(label="Tipo de Interface", required=False, error_messages=error_messages,
+                                  widget=forms.Select(attrs={'style': "width: 250px"}))
+    environment = forms.MultipleChoiceField(label=u'Ambiente', required=False, error_messages=error_messages,
+                                  widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
 
     def clean_name(self):
         name = self.cleaned_data['name']

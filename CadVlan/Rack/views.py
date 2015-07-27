@@ -149,7 +149,7 @@ def rack_config_delete (request, client, form, operation):
             # For each rack selected
             for id_rack in ids:
                 try:
-                    racks = client.create_rack().find_racks()
+                    racks = client.create_rack().list()
                     racks = racks.get('rack')
                     for ra in racks:
                         if ra.get('id')==id_rack:
@@ -232,7 +232,7 @@ def rack_form(request):
 
         if request.method == 'GET':
 
-            racks = client.create_rack().find_racks()
+            racks = client.create_rack().list()
             numero = proximo_rack(racks)
             form = RackForm(initial={'rack_number': numero})
 
@@ -295,7 +295,7 @@ def ajax_rack_view(request, client_api):
         racks = dict()
 
         # Get all racks from NetworkAPI
-        racks = client_api.create_rack().find_racks()
+        racks = client_api.create_rack().list()
 
         if not racks.has_key("rack"):
                     racks["rack"] = []
@@ -351,7 +351,7 @@ def rack_edit(request, id_rack):
         client = auth.get_clientFactory()
 
         # Get all racks from NetworkAPI
-        racks = client.create_rack().find_racks()
+        racks = client.create_rack().list()
 
         if not racks.has_key("rack"):
                     racks["rack"] = []

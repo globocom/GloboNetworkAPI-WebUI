@@ -175,15 +175,35 @@ def add_form(request, equip_name):
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     int_type_list = client.create_interface().list_all_interface_types()
 
+    #lista de ambientes
+    interface_list = client.create_interface().listar_switch_router(equip['id'])
+    interface_list = interface_list.get('map')
+    if len(interface_list) < 2:
+        raise InterfaceNaoExisteError(u'A interface do Servidor deve estar ligada ao Uplink.')
+    nome_rack = None
+    if 'LF-' in interface_list[0]['equipamento_nome']:
+        if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
+            nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
+    try:
+        racks = client.create_rack().get_rack(nome_rack)
+        rack = racks.get('rack')
+        id_rack = rack[0]['id']
+        environment_list = client.create_rack().list_all_rack_environments(id_rack)
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('equip.interface.search.list')
+
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
-    lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id']})
+    lists['form'] = AddInterfaceForm(environment_list, int_type_list, brand, 0, initial={'equip_name': equip['nome'],
+                                                                                         'equip_id': equip['id']})
 
     # If form was submited
     if request.method == "POST":
 
-        form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
+        form = AddInterfaceForm(environment_list, int_type_list, brand, 0, request.POST)
 
         try:
 
@@ -193,6 +213,7 @@ def add_form(request, equip_name):
                 description = form.cleaned_data['description']
                 protected = form.cleaned_data['protected']
                 int_type = form.cleaned_data['int_type']
+                envs = form.cleaned_data['environment']
 
                 client.create_interface().inserir(
                     name, protected, description, None, None, equip['id'], int_type)
