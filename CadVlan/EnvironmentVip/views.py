@@ -236,7 +236,7 @@ def edit_form(request, id_environmentvip):
             options = [options]
 
         if type(environment_related_list) is dict:
-            related_environments_list = [environment_related_list]
+            environment_related_list = [environment_related_list]
 
         if request.method == "POST":
 
