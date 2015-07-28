@@ -128,8 +128,8 @@ class AddInterfaceForm(forms.Form):
         type_choices.insert(0, (0, "Selecione um tipo de interface"))
         self.fields['int_type'].choices = type_choices
 
-        ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
-                         " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
+        ambiente_choice = ([(env['id'], env["nome_divisao"] + " - " + env["nome_ambiente_logico"] +
+                         " - " + env["nome_grupo_l3"]) for env in environment_list["ambiente"]])
         self.fields['environment'].choices = ambiente_choice
 
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
@@ -143,7 +143,7 @@ class AddInterfaceForm(forms.Form):
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     int_type = forms.ChoiceField(label="Tipo de Interface", required=False, error_messages=error_messages,
                                   widget=forms.Select(attrs={'style': "width: 250px"}))
-    environment = forms.MultipleChoiceField(label=u'Ambiente', required=False, error_messages=error_messages,
+    environment = forms.MultipleChoiceField(label=u'Ambientes Disponíveis', required=False, error_messages=error_messages,
                                   widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
 
     def clean_name(self):
