@@ -25,11 +25,11 @@ def populate_expectstring_choices(client):
 
 
 def populate_enviroments_choices(client):
-    enviroments = client.create_ambiente().list_all()
+    enviroments = client.create_pool().list_all_environment_related_environment_vip()
 
     # Format enviroments
     enviroments_choices = [('', '-')]
-    for obj in enviroments['ambiente']:
+    for obj in enviroments:
         enviroments_choices.append((obj['id'], "%s - %s - %s" % (obj['divisao_dc_name'],
                                                                  obj['ambiente_logico_name'],
                                                                  obj['grupo_l3_name'])))
