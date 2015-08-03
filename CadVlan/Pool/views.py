@@ -466,7 +466,7 @@ def modal_ip_list_real(request, client_api):
 
         # Valid Equipament
         equip = client_api.create_equipamento().listar_por_nome(equip_name).get("equipamento")
-        ips = client_api.create_equipamento().get_ips_by_equipment_and_environment(equip_name, ambiente)
+        ips = client_api.create_pool().get_available_ips_to_add_server_pool(equip_name, ambiente)
 
     except NetworkAPIClientError, e:
         logger.error(e)
