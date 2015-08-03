@@ -2849,9 +2849,11 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
                 ipv6 = obj_member.get('ipv6')
                 ip_obj = ipv4 or ipv6
 
-                equipment = client.create_pool().get_equip_by_ip(
-                    ip_obj.get('id')
-                )
+                # equipment = client.create_pool().get_equip_by_ip(ip_obj.get('id'))
+
+                # get_equip_by_ip method can return many equipments related with those Ips,
+                # this is an error, because the equipment returned cannot be the same
+                equipment = client.create_equipamento().listar_por_nome(obj_member['equipment_name'])
 
                 server_pool_members.append({
                     'id': obj_member['id'],

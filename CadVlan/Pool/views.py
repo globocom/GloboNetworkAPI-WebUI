@@ -904,7 +904,12 @@ def manage_tab3(request, id_server_pool):
 
                     if len(pool['server_pool_members']) > 0:
                         for obj in pool['server_pool_members']:
-                            equip = client.create_pool().get_equip_by_ip(obj['ip']['id'])
+
+                            # get_equip_by_ip method can return many equipments related with those Ips,
+                            # this is an error, because the equipment returned cannot be the same
+
+                            # equip = client.create_pool().get_equip_by_ip(obj['ip']['id'])
+                            equip = client.create_equipamento().listar_por_nome(obj['equipment_name'])
                             ip = ''
                             if obj['ip']:
                                 ip = obj['ip']['ip_formated']
