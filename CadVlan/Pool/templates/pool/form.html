@@ -101,6 +101,27 @@
                     success: function(data, textStatus, xhr) {
                         $('#content-ip').html(data);
                         $("#dialog_ip").dialog("open");
+                        $('#messages').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
+                    },
+                    error: function(data, textStatus, xhr) {
+
+                        response = JSON.parse(data.responseText);
+
+                        message_html = '<div class="ui-widget error-messages">'
+                            + '<p></p>'
+                            + '<div id="messagesError" class="ui-state-error ui-corner-all error">'
+                                + '<span class="ui-icon"></span>' + response.message + '</div>'
+                            + '<p></p>'
+                        + '</div>';
+
+                        $('#messages').html(message_html);
+
+                        $(".error-messages").each(function() {
+                            var $divMessage = $(this);
+                            $divMessage.click(function(){
+                                $divMessage.animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+                            });
+                        });
                     }
                 });
             }

@@ -470,8 +470,8 @@ def modal_ip_list_real(request, client_api):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
         status_code = 500
+        return HttpResponse(json.dumps({'message': e.error}), status=status_code, content_type='application/json')
 
     if ips and ips['list_ipv4'] and type(ips['list_ipv4']) is not type([]):
         ips['list_ipv4'] = [ips['list_ipv4']]
