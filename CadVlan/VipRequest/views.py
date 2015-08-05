@@ -2818,6 +2818,7 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
         pool_id = request.GET.get('pool_id')
 
         action = reverse('external.save.pool') if external else reverse('save.pool')
+        load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
 
         pool = client.create_pool().get_by_pk(pool_id)
 
@@ -2891,6 +2892,7 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
         context_attrs = {
             'form': form,
             'action': action,
+            'load_pool_url':load_pool_url,
             'pool_members': server_pool_members,
             'id_server_pool': pool_id,
             'selection_form': DeleteForm(),
@@ -3120,6 +3122,7 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         env_vip_id = request.GET.get('env_vip_id')
 
         action = reverse('external.save.pool') if external else reverse('save.pool')
+        load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
 
         expect_string_list = client.create_ambiente()\
             .listar_healtchcheck_expect_distinct()
@@ -3138,6 +3141,7 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
             templates.VIPREQUEST_POOL_FORM, {
                 'form': form,
                 'action': action,
+                'load_pool_url': load_pool_url,
                 'pool_members': pool_members,
                 'expect_strings': expect_string_list,
                 'show_environment': True

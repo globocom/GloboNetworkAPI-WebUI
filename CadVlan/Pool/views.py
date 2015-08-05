@@ -447,9 +447,6 @@ def ajax_modal_ip_real_server(request):
     return modal_ip_list_real(request, client_api)
 
 
-@log
-@login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "read": True, "write": True}])
 def modal_ip_list_real(request, client_api):
 
     lists = dict()

@@ -66,7 +66,7 @@
             if ( val_equip_name != '' ) {
                 $.ajax({
                     data: { id_environment: $('#id_environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
-                    url: "{% url pool.modal.ips.ajax %}",
+                    url: "{{ load_pool_url }}",
                     success: function(data, textStatus, xhr) {
                         $('#content-ip').html(data);
                         $("#dialog_ip").dialog("open");
