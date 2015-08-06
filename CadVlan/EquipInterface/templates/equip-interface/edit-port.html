@@ -15,20 +15,21 @@
   limitations under the License.
 -->
 {% load util %}
-
 <style>
 #ambiente ul li {
 	display: block;
 }
 </style>
-
 <script type="text/javascript">
 $(document).ready(function() {
 	defName({{ counter }}, {{ brand }});
+    $("#btn_edit").button({ icons: {primary: "ui-icon-pencil"}});
+
 });
 </script>
 
 <div style="position: relative; background-color: {% if rowcolors %}{{ rowcolors }}{% else %}#fefefe{% endif %};">
+
     <div style="float: left; padding-top: 4px; padding-left: 10px; width: 50%;">
     {% csrf_token %}
     {% for field in form %}
@@ -59,6 +60,7 @@ $(document).ready(function() {
             {% endifequal %}
         {% endif %}
     {% endfor %}
+    <a href="{% url home %}" target="blank"><button type="button" id="btn_edit">Editar</button></a>
     </div>
     {% ifequal equip_type '8' %}
         {% if formset %}
@@ -118,7 +120,8 @@ $(document).ready(function() {
             {{ form.equip_name.value }}
         </a>
     </div>
+    <div style="clear: left;">
+    </div>
 
-    <div style="clear: left;"></div>
 </div>
 

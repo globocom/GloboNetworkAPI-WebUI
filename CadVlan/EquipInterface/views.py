@@ -18,7 +18,8 @@
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM
+from CadVlan.templates import EQUIPMENT_INTERFACE_EDIT, EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, \
+                              EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
@@ -31,7 +32,7 @@ from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
-from CadVlan.EquipInterface.forms import AddInterfaceForm, AddSeveralInterfaceForm, ConnectForm
+from CadVlan.EquipInterface.forms import AddInterfaceForm, AddSeveralInterfaceForm, ConnectForm, EditForm
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
 
@@ -180,26 +181,23 @@ def add_form(request, equip_name):
     interface_list = interface_list.get('map')
     if len(interface_list) < 2:
         raise InterfaceNaoExisteError(u'A interface do Servidor deve estar ligada ao Uplink.')
+
     nome_rack = None
     if 'LF-' in interface_list[0]['equipamento_nome']:
         if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
             nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
-    try:
-        racks = client.create_rack().get_rack(nome_rack)
-        rack = racks.get('rack')
-        id_rack = rack[0]['id']
-        environment_list = client.create_rack().list_all_rack_environments(id_rack)
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        return redirect('equip.interface.search.list')
+
+    racks = client.create_rack().get_rack(nome_rack)
+    rack = racks.get('rack')
+    id_rack = rack[0]['id']
+
+    environment_list = client.create_rack().list_all_rack_environments(id_rack)
 
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
     lists['form'] = AddInterfaceForm(environment_list, int_type_list, brand, 0, initial={'equip_name': equip['nome'],
                                                                                          'equip_id': equip['id']})
-
     # If form was submited
     if request.method == "POST":
 
@@ -210,22 +208,17 @@ def add_form(request, equip_name):
             if form.is_valid():
 
                 name = form.cleaned_data['name']
-                description = form.cleaned_data['description']
                 protected = form.cleaned_data['protected']
                 int_type = form.cleaned_data['int_type']
-                envs = form.cleaned_data['environment']
 
-                client.create_interface().inserir(
-                    name, protected, description, None, None, equip['id'], int_type)
-                messages.add_message(
-                    request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
+                id_int = client.create_interface().inserir(name, protected, None, None, None, equip['id'], int_type, None)
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
 
-                # Redirect to list_all action
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_name) > 2:
                     url_param = url_param + "?equip_name=" + equip_name
-                return HttpResponseRedirect(url_param)
 
+                return HttpResponseRedirect(url_param)
             else:
                 lists['form'] = form
 
@@ -438,7 +431,7 @@ def edit_form(request, equip_name, id_interface):
 
     initials, params, equip_types, up, down, front_or_back = make_initials_and_params(related_list, int_type_list)
 
-    AddInterfaceFormSet = formset_factory(AddInterfaceForm, params=params, equip_types=equip_types, up=up, down=down,
+    EditFormSet = formset_factory(EditForm, params=params, equip_types=equip_types, up=up, down=down,
                                      front_or_back=front_or_back, extra=len(related_list), max_num=len(related_list))
 
     lists['equip_name'] = equip_name
@@ -447,7 +440,7 @@ def edit_form(request, equip_name, id_interface):
 
     if request.method == "POST":
 
-        form_set = AddInterfaceFormSet(request.POST)
+        form_set = EditFormSet(request.POST)
 
         if form_set.is_valid():
 
@@ -476,7 +469,7 @@ def edit_form(request, equip_name, id_interface):
         else:
             lists['formset'] = form_set
     else:
-        lists['formset'] = AddInterfaceFormSet(initial=initials)
+        lists['formset'] = EditFormSet(initial=initials)
 
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_FORM, lists, context_instance=RequestContext(request))
 

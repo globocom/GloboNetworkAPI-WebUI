@@ -168,7 +168,7 @@ $(document).ready(function() {
 	});
 	
 	$("#page_tab").tabs();
-	
+
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function() {
 		$("#edit_form").submit();
 	});
@@ -232,7 +232,7 @@ $(document).ready(function() {
 				{{ formset.management_form }}
 				{% for interface_form in formset %}
 					{% cycle "#fdfdfd" "#f5f5f5" as rowcolors silent %}
-					{% include "equip-interface/add-form.html" with form=interface_form up=formset.up.pop down=formset.down.pop equip_type=formset.equip_types.pop rowcolors=rowcolors counter=forloop.counter0 counter1=forloop.counter brand=formset.params.pop %}
+					{% include "equip-interface/edit-port.html" with form=interface_form up=formset.up.pop down=formset.down.pop equip_type=formset.equip_types.pop rowcolors=rowcolors counter=forloop.counter0 counter1=forloop.counter brand=formset.params.pop %}
 		        {% endfor %}
 			</form>
 			<div style="clear: both;"></div>

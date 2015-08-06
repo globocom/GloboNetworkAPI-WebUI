@@ -23,12 +23,12 @@
 {% block header %}
 <style>
 #fields ul li {
-	list-style: none;
-	display: inline-block;
+    list-style: none;
+    display: inline-block;
 }
 </style>
-<script type="text/javascript">
 
+<script type="text/javascript">
 var marca_id_store;
 
 function defName(index) {
@@ -164,7 +164,13 @@ $(document).ready(function() {
 			location.href = "{% url equip.interface.search.list %}";
 		}
 	});
-	
+
+    $("#btn_addvlan").button({ icons: {primary: "ui-icon-search"}, text: false });
+
+    $("#btn_addvlan").mouseover(function() {
+            $("#btn_addvlan").attr("title","Pesquisar Vlan");
+    });
+
 	$("textarea").maxlength();
 
 	$("#id_environment").pickList();
