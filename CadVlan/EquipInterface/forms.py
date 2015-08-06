@@ -125,9 +125,8 @@ class AddInterfaceForm(forms.Form):
         else:
             self.regex = ""
 
-        ambiente_choice = ([(env['id'], env["nome_divisao"] + " - " + env["nome_ambiente_logico"] + " - " +
-                             env["nome_grupo_l3"]) for env in envs["ambiente"]])
-
+        ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " +
+                         env["grupo_l3_name"]) for env in envs["ambiente"]])
         self.fields['environment'].choices = ambiente_choice
 
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)

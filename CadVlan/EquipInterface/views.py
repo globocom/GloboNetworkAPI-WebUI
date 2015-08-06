@@ -176,22 +176,27 @@ def add_form(request, equip_name):
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     int_type_list = client.create_interface().list_all_interface_types()
 
+    environment_list = []
     #lista de ambientes
-    interface_list = client.create_interface().listar_switch_router(equip['id'])
-    interface_list = interface_list.get('map')
-    if len(interface_list) < 2:
-        raise InterfaceNaoExisteError(u'A interface do Servidor deve estar ligada ao Uplink.')
+    try:
+        interface_list = client.create_interface().listar_switch_router(equip['id'])
+        interface_list = interface_list.get('map')
+        if len(interface_list) < 2:
+            raise InterfaceNaoExisteError(u'A interface do Servidor deve estar ligada ao Uplink.')
 
-    nome_rack = None
-    if 'LF-' in interface_list[0]['equipamento_nome']:
-        if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
-            nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
+        nome_rack = None
+        if 'LF-' in interface_list[0]['equipamento_nome']:
+            if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
+                nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
 
-    racks = client.create_rack().get_rack(nome_rack)
-    rack = racks.get('rack')
-    id_rack = rack[0]['id']
+        racks = client.create_rack().get_rack(nome_rack)
+        rack = racks.get('rack')
+        id_rack = rack[0]['id']
 
-    environment_list = client.create_rack().list_all_rack_environments(id_rack)
+        environment_list = client.create_rack().list_all_rack_environments(id_rack)
+    except:
+        pass
+        environment_list = client.create_ambiente().list_all()
 
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
