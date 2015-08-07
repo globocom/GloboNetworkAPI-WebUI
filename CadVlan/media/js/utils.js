@@ -317,7 +317,7 @@ function addMessageModal(data) {
 	var divMessage = '';
 	var classMessage = data.status === 'error' ? 'ui-state-error':'ui-state-highlight'
 		
-	divMessage += '<div class="ui-widget error-messages">';
+	divMessage += '<div class="ui-widget error-messages" style="display:none">';
 	divMessage += '<p></p>';
 	divMessage += '<div id="messagesError" class="'+classMessage+" ui-corner-all>";
 	divMessage += '<span class="ui-icon"></span>';
@@ -325,16 +325,13 @@ function addMessageModal(data) {
 	divMessage += '</div>';
 	divMessage += '<p></p>';
 	divMessage += '</div>';
-	
-	$('div#messagesModal').append(divMessage);
-	
-	$(".error-messages").last().each(function() {
-		var $divMessage = $(this);
 
-		$divMessage.click(function(){
+	var messageModal = $('div#messagesModal');
+	messageModal.html(divMessage).show();
 
-            $divMessage.animate({ opacity: 'toggle', height: 'toggle' }, "slow");
-
-        });
+	$(".error-messages", messageModal).unbind().click(function(){
+        $(this).hide('slow')
 	});
+
+	$(".error-messages", messageModal).show('slow')
 }

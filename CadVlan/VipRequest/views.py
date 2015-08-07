@@ -2954,7 +2954,7 @@ def _create_options_vip(client):
 
 def _create_options_environment(client, env_vip_id):
 
-    choices_environment = [(0, '-')]
+    choices_environment = [('', '-')]
 
     environments = client.create_api_vip_request()\
         .list_environment_by_environmet_vip(env_vip_id)

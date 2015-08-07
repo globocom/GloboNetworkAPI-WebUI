@@ -73,24 +73,8 @@
                         $('#messagesModal').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
                     },
                     error: function(data, textStatus, xhr) {
-
-                        response = JSON.parse(data.responseText);
-
-                        message_html = '<div class="ui-widget error-messages">'
-                            + '<p></p>'
-                            + '<div id="messagesError" class="ui-state-error ui-corner-all error">'
-                                + '<span class="ui-icon"></span>' + response.message + '</div>'
-                            + '<p></p>'
-                        + '</div>';
-
-                        $('#messagesModal').html(message_html);
-
-                        $(".error-messages").each(function() {
-                            var $divMessage = $(this);
-                            $divMessage.click(function(){
-                                $divMessage.animate({ opacity: 'toggle', height: 'toggle' }, "slow");
-                            });
-                        });
+                        message = jQuery.parseJSON(error.responseText);
+						addMessageModal(message);
                     }
                 });
             }
