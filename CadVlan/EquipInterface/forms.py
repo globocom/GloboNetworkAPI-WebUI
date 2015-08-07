@@ -132,7 +132,7 @@ class AddInterfaceForm(forms.Form):
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
     name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
     protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
-                                  widget=forms.RadioSelect, initial=0)
+                                  widget=forms.RadioSelect)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)

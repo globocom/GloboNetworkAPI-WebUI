@@ -60,7 +60,7 @@ $(document).ready(function() {
             {% endifequal %}
         {% endif %}
     {% endfor %}
-    <a href="{% url home %}" target="blank"><button type="button" id="btn_edit">Editar</button></a>
+    <a href="{% url equip.interface.edit id_interface %}" target="blank"><button type="button" id="btn_edit">Editar</button></a>
     </div>
     {% ifequal equip_type '8' %}
         {% if formset %}

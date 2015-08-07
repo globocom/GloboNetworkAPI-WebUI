@@ -157,7 +157,7 @@ def delete_all(request):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def add_form(request, equip_name):
+def add_form(request, equip_name=None):
 
     lists = dict()
 
@@ -477,6 +477,102 @@ def edit_form(request, equip_name, id_interface):
         lists['formset'] = EditFormSet(initial=initials)
 
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_FORM, lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def edit(request, id_interface=None):
+
+    lists = dict()
+
+    # Get user
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    try:
+        interface = client.create_interface().get_by_id(id_interface)
+        interface = interface.get('interface')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('equip.interface.search.list')
+
+    equip_name = interface.get('equipamento_nome')
+
+    try:
+        equip = client.create_equipamento().listar_por_nome(equip_name)
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('equip.interface.search.list')
+
+    equip = equip.get('equipamento')
+    brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
+    int_type_list = client.create_interface().list_all_interface_types()
+
+    #lista de ambientes
+    try:
+        interface_list = client.create_interface().listar_switch_router(equip['id'])
+        interface_list = interface_list.get('map')
+
+        nome_rack = None
+        if 'LF-' in interface_list[0]['equipamento_nome']:
+            if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
+                nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
+
+        racks = client.create_rack().get_rack(nome_rack)
+        rack = racks.get('rack')
+        id_rack = rack[0]['id']
+
+        environment_list = client.create_rack().list_all_rack_environments(id_rack)
+    except:
+        pass
+        environment_list = client.create_ambiente().list_all()
+
+    tipo = 0
+    if "trunk" in interface.get('tipo'):
+        tipo = 1
+
+    protegida = 1
+    if  interface.get('protegida')=="False":
+        protegida = 0
+
+    lists['equip_type'] = equip['id_tipo_equipamento']
+    lists['brand'] = brand
+    lists['int_type'] = int_type_list
+    lists['form'] = AddInterfaceForm(environment_list, int_type_list, brand, 0, initial={'equip_name': equip['nome'],
+                                                                                         'equip_id': equip['id'], 'name': interface.get('interface'), 'protected': protegida, 'int_type': tipo, 'vlan': interface.get('vlan') })
+    # If form was submited
+    if request.method == "POST":
+
+        form = AddInterfaceForm(environment_list, int_type_list, brand, 0, request.POST)
+
+        try:
+
+            if form.is_valid():
+
+                name = form.cleaned_data['name']
+                protected = form.cleaned_data['protected']
+                int_type = form.cleaned_data['int_type']
+
+                id_int = client.create_interface().inserir(name, protected, None, None, None, equip['id'], int_type, None)
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
+
+                url_param = reverse("equip.interface.search.list")
+                if len(equip_name) > 2:
+                    url_param = url_param + "?equip_name=" + equip_name
+
+                return HttpResponseRedirect(url_param)
+            else:
+                lists['form'] = form
+
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            lists['form'] = form
+            messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(EQUIPMENT_INTERFACE_FORM, lists, context_instance=RequestContext(request))
 
 
 @log
