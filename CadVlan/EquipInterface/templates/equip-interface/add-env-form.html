@@ -1,0 +1,48 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% load util %}
+
+<style>
+#ambiente ul li {
+	display: block;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {});
+</script>
+
+<div style="position: relative; background-color: {% if rowcolors %}{{ rowcolors }}{% else %}#fefefe{% endif %};">
+    <div style="float: left; padding-top: 4px; padding-left: 10px; width: 50%;">
+    {% csrf_token %}
+    {% for field in envform %}
+        <div>
+            <label for="{{ field.auto_id }}">
+                 {{ field.label_tag }}
+             </label>
+        </div> 
+        {{ field }}
+         <p id="error"> 
+            {% if field.errors %} 
+                {% for error in field.errors %} 
+                    {{ error|escape }} 
+                {% endfor %} 
+            {% endif %} 
+        </p>
+    {% endfor %}
+    </div>
+</div>

@@ -35,25 +35,25 @@ $(document).ready(function() {
         {% if field.is_hidden %}
             {{ field }}
         {% else %}
-            <div style="{% if forloop.counter < 3 %}float: left;{% endif %}" id="{% ifequal field.name 'environment' %}ambiente{% endifequal %}">
-                <div>
-                    <label for="{{ field.auto_id }}">
-                        {% if forloop.first %}&nbsp;{% endif %}
-                        {{ field.label_tag }}
-                        {% if field.field.required %}
-                            <span style="color: red;">*</span>
-                        {% endif %}
-                    </label>
+                <div style="{% if forloop.counter < 3 %}float: left;{% endif %}">
+                    <div>
+                        <label for="{{ field.auto_id }}">
+                            {% if forloop.first %}&nbsp;{% endif %}
+                            {{ field.label_tag }}
+                            {% if field.field.required %}
+                                <span style="color: red;">*</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                    {{ field }} {% ifequal field.name 'vlan' %}<a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>{% endifequal %}
+                    <p id="error">
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                    {% endif %}
+                    </p>
                 </div>
-                {{ field }} {% ifequal field.name 'vlan' %}<a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>{% endifequal %}
-                <p id="error">
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
             {% ifequal forloop.counter 2 %}
                 <div style="clear: left;"></div>
             {% endifequal %}

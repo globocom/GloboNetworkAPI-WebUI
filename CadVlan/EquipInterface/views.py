@@ -32,7 +32,7 @@ from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
-from CadVlan.EquipInterface.forms import AddInterfaceForm, AddSeveralInterfaceForm, ConnectForm, EditForm
+from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, AddSeveralInterfaceForm, ConnectForm, EditForm
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
 
@@ -201,8 +201,9 @@ def add_form(request, equip_name=None):
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
-    lists['form'] = AddInterfaceForm(environment_list, int_type_list, brand, 0, initial={'equip_name': equip['nome'],
+    lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'],
                                                                                          'equip_id': equip['id']})
+    lists['envform'] = AddEnvInterfaceForm(environment_list)
     # If form was submited
     if request.method == "POST":
 

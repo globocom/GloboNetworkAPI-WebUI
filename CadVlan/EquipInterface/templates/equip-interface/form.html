@@ -26,6 +26,7 @@
     list-style: none;
     display: inline-block;
 }
+
 </style>
 
 <script type="text/javascript">
@@ -149,7 +150,7 @@ if (typeof String.prototype.startsWith != 'function') {
 $(document).ready(function() {
 	
 	defName();
-	
+
 	$("#page_tab").tabs();
 	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function() {
@@ -178,7 +179,16 @@ $(document).ready(function() {
 	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
 	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
 	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
-	
+
+	$("#ambiente").hide();
+
+	$("#id_int_type_0").click( function() {
+		$("#ambiente").hide();
+	});
+
+	$("#id_int_type_1").click( function() {
+		$("#ambiente").show();
+	});
 });
 </script>
 {% endblock %}
@@ -190,9 +200,14 @@ $(document).ready(function() {
 	</ul>
 	<div id="tabs-1">
 		<div id="fields" class="ui-widget-content">
-			<form id="add_form" method="post">
-				{% include "equip-interface/add-form.html" %}
-			</form>
+            <div id="interfaceform">
+                {% include "equip-interface/add-form.html" %}
+            </div>
+            <div id="ambiente">
+                <form id="add_env_form" method="post">
+                    {% include "equip-interface/add-env-form.html" %}
+                </form>
+            </div>
 			<div style="clear: both;"></div>
 		</div>
 		

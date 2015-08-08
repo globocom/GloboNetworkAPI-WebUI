@@ -82,7 +82,7 @@ class ConnectForm(forms.Form):
 
 class AddInterfaceForm(forms.Form):
 
-    def __init__(self, envs, int_type_list, marca, index, *args, **kwargs):
+    def __init__(self, int_type_list, marca, index, *args, **kwargs):
         super(AddInterfaceForm, self).__init__(*args, **kwargs)
 
         attrs = dict()
@@ -125,14 +125,10 @@ class AddInterfaceForm(forms.Form):
         else:
             self.regex = ""
 
-        ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " +
-                         env["grupo_l3_name"]) for env in envs["ambiente"]])
-        self.fields['environment'].choices = ambiente_choice
-
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
     name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
     protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
-                                  widget=forms.RadioSelect)
+                                  widget=forms.RadioSelect, initial=0)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
@@ -140,8 +136,6 @@ class AddInterfaceForm(forms.Form):
                                   widget=forms.RadioSelect, initial=0)
     vlan = forms.CharField(label="Numero da Vlan", required=False, error_messages=error_messages, min_length=1, max_length=5)
 
-    environment = forms.ChoiceField(label=u'Ambientes Disponiveis', required=False, error_messages=error_messages,
-                                  widget=forms.Select(attrs={'style': "width: 250px"}))
 
     def clean_name(self):
         name = self.cleaned_data['name']
@@ -150,6 +144,18 @@ class AddInterfaceForm(forms.Form):
                 'Nome da interface inválida para esta marca')
 
         return self.cleaned_data['name']
+
+class AddEnvInterfaceForm(forms.Form):
+
+    def __init__(self, envs, *args, **kwargs):
+        super(AddEnvInterfaceForm, self).__init__(*args, **kwargs)
+
+        ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " +
+                         env["grupo_l3_name"]) for env in envs["ambiente"]])
+        self.fields['environment'].choices = ambiente_choice
+
+    environment = forms.MultipleChoiceField(label=u'Ambientes Disponiveis', required=False, error_messages=error_messages,
+                                  widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
 
 
 class AddSeveralInterfaceForm(forms.Form):
