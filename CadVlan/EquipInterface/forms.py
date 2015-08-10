@@ -145,6 +145,15 @@ class AddInterfaceForm(forms.Form):
 
         return self.cleaned_data['name']
 
+    def clean_type(self):
+        int_type = self.cleaned_data['int_type']
+        if int_type:
+            self.cleaned_data['int_type'] = "access"
+        else:
+            self.cleaned_data['int_type'] = "trunk"
+
+        return self.cleaned_data['int_type']
+
 class AddEnvInterfaceForm(forms.Form):
 
     def __init__(self, envs, *args, **kwargs):

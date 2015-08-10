@@ -176,7 +176,6 @@ def add_form(request, equip_name=None):
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     int_type_list = client.create_interface().list_all_interface_types()
 
-    environment_list = []
     #lista de ambientes
     try:
         interface_list = client.create_interface().listar_switch_router(equip['id'])
@@ -201,13 +200,14 @@ def add_form(request, equip_name=None):
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
-    lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'],
-                                                                                         'equip_id': equip['id']})
+    lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'],'equip_id': equip['id']})
     lists['envform'] = AddEnvInterfaceForm(environment_list)
+
     # If form was submited
     if request.method == "POST":
 
-        form = AddInterfaceForm(environment_list, int_type_list, brand, 0, request.POST)
+        form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
+        envform = AddEnvInterfaceForm(environment_list, request.POST)
 
         try:
 
@@ -216,8 +216,14 @@ def add_form(request, equip_name=None):
                 name = form.cleaned_data['name']
                 protected = form.cleaned_data['protected']
                 int_type = form.cleaned_data['int_type']
+                vlan = form.cleaned_data['vlan']
 
-                id_int = client.create_interface().inserir(name, protected, None, None, None, equip['id'], int_type, None)
+                if int_type=="0":
+                    int_type = "access"
+                else:
+                    int_type = "trunk"
+
+                id_int = client.create_interface().inserir(name, protected, None, None, None, equip['id'], int_type, vlan)
                 messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
 
                 url_param = reverse("equip.interface.search.list")
@@ -227,6 +233,7 @@ def add_form(request, equip_name=None):
                 return HttpResponseRedirect(url_param)
             else:
                 lists['form'] = form
+                lists['envform'] = envform
 
         except NetworkAPIClientError, e:
             logger.error(e)
