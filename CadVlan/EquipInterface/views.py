@@ -166,7 +166,7 @@ def add_form(request, equip_name=None):
     client = auth.get_clientFactory()
 
     try:
-        equip = client.create_equipamento().listar_por_nome(equip_name)
+        equip = client.create_equipamento().listar_por_nome(str(equip_name))
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -198,10 +198,13 @@ def add_form(request, equip_name=None):
         environment_list = client.create_ambiente().list_all()
 
     lists['equip_type'] = equip['id_tipo_equipamento']
+    lists['equip_name'] = equip['nome']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
-    lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'],'equip_id': equip['id']})
-    lists['envform'] = AddEnvInterfaceForm(environment_list)
+
+    if request.method == "GET":
+        lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'],'equip_id': equip['id']})
+        lists['envform'] = AddEnvInterfaceForm(environment_list)
 
     # If form was submited
     if request.method == "POST":
@@ -211,20 +214,31 @@ def add_form(request, equip_name=None):
 
         try:
 
-            if form.is_valid():
+            if form.is_valid() and envform.is_valid():
 
                 name = form.cleaned_data['name']
                 protected = form.cleaned_data['protected']
                 int_type = form.cleaned_data['int_type']
                 vlan = form.cleaned_data['vlan']
+                envs = envform.cleaned_data['environment']
 
+                trunk = 0
                 if int_type=="0":
                     int_type = "access"
                 else:
                     int_type = "trunk"
+                    trunk = 1
 
                 id_int = client.create_interface().inserir(name, protected, None, None, None, equip['id'], int_type, vlan)
                 messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
+
+                id_int = id_int.get("interface")
+
+                if trunk:
+                    for env in envs:
+                        client.create_interface().associar_ambiente(env, id_int['id'])
+
+                #success_insert: env, interface
 
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_name) > 2:
@@ -238,6 +252,7 @@ def add_form(request, equip_name=None):
         except NetworkAPIClientError, e:
             logger.error(e)
             lists['form'] = form
+            lists['envform'] = envform
             messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(EQUIPMENT_INTERFACE_FORM, lists, context_instance=RequestContext(request))

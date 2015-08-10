@@ -200,16 +200,14 @@ $(document).ready(function() {
 	</ul>
 	<div id="tabs-1">
 		<div id="fields" class="ui-widget-content">
-            <div id="interfaceform">
-				<form id="add_form" method="post">
-                	{% include "equip-interface/add-form.html" %}
-				</form>
-            </div>
-            <div id="ambiente">
-                <form id="add_env_form" method="post">
+            <form id="add_form" method="post" action="{% url equip.interface.form equip_name %}">
+                <div id="interfaceform">
+                    {% include "equip-interface/add-form.html" %}
+                </div>
+                <div id="ambiente">
                     {% include "equip-interface/add-env-form.html" %}
-                </form>
-            </div>
+                </div>
+            </form>
 			<div style="clear: both;"></div>
 		</div>
 		
