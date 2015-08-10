@@ -72,7 +72,7 @@
                         $("#dialog_ip").dialog("open");
                         $('#messagesModal').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
                     },
-                    error: function(data, textStatus, xhr) {
+                    error: function(error, textStatus, xhr) {
                         message = jQuery.parseJSON(error.responseText);
 						addMessageModal(message);
                     }
