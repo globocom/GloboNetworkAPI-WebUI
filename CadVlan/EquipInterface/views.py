@@ -564,8 +564,9 @@ def edit(request, id_interface):
                 messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
 
                 if trunk:
+                    client.create_interface().dissociar(id_interface)
                     for env in envs:
-                        client.create_interface().associar_ambiente(env, id_int['id'])
+                        client.create_interface().associar_ambiente(env, id_interface)
 
                 #success_insert: env, interface
 
