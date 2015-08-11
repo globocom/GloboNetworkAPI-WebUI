@@ -196,11 +196,11 @@ $(document).ready(function() {
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Interfaces</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">{% ifequal id None %}Cadastro de Interfaces{% else %}Editar Interface{% endifequal %}</a></li>
 	</ul>
 	<div id="tabs-1">
 		<div id="fields" class="ui-widget-content">
-            <form id="add_form" method="post" action="{% url equip.interface.form equip_name %}">
+            <form id="add_form" method="post" action="{% ifequal id None %}{% url equip.interface.form equip_name %}{% else %}{% url equip.interface.edit id %}{% endifequal %}">
                 <div id="interfaceform">
                     {% include "equip-interface/add-form.html" %}
                 </div>

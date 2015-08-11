@@ -18,7 +18,7 @@
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.templates import EQUIPMENT_INTERFACE_EDIT, EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, \
+from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, \
                               EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect
@@ -194,12 +194,13 @@ def add_form(request, equip_name=None):
     lists['equip_name'] = equip['nome']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
+    lists['id'] = None
 
     if request.method == "GET":
         lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'],'equip_id': equip['id']})
         lists['envform'] = AddEnvInterfaceForm(environment_list)
 
-    # If form was submited
+
     if request.method == "POST":
 
         form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
@@ -457,40 +458,7 @@ def edit_form(request, equip_name, id_interface):
 
     lists['equip_name'] = equip_name
     lists['id_interface'] = id_interface
-    #lists['int_type'] = int_type_list
-
-    if request.method == "POST":
-
-        form_set = EditFormSet(request.POST)
-
-        if form_set.is_valid():
-
-            for form in form_set:
-
-                idt = form.cleaned_data['inter_id']
-                name = form.cleaned_data['name']
-                description = form.cleaned_data['description']
-                protected = form.cleaned_data['protected']
-
-
-                old_interf = client.create_interface().get_by_id(
-                    idt)['interface']
-
-                try:
-                    client.create_interface().alterar(idt, name, protected, description,
-                                                      old_interf['ligacao_front'], old_interf['ligacao_back'])
-                    messages.add_message(
-                        request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
-                except NetworkAPIClientError, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
-
-            return redirect("equip.interface.edit.form", equip_name, id_interface)
-
-        else:
-            lists['formset'] = form_set
-    else:
-        lists['formset'] = EditFormSet(initial=initials)
+    lists['formset'] = EditFormSet(initial=initials)
 
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_FORM, lists, context_instance=RequestContext(request))
 
@@ -498,7 +466,7 @@ def edit_form(request, equip_name, id_interface):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def edit(request, id_interface=None):
+def edit(request, id_interface):
 
     lists = dict()
 
@@ -514,8 +482,11 @@ def edit(request, id_interface=None):
         messages.add_message(request, messages.ERROR, e)
         return redirect('equip.interface.search.list')
 
+    lig_front = interface.get('ligacao_front')
+    lig_back = interface.get('ligacao_back')
     equip_name = interface.get('equipamento_nome')
     lists['equip_name'] = equip_name
+    lists['id'] = id_interface
 
     try:
         equip = client.create_equipamento().listar_por_nome(equip_name)
@@ -547,48 +518,61 @@ def edit(request, id_interface=None):
         pass
         environment_list = client.create_ambiente().list_all()
 
-    tipo = 0
-    if "trunk" in interface.get('tipo'):
-        tipo = 1
-
-    protegida = 1
-    if  interface.get('protegida')=="False":
-        protegida = 0
-
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
-    lists['tipo'] = str(tipo)
 
     if request.method == "GET":
+
+        tipo = 0
+        if "trunk" in interface.get('tipo'):
+            tipo = 1
+
+        protegida = 1
+        if  interface.get('protegida')=="False":
+            protegida = 0
+
         lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id'],
                                          'name': interface.get('interface'), 'protected': protegida, 'int_type': tipo,
                                          'vlan': interface.get('vlan') })
         lists['envform'] = AddEnvInterfaceForm(environment_list)
 
-    # If form was submited
+
     if request.method == "POST":
 
-        form = AddInterfaceForm(environment_list, int_type_list, brand, 0, request.POST)
+        form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
+        envform = AddEnvInterfaceForm(environment_list, request.POST)
 
         try:
 
-            if form.is_valid():
-
+            if form.is_valid() and envform.is_valid():
                 name = form.cleaned_data['name']
                 protected = form.cleaned_data['protected']
                 int_type = form.cleaned_data['int_type']
+                vlan = form.cleaned_data['vlan']
+                envs = envform.cleaned_data['environment']
 
-                id_int = client.create_interface().inserir(name, protected, None, None, None, equip['id'], int_type, None)
-                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
+                trunk = 0
+                if int_type=="0":
+                    int_type = "access"
+                else:
+                    int_type = "trunk"
+                    trunk = 1
 
-                url_param = reverse("equip.interface.search.list")
-                if len(equip_name) > 2:
-                    url_param = url_param + "?equip_name=" + equip_name
+                id_int = client.create_interface().alterar(id_interface, name, protected, None, lig_front, lig_back,
+                                                           int_type, vlan)
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
 
-                return HttpResponseRedirect(url_param)
+                if trunk:
+                    for env in envs:
+                        client.create_interface().associar_ambiente(env, id_int['id'])
+
+                #success_insert: env, interface
+
+                return HttpResponseRedirect(reverse('equip.interface.edit.form', args=[equip_name, id_interface]))
             else:
                 lists['form'] = form
+                lists['envform'] = envform
 
         except NetworkAPIClientError, e:
             logger.error(e)
@@ -699,15 +683,17 @@ def connect(request, id_interface, front_or_back):
                                 'Configuração inválida. Loop detectado nas ligações entre patch-panels')
 
                     # Business Rules
-                    interface_client.alterar(inter_front['id'], inter_front['interface'], inter_front[
-                                             'protegida'], inter_front['descricao'], interface['id'], inter_front['ligacao_back'])
+                    interface_client.alterar(inter_front['id'], inter_front['interface'], inter_front['protegida'],
+                                             inter_front['descricao'], interface['id'], inter_front['ligacao_back'],
+                                             inter_front['tipo'], inter_front['vlan'])
                     if front_or_back == "0":
-                        interface_client.alterar(interface['id'], interface['interface'], interface[
-                                                 'protegida'], interface['descricao'], interface['ligacao_front'], inter_front['id'])
-                        #interface_client.alterar(id_interface, nome, protegida, descricao, id_ligacao_front, id_ligacao_back)
+                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'],
+                                                 interface['descricao'], interface['ligacao_front'], inter_front['id'],
+                                                 interface['tipo'], interface['vlan'])
                     else:
-                        interface_client.alterar(interface['id'], interface['interface'], interface[
-                                                 'protegida'], interface['descricao'], inter_front['id'], interface['ligacao_back'])
+                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'],
+                                                 interface['descricao'], inter_front['id'], interface['ligacao_back'],
+                                                 interface['tipo'], interface['vlan'])
 
                 else:
                     # Get back interface selected
@@ -727,14 +713,17 @@ def connect(request, id_interface, front_or_back):
                             raise Exception('Configuração inválida. Loop detectado nas ligações entre patch-panels')
 
                     # Business Rules
-                    interface_client.alterar(inter_back['id'], inter_back['interface'], inter_back[
-                                             'protegida'], inter_back['descricao'], inter_back['ligacao_front'], interface['id'])
+                    interface_client.alterar(inter_back['id'], inter_back['interface'], inter_back['protegida'],
+                                             inter_back['descricao'], inter_back['ligacao_front'], interface['id'],
+                                             inter_back['tipo'], inter_back['vlan'])
                     if front_or_back == "0":
-                        interface_client.alterar(interface['id'], interface['interface'], interface[
-                                                 'protegida'], interface['descricao'], interface['ligacao_front'], inter_back['id'])
+                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'],
+                                                 interface['descricao'], interface['ligacao_front'], inter_back['id'],
+                                                 interface['tipo'], interface['vlan'])
                     else:
-                        interface_client.alterar(interface['id'], interface['interface'], interface[
-                                                 'protegida'], interface['descricao'], inter_back['id'], interface['ligacao_back'])
+                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'],
+                                                 interface['descricao'], inter_back['id'], interface['ligacao_back'],
+                                                 interface['tipo'], interface['vlan'])
 
                 messages.add_message(
                     request, messages.SUCCESS, equip_interface_messages.get("success_connect"))

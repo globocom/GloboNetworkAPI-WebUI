@@ -87,7 +87,7 @@ equip_script_messages = {
 
 equip_interface_messages = {
     'success_insert':       u'Interface incluída com sucesso.',
-    'success_edit':         u'Interfaces alteradas com sucesso.',
+    'success_edit':         u'Interface alterada com sucesso.',
     'success_connect':      u'Interface conectada com sucesso.',
     'success_disconnect':   u'Interface disconectada com sucesso.',
     'success_remove':       u'Todas as interfaces selecionadas foram excluídas com sucesso.',
