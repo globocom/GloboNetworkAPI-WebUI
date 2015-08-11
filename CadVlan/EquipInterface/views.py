@@ -58,8 +58,7 @@ def search_list(request):
             client = auth.get_clientFactory()
 
             if request.GET.__contains__('equip_name'):
-                lists['search_form'] = search_form = SearchEquipForm(
-                    request.GET)
+                lists['search_form'] = search_form = SearchEquipForm(request.GET)
 
                 if search_form.is_valid():
 
@@ -67,15 +66,12 @@ def search_list(request):
                     name_equip = search_form.cleaned_data['equip_name']
 
                     # Get equipment by name from NetworkAPI
-                    equipment = client.create_equipamento().listar_por_nome(
-                        name_equip)['equipamento']
+                    equipment = client.create_equipamento().listar_por_nome(name_equip)['equipamento']
 
                     # Get all interfaces by equipment id
-                    equip_interface_list = client.create_interface().list_all_by_equip(
-                        equipment['id'])
+                    equip_interface_list = client.create_interface().list_all_by_equip(equipment['id'])
 
-                    init_map = {
-                        'equip_name': equipment['nome'], 'equip_id': equipment['id']}
+                    init_map = {'equip_name': equipment['nome'], 'equip_id': equipment['id']}
 
                     # New form
                     del_form = DeleteForm(initial=init_map)
@@ -85,8 +81,7 @@ def search_list(request):
                     lists['search_form'] = search_form
 
                     if equip_interface_list.has_key('interfaces'):
-                        lists['equip_interface'] = equip_interface_list[
-                            'interfaces']
+                        lists['equip_interface'] = equip_interface_list['interfaces']
                     if equipment['id_tipo_equipamento'] == str(PATCH_PANEL_ID):
                         lists['pp'] = "1"
 
@@ -124,10 +119,8 @@ def delete_all(request):
             # For each interface selected
             for id_es in ids:
                 try:
-
                     # Remove in NetworkAPI
                     equip_interface.remover(id_es)
-
                 except NetworkAPIClientError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
@@ -522,6 +515,7 @@ def edit(request, id_interface=None):
         return redirect('equip.interface.search.list')
 
     equip_name = interface.get('equipamento_nome')
+    lists['equip_name'] = equip_name
 
     try:
         equip = client.create_equipamento().listar_por_nome(equip_name)
@@ -564,8 +558,14 @@ def edit(request, id_interface=None):
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
-    lists['form'] = AddInterfaceForm(environment_list, int_type_list, brand, 0, initial={'equip_name': equip['nome'],
-                                                                                         'equip_id': equip['id'], 'name': interface.get('interface'), 'protected': protegida, 'int_type': tipo, 'vlan': interface.get('vlan') })
+    lists['tipo'] = str(tipo)
+
+    if request.method == "GET":
+        lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id'],
+                                         'name': interface.get('interface'), 'protected': protegida, 'int_type': tipo,
+                                         'vlan': interface.get('vlan') })
+        lists['envform'] = AddEnvInterfaceForm(environment_list)
+
     # If form was submited
     if request.method == "POST":
 

@@ -29,7 +29,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, {% ifequal pp "1" %}6{% else %}5{% endifequal %} ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, {% ifequal pp "1" %}7{% else %}6{% endifequal %} ] }]
 	});
 	
 	$("#checkAll").click( function() {
@@ -159,14 +159,24 @@ $(document).ready(function() {
 		</form>
 		{% endif %}
 		<table id="equip_interface_list">
-			<thead>
+            <col width="2%" />
+            <col width="8%" />
+            <col/>
+            {% ifequal pp "1" %}<col/>{% endifequal %}
+            <col width="7%" />
+            <col width="5%" />
+            <col width="7%" />
+            <col width="3%" />
+            <thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th>Interface</th>					
 					<th>Ligação de Front</th>
 					{% ifequal pp "1" %}<th>Ligação de Back</th>{% endifequal %}
 					<th>Protegida</th>
-					<th>Descrição</th>
+					<th>Tipo</th>
+					<th>Vlan Nativa</th>
+
 					<th></th>
 				</tr>
 			</thead>
@@ -178,7 +188,8 @@ $(document).ready(function() {
 					<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_front }}</a> {{ interface.nome_ligacao_front }}</td>
 					{% ifequal pp "1" %}<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_back }}</a> {{ interface.nome_ligacao_back }}</td>{% endifequal %}
 					<td>{% ifequal interface.protegida "True" %}Sim{% else %}Não{% endifequal %}</td>
-					<td>{% ifequal interface.descricao None %}{% else %}{{ interface.descricao }}{% endifequal %}</td>
+					<td>{% ifequal interface.tipo None %}{% else %}{{ interface.tipo }}{% endifequal %}</td>
+					<td>{% ifequal interface.vlan None %}{% else %}{{ interface.vlan }}{% endifequal %}</td>
 					<td class="text_center"><a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}

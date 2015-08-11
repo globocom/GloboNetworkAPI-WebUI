@@ -134,7 +134,7 @@ class AddInterfaceForm(forms.Form):
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")], error_messages=error_messages,
                                   widget=forms.RadioSelect, initial=0)
-    vlan = forms.CharField(label="Numero da Vlan", required=False, error_messages=error_messages, min_length=1, max_length=5)
+    vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1, max_length=5)
 
 
     def clean_name(self):
@@ -160,10 +160,10 @@ class AddEnvInterfaceForm(forms.Form):
         super(AddEnvInterfaceForm, self).__init__(*args, **kwargs)
 
         ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " +
-                         env["grupo_l3_name"]) for env in envs["ambiente"]])
+                         env["grupo_l3_name"] + " ( " + env["range"] + " ) ")  for env in envs["ambiente"]])
         self.fields['environment'].choices = ambiente_choice
 
-    environment = forms.MultipleChoiceField(label=u'Ambientes Disponiveis', required=False, error_messages=error_messages,
+    environment = forms.MultipleChoiceField(label=u'Ambientes Disponiveis (Range de Vlans)', required=False, error_messages=error_messages,
                                   widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
 
 
