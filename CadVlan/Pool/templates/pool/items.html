@@ -1,15 +1,7 @@
 {% load util %}
 <table id="tablePoolMembers_{{ server_pool.id }}" class="tablePoolMembers bordasimplesReal">
 <thead>
-	<tr>
-		<th colspan="6">
-			<span id="removePool" class="ui-icon ui-icon-closethick" style="cursor: pointer; float: right;"></span>
-			<b>{{ server_pool.identifier }}</b>
-			<input name="idsPool" type="hidden" value="{{ server_pool.id }}"/>
-            <input type='hidden' class='ports_vip' name='ports_vip' value='{{ server_pool.port_vip }}'/>
-            <input type='hidden' name='vip_port_id' value='{{server_pool.port_vip_id}}'/>
-		<th>
-	</tr>
+
     <tr >
         <th colspan="6">
 
@@ -64,7 +56,6 @@
 
         </th>
     </tr>
->>>>>>> s2it/sprint90/improvements_requestvip
 </thead>
 <tbody>
 <tr>

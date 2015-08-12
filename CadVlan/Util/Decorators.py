@@ -17,7 +17,6 @@
 
 
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Util.Json import Json
 from CadVlan.Util.utility import get_param_in_request
 from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.forms import ControlAcessForm
