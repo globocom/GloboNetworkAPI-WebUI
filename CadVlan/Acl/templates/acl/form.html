@@ -21,22 +21,38 @@
 {% block title %}[ACL - Cadastro- IP{{ network }}]{% endblock %}
 
 {% block header %}
+
+<style>
+ #content-acl {
+    width: 800px;
+    height: 400px;
+    border: 1px solid #CCC;
+    overflow-y:auto;
+ }
+ #content-acl:hover {
+    border: 1px solid #33F;
+ }
+</style>
 <script type="text/javascript">
 $(document).ready(function() {
 
     var typingTimer;
     var doneTypingInterval = 1000;  //time in ms, 1 second
 
+    var div_content = '<div id="content-acl" contenteditable="true"></div>';
+
+    $('textarea#id_acl').hide().after(div_content);
+
 	$("#page_tab").tabs();
 	$("#page_tab_lists").tabs();
-	
+
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
-	
+
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
 		location.href = "{% url vlan.edit.by.id id_vlan %}";
 	});
 
-    $('textarea#id_acl').keydown(function(){
+    $('#content-acl').keydown(function(){
 
         clearTimeout(typingTimer);
 
@@ -51,7 +67,7 @@ $(document).ready(function() {
 				data: {
 					id_vlan: {{ id_vlan }},
                     type_acl: "{{ network }}",
-                    content_draft: $('textarea#id_acl').val(),
+                    content_draft: $('#content-acl').html(),
                     csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
 				},
                 type: "POST",
@@ -82,24 +98,24 @@ $(document).ready(function() {
 				}
 		});
     }
-	
+
 	{% if vlan.acl_valida == 'True' and network == 'v4' or vlan.acl_valida_v6 == 'True' and network == 'v6' %}
-	
+
 		$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
 			$("#id_apply_acl").val('1');
 			$("#add_form").submit();
 		});
-		
+
 	{% endif %}
-	
+
 	{% if script %}
-	
+
 		$("#btn_script").button({ icons: {primary: "ui-icon-script"} }).click(function(){
 			location.href = "{% url acl.script id_vlan network %}";
 		});
 
 	{% endif %}
-	
+
 	oTable = $("#network_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
@@ -124,8 +140,9 @@ $(document).ready(function() {
                         var contentDraft = "{{ vlan.acl_draft_v6 }}";
                     }
 
-                    $('textarea#id_acl').val(contentDraft);
+                    $('textarea#id_acl').html(contentDraft);
                     $( this ).dialog( "close" );
+                    $('#content-acl').html($('textarea#id_acl').val())
                 },
                 "Apagar": function() {
                     if(confirm("Deseja realmente apagar o rascunho?")){
@@ -140,7 +157,7 @@ $(document).ready(function() {
         });
 
     {% endif %}
-	
+
 })
 </script>
 {% endblock %}
@@ -155,7 +172,7 @@ $(document).ready(function() {
 		{% csrf_token %}
 
 		<div id="fields" class="ui-widget-content">
-		
+
 			<table border="5">
 				<tr>
 					<td style="width: 150px"><label for="nome_ambiente">Nome do Ambiente</label></td>
@@ -187,24 +204,24 @@ $(document).ready(function() {
 				</tr>
 			</table>
 		</div>
-	
+
 		<div class="separator spacer"></div>
-	
+
 		<div>
 			<div id="page_tab_lists">
 				<ul>
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">
-					
+
 					{% ifequal network 'v4' %}
-					
+
 						{{ vlan.acl_file_name }}
-					
+
 					{% else %}
-					
+
 						{{ vlan.acl_file_name_v6 }}
-						
+
 					{% endifequal %}
-					
+
 					- IP{{ network }}</a></li>
 
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Redes - IP{{ network }}</a></li>
@@ -219,7 +236,7 @@ $(document).ready(function() {
 								<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
 								{{ field }}
 								<p id="error">
-								{% if field.errors %} 
+								{% if field.errors %}
 									{% for error in field.errors %}
 										{{ error|escape }}
 									{% endfor %}
@@ -228,30 +245,29 @@ $(document).ready(function() {
 							</div>
 						{% endfor %}
 						</div>
-						
+
 						<div class="separator spacer"></div>
-						
+
 						<div class="buttons-l ui-widget-header">
-							
+
 							{% if script %}
-							
+
 								<button id="btn_script" type="button">Gerar Script</button>
-							
+
 							{% endif %}
-						
+
 							{% if vlan.acl_valida == 'True' and network == 'v4' %}
-							
+
 								<button id="btn_apply" type="button">Aplicar ACL</button>
-							
+
 							{% endif %}
-							
+
 							{% if vlan.acl_valida_v6 == 'True' and network == 'v6' %}
-							
+
 								<button id="btn_apply" type="button">Aplicar ACL</button>
-							
+
 							{% endif %}
-						
-						
+
 							<button id="btn_sav" type="submit">Gravar</button>
 							<button id="btn_can" type="button">Voltar</button>
 						</div>
