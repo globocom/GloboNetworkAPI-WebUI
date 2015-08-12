@@ -43,7 +43,8 @@ auth_messages = {
     'nogroup_error':                u'Somente usuários que pertecem à algum grupo, podem efetuar login no sistema. ',
     'token_invalid':                u'O seu tempo de acesso expirou. Por favor, atualize a página.',
     'user_ldap_not_found':          u'Usuário de rede não encontrado.',
-    'user_ldap_cant_recover_pass':  u'Função não disponível para usuários de rede. Contate o administrador.'
+    'user_ldap_cant_recover_pass':  u'Função não disponível para usuários de rede. Contate o administrador.',
+    'token_required':               u'Informe o token de acesso.',
 }
 
 script_messages = {

@@ -206,7 +206,17 @@ $(document).ready(function() {
 
 			<br>
 
-			<div id="divPools" class="bordasimples">
+            {% has_perm POOL_MANAGEMENT True False token %}
+            {% with has_perm as has_pool_write %}
+
+            {% has_perm POOL_CREATE_SCRIPT True False token %}
+            {% with has_perm as has_pool_script_create %}
+            {% has_perm POOL_ALTER_SCRIPT True False token %}
+            {% with has_perm as has_pool_script_alter %}
+            {% has_perm POOL_REMOVE_SCRIPT True False token %}
+            {% with has_perm as has_pool_script_remove %}
+
+            <div id="divPools" class="bordasimples">
 
                 <div style="float: left; width: 7%;">
                     <label for="idPort">Porta Vip</label>
@@ -219,13 +229,21 @@ $(document).ready(function() {
                     <br>
                     {{ vip_pool_form.pools }}
                     <button id="btn_add_pool" type="button">Selecionar Pool</button>
-                    <button id="btn_copy" type="button">Copiar Pool</button>
-                    <button id="btn_new_pool" type="button">Novo Pool</button>
+
+                    {% if has_pool_write and has_pool_script_create and has_pool_script_alter and has_pool_script_remove %}
+                        <button id="btn_copy" type="button">Copiar Pool</button>
+                        <button id="btn_new_pool" type="button">Novo Pool</button>
+                    {% endif %}
                 </div>
 
-				<br>
-				<br>
-			</div>
+                <br>
+                <br>
+            </div>
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+
 		    <br>
 			<br>
 

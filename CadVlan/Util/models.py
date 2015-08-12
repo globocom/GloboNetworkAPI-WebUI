@@ -17,8 +17,10 @@
 
 
 from django import template
+from django.core.cache import cache
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.permissions import PERMISSIONS
+
 
 
 class IncrementVarNode(template.Node):
@@ -74,6 +76,43 @@ class Permission(template.Node):
             context["has_perm"] = True
         else:
             context["has_perm"] = False
+
+        return u""
+
+
+class PermissionExternal(template.Node):
+    """
+        Validates that the user has access permission in view from access external
+    """
+
+    def __init__(self, permission, write, read, external_token):
+        self._permission = permission
+        self._write = write
+        self._read = read
+        self._external_token = template.Variable(external_token)
+
+    def render(self, context):
+
+        condition = "True"
+        has_permission = False
+        token = self._external_token.resolve(context)
+
+        if token in cache:
+
+            data_from_cache = cache.get(token)
+            permissions = data_from_cache.get('permissions')
+            required_permission = PERMISSIONS.get(self._permission)
+            permission = permissions.get(required_permission)
+
+            write_required = condition == self._write
+            read_required = condition == self._read
+            write_permission = condition == permission.get('write')
+            read_permission = condition == permission.get('read')
+
+            if (not write_required or write_permission) and (not read_required or read_permission):
+                has_permission = True
+
+        context["has_external_perm"] = has_permission
 
         return u""
 

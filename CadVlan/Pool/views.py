@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 from CadVlan.Pool.facade import populate_enviroments_choices, populate_optionsvips_choices, \
     populate_expectstring_choices, populate_optionspool_choices, populate_pool_members_by_lists, \
     populate_pool_members_by_obj
-from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
+from CadVlan.Util.Decorators import log, login_required, has_perm, has_perm_external
 from django.views.decorators.csrf import csrf_exempt
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
     POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_REQVIP_DATATABLE, POOL_MEMBER_ITEMS, POOL_MANAGE_TAB1, \
@@ -36,7 +36,7 @@ from django.contrib import messages
 from CadVlan.messages import healthcheck_messages
 from CadVlan.messages import error_messages, pool_messages
 from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
-    HEALTH_CHECK_EXPECT
+    HEALTH_CHECK_EXPECT, EQUIPMENT_MANAGEMENT, VIPS_REQUEST, ENVIRONMENT_MANAGEMENT
 from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from networkapiclient.Pagination import Pagination
@@ -313,7 +313,7 @@ def add_form(request):
 @log
 @login_required
 @has_perm([
-    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_MANAGEMENT, "write": True, "read": True},
     {"permission": POOL_ALTER_SCRIPT, "write": True}]
 )
 def edit_form(request, id_server_pool):
@@ -431,23 +431,29 @@ def edit_form(request, id_server_pool):
                               context_instance=RequestContext(request))
 
 
-@csrf_exempt
-@access_external()
 @log
+@csrf_exempt
+@has_perm_external([
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
+    {"permission": EQUIPMENT_MANAGEMENT, "read": True, }
+])
 def ajax_modal_ip_real_server_external(request, form_acess, client):
-    return modal_ip_list_real(request, client)
+    return __modal_ip_list_real(request, client)
 
 
 @log
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "read": True, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
+    {"permission": EQUIPMENT_MANAGEMENT, "read": True, }
+])
 def ajax_modal_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return modal_ip_list_real(request, client_api)
+    return __modal_ip_list_real(request, client_api)
 
 
-def modal_ip_list_real(request, client_api):
+def __modal_ip_list_real(request, client_api):
 
     lists = dict()
     lists['msg'] = ''
@@ -488,18 +494,22 @@ def modal_ip_list_real(request, client_api):
     )
 
 @log
-@login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
-def ajax_get_opcoes_pool_by_ambiente(request):
-    auth = AuthSession(request.session)
-    client_api = auth.get_clientFactory()
-    return get_opcoes_pool_by_ambiente(request, client_api)
+@csrf_exempt
+@has_perm_external([{"permission": POOL_MANAGEMENT, "read": True}])
+def ajax_get_opcoes_pool_by_ambiente_external(request, form_acess, client):
+    return __get_opcoes_pool_by_ambiente(request, client)
 
 
 @log
 @login_required
 @has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
-def get_opcoes_pool_by_ambiente(request, client_api):
+def ajax_get_opcoes_pool_by_ambiente(request):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return __get_opcoes_pool_by_ambiente(request, client_api)
+
+
+def __get_opcoes_pool_by_ambiente(request, client_api):
 
     lists = dict()
     lists['opcoes_pool'] = ''
@@ -690,17 +700,25 @@ def disable(request):
 
 
 @log
+@csrf_exempt
+@has_perm_external([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
+def add_healthcheck_expect_external(request, form_acess, client):
+    return __add_healthcheck_expect_shared(request, client)
+
+
+@log
 @login_required
 @has_perm([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
 def add_healthcheck_expect(request):
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
 
+    return __add_healthcheck_expect_shared(request, client)
+
+
+def __add_healthcheck_expect_shared(request, client):
     lists = dict()
-
     try:
-
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
         if request.method == 'GET':
 
             expect_string = request.GET.get("expect_string")
@@ -750,7 +768,12 @@ def pool_member_items(request):
 @log
 @login_required
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True, "read": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": VIPS_REQUEST, "read": True},
+    {"permission": ENVIRONMENT_MANAGEMENT, "read": True}
+])
 def manage_tab1(request, id_server_pool):
 
     try:
@@ -790,7 +813,11 @@ def manage_tab1(request, id_server_pool):
 @log
 @login_required
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True, "read": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": ENVIRONMENT_MANAGEMENT, "read": True}
+])
 def manage_tab2(request, id_server_pool):
     try:
         auth = AuthSession(request.session)
@@ -829,7 +856,11 @@ def manage_tab2(request, id_server_pool):
 @log
 @login_required
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": ENVIRONMENT_MANAGEMENT, "read": True}
+])
 def manage_tab3(request, id_server_pool):
     try:
         auth = AuthSession(request.session)
@@ -960,7 +991,11 @@ def manage_tab3(request, id_server_pool):
 @log
 @login_required
 @login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": ENVIRONMENT_MANAGEMENT, "read": True}
+])
 def manage_tab4(request, id_server_pool):
 
     try:

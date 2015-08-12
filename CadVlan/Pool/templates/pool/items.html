@@ -1,5 +1,5 @@
 {% load util %}
-<table id="tablePoolMembers" class="tablePoolMembers bordasimplesReal">
+<table id="tablePoolMembers_{{ server_pool.id }}" class="tablePoolMembers bordasimplesReal">
 <thead>
 	<tr>
 		<th colspan="6">
@@ -10,19 +10,74 @@
             <input type='hidden' name='vip_port_id' value='{{server_pool.port_vip_id}}'/>
 		<th>
 	</tr>
+    <tr >
+        <th colspan="6">
+
+            <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
+
+            {% if external %}
+                {% if not server_pool.pool_created%}
+                    {% has_external_perm POOL_MANAGEMENT True False token %}
+                    {% with has_external_perm as has_pool_write %}
+
+                    {% has_external_perm POOL_CREATE_SCRIPT True False token %}
+                    {% with has_external_perm as has_pool_script_create %}
+                    {% has_external_perm POOL_ALTER_SCRIPT True False token %}
+                    {% with has_external_perm as has_pool_script_alter %}
+                    {% has_external_perm POOL_REMOVE_SCRIPT True False token %}
+                    {% with has_external_perm as has_pool_script_remove %}
+
+                    {% if has_pool_write and has_pool_script_alter and has_pool_script_remove and has_pool_script_create %}
+                    <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
+                    {% endif %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                {% endif %}
+            {% else %}
+                {% if not server_pool.pool_created%}
+                    {% has_perm POOL_MANAGEMENT True False token %}
+                    {% with has_perm as has_pool_write %}
+
+                    {% has_perm POOL_CREATE_SCRIPT True False token %}
+                    {% with has_perm as has_pool_script_create %}
+                    {% has_perm POOL_ALTER_SCRIPT True False token %}
+                    {% with has_perm as has_pool_script_alter %}
+                    {% has_perm POOL_REMOVE_SCRIPT True False token %}
+                    {% with has_perm as has_pool_script_remove %}
+
+                    {% if has_pool_write and has_pool_script_alter and has_pool_script_remove and has_pool_script_create %}
+                    <span id="editPool" class="ui-icon ui-icon-pencil" style="cursor:pointer;float:right;"></span>
+                    {% endif %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                {% endif %}
+           {%endif%}
+
+            <b>{{ server_pool.identifier }}</b>
+            <input name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>
+            <input class="ports_vip" name="ports_vip" type="hidden" value='{{ server_pool.port_vip }}'/>
+            <input name="vip_port_id" id="vip_port_id" type="hidden" value='{{server_pool.port_vip_id}}'/>
+
+        </th>
+    </tr>
+>>>>>>> s2it/sprint90/improvements_requestvip
 </thead>
 <tbody>
 <tr>
-	<td>Nome do Real</td>
+    <td>Nome do Real</td>
     <td>Ip do Real</td>
     <td>Porta VIP</td>
-	<td>Porta Real</td>
-	<td>Prioridade</td>
+    <td>Porta Real</td>
+    <td>Prioridade</td>
 </tr>
 {% for pool_member in server_pool_members %}
 <tr>
-	<td>{{ pool_member.equipment_name }}</td>
-	<td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
+    <td>{{ pool_member.equipment_name }}</td>
+    <td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
     {% if server_pool.port_vip %}
         <td>
             <label class='portVip editable'>{{ server_pool.port_vip }}</label>
@@ -33,7 +88,7 @@
         </td>
     {% endif %}
     <td>{{ pool_member.port_real }}</td>
-	<td>{{ pool_member.priority }}</td>
+    <td>{{ pool_member.priority }}</td>
 </tr>
 {% endfor %}
 </tbody>

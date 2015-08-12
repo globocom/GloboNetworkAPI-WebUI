@@ -21,7 +21,6 @@ USER_ADMINISTRATION = 'administracao_usuarios'
 ENVIRONMENT_MANAGEMENT = 'cadastro_de_ambiente'
 NETWORK_TYPE_MANAGEMENT = 'cadastro_de_tipo_rede'
 SCRIPT_MANAGEMENT = 'cadastro_de_roteiro'
-POOL_MANAGEMENT = 'cadastro_de_pool'
 BRAND_MANAGEMENT = 'cadastro_de_marca'
 EQUIPMENT_MANAGEMENT = 'cadastro_de_equipamentos'
 EQUIPMENT_GROUP_MANAGEMENT = 'cadastro_de_grupos_equipamentos'
@@ -46,13 +45,14 @@ AUTHENTICATE = 'authenticate'
 ACCESS_TYPE_MANAGEMENT = 'cadastro_de_tipo_acesso'
 AUDIT_LOG = 'audit_logs'
 ACL_APPLY = 'aplicar_acl'
-POOL_MANAGEMENT = 'cadastro_de_pool'
+
 """
 Pool Permissions
 """
 POOL_CREATE_SCRIPT = 'script_criacao_pool'
 POOL_REMOVE_SCRIPT = 'script_remover_pool'
 POOL_ALTER_SCRIPT = 'script_alterar_pool'
+POOL_MANAGEMENT = 'cadastro_de_pool'
 
 PERMISSIONS = {
     'ADMINISTRATION': ADMINISTRATION,
