@@ -56,7 +56,6 @@ def proximo_rack(racks):
         return ''
     return str(rack_anterior)
 
-
 def validar_mac(mac):
 
     if not mac=='':
@@ -85,16 +84,13 @@ def buscar_nome_equip(client, rack, tipo):
     else:
         rack[tipo] = ''
 
-
 def valid_rack_number(rack_number):
    if not rack_number < 120:
       raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - 119') 
 
-
 def valid_rack_name(rack_name):
    if not check_regex(rack_name, r'^[A-Z][A-Z][0-9][0-9]'):
       raise InvalidParameterError('Nome inváildo. Ex: AA00')
-
 
 def get_msg(request, var, nome, operation):
 
@@ -113,7 +109,6 @@ def get_msg(request, var, nome, operation):
         elif operation=='APLICAR':
             msg = rack_messages.get('can_not_aplicar_config') % nome
         messages.add_message(request, messages.ERROR, msg)
-
 
 def rack_config_delete (request, client, form, operation):
 
@@ -202,12 +197,10 @@ def rack_config_delete (request, client, form, operation):
             return redirect("ajax.view.rack")
 
         else:
-            messages.add_message(
-                request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
          # Redirect to list_all action
         return redirect("ajax.view.rack")
-
 
 @log
 @login_required
@@ -267,7 +260,6 @@ def rack_form(request):
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(RACK_FORM, {'form': form}, context_instance=RequestContext(request))
 
-
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_MANAGEMENT, "write": True}])
@@ -278,7 +270,6 @@ def ajax_view(request):
     client_api = auth.get_clientFactory()
 
     return ajax_rack_view(request, client_api)
-
 
 def ajax_rack_view(request, client_api):
 

@@ -73,6 +73,14 @@ $(document).ready(function() {
 			return;
 		}
 	});
+
+	$("#btn_channel").button({ icons: {primary: "ui-icon-heart"} }).click(function(){
+        if (confirm('Criar channel?')){
+            var data = getSelectionData(oTable);
+            $("#id_ids_channel").val(data).parent().submit();
+        }
+
+    });
 	
 	{% has_perm EQUIPMENT_MANAGEMENT True None %}
 	{% if has_perm %}
@@ -143,6 +151,7 @@ $(document).ready(function() {
 			<span id="tool">
 			<button id="btn_new">Novo Registro</button>
 			<button id="btn_add_several">Adicionar Vários</button>
+			<button id="btn_channel">Channel</button>
 			{% has_perm EQUIPMENT_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
@@ -158,6 +167,14 @@ $(document).ready(function() {
 			{% endfor %}
 		</form>
 		{% endif %}
+        {% if has_perm %}
+        <form id="channel_form" method="post" action="{% url equip.interface.channel %}" style="visibility: hidden;">
+            {% csrf_token %}
+            {% for field in channel_form %}
+                {{ field }}
+            {% endfor %}
+        </form>
+        {% endif %}
 		<table id="equip_interface_list">
             <col width="2%" />
             <col width="8%" />

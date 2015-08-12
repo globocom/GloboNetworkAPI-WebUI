@@ -78,6 +78,7 @@ EQUIPMENT_INTERFACE_EDIT_FORM = 'equip-interface/edit-form.html'
 EQUIPMENT_INTERFACE_CONNECT_FORM = 'equip-interface/connect-form.html'
 EQUIPMENT_INTERFACE_ADD_FORM = 'equip-interface/add-form.html'
 EQUIPMENT_INTERFACE_EDIT = 'equip-interface/edit-port.html'
+EQUIPMENT_INTERFACE_ADD_CHANNEL = 'equip-interface/add-channel.html'
 
 # Equipment
 EQUIPMENT_SEARCH_LIST = 'equipment/search-list.html'

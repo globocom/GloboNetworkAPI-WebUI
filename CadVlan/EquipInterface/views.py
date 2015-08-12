@@ -18,7 +18,7 @@
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, \
+from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_ADD_CHANNEL,\
                               EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect
@@ -27,7 +27,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, InterfaceNaoExisteError, NomeInterfaceDuplicadoParaEquipamentoError
 from django.contrib import messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm, SearchEquipForm
+from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
@@ -35,6 +35,7 @@ from django.core.urlresolvers import reverse
 from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, AddSeveralInterfaceForm, ConnectForm, EditForm
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
+import urllib
 
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,7 @@ def search_list(request):
         lists = dict()
         lists['search_form'] = SearchEquipForm()
         lists['del_form'] = DeleteForm()
+        lists['channel_form'] = ChannelForm()
 
         if request.method == "GET":
 
@@ -75,6 +77,8 @@ def search_list(request):
 
                     # New form
                     del_form = DeleteForm(initial=init_map)
+
+                    lists['channel_form'] = ChannelForm(initial=init_map)
 
                     # Send to template
                     lists['del_form'] = del_form
@@ -765,13 +769,64 @@ def disconnect(request, id_interface, back_or_front, equip_name, id_interf_edit)
         client = auth.get_clientFactory()
 
         # Business
-        client.create_interface().remove_connection(
-            id_interface, back_or_front)
-        messages.add_message(
-            request, messages.SUCCESS, equip_interface_messages.get("success_disconnect"))
+        client.create_interface().remove_connection(id_interface, back_or_front)
+        messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_disconnect"))
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     return redirect("equip.interface.edit.form", equip_name, id_interf_edit)
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def channel(request):
+
+    if request.method == 'POST':
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = ChannelForm(request.POST)
+
+        equip_nam = request.POST['equip_name']
+
+        if form.is_valid():
+            ids = split_to_array(form.cleaned_data['ids_channel'])
+            interfaces = dict()
+            interfaces['ids'] = ids
+            url_param = reverse("equip.interface.add.channel")
+            url_param = url_param + "?ids=" + urllib.urlencode(interfaces)
+            return HttpResponseRedirect(url_param)
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            url_param = reverse("equip.interface.search.list")
+            if len(equip_nam) > 2:
+                url_param = url_param + "?equip_name=" + equip_nam
+            return HttpResponseRedirect(url_param)
+
+    return redirect("home")
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
+def add_channel(request):
+
+    try:
+        lists = dict()
+
+        if request.method == "GET":
+
+            # Get user
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            #request.GET['ids']==ids=[u'23205', u'23206']
+
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
