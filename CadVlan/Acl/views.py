@@ -34,10 +34,11 @@ from CadVlan.templates import ACL_FORM, ACL_APPLY_LIST, ACL_APPLY_RESULT,\
     ACL_TEMPLATE_ADD_FORM
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError
+from django.views.decorators.http import require_http_methods
 import logging
 from CadVlan.settings import PATH_ACL
 import urllib
@@ -169,8 +170,7 @@ def edit(request, id_vlan, network):
         client = auth.get_clientFactory()
 
         vlan = client.create_vlan().get(id_vlan).get("vlan")
-        environment = client.create_ambiente().buscar_por_id(
-            vlan.get("ambiente")).get("ambiente")
+        environment = client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
 
         if network == NETWORK_TYPES.v4:
             template_name = environment['ipv4_template']
@@ -202,6 +202,14 @@ def edit(request, id_vlan, network):
                 alterAclCvs(vlan.get(key_acl), acl, environment, comments, network, AuthSession(
                     request.session).get_user())
 
+                #Remove Draft
+                client.create_api_vlan().acl_remove_draft(id_vlan, network)
+
+                if network == NETWORK_TYPES.v4:
+                    vlan["acl_draft"] = None
+                else:
+                    vlan["acl_draft_v6"] = None
+
                 lists['form'] = AclForm(
                     initial={'acl': form.cleaned_data['acl'], 'comments': ''})
 
@@ -214,9 +222,15 @@ def edit(request, id_vlan, network):
 
         else:
 
-            content = getAclCvs(
-                vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
+            content = getAclCvs(vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
             lists['form'] = AclForm(initial={'acl': content, 'comments': ''})
+
+            if network == NETWORK_TYPES.v4:
+                if vlan["acl_draft"] == content:
+                    vlan["acl_draft"] = None
+            else:
+                if vlan["acl_draft_v6"] == content:
+                    vlan["acl_draft_v6"] = None
 
             if content is None or content == "":
                 lists['script'] = script_template(environment.get("nome_ambiente_logico"), environment.get(
@@ -634,3 +648,56 @@ def template_delete(request):
                 request, messages.ERROR, error_messages.get("select_one"))
 
     return HttpResponseRedirect(reverse('acl.template.list'))
+
+
+@log
+@login_required
+@require_http_methods(["POST"])
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}])
+def save_draft(request):
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        id_vlan = request.POST.get('id_vlan')
+        type_acl = request.POST.get('type_acl')
+        content_draft = request.POST.get('content_draft')
+
+        client.create_api_vlan().acl_save_draft(id_vlan, type_acl, content_draft)
+
+        return HttpResponse()
+
+    except NetworkAPIClientError, exception:
+        logger.error(exception)
+        return HttpResponse(exception, status=203)
+
+    except Exception, exception:
+        logger.error(exception)
+        return HttpResponse(exception, status=203)
+
+
+@log
+@login_required
+@require_http_methods(["GET"])
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}])
+def remove_draft(request):
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        id_vlan = request.GET.get('id_vlan')
+        type_acl = request.GET.get('type_acl')
+
+        client.create_api_vlan().acl_remove_draft(id_vlan, type_acl)
+
+        return HttpResponse()
+
+    except NetworkAPIClientError, exception:
+        logger.error(exception)
+        return HttpResponse(exception, status=203)
+
+    except Exception, exception:
+        logger.error(exception)
+        return HttpResponse(exception, status=203)
