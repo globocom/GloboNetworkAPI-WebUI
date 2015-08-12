@@ -59,12 +59,6 @@ def login_required(view_func):
                 response.status_code = 278
 
                 return response
-
-            ajax = request.META.get(AJAX)
-
-            if ajax is not None and ajax == 1:
-                return HttpResponse(json.dumps(Json(None, True, URL_LOGIN).__dict__))
-
             else:
                 return HttpResponseRedirect(URL_LOGIN + '?redirect=' + request.path)
 
