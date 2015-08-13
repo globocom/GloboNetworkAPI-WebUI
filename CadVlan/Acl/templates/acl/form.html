@@ -21,27 +21,11 @@
 {% block title %}[ACL - Cadastro- IP{{ network }}]{% endblock %}
 
 {% block header %}
-
-<style>
- #content-acl {
-    width: 800px;
-    height: 400px;
-    border: 1px solid #CCC;
-    overflow-y:auto;
- }
- #content-acl:hover {
-    border: 1px solid #33F;
- }
-</style>
 <script type="text/javascript">
 $(document).ready(function() {
 
     var typingTimer;
     var doneTypingInterval = 1000;  //time in ms, 1 second
-
-    var div_content = '<div id="content-acl" contenteditable="true"></div>';
-
-    $('textarea#id_acl').hide().after(div_content);
 
 	$("#page_tab").tabs();
 	$("#page_tab_lists").tabs();
@@ -52,7 +36,7 @@ $(document).ready(function() {
 		location.href = "{% url vlan.edit.by.id id_vlan %}";
 	});
 
-    $('#content-acl').keydown(function(){
+    $('textarea#id_acl').keydown(function(){
 
         clearTimeout(typingTimer);
 
@@ -67,7 +51,7 @@ $(document).ready(function() {
 				data: {
 					id_vlan: {{ id_vlan }},
                     type_acl: "{{ network }}",
-                    content_draft: $('#content-acl').html(),
+                    content_draft: $('textarea#id_acl').val(),
                     csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
 				},
                 type: "POST",
@@ -135,14 +119,13 @@ $(document).ready(function() {
                 "Recuperar": function() {
 
                     if ("{{ network }}" == "v4") {
-                        var contentDraft = "{{ vlan.acl_draft }}";
+                        var contentDraft = $('#acl_draft').val();
                     }else{
-                        var contentDraft = "{{ vlan.acl_draft_v6 }}";
+                        var contentDraft = $('#acl_draft_v6').val();
                     }
 
                     $('textarea#id_acl').html(contentDraft);
                     $( this ).dialog( "close" );
-                    $('#content-acl').html($('textarea#id_acl').val())
                 },
                 "Apagar": function() {
                     if(confirm("Deseja realmente apagar o rascunho?")){
@@ -229,6 +212,10 @@ $(document).ready(function() {
 
 				<div id="tabs-1">
 					<form id="add_form" method="post" action="{% url acl.edit id_vlan network %}">
+
+                        <input id="acl_draft" value="{{ vlan.acl_draft }}" type="hidden">
+                        <input id="acl_draft_v6" value="{{ vlan.acl_draft_v6 }}" type="hidden">
+
 						{% csrf_token %}
 						<div id="fields" class="ui-widget-content">
 						{% for field in form %}
