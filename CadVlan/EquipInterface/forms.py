@@ -323,3 +323,18 @@ class EditForm(forms.Form):
                 'Nome da interface inválida para esta marca')
 
         return self.cleaned_data['name']
+
+class ChannelAddForm(forms.Form):
+
+
+    def __init__(self , *args, **kwargs):
+        super(ChannelAddForm, self).__init__(*args, **kwargs)
+
+        widget = forms.TextInput(attrs={"style": "width: 100px;"})
+        self.fields['name'].widget = widget
+
+    name = forms.CharField(label="Nome do Channel", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    lacp = forms.ChoiceField(label="LACP", required=False, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
+                                  widget=forms.RadioSelect(), initial=1)
+    ids = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)

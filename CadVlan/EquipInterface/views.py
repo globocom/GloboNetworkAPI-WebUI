@@ -32,7 +32,8 @@ from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
-from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, AddSeveralInterfaceForm, ConnectForm, EditForm
+from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, AddSeveralInterfaceForm, ConnectForm, \
+                                         EditForm, ChannelAddForm
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
 import urllib
@@ -794,10 +795,13 @@ def channel(request):
 
         if form.is_valid():
             ids = split_to_array(form.cleaned_data['ids_channel'])
-            interfaces = dict()
-            interfaces['ids'] = ids
+
+            interfaces_ids = ""
+            for id_interface in ids:
+                interfaces_ids = interfaces_ids + "-" + str(id_interface)
+
             url_param = reverse("equip.interface.add.channel")
-            url_param = url_param + "?ids=" + urllib.urlencode(interfaces)
+            url_param = url_param + "/?ids=" + interfaces_ids + "?" + equip_nam
             return HttpResponseRedirect(url_param)
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
@@ -810,20 +814,43 @@ def channel(request):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def add_channel(request):
 
     try:
         lists = dict()
 
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
         if request.method == "GET":
 
-            # Get user
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
+            requestGet = request.GET['ids']
+            requestGet = requestGet.split("?")
 
-            #request.GET['ids']==ids=[u'23205', u'23206']
+            form = ChannelAddForm(initial={'ids': requestGet[0], 'equip_name': requestGet[1]})
+            lists['form'] = form
 
+        if request.method == "POST":
+
+            form = ChannelAddForm(request.POST)
+
+            if form.is_valid():
+
+                name = form.cleaned_data['name']
+                lacp = form.cleaned_data['lacp']
+                interfaces_ids = form.cleaned_data['ids']
+                equip_nam = form.cleaned_data['equip_name']
+
+                client.create_interface().inserir_channel(interfaces_ids, name, lacp)
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert_channel"))
+
+                url_param = reverse("equip.interface.search.list")
+                if len(equip_nam) > 2:
+                    url_param = url_param + "?equip_name=" + equip_nam
+                return HttpResponseRedirect(url_param)
+            else:
+                lists['form'] = form
 
     except NetworkAPIClientError, e:
         logger.error(e)
