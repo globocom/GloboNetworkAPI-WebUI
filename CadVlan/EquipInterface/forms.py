@@ -338,3 +338,6 @@ class ChannelAddForm(forms.Form):
                                   widget=forms.RadioSelect(), initial=1)
     ids = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")], error_messages=error_messages,
+                                  widget=forms.RadioSelect)
+    vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1, max_length=5)

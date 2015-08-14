@@ -182,6 +182,7 @@ $(document).ready(function() {
             <col width="7%" />
             <col width="5%" />
             <col width="7%" />
+            <col width="7%" />
             <col width="3%" />
             <thead>
 				<tr>
@@ -192,7 +193,7 @@ $(document).ready(function() {
 					<th>Protegida</th>
 					<th>Tipo</th>
 					<th>Vlan Nativa</th>
-
+					<th>Channel</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -206,6 +207,7 @@ $(document).ready(function() {
 					<td>{% ifequal interface.protegida "True" %}Sim{% else %}Não{% endifequal %}</td>
 					<td>{% ifequal interface.tipo None %}{% else %}{{ interface.tipo }}{% endifequal %}</td>
 					<td>{% ifequal interface.vlan None %}{% else %}{{ interface.vlan }}{% endifequal %}</td>
+					<td>{% ifequal interface.channel None %}{% else %}{{ interface.channel }}{% endifequal %}</td>
 					<td class="text_center"><a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}

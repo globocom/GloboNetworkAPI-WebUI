@@ -42,6 +42,31 @@ import urllib
 logger = logging.getLogger(__name__)
 
 
+def get_environment_list(client, equip_id):
+
+    environment_list = None
+    try:
+        interface_list = client.create_interface().listar_switch_router(equip_id)
+        interface_list = interface_list.get('map')
+        if len(interface_list) < 2:
+            raise InterfaceNaoExisteError(u'A interface do Servidor deve estar ligada ao Uplink.')
+
+        nome_rack = None
+        if 'LF-' in interface_list[0]['equipamento_nome']:
+            if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
+                nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
+
+        racks = client.create_rack().get_rack(nome_rack)
+        rack = racks.get('rack')
+        id_rack = rack[0]['id']
+
+        environment_list = client.create_rack().list_all_rack_environments(id_rack)
+    except:
+        pass
+
+    return environment_list
+
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
@@ -174,25 +199,9 @@ def add_form(request, equip_name=None):
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     int_type_list = client.create_interface().list_all_interface_types()
 
-    #lista de ambientes
-    try:
-        interface_list = client.create_interface().listar_switch_router(equip['id'])
-        interface_list = interface_list.get('map')
-        if len(interface_list) < 2:
-            raise InterfaceNaoExisteError(u'A interface do Servidor deve estar ligada ao Uplink.')
+    environment_list = get_environment_list(client, equip['id'])
 
-        nome_rack = None
-        if 'LF-' in interface_list[0]['equipamento_nome']:
-            if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
-                nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
-
-        racks = client.create_rack().get_rack(nome_rack)
-        rack = racks.get('rack')
-        id_rack = rack[0]['id']
-
-        environment_list = client.create_rack().list_all_rack_environments(id_rack)
-    except:
-        pass
+    if environment_list is None:
         environment_list = client.create_ambiente().list_all()
 
     lists['equip_type'] = equip['id_tipo_equipamento']
@@ -237,7 +246,7 @@ def add_form(request, equip_name=None):
                     for env in envs:
                         client.create_interface().associar_ambiente(env, id_int['id'])
 
-                #success_insert: env, interface
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_associando_amb"))
 
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_name) > 2:
@@ -504,23 +513,9 @@ def edit(request, id_interface):
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     int_type_list = client.create_interface().list_all_interface_types()
 
-    #lista de ambientes
-    try:
-        interface_list = client.create_interface().listar_switch_router(equip['id'])
-        interface_list = interface_list.get('map')
+    environment_list = get_environment_list(client, equip['id'])
 
-        nome_rack = None
-        if 'LF-' in interface_list[0]['equipamento_nome']:
-            if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
-                nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
-
-        racks = client.create_rack().get_rack(nome_rack)
-        rack = racks.get('rack')
-        id_rack = rack[0]['id']
-
-        environment_list = client.create_rack().list_all_rack_environments(id_rack)
-    except:
-        pass
+    if environment_list is None:
         environment_list = client.create_ambiente().list_all()
 
     lists['equip_type'] = equip['id_tipo_equipamento']
@@ -564,7 +559,7 @@ def edit(request, id_interface):
                     int_type = "trunk"
                     trunk = 1
 
-                id_int = client.create_interface().alterar(id_interface, name, protected, None, lig_front, lig_back,
+                client.create_interface().alterar(id_interface, name, protected, None, lig_front, lig_back,
                                                            int_type, vlan)
                 messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
 
@@ -800,7 +795,7 @@ def channel(request):
             for id_interface in ids:
                 interfaces_ids = interfaces_ids + "-" + str(id_interface)
 
-            url_param = reverse("equip.interface.add.channel")
+            url_param = reverse("equip.interface.add.channel", args=[equip_nam])
             url_param = url_param + "/?ids=" + interfaces_ids + "?" + equip_nam
             return HttpResponseRedirect(url_param)
         else:
@@ -815,7 +810,7 @@ def channel(request):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def add_channel(request):
+def add_channel(request, equip_name=None):
 
     try:
         lists = dict()
@@ -823,26 +818,75 @@ def add_channel(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        equip = client.create_equipamento().listar_por_nome(str(equip_name))
+        equip = equip.get('equipamento')
+
+        envs = get_environment_list(client, equip['id'])
+        if envs is None:
+            envs = client.create_ambiente().list_all()
+
+        lists['equip_name'] = equip_name
+
         if request.method == "GET":
 
             requestGet = request.GET['ids']
             requestGet = requestGet.split("?")
+            ids = requestGet[0]
 
-            form = ChannelAddForm(initial={'ids': requestGet[0], 'equip_name': requestGet[1]})
-            lists['form'] = form
+            for var in ids.split('-'):
+                if var is not None:
+                    interface = var
+
+            try:
+                interface = client.create_interface().get_by_id(int(interface))
+                interface = interface.get('interface')
+                interface = interface['id_ligacao_front']
+                interface = client.create_interface().get_by_id(int(interface))
+                interface = interface.get('interface')
+
+                tipo = interface['tipo']
+                if "access" in tipo:
+                    tipo = 0
+                else:
+                    tipo = 1
+
+                form = ChannelAddForm(initial={'ids': ids, 'equip_name': equip_name, 'int_type': tipo, 'vlan': interface['vlan']})
+                lists['form'] = form
+
+                if tipo:
+                    int_envs = client.create_interface().get_env_by_id(interface['id'])
+                    int_envs = int_envs.get('ambiente')
+                    env_list =[]
+                    for amb in int_envs:
+                        env_list.append(int(amb['id']))
+                    envform = AddEnvInterfaceForm(envs, initial={'environment': env_list})
+                else:
+                    envform = AddEnvInterfaceForm(envs)
+                lists['envform'] = envform
+            except:
+                raise InterfaceNaoExisteError(u'Interfaces não encontradas')
 
         if request.method == "POST":
 
             form = ChannelAddForm(request.POST)
+            envform = AddEnvInterfaceForm(envs, request.POST)
 
-            if form.is_valid():
+            if form.is_valid() and envform.is_valid():
 
                 name = form.cleaned_data['name']
                 lacp = form.cleaned_data['lacp']
+                int_type = form.cleaned_data['int_type']
+                vlan = form.cleaned_data['vlan']
                 interfaces_ids = form.cleaned_data['ids']
                 equip_nam = form.cleaned_data['equip_name']
+                envs = envform.cleaned_data['environment']
 
-                client.create_interface().inserir_channel(interfaces_ids, name, lacp)
+                if int_type=="0":
+                    int_type = "access"
+                else:
+                    int_type = "trunk"
+
+                client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlan, envs)
                 messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert_channel"))
 
                 url_param = reverse("equip.interface.search.list")
