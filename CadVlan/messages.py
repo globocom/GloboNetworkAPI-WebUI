@@ -98,7 +98,7 @@ equip_interface_messages = {
     'several_warning':      u'Estas interfaces já se encontravam cadastradas: %s. Todas as outras foram registradas com sucesso.',
     'several_error':        u'Interfaces já cadastradas: %s.',
     'success_insert_channel': u'Port Channel incluído com sucesso.',
-    'success_associando_amb': u'Ambientes associados à interface.'
+    'success_associando_amb': u'Ambientes associados à interface.',
 }
 
 network_ip_messages = {

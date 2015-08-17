@@ -94,12 +94,23 @@ $(document).ready(function() {
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
 	});
-	
+
+	$(".btn_edit_channel").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+
+	$(".btn_edit_channel", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+
+	$(".btn_editar").button({ icons: {primary: "ui-icon-pencil"}, text: false }).click(function() {
+		if (confirm('Esta interface deve ser editada pelo editar do port channel.')){
+		}
+	});
+
+
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false }).click(function(e) {
 		e.preventDefault();
 		url = "/equip-interface/edit/" + $("#id_equip_name").val() + "/" + $(this).attr("href");
 		location.href = url;
 	});
+
 	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false }).click(function(e) {
 		e.preventDefault();
 		url = "/equip-interface/edit/" + $("#id_equip_name").val() + "/" + $(this).attr("href");
@@ -177,23 +188,23 @@ $(document).ready(function() {
 		<table id="equip_interface_list">
             <col width="2%" />
             <col width="8%" />
+            <col width="7%" />
             <col/>
             {% ifequal pp "1" %}<col/>{% endifequal %}
             <col width="7%" />
             <col width="5%" />
-            <col width="7%" />
             <col width="7%" />
             <col width="3%" />
             <thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th>Interface</th>					
+					<th>Channel</th>
 					<th>Ligação de Front</th>
 					{% ifequal pp "1" %}<th>Ligação de Back</th>{% endifequal %}
 					<th>Protegida</th>
 					<th>Tipo</th>
 					<th>Vlan Nativa</th>
-					<th>Channel</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -202,13 +213,13 @@ $(document).ready(function() {
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ interface.id }}" /></td>
 					<td>{{ interface.interface }}</td>
+					<td>{% ifequal interface.channel None %}{% else %}<a href="{% url equip.interface.edit.channel interface.channel %}" style="width: 20px; height: 20px;" class="btn_edit_channel">Editar</a> {{ interface.channel }}{% endifequal %}</td>
 					<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_front }}</a> {{ interface.nome_ligacao_front }}</td>
 					{% ifequal pp "1" %}<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_back }}</a> {{ interface.nome_ligacao_back }}</td>{% endifequal %}
 					<td>{% ifequal interface.protegida "True" %}Sim{% else %}Não{% endifequal %}</td>
 					<td>{% ifequal interface.tipo None %}{% else %}{{ interface.tipo }}{% endifequal %}</td>
 					<td>{% ifequal interface.vlan None %}{% else %}{{ interface.vlan }}{% endifequal %}</td>
-					<td>{% ifequal interface.channel None %}{% else %}{{ interface.channel }}{% endifequal %}</td>
-					<td class="text_center"><a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center">{% ifequal interface.channel None %}<a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">{% else %}<a style="width: 20px; height: 20px;" class="btn_editar">{% endifequal %}Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>
