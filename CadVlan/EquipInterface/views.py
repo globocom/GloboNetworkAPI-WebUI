@@ -41,6 +41,20 @@ import urllib
 
 logger = logging.getLogger(__name__)
 
+def get_environment_list(client, equip_id):
+
+    environment_list = None
+    try:
+        rack = client.create_rack().get_rack_by_equip_id(equip_id)
+        rack = rack.get('rack')
+        environment_list = client.create_rack().list_all_rack_environments(rack[0].get('id'))
+    except:
+        pass
+
+    if environment_list is None:
+        environment_list = client.create_ambiente().list_all()
+
+    return environment_list
 
 def get_rack(client, equip_id):
     try:

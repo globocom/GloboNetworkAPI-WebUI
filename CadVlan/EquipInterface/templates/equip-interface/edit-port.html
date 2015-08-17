@@ -46,7 +46,7 @@ $(document).ready(function() {
                         {% endif %}
                     </label>
                 </div>
-                {{ field }} {% ifequal field.name 'vlan' %}<a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>{% endifequal %}
+                {{ field }} {% ifequal field.name 'vlan' %}<button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>{% endifequal %}
                 <p id="error">
                 {% if field.errors %}
                     {% for error in field.errors %}
@@ -60,7 +60,7 @@ $(document).ready(function() {
             {% endifequal %}
         {% endif %}
     {% endfor %}
-    <a href="{% url equip.interface.edit id_interface %}" target="blank"><button type="button" id="btn_edit">Editar</button></a>
+    <a href="{% url equip.interface.edit form.inter_id.value %}" target="blank"><button type="button" id="btn_edit">Editar</button></a>
     </div>
     {% ifequal equip_type '8' %}
         {% if formset %}
