@@ -39,6 +39,20 @@ from CadVlan.Util.extends.formsets import formset_factory
 
 logger = logging.getLogger(__name__)
 
+def get_environment_list(client, equip_id):
+
+    environment_list = None
+    try:
+        rack = client.create_rack().get_rack_by_equip_id(equip_id)
+        rack = rack.get('rack')
+        environment_list = client.create_rack().list_all_rack_environments(rack[0].get('id'))
+    except:
+        pass
+
+    if environment_list is None:
+        environment_list = client.create_ambiente().list_all()
+
+    return environment_list
 
 @log
 @login_required
@@ -169,26 +183,7 @@ def add_form(request, equip_name=None):
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     int_type_list = client.create_interface().list_all_interface_types()
 
-    #lista de ambientes
-    try:
-        interface_list = client.create_interface().listar_switch_router(equip['id'])
-        interface_list = interface_list.get('map')
-        if len(interface_list) < 2:
-            raise InterfaceNaoExisteError(u'A interface do Servidor deve estar ligada ao Uplink.')
-
-        nome_rack = None
-        if 'LF-' in interface_list[0]['equipamento_nome']:
-            if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
-                nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
-
-        racks = client.create_rack().get_rack(nome_rack)
-        rack = racks.get('rack')
-        id_rack = rack[0]['id']
-
-        environment_list = client.create_rack().list_all_rack_environments(id_rack)
-    except:
-        pass
-        environment_list = client.create_ambiente().list_all()
+    environment_list = get_environment_list(client, equip['id'])
 
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['equip_name'] = equip['nome']
@@ -499,24 +494,7 @@ def edit(request, id_interface):
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     int_type_list = client.create_interface().list_all_interface_types()
 
-    #lista de ambientes
-    try:
-        interface_list = client.create_interface().listar_switch_router(equip['id'])
-        interface_list = interface_list.get('map')
-
-        nome_rack = None
-        if 'LF-' in interface_list[0]['equipamento_nome']:
-            if interface_list[0]['equipamento_nome'].split("-")[0]=='LF' and interface_list[1]['equipamento_nome'].split("-")[0]=='LF':
-                nome_rack = str(interface_list[0]['equipamento_nome'].split("-")[2])
-
-        racks = client.create_rack().get_rack(nome_rack)
-        rack = racks.get('rack')
-        id_rack = rack[0]['id']
-
-        environment_list = client.create_rack().list_all_rack_environments(id_rack)
-    except:
-        pass
-        environment_list = client.create_ambiente().list_all()
+    environment_list = get_environment_list(client, equip['id'])
 
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
