@@ -815,15 +815,18 @@ def add_channel(request, equip_name=None):
             ids = requestGet[0]
 
             for var in ids.split('-'):
-                if var is not None:
+                if len(var) > 1:
                     interface = var
+                    try:
+                        interface = client.create_interface().get_by_id(int(interface))
+                        interface = interface.get('interface')
+                    except:
+                        messages.add_message(request, messages.ERROR, u'Interface %s não encontrada.' % var)
+                        return redirect('equip.interface.search.list')
 
-            try:
-                interface = client.create_interface().get_by_id(int(interface))
-                interface = interface.get('interface')
-            except:
-                messages.add_message(request, messages.ERROR, u'Interface não encontrada.')
-                return redirect('equip.interface.search.list')
+                    if interface['channel'] is not None:
+                        messages.add_message(request, messages.ERROR, u'Interface %s já está associada ao channel %s.' % (interface['interface'],interface['channel']))
+                        return redirect('equip.interface.search.list')
 
             try:
                 interface = interface['id_ligacao_front']
