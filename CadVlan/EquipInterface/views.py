@@ -27,7 +27,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, InterfaceNaoExisteError, NomeInterfaceDuplicadoParaEquipamentoError
 from django.contrib import messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm
+from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
@@ -36,7 +36,6 @@ from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, 
                                          EditForm, ChannelAddForm
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
-import urllib
 
 
 logger = logging.getLogger(__name__)
@@ -66,6 +65,7 @@ def search_list(request):
         lists = dict()
         lists['search_form'] = SearchEquipForm()
         lists['del_form'] = DeleteForm()
+        lists['del_chan_form'] = DeleteChannelForm()
         lists['channel_form'] = ChannelForm()
 
         if request.method == "GET":
@@ -93,10 +93,13 @@ def search_list(request):
                     # New form
                     del_form = DeleteForm(initial=init_map)
 
+                    del_chan_form = DeleteChannelForm(initial=init_map)
+
                     lists['channel_form'] = ChannelForm(initial=init_map)
 
                     # Send to template
                     lists['del_form'] = del_form
+                    lists['del_chan_form'] = del_chan_form
                     lists['search_form'] = search_form
 
                     if equip_interface_list.has_key('interfaces'):
@@ -158,6 +161,55 @@ def delete_all(request):
         else:
             messages.add_message(
                 request, messages.ERROR, error_messages.get("select_one"))
+
+    # Redirect to list_all action
+    url_param = reverse("equip.interface.search.list")
+    if len(equip_nam) > 2:
+        url_param = url_param + "?equip_name=" + equip_nam
+    return HttpResponseRedirect(url_param)
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def channel_delete(request):
+
+    equip_nam = request.POST['equip_name']
+
+    if request.method == 'POST':
+
+        form = DeleteChannelForm(request.POST)
+
+        if form.is_valid():
+
+            # Get user
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            # All ids to be deleted
+            ids = split_to_array(form.cleaned_data['ids_chan'])
+            equip_nam = form.cleaned_data['equip_name']
+
+            # Control others exceptions
+            have_errors = False
+
+            try:
+                interface = client.create_interface().get_by_id(ids[0])
+                interface = interface.get('interface')
+                channel = interface['channel']
+                client.create_interface().delete_channel(str(channel))
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+                have_errors = True
+
+            if have_errors == False:
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_remove_channel"))
+
+            else:
+                messages.add_message(request, messages.WARNING, error_messages.get("can_not_remove_error"))
+
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
     url_param = reverse("equip.interface.search.list")

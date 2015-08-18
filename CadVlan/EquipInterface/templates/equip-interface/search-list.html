@@ -90,7 +90,17 @@ $(document).ready(function() {
 		}
 	});
 	{% endif %}
-	
+
+	{% has_perm EQUIPMENT_MANAGEMENT True None %}
+	{% if has_perm %}
+	$("#btn_del_chan").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		if (confirm('O Channel será excluido mas a configuração das interfaces permanecerá igual. Deseja excluir o channel?')){
+			var data = getSelectionData(oTable);
+			$("#id_ids_chan").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
 	});
@@ -162,6 +172,7 @@ $(document).ready(function() {
 			<button id="btn_new">Novo Registro</button>
 			<button id="btn_add_several">Adicionar Vários</button>
 			<button id="btn_channel">Channel</button>
+            <button id="btn_del_chan">Excluir Channel</button>
 			{% has_perm EQUIPMENT_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir</button>
@@ -177,8 +188,18 @@ $(document).ready(function() {
 			{% endfor %}
 		</form>
 		{% endif %}
+		{% has_perm EQUIPMENT_MANAGEMENT True None %}
+		{% if has_perm %}
+		<form id="delete_chan_form" method="post" action="{% url delete.channel %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in del_chan_form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		{% endif %}
+		{% has_perm EQUIPMENT_MANAGEMENT True None %}
         {% if has_perm %}
-        <form id="channel_form" method="post" action="{% url equip.interface.channel %}" style="visibility: hidden;">
+        <form id="channel_form" method="post" action="{% url inserir.channel %}" style="visibility: hidden;">
             {% csrf_token %}
             {% for field in channel_form %}
                 {{ field }}

@@ -110,11 +110,13 @@ urlpatterns += patterns('CadVlan.EquipInterface.views',
                         url('^equip-interface/connect/(?P<id_interface>\d+)/(?P<front_or_back>\d+)[/]?$',
                             'connect', name='equip.interface.connect',),
                         url('^equip-interface/new-channel[/]?$', 'channel',
-                            name='equip.interface.channel',),
+                            name='inserir.channel',),
                         url('^equip-interface/new-channel/interfaces/(?P<equip_name>[^/]+)[/]?$', 'add_channel',
                             name='equip.interface.add.channel',),
                         url('^equip-interface/edit-channel/(?P<channel_name>[^/]+)[/]?$', 'edit_channel',
                             name='equip.interface.edit.channel',),
+                        url('^equip-interface/channel/delete[/]?$', 'channel_delete',
+                            name='delete.channel',),
                         )
 
 # URL's Equipment

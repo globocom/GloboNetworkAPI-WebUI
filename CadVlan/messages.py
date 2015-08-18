@@ -91,6 +91,7 @@ equip_interface_messages = {
     'success_connect':      u'Interface conectada com sucesso.',
     'success_disconnect':   u'Interface disconectada com sucesso.',
     'success_remove':       u'Todas as interfaces selecionadas foram excluídas com sucesso.',
+    'success_remove_channel': u'Channel excluido com sucesso.',
     'brand_error':          u'Incluir várias interfaces não disponível para este equipamento.',
     'name_error':           u'Início deve ser menor que Final.',
     'validation_error':     u'Erro na validação dos dados de Interface, verifique se o campo inicial é menor que o campo final, ou se os campos foram preenchidos da maneira correta.',
