@@ -109,12 +109,6 @@ $(document).ready(function() {
 
 	$(".btn_edit_channel", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 
-	$(".btn_editar").button({ icons: {primary: "ui-icon-pencil"}, text: false }).click(function() {
-		if (confirm('Esta interface deve ser editada pelo editar do port channel.')){
-		}
-	});
-
-
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false }).click(function(e) {
 		e.preventDefault();
 		url = "/equip-interface/edit/" + $("#id_equip_name").val() + "/" + $(this).attr("href");
@@ -240,7 +234,7 @@ $(document).ready(function() {
 					<td>{% ifequal interface.protegida "True" %}Sim{% else %}Não{% endifequal %}</td>
 					<td>{% ifequal interface.tipo None %}{% else %}{{ interface.tipo }}{% endifequal %}</td>
 					<td>{% ifequal interface.vlan None %}{% else %}{{ interface.vlan }}{% endifequal %}</td>
-					<td class="text_center">{% ifequal interface.channel None %}<a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">{% else %}<a style="width: 20px; height: 20px;" class="btn_editar">{% endifequal %}Editar</a></td>
+					<td class="text_center"><a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

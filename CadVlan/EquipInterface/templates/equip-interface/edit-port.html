@@ -22,9 +22,15 @@
 </style>
 <script type="text/javascript">
 $(document).ready(function() {
-	defName({{ counter }}, {{ brand }});
+
+	defName( {{ counter }}, {{ brand }} );
+
     $("#btn_edit").button({ icons: {primary: "ui-icon-pencil"}});
 
+	$(".btn_editar").button({ icons: {primary: "ui-icon-pencil"}, text: false }).click(function() {
+		if (confirm('Esta interface deve ser editada pelo editar do port channel.')){
+		}
+	});
 });
 </script>
 
@@ -60,7 +66,7 @@ $(document).ready(function() {
             {% endifequal %}
         {% endif %}
     {% endfor %}
-    <a href="{% url equip.interface.edit form.inter_id.value %}" target="blank"><button type="button" id="btn_edit">Editar</button></a>
+    {% ifequal channel None %}<a href="{% url equip.interface.edit form.inter_id.value %}" target="blank"><button type="button" id="btn_edit">{% else %}<a href="{% url equip.interface.edit.channel channel %}" target="blank"><button type="button" id="btn_editar">{% endifequal %}Editar</button></a>
     </div>
     {% ifequal equip_type '8' %}
         {% if formset %}

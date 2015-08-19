@@ -484,6 +484,8 @@ def edit_form(request, equip_name, id_interface):
         if interface is None:
             raise InterfaceNaoExisteError("Interface não cadastrada")
 
+        lists['channel'] = interface['channel']
+
         # Get interface types
         int_type_list = client.create_interface().list_all_interface_types()
 
