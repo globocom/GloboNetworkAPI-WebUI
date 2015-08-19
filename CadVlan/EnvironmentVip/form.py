@@ -22,10 +22,10 @@ from CadVlan.messages import error_messages
 
 class EnvironmentVipForm(forms.Form):
 
-    def __init__(self, script_type_list, *args, **kwargs):
+    def __init__(self, script_type_list, environment_list={}, *args, **kwargs):
         super(EnvironmentVipForm, self).__init__(*args, **kwargs)
-        self.fields['option_vip'].choices = [(st['id'], st[
-                                              'tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["option_vip"]]
+        self.fields['option_vip'].choices = [(st['id'], st['tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["option_vip"]]
+        self.fields['environment'].choices = [(environment['id'], environment['divisao_dc_name'] + " - " + environment['ambiente_logico_name'] + " - " + environment['grupo_l3_name']) for environment in environment_list["ambiente"]]
 
     id = forms.IntegerField(
         label="",
@@ -72,6 +72,13 @@ class EnvironmentVipForm(forms.Form):
 
     option_vip = forms.MultipleChoiceField(
         label=u'Opções VIP',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.SelectMultiple(attrs={'style': "width: 310px"})
+    )
+
+    environment = forms.MultipleChoiceField(
+        label=u'Ambientes',
         required=False,
         error_messages=error_messages,
         widget=forms.SelectMultiple(attrs={'style': "width: 310px"})
