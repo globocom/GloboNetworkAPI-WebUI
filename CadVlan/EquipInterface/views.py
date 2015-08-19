@@ -19,7 +19,8 @@
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_ADD_CHANNEL,\
-                              EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM
+                              EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM,\
+                              EQUIPMENT_INTERFACE_EDIT_CHANNEL
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
@@ -96,6 +97,7 @@ def search_list(request):
                     del_chan_form = DeleteChannelForm(initial=init_map)
 
                     lists['channel_form'] = ChannelForm(initial=init_map)
+                    lists['equip_name'] = name_equip
 
                     # Send to template
                     lists['del_form'] = del_form
@@ -485,6 +487,7 @@ def edit_form(request, equip_name, id_interface):
             raise InterfaceNaoExisteError("Interface não cadastrada")
 
         lists['channel'] = interface['channel']
+        lists['equip_name'] = equip_name
 
         # Get interface types
         int_type_list = client.create_interface().list_all_interface_types()
@@ -957,7 +960,7 @@ def add_channel(request, equip_name=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def edit_channel(request, channel_name=None):
+def edit_channel(request, channel_name=None, equip_name=None):
 
     try:
         lists = dict()
@@ -974,28 +977,8 @@ def edit_channel(request, channel_name=None):
 
         if request.method == "GET":
 
-            requestGet = request.GET['ids']
-            requestGet = requestGet.split("?")
-            ids = requestGet[0]
-
-            for var in ids.split('-'):
-                if var is not None:
-                    interface = var
-
-            try:
-                interface = client.create_interface().get_by_id(int(interface))
-                interface = interface.get('interface')
-            except:
-                messages.add_message(request, messages.ERROR, u'Interface não encontrada.')
-                return redirect('equip.interface.search.list')
-
-            try:
-                interface = interface['id_ligacao_front']
-                interface = client.create_interface().get_by_id(int(interface))
-                interface = interface.get('interface')
-            except:
-                messages.add_message(request, messages.ERROR, u'Interface não conectada')
-                return redirect('equip.interface.search.list')
+            interface = client.create_interface().get_interface_by_channel(channel_name)
+            interface = interface.get('interface')
 
             tipo = interface['tipo']
             if "access" in tipo:
@@ -1003,7 +986,8 @@ def edit_channel(request, channel_name=None):
             else:
                 tipo = 1
 
-            form = ChannelAddForm(initial={'ids': ids, 'equip_name': equip_name, 'int_type': tipo, 'vlan': interface['vlan']})
+            form = ChannelAddForm(initial={'id': interface['id_channel'], 'name': interface['channel'], 'lacp': interface['lacp'], 'equip_name': equip_name,
+                                           'int_type': tipo, 'vlan': interface['vlan']})
             lists['form'] = form
 
             if tipo:
@@ -1030,11 +1014,11 @@ def edit_channel(request, channel_name=None):
 
             if form.is_valid() and envform.is_valid():
 
+                id_channel = form.cleaned_data['id']
                 name = form.cleaned_data['name']
                 lacp = form.cleaned_data['lacp']
                 int_type = form.cleaned_data['int_type']
                 vlan = form.cleaned_data['vlan']
-                interfaces_ids = form.cleaned_data['ids']
                 equip_nam = form.cleaned_data['equip_name']
                 envs = envform.cleaned_data['environment']
 
@@ -1043,8 +1027,8 @@ def edit_channel(request, channel_name=None):
                 else:
                     int_type = "trunk"
 
-                client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlan, envs)
-                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert_channel"))
+                client.create_interface().editar_channel(id_channel, name, lacp, int_type, vlan, envs)
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit_channel"))
 
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_nam) > 2:
@@ -1057,4 +1041,4 @@ def edit_channel(request, channel_name=None):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
+    return render_to_response(EQUIPMENT_INTERFACE_EDIT_CHANNEL, lists, context_instance=RequestContext(request))
