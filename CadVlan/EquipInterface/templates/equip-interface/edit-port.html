@@ -66,7 +66,7 @@ $(document).ready(function() {
             {% endifequal %}
         {% endif %}
     {% endfor %}
-    {% ifequal channel None %}<a href="{% url equip.interface.edit form.inter_id.value %}" target="blank"><button type="button" id="btn_edit">{% else %}<a href="{% url equip.interface.edit.channel channel equip_name %}" target="blank"><button type="button" id="btn_editar">{% endifequal %}Editar</button></a>
+    {% ifequal form.channel.value None %}<a href="{% url equip.interface.edit form.inter_id.value %}" target="blank"><button type="button" id="btn_edit">{% else %}<a href="{% url equip.interface.edit.channel channel equip_name %}" target="blank"><button type="button" id="btn_editar">{% endifequal %}Editar</button></a>
     </div>
     {% ifequal equip_type '8' %}
         {% if formset %}

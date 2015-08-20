@@ -487,6 +487,7 @@ def edit_form(request, equip_name, id_interface):
             raise InterfaceNaoExisteError("Interface não cadastrada")
 
         lists['channel'] = interface['channel']
+        lists['sw_router'] = interface['sw_router']
         lists['equip_name'] = equip_name
 
         # Get interface types
@@ -960,7 +961,7 @@ def add_channel(request, equip_name=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def edit_channel(request, channel_name=None, equip_name=None):
+def edit_channel(request, channel_name, equip_name):
 
     try:
         lists = dict()

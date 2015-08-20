@@ -135,6 +135,7 @@ class AddInterfaceForm(forms.Form):
     int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")], error_messages=error_messages,
                                   widget=forms.RadioSelect, initial=0)
     vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1, max_length=5)
+    channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
 
 
     def clean_name(self):
@@ -314,6 +315,7 @@ class EditForm(forms.Form):
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
 
 
     def clean_name(self):
@@ -342,3 +344,4 @@ class ChannelAddForm(forms.Form):
                                   widget=forms.RadioSelect)
     vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1, max_length=5)
     id = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
