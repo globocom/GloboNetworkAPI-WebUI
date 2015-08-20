@@ -228,7 +228,7 @@ $(document).ready(function() {
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ interface.id }}" /></td>
 					<td>{{ interface.interface }}</td>
-					<td>{% ifequal interface.channel None %}{% else %}<a href="{% url equip.interface.edit.channel interface.channel search_form.equip_name.value %}" style="width: 20px; height: 20px;" class="btn_edit_channel">Editar</a> {{ interface.channel }}{% endifequal %}</td>
+					<td>{% ifequal interface.channel None %}{% else %}<a  style="width: 20px; height: 20px;" class="btn_edit_channel">Editar</a> {{ interface.channel }}{% endifequal %}</td>
 					<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_front }}</a> {{ interface.nome_ligacao_front }}</td>
 					{% ifequal pp "1" %}<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_back }}</a> {{ interface.nome_ligacao_back }}</td>{% endifequal %}
 					<td>{% ifequal interface.protegida "True" %}Sim{% else %}Não{% endifequal %}</td>
