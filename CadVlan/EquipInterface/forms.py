@@ -329,15 +329,22 @@ class EditForm(forms.Form):
 class ChannelAddForm(forms.Form):
 
 
-    def __init__(self , *args, **kwargs):
+    def __init__(self , equip_list, *args, **kwargs):
         super(ChannelAddForm, self).__init__(*args, **kwargs)
 
         widget = forms.TextInput(attrs={"style": "width: 100px;"})
         self.fields['name'].widget = widget
 
+        equip_interface = [(tp["id"], tp["equipamento_nome"] + "   " + tp["nome"]) for tp in equip_list["interfaces"]]
+        equip_interface.insert(0, (0, "Selecione uma interface para adicionar"))
+
+        self.fields['equip_interface'].choices = equip_interface
+
     name = forms.CharField(label="Nome do Channel", required=True, error_messages=error_messages, min_length=1, max_length=20)
-    lacp = forms.ChoiceField(label="LACP", required=False, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
+    lacp = forms.ChoiceField(label="LACP", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
                                   widget=forms.RadioSelect(), initial=1)
+    equip_interface = forms.ChoiceField(label="Equipamento/Interface", required=False, error_messages=error_messages,
+                                        widget=forms.Select(attrs={'style': "width: 400px"}))
     ids = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")], error_messages=error_messages,
