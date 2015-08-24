@@ -942,8 +942,15 @@ def add_channel(request, equip_name=None):
                 else:
                     int_type = "trunk"
 
-                client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlan, envs)
-                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert_channel"))
+                try:
+                    client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlan, envs)
+                    messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert_channel"))
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    form = ChannelAddForm(equip_interface_list)
+                    lists['form'] = form
+                    return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
 
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_nam) > 2:
