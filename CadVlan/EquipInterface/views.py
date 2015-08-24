@@ -1038,7 +1038,6 @@ def edit_channel(request, channel_name, equip_name):
                 envs = envform.cleaned_data['environment']
                 ids_interface = request.POST.getlist('idsInterface')
 
-
                 if int_type=="0":
                     int_type = "access"
                 else:

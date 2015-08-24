@@ -74,7 +74,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#btn_channel").button({ icons: {primary: "ui-icon-heart"} }).click(function(){
+	$("#btn_channel").button({ icons: {primary: "ui-icon-copy"} }).click(function(){
         if (confirm('Criar channel?')){
             var data = getSelectionData(oTable);
             $("#id_ids_channel").val(data).parent().submit();
