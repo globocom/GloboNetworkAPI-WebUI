@@ -28,7 +28,7 @@ error_messages = {
     'select_one':           u'Nenhum item foi selecionado.',
     'invalid_param':        u'Valor do %s nulo ou inválido.',
     'vlan_select_one':      u'Vlan já criada, selecione ao menos uma Rede',
-
+    'login_required':       u'Você precisa estar logado para continuar. Clique <a href="/">aqui</a> para fazer login.'
 }
 
 auth_messages = {

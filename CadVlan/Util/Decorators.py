@@ -20,7 +20,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.utility import get_param_in_request
 from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.forms import ControlAcessForm
-from CadVlan.messages import auth_messages
+from CadVlan.messages import auth_messages, error_messages
 from CadVlan.settings import URL_HOME, URL_LOGIN, NETWORK_API_URL
 from CadVlan.templates import TOKEN_INVALID
 from networkapiclient.ClientFactory import ClientFactory
@@ -57,7 +57,7 @@ def login_required(view_func):
             if request.is_ajax():
                 response = HttpResponseRedirect(URL_LOGIN)
                 response.status_code = 278
-
+                response.content = error_messages.get('login_required')
                 return response
             else:
                 return HttpResponseRedirect(URL_LOGIN + '?redirect=' + request.path)
