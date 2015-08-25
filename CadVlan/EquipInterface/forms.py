@@ -79,7 +79,6 @@ class ConnectForm(forms.Form):
 
         return self.cleaned_data.get("back")
 
-
 class AddInterfaceForm(forms.Form):
 
     def __init__(self, int_type_list, marca, index, *args, **kwargs):
@@ -166,7 +165,6 @@ class AddEnvInterfaceForm(forms.Form):
 
     environment = forms.MultipleChoiceField(label=u'Ambientes Disponiveis (Range de Vlans)', required=False, error_messages=error_messages,
                                   widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
-
 
 class AddSeveralInterfaceForm(forms.Form):
 

@@ -41,6 +41,12 @@ $(document).ready(function() {
 		}
 	});
 
+    $("#btn_addvlan").button({ icons: {primary: "ui-icon-search"}, text: false });
+
+    $("#btn_addvlan").mouseover(function() {
+            $("#btn_addvlan").attr("title","Pesquisar Vlan");
+    });
+    
     $("#id_name").keyup(function() {
             var valor = $(this).val().replace(/[^A-Za-z0-9-]+/g,'');
             $(this).val(valor);
@@ -81,38 +87,76 @@ $(document).ready(function() {
 	<div id="tabs-1">
 		<div id="fields" class="ui-widget-content">
 			<form id="add_form" method="post" action="{% url equip.interface.add.channel equip_name %}">
-                <div>
+                <div class="bordasimples">
+                    {% for field in form %}
+                        {% if field.is_hidden %}
+                            {{ field }}
+                        {% endif %}
+                    {% endfor %}
+
                     <div style="clear: both;"></div>
                     <div style="clear: both;"></div>
                     {% csrf_token %}
-                    {% for field in form %}
-                        <div id="exemplo">
-                            <div><label for="{{ field.auto_id }}">
-                                {{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}
-                            </label></div>
+                    <div>
+                        <div><label for="{{ form.name.auto_id }}">{{ form.name.label_tag }}{% if form.name.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                        {{ form.name }}
+                        <p id="error">
+                        {% if form.name.errors %}
+                            {% for error in form.name.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        {% endif %}
+                        </p>
+                    </div>
 
-                            {{ field }}
-                            <p id="error">
-                            {% if field.errors %}
-                                {% for error in field.errors %}
-                                    {{ error|escape }}
-                                {% endfor %}
-                            {% endif %}
-                            </p>
-                        </div>
-                        {% ifequal field.name 'equip_name' %}
-                            <div class="separator spacer"></div>
-                            <div style="clear: both; margin: 20px"></div>
-                            <h> CONFIGURAÇÃO DAS INTERFACES: </h>
-                        {% endifequal %}
-                        <div style="clear: left;"></div>
-                    {% endfor %}
+                    <div>
+                        <div><label for="{{ form.lacp.auto_id }}">{{ form.lacp.label_tag }}{% if form.lacp.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                        {{ form.lacp }}
+                        <p id="error">
+                        {% if form.lacp.errors %}
+                            {% for error in form.lacp.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        {% endif %}
+                        </p>
+                    </div>
                 </div>
-                <div id="ambiente">
-                    {% include "equip-interface/add-env-form.html" %}
+                <div class="bordasimples">
+                    <div class="separator spacer"></div>
+                    <div style="clear: both; margin: 20px"></div>
+                    <div style="clear: both;"></div>
+                    <h> CONFIGURAÇÃO DAS INTERFACES: </h>
+                    <div style="clear: both; margin: 10px"></div>
+
+                    <div>
+                        <div><label for="{{ form.int_type.auto_id }}">{{ form.int_type.label_tag }}{% if form.int_type.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                        {{ form.int_type }}
+                        <p id="error">
+                        {% if form.int_type.errors %}
+                            {% for error in form.int_type.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        {% endif %}
+                        </p>
+                    </div>
+
+                    <div>
+                        <div><label for="{{ form.vlan.auto_id }}">{{ form.vlan.label_tag }}{% if form.int_type.vlan.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                        {{ form.vlan }} <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>
+                        <p id="error">
+                        {% if form.vlan.errors %}
+                            {% for error in form.vlan.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        {% endif %}
+                        </p>
+                    </div>
+                    <div id="ambiente">
+                        {% include "equip-interface/add-env-form.html" %}
+                    </div>
+                    <div style="clear: both;"></div>
                 </div>
 			</form>
-            <div style="clear: both;"></div>
 		</div>
 
 		<div class="separator spacer"></div>

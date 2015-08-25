@@ -83,6 +83,7 @@ def search_list(request):
                     # Get equip name in form
                     name_equip = search_form.cleaned_data['equip_name']
 
+                    lists['equip_name'] = name_equip
                     # Get equipment by name from NetworkAPI
                     equipment = client.create_equipamento().listar_por_nome(name_equip)['equipamento']
 
@@ -97,7 +98,6 @@ def search_list(request):
                     del_chan_form = DeleteChannelForm(initial=init_map)
 
                     lists['channel_form'] = ChannelForm(initial=init_map)
-                    lists['equip_name'] = name_equip
 
                     # Send to template
                     lists['del_form'] = del_form
@@ -514,7 +514,6 @@ def edit_form(request, equip_name, id_interface):
     EditFormSet = formset_factory(EditForm, params=params, equip_types=equip_types, up=up, down=down,
                                      front_or_back=front_or_back, extra=len(related_list), max_num=len(related_list))
 
-    lists['equip_name'] = equip_name
     lists['id_interface'] = id_interface
     lists['formset'] = EditFormSet(initial=initials)
 
@@ -983,8 +982,6 @@ def edit_channel(request, channel_name, equip_name):
         equip_interface_list = client.create_interface().list_all_by_equip(equip['id'])
 
         envs = get_environment_list(client, equip['id'])
-
-        lists['equip_name'] = equip_name
 
         if request.method == "GET":
 
