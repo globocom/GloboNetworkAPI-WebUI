@@ -1,0 +1,23 @@
+{% load util %}
+<table id="tableEquipInterface" class="tablePoolMembers bordasimplesReal">
+    <col width="45%" />
+    <col width="55%" />
+    <thead>
+        <tr>
+            <td>Equipamento</td>
+            <td>Interface</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in equip_interface %}
+            <tr>
+                <td> {{ item.equipamento_nome }} </td>
+                <td>
+                    <span id="removeInt" class="ui-icon ui-icon-closethick" style="cursor: pointer; float: right;"></span>
+                    {{ item.interface }}
+                    <input name="idsInterface" type="hidden" value="{{ item.id }}"/>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

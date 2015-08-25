@@ -168,12 +168,8 @@ $(document).ready(function() {
 	});
 	
 	$("#page_tab").tabs();
-	
-	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function() {
-		$("#edit_form").submit();
-	});
-	
-	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
+
+	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function() {
 		location.href = "{% url equip.interface.search.list %}?equip_name={{ equip_name }}";
 	});
 	
@@ -224,7 +220,7 @@ $(document).ready(function() {
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Interfaces</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Editar conexão entre as Interfaces</a></li>
 	</ul>
 	<div id="tabs-1">
 		<div id="fields" class="ui-widget-content">
@@ -232,7 +228,7 @@ $(document).ready(function() {
 				{{ formset.management_form }}
 				{% for interface_form in formset %}
 					{% cycle "#fdfdfd" "#f5f5f5" as rowcolors silent %}
-					{% include "equip-interface/add-form.html" with form=interface_form up=formset.up.pop down=formset.down.pop equip_type=formset.equip_types.pop rowcolors=rowcolors counter=forloop.counter0 counter1=forloop.counter brand=formset.params.pop %}
+					{% include "equip-interface/edit-port.html" with form=interface_form up=formset.up.pop down=formset.down.pop equip_type=formset.equip_types.pop rowcolors=rowcolors counter=forloop.counter0 counter1=forloop.counter brand=formset.params.pop %}
 		        {% endfor %}
 			</form>
 			<div style="clear: both;"></div>
@@ -241,8 +237,7 @@ $(document).ready(function() {
 		<div class="separator spacer"></div>
 		
 		<div class="buttons-l ui-widget-header">
-			<button id="btn_sav" type="submit">Gravar</button>
-			<button id="btn_can" type="button">Cancelar</button>
+			<button id="btn_can" type="button">Voltar</button>
 		</div>
 	</div>
 </div>

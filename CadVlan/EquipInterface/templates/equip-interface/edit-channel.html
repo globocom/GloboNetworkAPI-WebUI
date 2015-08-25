@@ -1,0 +1,234 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Adicionar Port Channel]{% endblock %}
+
+{% block header %}
+<style>
+#fields ul li {
+    list-style: none;
+    display: inline-block;
+}
+#exemplo {
+    margin: 10px;
+}
+#tableEquipInterface {
+	width: 600px;
+	margin-bottom: 1%;
+}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("#page_tab").tabs();
+
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+        if(confirm('A configuração setada será aplicada a todas as interfaces selecionadas para o Channel. Deseja continuar?')){
+			$("#add_form").submit();
+		}
+	});
+
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url home %}";
+	});
+
+	$("#id_environment").pickList();
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+
+	$("#ambiente").hide();
+
+	$("#id_int_type_0").click( function() {
+		$("#ambiente").hide();
+	});
+
+	$("#id_int_type_1").click( function() {
+		$("#ambiente").show();
+	});
+
+    $("#btn_add_int").button({ icons: {primary: "ui-icon-plus"}, text: false });
+
+    $("#btn_add_int").mouseover(function() {
+            $("#btn_add_int").attr("title","Adicionar interface ao channel.");
+    });
+
+    $("#btn_addvlan").button({ icons: {primary: "ui-icon-search"}, text: false });
+
+    $("#btn_addvlan").mouseover(function() {
+            $("#btn_addvlan").attr("title","Pesquisar Vlan");
+    });
+
+    $("span[id^=removeInt]").live("click", function(){
+	    var $this = $(this);
+	    $this.parents('tr').remove();
+    });
+
+    $("#btn_add_interface").button({ icons: {primary: "ui-icon-plus"}, text: false}).live("click", function() {
+
+        var interfaceId = $("#id_equip_interface").val();
+
+        if (interfaceId !=  0 && interfaceId != null){
+            $.ajax({
+                data: { interface_Id: interfaceId },
+                url: "{% url insert.interface.channel %}",
+                success: function(data) {
+                    $("#equipInterface").append(data);
+                    $('#id_equip_interface').prop('selectedIndex', 0);
+                },
+                error: function (error) {
+                    message = jQuery.parseJSON(error.responseText);
+                    addMessage(message);
+                }
+            });
+        };
+    });
+
+    $("#id_name").keyup(function() {
+            var valor = $(this).val().replace(/[^A-Za-z0-9-]+/g,'');
+            $(this).val(valor);
+    });
+
+    $("#id_name").mouseover(function() {
+            $(this).attr("title","Formato: <port channel>-<numero do channel>");
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Editar Port Channel</a></li>
+	</ul>
+	<div id="tabs-1">
+        <div>
+            <div id="fields" class="ui-widget-content">
+                <form id="add_form" method="post" action="{% url equip.interface.edit.channel 'None' form.equip_name.value %}">
+                    <div class="bordasimples">
+                        {% for field in form %}
+                            {% if field.is_hidden %}
+                                {{ field }}
+                            {% endif %}
+                        {% endfor %}
+
+                        <div style="clear: both;"></div>
+                        <div style="clear: both;"></div>
+                        {% csrf_token %}
+                        <div>
+                            <div><label for="{{ form.name.auto_id }}">{{ form.name.label_tag }}{% if form.name.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                            {{ form.name }}
+                            <p id="error">
+                            {% if form.name.errors %}
+                                {% for error in form.name.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            </p>
+                        </div>
+
+                        <div>
+                            <div><label for="{{ form.lacp.auto_id }}">{{ form.lacp.label_tag }}{% if form.lacp.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                            {{ form.lacp }}
+                            <p id="error">
+                            {% if form.lacp.errors %}
+                                {% for error in form.lacp.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            </p>
+                        </div>
+
+                        <div>
+                            <div><label for="{{ form.equip_interface.auto_id }}">{{ form.equip_interface.label_tag }}{% if form.equip_interface.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                            {{ form.equip_interface }} <button id="btn_add_interface" type="button">Adicionar Interface</button>
+                            <p id="error">
+                            {% if form.equip_interface.errors %}
+                                {% for error in form.equip_interface.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            </p>
+                        </div>
+
+                        <div style="clear: both; margin: 10px"></div>
+                        <div style="clear: both;"></div>
+
+                        <div  id="equipInterface" class="bordasimples" >
+                            <div class="tablesInterfaces">
+                            {% include "equip-interface/equipInterfaces.html" with equip_interface=equip_interface %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bordasimples">
+
+                        <div class="separator spacer"></div>
+                        <div style="clear: both; margin: 20px"></div>
+                        <div style="clear: both;"></div>
+                        <h> CONFIGURAÇÃO DAS INTERFACES: </h>
+                        <div style="clear: both; margin: 10px"></div>
+
+                        <div>
+                            <div><label for="{{ form.int_type.auto_id }}">{{ form.int_type.label_tag }}{% if form.int_type.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                            {{ form.int_type }}
+                            <p id="error">
+                            {% if form.int_type.errors %}
+                                {% for error in form.int_type.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            </p>
+                        </div>
+
+                        <div>
+                            <div><label for="{{ form.vlan.auto_id }}">{{ form.vlan.label_tag }}{% if form.int_type.vlan.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                            {{ form.vlan }} <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>
+                            <p id="error">
+                            {% if form.vlan.errors %}
+                                {% for error in form.vlan.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            </p>
+                        </div>
+
+                        <div id="ambiente">
+                            {% include "equip-interface/add-env-form.html" %}
+                        </div>
+
+                        <div style="clear: both; margin: 20px"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+		<div class="separator spacer"></div>
+
+		<div class="buttons-l ui-widget-header">
+			<button id="btn_sav" type="submit">Gravar</button>
+			<button id="btn_can" type="button">Cancelar</button>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+
+
+

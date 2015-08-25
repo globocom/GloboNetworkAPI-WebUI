@@ -79,10 +79,9 @@ class ConnectForm(forms.Form):
 
         return self.cleaned_data.get("back")
 
-
 class AddInterfaceForm(forms.Form):
 
-    def __init__(self, marca, index, *args, **kwargs):
+    def __init__(self, int_type_list, marca, index, *args, **kwargs):
         super(AddInterfaceForm, self).__init__(*args, **kwargs)
 
         attrs = dict()
@@ -104,8 +103,9 @@ class AddInterfaceForm(forms.Form):
             self.fields['combo'].choices = [("", "")]
 
         widget = forms.TextInput(
-            attrs={"style": "width: 150px;", "onKeyUp": "javascript:fixName(this, " + str(index) + ");"})
+            attrs={"style": "width: 100px;", "onKeyUp": "javascript:fixName(this, " + str(index) + ");"})
         self.fields['name'].widget = widget
+        self.fields['vlan'].widget = widget
 
         if marca == "0":
             self.regex = "^([a-zA-Z0-9-_/ ]+(:)?){1,6}$"
@@ -124,20 +124,18 @@ class AddInterfaceForm(forms.Form):
         else:
             self.regex = ""
 
-    combo = forms.ChoiceField(
-        label="", required=False, error_messages=error_messages)
-    name = forms.CharField(label="Nome da Interface", required=True,
-                           min_length=1, max_length=20, error_messages=error_messages)
-    description = forms.CharField(label=u'Descrição', required=False, min_length=3, max_length=200, error_messages=error_messages, widget=forms.Textarea(
-        attrs={'style': "width: 250px; height: 34px;", 'rows': 2, 'data-maxlenght': 200}))
-    protected = forms.ChoiceField(label="Protegido", required=True, choices=[(
-        0, "Não"), (1, "Sim")], error_messages=error_messages, widget=forms.RadioSelect, initial=0)
-    equip_name = forms.CharField(
-        widget=forms.HiddenInput(), label='', required=False)
-    equip_id = forms.IntegerField(
-        widget=forms.HiddenInput(), label='', required=False)
-    inter_id = forms.IntegerField(
-        widget=forms.HiddenInput(), label='', required=False)
+    combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
+    name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
+                                  widget=forms.RadioSelect, initial=0)
+    equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")], error_messages=error_messages,
+                                  widget=forms.RadioSelect, initial=0)
+    vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1, max_length=5)
+    channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+
 
     def clean_name(self):
         name = self.cleaned_data['name']
@@ -147,6 +145,26 @@ class AddInterfaceForm(forms.Form):
 
         return self.cleaned_data['name']
 
+    def clean_type(self):
+        int_type = self.cleaned_data['int_type']
+        if int_type:
+            self.cleaned_data['int_type'] = "access"
+        else:
+            self.cleaned_data['int_type'] = "trunk"
+
+        return self.cleaned_data['int_type']
+
+class AddEnvInterfaceForm(forms.Form):
+
+    def __init__(self, envs, *args, **kwargs):
+        super(AddEnvInterfaceForm, self).__init__(*args, **kwargs)
+
+        ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " +
+                         env["grupo_l3_name"] + " ( " + env["range"] + " ) ")  for env in envs["ambiente"]])
+        self.fields['environment'].choices = ambiente_choice
+
+    environment = forms.MultipleChoiceField(label=u'Ambientes Disponiveis (Range de Vlans)', required=False, error_messages=error_messages,
+                                  widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
 
 class AddSeveralInterfaceForm(forms.Form):
 
@@ -242,3 +260,93 @@ class AddSeveralInterfaceForm(forms.Form):
                 'Nome da interface inválida para esta marca')
 
         return self.cleaned_data['name']
+
+class EditForm(forms.Form):
+
+
+    def __init__(self, int_type_list, marca, index, *args, **kwargs):
+        super(EditForm, self).__init__(*args, **kwargs)
+
+        attrs = dict()
+        if marca == "3":
+            attrs["onChange"] = "javascript:setMask(" + str(index) + ")"
+            attrs["style"] = "width: 98px;"
+            self.fields['combo'].widget = forms.Select(attrs=attrs)
+            self.fields['combo'].choices = [
+                ("", "Selecione"), ("Eth","Eth"), ("Fa", "Fa"), ("Gi", "Gi"), ("mgmt", "mgmt"), ("Serial", "Serial"), ("Te", "Te")]
+        elif marca == "21":
+            attrs["onChange"] = "javascript:setMask(" + str(index) + ")"
+            attrs["style"] = "width: 98px;"
+            self.fields['combo'].widget = forms.Select(attrs=attrs)
+            self.fields['combo'].choices = [
+                ("", "Selecione"), ("GE","GE"), ("10GE", "10GE"), ("40GE", "40GE"), ("100GE", "100GE"), ("meth", "meth")]
+        else:
+            attrs["style"] = "display: none;"
+            self.fields['combo'].widget = forms.Select(attrs=attrs)
+            self.fields['combo'].choices = [("", "")]
+
+        widget = forms.TextInput(
+            attrs={"style": "width: 100px;", "onKeyUp": "javascript:fixName(this, " + str(index) + ");", "readonly": True})
+        self.fields['name'].widget = widget
+
+        if marca == "0":
+            self.regex = "^([a-zA-Z0-9-_/ ]+(:)?){1,6}$"
+        elif marca == "2":
+            self.regex = "^(Int)\s[0-9]+$"
+        elif marca == "3":
+            self.regex = "^(Fa|Gi|Te|Serial|Eth|mgmt)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+        elif marca == "4":
+            self.regex = "^(interface)\s[0-9a-zA-Z]+(/[0-9a-zA-Z])+([0-9a-zA-Z-.]+)?$"
+        elif marca == "5":#Trocar pelo Brocade
+            self.regex = "^(eth)[0-9]+(/[0-9]+)?$"
+        elif marca == "8":
+            self.regex = "^[0-9]+$"
+        elif marca == "21":
+            self.regex = "^(GE|10GE|40GE|100GE|meth)\s+[0-9]+(/[0-9]+(/[0-9]+)?)?$"
+        else:
+            self.regex = ""
+
+    combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
+    name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
+                                  widget=forms.RadioSelect(attrs={'disabled': 'disabled'}), initial=0)
+    equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        if not check_regex(name, self.regex):
+            raise forms.ValidationError(
+                'Nome da interface inválida para esta marca')
+
+        return self.cleaned_data['name']
+
+class ChannelAddForm(forms.Form):
+
+
+    def __init__(self , equip_list, *args, **kwargs):
+        super(ChannelAddForm, self).__init__(*args, **kwargs)
+
+        widget = forms.TextInput(attrs={"style": "width: 100px;"})
+        self.fields['name'].widget = widget
+
+        equip_interface = [(tp["id"], tp["equipamento_nome"] + "   " + tp["nome"]) for tp in equip_list["interfaces"]]
+        equip_interface.insert(0, (0, "Selecione uma interface para adicionar"))
+
+        self.fields['equip_interface'].choices = equip_interface
+
+    name = forms.CharField(label="Nome do Channel", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    lacp = forms.ChoiceField(label="LACP", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
+                                  widget=forms.RadioSelect(), initial=1)
+    equip_interface = forms.ChoiceField(label="Equipamento/Interface", required=False, error_messages=error_messages,
+                                        widget=forms.Select(attrs={'style': "width: 400px"}))
+    ids = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")], error_messages=error_messages,
+                                  widget=forms.RadioSelect)
+    vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1, max_length=5)
+    id = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)

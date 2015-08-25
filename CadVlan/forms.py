@@ -72,3 +72,9 @@ class AplicarForm(EquipForm):
 class CriarVlanAmbForm(EquipForm):
     ids_config = forms.CharField(
         widget=forms.HiddenInput(), label='', required=True)
+
+class ChannelForm(EquipForm):
+    ids_channel = forms.CharField(widget=forms.HiddenInput(), label='', required=True)
+
+class DeleteChannelForm(EquipForm):
+    ids_chan = forms.CharField(widget=forms.HiddenInput(), label='', required=True)

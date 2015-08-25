@@ -19,26 +19,18 @@
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, EnvironmentVipNotFoundError, InvalidParameterError, NetworkAPIClientError, UserNotAuthorizedError, NumeroRackDuplicadoError 
+from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, InvalidParameterError, NetworkAPIClientError, NumeroRackDuplicadoError
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Util.shortcuts import render_to_response_ajax
 from CadVlan.templates import RACK_EDIT, RACK_FORM, RACK_VIEW_AJAX
 from django.template.context import RequestContext
 from CadVlan.Rack.forms import RackForm
 from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
-from networkapiclient.Pagination import Pagination
-from django.http import HttpResponseServerError, HttpResponse
 from django.shortcuts import render_to_response, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.template import loader
-from django.core.context_processors import request
 from django.template.context import Context, RequestContext
 from CadVlan.messages import auth_messages, equip_messages, error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm
-
-import json
 
 
 logger = logging.getLogger(__name__)
@@ -63,7 +55,6 @@ def proximo_rack(racks):
     if rack_anterior > 119:
         return ''
     return str(rack_anterior)
-
 
 def validar_mac(mac):
 
@@ -93,16 +84,13 @@ def buscar_nome_equip(client, rack, tipo):
     else:
         rack[tipo] = ''
 
-
 def valid_rack_number(rack_number):
    if not rack_number < 120:
       raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - 119') 
 
-
 def valid_rack_name(rack_name):
    if not check_regex(rack_name, r'^[A-Z][A-Z][0-9][0-9]'):
       raise InvalidParameterError('Nome inváildo. Ex: AA00')
-
 
 def get_msg(request, var, nome, operation):
 
@@ -121,7 +109,6 @@ def get_msg(request, var, nome, operation):
         elif operation=='APLICAR':
             msg = rack_messages.get('can_not_aplicar_config') % nome
         messages.add_message(request, messages.ERROR, msg)
-
 
 def rack_config_delete (request, client, form, operation):
 
@@ -210,12 +197,10 @@ def rack_config_delete (request, client, form, operation):
             return redirect("ajax.view.rack")
 
         else:
-            messages.add_message(
-                request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
          # Redirect to list_all action
         return redirect("ajax.view.rack")
-
 
 @log
 @login_required
@@ -275,7 +260,6 @@ def rack_form(request):
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(RACK_FORM, {'form': form}, context_instance=RequestContext(request))
 
-
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_MANAGEMENT, "write": True}])
@@ -286,7 +270,6 @@ def ajax_view(request):
     client_api = auth.get_clientFactory()
 
     return ajax_rack_view(request, client_api)
-
 
 def ajax_rack_view(request, client_api):
 

@@ -51,8 +51,7 @@ def find_first_interface(interfs):
 
 def get_initial(interf):
     if interf['marca'] == "3":
-        combo = interf['interface'][0:2] if not interf[
-            'interface'].startswith("Serial") else "Serial"
+        combo = interf['interface'][0:2] if not interf['interface'].startswith("Serial") else "Serial"
     else:
         combo = ""
 
@@ -62,7 +61,8 @@ def get_initial(interf):
 
     return {'combo': combo, 'name': interf['interface'], 'description': interf['descricao'],
             'protected': prot, 'equip_name': interf['equipamento_nome'],
-            'equip_id': interf['equipamento'], 'inter_id': interf['id']}
+            'equip_id': interf['equipamento'], 'inter_id': interf['id'], 'int_type': interf['tipo'],
+            'channel': interf['sw_router']}
 
 
 def next_interface(interface, interfs, last_id, first_time):
@@ -87,13 +87,14 @@ def next_interface(interface, interfs, last_id, first_time):
         return None, interface['id'], False
 
 
-def make_initials_and_params(interfs):
+def make_initials_and_params(interfs, int_type_list=None):
     initials = []
     params = []
     equip_types = []
     up_list = []
     down_list = []
     front_or_back = []
+    parametros = []
 
     # First interface to show in edit form
     interface = find_first_interface(interfs)
@@ -110,7 +111,6 @@ def make_initials_and_params(interfs):
         elif back == None and not front == None:
             down = 1
             front_or_back.append("back")
-
         if len(front_or_back) == 0:
             front_or_back.append("front")
     else:
@@ -120,19 +120,19 @@ def make_initials_and_params(interfs):
 
     # Add
     brand = interface['marca'] if interface['tipo_equip'] != "2" else "0"
-    params.append(brand)
+    parametros.append(brand)
+    parametros.append(int_type_list)
+    params.append(parametros)
     up_list.append(up)
     down_list.append(down)
     initials.append(get_initial(interface))
     equip_types.append(interface['tipo_equip'])
-
     last_id = interface['id']
     first_time = True
+
     while True:
         # Get the next interface to show in edit form
-
-        interface, last_id, first_time = next_interface(
-            interface, interfs, last_id, first_time)
+        interface, last_id, first_time = next_interface(interface, interfs, last_id, first_time)
 
         if interface != None:
             # Connect lines
@@ -150,11 +150,12 @@ def make_initials_and_params(interfs):
                     front_or_back.append("back")
             else:
                 up, down = 1, 0
-
             # Add
-            brand = interface['marca'] if interface[
-                'tipo_equip'] != "2" else "0"
-            params.append(brand)
+            parametros = []
+            brand = interface['marca'] if interface['tipo_equip'] != "2" else "0"
+            parametros.append(brand)
+            parametros.append(int_type_list)
+            params.append(parametros)
             up_list.append(up)
             down_list.append(down)
             initials.append(get_initial(interface))

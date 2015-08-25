@@ -101,12 +101,24 @@ urlpatterns += patterns('CadVlan.EquipInterface.views',
                             'add_form', name='equip.interface.form',),
                         url('^equip-interface/edit/(?P<equip_name>[^/]+)/(?P<id_interface>\d+)[/]?$',
                             'edit_form', name='equip.interface.edit.form',),
+                        url('^equip-interface/edit-interface/(?P<id_interface>[^/]+)[/]?$',
+                            'edit', name='equip.interface.edit',),
                         url('^equip-interface/addseveral/(?P<equip_name>[^/]+)[/]?$',
                             'add_several_forms', name='equip.interface.several.form',),
-                        url(
-                            '^equip-interface/disconnect/(?P<id_interface>\d+)/(?P<back_or_front>\d+)/(?P<equip_name>[^/]+)/(?P<id_interf_edit>\d+)[/]?$', 'disconnect', name='equip.interface.disconnect',),
-                        url(
-                            '^equip-interface/connect/(?P<id_interface>\d+)/(?P<front_or_back>\d+)[/]?$', 'connect', name='equip.interface.connect',),
+                        url('^equip-interface/disconnect/(?P<id_interface>\d+)/(?P<back_or_front>\d+)/(?P<equip_name>[^/]+)/(?P<id_interf_edit>\d+)[/]?$',
+                            'disconnect', name='equip.interface.disconnect',),
+                        url('^equip-interface/connect/(?P<id_interface>\d+)/(?P<front_or_back>\d+)[/]?$',
+                            'connect', name='equip.interface.connect',),
+                        url('^equip-interface/new-channel[/]?$', 'channel',
+                            name='inserir.channel',),
+                        url('^equip-interface/new-channel/interfaces/(?P<equip_name>[^/]+)[/]?$', 'add_channel',
+                            name='equip.interface.add.channel',),
+                        url('^equip-interface/edit-channel/(?P<channel_name>[^/]+)/(?P<equip_name>[^/]+)[/]?$', 'edit_channel',
+                            name='equip.interface.edit.channel',),
+                        url('^equip-interface/channel/delete[/]?$', 'channel_delete',
+                            name='delete.channel',),
+                        url('^equip-interface/insert-interface[/]?$', 'channel_insert_interface',
+                            name='insert.interface.channel',),
                         )
 
 # URL's Equipment
@@ -673,6 +685,7 @@ urlpatterns += patterns('CadVlan.Rack.views',
                             name='rack.config',),
                         url('^rack/aplicar-configuracao[/]?$', 'rack_aplicar_config',
                             name='rack.aplicar_config',),
+
                         )
 
 

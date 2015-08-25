@@ -23,12 +23,13 @@
 {% block header %}
 <style>
 #fields ul li {
-	list-style: none;
-	display: inline-block;
+    list-style: none;
+    display: inline-block;
 }
-</style>
-<script type="text/javascript">
 
+</style>
+
+<script type="text/javascript">
 var marca_id_store;
 
 function defName(index) {
@@ -149,7 +150,7 @@ if (typeof String.prototype.startsWith != 'function') {
 $(document).ready(function() {
 	
 	defName();
-	
+
 	$("#page_tab").tabs();
 	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function() {
@@ -164,9 +165,30 @@ $(document).ready(function() {
 			location.href = "{% url equip.interface.search.list %}";
 		}
 	});
-	
+
+    $("#btn_addvlan").button({ icons: {primary: "ui-icon-search"}, text: false });
+
+    $("#btn_addvlan").mouseover(function() {
+            $("#btn_addvlan").attr("title","Pesquisar Vlan");
+    });
+
 	$("textarea").maxlength();
-	
+
+	$("#id_environment").pickList();
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+
+	$("#ambiente").hide();
+
+	$("#id_int_type_0").click( function() {
+		$("#ambiente").hide();
+	});
+
+	$("#id_int_type_1").click( function() {
+		$("#ambiente").show();
+	});
 });
 </script>
 {% endblock %}
@@ -174,13 +196,18 @@ $(document).ready(function() {
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Interfaces</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">{% ifequal id None %}Cadastro de Interfaces{% else %}Editar Interface{% endifequal %}</a></li>
 	</ul>
 	<div id="tabs-1">
 		<div id="fields" class="ui-widget-content">
-			<form id="add_form" method="post">
-				{% include "equip-interface/add-form.html" %}
-			</form>
+            <form id="add_form" method="post" action="{% ifequal id None %}{% url equip.interface.form equip_name %}{% else %}{% url equip.interface.edit id %}{% endifequal %}">
+                <div id="interfaceform">
+                    {% include "equip-interface/add-form.html" %}
+                </div>
+                <div id="ambiente">
+                    {% include "equip-interface/add-env-form.html" %}
+                </div>
+            </form>
 			<div style="clear: both;"></div>
 		</div>
 		

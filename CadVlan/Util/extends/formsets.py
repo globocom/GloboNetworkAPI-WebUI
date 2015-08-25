@@ -28,9 +28,9 @@ class BaseFormSet(formsets.BaseFormSet):
         # instantiate all the forms and put them in self.forms
         self.forms = []
 
-        qnt = xrange(self.total_form_count())
+        qnt = xrange(self.total_form_count()) #numero de forms necessarios
 
-        if len(self.params) != len(qnt):
+        if len(self.params) != len(qnt): #o params tera que ser algo do tipo [[parametros form1],[parametros form2],...,[parametros formn]]
             raise AttributeError(
                 "'%s' object with attribute 'params' has different length of forms quantity" % self.__class__.__name__)
 
@@ -54,7 +54,7 @@ class BaseFormSet(formsets.BaseFormSet):
         if i >= self.initial_form_count():
             defaults['empty_permitted'] = True
         defaults.update(kwargs)
-        form = self.form(self.params[len(self.params) - i - 1], i, **defaults)
+        form = self.form(self.params[len(self.params) - i - 1][1], self.params[len(self.params) - i - 1][0], i, **defaults) #passando o params[i] para o form[i]
         self.add_fields(form, i)
         return form
 
@@ -74,7 +74,7 @@ class BaseFormSet(formsets.BaseFormSet):
 def formset_factory(form, params=[], equip_types=[], up=[], down=[], front_or_back=[],
                     formset=BaseFormSet, extra=1, can_order=False, can_delete=False, max_num=None):
     """Return a FormSet for the given form class with parameters."""
-    attrs = {'form': form, 'extra': extra, 'max_num': max_num, 'can_order': can_order,
-             'can_delete': can_delete, 'params': params, 'equip_types': equip_types,
-             'up': up, 'down': down, 'front_or_back': front_or_back}
+    attrs = {'form': form, 'extra': extra, 'max_num': max_num, 'can_order': can_order, 'can_delete': can_delete,
+             'params': params, 'equip_types': equip_types, 'up': up, 'down': down, 'front_or_back': front_or_back}
+
     return type(form.__name__ + 'Set', (formset,), attrs)
