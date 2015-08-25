@@ -8,4 +8,4 @@ Documentation/_build/*
 **/ACLS/*
 *.idea
 .vagrant*
-
+.DS_STORE
