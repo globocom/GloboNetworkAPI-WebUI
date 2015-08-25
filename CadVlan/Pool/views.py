@@ -455,32 +455,37 @@ def ajax_modal_ip_real_server(request):
 
 def __modal_ip_list_real(request, client_api):
 
-    lists = dict()
-    lists['msg'] = ''
-    lists['ips'] = ''
-    ips = None
-    equip = None
-    status_code = None
+    lists = {
+        'msg': str(),
+        'ips': []
+    }
+
+    ips = {}
+    status_code = 200
+
+    ambiente = get_param_in_request(request, 'id_environment')
+    equip_name = get_param_in_request(request, 'equip_name')
 
     try:
-
-        ambiente = get_param_in_request(request, 'id_environment')
-        equip_name = get_param_in_request(request, 'equip_name')
-
         # Valid Equipament
         equip = client_api.create_equipamento().listar_por_nome(equip_name).get("equipamento")
-        ips = client_api.create_pool().get_available_ips_to_add_server_pool(equip_name, ambiente)
-
+        ips_list = client_api.create_pool().get_available_ips_to_add_server_pool(equip_name, ambiente)
     except NetworkAPIClientError, e:
         logger.error(e)
         status_code = 500
-        return HttpResponse(json.dumps({'message': e.error, 'status': 'error'}), status=status_code, content_type='application/json')
+        return HttpResponse(json.dumps({'message': e.error, 'status': 'error'}),
+                            status=status_code,
+                            content_type='application/json')
 
-    if ips and ips['list_ipv4'] and type(ips['list_ipv4']) is not type([]):
-        ips['list_ipv4'] = [ips['list_ipv4']]
+    if not ips_list['ipsv4'] and not ips_list['ipsv6']:
+        return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
+                                                   u'possa ser utilizado nos pools desse ambiente.',
+                                        'status': 'error'}),
+                            status=status_code,
+                            content_type='application/json')
 
-    if ips and ips['list_ipv6'] and type(ips['list_ipv6']) is not type([]):
-        ips['list_ipv6'] = [ips['list_ipv6']]
+    ips['list_ipv4'] = ips_list['ipsv4']
+    ips['list_ipv6'] = ips_list['ipsv6']
 
     lists['ips'] = ips
     lists['equip'] = equip

@@ -99,6 +99,11 @@
                     data: { id_environment: $('#id_environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
                     url: "{% url pool.modal.ips.ajax %}",
                     success: function(data, textStatus, xhr) {
+                        if(data.message && data.status == "error"){
+                            alert(data.message);
+                            return false;
+                        }
+
                         $('#content-ip').html(data);
                         $("#dialog_ip").dialog("open");
                         $('#messages').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
@@ -108,6 +113,8 @@
                         addMessage(response);
                     }
                 });
+            }else{
+                alert('Por favor, escolha o nome do equipamento.');
             }
         });
 
