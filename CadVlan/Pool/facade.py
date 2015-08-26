@@ -48,6 +48,22 @@ def populate_optionsvips_choices(client, tips = 'Balanceamento'):
 
     return optionsvips_choices
 
+def populate_servicedownaction_choices(client, tips = 'ServiceDownAction'):
+    optionspool = client.create_option_pool().get_all_option_pool(option_type='ServiceDownAction')
+
+    # Filter options vip
+    servicedownaction_choices = [('', '-')]
+    for obj in optionspool:
+        #if obj['type'] == tips:
+        servicedownaction_choices.append((obj['name'], obj['name']))
+
+    return servicedownaction_choices
+
+def find_servicedownaction_id(client, option_name):
+    optionspool = client.create_option_pool().get_all_option_pool(option_type='ServiceDownAction')
+    for obj in optionspool:
+        if obj['name'] == option_name:
+            return obj['id']
 
 def populate_optionspool_choices(client, environment):
     optionspool_choices = [('', '-')]

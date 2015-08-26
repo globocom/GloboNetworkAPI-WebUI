@@ -22,11 +22,12 @@ from CadVlan.messages import error_messages
 
 class PoolForm(forms.Form):
 
-    def __init__(self, enviroments_choices, optionsvips_choices, healthcheck_choices=[('', '-')], *args, **kwargs):
+    def __init__(self, enviroments_choices, optionsvips_choices,servicedownaction_choices, healthcheck_choices=[('', '-')], *args, **kwargs):
         super(PoolForm, self).__init__(*args, **kwargs)
 
         self.fields['environment'].choices = enviroments_choices
         self.fields['balancing'].choices = optionsvips_choices
+        self.fields['servicedownaction'].choices = servicedownaction_choices
         self.fields['health_check'].choices = healthcheck_choices
 
     id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
@@ -38,6 +39,8 @@ class PoolForm(forms.Form):
     environment = forms.ChoiceField(label=u'Environment', choices=[], required=True,
                                     error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
     balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
+                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+    servicedownaction = forms.ChoiceField(label=u'Action on ServiceDown', choices=[], required=True,
                                   error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
     health_check = forms.ChoiceField(label=u'HealthCheck', choices=[], required=True,
                                   error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))

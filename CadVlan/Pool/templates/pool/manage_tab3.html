@@ -167,6 +167,10 @@ $(document).ready(function() {
                         <td><label style="width:350px;color:blue;text-align:center;" id="list_balancing">{% if balancing %} {{ balancing }} {% endif %}</label></td>
                     </tr>
                     <tr>
+                        <td><label>ServiceDownAction:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;" id="list_servicedownaction">{% if servicedownaction %} {{ servicedownaction }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
                         <td><label>Healthcheck:</label></td>
                         <td><label style="width:350px;color:blue;text-align:center;">{% if health_check %} {{ health_check }} {% endif %}</label></td>
                     </tr>
@@ -259,6 +263,22 @@ $(document).ready(function() {
                         <p id="error">
                         {% if form.balancing.errors %}
                             {% for error in form.balancing.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        {% endif %}
+                        </p>
+                    </div>
+
+                    <div>
+                        <div>
+                            <label for="{{ form.identifier.auto_id }}">
+                                {{ form.servicedownaction.label }}{% if form.servicedownaction.field.required %}<span style="color: red;">*</span>{% endif %}
+                            </label>
+                        </div>
+                        {{ form.servicedownaction }}
+                        <p id="error">
+                        {% if form.servicedownaction.errors %}
+                            {% for error in form.servicedownaction.errors %}
                                 {{ error|escape }}
                             {% endfor %}
                         {% endif %}
