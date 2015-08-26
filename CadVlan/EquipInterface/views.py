@@ -28,7 +28,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, InterfaceNaoExisteError, NomeInterfaceDuplicadoParaEquipamentoError
 from django.contrib import messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm
+from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm, AplicarForm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
@@ -97,9 +97,7 @@ def search_list(request):
 
                     # New form
                     del_form = DeleteForm(initial=init_map)
-
                     del_chan_form = DeleteChannelForm(initial=init_map)
-
                     lists['channel_form'] = ChannelForm(initial=init_map)
 
                     # Send to template
@@ -567,6 +565,7 @@ def edit(request, id_interface):
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
+    lists['id_interface'] = interface.get('id')
 
     if request.method == "GET":
 
@@ -980,8 +979,6 @@ def add_channel(request, equip_name=None):
 
     return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
 
-
-
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
@@ -1106,3 +1103,37 @@ def channel_insert_interface(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+
+def config_sync_all(request, equip_name, is_channel, ids):
+
+    equip_nam = equip_name
+
+    # Get user
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    # Control others exceptions
+    have_errors = False
+
+    try:
+        if int(is_channel):
+            client.create_api_interface_request().deploy_channel_config_sync(ids)
+        else:
+            client.create_api_interface_request().deploy_interface_config_sync(ids)
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        have_errors = True
+
+    # If all has ben removed
+    if have_errors == False:
+        messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_sync"))
+    else:
+        messages.add_message(request, messages.WARNING, error_messages.get("can_not_sync_error"))
+
+
+    # Redirect to list_all action
+    url_param = reverse("equip.interface.search.list")
+    if len(equip_nam) > 2:
+        url_param = url_param + "?equip_name=" + equip_nam
+    return HttpResponseRedirect(url_param)
