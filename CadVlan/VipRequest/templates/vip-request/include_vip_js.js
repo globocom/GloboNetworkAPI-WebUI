@@ -140,6 +140,7 @@
 		$("#id_persistence").html('');
 		$("#id_timeout").html('');
 		$("#id_balancing").html('');
+		$("#id_servicedownaction").html('');
 		$("#id_environment_vip").val('');
 		$("#id_rules").html('');
 		$("#id_healthcheck_type_content").html('');
@@ -175,6 +176,7 @@
 		$("#id_persistence").html('');
 		$("#id_timeout").html('');
 		$("#id_balancing").html('');
+		$("#id_servicedownaction").html('');
 		$("#id_environment_vip").val('');
 		$("#id_rules").html('');
 		$("#id_healthcheck_type_content").html('');
@@ -205,6 +207,7 @@
 					$("#id_persistence").html(data.persistence);
 					$("#id_timeout").html(data.timeout);
 					$("#id_balancing").html(data.balancing);
+					$("#id_servicedownaction").html(data.servicedownaction);
 					$("#id_environment_vip").val(id_environment_vip);
 					$("#id_rules").html(data.rules);
 					$("#id_healthcheck_type_content").html(data.healthcheck_list);

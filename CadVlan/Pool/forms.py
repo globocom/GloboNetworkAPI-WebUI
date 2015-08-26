@@ -70,14 +70,19 @@ class SearchPoolForm(forms.Form):
 
 class PoolFormEdit(forms.Form):
 
-    def __init__(self, choices_opvip, *args, **kwargs):
+    def __init__(self, choices_opvip,servicedownaction_choices, *args, **kwargs):
 
         super(PoolFormEdit, self).__init__(*args, **kwargs)
 
         self.fields['balancing'].choices = choices_opvip
         self.fields['balancing'].choices.insert(0, ('',''))
 
+        self.fields['servicedownaction'].choices = servicedownaction_choices
+        self.fields['servicedownaction'].choices.insert(0, ('',''))
+
     default_port = forms.CharField(label=u'Default Port', min_length=2, max_length=5, required=True,
                                    error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
     balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
+                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+    servicedownaction = forms.ChoiceField(label=u'Action on ServiceDown', choices=[], required=True,
                                   error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))

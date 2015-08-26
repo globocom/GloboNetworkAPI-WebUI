@@ -47,6 +47,7 @@ from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.forms import DeleteForm, ValidateForm, CreateForm, RemoveForm
 from CadVlan.messages import error_messages, request_vip_messages, \
     healthcheck_messages, equip_group_messages, auth_messages, pool_messages
+from CadVlan.Pool.facade import populate_servicedownaction_choices, find_servicedownaction_id
 from CadVlan.permissions import VIP_CREATE_SCRIPT, \
     VIP_VALIDATION, VIP_REMOVE_SCRIPT, VIPS_REQUEST, VIP_ALTER_SCRIPT, \
     POOL_MANAGEMENT, POOL_ALTER_SCRIPT
@@ -2837,6 +2838,8 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
 
         options_vip_choices = _create_options_vip(client)
 
+        servicedownaction_choices = populate_servicedownaction_choices(client)
+
         options_pool_as_healthcheck_choices = _create_options_pool_as_healthcheck(
             client,
             environment_id
@@ -2872,9 +2875,11 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
         healthcheck_request = pool['server_pool']['healthcheck']['healthcheck_request'] \
             if pool['server_pool']['healthcheck'] else ''
 
+        sda=server_pool.get('servicedownaction')
         form_initial = {
             'default_port': server_pool.get('default_port'),
             'balancing': server_pool.get('lb_method'),
+            'servicedownaction': sda.get('name'),
             'health_check': health_check,
             'max_con': server_pool.get('default_limit')
         }
@@ -2882,6 +2887,7 @@ def shared_load_pool_for_copy(request, client, form_acess=None, external=False):
         form = PoolForm(
             options_environment_choices,
             options_vip_choices,
+            servicedownaction_choices,
             options_pool_as_healthcheck_choices,
             initial=form_initial
         )
@@ -3027,9 +3033,12 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 
         options_vip_choices = _create_options_vip(client)
 
+        servicedownaction_choices = populate_servicedownaction_choices(client)
+
         form = PoolForm(
             options_environment,
             options_vip_choices,
+            servicedownaction_choices,
             options_pool_choices,
             request.POST
         )
@@ -3041,7 +3050,10 @@ def shared_save_pool(request, client, form_acess=None, external=False):
             identifier = form.cleaned_data['identifier']
             default_port = form.cleaned_data['default_port']
             balancing = form.cleaned_data['balancing']
+            servicedownaction = form.cleaned_data['servicedownaction']
             maxcom = form.cleaned_data['max_con']
+
+            servicedownaction_id=find_servicedownaction_id(client, servicedownaction)
 
             is_valid, error_list = valid_reals(
                 equipment_ids,
@@ -3066,7 +3078,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
                     environment_id, balancing, healthcheck_type,
                     healthcheck_expect, healthcheck_request, maxcom,
                     ip_list_full, equipment_names, equipment_ids,
-                    priorities, weight, ports_reals, pool_member_ids
+                    priorities, weight, ports_reals, pool_member_ids,servicedownaction_id
                 )
 
                 return render_message_json(
@@ -3123,13 +3135,14 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
             .listar_healtchcheck_expect_distinct()
 
         options_vip_choices = _create_options_vip(client)
+        servicedownaction_choices = populate_servicedownaction_choices(client)
 
         choices_environment = _create_options_environment(
             client,
             env_vip_id
         )
 
-        form = PoolForm(choices_environment, options_vip_choices)
+        form = PoolForm(choices_environment, options_vip_choices,servicedownaction_choices)
 
         return render(
             request,

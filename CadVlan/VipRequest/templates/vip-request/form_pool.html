@@ -309,6 +309,22 @@
 
             <div>
                 <div>
+                    <label for="{{ form.identifier.auto_id }}">
+                        {{ form.servicedownaction.label }}{% if form.servicedownaction.field.required %}<span style="color: red;">*</span>{% endif %}
+                    </label>
+                </div>
+                {{ form.servicedownaction }}
+                <p id="error">
+                {% if form.servicedownaction.errors %}
+                    {% for error in form.servicedownaction.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
+                </p>
+            </div>
+
+            <div>
+                <div>
                     <label for="{{ form.health_check.auto_id }}">
                         {{ form.health_check.label }}{% if form.health_check.field.required %}<span style="color: red;">*</span>{% endif %}
                     </label>
