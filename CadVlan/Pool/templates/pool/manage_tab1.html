@@ -73,6 +73,10 @@ $(document).ready(function() {
                         <td><label style="width:350px;color:blue;text-align:center;" id="list_balancing">{% if balancing %} {{ balancing }} {% endif %}</label></td>
                     </tr>
                     <tr>
+                        <td><label>ServiceDownAction:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;" id="list_servicedownaction">{% if servicedownaction %} {{ servicedownaction }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
                         <td><label>Healthcheck:</label></td>
                         <td><label style="width:350px;color:blue;text-align:center;">{% if health_check %} {{ health_check }} {% endif %}</label></td>
                     </tr>
