@@ -100,13 +100,12 @@
                     url: "{% url pool.modal.ips.ajax %}",
                     success: function(data, textStatus, xhr) {
                         if(data.message && data.status == "error"){
-                            alert(data.message);
-                            return false;
+                            addMessage(data);
+                        }else{
+                            $('#content-ip').html(data);
+                            $("#dialog_ip").dialog("open");
+                            $('#messages').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
                         }
-
-                        $('#content-ip').html(data);
-                        $("#dialog_ip").dialog("open");
-                        $('#messages').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
                     },
                     error: function(data, textStatus, xhr) {
                         response = JSON.parse(data.responseText);
@@ -114,7 +113,7 @@
                     }
                 });
             }else{
-                alert('Por favor, escolha o nome do equipamento.');
+                alert('Por favor, informe o nome do equipamento.');
             }
         });
 

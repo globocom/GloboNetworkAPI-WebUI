@@ -56,19 +56,26 @@
                     data: { id_environment: $('#id_environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
                     url: "{{ load_pool_url }}",
                     success: function(data, textStatus, xhr) {
-                        $('#content-ip').html(data);
-                        $("#dialog_ip").dialog("open");
-                        $('#messagesModal').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
+                        if(data.message && data.status == "error"){
+                            addMessageModal(data);
+                        }else{
+                            $('#content-ip').html(data);
+                            $("#dialog_ip").dialog("open");
+                            $('#messagesModal').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
+                        }
                     },
                     error: function(error, textStatus, xhr) {
                         message = jQuery.parseJSON(error.responseText);
 						addMessageModal(message);
                     }
                 });
+            }else{
+                addMessageModal({message:'Por favor, informe o nome do equipamento.',
+                                 status: 'error'});
             }
         });
 
-        $("#dialog_ip").dialog({
+        /*$("#dialog_ip").dialog({
             height: 600,
             width: 600,
             modal: true,
@@ -80,7 +87,7 @@
                     $(this).dialog("close");
                 }
             }
-        });
+        });*/
 
         $(".numbersOnly").live('focusout', function(){
             this_element = $(this);

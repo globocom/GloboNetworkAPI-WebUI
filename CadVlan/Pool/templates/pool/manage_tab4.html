@@ -96,19 +96,25 @@ $(document).ready(function() {
                 data: { id_environment: $('#environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
                 url: "{% url pool.modal.ips.ajax %}",
                 success: function(data, textStatus, xhr) {
-                    $('#content-ip').html(data);
-                    $("#dialog_ip").dialog("open");
-                    $('#messages').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
+                    if(data.message && data.status == "error"){
+                        addMessage(data);
+                    }else{
+                        $('#content-ip').html(data);
+                        $("#dialog_ip").dialog("open");
+                        $('#messages').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
+                    }
                 },
                 error: function(data, textStatus, xhr) {
                     response = JSON.parse(data.responseText);
                     addMessage(response);
                 }
             });
+        }else{
+            alert('Por favor, informe o nome do equipamento.');
         }
     });
 
-    $("#dialog_ip").dialog({
+    /*$("#dialog_ip").dialog({
         height: 600,
         width: 1000,
         modal: true,
@@ -120,7 +126,7 @@ $(document).ready(function() {
                 $(this).dialog("close");
             }
         }
-    });
+    });*/
 
     $(".numbersOnly").live('focusout', function(){
         this_element = $(this);
