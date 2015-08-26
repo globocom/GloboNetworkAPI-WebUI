@@ -190,14 +190,18 @@ $(document).ready(function() {
 		$("#ambiente").show();
 	});
 
-	{% has_perm EQUIPMENT_MANAGEMENT True None %}
-	{% if has_perm %}
-	$("#btn_config_sync").button({ icons: {primary: "ui-icon-power"} }).click(function(){
-		if (confirm('Deseja aplicar a configuração na(s) Interface(s) selecionada(s)?')){
-		    location.href = "{% url equip.interface.config.sync form.equip_name.value 0 id_interface %}";
-		}
-	});
-	{% endif %}
+    {% ifequal id None %}
+    {% else %}
+        {% has_perm EQUIPMENT_MANAGEMENT True None %}
+        {% if has_perm %}
+
+        $("#btn_config_sync").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+            if (confirm('Deseja aplicar a configuração na(s) Interface(s) selecionada(s)?')){
+                location.href = "{% url equip.interface.config.sync equip_name 0 id_interface %}";
+            }
+        });
+        {% endif %}
+    {% endifequal %}
 });
 </script>
 {% endblock %}

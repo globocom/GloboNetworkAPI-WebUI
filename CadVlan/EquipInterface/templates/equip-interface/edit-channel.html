@@ -137,7 +137,7 @@ $(document).ready(function() {
 	<div id="tabs-1">
         <div>
             <div id="fields" class="ui-widget-content">
-                <form id="add_form" method="post" action="{% url equip.interface.edit.channel 'None' form.equip_name.value %}">
+                <form id="add_form" method="post" action="{% url equip.interface.edit.channel channel_name form.equip_name.value %}">
                     <div class="bordasimples">
                         {% for field in form %}
                             {% if field.is_hidden %}
