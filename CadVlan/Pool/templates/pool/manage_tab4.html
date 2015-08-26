@@ -192,6 +192,10 @@ $(document).ready(function() {
                         <td><label style="width:350px;color:blue;text-align:center;" id="det_balancing">{% if balancing %} {{ balancing }} {% endif %}</label></td>
                     </tr>
                     <tr>
+                        <td><label>ServiceDownAction:</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;" id="list_servicedownaction">{% if servicedownaction %} {{ servicedownaction }} {% endif %}</label></td>
+                    </tr>
+                    <tr>
                         <td><label>Healthcheck:</label></td>
                         <td><label style="width:350px;color:blue;text-align:center;">{% if health_check %} {{ health_check }} {% endif %}</label></td>
                     </tr>
@@ -221,7 +225,7 @@ $(document).ready(function() {
             <input type="hidden" name="environment" id="environment" value="{{ environment }}">
             <input type="hidden" name="id_default_port" id="id_default_port" value="{{ default_port }}">
             <input type="hidden" name="id_balancing" id="id_balancing" value="{{ balancing }}">
-
+            <input type="hidden" name="id_servicedownaction" id="id_servicedownaction" value="{{ balancing }}">
             {{ form.id }}
             {% csrf_token %}
 

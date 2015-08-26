@@ -152,7 +152,7 @@ def show_form(request):
                 descricao = form.cleaned_data['description']
                 try:
                     client.create_tipo_roteiro().inserir(
-                        tipo.upper(), descricao)
+                        tipo, descricao)
                     messages.add_message(
                         request, messages.SUCCESS, script_type_messages.get("success_insert"))
 

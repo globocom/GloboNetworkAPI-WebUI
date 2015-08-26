@@ -158,7 +158,7 @@ def add_form(request):
             if form.is_valid():
 
                 # Data
-                name = upper(form.cleaned_data['name'])
+                name = form.cleaned_data['name']
                 script_type = form.cleaned_data['script_type']
                 description = form.cleaned_data['description']
 

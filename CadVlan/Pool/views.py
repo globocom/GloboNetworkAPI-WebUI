@@ -20,7 +20,7 @@ import logging
 from django.core.urlresolvers import reverse
 from CadVlan.Pool.facade import populate_enviroments_choices, populate_optionsvips_choices, \
     populate_expectstring_choices, populate_optionspool_choices, populate_pool_members_by_lists, \
-    populate_pool_members_by_obj
+    populate_pool_members_by_obj, populate_servicedownaction_choices, find_servicedownaction_id
 from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
 from django.views.decorators.csrf import csrf_exempt
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
@@ -36,7 +36,7 @@ from django.contrib import messages
 from CadVlan.messages import healthcheck_messages
 from CadVlan.messages import error_messages, pool_messages
 from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
-    HEALTH_CHECK_EXPECT
+    HEALTH_CHECK_EXPECT, VLAN_MANAGEMENT
 from CadVlan.forms import DeleteForm
 from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from networkapiclient.Pagination import Pagination
@@ -229,8 +229,9 @@ def reqvip_datatable(request, id_server_pool):
 @log
 @login_required
 @has_perm([
-    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_MANAGEMENT, "write": True },
     {"permission": POOL_ALTER_SCRIPT, "write": True}]
+    #{"permission": VLAN_MANAGEMENT, "write": True,"read": True },]
 )
 def add_form(request):
 
@@ -244,8 +245,9 @@ def add_form(request):
         expectstring_choices = populate_expectstring_choices(client)
         enviroments_choices = populate_enviroments_choices(client)
         optionsvips_choices = populate_optionsvips_choices(client)
+        servicedownaction_choices = populate_servicedownaction_choices(client)
 
-        form = PoolForm(enviroments_choices, optionsvips_choices)
+        form = PoolForm(enviroments_choices, optionsvips_choices,servicedownaction_choices)
         action = reverse('pool.add.form')
         label_tab = u'Cadastro de Pool'
         pool_members = list()
@@ -280,7 +282,7 @@ def add_form(request):
 
             optionspool_choices = populate_optionspool_choices(client, environment)
 
-            form = PoolForm(enviroments_choices, optionsvips_choices, optionspool_choices, request.POST)
+            form = PoolForm(enviroments_choices, optionsvips_choices,servicedownaction_choices, optionspool_choices, request.POST)
 
             if form.is_valid():
                 # Data form
@@ -289,11 +291,13 @@ def add_form(request):
                 environment = form.cleaned_data['environment']
                 balancing = form.cleaned_data['balancing']
                 max_con = form.cleaned_data['max_con']
+                servicedownaction = form.cleaned_data['servicedownaction']
+                servicedownaction_id=find_servicedownaction_id(client, servicedownaction)
 
                 client.create_pool().save(None, identifier, default_port, environment,
                                          balancing, healthcheck_type, healthcheck_expect,
                                          healthcheck_request, max_con, ip_list_full, nome_equips,
-                                         id_equips, priorities, weight, ports_reals, id_pool_member)
+                                         id_equips, priorities, weight, ports_reals, id_pool_member, servicedownaction_id)
                 messages.add_message(
                         request, messages.SUCCESS, pool_messages.get('success_insert'))
 
@@ -326,6 +330,8 @@ def edit_form(request, id_server_pool):
         expectstring_choices = populate_expectstring_choices(client)
         enviroments_choices = populate_enviroments_choices(client)
         optionsvips_choices = populate_optionsvips_choices(client)
+        servicedownaction_choices = populate_servicedownaction_choices(client)
+
 
         action = reverse('pool.edit.form', args=[id_server_pool])
         label_tab = u'Edição de Pool'
@@ -364,7 +370,7 @@ def edit_form(request, id_server_pool):
 
             optionspool_choices = populate_optionspool_choices(client, environment)
 
-            form = PoolForm(enviroments_choices, optionsvips_choices, optionspool_choices, request.POST)
+            form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices, request.POST)
 
             if form.is_valid():
                 # Data form
@@ -374,15 +380,18 @@ def edit_form(request, id_server_pool):
                 environment = form.cleaned_data['environment']
                 balancing = form.cleaned_data['balancing']
                 max_con = form.cleaned_data['max_con']
+                servicedownaction = form.cleaned_data['servicedownaction']
+                servicedownaction_id=find_servicedownaction_id(client, servicedownaction)
 
                 client.create_pool().save(id, identifier, default_port, environment,
                                          balancing, healthcheck_type, healthcheck_expect,
                                          healthcheck_request, max_con, ip_list_full, nome_equips,
-                                         id_equips, priorities, weight, ports_reals, id_pool_member)
+                                         id_equips, priorities, weight, ports_reals, id_pool_member,servicedownaction_id)
 
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
 
                 return redirect(action)
+
         else:
             pool = client.create_pool().get_by_pk(id_server_pool)
 
@@ -411,11 +420,12 @@ def edit_form(request, id_server_pool):
                 'balancing': pool['server_pool']['lb_method'],
                 'health_check': health_check,
                 'max_con': pool['server_pool']['default_limit'],
+                'servicedownaction': pool['server_pool']['servicedownaction'][u'name']
             }
 
             pool_members = populate_pool_members_by_obj(client, pool['server_pool_members'])
 
-            form = PoolForm(enviroments_choices, optionsvips_choices, optionspool_choices, initial=initial_pool)
+            form = PoolForm(enviroments_choices, optionsvips_choices,servicedownaction_choices, optionspool_choices, initial=initial_pool)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -427,7 +437,7 @@ def edit_form(request, id_server_pool):
     return render_to_response(POOL_FORM, {'form': form, 'action': action, 'pool_members': pool_members,
                                       'expect_strings': expectstring_choices, 'healthcheck_expect': healthcheck_expect,
                                       'healthcheck_request': healthcheck_request, 'label_tab': label_tab,
-                                      'pool_created': pool_created, 'id_server_pool': id_server_pool},
+                                      'pool_created': pool_created, 'id_server_pool': id_server_pool },
                               context_instance=RequestContext(request))
 
 
@@ -773,6 +783,7 @@ def manage_tab1(request, id_server_pool):
         identifier = pool['server_pool']['identifier']
         default_port = pool['server_pool']['default_port']
         balancing = pool['server_pool']['lb_method']
+        servicedownaction = pool['server_pool']['servicedownaction'][u'name']
         max_con = pool['server_pool']['default_limit']
 
         pool_created = pool['server_pool']['pool_created']
@@ -782,7 +793,7 @@ def manage_tab1(request, id_server_pool):
         return render_to_response(POOL_MANAGE_TAB1, {'id_server_pool': id_server_pool, 'health_check': health_check,
                                                      'environment': environment_desc, 'identifier': identifier,
                                                      'default_port': default_port, 'balancing': balancing,
-                                                     'max_con': max_con},
+                                                     'max_con': max_con, 'servicedownaction': servicedownaction},
                                   context_instance=RequestContext(request))
 
     except NetworkAPIClientError, e:
@@ -812,6 +823,7 @@ def manage_tab2(request, id_server_pool):
         identifier = pool['server_pool']['identifier']
         default_port = pool['server_pool']['default_port']
         balancing = pool['server_pool']['lb_method']
+        servicedownaction = pool['server_pool']['servicedownaction'][u'name']
         max_con = pool['server_pool']['default_limit']
 
         pool_created = pool['server_pool']['pool_created']
@@ -821,7 +833,7 @@ def manage_tab2(request, id_server_pool):
         return render_to_response(POOL_MANAGE_TAB2, {'id_server_pool': id_server_pool, 'health_check': health_check,
                                                      'environment': environment_desc, 'identifier': identifier,
                                                      'default_port': default_port, 'balancing': balancing,
-                                                     'max_con': max_con},
+                                                     'max_con': max_con, 'servicedownaction':servicedownaction},
                                   context_instance=RequestContext(request))
 
     except NetworkAPIClientError, e:
@@ -831,8 +843,9 @@ def manage_tab2(request, id_server_pool):
 
 @log
 @login_required
-@login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "write": True}, {"permission": POOL_ALTER_SCRIPT, "write": True}])
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True}])
 def manage_tab3(request, id_server_pool):
     try:
         auth = AuthSession(request.session)
@@ -841,6 +854,7 @@ def manage_tab3(request, id_server_pool):
         enviroments_choices = populate_enviroments_choices(client)
         optionsvips_choices = populate_optionsvips_choices(client)
         expectstring_choices = populate_expectstring_choices(client)
+        servicedownaction_choices = populate_servicedownaction_choices(client)
 
         action = reverse('pool.manage.tab3', args=[id_server_pool])
 
@@ -867,6 +881,7 @@ def manage_tab3(request, id_server_pool):
         identifier = pool['server_pool']['identifier']
         default_port = pool['server_pool']['default_port']
         balancing = pool['server_pool']['lb_method']
+        servicedownaction= pool['server_pool']['servicedownaction'][u'name']
         max_con = pool['server_pool']['default_limit']
 
         environment = pool['server_pool']['environment']['id'] if pool['server_pool']['environment'] else None
@@ -884,7 +899,7 @@ def manage_tab3(request, id_server_pool):
                     healthcheck_expect = ''
                     healthcheck_request = ''
 
-                form = PoolForm(enviroments_choices, optionsvips_choices, optionspool_choices, request.POST)
+                form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices, request.POST)
                 if form.is_valid():
                     # Data form
                     sv_id_server_pool = form.cleaned_data['id']
@@ -893,6 +908,8 @@ def manage_tab3(request, id_server_pool):
                     sv_environment = form.cleaned_data['environment']
                     sv_balancing = form.cleaned_data['balancing']
                     sv_max_con = form.cleaned_data['max_con']
+                    sv_servicedownaction = form.cleaned_data['servicedownaction']
+                    sv_servicedownaction_id=find_servicedownaction_id(client, sv_servicedownaction)
 
                     sv_id_pool_member = []
                     sv_ip_list_full = []
@@ -922,11 +939,11 @@ def manage_tab3(request, id_server_pool):
                     client.create_pool().save(sv_id_server_pool, sv_identifier, sv_default_port, sv_environment,
                                               sv_balancing, healthcheck_type, healthcheck_expect,
                                               healthcheck_request, sv_max_con, sv_ip_list_full, sv_nome_equips,
-                                              sv_id_equips, sv_priorities, sv_weight, sv_ports_reals, sv_id_pool_member)
+                                              sv_id_equips, sv_priorities, sv_weight, sv_ports_reals, sv_id_pool_member, sv_servicedownaction_id)
 
                     messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
-
                     return redirect(reverse('pool.manage.tab3', args=[id_server_pool]))
+
         else:
             initial_pool = {
                 'id': pool['server_pool']['id'],
@@ -934,13 +951,14 @@ def manage_tab3(request, id_server_pool):
                 'default_port': pool['server_pool']['default_port'],
                 'environment': environment,
                 'balancing': pool['server_pool']['lb_method'],
+                'servicedownaction': pool['server_pool']['servicedownaction'][u'name'],
                 'health_check': health_check,
                 'max_con': pool['server_pool']['default_limit'],
             }
 
             optionspool_choices = populate_optionspool_choices(client, environment)
 
-            form = PoolForm(enviroments_choices, optionsvips_choices, optionspool_choices, initial=initial_pool)
+            form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices, initial=initial_pool)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -951,7 +969,7 @@ def manage_tab3(request, id_server_pool):
                                              'default_port': default_port, 'balancing': balancing,
                                              'max_con': max_con, 'healthcheck_request': healthcheck_request,
                                              'form': form, 'healthcheck_expect': healthcheck_expect, 'action': action,
-                                             'expectstring_choices': expectstring_choices},
+                                             'expectstring_choices': expectstring_choices, 'servicedownaction':servicedownaction},
                               context_instance=RequestContext(request))
 
 
@@ -983,6 +1001,7 @@ def manage_tab4(request, id_server_pool):
         identifier = pool['server_pool']['identifier']
         default_port = pool['server_pool']['default_port']
         balancing = pool['server_pool']['lb_method']
+        servicedownaction = pool['server_pool']['servicedownaction'][u'name']
         max_con = pool['server_pool']['default_limit']
         environment = pool['server_pool']['environment']['id'] if pool['server_pool']['environment'] else ''
 
@@ -1019,5 +1038,5 @@ def manage_tab4(request, id_server_pool):
                                                  'environment_desc': environment_desc, 'identifier': identifier,
                                                  'default_port': default_port, 'balancing': balancing,
                                                  'max_con': max_con, 'pool_members': pool_members, 'action': action,
-                                                 'environment': environment},
+                                                 'environment': environment, 'servicedownaction':servicedownaction},
                           context_instance=RequestContext(request))
