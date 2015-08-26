@@ -292,7 +292,6 @@ def add_form(request, equip_name=None):
                 if trunk and envs is not None:
                     for env in envs:
                         client.create_interface().associar_ambiente(env, id_int['id'])
-
                     messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_associando_amb"))
 
                 url_param = reverse("equip.interface.search.list")
@@ -591,6 +590,7 @@ def edit(request, id_interface):
         form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
         if environment_list is not None:
             envform = AddEnvInterfaceForm(environment_list, request.POST)
+            lists['envform'] = envform
 
         try:
 
@@ -623,7 +623,7 @@ def edit(request, id_interface):
                 return HttpResponseRedirect(reverse('equip.interface.edit.form', args=[equip_name, id_interface]))
             else:
                 lists['form'] = form
-                lists['envform'] = envform
+
 
         except NetworkAPIClientError, e:
             logger.error(e)
