@@ -45,8 +45,14 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url home %}";
+
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
+		equip = $("#id_equip_name").val();
+		if (!isBlank(equip)) {
+			location.href = "{% url equip.interface.search.list %}?equip_name=" + equip;
+		} else {
+			location.href = "{% url equip.interface.search.list %}";
+		}
 	});
 
 	$("#id_environment").pickList();
