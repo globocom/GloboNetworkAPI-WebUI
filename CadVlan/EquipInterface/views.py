@@ -44,10 +44,19 @@ logger = logging.getLogger(__name__)
 def get_equip_environment(client, equip_id):
 
     environment_list = client.create_ambiente().listar_por_equip(equip_id)
-    if len(environment_list) < 2:
-        environment_list = environment_list.get('ambiente')
+
+    if environment_list is not None:
+        if environment_list.get('ambiente') is None:
+            environment_list = None
+    try:
+        environment = environment_list.get('ambiente')
+        environment.get('id')
         ambiente = []
-        ambiente.append(environment_list)
+        ambiente.append(environment)
+        environment_list = dict()
+        environment_list['ambiente'] = ambiente
+    except:
+        pass
     return environment_list
 
 @log
@@ -155,8 +164,7 @@ def delete_all(request):
                     request, messages.WARNING, error_messages.get("can_not_remove_error"))
 
         else:
-            messages.add_message(
-                request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
     url_param = reverse("equip.interface.search.list")
@@ -246,14 +254,14 @@ def add_form(request, equip_name=None):
 
     if request.method == "GET":
         lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'],'equip_id': equip['id']})
-        if environment_list.get('ambiente') is not None:
+        if environment_list is not None:
             lists['envform'] = AddEnvInterfaceForm(environment_list)
 
 
     if request.method == "POST":
 
         form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
-        if environment_list.get('ambiente') is not None:
+        if environment_list is not None:
             envform = AddEnvInterfaceForm(environment_list, request.POST)
 
         try:
@@ -266,7 +274,7 @@ def add_form(request, equip_name=None):
                 vlan = form.cleaned_data['vlan']
 
                 envs = None
-                if environment_list.get('ambiente') is not None and envform.is_valid():
+                if environment_list is not None and envform.is_valid():
                     envs = envform.cleaned_data['environment']
 
                 trunk = 0
@@ -574,14 +582,14 @@ def edit(request, id_interface):
         lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id'],
                                          'name': interface.get('interface'), 'protected': protegida, 'int_type': tipo,
                                          'vlan': interface.get('vlan') })
-        if environment_list.get('ambiente') is not None:
+        if environment_list is not None:
             lists['envform'] = AddEnvInterfaceForm(environment_list)
 
 
     if request.method == "POST":
 
         form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
-        if environment_list.get('ambiente') is not None:
+        if environment_list is not None:
             envform = AddEnvInterfaceForm(environment_list, request.POST)
 
         try:
@@ -593,7 +601,7 @@ def edit(request, id_interface):
                 vlan = form.cleaned_data['vlan']
 
                 envs = None
-                if environment_list.get('ambiente') is not None and envform.is_valid():
+                if environment_list is not None and envform.is_valid():
                     envs = envform.cleaned_data['environment']
 
                 trunk = 0
@@ -905,7 +913,7 @@ def add_channel(request, equip_name=None):
             form = ChannelAddForm(equip_interface_list, initial={'ids': ids, 'equip_name': equip_name, 'int_type': tipo, 'vlan': interface['vlan']})
             lists['form'] = form
 
-            if environment_list.get('ambiente') is not None:
+            if environment_list is not None:
                 if tipo:
                     try:
                         int_envs = client.create_interface().get_env_by_id(interface['id'])
@@ -928,7 +936,7 @@ def add_channel(request, equip_name=None):
         if request.method == "POST":
 
             form = ChannelAddForm(equip_interface_list, request.POST)
-            if environment_list.get('ambiente') is not None:
+            if environment_list is not None:
                 envform = AddEnvInterfaceForm(environment_list, request.POST)
 
             if form.is_valid():
@@ -941,7 +949,7 @@ def add_channel(request, equip_name=None):
                 equip_nam = form.cleaned_data['equip_name']
 
                 envs = None
-                if environment_list.get('ambiente') is not None and envform.is_valid():
+                if environment_list is not None and envform.is_valid():
                     envs = envform.cleaned_data['environment']
 
                 if int_type=="0":
@@ -1016,7 +1024,7 @@ def edit_channel(request, channel_name, equip_name):
                                            'int_type': tipo, 'vlan': channel[0]['vlan']})
             lists['form'] = form
 
-            if environment_list.get('ambiente') is not None:
+            if environment_list is not None:
                 if tipo:
                     try:
                         int_envs = client.create_interface().get_env_by_id(channel[0]['id'])
@@ -1040,7 +1048,7 @@ def edit_channel(request, channel_name, equip_name):
 
 
             form = ChannelAddForm(equip_interface_list, request.POST)
-            if environment_list.get('ambiente') is not None:
+            if environment_list is not None:
                 envform = AddEnvInterfaceForm(environment_list, request.POST)
 
             if form.is_valid():
@@ -1054,7 +1062,7 @@ def edit_channel(request, channel_name, equip_name):
                 ids_interface = request.POST.getlist('idsInterface')
 
                 envs = None
-                if environment_list.get('ambiente') is not None and envform.is_valid():
+                if environment_list is not None and envform.is_valid():
                     envs = envform.cleaned_data['environment']
 
                 if int_type=="0":
