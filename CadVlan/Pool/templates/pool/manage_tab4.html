@@ -110,11 +110,11 @@ $(document).ready(function() {
                 }
             });
         }else{
-            alert('Por favor, informe o nome do equipamento.');
+            addMessage({message: 'Por favor, informe o nome do equipamento.', status: 'error'});
         }
     });
 
-    /*$("#dialog_ip").dialog({
+    $("#dialog_ip").dialog({
         height: 600,
         width: 1000,
         modal: true,
@@ -126,7 +126,7 @@ $(document).ready(function() {
                 $(this).dialog("close");
             }
         }
-    });*/
+    });
 
     $(".numbersOnly").live('focusout', function(){
         this_element = $(this);
