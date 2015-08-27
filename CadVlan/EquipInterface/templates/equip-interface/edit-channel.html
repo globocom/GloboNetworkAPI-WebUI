@@ -55,6 +55,15 @@ $(document).ready(function() {
 		}
 	});
 
+	{% has_perm EQUIPMENT_MANAGEMENT True None %}
+	{% if has_perm %}
+	$("#btn_config_sync").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+		if (confirm('Deseja aplicar a configuração na(s) Interface(s) selecionada(s)?')){
+		    location.href = "{% url equip.interface.config.sync form.equip_name.value 1 form.id.value %}";
+		}
+	});
+	{% endif %}
+
 	$("#id_environment").pickList();
 	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
 	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
@@ -128,7 +137,7 @@ $(document).ready(function() {
 	<div id="tabs-1">
         <div>
             <div id="fields" class="ui-widget-content">
-                <form id="add_form" method="post" action="{% url equip.interface.edit.channel 'None' form.equip_name.value %}">
+                <form id="add_form" method="post" action="{% url equip.interface.edit.channel channel_name form.equip_name.value %}">
                     <div class="bordasimples">
                         {% for field in form %}
                             {% if field.is_hidden %}
@@ -229,6 +238,7 @@ $(document).ready(function() {
 
 		<div class="buttons-l ui-widget-header">
 			<button id="btn_sav" type="submit">Gravar</button>
+            <button id="btn_config_sync">Aplicar</button>
 			<button id="btn_can" type="button">Cancelar</button>
 		</div>
 	</div>
