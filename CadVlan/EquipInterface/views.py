@@ -28,7 +28,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, InterfaceNaoExisteError, NomeInterfaceDuplicadoParaEquipamentoError
 from django.contrib import messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm
+from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm, AplicarForm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
@@ -97,9 +97,7 @@ def search_list(request):
 
                     # New form
                     del_form = DeleteForm(initial=init_map)
-
                     del_chan_form = DeleteChannelForm(initial=init_map)
-
                     lists['channel_form'] = ChannelForm(initial=init_map)
 
                     # Send to template
@@ -292,7 +290,6 @@ def add_form(request, equip_name=None):
                 if trunk and envs is not None:
                     for env in envs:
                         client.create_interface().associar_ambiente(env, id_int['id'])
-
                     messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_associando_amb"))
 
                 url_param = reverse("equip.interface.search.list")
@@ -568,6 +565,7 @@ def edit(request, id_interface):
     lists['equip_type'] = equip['id_tipo_equipamento']
     lists['brand'] = brand
     lists['int_type'] = int_type_list
+    lists['id_interface'] = interface.get('id')
 
     if request.method == "GET":
 
@@ -589,46 +587,41 @@ def edit(request, id_interface):
     if request.method == "POST":
 
         form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
+        lists['form'] = form
+
         if environment_list is not None:
             envform = AddEnvInterfaceForm(environment_list, request.POST)
+            lists['envform'] = envform
 
-        try:
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            protected = form.cleaned_data['protected']
+            int_type = form.cleaned_data['int_type']
+            vlan = form.cleaned_data['vlan']
 
-            if form.is_valid():
-                name = form.cleaned_data['name']
-                protected = form.cleaned_data['protected']
-                int_type = form.cleaned_data['int_type']
-                vlan = form.cleaned_data['vlan']
+            envs = None
+            if environment_list is not None and envform.is_valid():
+                envs = envform.cleaned_data['environment']
 
-                envs = None
-                if environment_list is not None and envform.is_valid():
-                    envs = envform.cleaned_data['environment']
-
-                trunk = 0
-                if int_type=="0":
-                    int_type = "access"
-                else:
-                    int_type = "trunk"
-                    trunk = 1
-
-                client.create_interface().alterar(id_interface, name, protected, None, lig_front, lig_back,
-                                                           int_type, vlan)
-                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
-
-                if trunk and envs is not None:
-                    client.create_interface().dissociar(id_interface)
-                    for env in envs:
-                        client.create_interface().associar_ambiente(env, id_interface)
-
-                return HttpResponseRedirect(reverse('equip.interface.edit.form', args=[equip_name, id_interface]))
+            trunk = 0
+            if int_type=="0":
+                int_type = "access"
             else:
-                lists['form'] = form
-                lists['envform'] = envform
+                int_type = "trunk"
+                trunk = 1
 
-        except NetworkAPIClientError, e:
-            logger.error(e)
-            lists['form'] = form
-            messages.add_message(request, messages.ERROR, e)
+            try:
+                client.create_interface().alterar(id_interface, name, protected, None, lig_front, lig_back,
+                                                       int_type, vlan)
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+
+            if trunk and envs is not None:
+                client.create_interface().dissociar(id_interface)
+                for env in envs:
+                    client.create_interface().associar_ambiente(env, id_interface)
 
     return render_to_response(EQUIPMENT_INTERFACE_FORM, lists, context_instance=RequestContext(request))
 
@@ -936,6 +929,7 @@ def add_channel(request, equip_name=None):
         if request.method == "POST":
 
             form = ChannelAddForm(equip_interface_list, request.POST)
+            lists['form'] = form
             if environment_list is not None:
                 envform = AddEnvInterfaceForm(environment_list, request.POST)
 
@@ -963,16 +957,12 @@ def add_channel(request, equip_name=None):
                 except NetworkAPIClientError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
-                    form = ChannelAddForm(equip_interface_list)
-                    lists['form'] = form
                     return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
 
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_nam) > 2:
                     url_param = url_param + "?equip_name=" + equip_nam
                 return HttpResponseRedirect(url_param)
-            else:
-                lists['form'] = form
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -980,18 +970,18 @@ def add_channel(request, equip_name=None):
 
     return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
 
-
-
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def edit_channel(request, channel_name, equip_name):
 
-    try:
-        lists = dict()
+    lists = dict()
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    lists['channel_name'] = channel_name
+
+    try:
 
         equip = client.create_equipamento().listar_por_nome(str(equip_name))
         equip = equip.get('equipamento')
@@ -999,15 +989,12 @@ def edit_channel(request, channel_name, equip_name):
 
         environment_list = get_equip_environment(client, equip['id'])
 
+        channel = client.create_interface().get_interface_by_channel(channel_name)
+        channel = channel.get('interface')
+        equip_interface = channel
+        lists['equip_interface'] = equip_interface
+
         if request.method == "GET":
-
-            channel = client.create_interface().get_interface_by_channel(channel_name)
-            channel = channel.get('interface')
-            equip_interface = channel
-            lists['equip_interface'] = equip_interface
-
-            equip_interface_list = client.create_interface().list_all_by_equip(equip['id'])
-            #equipamentos =
 
             tipo = channel[0]['tipo']
             if "access" in tipo:
@@ -1048,6 +1035,8 @@ def edit_channel(request, channel_name, equip_name):
 
 
             form = ChannelAddForm(equip_interface_list, request.POST)
+            lists['form'] = form
+
             if environment_list is not None:
                 envform = AddEnvInterfaceForm(environment_list, request.POST)
 
@@ -1058,7 +1047,6 @@ def edit_channel(request, channel_name, equip_name):
                 lacp = form.cleaned_data['lacp']
                 int_type = form.cleaned_data['int_type']
                 vlan = form.cleaned_data['vlan']
-                equip_nam = form.cleaned_data['equip_name']
                 ids_interface = request.POST.getlist('idsInterface')
 
                 envs = None
@@ -1070,15 +1058,13 @@ def edit_channel(request, channel_name, equip_name):
                 else:
                     int_type = "trunk"
 
-                client.create_interface().editar_channel(id_channel, name, lacp, int_type, vlan, envs, ids_interface)
-                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit_channel"))
+                try:
+                    client.create_interface().editar_channel(id_channel, name, lacp, int_type, vlan, envs, ids_interface)
+                    messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit_channel"))
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
 
-                url_param = reverse("equip.interface.search.list")
-                if len(equip_nam) > 2:
-                    url_param = url_param + "?equip_name=" + equip_nam
-                return HttpResponseRedirect(url_param)
-            else:
-                lists['form'] = form
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -1106,3 +1092,37 @@ def channel_insert_interface(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+
+def config_sync_all(request, equip_name, is_channel, ids):
+
+    equip_nam = equip_name
+
+    # Get user
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    # Control others exceptions
+    have_errors = False
+
+    try:
+        if int(is_channel):
+            client.create_api_interface_request().deploy_channel_config_sync(ids)
+        else:
+            client.create_api_interface_request().deploy_interface_config_sync(ids)
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        have_errors = True
+
+    # If all has ben removed
+    if have_errors == False:
+        messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_sync"))
+    else:
+        messages.add_message(request, messages.WARNING, error_messages.get("can_not_sync_error"))
+
+
+    # Redirect to list_all action
+    url_param = reverse("equip.interface.search.list")
+    if len(equip_nam) > 2:
+        url_param = url_param + "?equip_name=" + equip_nam
+    return HttpResponseRedirect(url_param)
