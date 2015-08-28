@@ -105,7 +105,6 @@ class AddInterfaceForm(forms.Form):
         widget = forms.TextInput(
             attrs={"style": "width: 100px;", "onKeyUp": "javascript:fixName(this, " + str(index) + ");"})
         self.fields['name'].widget = widget
-        self.fields['vlan'].widget = widget
 
         if marca == "0":
             self.regex = "^([a-zA-Z0-9-_/ ]+(:)?){1,6}$"
