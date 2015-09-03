@@ -373,7 +373,7 @@ $('#id_environment').live("change", function(){
                     'token': tokenId
                 },
                 success: function(data, textStatus, xhr) {
-                    alert(data);
+                    //alert(data);
                     if(xhr.status == 200) {
                         for (var i = 0; i < data.length; i++) {
                             $('#id_health_check').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
