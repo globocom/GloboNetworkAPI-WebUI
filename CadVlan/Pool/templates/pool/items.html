@@ -29,14 +29,14 @@
                 {% endif %}
             {% else %}
                 {% if not server_pool.pool_created%}
-                    {% has_perm POOL_MANAGEMENT True False token %}
+                    {% has_perm POOL_MANAGEMENT True False %}
                     {% with has_perm as has_pool_write %}
 
-                    {% has_perm POOL_CREATE_SCRIPT True False token %}
+                    {% has_perm POOL_CREATE_SCRIPT True False %}
                     {% with has_perm as has_pool_script_create %}
-                    {% has_perm POOL_ALTER_SCRIPT True False token %}
+                    {% has_perm POOL_ALTER_SCRIPT True False %}
                     {% with has_perm as has_pool_script_alter %}
-                    {% has_perm POOL_REMOVE_SCRIPT True False token %}
+                    {% has_perm POOL_REMOVE_SCRIPT True False %}
                     {% with has_perm as has_pool_script_remove %}
 
                     {% if has_pool_write and has_pool_script_alter and has_pool_script_remove and has_pool_script_create %}
