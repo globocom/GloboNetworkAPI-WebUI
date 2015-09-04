@@ -3122,8 +3122,6 @@ def shared_save_pool(request, client, form_acess=None, external=False):
                 param_dic['id'] = sp_id
 
                 return HttpResponse(json.dumps(param_dic), content_type="application/json")
-                return render_to_response_ajax(templates.VIPREQUEST_POOL_SAVE, param_dic,
-                                               context_instance=RequestContext(request))
 
         erros = _format_form_error([form])
 
@@ -3285,6 +3283,11 @@ def shared_pool_member_items(request, client, form_acess=None, external=False):
 
         pool_id = request.GET.get('pool_id')
         pool_data = client.create_pool().get_by_pk(pool_id)
+        pool_data.update({'external': external})
+
+        if external:
+            token = form_acess.initial.get("token")
+            pool_data.update({'token': token})
 
         return render(request, templates.POOL_MEMBER_ITEMS, pool_data)
 
