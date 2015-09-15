@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 
 def get_equip_environment(client, equip_id):
 
+
     environment_list = client.create_ambiente().listar_por_equip(equip_id)
 
     if environment_list is not None:
@@ -958,6 +959,9 @@ def add_channel(request, equip_name=None):
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
+                except Exception, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
 
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_nam) > 2:
@@ -985,36 +989,53 @@ def edit_channel(request, channel_name, equip_name):
 
         equip = client.create_equipamento().listar_por_nome(str(equip_name))
         equip = equip.get('equipamento')
-        equip_interface_list = client.create_interface().list_all_by_equip(equip['id'])
+
+        equip_interface_list = client.create_interface().list_available_interfaces(channel_name, equip['id'])
+
+        try:
+            equip_interface_list.get('interface')['id']
+            equip_interface_list = equip_interface_list.get('interface')
+            interface = []
+            interface.append(equip_interface_list)
+            equip_interface_list = dict()
+            equip_interface_list['interface'] = interface
+        except:
+            pass
 
         environment_list = get_equip_environment(client, equip['id'])
 
         channel = client.create_interface().get_interface_by_channel(channel_name)
-        channel = channel.get('interface')
-        equip_interface = channel
-        lists['equip_interface'] = equip_interface
+        channel = channel.get('interfaces')
+
+        if type(channel) is list:
+            lists['equip_interface'] = channel
+            channel = channel[0]
+        else:
+            equip_int = []
+            equip_int.append(channel)
+            lists['equip_interface'] = equip_int
 
         if request.method == "GET":
 
-            tipo = channel[0]['tipo']
+            tipo = channel['tipo']
             if "access" in tipo:
                 tipo = 0
             else:
                 tipo = 1
 
-            if channel[0]['lacp']=="True":
+            if channel['lacp']=="True":
                 lacp = 1
             else:
                 lacp = 0
 
-            form = ChannelAddForm(equip_interface_list, initial={'id': channel[0]['id_channel'], 'name': channel[0]['channel'], 'lacp': lacp, 'equip_name': equip_name,
-                                           'int_type': tipo, 'vlan': channel[0]['vlan']})
+            form = ChannelAddForm(equip_interface_list, initial={'id': channel['id_channel'], 'name': channel['channel'], 'lacp': lacp, 'equip_name': equip_name,
+                                           'int_type': tipo, 'vlan': channel['vlan']})
             lists['form'] = form
 
             if environment_list is not None:
                 if tipo:
                     try:
-                        int_envs = client.create_interface().get_env_by_id(channel[0]['id'])
+                        int_envs = client.create_interface().get_env_by_id(channel['id'])
                         int_envs = int_envs.get('ambiente')
                         env_list =[]
                         for amb in int_envs:
@@ -1086,6 +1107,7 @@ def channel_insert_interface(request):
         equip_interface_list.append(equip_interface)
         lists = dict()
         lists['equip_interface'] = equip_interface_list
+        lists['qtd'] = 0
 
         return render( request, EQUIPMENT_INTERFACES, lists)
 
