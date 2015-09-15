@@ -28,6 +28,10 @@ $(document).ready(function() {
 		var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
 		$(this).val(valor);
 	});
+
+	$("#id_vrf").mouseover(function() {
+		$("#id_vrf").attr("title","Insira o nome da VRF a ser utilizada nos equipamentos desse ambiente.");
+	});
 	
 	$('#form_environment').submit(function(){
 		id_min_num_vlan_1 = $('#id_min_num_vlan_1').val();

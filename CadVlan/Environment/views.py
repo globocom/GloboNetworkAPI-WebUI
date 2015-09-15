@@ -371,6 +371,9 @@ def insert_ambiente(request):
                     filter_ = None
                 link = ambiente_form.cleaned_data['link']
                 acl_path = ambiente_form.cleaned_data['acl_path']
+                vrf = ambiente_form.cleaned_data['vrf']
+                if str(vrf) == str(None):
+                    vrf = None
 
                 ipv4_template = ambiente_form.cleaned_data.get(
                     'ipv4_template', None)
@@ -389,7 +392,7 @@ def insert_ambiente(request):
                 # Business
                 client.create_ambiente().inserir(grupo_l3, ambiente_logico, divisao_dc, link, filter_,
                                                  acl_path, ipv4_template, ipv6_template, min_num_vlan_1,
-                                                 max_num_vlan_1, min_num_vlan_2, max_num_vlan_2)
+                                                 max_num_vlan_1, min_num_vlan_2, max_num_vlan_2, vrf)
                 messages.add_message(
                     request, messages.SUCCESS, environment_messages.get("success_insert"))
 
@@ -458,6 +461,7 @@ def edit(request, id_environment):
                    "grupol3": env.get("id_grupo_l3"),
                    "filter": env.get("id_filter"),
                    "acl_path": env.get("acl_path"),
+                   "vrf": env.get("vrf"),
                    "ipv4_template": env.get("ipv4_template"),
                    "ipv6_template": env.get("ipv6_template"),
                    "min_num_vlan_1": env.get("min_num_vlan_1"),
@@ -498,6 +502,7 @@ def edit(request, id_environment):
                 if str(filter_) == str(None):
                     filter_ = None
                 link = ambiente_form.cleaned_data['link']
+                vrf = ambiente_form.cleaned_data['vrf']
                 acl_path = ambiente_form.cleaned_data['acl_path']
 
                 ipv4_template = ambiente_form.cleaned_data.get(
@@ -517,7 +522,7 @@ def edit(request, id_environment):
                 # Business
                 client.create_ambiente().alterar(id_env, grupo_l3, ambiente_logico, divisao_dc,
                                                  link, filter_, acl_path, ipv4_template, ipv6_template,
-                                                 min_num_vlan_1, max_num_vlan_1, min_num_vlan_2, max_num_vlan_2)
+                                                 min_num_vlan_1, max_num_vlan_1, min_num_vlan_2, max_num_vlan_2, vrf)
                 messages.add_message(
                     request, messages.SUCCESS, environment_messages.get("success_edit"))
 

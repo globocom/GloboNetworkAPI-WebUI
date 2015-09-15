@@ -422,11 +422,12 @@ def equip_form(request):
                 marca = form.cleaned_data['marca']
                 modelo = form.cleaned_data['modelo']
                 tipo_equipamento = form.cleaned_data['tipo_equipamento']
+                maintenance = form.cleaned_data['maintenance']
 
                 grupo_aux = grupos[0]
 
                 equip = client.create_equipamento().inserir(
-                    nome, tipo_equipamento, modelo, grupo_aux)
+                    nome, tipo_equipamento, modelo, grupo_aux, maintenance)
                 equip = equip.get('equipamento').get('id')
                 for g in grupos:
                     if g != grupo_aux:
@@ -620,6 +621,7 @@ def equip_edit(request, id_equip):
                 name = form.cleaned_data['nome']
                 model = form.cleaned_data['modelo']
                 type_equipment = form.cleaned_data['tipo_equipamento']
+                maintenance = form.cleaned_data['maintenance']
 
                 # Equipment orquestração
                 orquestracao = 1
@@ -740,7 +742,7 @@ def equip_edit(request, id_equip):
 
                 # edit name
                 client.create_equipamento().edit(
-                    id_equip, name, type_equipment, model)
+                    id_equip, name, type_equipment, model, maintenance)
 
                 if is_error:
                     raise Exception
@@ -776,7 +778,7 @@ def equip_edit(request, id_equip):
                 modelos = client.create_modelo().listar_por_marca(
                     equip.get('id_marca'))
                 forms_aux['modelos'] = modelos.get('model')
-                lists['form'] = EquipForm(forms_aux, initial={"nome": equip.get('nome'), "tipo_equipamento": equip.get(
+                lists['form'] = EquipForm(forms_aux, initial={"nome": equip.get('nome'), "maintenance": equip.get('maintenance'), "tipo_equipamento": equip.get(
                     'id_tipo_equipamento'), "marca": equip.get('id_marca'), "modelo": equip.get('id_modelo'), "grupo": list_groups, "ambiente": list_environments})
                 lists['roteadores'] = roteadores
 

@@ -111,6 +111,7 @@ $(document).ready(function() {
 					<th>Ambiente Lógico</th>
 					<th>Grupo Layer3</th>
 					<th>Filtro</th>
+					<th>VRF</th>
 					<th>Wiki</th>
 					<th style="width: 45px"></th>
 				</tr>
@@ -123,6 +124,7 @@ $(document).ready(function() {
 					<td>{{ ambiente.nome_ambiente_logico }}</td>
 					<td>{{ ambiente.nome_grupo_l3 }}</td>
 					<td class="text_center">{% if ambiente.filter_name %}{{ ambiente.filter_name }}{% else %}-{% endif %}</td>
+					<td class="text_center">{% if ambiente.vrf %}{{ ambiente.vrf }}{% else %}-{% endif %}</td>
 					<td class="text_center">{% ifequal ambiente.link None %}-{% else %}<a href="{{ ambiente.link }}" target="_blank">wiki</a>{% endifequal %}</td>
 					<td class="text_center">
 						<a href="{% url environment.edit ambiente.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a>

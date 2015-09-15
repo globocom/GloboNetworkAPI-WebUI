@@ -70,6 +70,10 @@ $(document).ready(function() {
     	 $("#id_nome").attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
     });
 	
+	$("#id_maintenance").mouseover(function() {
+		$("#id_maintenance").attr("title","Marque a flag para o equipamento nao ser configurado pela API na chamadas de deploy.");
+	});
+
 	$("#btn_marca").button({ icons: {primary: "ui-icon-plus"}, text: false });
 	$("#btn_att_marca").button({ icons: {primary: "ui-icon-refresh"}, text: false }).click(function(){
 		
@@ -136,7 +140,7 @@ function rmv_checkboxs_routeador(target){
 					{{ field }}
 					
 					
-					{% ifequal forloop.counter 3 %}
+					{% ifequal forloop.counter 4 %}
 					
 						<a href="{% url equipment.marca.form %}" target="blank"><button type="button" id="btn_marca">Adcionar marca/modelo</button></a>
 						<button type="button" id="btn_att_marca">Atualizar combos marca/modelo</button>

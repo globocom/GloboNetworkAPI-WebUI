@@ -103,6 +103,8 @@ class AmbienteForm(forms.Form):
         '', '--------')], required=False, widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
     link = forms.CharField(label=u'Link', max_length=200, required=False,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 280px"}))
+    vrf = forms.CharField(label=u'Vrf', max_length=100, required=False,
+                           error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 280px"}))
 
     max_num_vlan_1 = forms.IntegerField(
         label=u'Max Vlan 1', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))

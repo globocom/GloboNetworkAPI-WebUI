@@ -94,6 +94,8 @@ class EquipForm(forms.Form):
 
     nome = forms.CharField(label=u'Nome', min_length=3, max_length=50, required=True,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
+    maintenance = forms.BooleanField(
+        label="Em manutencao", required=False, error_messages=error_messages)
     tipo_equipamento = forms.ChoiceField(label="Tipo equipamento", required=True, widget=forms.Select(
         attrs={'style': "width: 400px"}), error_messages=error_messages)
     marca = forms.ChoiceField(label="Marca", required=True, widget=forms.Select(
