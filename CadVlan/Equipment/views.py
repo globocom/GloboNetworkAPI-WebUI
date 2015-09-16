@@ -778,7 +778,12 @@ def equip_edit(request, id_equip):
                 modelos = client.create_modelo().listar_por_marca(
                     equip.get('id_marca'))
                 forms_aux['modelos'] = modelos.get('model')
-                lists['form'] = EquipForm(forms_aux, initial={"nome": equip.get('nome'), "maintenance": equip.get('maintenance'), "tipo_equipamento": equip.get(
+
+                maintenance = False
+                if equip.get('maintenance') == u'True':
+                    maintenance = True
+
+                lists['form'] = EquipForm(forms_aux, initial={"nome": equip.get('nome'), "maintenance": maintenance, "tipo_equipamento": equip.get(
                     'id_tipo_equipamento'), "marca": equip.get('id_marca'), "modelo": equip.get('id_modelo'), "grupo": list_groups, "ambiente": list_environments})
                 lists['roteadores'] = roteadores
 
