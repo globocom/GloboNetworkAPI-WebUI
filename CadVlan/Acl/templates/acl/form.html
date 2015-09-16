@@ -23,33 +23,83 @@
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
+    var typingTimer;
+    var doneTypingInterval = 1000;  //time in ms, 1 second
+
 	$("#page_tab").tabs();
 	$("#page_tab_lists").tabs();
-	
+
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
-	
+
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
 		location.href = "{% url vlan.edit.by.id id_vlan %}";
 	});
-	
+
+    $('textarea#id_acl').keydown(function(){
+
+        clearTimeout(typingTimer);
+
+    }).keyup(function(){
+
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(saveAclDraft, doneTypingInterval);
+    });
+
+    function saveAclDraft () {
+        $.ajax({
+				data: {
+					id_vlan: {{ id_vlan }},
+                    type_acl: "{{ network }}",
+                    content_draft: $('textarea#id_acl').val(),
+                    csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
+				},
+                type: "POST",
+				url: "{% url acl.save.draft %}",
+                beforeSend: function(){
+                    $(".loading").hide();
+                },
+				success: function(data, textStatus, xhr) {
+                    if(xhr.status == 203){
+                        alert(data);
+                    }
+				}
+		});
+    }
+
+    function removeAclDraft(){
+        $.ajax({
+				data: {
+					id_vlan: {{ id_vlan }},
+                    type_acl: "{{ network }}"
+				},
+                type: "GET",
+				url: "{% url acl.remove.draft %}",
+				success: function(data, textStatus, xhr) {
+                    if(xhr.status == 203){
+                        alert(data);
+                    }
+				}
+		});
+    }
+
 	{% if vlan.acl_valida == 'True' and network == 'v4' or vlan.acl_valida_v6 == 'True' and network == 'v6' %}
-	
+
 		$("#btn_apply").button({ icons: {primary: "ui-icon-check"} }).click(function(){
 			$("#id_apply_acl").val('1');
 			$("#add_form").submit();
 		});
-		
+
 	{% endif %}
-	
+
 	{% if script %}
-	
+
 		$("#btn_script").button({ icons: {primary: "ui-icon-script"} }).click(function(){
 			location.href = "{% url acl.script id_vlan network %}";
 		});
 
 	{% endif %}
-	
+
 	oTable = $("#network_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
@@ -57,13 +107,46 @@ $(document).ready(function() {
 		"iDisplayLength": {% max_results %},
 		"aoColumns": [{ "sType": "ip{{network}}" }, null, null]
 	});
-	
-	
+
+     {% if vlan.acl_draft and network == "v4" or vlan.acl_draft_v6 and network == "v6" %}
+
+        $("#dialog-draft-acl").dialog({
+            resizable: false,
+            height:140,
+            width: 300,
+            modal: true,
+            buttons: {
+                "Recuperar": function() {
+
+                    if ("{{ network }}" == "v4") {
+                        var contentDraft = $('#acl_draft').val();
+                    }else{
+                        var contentDraft = $('#acl_draft_v6').val();
+                    }
+
+                    $('textarea#id_acl').text(contentDraft);
+                    $( this ).dialog( "close" );
+                },
+                "Apagar": function() {
+                    if(confirm("Deseja realmente apagar o rascunho?")){
+                        removeAclDraft();
+                        $( this ).dialog( "close" );
+                    }
+                },
+                Cancelar: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        });
+
+    {% endif %}
+
 })
 </script>
 {% endblock %}
 
 {% block content %}
+
 <div id="page_tab">
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Vlan</a></li>
@@ -72,7 +155,7 @@ $(document).ready(function() {
 		{% csrf_token %}
 
 		<div id="fields" class="ui-widget-content">
-		
+
 			<table border="5">
 				<tr>
 					<td style="width: 150px"><label for="nome_ambiente">Nome do Ambiente</label></td>
@@ -104,24 +187,24 @@ $(document).ready(function() {
 				</tr>
 			</table>
 		</div>
-	
+
 		<div class="separator spacer"></div>
-	
+
 		<div>
 			<div id="page_tab_lists">
 				<ul>
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">
-					
+
 					{% ifequal network 'v4' %}
-					
+
 						{{ vlan.acl_file_name }}
-					
+
 					{% else %}
-					
+
 						{{ vlan.acl_file_name_v6 }}
-						
+
 					{% endifequal %}
-					
+
 					- IP{{ network }}</a></li>
 
 					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2">Redes - IP{{ network }}</a></li>
@@ -129,6 +212,10 @@ $(document).ready(function() {
 
 				<div id="tabs-1">
 					<form id="add_form" method="post" action="{% url acl.edit id_vlan network %}">
+
+                        <input id="acl_draft" value="{{ vlan.acl_draft }}" type="hidden">
+                        <input id="acl_draft_v6" value="{{ vlan.acl_draft_v6 }}" type="hidden">
+
 						{% csrf_token %}
 						<div id="fields" class="ui-widget-content">
 						{% for field in form %}
@@ -136,7 +223,7 @@ $(document).ready(function() {
 								<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
 								{{ field }}
 								<p id="error">
-								{% if field.errors %} 
+								{% if field.errors %}
 									{% for error in field.errors %}
 										{{ error|escape }}
 									{% endfor %}
@@ -145,30 +232,29 @@ $(document).ready(function() {
 							</div>
 						{% endfor %}
 						</div>
-						
+
 						<div class="separator spacer"></div>
-						
+
 						<div class="buttons-l ui-widget-header">
-							
+
 							{% if script %}
-							
+
 								<button id="btn_script" type="button">Gerar Script</button>
-							
+
 							{% endif %}
-						
+
 							{% if vlan.acl_valida == 'True' and network == 'v4' %}
-							
+
 								<button id="btn_apply" type="button">Aplicar ACL</button>
-							
+
 							{% endif %}
-							
+
 							{% if vlan.acl_valida_v6 == 'True' and network == 'v6' %}
-							
+
 								<button id="btn_apply" type="button">Aplicar ACL</button>
-							
+
 							{% endif %}
-						
-						
+
 							<button id="btn_sav" type="submit">Gravar</button>
 							<button id="btn_can" type="button">Voltar</button>
 						</div>
@@ -201,5 +287,7 @@ $(document).ready(function() {
 		</div>
 	</div>
 </div>
-
+    <div id="dialog-draft-acl" title="Você possui rascunho!" style="display: none;">
+        <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Você possui rascunho de acl que pode ser recuperado. O que deseja fazer?</p>
+    </div>
 {% endblock %}

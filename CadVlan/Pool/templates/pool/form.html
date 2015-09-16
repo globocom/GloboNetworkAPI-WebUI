@@ -99,10 +99,21 @@
                     data: { id_environment: $('#id_environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
                     url: "{% url pool.modal.ips.ajax %}",
                     success: function(data, textStatus, xhr) {
-                        $('#content-ip').html(data);
-                        $("#dialog_ip").dialog("open");
+                        if(data.message && data.status == "error"){
+                            addMessage(data);
+                        }else{
+                            $('#content-ip').html(data);
+                            $("#dialog_ip").dialog("open");
+                            $('#messages').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
+                        }
+                    },
+                    error: function(data, textStatus, xhr) {
+                        response = JSON.parse(data.responseText);
+                        addMessage(response);
                     }
                 });
+            }else{
+                addMessage({message: 'Por favor, informe o nome do equipamento.', status: 'error'});
             }
         });
 

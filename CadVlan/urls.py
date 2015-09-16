@@ -422,7 +422,10 @@ urlpatterns += patterns('CadVlan.Acl.views',
                         url('^acl/template/delete[/]?$',
                             'template_delete', name='acl.template.delete',),
 
-                        )
+                        url('^acl/save/draft$', 'save_draft', name='acl.save.draft',),
+                        url('^acl/remove/draft$', 'remove_draft', name='acl.remove.draft',),
+
+)
 
 # URL's Vip Requests
 urlpatterns += patterns('CadVlan.VipRequest.views',
@@ -506,43 +509,27 @@ urlpatterns += patterns('CadVlan.VipRequest.views',
 
                         url('^vip-request/load/pool[/]?$',
                             'load_pool_for_copy', name='vip-request.load.pool',),
-
                         url('^vip-request/save/pool[/]?$',
                             'save_pool', name='save.pool',),
-
                         url('^vip-request/load/new/pool[/]?$',
                             'load_new_pool', name='vip-request.load.new.pool',),
-
                         url('^vip-request/load/options/pool[/]?$',
                             'load_options_pool', name='vip-request.load.options.pool',),
+                        url('^vip-request/list/pool/members/items/$',
+                            'pool_member_items', name='vip-request.members.items',),
 
                         # External Access
                         url('^vip-request/external/load/pool[/]?$',
                             'external_load_pool_for_copy', name='vip-request.external.load.pool',),
-
                         url('^vip-request/external/save/pool[/]?$',
                             'external_save_pool', name='external.save.pool',),
-
                         url('^vip-request/external/load/new/pool[/]?$',
                             'external_load_new_pool', name='vip-request.external.load.new.pool',),
-
-                        url(
-                            '^vip-request/external/load/options/pool[/]?$',
+                        url('^vip-request/external/load/options/pool[/]?$',
                             'external_load_options_pool',
-                            name='vip-request.external.load.options.pool',
-                        ),
-
-
-                        url(
-                            '^vip-request/list/pool/members/items/$',
-                            'pool_member_items',
-                            name='vip-request.members.items',
-                        ),
-
-                        url(
-                            '^vip-request/external/list/pool/members/items/$',
-                            'external_pool_member_items',
-                            name='vip-request.external.members.items',
+                            name='vip-request.external.load.options.pool',),
+                        url('^vip-request/external/list/pool/members/items/$',
+                            'external_pool_member_items', name='vip-request.external.members.items',
                         ),
 
 )
@@ -670,7 +657,9 @@ urlpatterns += patterns(
     url('^pool/ajax_modal_ips[/]?$', 'ajax_modal_ip_real_server', name='pool.modal.ips.ajax',),
     url('^pool/ajax_modal_ips/external[/]?$', 'ajax_modal_ip_real_server_external', name='pool.modal.ips.ajax.external',),
     url('^pool/ajax_get_opcoes_pool_by_ambiente[/]?$', 'ajax_get_opcoes_pool_by_ambiente', name='pool.ajax.get.opcoes.pool.by.ambiente',),
+    url('^pool/ajax_get_opcoes_pool_by_ambiente/external[/]?$', 'ajax_get_opcoes_pool_by_ambiente_external', name='pool.ajax.get.opcoes.pool.by.ambiente.external',),
     url('^pool/add_healthcheck_expect[/]?$', 'add_healthcheck_expect', name='pool.add.healthcheck.expect',),
+    url('^pool/add_healthcheck_expect/external[/]?$', 'add_healthcheck_expect_external', name='pool.add.healthcheck.expect.external',),
 )
 
 # URL's Rack

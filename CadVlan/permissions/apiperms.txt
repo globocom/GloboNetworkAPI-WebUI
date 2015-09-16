@@ -113,56 +113,56 @@ save_blocks()
 	Escrita
 	False
 	None
-	
+
 Ambiente
 update_blocks()
 	validar_vip
 	Escrita
 	False
 	None
-	
+
 Ambiente
 get_blocks()
 	validar_vip
 	Escrita
 	False
 	None
-	
+
 Ambiente
 list_no_blocks()
 	cadastro_de_ambiente
 	Leitura
 	False
 	None
-	
+
 Ambiente
 get_rule_by_pk()
 	requisicao_vips
 	Leitura
 	False
 	None
-	
+
 Ambiente
 save_rule()
 	validar_vip
 	Escrita
 	False
 	None
-	
+
 Ambiente
 update_rule()
 	validar_vip
 	Escrita
 	False
 	None
-	
+
 Ambiente
 delete_rule()
 	validar_vip
 	Escrita
 	False
 	None
-	
+
 Ambiente
 get_all_rules()
 	validar_vip
@@ -176,7 +176,7 @@ get_rule_by_id()
 	Leitura
 	False
 	None
-		
+
 AmbienteLogico
 listar()
 	cadastro_de_ambiente
@@ -1761,7 +1761,7 @@ create_acl()
 	Escrita
 	False
 	None
-	
+
 Vlan
 create_script_acl()
 	cadastro_de_vlans
@@ -1877,6 +1877,208 @@ allocate_IPv6()
 Permission
 list_all()
 	administracao_usuarios
+	Leitura
+	False
+	None
+
+Pool
+list_all()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+list_all_by_reqvip()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+save()
+	cadastro_de_pool
+	Escrita
+	False
+	None
+	script_alterar_pool
+	Escrita
+	False
+	None
+
+Pool
+save_reals()
+	cadastro_de_pool
+	Escrita
+	False
+	None
+	script_alterar_pool
+	Escrita
+	False
+	None
+
+Pool
+updates()
+	cadastro_de_pool
+	Escrita
+	False
+	None
+	script_alterar_pool
+	Escrita
+	False
+	None
+
+Pool
+list_all_members_by_pool()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+get_equip_by_ip()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+list_healthchecks()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+delete()
+	cadastro_de_pool
+	Escrita
+	False
+	None
+	script_alterar_pool
+	Escrita
+	False
+	None
+
+Pool
+get_by_pk()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+remove()
+	script_remover_pool
+	Escrita
+	False
+	None
+
+Pool
+create()
+	cadastro_de_pool
+	Escrita
+	False
+	None
+	script_criacao_pool
+	Escrita
+	False
+	None
+
+Pool
+enable()
+	script_alterar_pool
+	Escrita
+	False
+	None
+
+Pool
+disable()
+	script_alterar_pool
+	Escrita
+	False
+	None
+
+Pool
+get_opcoes_pool_by_ambiente()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+get_requisicoes_vip_by_pool()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+list_by_environment()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+list_pool_members()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+list_by_environmet_vip()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+Pool
+list_environments_with_pools()
+	cadastro_de_pool
+	Leitura
+	False
+	None
+
+ApiVipRequest
+add_pools()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+ApiVipRequest
+delete()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+ApiVipRequest
+list_environment_by_environmet_vip()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+ApiVipRequest
+save()
+	requisicao_vips
+	Escrita
+	False
+	None
+
+ApiVipRequest
+get_by_pk()
+	requisicao_vips
+	Leitura
+	False
+	None
+
+Healthcheck
+inserir()
+	requisicao_vips
 	Leitura
 	False
 	None

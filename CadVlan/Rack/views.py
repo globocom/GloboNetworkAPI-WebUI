@@ -17,7 +17,8 @@
 
 
 import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
+
+from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, InvalidParameterError, NetworkAPIClientError, NumeroRackDuplicadoError
 from django.contrib import messages
@@ -27,8 +28,7 @@ from django.template.context import RequestContext
 from CadVlan.Rack.forms import RackForm
 from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
 from django.shortcuts import render_to_response, redirect
-from django.template.context import Context, RequestContext
-from CadVlan.messages import auth_messages, equip_messages, error_messages, rack_messages
+from CadVlan.messages import error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm
 

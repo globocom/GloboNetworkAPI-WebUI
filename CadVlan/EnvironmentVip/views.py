@@ -227,16 +227,18 @@ def edit_form(request, id_environmentvip):
         environmnet_list = client.create_ambiente().list_all()
 
         options = client.create_option_vip().get_option_vip(id_environmentvip)
-        environment_related_list = client.create_ambiente().get_related_environment_list(id_environmentvip)
+        environment_related_list_dict = client.create_ambiente().get_related_environment_list(id_environmentvip)
 
         options = options.get("option_vip", [])
-        environment_related_list = environment_related_list.get('environment_related_list', [])
+        environment_related_list_dict = environment_related_list_dict.get('environment_related_list', [])
 
         if type(options) is dict:
             options = [options]
 
-        if type(environment_related_list) is dict:
-            environment_related_list = [environment_related_list]
+        if type(environment_related_list_dict) is dict:
+            environment_related_list_dict = [environment_related_list_dict]
+
+        environment_id_related_list = [env.get('environment_id') for env in environment_related_list_dict]
 
         if request.method == "POST":
 
@@ -250,7 +252,7 @@ def edit_form(request, id_environmentvip):
                 environment_p44 = form.cleaned_data['environment_p44']
                 description = form.cleaned_data['description']
                 option_vip_ids = form.cleaned_data['option_vip']
-                environment_ids = form.cleaned_data['environment']
+                environment_ids_form = form.cleaned_data['environment']
 
                 client.create_environment_vip().alter(
                     id_environmentvip,
@@ -264,10 +266,13 @@ def edit_form(request, id_environmentvip):
                 for opt_id in option_vip_ids:
                     client.create_option_vip().associate(opt_id, id_environmentvip)
 
-                for env in environment_related_list:
-                    client.create_ambiente().disassociate(env.get('environment_id'), id_environmentvip)
-                for env_id in environment_ids:
-                    client.create_ambiente().associate(env_id, id_environmentvip)
+                for related_environment_id in environment_id_related_list:
+                    if _need_dissassociate_environment(related_environment_id, environment_ids_form):
+                        client.create_ambiente().disassociate(related_environment_id, id_environmentvip)
+
+                for environment_form_id in environment_ids_form:
+                    if not _environment_already_associated(environment_form_id, environment_id_related_list):
+                        client.create_ambiente().associate(environment_form_id, id_environmentvip)
 
                 messages.add_message(
                     request, messages.SUCCESS, environment_vip_messages.get("sucess_edit"))
@@ -280,13 +285,9 @@ def edit_form(request, id_environmentvip):
             environment_vip = environment_vip.get("environment_vip")
 
             opts = []
-            environment_ids = []
 
             for opt in options:
                 opts.append(opt.get('id'))
-
-            for env in environment_related_list:
-                environment_ids.append(env.get('environment_id'))
 
             lists['form'] = EnvironmentVipForm(options_vip, environmnet_list, initial={"id": environment_vip.get("id"),
                                                                      "finality": environment_vip.get("finalidade_txt"),
@@ -294,9 +295,19 @@ def edit_form(request, id_environmentvip):
                                                                      "environment_p44": environment_vip.get("ambiente_p44_txt"),
                                                                      "description": environment_vip.get("description"),
                                                                      "option_vip": opts,
-                                                                     "environment": environment_ids})
+                                                                     "environment": environment_id_related_list})
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(ENVIRONMENTVIP_EDIT, lists, context_instance=RequestContext(request))
+
+
+def _need_dissassociate_environment(related_environment_id, form_ids_list):
+    need = related_environment_id not in form_ids_list
+    return need
+
+
+def _environment_already_associated(environment_form_id, environment_related_list):
+    linked = environment_form_id in environment_related_list
+    return linked

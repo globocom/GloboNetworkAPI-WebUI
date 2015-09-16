@@ -16,11 +16,12 @@
 # limitations under the License.
 
 
-from CadVlan.Util.utility import DataTablePaginator, validates_dict
+import logging
+
+from CadVlan.Util.utility import DataTablePaginator
 from networkapiclient.Pagination import Pagination
 from django.http import HttpResponseServerError, HttpResponse
-import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm, access_external
+from CadVlan.Util.Decorators import log, login_required, has_perm
 from django.shortcuts import render_to_response
 from CadVlan.templates import LOG_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_LOG_LIST,\
     VERSION_HTML
@@ -33,6 +34,7 @@ from CadVlan.EventLog.forms import SearchFormLog
 from django.template import loader
 from CadVlan.settings import CADVLAN_VERSION
 from networkapiclient.version_control import CLIENT_VERSION
+
 logger = logging.getLogger(__name__)
 
 

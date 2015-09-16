@@ -1,19 +1,14 @@
 {% load util %}
 
 <script type="text/javascript">
-
     var balancing = "weighted";
-
     function verifyWeight() {
-    	
-    	
         if ( $("#id_balancing").val() != null &&  $.trim($("select#id_balancing option:selected").text()).toLowerCase() == balancing){
             $('.weighted').show();
         }else{
             $('.weighted').hide();
         }
     }
-
     function update_port_vips(element){
             if(element.parent().parent().next().attr('name') == 'ports_vip'){
                 new_port_vip = element.val();
@@ -30,15 +25,12 @@
                   });
             }
     }
-
     $(document).ready(function() {
-
         var obj_btn_sav = $("#btn_sav");
         var obj_btn_can = $("#btn_can");
         var obj_btn_new_port = $("#btn_new_port");
         var obj_btn_new_real = $("#btn_new_real");
         var obj_btn_new_expect = $("#btn_new_expect");
-
 
         obj_btn_sav.button({icons: {primary: "ui-icon-disk"}});
         obj_btn_can.button({icons: {primary: "ui-icon-cancel"}});
@@ -52,10 +44,6 @@
         $('.editable').editableTable();
         $("textarea").maxlength();
 
-        obj_btn_can.click(function(){
-            location.href = "{% url pool.list %}";
-        });
-
         obj_btn_new_port.live("click", function(){
             $('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><label class='editable'></label> <input type='hidden' name='ports_real' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
             $('.editable').editableTable();
@@ -66,18 +54,30 @@
             if ( val_equip_name != '' ) {
                 $.ajax({
                     data: { id_environment: $('#id_environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
-                    url: "{% url pool.modal.ips.ajax %}",
+                    url: "{{ load_pool_url }}",
                     success: function(data, textStatus, xhr) {
-                        $('#content-ip').html(data);
-                        $("#dialog_ip").dialog("open");
+                        if(data.message && data.status == "error"){
+                            addMessageModal(data);
+                        }else{
+                            $('#content-ip').html(data);
+                            $("#dialog_ip").dialog("open");
+                            $('#messagesModal').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
+                        }
+                    },
+                    error: function(error, textStatus, xhr) {
+                        message = jQuery.parseJSON(error.responseText);
+						addMessageModal(message);
                     }
                 });
+            }else{
+                addMessageModal({message:'Por favor, informe o nome do equipamento.',
+                                 status: 'error'});
             }
         });
 
         $("#dialog_ip").dialog({
             height: 600,
-            width: 1000,
+            width: 600,
             modal: true,
             autoOpen: false,
             draggable: false,
@@ -89,11 +89,6 @@
             }
         });
 
-        //var port_vip;
-        //$(".numbersOnly").live('focus', function(){
-            //port_vip = $(this).val();
-        //});
-
         $(".numbersOnly").live('focusout', function(){
             this_element = $(this);
             $(this).next().click(function(){                
@@ -102,8 +97,8 @@
         });
 
         $('.numbersOnly').live("keydown", function(e){
-            if(e.keyCode == 9 || e.keyCode == 13){                
-            	update_port_vips($(this));
+            if(e.keyCode == 9 || e.keyCode == 13){
+                update_port_vips($(this));
                 label = $(this).parent().parent().parent().next().find('.editable');
                  $(this).next().click();
                  label.click();
@@ -114,7 +109,6 @@
         });
 
         $('#table_ports tbody tr span').live("click", function(){
-
             port_vip_value = $(this).parents().find('input=[name=ports_vip]').val();
 
             if (confirm('Deseja realmente excluir a(s) Portas selecionada(s)?')){
@@ -135,51 +129,6 @@
             if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){
             $(this).parents(".remove_port").remove();
             return false;
-            }
-        });
-
-        obj_btn_new_expect.click(function(){
-            var expect_string = $.trim($('#expect_string').val());
-            var id_environment = $('#id_environment').val();
-            var id_token = $("#id_token").val();
-
-            if(expect_string) {
-                $.ajax({
-                        data: { 'expect_string': expect_string, 'id_environment': id_environment, token:id_token },
-                        url: "{% url pool.add.healthcheck.expect %}",
-                        success: function(data, xhr) {
-
-                            $('#msg_new_health_check').fadeIn(1000);
-                            $("#id_expect").append('<option value="'+data['expect_string']+'">'+data['expect_string']+'</option>');
-                            $("#msg_new_health_check").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">'+data['mensagem']+'</td>');
-                            $("#msg_new_health_check").delay(15000).fadeOut('slow');
-                            $("#id_expect option:last").attr('selected', 'selected');
-                            $("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
-                            $("#expect_string").val('');
-                        }
-                    });
-            }
-        });
-	
-        $('#id_environment').on("change", function(){
-            $('#id_health_check').html('<option value="">-</option>');
-
-            var environmentId = this.value;
-
-            if (environmentId != ''){
-                $("#id_equip_name, #btn_new_real").prop('disabled', '');
-
-                $.ajax({
-                        data: { id_environment: environmentId},
-                        url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
-                        success: function(data, xhr) {
-                            for (var i = 0; i < data.length; i++) {
-                                $('#id_health_check').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
-                            }
-                        }
-                    });
-            }else{
-                $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
             }
         });
 
@@ -211,15 +160,12 @@
             $("#table_health_check").show();
         }
 
-        autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
-
         verifyWeight();
     });
 </script>
 
 <div id="page_tab">
-    <div id="messagesModal">
-    </div>
+    <div id="messagesModal"></div>
 
     <div id="dialog_ip">
         <div id="content-ip"></div>
@@ -229,26 +175,29 @@
         {% csrf_token %}
 
         {% if environment_id %}
-			<input type="hidden" name="environment" id="id_environment" value="{{ environment_id }}">
-		{% endif %}
+            <input type="hidden" name="environment" id="id_environment" value="{{ environment_id }}">
+        {% endif %}
+
+        {% if not is_copy %}
+            {{ form.id }}
+        {% endif %}
 
         <div id="fields" class="ui-widget-content">
-
             {% if env_name %}
-				<div>
-					<div><label for="env">Ambiente:</label></div>
-					<input id="env" type="text" disabled="disabled" value="{{ env_name }}" style="width: 300px;">
-				</div>
-				<br/>
-			{% endif %}
-
+                <div>
+                    <div><label for="env">Ambiente:</label></div>
+                    <input id="env" type="text" disabled="disabled" value="{{ env_name }}" style="width: 300px;">
+                </div>
+                <br/>
+            {% endif %}
             <div>
                 <div>
                     <label for="{{ form.identifier.auto_id }}">
                         {{ form.identifier.label }}{% if form.identifier.field.required %}<span style="color: red;">*</span>{% endif %}
                     </label>
                 </div>
-                {{ form.identifier }}                    <p id="error">
+                {{ form.identifier }}
+                <p id="error">
                 {% if form.identifier.errors %}
                     {% for error in form.identifier.errors %}
                         {{ error|escape }}
@@ -438,7 +387,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-
                                 {% for field in pool_members %}
                                     <tr class='remove_port'>
                                         <td>
@@ -462,7 +410,11 @@
                                         <td>
                                             <label class="editable" style="" title="Click para editar.">{% if field.port_real != "-" %}{{field.port_real}}{%endif%}</label>
                                             <input type="hidden" value="{{field.port_real}}" name="ports_real_reals">
-                                            <input type='hidden' name='id_pool_member' value='{{field.id}}' />
+                                                {% if not is_copy %}
+                                                    <input type='hidden' name='id_pool_member' value='{{field.id}}' />
+                                                {% else %}
+                                                    <input type='hidden' name='id_pool_member' value='' />
+                                                {% endif %}
                                         </td>
                                         <td>
                                             <span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>

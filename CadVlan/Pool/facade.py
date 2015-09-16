@@ -25,11 +25,12 @@ def populate_expectstring_choices(client):
 
 
 def populate_enviroments_choices(client):
-    enviroments = client.create_ambiente().list_all()
+    enviroments = client.create_pool().list_all_environment_related_environment_vip()
+
+    enviroments_choices = [('', '-')]
 
     # Format enviroments
-    enviroments_choices = [('', '-')]
-    for obj in enviroments['ambiente']:
+    for obj in enviroments:
         enviroments_choices.append((obj['id'], "%s - %s - %s" % (obj['divisao_dc_name'],
                                                                  obj['ambiente_logico_name'],
                                                                  obj['grupo_l3_name'])))
@@ -101,7 +102,11 @@ def populate_pool_members_by_obj(client, server_pool_members):
 
     if len(server_pool_members) > 0:
         for obj in server_pool_members:
-            equip = client.create_pool().get_equip_by_ip(obj['ip']['id'])
+            # get_equip_by_ip method can return many equipments related with those Ips,
+            # this is an error, because the equipment returned cannot be the same
+
+            # equip = client.create_pool().get_equip_by_ip(obj['ip']['id'])
+            equip = client.create_equipamento().listar_por_nome(obj['equipment_name'])
 
             ip = ''
             if obj['ip']:

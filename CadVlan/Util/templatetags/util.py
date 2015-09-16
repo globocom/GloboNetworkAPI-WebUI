@@ -20,7 +20,7 @@ from django import template
 from django.template.defaultfilters import stringfilter
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.models import Permission, PermissionMenu, SetVariable,\
-    IncrementVarNode
+    IncrementVarNode, PermissionExternal
 from CadVlan.settings import MAX_RESULT_DEFAULT
 from django.utils.safestring import mark_safe
 from django.db.models.query import QuerySet
@@ -73,6 +73,34 @@ def has_perm(parser, token):
 
 
 @register.tag
+def has_external_perm(parser, token):
+    """
+    Validates that the user has access permission in view
+
+    @Example: {% has_external_perm <permission> <write> <read> %}
+
+    :param parser:
+    :param token:
+    :return: Template Node
+
+    """
+    parts = token.split_contents()
+    if len(parts) < 5:
+        raise template.TemplateSyntaxError(
+            "'has_external_perm' tag must be of the form:  {% has_perm <permission> <write> <read> <external_token>%}"
+        )
+
+    key_permission = 1
+    key_write = 2
+    key_read = 3
+    key_token = 4
+
+    template_node = PermissionExternal(parts[key_permission], parts[key_write], parts[key_read], parts[key_token])
+
+    return template_node
+
+
+@register.tag
 def has_perm_menu(parser, token):
     '''Validates that the user has access permission in top menu
 
@@ -118,6 +146,7 @@ def jsonify(json_object):
     if isinstance(json_object, QuerySet):
         return mark_safe(serialize('json', json_object))
     return mark_safe(simplejson.dumps(json_object))
+
 
 @register.filter
 def int_to_str(par_int):

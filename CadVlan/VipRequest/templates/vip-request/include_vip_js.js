@@ -8,30 +8,17 @@
 		location.href = "{% url vip-request.list %}";
 	});
 
-	$("#dialog-ip").dialog({
-		height: 600,
-		width: 1000,
-		modal: true,
-		autoOpen: false,
-		draggable: false,
-		resizable: true,
-		buttons: {
-			"Voltar": function() {
-				$(this).dialog("close");
-			}
-		}
-	});
-
     $("#idPort").live("keyup", function(e){
         $(this).val($(this).val().replace(/[^0-9]+/g,''));
 	});
 
 	$(".numbersOnly").live('focus', function(){
+        $(this).attr("style", "width: 35px; height: 14px;");
 		oldPortVip = $(this).val();
 	});
 	
 	$(".numbersOnly").live('focusout', function(){
-
+        $(this).attr("style", "width: 35px; height: 14px;");
 		var this_element = $(this);
         var tableEditing = this_element.parents("#tablePoolMembers");
 
@@ -40,15 +27,17 @@
 				return false;
 			}
 
-            var newPortVIp = this_element.val();;
+            var newPortVIp = this_element.val();
+
+            check_port_vip(this_element);
 
             update_pools_new_vip(tableEditing, oldPortVip, newPortVIp);
 		});
 	});
 	
 	$('.numbersOnly').live("keydown", function(e){
-          console.log("keydown");
 
+          $(this).attr("style", "width: 35px; height: 14px;");
 
     	  if(e.keyCode == 9 || e.keyCode == 13){
 
@@ -70,6 +59,8 @@
 
                 var newPortVIp = $(this).val();
 
+                check_port_vip(this_element);
+
 	      		update_pools_new_vip(tableEditing, oldPortVip, newPortVIp);
 
 	      		return false;
@@ -84,7 +75,9 @@
 	
 	// Check if port vip is duplicated
 	function check_port_vip(element){
-		if(element.parent().parent().next().attr('name') == 'ports_vip'){
+        var elementName = element.parent().parent().next().attr('name');
+		if( elementName == 'ports_vip' || element.hasClass("numbersOnly")){
+
 			is_valid = true;
 			
 			if (oldPortVip != element.val()){
@@ -121,14 +114,15 @@
 			dataType: 'text',
 			success: function(data, textStatus, xhr) {
 			
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-					
-				else if (xhr.status == "203")
-					alert(data);
-				
-				else
-					$("#id_client_content").html(data);
+				if (xhr.status == 278) {
+                    window.location = xhr.getResponseHeader('Location');
+                }
+				else if (xhr.status == 203) {
+                    alert(data);
+                }
+				else {
+                    $("#id_client_content").html(data);
+                }
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
@@ -158,14 +152,16 @@
 			url: "{% if external %}{% url vip-request.environment.ajax.external %}{% else %}{% url vip-request.environment.ajax %}{% endif %}",
 			dataType: 'text',
 			success: function(data, textStatus, xhr) {
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-					
-				else if (xhr.status == "203")
-					alert(data);
-				
-				else
-					$("#id_environment_content").html(data);
+				if (xhr.status == 278) {
+                    window.location = xhr.getResponseHeader('Location');
+                }
+				else if (xhr.status == 203) {
+                    alert(data);
+                }
+				else {
+                    $("#id_environment_content").html(data);
+
+                }
 			},
 			error: function (xhr, error, thrown) {
 				location.reload();
@@ -193,14 +189,15 @@
 		$.ajax({
 			data: { environment_vip: id_environment_vip, id_vip: '{{id_vip}}', token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.options.ajax.external %}{% else %}{% url vip-request.options.ajax %}{% endif %}",
-			dataType: 'json',
 			success: function(data, textStatus, xhr) {
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-					
-				else if (xhr.status == "203")
-					alert(data.msg);
-				
+
+				if (xhr.status == 278) {
+                    alert(xhr.status);
+                    window.location = xhr.getResponseHeader('Location');
+                }
+				else if (xhr.status == 203) {
+                    alert(data);
+                }
 				else {
 
 					$("#id_caches").html(data.caches);
@@ -208,9 +205,11 @@
 					$("#id_timeout").html(data.timeout);
 					$("#id_balancing").html(data.balancing);
 					$("#id_servicedownaction").html(data.servicedownaction);
+                    var data_json = jQuery.parseJSON(data);
+
 					$("#id_environment_vip").val(id_environment_vip);
-					$("#id_rules").html(data.rules);
-					$("#id_healthcheck_type_content").html(data.healthcheck_list);
+					$("#id_rules").html(data_json.rules);
+					$("#id_healthcheck_type_content").html(data_json.healthcheck_list);
 					$("#table_healthcheck").hide();
 					
 					if ( $("#id_balancing").val() != null && $('#id_balancing').val().toLowerCase() == "weighted".toLowerCase())
@@ -218,9 +217,7 @@
 					else{
 						$('.weighted').hide();
 					}
-
 					loadPools(id_environment_vip);
-
 				}
 			},
 			error: function (xhr, error, thrown) {
@@ -239,12 +236,12 @@
 				url: "{% if external %}{% url vip-request.rule.ajax.external %}{% else %}{% url vip-request.rule.ajax %}{% endif %}",
 				dataType: 'json',
 				success: function(data, textStatus, xhr) {
-					if (xhr.status == "278")
-						window.location = xhr.getResponseHeader('Location');
-						
-					else if (xhr.status == "203")
-						alert(data.msg);
-					
+					if (xhr.status == 278) {
+                        window.location = xhr.getResponseHeader('Location');
+                    }
+					else if (xhr.status == 203) {
+                        alert(data);
+                    }
 					else {
 						$("#id_filter_l7").val(data.rule);
 					}
@@ -316,9 +313,15 @@
             },
             data: {environment_vip_id : envVipId, token: $("#id_token").val()},
             url: "{% if external %}{% url vip-request.external.load.options.pool %}{% else %}{% url vip-request.load.options.pool %}{% endif %}",
-            success: function(data) {
-                $("select#id_pools").empty();
-                $("select#id_pools").html(data);
+            success: function(data, textStatus, xhr) {
+                if (xhr.status == 200){
+                    $("select#id_pools").empty();
+                    $("select#id_pools").html(data);
+                }
+                else if (xhr.status == 203) {
+                    alert(data);
+                }
+
             },
             error: function (error) {
                 message = jQuery.parseJSON(error.responseText);
@@ -339,6 +342,7 @@
 
             $("label:contains("+oldPortVip+")", tableEditing).html(newPortVip);
             $("input:hidden[value="+oldPortVip+"]", tableEditing).val(newPortVip);
+            $("strong:contains("+oldPortVip+")", tableEditing).html(newPortVip);
 
         }
         else {

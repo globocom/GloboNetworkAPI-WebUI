@@ -17,11 +17,10 @@
 
 
 from CadVlan.Auth.AuthSession import AuthSession
-#from CadVlan.Util.Json import Json
 from CadVlan.Util.utility import get_param_in_request
 from CadVlan.VipRequest.encryption import Encryption
 from CadVlan.forms import ControlAcessForm
-from CadVlan.messages import auth_messages
+from CadVlan.messages import auth_messages, error_messages
 from CadVlan.settings import URL_HOME, URL_LOGIN, NETWORK_API_URL
 from CadVlan.templates import TOKEN_INVALID
 from networkapiclient.ClientFactory import ClientFactory
@@ -34,6 +33,7 @@ import json
 import logging
 import time
 import re
+
 
 logger = logging.getLogger(__name__)
 
@@ -57,14 +57,8 @@ def login_required(view_func):
             if request.is_ajax():
                 response = HttpResponseRedirect(URL_LOGIN)
                 response.status_code = 278
-
+                response.content = error_messages.get('login_required')
                 return response
-
-            ajax = request.META.get(AJAX)
-
-            if ajax is not None and ajax == 1:
-                return HttpResponse(json.dumps(Json(None, True, URL_LOGIN).__dict__))
-
             else:
                 return HttpResponseRedirect(URL_LOGIN + '?redirect=' + request.path)
 
@@ -90,8 +84,8 @@ def has_perm(permission):
                 user = auth.get_user()
 
                 for perm in permission:
-                    write = perm['write'] if perm.has_key("write") else None
-                    read = perm['read'] if perm.has_key("read") else None
+                    write = perm.get("write")
+                    read = perm.get("read")
                     if not user.has_perm(perm['permission'], write, read):
                         messages.add_message(
                             request, messages.ERROR, auth_messages.get('user_not_authorized'))
@@ -127,51 +121,68 @@ def log(view_func):
     return _decorated
 
 
-def access_external():
-    '''
-    Controls access external request vip form with token stored in memcached
-    '''
+def has_perm_external(required_permissions=None):
+    """
+    Controls access external request vip form with token stored in memcached and
+    if has required permissions check each permission.
+
+    :param required_permissions:
+        [{"permission":"<name>", "read": <bool>, "write": <bool>},] or
+        [{"permission":"<name>", "read": <bool>},] or
+        [{"permission":"<name>", "write": <bool>},]
+
+    :return: HttpResponse
+    """
     def _decorated(func):
 
         def _control(request, *args, **kwargs):
 
             key = get_param_in_request(request, TOKEN)
+            condition = "True"
 
-            is_valid = True
-            if key is not None:
-
-                # Search in cache if it exists
-                if cache.has_key(key):
-
-                    # Get hash in cache
-                    hash = cache.get(key)
-
-                    # Decrypt hash
-                    user = Encryption().Decrypt(hash)
-
-                    username, password, user_ldap = str(user).split("@")
-
-                    if user_ldap == "":
-                        client = ClientFactory(
-                            NETWORK_API_URL, username, password)
-                    else:
-                        client = ClientFactory(
-                            NETWORK_API_URL, username, password, user_ldap)
-                else:
-                    is_valid = False
-
-            # If it is not valid  mount of return depending on the type of
-            # request
-            if not is_valid or key is None:
-
-                msg = auth_messages.get("token_invalid")
-
+            if not key:
+                message = auth_messages.get("token_required")
                 if request.is_ajax():
-                    return HttpResponse(msg, status=203)
+                    return HttpResponse(message, status=203)
+                return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": message}))
 
-                else:
+            if key not in cache:
+                message = auth_messages.get("token_invalid")
+                if request.is_ajax():
+                    return HttpResponse(message, status=203)
+                return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": message}))
 
-                    return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": msg}), status=200)
+            # Get hash in cache
+            data_from_cache = cache.get(key)
+            user_hash = data_from_cache.get('user_hash')
+            permissions = data_from_cache.get('permissions')
+
+            #Check Has Permission
+            if required_permissions:
+                for perm in required_permissions:
+
+                    write_required = perm.get('write', False)
+                    read_required = perm.get('read', False)
+                    required_permission = perm.get('permission')
+
+                    permission = permissions.get(required_permission)
+                    write_permission = condition == permission.get('write')
+                    read_permission = condition == permission.get('read')
+
+                    if (write_required and not write_permission) or (read_required and not read_permission):
+                        message = auth_messages.get('user_not_authorized')
+                        if request.is_ajax():
+                            return HttpResponse(message, status=2003)
+                        return HttpResponse(loader.render_to_string(TOKEN_INVALID, {"error": message}))
+
+            # Decrypt hash
+            user = Encryption().Decrypt(user_hash)
+            username, password, user_ldap = str(user).split("@")
+
+            if user_ldap == "":
+                client = ClientFactory(NETWORK_API_URL, username, password)
+            else:
+                client = ClientFactory(NETWORK_API_URL, username, password, user_ldap)
 
             kwargs["form_acess"] = ControlAcessForm(initial={"token": key})
             kwargs["client"] = client
