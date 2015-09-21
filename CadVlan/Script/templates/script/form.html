@@ -33,7 +33,10 @@ $(document).ready(function() {
 	});
 	
 	$("textarea").maxlength();
-	
+
+	$('#id_marca').change(function(){
+	    $('#id_modelo').load('/equipment/modelo/'+$('#id_marca').val());
+	});
 })
 </script>
 {% endblock %}

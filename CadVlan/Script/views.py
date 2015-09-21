@@ -29,7 +29,6 @@ from CadVlan.Util.converters.util import split_to_array, replace_id_to_name
 from CadVlan.permissions import SCRIPT_MANAGEMENT
 from CadVlan.forms import DeleteForm
 from CadVlan.Script.forms import ScriptForm
-from django.template.defaultfilters import upper
 
 logger = logging.getLogger(__name__)
 
@@ -148,38 +147,38 @@ def add_form(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        # Enviar listas para formar os Selects do formulário
+        forms_aux = dict()
+
+        # List All - Brands
+        forms_aux['marcas'] = client.create_marca().listar().get('brand')
+        # Get all script_types from NetworkAPI
+        forms_aux['tipo_roteiro'] = client.create_tipo_roteiro().listar()
+
         # If form was submited
         if request.method == 'POST':
 
-            # Get all script_types from NetworkAPI
-            script_type_list = client.create_tipo_roteiro().listar()
-            form = ScriptForm(script_type_list, request.POST)
+            form = ScriptForm(forms_aux, request.POST)
 
             if form.is_valid():
 
                 # Data
                 name = form.cleaned_data['name']
                 script_type = form.cleaned_data['script_type']
+                modelo = form.cleaned_data['modelo']
                 description = form.cleaned_data['description']
 
                 try:
                     # Business
-                    client.create_roteiro().inserir(
-                        script_type, name, description)
-                    messages.add_message(
-                        request, messages.SUCCESS, script_messages.get("success_insert"))
-
+                    client.create_roteiro().inserir(script_type, name, modelo, description)
+                    messages.add_message(request, messages.SUCCESS, script_messages.get("success_insert"))
                     return redirect('script.list')
                 except NomeRoteiroDuplicadoError, e:
                     messages.add_message(request, messages.ERROR, e)
 
         else:
-
-            # Get all script_types from NetworkAPI
-            script_type_list = client.create_tipo_roteiro().listar()
-
-            # New form
-            form = ScriptForm(script_type_list)
+            forms_aux['modelos'] = None
+            form = ScriptForm(forms_aux)
 
     except NetworkAPIClientError, e:
         logger.error(e)
