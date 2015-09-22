@@ -157,19 +157,21 @@ def add_form(request):
 
         # If form was submited
         if request.method == 'POST':
+            try:
+                marca = int(request.POST['marca'])
+                forms_aux['modelos'] = client.create_modelo().listar_por_marca(marca).get('model')
+            except:
+                forms_aux['modelos'] = None
 
             form = ScriptForm(forms_aux, request.POST)
 
             if form.is_valid():
-
-                # Data
                 name = form.cleaned_data['name']
                 script_type = form.cleaned_data['script_type']
                 modelo = form.cleaned_data['modelo']
                 description = form.cleaned_data['description']
 
                 try:
-                    # Business
                     client.create_roteiro().inserir(script_type, name, modelo, description)
                     messages.add_message(request, messages.SUCCESS, script_messages.get("success_insert"))
                     return redirect('script.list')
