@@ -150,25 +150,19 @@ def add_form(request):
         # Enviar listas para formar os Selects do formulário
         forms_aux = dict()
 
-        # List All - Brands
-        forms_aux['marcas'] = client.create_marca().listar().get('brand')
         # Get all script_types from NetworkAPI
         forms_aux['tipo_roteiro'] = client.create_tipo_roteiro().listar()
+        forms_aux['modelos'] = client.create_modelo().listar().get('model')
 
         # If form was submited
         if request.method == 'POST':
-            try:
-                marca = int(request.POST['marca'])
-                forms_aux['modelos'] = client.create_modelo().listar_por_marca(marca).get('model')
-            except:
-                forms_aux['modelos'] = None
-
             form = ScriptForm(forms_aux, request.POST)
 
             if form.is_valid():
                 name = form.cleaned_data['name']
                 script_type = form.cleaned_data['script_type']
                 modelo = form.cleaned_data['modelo']
+                Exception("modelo"+str(modelo))
                 description = form.cleaned_data['description']
 
                 try:
@@ -179,7 +173,6 @@ def add_form(request):
                     messages.add_message(request, messages.ERROR, e)
 
         else:
-            forms_aux['modelos'] = None
             form = ScriptForm(forms_aux)
 
     except NetworkAPIClientError, e:
