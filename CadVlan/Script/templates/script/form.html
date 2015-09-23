@@ -33,7 +33,12 @@ $(document).ready(function() {
 	});
 	
 	$("textarea").maxlength();
-	
+
+	$("#id_modelo").pickList();
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
 })
 </script>
 {% endblock %}
