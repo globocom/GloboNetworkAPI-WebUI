@@ -487,15 +487,15 @@ def __modal_ip_list_real(request, client_api):
                             status=status_code,
                             content_type='application/json')
 
-    if not ips_list['ipsv4'] and not ips_list['ipsv6']:
+    if not ips_list['list_ipv4'] and not ips_list['list_ipv6']:
         return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
                                                    u'possa ser utilizado nos pools desse ambiente.',
                                         'status': 'error'}),
                             status=status_code,
                             content_type='application/json')
 
-    ips['list_ipv4'] = ips_list['ipsv4']
-    ips['list_ipv6'] = ips_list['ipsv6']
+    ips['list_ipv4'] = ips_list['list_ipv4']
+    ips['list_ipv6'] = ips_list['list_ipv6']
 
     lists['ips'] = ips
     lists['equip'] = equip

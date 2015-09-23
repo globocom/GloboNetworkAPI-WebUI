@@ -189,6 +189,7 @@
 		$.ajax({
 			data: { environment_vip: id_environment_vip, id_vip: '{{id_vip}}', token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.options.ajax.external %}{% else %}{% url vip-request.options.ajax %}{% endif %}",
+			dataType: 'json',
 			success: function(data, textStatus, xhr) {
 
 				if (xhr.status == 278) {
@@ -205,11 +206,10 @@
 					$("#id_timeout").html(data.timeout);
 					$("#id_balancing").html(data.balancing);
 					$("#id_servicedownaction").html(data.servicedownaction);
-                    var data_json = jQuery.parseJSON(data);
 
 					$("#id_environment_vip").val(id_environment_vip);
-					$("#id_rules").html(data_json.rules);
-					$("#id_healthcheck_type_content").html(data_json.healthcheck_list);
+					$("#id_rules").html(data.rules);
+					$("#id_healthcheck_type_content").html(data.healthcheck_list);
 					$("#table_healthcheck").hide();
 					
 					if ( $("#id_balancing").val() != null && $('#id_balancing').val().toLowerCase() == "weighted".toLowerCase())
