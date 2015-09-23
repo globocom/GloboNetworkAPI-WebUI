@@ -3133,10 +3133,14 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 
             if is_valid and is_valid_healthcheck:
                 param_dic = {}
-                sp_id = client.create_pool().save(pool_id, identifier, default_port, environment_id, balancing,
-                                                  healthcheck_type, healthcheck_expect, healthcheck_request, maxcom,
-                                                  ip_list_full, equipment_names, equipment_ids, priorities, weight,
-                                                  ports_reals, pool_member_ids)
+
+                sp_id = client.create_pool().save(
+                    pool_id, identifier, default_port,
+                    environment_id, balancing, healthcheck_type,
+                    healthcheck_expect, healthcheck_request, maxcom,
+                    ip_list_full, equipment_names, equipment_ids,
+                    priorities, weight, ports_reals, pool_member_ids,servicedownaction_id
+                )
 
                 if pool_id:
                     param_dic['message'] = pool_messages.get('success_update')
@@ -3144,14 +3148,6 @@ def shared_save_pool(request, client, form_acess=None, external=False):
                     param_dic['message'] = pool_messages.get('success_insert')
 
                 param_dic['id'] = sp_id
-
-                client.create_pool().save(
-                    pool_id, identifier, default_port,
-                    environment_id, balancing, healthcheck_type,
-                    healthcheck_expect, healthcheck_request, maxcom,
-                    ip_list_full, equipment_names, equipment_ids,
-                    priorities, weight, ports_reals, pool_member_ids,servicedownaction_id
-                )
 
                 return HttpResponse(json.dumps(param_dic), content_type="application/json")
 
