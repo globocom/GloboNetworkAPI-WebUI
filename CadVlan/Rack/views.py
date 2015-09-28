@@ -345,12 +345,7 @@ def rack_edit(request, id_rack):
                 rack = var
 
         if request.method == 'GET':
-
-            nome_eq1 = buscar_nome_equip(client, rack, 'id_sw1')
-            nome_eq2 = buscar_nome_equip(client, rack, 'id_sw2')
-            nome_eq3 = buscar_nome_equip(client, rack, 'id_ilo')
             lists['numero'] = rack.get('numero')
-
             lists['form'] = RackForm(initial={'rack_number': rack.get('numero'), 'rack_name': rack.get('nome'), "mac_address_sw1": rack.get('mac_sw1'), "mac_address_sw2": rack.get("mac_sw2"), "mac_address_ilo": rack.get('mac_ilo'), "nome_sw1": rack.get('id_sw1'), "nome_sw2": rack.get('id_sw2'), "nome_ilo": rack.get('id_ilo')})
     
         if request.method == 'POST':

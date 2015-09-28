@@ -18,7 +18,7 @@
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.templates import SCRIPT_LIST, SCRIPT_FORM
+from CadVlan.templates import SCRIPT_LIST, SCRIPT_FORM, SCRIPT_EDIT
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
@@ -161,8 +161,7 @@ def add_form(request):
             if form.is_valid():
                 name = form.cleaned_data['name']
                 script_type = form.cleaned_data['script_type']
-                modelo = form.cleaned_data['modelo']
-                Exception("modelo"+str(modelo))
+                modelo = form.cleaned_data['model']
                 description = form.cleaned_data['description']
 
                 try:
@@ -180,3 +179,53 @@ def add_form(request):
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(SCRIPT_FORM, {'form': form}, context_instance=RequestContext(request))
+
+
+
+@log
+@login_required
+@has_perm([{"permission": SCRIPT_MANAGEMENT, "read": True, "write": True}])
+def edit_form(request, id_script):
+    try:
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists = dict()
+        list_models = []
+        forms_aux = dict()
+
+        script = client.create_roteiro().get_by_id(id_script)
+        script = script.get('script')
+        forms_aux['tipo_roteiro'] = client.create_tipo_roteiro().listar()
+        forms_aux['modelos'] = client.create_modelo().listar().get('model')
+        modelos = client.create_modelo().get_by_script_id(id_script)
+        modelos = modelos.get('model')
+
+        if modelos is not []:
+            for i in modelos:
+                list_models.append(i.get('id'))
+
+        lists['id'] = id_script
+
+        if request.method == 'GET':
+            form = ScriptForm(forms_aux, initial= {'name': script.get('roteiro'), 'script_type': script.get('tipo'),
+                                                   'model': list_models, 'description': script.get('descricao')})
+        if request.method == 'POST':
+            form = ScriptForm(forms_aux, request.POST)
+            if form.is_valid():
+                nome = form.cleaned_data['name']
+                tipo = form.cleaned_data['script_type']
+                modelo = form.cleaned_data['model']
+                descricao = form.cleaned_data['description']
+
+                client.create_roteiro().alterar( id_script, tipo, nome, descricao, modelo)
+                messages.add_message(request, messages.SUCCESS, script_messages.get("success_edit"))
+
+        lists['form'] = form
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(SCRIPT_EDIT, lists, context_instance=RequestContext(request))

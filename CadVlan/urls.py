@@ -49,12 +49,10 @@ urlpatterns += patterns('CadVlan.Auth.views',
 
 # URL's Script
 urlpatterns += patterns('CadVlan.Script.views',
-                        url('^script/list[/]?$', 'list_all',
-                            name='script.list',),
-                        url('^script/delete[/]?$',
-                            'delete_all', name='script.delete',),
-                        url('^script/form[/]?$', 'add_form',
-                            name='script.form',),
+                        url('^script/list[/]?$', 'list_all', name='script.list',),
+                        url('^script/delete[/]?$', 'delete_all', name='script.delete',),
+                        url('^script/form[/]?$', 'add_form', name='script.form',),
+                        url('^script/edit/(?P<id_script>\d+)[/]?$', 'edit_form', name='script.edit.form',),
                         )
 
 # URL's ScriptType

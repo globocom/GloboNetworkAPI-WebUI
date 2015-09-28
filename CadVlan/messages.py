@@ -51,6 +51,7 @@ script_messages = {
     'success_remove':       u'Todos os roteiros selecionados foram excluídos com sucesso.',
     'success_insert':       u'Roteiro incluído com sucesso.',
     'error_equal_name':     u'Roteiro com o nome %s já cadastrado.',
+    'success_edit':         u'Roteiro alterado com sucesso.'
 }
 
 script_type_messages = {
