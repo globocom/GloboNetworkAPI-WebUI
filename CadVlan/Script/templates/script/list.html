@@ -23,7 +23,7 @@
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
 	oTable = $("#script_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
@@ -31,7 +31,7 @@ $(document).ready(function() {
 		"iDisplayLength": {% max_results %},
 		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0 ] }]
 	});
-	
+
 	$("#checkAll").click( function() {
 		if ($(this).attr('checked')) {
 			$(":checkbox").attr("checked", true);
@@ -39,35 +39,38 @@ $(document).ready(function() {
 			$(":checkbox").attr("checked", false);
 		}
 	});
-	
+
 	$(".fg-button").live("click", function(){
 		$(":checkbox").attr("checked", false);
 		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
 		$("#checkAll").attr("checked", false);
 	});
-	
+
 	$("#page_tab").tabs();
-	
+
 	$("#tool").buttonset();
-	
+
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 		location.href = "{% url script.form %}";
 	});
-	
+
+    $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false }); 
+    $(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+
 	{% has_perm SCRIPT_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Roteiro(s) selecionado(s)?')){ 
+		if (confirm('Deseja realmente excluir o(s) Roteiro(s) selecionado(s)?')){
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
 	});
 	{% endif %}
-	
+
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
 	});
-	
+
 })
 </script>
 {% endblock %}
@@ -101,9 +104,10 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th>Roteiro</th>					
+					<th>Roteiro</th>
 					<th>Descrição</th>
 					<th>Tipo de Roteiro</th>
+                    <th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -113,6 +117,7 @@ $(document).ready(function() {
 					<td>{{ script.roteiro }}</td>
 					<td>{{ script.descricao }}</td>
 					<td class="text_center">{{ script.tipo_roteiro }}</td>
+                    <td><a href="{% url script.edit.form script.id %}" style="width: 20px; height: 20px;" class="btn_edit"></a></td>
 				</tr>
 				{% endfor %}
 			</tbody>

@@ -27,13 +27,13 @@ class ScriptForm(forms.Form):
 
         self.fields['script_type'].choices = [(st['id'], st['tipo'] + " - " + st['descricao'])
                                               for st in forms_aux["tipo_roteiro"]["script_type"]]
-        self.fields['modelo'].choices = ([(m['id'], m['nome']) for m in forms_aux["modelos"]])
+        self.fields['model'].choices = ([(m['id'], m['nome']) for m in forms_aux["modelos"]])
 
     name = forms.CharField(label=u'Nome do Roteiro', min_length=3, max_length=40, required=True,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     script_type = forms.ChoiceField(label=u'Tipo de Roteiro', choices=[(0, 'Selecione')], required=True,
                                     error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
-    modelo = forms.MultipleChoiceField(label=u'Modelos', required=True, error_messages=error_messages,
+    model = forms.MultipleChoiceField(label=u'Modelos', required=True, error_messages=error_messages,
                                        widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
     description = forms.CharField(label=u'Descrição', min_length=3, max_length=100, required=True,
                                   error_messages=error_messages, widget=forms.Textarea(

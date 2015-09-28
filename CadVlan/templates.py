@@ -51,6 +51,7 @@ AJAX_LDAP_USER_POP_NAME_MAIL = 'ajax/pop_ldap_user_mail.json'
 # Script
 SCRIPT_LIST = 'script/list.html'
 SCRIPT_FORM = 'script/form.html'
+SCRIPT_EDIT = 'script/edit.html'
 
 # Script Type
 SCRIPTTYPE_LIST = 'script-type/list.html'
