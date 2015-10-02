@@ -662,19 +662,19 @@ urlpatterns += patterns(
 
 # URL's Rack
 urlpatterns += patterns('CadVlan.Rack.views',
-                        url('^rack/form[/]?$', 'rack_form',
-                            name='rack.form',),
-                        url('^rack/ajax-view[/]?$', 'ajax_view',
-                            name='ajax.view.rack',),
-                        url('^rack/edit/(?P<id_rack>\d+)[/]?$', 'rack_edit',
-                            name='rack.edit',),
-                        url('^rack/delete[/]?$', 'rack_delete',
-                            name='rack.delete',),
-                        url('^rack/gerar-configuracao[/]?$', 'rack_config',
-                            name='rack.config',),
-                        url('^rack/aplicar-configuracao[/]?$', 'rack_aplicar_config',
-                            name='rack.aplicar_config',),
+                        url('^rack/form[/]?$', 'rack_form', name='rack.form',),
+                        url('^rack/ajax-view[/]?$', 'ajax_view', name='ajax.view.rack',),
+                        url('^rack/edit/(?P<id_rack>\d+)[/]?$', 'rack_edit', name='rack.edit',),
+                        url('^rack/delete[/]?$', 'rack_delete', name='rack.delete',),
+                        url('^rack/gerar-configuracao[/]?$', 'rack_config', name='rack.config',),
+                        url('^rack/aplicar-configuracao[/]?$', 'rack_aplicar_config', name='rack.aplicar_config',),
+)
 
-                        )
+# URL's System
+urlpatterns += patterns('CadVlan.System.views',
+                        url('^system/variables/form[/]?$', 'add_variable', name='variables.form'),
+                        url('^system/variables/edit/(?P<variable_id>\d+)[/]?$', 'edit_variable', name='variables.edit'),
+                        url('^system/variables/list[/]?$', 'list_variables', name='variables.list'),
+)
 
 

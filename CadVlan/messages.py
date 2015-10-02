@@ -387,3 +387,8 @@ pool_messages = {
     'error_update':         u'Erro ao alterar pool',
     'select_one':           u'Deve adicionar ao menos um pool '
 }
+
+system_variable_messages = {
+    'success_insert': u'Variável incluída com sucesso!',
+    'success_update': u'Variável alterada com sucesso'
+}

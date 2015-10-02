@@ -359,7 +359,9 @@
 						<a href="#" class="rot">Roteiros</a>
 						<ul class="sub_menu">
 							<li><a href="{% url equip.script.search.list %}">Roteiros do Equipamento</a></li>
+                            <li><a href="{% url variables.form %}">Variáveis do Sistema</a></li>
 						</ul>
+
 					</li>
 					{% endif %}
 					
@@ -382,13 +384,14 @@
 					<li>
 						<a href="#" class="adm">Administração</a>
 						<ul class="sub_menu">
-							<li><a href="{% url group-equip.list %}">Grupos de equipamentos</a></li>
+							<li><a href="{% url group-equip.list %}">Grupos de Equipamentos</a></li>
 							<li><a href="{% url group-user.list %}">Grupos de Usuários</a></li>
-							<li><a href="{% url user.list 0 0 %}">Usuários</a></li>
 							{% has_perm AUDIT_LOG None True %}
 							{% if has_perm %}
 							<li><a href="{% url event-log.list %}">Pesquisar Log</a></li>
 							{% endif %}
+							<li><a href="{% url user.list 0 0 %}">Usuários</a></li>
+
 						</ul>
 					</li>
 					{% endif %}
