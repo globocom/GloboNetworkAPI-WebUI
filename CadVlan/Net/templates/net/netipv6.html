@@ -90,6 +90,14 @@ $(document).ready(function() {
 						{% endif %}
 						</td>
 					</tr>
+					<tr>
+						<td><label for="sit_rede">DHCP Server(s)</label></td>
+						<td>
+						
+							<label style="width: 350px;color: blue;text-align: center;" >{% for dhcp in dhcp_relays %} {{ dhcp.ip_formated }} &nbsp&nbsp{% endfor %}</label>
+						
+						</td>
+					</tr>
 			{% endfor %}
 			
 			</table>
