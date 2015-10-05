@@ -26,6 +26,7 @@ from django.contrib import messages
 from CadVlan.messages import error_messages, system_variable_messages
 from CadVlan.permissions import ADMINISTRATION, EQUIPMENT_MANAGEMENT
 from CadVlan.forms import DeleteForm
+from CadVlan.System.facade import *
 from CadVlan.System.forms import VariableForm
 
 
@@ -53,11 +54,11 @@ def add_variable(request):
             form = VariableForm(request.POST)
 
             if form.is_valid():
-                name = request.POST.getlist('name')
-                value = request.POST.getlist('value')
-                description = request.POST.getlist('description')
+                name = request.POST.get('name')
+                value = request.POST.get('value')
+                description = request.POST.get('description')
 
-                #create_new_variable(client,name, value, description)
+                create_new_variable(client, name, value, description)
                 messages.add_message(request, messages.SUCCESS, system_variable_messages.get('success_insert'))
 
                 #return redirect('pool.list')
