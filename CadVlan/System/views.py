@@ -61,7 +61,7 @@ def add_variable(request):
                 create_new_variable(client, name, value, description)
                 messages.add_message(request, messages.SUCCESS, system_variable_messages.get('success_insert'))
 
-                #return redirect('pool.list')
+                return redirect('variables.list')
 
         lists['form'] = form
 
