@@ -105,9 +105,9 @@ $(document).ready(function() {
 				{% for var in variables %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ script.id }}" /></td>
-					<td>{{ var.nome }}</td>
-					<td>{{ var.valor }}</td>
-					<td class="text_center">{{ var.descricao }}</td>
+					<td>{{ var.name }}</td>
+					<td>{{ var.value }}</td>
+					<td class="text_center">{{ var.description }}</td>
                     <td><a href="{% url variables.edit var.id %}" style="width: 20px; height: 20px;" class="btn_edit"></a></td>
 				</tr>
 				{% endfor %}

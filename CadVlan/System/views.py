@@ -129,7 +129,7 @@ def list_variables(request):
         lists = dict()
 
         if request.method == 'GET':
-            lists['variables'] = [] #list_all_variables(client)
+            lists['variables'] = list_all_variables(client)
             lists['delete_form'] = DeleteForm()
 
     except NetworkAPIClientError, e:

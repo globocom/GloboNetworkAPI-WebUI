@@ -34,5 +34,5 @@ def update_variable(client, name, value, description):
 
 def list_all_variables(client):
 
-    variables_list = client.create_system.get_all()
+    variables_list = client.create_system().get_all()
     return variables_list
