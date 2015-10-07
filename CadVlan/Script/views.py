@@ -209,7 +209,7 @@ def edit_form(request, id_script):
         lists['id'] = id_script
 
         if request.method == 'GET':
-            form = ScriptForm(forms_aux, initial= {'name': script.get('roteiro'), 'script_type': script.get('tipo'),
+            form = ScriptForm(forms_aux, initial= {'name': script.get('roteiro'), 'script_type': script.get('tipo_roteiro'),
                                                    'model': list_models, 'description': script.get('descricao')})
         if request.method == 'POST':
             form = ScriptForm(forms_aux, request.POST)

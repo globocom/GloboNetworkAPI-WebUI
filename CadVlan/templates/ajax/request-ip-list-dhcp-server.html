@@ -28,12 +28,10 @@
 		
 			<br>
 			
-			<table id="table_real_ips">
+			<table id="table_dhcp_ips">
 				<thead>
 					<tr>
 						<th>Ip</th>
-						<th>Rede</th>
-						<th>Máscara</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -42,16 +40,12 @@
 					{% for ipv4 in ips.list_ipv4 %}
 						<tr>
 							<td class="text_center">{{ ipv4.ip }}</td>
-							<td class="text_center">{{ ipv4.network.network }}</td>
-							<td class="text_center">{{ ipv4.network.mask }}</td>
 							<td class="text_center"><span class="ui-icon ui-icon-plusthick" style="cursor: pointer;margin-left: 35%;"  onclick="javascript:setIpReal( '{{equip.nome}}', {{equip.id}}, '{{ipv4.ip}}', {{ipv4.id}} );"></span></td>
 						</tr>
 					{% endfor %}
 					{% for ipv6 in ips.list_ipv6 %}
 						<tr>
 							<td class="text_center">{{ ipv6.ip }}</td>
-							<td class="text_center">{{ ipv6.network.network }}</td>
-							<td class="text_center">{{ ipv6.network.mask }}</td>
 							<td class="text_center"><span class="ui-icon ui-icon-plusthick" style="cursor: pointer;margin-left: 35%;" onclick="javascript:setIpReal( '{{equip.nome}}', {{equip.id}}, '{{ipv6.ip}}', {{ipv6.id}} );"></span></td>
 						</tr>
 					{% endfor %}
@@ -66,12 +60,12 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	
-	oTable = $("#table_real_ips").dataTable({
+	oTable = $("#table_dhcp_ips").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": 25,
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 1, 2, 3 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 1 ] }]
 	});
 	
 	$("#page_tab_model").tabs();
@@ -107,7 +101,7 @@ function setIpReal(real_name, real_id, ip, id_ip) {
 				"</tr>";
 
 
-			$('#table_real tbody').append(html);
+			$('#table_dhcp tbody').append(html);
 
 
 	

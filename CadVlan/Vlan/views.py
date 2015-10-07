@@ -26,7 +26,7 @@ from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, \
     VLAN_CREATE_SCRIPT
-from CadVlan.forms import DeleteForm, CreateForm
+from CadVlan.forms import DeleteForm, CreateForm, RemoveForm
 from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS, AJAX_VLAN_AUTOCOMPLETE, VLAN_FORM, VLAN_EDIT, AJAX_SUGGEST_NAME, \
     AJAX_CONFIRM_VLAN
 from CadVlan.Vlan.forms import SearchVlanForm, VlanForm
@@ -280,6 +280,7 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
     lista = []
     lists["delete_form"] = DeleteForm()
     lists["create_form"] = CreateForm()
+    lists["remove_form"] = RemoveForm() 
     lists['sf_number'] = sf_number
     lists['sf_name'] = sf_name
     lists['sf_environment'] = sf_environment
@@ -328,13 +329,17 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
             listaIps.append(montaIPRede(redesIPV6, False))
 
         # Show 'Criar Redes' button
-        lists['networks_active'] = 1
+        lists['exists_active_network'] = 0
+        lists['exists_not_active_network'] = 0
 
         for item in listaIps:
             for i in item:
+                # Show/Hide create and/or remove network button
                 if i['active'] == 'False':
-                    # Hide 'Criar Redes' button
-                    lists['networks_active'] = 0
+                    lists['exists_not_active_network'] = 1
+                else:
+                    lists['exists_active_network'] = 1
+                    
                 lista.append(i)
 
         net_type = client.create_tipo_rede().listar()
@@ -914,22 +919,26 @@ def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
                     id_net = value[0]
                     network_type = value[1]
 
-                    if network_type == 'v4':
+                    if network_type == 'v4': 
                         net = client.create_network().get_network_ipv4(id_net)
-                        equipments_ipv4.extend(
-                            list_equipment_by_network_ip4(client, id_net))
                     else:
                         net = client.create_network().get_network_ipv6(id_net)
-                        equipments_ipv6.extend(
-                            list_equipment_by_network_ip6(client, id_net))
 
                     if net['network']['active'] == 'True':
                         networks_activated = True
                     else:
                         networks_was_activated = False
 
-                # Create networks
-                client.create_network().create_networks(ids, id_vlan)
+                    if network_type == 'v4':                        
+                        equipments_ipv4.extend(
+                            list_equipment_by_network_ip4(client, id_net))
+                        
+                        client.create_api_network_ipv4().deploy(id_net)
+                    else:      
+                        equipments_ipv6.extend(
+                            list_equipment_by_network_ip6(client, id_net))
+
+                        client.create_api_network_ipv6().deploy(id_net)
 
                 apply_acl_for_network_v4(
                     request, client, equipments_ipv4, vlan, environment)
@@ -962,6 +971,92 @@ def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
         messages.add_message(request, messages.ERROR, e)
 
     return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def remove_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
+    """ Set column 'active = 0' in tables  """
+    try:
+        if request.method == 'POST':
+
+            form = RemoveForm(request.POST)
+
+            # Get user
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            networks_activated = False
+            networks_was_activated = True
+
+            equipments_ipv4 = list()
+            equipments_ipv6 = list()
+
+            if form.is_valid():
+
+                # If vlan with parameter id_vlan  don't exist,
+                # VlanNaoExisteError exception will be called
+                vlan = client.create_vlan().get(id_vlan)
+
+                environment = client.create_ambiente().buscar_por_id(
+                    vlan['vlan']["ambiente"]).get("ambiente")
+
+                # All ids to be activated
+                ids = split_to_array(form.cleaned_data['ids_remove'])
+
+                for id in ids:
+                    value = id.split('-')
+                    id_net = value[0]
+                    network_type = value[1]
+
+                    if network_type == 'v4': 
+                        net = client.create_network().get_network_ipv4(id_net)
+                    else:
+                        net = client.create_network().get_network_ipv6(id_net)
+
+                    if net['network']['active'] == 'True':
+                        networks_activated = True
+                    else:
+                        networks_was_activated = False
+
+                    if network_type == 'v4':                        
+                        equipments_ipv4.extend(
+                            list_equipment_by_network_ip4(client, id_net))
+                        
+                        client.create_api_network_ipv4().undeploy(id_net)
+                    else:      
+                        equipments_ipv6.extend(
+                            list_equipment_by_network_ip6(client, id_net))
+
+                        client.create_api_network_ipv6().undeploy(id_net)
+
+                if networks_activated == False:
+                    messages.add_message(
+                        request, messages.ERROR, network_ip_messages.get("networks_deactivated"))
+
+                if networks_was_activated == True:
+                    messages.add_message(
+                        request, messages.SUCCESS, network_ip_messages.get("net_remove_success"))
+
+            else:
+                vlan = client.create_vlan().get(id_vlan)
+                if vlan['vlan']['ativada'] == 'False':
+                    messages.add_message(
+                        request, messages.ERROR, error_messages.get("vlan_select_one"))
+                else:
+                    messages.add_message(
+                        request, messages.ERROR, error_messages.get("select_one"))
+
+    except VlanNaoExisteError, e:
+        logger.error(e)
+        return redirect('vlan.search.list')
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
+
 
 def list_equipment_by_network_ip4(client, id_net):
 

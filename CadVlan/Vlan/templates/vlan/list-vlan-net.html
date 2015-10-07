@@ -49,14 +49,20 @@ $(document).ready(function() {
 	
 	///////////
 	$("#btn_create").button({ icons: {primary: "ui-icon-plus"} }).click(function(){
-		if (confirm('Deseja realmente criar a Vlan?')){ 
+		if (confirm('Deseja realmente criar a Vlan nos equipamentos?')){ 
 			location.href = "{% url vlan.create vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 		}
 	});
 	$("#btn_create_networks").button({ icons: {primary: "ui-icon-plus"} }).click(function(){
-		if (confirm('Deseja realmente criar a(s) Rede(s) da Vlan selecionada(s)?')){ 
+		if (confirm('Deseja realmente criar a(s) Rede(s) nos equipamentos (deploy de configuracao)?')){ 
 			var data_net = getSelectionData(oTable);
 			$("#id_ids_create").val(data_net).parent().submit();
+		}
+	});
+	$("#btn_remove_networks").button({ icons: {primary: "ui-icon-plus"} }).click(function(){
+		if (confirm('Deseja realmente remover a(s) Rede(s) nos equipamentos (remover configuracao)?')){ 
+			var data_net = getSelectionData(oTable);
+			$("#id_ids_remove").val(data_net).parent().submit();
 		}
 	});
 	
@@ -108,21 +114,26 @@ $(document).ready(function() {
 	<div id="tabs-2">
 		<div class="buttons">
 			<button id="btn_can" >Voltar</button>
+
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			
 			{% if vlan.ativada == 'False'%}
 			<button id="btn_create" >Criar VLan L2</button>
 			{% endif %}
 
-			{% if networks_active == 0 %}
-			<button id="btn_create_networks" >Criar Redes</button>
+			{% if exists_not_active_network == 1 %}
+			<button id="btn_create_networks" >Criar Rede(s) (Deploy)</button>
 			{% endif%}
-			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+
+			{% if exists_active_network == 1 %}
+			<button id="btn_remove_networks" >Remover Rede(s) (Deploy)</button>
+			{% endif%}
 			
 			<span id="tool">
-			<button id="btn_new" type="button">Novo Registro</button>
+			<button id="btn_new" type="button">Alocar Nova Rede</button>
 			{% has_perm VLAN_MANAGEMENT True None %}
 			{% if has_perm %}
-			<button id="btn_del">Excluir</button>
+			<button id="btn_del">Desalocar Rede(s)</button>
 			{% endif %}
 			</span>
 		</div>
@@ -137,6 +148,12 @@ $(document).ready(function() {
 		<form id="create_form" method="post" action="{% url vlan.create.network vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in create_form %}
+				{{ field }}
+			{% endfor %}
+		</form>
+		<form id="remove_form" method="post" action="{% url vlan.remove.network vlan.id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="visibility: hidden;">
+			{% csrf_token %}
+			{% for field in remove_form %}
 				{{ field }}
 			{% endfor %}
 		</form>

@@ -25,7 +25,7 @@ from networkapiclient.exception import NetworkAPIClientError, VipIpError, IpEqui
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP, IPS
 from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, IP4ASSOC, IP6ASSOC, NET_FORM, NET6_EDIT, NET4_EDIT,\
-    NET_EVIP_OPTIONS
+    NET_EVIP_OPTIONS, AJAX_IPLIST_EQUIPMENT_DHCP_SERVER_HTML
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
 from CadVlan.Net.forms import IPForm, IPEditForm, IPAssocForm, NetworkForm, NetworkEditForm
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
@@ -37,6 +37,7 @@ from django.core.urlresolvers import reverse
 from CadVlan.OptionVip.forms import OptionVipNetForm
 from django.http import HttpResponse
 from django.template import loader
+from CadVlan.Util.utility import get_param_in_request
 
 
 logger = logging.getLogger(__name__)
@@ -91,16 +92,30 @@ def add_network_form(request):
                 net_version = form.cleaned_data['ip_version']
                 networkv4 = form.cleaned_data['networkv4']
                 networkv6 = form.cleaned_data['networkv6']
+                id_equips = request.POST.getlist('id_equip')
+                nome_equips = request.POST.getlist('equip')
+                id_ips = request.POST.getlist('id_ip')
+                ips = request.POST.getlist('ip')
 
-                if net_version == "0":
-                    network = networkv4
-                else:
-                    network = networkv6
 
                 # Business
                 client.create_vlan().get(vlan_id)
-                client.create_network().add_network(
-                    network, vlan_id, net_type, env_vip)
+
+                if net_version == "0":
+                    network = networkv4
+                    network_obj = client.create_network().add_network(
+                        network, vlan_id, net_type, env_vip)
+                    net = network_obj.get('network')
+                    for id_ip in id_ips:
+                        client.create_dhcprelay_ipv4().add(net.get("id"), id_ip)
+                else:
+                    network = networkv6
+                    network_obj = client.create_network().add_network(
+                        network, vlan_id, net_type, env_vip)
+                    net = network_obj.get('network')
+                    for id_ip in id_ips:
+                        client.create_dhcprelay_ipv4().add(net.get("id"), id_ip)
+
                 messages.add_message(
                     request, messages.SUCCESS, network_ip_messages.get("success_insert"))
 
@@ -167,16 +182,26 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
                 net_version = form.cleaned_data['ip_version']
                 networkv4 = form.cleaned_data['networkv4']
                 networkv6 = form.cleaned_data['networkv6']
+                id_equips = request.POST.getlist('id_equip')
+                nome_equips = request.POST.getlist('equip')
+                id_ips = request.POST.getlist('id_ip')
+                ips = request.POST.getlist('ip')
 
                 if net_version == "0":
                     network = networkv4
+                    network_obj = client.create_network().add_network(
+                        network, vlan_id, net_type, env_vip)
+                    net = network_obj.get('network')
+                    for id_ip in id_ips:
+                        client.create_dhcprelay_ipv4().add(net.get("id"), id_ip)
                 else:
                     network = networkv6
+                    network_obj = client.create_network().add_network(
+                        network, vlan_id, net_type, env_vip)
+                    net = network_obj.get('network')
+                    for id_ip in id_ips:
+                        client.create_dhcprelay_ipv4().add(net.get("id"), id_ip)
 
-                # Business
-                client.create_vlan().get(vlan_id)
-                client.create_network().add_network(
-                    network, vlan_id, net_type, env_vip)
                 messages.add_message(
                     request, messages.SUCCESS, network_ip_messages.get("success_insert"))
 
@@ -199,6 +224,7 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
             # Forms
             lists['form'] = NetworkForm(net_type_list, env_vip_list, initial={
                                         'vlan_name': vlan_nome, 'vlan_name_id': vlan.get("id")})
+            lists['dhcp_relays'] = list()
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -210,6 +236,61 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
             pass
 
     return render_to_response(NET_FORM, lists, context_instance=RequestContext(request))
+
+def ajax_modal_ip_dhcp_server(request):
+    auth = AuthSession(request.session)
+    client_api = auth.get_clientFactory()
+    return __modal_ip_list_dhcp(request, client_api)
+
+
+def __modal_ip_list_dhcp(request, client_api):
+
+    lists = {
+        'msg': str(),
+        'ips': []
+    }
+
+    ips = {}
+    status_code = 200
+
+    equip_name = get_param_in_request(request, 'equip_name')
+
+    try:
+        # Valid Equipament
+        equip = client_api.create_equipamento().listar_por_nome(equip_name).get("equipamento")
+        ips_list = client_api.create_ip().find_ips_by_equip(equip.get("id"))
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        status_code = 500
+        return HttpResponse(json.dumps({'message': e.error, 'status': 'error'}),
+                            status=status_code,
+                            content_type='application/json')
+
+    if not ips_list['ips']['ipv4'] and not ips_list['ips']['ipv6']:
+        return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
+                                                   u'possa ser utilizado como DHCP server dessa rede.',
+                                        'status': 'error'}),
+                            status=status_code,
+                            content_type='application/json')
+
+    ips['list_ipv4'] = ips_list['ips']['ipv4']
+    ips['list_ipv6'] = ips_list['ips']['ipv6']
+
+    lists['ips'] = ips
+    lists['equip'] = equip
+
+    for ip in lists['ips']['list_ipv4']:
+        ip['ip'] = "%s.%s.%s.%s" % (ip['oct1'], ip['oct2'], ip['oct3'], ip['oct4'])
+    for ip in lists['ips']['list_ipv6']:
+        ip['ip'] = "%s:%s:%s:%s:%s:%s:%s:%s" % (ip['bloco1'], ip['bloco2'], ip['bloco3'], ip['bloco4'], ip['bloco5'], ip['bloco6'], ip['bloco7'], ip['bloco8'])
+
+    return HttpResponse(
+        loader.render_to_string(
+            AJAX_IPLIST_EQUIPMENT_DHCP_SERVER_HTML,
+            lists,
+            context_instance=RequestContext(request)
+        ), status=status_code
+    )
 
 
 @log
@@ -248,6 +329,7 @@ def list_netip4_by_id(request, id_net='0', id_vlan='0', sf_number='0', sf_name='
     lists['sf_network'] = sf_network
     lists['sf_iexact'] = sf_iexact
     lists['sf_acl'] = sf_acl
+    lists['dhcp_relays'] = list()
 
     try:
 
@@ -261,6 +343,10 @@ def list_netip4_by_id(request, id_net='0', id_vlan='0', sf_number='0', sf_name='
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
         lists['vlan_id'] = vlan['vlan']['id']
         
+        dhcp_relays = client.create_dhcprelay_ipv4().list(networkipv4=id_net)
+        for dhcp in dhcp_relays:
+            lists['dhcp_relays'].append(dhcp['ipv4'])
+
 	lists['num_vlan'] = vlan['vlan']['num_vlan']
 	
 	net['network']['vlan'] = vlan.get('vlan').get('nome')
@@ -378,6 +464,7 @@ def list_netip6_by_id(request, id_net='0', id_vlan='0', sf_number='0', sf_name='
     lists['sf_network'] = sf_network
     lists['sf_iexact'] = sf_iexact
     lists['sf_acl'] = sf_acl
+    lists['dhcp_relays'] = list()
 
     try:
 
@@ -391,7 +478,12 @@ def list_netip6_by_id(request, id_net='0', id_vlan='0', sf_number='0', sf_name='
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
         lists['vlan_id'] = vlan.get('vlan')['id']
 
+        dhcp_relays = client.create_dhcprelay_ipv4().list(networkipv4=id_net)
+        for dhcp in dhcp_relays:
+            lists['dhcp_relays'].append(dhcp['ipv4'])
+
         net['network']['vlan'] = vlan.get('vlan').get('nome')
+
 	lists['num_vlan'] = vlan['vlan']['num_vlan']
         net_type = client.create_tipo_rede().listar()
 
@@ -1252,6 +1344,10 @@ def edit_network4_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
 
             form = NetworkEditForm(net_type_list, env_vip_list, request.POST)
             lists['form'] = form
+            id_ips_list = request.POST.getlist('id_ip')
+            id_ips = list()
+            for item in id_ips_list:
+                id_ips.append(int(item))
 
             if form.is_valid():
 
@@ -1261,6 +1357,28 @@ def edit_network4_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
 
                 client.create_network().edit_network(
                     id_net, ip_type, net_type, env_vip)
+
+                dhcp_list = client.create_dhcprelay_ipv4().list(networkipv4=network.get('id'))
+                dhcp_id_ip_list = list()
+                for dhcp in dhcp_list:
+                    dhcp_id_ip_list.append(dhcp['ipv4']['id'])
+
+                dhcp_to_remove = list()
+                dhcp_to_add = list()
+                for id_ip in id_ips:
+                    if id_ip not in dhcp_id_ip_list:
+                        dhcp_to_add.append(id_ip)
+                for id_ip in dhcp_id_ip_list:
+                    if id_ip not in id_ips:
+                        dhcp_to_remove.append(id_ip)
+
+                for dhcp_id_ip in dhcp_to_add:
+                        client.create_dhcprelay_ipv4().add(network.get("id"), dhcp_id_ip)
+                for dhcp_id_ip in dhcp_to_remove:
+                    for dhcp in dhcp_list:
+                        if dhcp_id_ip == dhcp['ipv4']['id']:
+                            client.create_dhcprelay_ipv4().remove(dhcp['id'])
+
                 messages.add_message(
                     request, messages.SUCCESS, network_ip_messages.get("sucess_edit"))
 
@@ -1281,6 +1399,20 @@ def edit_network4_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
                 "nome_divisao"), environment.get("nome_ambiente_logico"), environment.get("nome_grupo_l3"))
             lists['form'] = NetworkEditForm(net_type_list, env_vip_list, initial={
                                             'vlan_name': vlan_nome, 'net_type': net_type, 'env_vip': env_vip, 'ip_version': ip_version})
+
+            dhcp_relays_ipv4 = client.create_dhcprelay_ipv4().list(networkipv4=network.get('id'))
+            dhcp_relays = list()
+            for dhcp in dhcp_relays_ipv4:
+                dhcp_dict = dict()
+                dhcp_dict['ip'] = dhcp['ipv4']['ip_formated']
+                dhcp_dict['id_ip'] = dhcp['ipv4']['id']
+                equip_nome = client.create_ip().get_ipv4(dhcp['ipv4']['id']).get('ipv4').get('equipamentos')[0]
+                equip = client.create_equipamento().listar_por_nome(equip_nome)
+                dhcp_dict['nome_equipamento'] = equip_nome
+                dhcp_dict['id_equip'] = equip.get('equipamento').get('id')
+                dhcp_relays.append(dhcp_dict)
+
+            lists['dhcp_relays'] = dhcp_relays
 
     except NetworkAPIClientError, e:
 
@@ -1348,6 +1480,28 @@ def edit_network6_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
 
                 client.create_network().edit_network(
                     id_net, ip_type, net_type, env_vip)
+
+                dhcp_list = client.create_dhcprelay_ipv6().list(networkipv6=network.get('id'))
+                dhcp_id_ip_list = list()
+                for dhcp in dhcp_list:
+                    dhcp_id_ip_list.append(dhcp['ipv6']['id'])
+
+                dhcp_to_remove = list()
+                dhcp_to_add = list()
+                for id_ip in id_ips:
+                    if id_ip not in dhcp_id_ip_list:
+                        dhcp_to_add.append(id_ip)
+                for id_ip in dhcp_id_ip_list:
+                    if id_ip not in id_ips:
+                        dhcp_to_remove.append(id_ip)
+
+                for dhcp_id_ip in dhcp_to_add:
+                        client.create_dhcprelay_ipv6().add(network.get("id"), dhcp_id_ip)
+                for dhcp_id_ip in dhcp_to_remove:
+                    for dhcp in dhcp_list:
+                        if dhcp_id_ip == dhcp['ipv6']['id']:
+                            client.create_dhcprelay_ipv6().remove(dhcp['id'])
+
                 messages.add_message(
                     request, messages.SUCCESS, network_ip_messages.get("sucess_edit"))
 
