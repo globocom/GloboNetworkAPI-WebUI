@@ -346,7 +346,10 @@ def rack_edit(request, id_rack):
 
         if request.method == 'GET':
             lists['numero'] = rack.get('numero')
-            lists['form'] = RackForm(initial={'rack_number': rack.get('numero'), 'rack_name': rack.get('nome'), "mac_address_sw1": rack.get('mac_sw1'), "mac_address_sw2": rack.get("mac_sw2"), "mac_address_ilo": rack.get('mac_ilo'), "nome_sw1": rack.get('id_sw1'), "nome_sw2": rack.get('id_sw2'), "nome_ilo": rack.get('id_ilo')})
+            nome_sw1 = client.create_equipamento().listar_por_id(rack.get('id_sw1'))['equipamento']['nome']
+            nome_sw2 = client.create_equipamento().listar_por_id(rack.get('id_sw2'))['equipamento']['nome']
+            nome_ilo = client.create_equipamento().listar_por_id(rack.get('id_ilo'))['equipamento']['nome']
+            lists['form'] = RackForm(initial={'rack_number': rack.get('numero'), 'rack_name': rack.get('nome'), "mac_address_sw1": rack.get('mac_sw1'), "mac_address_sw2": rack.get("mac_sw2"), "mac_address_ilo": rack.get('mac_ilo'), "nome_sw1": nome_sw1, "nome_sw2": nome_sw2, "nome_ilo": nome_ilo})
     
         if request.method == 'POST':
             form = RackForm(request.POST)
