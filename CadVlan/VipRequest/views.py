@@ -847,6 +847,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         timeout = form_options.cleaned_data["timeout"]
         caches = form_options.cleaned_data["caches"]
         persistence = form_options.cleaned_data["persistence"]
+        trafficreturn = form_options.cleaned_data["traffic_return"]
         # balancing = form_options.cleaned_data["balancing"]
 
         rule_id = form_options.cleaned_data["rules"]
@@ -918,7 +919,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                         caches, persistence, timeout, name, business,
                         service, filter_l7, vip_ports_to_pools=vip_ports_to_pools,
                         rule_id=rule_id,
-                        pk=vip_id
+                        pk=vip_id, trafficreturn=trafficreturn
                     )
 
                 else:
@@ -926,7 +927,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                         ipv4, ipv6, finality, client, environment,
                         caches, persistence, timeout, name, business,
                         service, filter_l7, vip_ports_to_pools=vip_ports_to_pools,
-                        rule_id=rule_id
+                        rule_id=rule_id, trafficreturn=trafficreturn
                     )
 
                 id_vip_created = vip.get("id")

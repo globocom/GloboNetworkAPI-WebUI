@@ -146,6 +146,19 @@ class RequestVipFormOptions(forms.Form):
                     messages.add_message(request, messages.ERROR, request_vip_messages.get(
                         "error_existing_persistence") % persistence)
 
+            trafficreturns = validates_dict(
+                client_ovip.buscar_trafficreturn_opcvip(environment_vip), 'trafficreturn_opt')
+            if trafficreturns is not None:
+                self.fields['traffic_return'].choices = [
+                    (st['trafficreturn_opt'], st['trafficreturn_opt']) for st in trafficreturns]
+            else:
+                if 'initial' in kwargs:
+                    trafficreturn = kwargs.get('initial').get(
+                        'traffic_return') if "traffic_return" in kwargs.get('initial') else ''
+                    messages.add_message(request, messages.ERROR, request_vip_messages.get(
+                        "error_existing_trafficreturn") % trafficreturn)
+
+
             rules = validates_dict(
                 client_ovip.buscar_rules(environment_vip, vip_id),
                 'name_rule_opt'
@@ -165,6 +178,9 @@ class RequestVipFormOptions(forms.Form):
                                error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     persistence = forms.ChoiceField(
         label="Persistência", required=True, error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
+
+    trafficreturn = forms.ChoiceField(
+        label="Traffic Return", required=True, error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
 
     rules = forms.ChoiceField(label=u'Regras', required=False, error_messages=error_messages, widget=forms.Select(
         attrs={"style": "width: 300px"}))
