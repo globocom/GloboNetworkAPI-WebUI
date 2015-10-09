@@ -85,16 +85,16 @@ $(document).ready(function() {
 			<button id="btn_del">Excluir</button>
 			</span>
 		</div>
-		<form id="delete_form" method="post" action="{% url home %}" style="visibility: hidden;">
+		<form id="delete_form" method="post" action="{% url variables.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in form %}
+			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
 		<table id="variables_list">
 			<thead>
 				<tr>
-					<th><input id="checkAll" type="checkbox" /></th>
+					<th><input id="checkAll" type="checkbox"/></th>
 					<th>Nome</th>
 					<th>Valor</th>
 					<th>Descrição</th>
@@ -104,7 +104,7 @@ $(document).ready(function() {
 			<tbody>
 				{% for var in variables %}
 				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ script.id }}" /></td>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ var.id }}" /></td>
 					<td>{{ var.name }}</td>
 					<td>{{ var.value }}</td>
 					<td class="text_center">{{ var.description }}</td>

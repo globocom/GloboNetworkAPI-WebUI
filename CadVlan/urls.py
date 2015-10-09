@@ -681,6 +681,7 @@ urlpatterns += patterns('CadVlan.System.views',
                         url('^system/variables/form[/]?$', 'add_variable', name='variables.form'),
                         url('^system/variables/edit/(?P<variable_id>\d+)[/]?$', 'edit_variable', name='variables.edit'),
                         url('^system/variables/list[/]?$', 'list_variables', name='variables.list'),
+                        url('^system/variables/delete[/]?$', 'delete_all', name='variables.delete'),
 )
 
 

@@ -390,5 +390,6 @@ pool_messages = {
 
 system_variable_messages = {
     'success_insert': u'Variável incluída com sucesso!',
-    'success_update': u'Variável alterada com sucesso'
+    'success_update': u'Variável alterada com sucesso',
+    'success_delete':  u'Variável removida com sucesso'
 }
