@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 @has_perm([
-    {"permission": EQUIPMENT_MANAGEMENT, "read": True }, #ADMINISTRATION
+    {"permission": EQUIPMENT_MANAGEMENT, "read": True },
     {"permission": EQUIPMENT_MANAGEMENT, "write": True}
 ])
 def add_variable(request):
@@ -76,7 +76,7 @@ def add_variable(request):
 @log
 @login_required
 @has_perm([
-    {"permission": EQUIPMENT_MANAGEMENT, "read": True }, #ADMINISTRATION
+    {"permission": EQUIPMENT_MANAGEMENT, "read": True },
     {"permission": EQUIPMENT_MANAGEMENT, "write": True}
 ])
 def edit_variable(request, variable_id):
@@ -118,7 +118,7 @@ def edit_variable(request, variable_id):
 @log
 @login_required
 @has_perm([
-    {"permission": EQUIPMENT_MANAGEMENT, "read": True }, #ADMINISTRATION
+    {"permission": EQUIPMENT_MANAGEMENT, "read": True },
     {"permission": EQUIPMENT_MANAGEMENT, "write": True}
 ])
 def list_variables(request):

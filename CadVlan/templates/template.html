@@ -358,8 +358,7 @@
 					<li>
 						<a href="#" class="rot">Roteiros</a>
 						<ul class="sub_menu">
-							<li><a href="{% url equip.script.search.list %}">Roteiros do Equipamento</a></li>
-                            <li><a href="{% url variables.form %}">Variáveis do Sistema</a></li>
+							<li>><a href="{% url equip.script.search.list %}">Roteiros do Equipamento</a></li>
 						</ul>
 
 					</li>
@@ -391,7 +390,7 @@
 							<li><a href="{% url event-log.list %}">Pesquisar Log</a></li>
 							{% endif %}
 							<li><a href="{% url user.list 0 0 %}">Usuários</a></li>
-
+							<li><a href="{% url variables.list %}">Variáveis do Sistema</a></li>
 						</ul>
 					</li>
 					{% endif %}
