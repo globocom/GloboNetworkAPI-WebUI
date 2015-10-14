@@ -249,7 +249,7 @@ def rack_form(request):
                 id_sw2 = buscar_id_equip(client,nome_sw2)
                 id_ilo = buscar_id_equip(client,nome_ilo)
  
-                rack = client.create_rack().insert_rack(rack_number, rack_name, mac_sw1, mac_sw2, mac_ilo, id_sw1, id_sw2, id_ilo)
+                rack = client.create_apirack().insert_rack(rack_number, rack_name, mac_sw1, mac_sw2, mac_ilo, id_sw1, id_sw2, id_ilo)
                 messages.add_message(request, messages.SUCCESS, rack_messages.get("success_insert"))
 
                 form = RackForm()
