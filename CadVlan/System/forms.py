@@ -26,9 +26,9 @@ class VariableForm(forms.Form):
         super(VariableForm, self).__init__(*args, **kwargs)
 
 
-    name = forms.CharField(label=u'Nome', min_length=3, max_length=40, required=True, error_messages=error_messages,
+    name = forms.CharField(label=u'Nome', min_length=1, max_length=40, required=True, error_messages=error_messages,
                            widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    value = forms.CharField(label=u'Valor', min_length=3, max_length=40, required=True, error_messages=error_messages,
+    value = forms.CharField(label=u'Valor', min_length=1, max_length=40, required=True, error_messages=error_messages,
                            widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    description = forms.CharField(label=u'Descrição', min_length=3, max_length=40, required=False,
+    description = forms.CharField(label=u'Descrição', min_length=1, max_length=40, required=False,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
