@@ -700,13 +700,20 @@ def status_change(request):
                 pl = pool['server_pool_members']
                 pools['pools'][i]['server_pool_members'] = []
                 for j, p in enumerate(pl):
-                    member_status = p['member_status']
-                    member_status = int(bin(member_status),2) + int(action,2)
-                    if member_status >= 0 and member_status <= 7 and str(p['id']) in ids.split(';'):
+                    member_status = list(bin(p['member_status']))
+                    if action[-2] != 'x':
+                        member_status[-2] = action[-2]
+                    else:
+                        member_status[-1] = action[-1]
+
+                    member_status = int(''.join(member_status),2)
+
+                    if member_status != p['member_status'] and str(p['id']) in ids.split(';'):
                         p['member_status'] = member_status
                         pools['pools'][i]['server_pool_members'].append(p)
 
-            client.create_pool().poolmember_state(pools['pools'])
+            if len(pools['pools'][i]['server_pool_members']) > 0:
+                client.create_pool().poolmember_state(pools['pools'])
             messages.add_message(
                 request, messages.SUCCESS, pool_messages.get('success_status_change'))
         else:
