@@ -55,16 +55,25 @@
     $("#btn_disable").button({ icons: {primary: "ui-icon-disk"} });
     $("#btn_disable").button("disable");
     
+    $("#btn_enable_user").button({ icons: {primary: "ui-icon-disk"} });
+    $("#btn_enable_user").button("disable");
+    
+    $("#btn_disable_user").button({ icons: {primary: "ui-icon-disk"} });
+    $("#btn_disable_user").button("disable");
+    
     {% has_perm VIP_ALTER_SCRIPT True True %}
     {% if has_perm %}
     $("#btn_enable").button("enable");
     $("#btn_disable").button("enable");
+    $("#btn_enable_user").button("enable");
+    $("#btn_disable_user").button("enable");
     {% endif %}
     
     $("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
         if (confirm('Deseja realmente Habilitar os Real servers selecionados ?')){ 
             var data = getSelectionData(oTable);
-            $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'enable' %}" )
+            $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'status_change' %}" )
+            $("#action").val('10');
             $("#id_ids").val(data).parent().submit();
         }
     });
@@ -72,7 +81,26 @@
     $("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
         if (confirm('Deseja realmente Desabilitar os Real servers selecionados ?')){ 
             var data = getSelectionData(oTable);
-            $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'disable' %}" )
+            $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'status_change' %}" )
+            $("#action").val('-10');
+            $("#id_ids").val(data).parent().submit();
+        }
+    });
+
+    $("#btn_enable_user").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+        if (confirm('Deseja realmente colocar como "user-up" o(s) Pool(s) Member(s) selecionado(s)?')){ 
+            var data = getSelectionData(oTable);
+            $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'status_change' %}" )
+            $("#action").val('1');
+            $("#id_ids").val(data).parent().submit();
+        }
+    });
+    
+    $("#btn_disable_user").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+        if (confirm('Deseja realmente colocar como "user-down" o(s) Pool(s) Member(s) selecionado(s)?')){ 
+            var data = getSelectionData(oTable);
+            $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'status_change' %}" )
+            $("#action").val('-1');
             $("#id_ids").val(data).parent().submit();
         }
     });
@@ -90,6 +118,8 @@
     <div class="buttons">
         <button id="btn_enable" title="Habilitar Real">Habilitar Real</button>
         <button id="btn_disable" title="Desabilitar Real">Desabilitar Real</button>
+        <button id="btn_disable_user" title="Desabilitar Real">User Down Real</button>
+        <button id="btn_disable_user" title="Desabilitar Real">User Up Real</button>
     </div>
     {% has_perm ADMINISTRATION True None %}
     {% if has_perm %}
