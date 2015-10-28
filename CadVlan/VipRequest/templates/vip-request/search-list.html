@@ -316,7 +316,7 @@ input {
 			{% endif %}
 			</span>
 		</div>
-		{% has_perm ADMINISTRATION True None %}
+		{% has_perm VIPS_REQUEST True True %}
 		{% if has_perm %}
 		<form id="delete_form" method="post" action="{% url vip.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
@@ -325,7 +325,7 @@ input {
 			{% endfor %}
 		</form>
 		{% endif %}
-		{% has_perm ADMINISTRATION True None %}
+		{% has_perm VIP_VALIDATION True True %}
 		{% if has_perm %}
 		<form id="valid_form" method="post" action="{% url vip.valid %}" style="visibility: hidden;">
 			{% csrf_token %}
@@ -334,7 +334,7 @@ input {
 			{% endfor %}
 		</form>
 		{% endif %}
-		{% has_perm ADMINISTRATION True None %}
+		{% has_perm VIP_CREATE_SCRIPT True True %}
 		{% if has_perm %}
 		<form id="create_form" method="post" action="{% url vip.create %}" style="visibility: hidden;">
 			{% csrf_token %}
@@ -344,7 +344,7 @@ input {
 		</form>
 		{% endif %}
 		
-		{% has_perm ADMINISTRATION True None %}
+		{% has_perm VIP_REMOVE_SCRIPT True True %}
 		{% if has_perm %}
 		<form id="remove_form" method="post" action="{% url vip.remove %}" style="visibility: hidden;">
 			{% csrf_token %}

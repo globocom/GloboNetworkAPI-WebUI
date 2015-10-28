@@ -650,6 +650,7 @@ urlpatterns += patterns(
     url('^pool/create[/]?$', 'create', name='pool.create',),
     url('^pool/enable/[/]?$', 'enable', name='pool.enable',),
     url('^pool/disable/[/]?$', 'disable', name='pool.disable',),
+    url('^pool/status_change/[/]?$', 'status_change', name='pool.status_change',),
 
     url('^pool/manage/tab1/(?P<id_server_pool>\d+)[/]?$', 'manage_tab1', name='pool.manage.tab1',),
     url('^pool/manage/tab2/(?P<id_server_pool>\d+)[/]?$', 'manage_tab2', name='pool.manage.tab2',),

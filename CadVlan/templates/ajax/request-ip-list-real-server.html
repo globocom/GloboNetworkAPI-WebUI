@@ -102,6 +102,19 @@ function setIpReal(real_name, real_id, ip, id_ip) {
 						"<input type='hidden' name='id_ip' value='" + id_ip + "'>" +
 					"</td>" +
 					"<td>" +
+						"<label class='editable'>0</label>" +
+						"<input type='hidden' name='priority' value='0'>" +
+					"</td>" +
+					"<td class='weighted' style='display: "+display+";'>" +
+						"<label class='editable' for='weighted'></label>" +
+						"<input type='hidden' name='weight' value='0'>" +
+					"</td>" +
+					"<td>" +
+						"<label class='editable'>" + port_real_padrao + "</label>" +
+						"<input type='hidden' name='ports_real_reals' value='" + port_real_padrao + "'>" +
+						"<input type='hidden' name='id_pool_member' value='' />" +
+					"</td>" +
+					"<td>" +
 						"<span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span>" +
 					"</td>" +
 				"</tr>";
