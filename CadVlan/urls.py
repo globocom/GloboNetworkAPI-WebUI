@@ -673,7 +673,8 @@ urlpatterns += patterns('CadVlan.Rack.views',
                         url('^rack/edit/(?P<id_rack>\d+)[/]?$', 'rack_edit', name='rack.edit',),
                         url('^rack/delete[/]?$', 'rack_delete', name='rack.delete',),
                         url('^rack/gerar-configuracao[/]?$', 'rack_config', name='rack.config',),
-                        url('^rack/aplicar-configuracao[/]?$', 'rack_aplicar_config', name='rack.aplicar_config',),
+                        url('^rack/alocar[/]?$', 'rack_alocar', name='rack.alocar',),
+                        url('^rack/save/deploy[/]?$', 'rack_deploy', name='rack.deploy',),
 )
 
 # URL's System
