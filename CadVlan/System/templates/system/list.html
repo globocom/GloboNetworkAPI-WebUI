@@ -54,9 +54,6 @@ $(document).ready(function() {
 		location.href = "{% url variables.form %}";
 	});
 
-    $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false }); 
-    $(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
-
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
 		if (confirm('Deseja realmente excluir a(s) Variável(s) selecionada(s)?')){
 			var data = getSelectionData(oTable);
@@ -98,7 +95,6 @@ $(document).ready(function() {
 					<th>Nome</th>
 					<th>Valor</th>
 					<th>Descrição</th>
-                    <th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -108,7 +104,6 @@ $(document).ready(function() {
 					<td>{{ var.name }}</td>
 					<td>{{ var.value }}</td>
 					<td class="text_center">{{ var.description }}</td>
-                    <td><a href="{% url variables.edit var.id %}" style="width: 20px; height: 20px;" class="btn_edit"></a></td>
 				</tr>
 				{% endfor %}
 			</tbody>
