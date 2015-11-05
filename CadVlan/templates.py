@@ -234,3 +234,8 @@ POOL_MEMBER_ITEMS = 'pool/items.html'
 RACK_FORM = 'rack/form.html'
 RACK_VIEW_AJAX = 'rack/view-rack.html'
 RACK_EDIT = 'rack/edit.html'
+
+#System
+VARIABLES_FORM = 'system/form.html'
+VARIABLES_EDIT = 'system/edit.html'
+VARIABLES_LIST = 'system/list.html'

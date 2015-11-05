@@ -268,6 +268,7 @@ def add_form(request, equip_name=None):
             if form.is_valid():
 
                 name = form.cleaned_data['name']
+                description = form.cleaned_data['description']
                 protected = form.cleaned_data['protected']
                 int_type = form.cleaned_data['int_type']
                 vlan = form.cleaned_data['vlan']
@@ -283,7 +284,7 @@ def add_form(request, equip_name=None):
                     int_type = "trunk"
                     trunk = 1
 
-                id_int = client.create_interface().inserir(name, protected, None, None, None, equip['id'], int_type, vlan)
+                id_int = client.create_interface().inserir(name, protected, description, None, None, equip['id'], int_type, vlan)
                 messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
 
                 id_int = id_int.get("interface")
@@ -579,7 +580,7 @@ def edit(request, id_interface):
             protegida = 0
 
         lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id'],
-                                         'name': interface.get('interface'), 'protected': protegida, 'int_type': tipo,
+                                         'name': interface.get('interface'), 'description': interface.get('descricao'), 'protected': protegida, 'int_type': tipo,
                                          'vlan': interface.get('vlan') })
         if environment_list is not None:
             lists['envform'] = AddEnvInterfaceForm(environment_list)
@@ -596,6 +597,7 @@ def edit(request, id_interface):
 
         if form.is_valid():
             name = form.cleaned_data['name']
+            description = form.cleaned_data['description']
             protected = form.cleaned_data['protected']
             int_type = form.cleaned_data['int_type']
             vlan = form.cleaned_data['vlan']
@@ -612,7 +614,7 @@ def edit(request, id_interface):
                 trunk = 1
 
             try:
-                client.create_interface().alterar(id_interface, name, protected, None, lig_front, lig_back,
+                client.create_interface().alterar(id_interface, name, protected, description, lig_front, lig_back,
                                                        int_type, vlan)
                 messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit"))
             except NetworkAPIClientError, e:

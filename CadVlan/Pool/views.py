@@ -236,7 +236,6 @@ def reqvip_datatable(request, id_server_pool):
 @has_perm([
     {"permission": POOL_MANAGEMENT, "write": True},
     {"permission": POOL_ALTER_SCRIPT, "write": True}]
-    #{"permission": VLAN_MANAGEMENT, "write": True,"read": True },]
 )
 def add_form(request):
 

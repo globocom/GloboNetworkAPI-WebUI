@@ -170,6 +170,7 @@ INSTALLED_APPS = (
     'CadVlan.Rack',
     'CadVlan.Script',
     'CadVlan.ScriptType',
+    'CadVlan.System',
     'CadVlan.User',
     'CadVlan.UserGroup',
     'CadVlan.Util',
