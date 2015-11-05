@@ -45,7 +45,7 @@ $(document).ready(function() {
                             {% endif %}
                         </label>
                     </div>
-                    {{ field }} {% ifequal field.name 'vlan' %}<a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>{% endifequal %}
+                    {{ field }} {% ifequal field.name 'vlan' %}<a href="{% url vlan.search.list %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>{% endifequal %}
                     <p id="error">
                     {% if field.errors %}
                         {% for error in field.errors %}
