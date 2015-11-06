@@ -195,15 +195,13 @@ def channel_delete(request):
             # Control others exceptions
             have_errors = False
 
-            try:
-                interface = client.create_interface().get_by_id(ids[0])
-                interface = interface.get('interface')
-                channel = interface['channel']
-                client.create_interface().delete_channel(str(channel))
-            except NetworkAPIClientError, e:
-                logger.error(e)
-                messages.add_message(request, messages.ERROR, e)
-                have_errors = True
+            for idt in ids:
+                try:
+                    client.create_interface().delete_channel(idt)
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    have_errors = True
 
             if have_errors == False:
                 messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_remove_channel"))
@@ -1006,7 +1004,7 @@ def edit_channel(request, channel_name, equip_name):
 
         environment_list = get_equip_environment(client, equip['id'])
 
-        channel = client.create_interface().get_interface_by_channel(channel_name)
+        channel = client.create_interface().get_interface_by_channel(channel_name, equip_name)
         channel = channel.get('interfaces')
 
         if type(channel) is list:
