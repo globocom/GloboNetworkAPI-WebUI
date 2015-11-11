@@ -48,16 +48,16 @@ $(document).ready(function() {
     });
     
     $("#id_name").keyup(function() {
-            var valor = $(this).val().replace(/[^A-Za-z0-9-]+/g,'');
+            var valor = $(this).val().replace(/[^0-9-]+/g,'');
             $(this).val(valor);
     });
 
     $("#id_name").mouseover(function() {
-            $(this).attr("title","Formato: <port channel>-<numero do channel>");
+            $(this).attr("title","Formato: <numero do channel>");
     });
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url home %}";
+		location.href = "{% url equip.interface.search.list %}";
 	});
 
 	$("#id_environment").pickList();
@@ -142,7 +142,7 @@ $(document).ready(function() {
 
                     <div>
                         <div><label for="{{ form.vlan.auto_id }}">{{ form.vlan.label_tag }}{% if form.int_type.vlan.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-                        {{ form.vlan }} <a href="{% url equipment.form %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>
+                        {{ form.vlan }} <a href="{% url vlan.search.list %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>
                         <p id="error">
                         {% if form.vlan.errors %}
                             {% for error in form.vlan.errors %}

@@ -592,7 +592,8 @@ def equip_edit(request, id_equip):
 
     list_groups = []
     list_environments = []
-
+    logger.info("groups = %s" % groups)
+    logger.error("groups = %s" % groups)
     try:
 
         if request.method == 'POST':

@@ -125,6 +125,7 @@ class AddInterfaceForm(forms.Form):
 
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
     name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    description = forms.CharField(label=u'Descrição', required=False, min_length=3, max_length=200, error_messages=error_messages)
     protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
                                   widget=forms.RadioSelect, initial=0)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
@@ -337,7 +338,7 @@ class ChannelAddForm(forms.Form):
 
         self.fields['equip_interface'].choices = equip_interface
 
-    name = forms.CharField(label="Nome do Channel", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    name = forms.CharField(label="Numero do Channel", required=True, error_messages=error_messages, min_length=1, max_length=20)
     lacp = forms.ChoiceField(label="LACP", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
                                   widget=forms.RadioSelect(), initial=1)
     equip_interface = forms.ChoiceField(label="Equipamento/Interface", required=False, error_messages=error_messages,

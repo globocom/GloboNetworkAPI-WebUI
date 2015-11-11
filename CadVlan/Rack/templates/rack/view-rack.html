@@ -68,7 +68,7 @@ $(document).ready(function() {
         {% has_perm EQUIPMENT_MANAGEMENT True None %}
         {% if has_perm %}
         $("#btn_conf").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"} }).click(function(){
-                if (confirm('Criar vlans e ambientes do Rack e gerar o arquivo de configuracao dos equipamentos?')){ 
+                if (confirm('Gerar os arquivos de configuracao dos equipamentos?')){
                         var data = getSelectionData(oTable);
                         $("#id_ids_config").val(data).parent().submit();
                 }
@@ -77,14 +77,23 @@ $(document).ready(function() {
 
         {% has_perm EQUIPMENT_MANAGEMENT True None %}
         {% if has_perm %}
+        $("#btn_alocar").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+                if (confirm('Alocar os ambientes, vlan e redes do(s) Rack(s) selecionado(s)?')){
+                        var data = getSelectionData(oTable);
+                        $("#id_ids_alocar").val(data).parent().submit();
+                }
+        });
+        {% endif %}
+
+        {% has_perm EQUIPMENT_MANAGEMENT True None %}
+        {% if has_perm %}
         $("#btn_aplicar").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-                if (confirm('Aplicar a configuracao no(s) Rack(s) selecionado(s)?')){ 
+                if (confirm('Aplicar a configuracao no(s) equipamento(s) Rack(s) selecionado(s)?')){
                         var data = getSelectionData(oTable);
                         $("#id_ids_aplicar").val(data).parent().submit();
                 }
         });
         {% endif %}
-
 
         $("#checkAll").click( function() {
                 if ($(this).attr('checked')) {
@@ -125,7 +134,7 @@ $(document).ready(function() {
                         <button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
                         {% has_perm EQUIPMENT_MANAGEMENT True True %}
                         {% if has_perm %}
-                            <button id="btn_new">Novo Registro</button>
+                            <button id="btn_new">Novo Rack</button>
                         {% endif %}
                         {% has_perm EQUIPMENT_MANAGEMENT True True %}
                         {% if has_perm %}
@@ -133,7 +142,10 @@ $(document).ready(function() {
                         {% endif %}
                         {% has_perm EQUIPMENT_MANAGEMENT True True %}
                         {% if has_perm %}
-                            <button id="btn_aplicar">Aplicar Configuracao</button>
+                            <button id="btn_alocar">Alocar</button>
+                        {% endif %}
+                        {% if has_perm %}
+                            <button id="btn_aplicar">Aplicar</button>
                         {% endif %}
                         <span id="tool">
                         {% has_perm EQUIPMENT_MANAGEMENT True None %}
@@ -161,7 +173,15 @@ $(document).ready(function() {
                 </form>
                 {% endif %}
                 {% if has_perm %}
-                <form id="aplicar_form" method="post" action="{% url rack.aplicar_config %}" style="visibility: hidden;">
+                <form id="alocar_form" method="post" action="{% url rack.alocar %}" style="visibility: hidden;">
+                        {% csrf_token %}
+                        {% for field in alocar_form %}
+                                {{ field }}
+                        {% endfor %}
+                </form>
+                {% endif %}
+                {% if has_perm %}
+                <form id="aplicar_form" method="post" action="{% url rack.deploy %}" style="visibility: hidden;">
                         {% csrf_token %}
                         {% for field in aplicar_form %}
                                 {{ field }}

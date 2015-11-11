@@ -2338,12 +2338,22 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             id_ipv4 = vip.get("id_ip")
             id_ipv6 = vip.get("id_ipv6")
 
-            environment_vip = client_api.create_environment_vip().search(
-                None,
-                finality,
-                client,
-                environment
-            )
+            try:
+
+                environment_vip = client_api.create_environment_vip().search(
+                    None,
+                    finality,
+                    client,
+                    environment
+                )
+
+            except Exception, e:
+                environment_vip = None
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    request_vip_messages.get("error_existing_environment_vip") % (finality, client, environment)
+                )
 
             pools = client_api.create_pool().list_by_environmet_vip(
                 environment_vip["environment_vip"]["id"]
@@ -2375,23 +2385,6 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                 }
             )
 
-            try:
-
-                environment_vip = client_api.create_environment_vip().search(
-                    None,
-                    finality,
-                    client,
-                    environment
-                ).get("environment_vip").get("id")
-
-            except Exception, e:
-                environment_vip = None
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    request_vip_messages.get("error_existing_environment_vip") % (finality, client, environment)
-                )
-
             form_environment = forms.RequestVipFormEnvironment(
                 finality_list,
                 finality,
@@ -2399,16 +2392,16 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                 environment,
                 client_api,
                 initial={
-                    "finality": finality,
-                    "client": client,
-                    "environment": environment,
-                    "environment_vip": environment_vip
+                    "finality": environment_vip.get("environment_vip").get("finalidade_txt"),
+                    "client": environment_vip.get("environment_vip").get("cliente_txt"),
+                    "environment": environment_vip.get("environment_vip").get("ambiente_p44_txt"),
+                    "environment_vip": environment_vip.get("environment_vip").get("id")
                 }
             )
 
             form_options = forms.RequestVipFormOptions(
                 request,
-                environment_vip,
+                environment_vip.get("environment_vip").get("id"),
                 client_api,
                 id_vip,
                 initial={
@@ -2427,7 +2420,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             lists['form_options'] = form_options
             lists['form_ip'] = form_ip
             lists["pools"] = vip.get('pools')
-            lists["env_vip_id"] = environment_vip
+            lists["env_vip_id"] = environment_vip.get("environment_vip").get("id")
 
     except VipNaoExisteError, e:
         logger.error(e)

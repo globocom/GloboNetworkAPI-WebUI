@@ -1,0 +1,117 @@
+<div id="page_tab_model">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes do Equipamento</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="fields" class="ui-widget-content">
+			<table border="5">
+				<tr>
+					<td style="width: 60px"><label for="nome_ambiente">Nome</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.nome}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="nome_vlan">Tipo</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.nome_modelo}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="nome_vlan">Modelo</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.nome_tipo_equipamento}}</label></td>
+				</tr>
+				<tr>
+					<td><label for="nome_vlan">Marca</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.nome_marca}}</label></td>
+				</tr>
+			</table>
+		</div>
+	
+		<div>
+		
+			<br>
+			
+			<table id="table_dhcp_ips">
+				<thead>
+					<tr>
+						<th>Ip</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+				{% if ips %}
+					{% for ipv4 in ips.list_ipv4 %}
+						<tr>
+							<td class="text_center">{{ ipv4.ip }}</td>
+							<td class="text_center"><span class="ui-icon ui-icon-plusthick" style="cursor: pointer;margin-left: 35%;"  onclick="javascript:setIpReal( '{{equip.nome}}', {{equip.id}}, '{{ipv4.ip}}', {{ipv4.id}} );"></span></td>
+						</tr>
+					{% endfor %}
+					{% for ipv6 in ips.list_ipv6 %}
+						<tr>
+							<td class="text_center">{{ ipv6.ip }}</td>
+							<td class="text_center"><span class="ui-icon ui-icon-plusthick" style="cursor: pointer;margin-left: 35%;" onclick="javascript:setIpReal( '{{equip.nome}}', {{equip.id}}, '{{ipv6.ip}}', {{ipv6.id}} );"></span></td>
+						</tr>
+					{% endfor %}
+				{% endif %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	oTable = $("#table_dhcp_ips").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": 25,
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 1 ] }]
+	});
+	
+	$("#page_tab_model").tabs();
+	$("#page_tab_lists").tabs();
+	
+});
+
+
+
+function setIpReal(real_name, real_id, ip, id_ip) {
+		port_real_padrao = $('#id_default_port').val();
+
+		if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
+            display = 'grid';
+        } else {
+            display = 'none';
+        }
+
+		html = "<tr class='remove_port'>" +
+					"<td>" +
+						"<label>" + real_name + "</label>" +
+						"<input type='hidden' name='equip' value='" + real_name + "'>" +
+						"<input type='hidden' name='id_equip' value='" + real_id + "'>" +
+					"</td>" +
+					"<td>" +
+						"<label>" + ip + "</label>" +
+						"<input type='hidden' name='ip' value='" + ip + "'>" +
+						"<input type='hidden' name='id_ip' value='" + id_ip + "'>" +
+					"</td>" +
+					"<td>" +
+						"<span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span>" +
+					"</td>" +
+				"</tr>";
+
+
+			$('#table_dhcp tbody').append(html);
+
+
+	
+	
+	$('.editable').editableTable();
+	
+	$("#ip-view").html("");
+	$("#dialog_ip").dialog("close");
+	
+	 
+}
+
+</script>

@@ -50,8 +50,9 @@ $(document).ready(function() {
             if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
+                $("#action").val('x1x');
 
-                $('#delete_form').attr('action','{% url pool.enable %}').submit();
+                $('#delete_form').attr('action','{% url pool.status_change %}').submit();
             }
         });
     {% endif %}
@@ -62,8 +63,35 @@ $(document).ready(function() {
             if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
+                $("#action").val('x0x');
 
-                $('#delete_form').attr('action','{% url pool.disable %}').submit();
+                $('#delete_form').attr('action','{% url pool.status_change %}').submit();
+            }
+        });
+    {% endif %}
+
+    {% has_perm POOL_ALTER_SCRIPT True None %}
+    {% if has_perm %}
+        $("#btn_enable_user").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+            if (confirm('Deseja realmente colocar como "user-up" o(s) Pool(s) Member(s) selecionado(s)?')){
+                var data = getSelectionData(oTableSpm);
+                $("#ids").val(data);
+                $("#action").val('xx1');
+
+                $('#delete_form').attr('action','{% url pool.status_change %}').submit();
+            }
+        });
+    {% endif %}
+
+    {% has_perm POOL_ALTER_SCRIPT True None %}
+    {% if has_perm %}
+        $("#btn_disable_user").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+            if (confirm('Deseja realmente colocar como "user-down" o(s) Pool(s) Member(s) selecionado(s)?')){
+                var data = getSelectionData(oTableSpm);
+                $("#ids").val(data);
+                $("#action").val('xx0');
+
+                $('#delete_form').attr('action','{% url pool.status_change %}').submit();
             }
         });
     {% endif %}
@@ -148,6 +176,8 @@ $(document).ready(function() {
                 {% if has_perm %}
                     <button id="btn_enable">Habilitar Real</button>
                     <button id="btn_disable">Desabilitar Real</button>
+                    <button id="btn_enable_user">User Up Real</button>
+                    <button id="btn_disable_user">User Down Real</button>
                 {% endif %}
                 </span>
             </div>
@@ -155,6 +185,7 @@ $(document).ready(function() {
             <form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden; height:0px;">
                 <input type='hidden' name='id_server_pool' value='{{id_server_pool}}' />
                 <input type='hidden' id="ids" name='ids' value='{{ids}}' />
+                <input type='hidden' id="action" name='action' value='{{action}}' />
                 {% csrf_token %}
 
                 {% for field in reals %}
@@ -168,7 +199,8 @@ $(document).ready(function() {
                 <col width="20%" />
                 <col width="10%" />
                 <col width="10%" />
-                <col width="10%" />
+                <col width="5%" />
+                <col width="5%" />
                 <col width="10%" />
                 <col width="10%" />
                 <thead>
@@ -178,6 +210,7 @@ $(document).ready(function() {
                         <th>IP do Real</th>
                         <th>Porta Real</th>
                         <th>Prioridade</th>
+                        <th>User Up/Down</th>
                         <th>Habilitado</th>
                         <th>Up/Down</th>
                         <th>Ult. Atualização</th>

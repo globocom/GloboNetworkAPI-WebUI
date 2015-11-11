@@ -219,6 +219,10 @@ urlpatterns += patterns('CadVlan.Vlan.views',
                             'create_network', name='vlan.create.network'),
                         url('^vlan/create/network/(?P<id_vlan>\d+)/(?P<sf_number>\d+)/(?P<sf_name>\w+)/(?P<sf_environment>\d+)/(?P<sf_nettype>\d+)/(?P<sf_subnet>\d+)/(?P<sf_ipversion>\d+)/(?P<sf_network>\w+)/(?P<sf_iexact>\d+)/(?P<sf_acl>\d+)[/]?$',
                             'create_network', name='vlan.create.network'),
+                        url('^vlan/remove/network/(?P<id_vlan>\d+)[/]?$',
+                            'remove_network', name='vlan.remove.network'),
+                        url('^vlan/remove/network/(?P<id_vlan>\d+)/(?P<sf_number>\d+)/(?P<sf_name>\w+)/(?P<sf_environment>\d+)/(?P<sf_nettype>\d+)/(?P<sf_subnet>\d+)/(?P<sf_ipversion>\d+)/(?P<sf_network>\w+)/(?P<sf_iexact>\d+)/(?P<sf_acl>\d+)[/]?$',
+                            'remove_network', name='vlan.remove.network'),
                         url('^vlan/form/get/available/environment/configuration/by/environment/id[/]?$',
                             'ajax_get_available_ip_config_by_environment_id', name='vlan.get.available.environment.configuration'),
                         )
@@ -239,6 +243,8 @@ urlpatterns += patterns('CadVlan.Net.views',
                             'vlan_add_network_form', name='network.form.vlan',),
                         url('^network/form/(?P<id_vlan>\d+)/(?P<sf_number>\d+)/(?P<sf_name>\w+)/(?P<sf_environment>\d+)/(?P<sf_nettype>\d+)/(?P<sf_subnet>\d+)/(?P<sf_ipversion>\d+)/(?P<sf_network>\w+)/(?P<sf_iexact>\d+)/(?P<sf_acl>\d+)[/]?$',
                             'vlan_add_network_form', name='network.form.vlan',),
+                        url('^network/ajax_modal_ips[/]?$', 'ajax_modal_ip_dhcp_server',
+                            name='network.modal.ips.ajax',),
                         url('^network/get/ip4/(?P<id_net>\d+)[/]?$',
                             'list_netip4_by_id', name='network.ip4.list.by.id',),
                         url('^network/get/ip4/(?P<id_net>\d+)/(?P<id_vlan>\d+)/(?P<sf_number>\d+)/(?P<sf_name>\w+)/(?P<sf_environment>\d+)/(?P<sf_nettype>\d+)/(?P<sf_subnet>\d+)/(?P<sf_ipversion>\d+)/(?P<sf_network>\w+)/(?P<sf_iexact>\d+)/(?P<sf_acl>\d+)[/]?$',
@@ -644,6 +650,7 @@ urlpatterns += patterns(
     url('^pool/create[/]?$', 'create', name='pool.create',),
     url('^pool/enable/[/]?$', 'enable', name='pool.enable',),
     url('^pool/disable/[/]?$', 'disable', name='pool.disable',),
+    url('^pool/status_change/[/]?$', 'status_change', name='pool.status_change',),
 
     url('^pool/manage/tab1/(?P<id_server_pool>\d+)[/]?$', 'manage_tab1', name='pool.manage.tab1',),
     url('^pool/manage/tab2/(?P<id_server_pool>\d+)[/]?$', 'manage_tab2', name='pool.manage.tab2',),
@@ -662,19 +669,21 @@ urlpatterns += patterns(
 
 # URL's Rack
 urlpatterns += patterns('CadVlan.Rack.views',
-                        url('^rack/form[/]?$', 'rack_form',
-                            name='rack.form',),
-                        url('^rack/ajax-view[/]?$', 'ajax_view',
-                            name='ajax.view.rack',),
-                        url('^rack/edit/(?P<id_rack>\d+)[/]?$', 'rack_edit',
-                            name='rack.edit',),
-                        url('^rack/delete[/]?$', 'rack_delete',
-                            name='rack.delete',),
-                        url('^rack/gerar-configuracao[/]?$', 'rack_config',
-                            name='rack.config',),
-                        url('^rack/aplicar-configuracao[/]?$', 'rack_aplicar_config',
-                            name='rack.aplicar_config',),
+                        url('^rack/form[/]?$', 'rack_form', name='rack.form',),
+                        url('^rack/ajax-view[/]?$', 'ajax_view', name='ajax.view.rack',),
+                        url('^rack/edit/(?P<id_rack>\d+)[/]?$', 'rack_edit', name='rack.edit',),
+                        url('^rack/delete[/]?$', 'rack_delete', name='rack.delete',),
+                        url('^rack/gerar-configuracao[/]?$', 'rack_config', name='rack.config',),
+                        url('^rack/alocar[/]?$', 'rack_alocar', name='rack.alocar',),
+                        url('^rack/save/deploy[/]?$', 'rack_deploy', name='rack.deploy',),
+)
 
-                        )
+# URL's System
+urlpatterns += patterns('CadVlan.System.views',
+                        url('^system/variables/form[/]?$', 'add_variable', name='variables.form'),
+                        url('^system/variables/edit/(?P<variable_id>\d+)[/]?$', 'edit_variable', name='variables.edit'),
+                        url('^system/variables/list[/]?$', 'list_variables', name='variables.list'),
+                        url('^system/variables/delete[/]?$', 'delete_all', name='variables.delete'),
+)
 
 

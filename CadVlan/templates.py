@@ -222,6 +222,7 @@ POOL_MANAGE_TAB2 = 'pool/manage_tab2.html'
 POOL_MANAGE_TAB3 = 'pool/manage_tab3.html'
 POOL_MANAGE_TAB4 = 'pool/manage_tab4.html'
 
+AJAX_IPLIST_EQUIPMENT_DHCP_SERVER_HTML = 'ajax/request-ip-list-dhcp-server.html'
 AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML = 'ajax/request-ip-list-real-server.html'
 AJAX_IPLIST_EQUIPMENT_REAL_SERVER = 'ajax/request-ip-list-real-server.json'
 POOL_DATATABLE = 'pool/datatable.json'
@@ -233,3 +234,8 @@ POOL_MEMBER_ITEMS = 'pool/items.html'
 RACK_FORM = 'rack/form.html'
 RACK_VIEW_AJAX = 'rack/view-rack.html'
 RACK_EDIT = 'rack/edit.html'
+
+#System
+VARIABLES_FORM = 'system/form.html'
+VARIABLES_EDIT = 'system/edit.html'
+VARIABLES_LIST = 'system/list.html'

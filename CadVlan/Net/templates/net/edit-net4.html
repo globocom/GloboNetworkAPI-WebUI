@@ -50,6 +50,56 @@ $(document).ready(function() {
 	$("#id_ip_version_1").attr("disabled","disabled");
 	$("#id_ip_version_0").attr("readonly","readonly");
 	
+	var obj_btn_new_dhcp = $("#btn_new_dhcp");
+	obj_btn_new_dhcp.button({icons: {primary: "ui-icon-disk"}});
+	$("#id_equip_name, #btn_new_dhcp").prop('enabled', 'disabled');
+
+	obj_btn_new_dhcp.live("click", function(){
+	    var val_equip_name = $.trim($('#id_equip_name').val());
+	    if ( val_equip_name != '' ) {
+	        $.ajax({
+	            data: { id_environment: '5', equip_name: val_equip_name, token: $("#id_token").val() },
+	            url: "{% url network.modal.ips.ajax %}",
+	            success: function(data, textStatus, xhr) {
+	                if(data.message && data.status == "error"){
+	                    addMessage(data);
+	                }else{
+	                    $('#content-ip').html(data);
+	                    $("#dialog_ip").dialog("open");
+	                    $('#messages').animate({ opacity: 'toggle', height: 'toggle' }, "hide");
+	                }
+	            },
+	            error: function(data, textStatus, xhr) {
+	                response = JSON.parse(data.responseText);
+	                addMessage(response);
+	            }
+	        });
+	    }else{
+	        addMessage({message: 'Por favor, informe o nome do equipamento.', status: 'error'});
+	    }
+	});
+
+    $("#dialog_ip").dialog({
+        height: 600,
+        width: 1000,
+        modal: true,
+        autoOpen: false,
+        draggable: false,
+        resizable: true,
+        buttons: {
+            "Voltar": function() {
+                $(this).dialog("close");
+            }
+        }
+    });
+
+	$('#table_dhcp tbody tr span').die("click");
+	$('#table_dhcp tbody tr span').live("click", function(e){
+		if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){
+		$(this).parents(".remove_port").remove();
+		return false;
+		}
+	});
 	
 });
 </script>
@@ -60,6 +110,11 @@ $(document).ready(function() {
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Rede</a></li>
 	</ul>
+
+    <div id="dialog_ip">
+        <div id="content-ip"></div>
+    </div>
+
 	<div id="tabs-1">
 	
 		<form id="search_form" method="post" action="{% url network.edit.by.id.rede.ipv4 id_net id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}">
@@ -107,7 +162,67 @@ $(document).ready(function() {
 					</div>
 			{% endfor %}
 			</div>
-			
+
+                <div>
+                    <table  class="bordasimples" >
+                        <tr>
+                            <td>Buscar novo</td>
+                            <td style="margin-left: 5px;">
+                                <input id="id_equip_name" type="text" name="equip_name" maxlength="100" style="width:250px" />
+                            </td>
+                            <td>
+                                <input type="button" id="btn_new_dhcp" value="Adicionar DHCP Relay" />
+                            </td>
+                        </tr>
+                        <tr id="error_real_server">
+                        </tr>
+                        <tr>
+                            <td colspan="3">&nbsp</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <table id="table_dhcp" class="bordasimplesReal">
+                                    <thead>
+                                        <tr>
+                                            <td>Nome do DHCP Server</td>
+                                            <td>IP do DHCP Server </td>
+                                            <td style="width: 20px;"></td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    {% for field in dhcp_relays %}
+                                        <tr class='remove_port'>
+                                            <td>
+                                                <label>{% if field.nome_equipamento != "-" %}{{field.nome_equipamento}}{% endif %}</label>
+                                                <input type='hidden' name='equip' value='{{field.nome_equipamento}}' />
+                                                <input type='hidden' name='id_equip' value='{{field.id_equip}}' />
+                                            </td>
+                                            <td>
+                                                <label>{% if field.ip != "-" %}{{field.ip}}{% endif %}</label>
+                                                <input type='hidden' name='ip' value='{{field.ip}}'>
+                                                <input type='hidden' name='id_ip' value='{{field.id_ip}}'>
+                                            </td>
+                                            <td>
+                                                <span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <p id="error">{{reals_error}}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">&nbsp</td>
+                        </tr>
+                    </table>
+                </div>
+
 			<div class="separator spacer"></div>
 			
 			<div class="buttons-l ui-widget-header">
