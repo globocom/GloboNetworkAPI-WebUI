@@ -2328,6 +2328,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             timeout = vip.get("timeout")
             caches = vip.get("cache")
             persistence = vip.get("persistencia")
+            traffic_return = vip.get("traffic_return")
             rule = vip.get('rule_id')
 
             finality = vip.get("finalidade", "")
@@ -2414,6 +2415,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     "timeout": timeout,
                     "caches": caches,
                     "persistence": persistence,
+                    "traffic_return": traffic_return,
                     "rules": rule
                 }
             )
@@ -2568,6 +2570,8 @@ def popular_options_shared(request, client_api):
             client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
         lists['persistence'] = validates_dict(
             client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
+        lists['traffic_return'] = validates_dict(
+            client_ovip.buscar_trafficreturn_opcvip(environment_vip), 'trafficreturn_opt')
         lists['rules'] = validates_dict(
             client_ovip.buscar_rules(environment_vip, id_vip), 'name_rule_opt')
         # lists['rules'] = [{u'content': u''}, {u'content': u'haieie'}]
