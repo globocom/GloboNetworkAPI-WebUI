@@ -22,7 +22,7 @@ from datetime import datetime
 from datetime import timedelta
 from ldap import modlist, SERVER_DOWN, NO_SUCH_OBJECT
 from CadVlan.settings import LDAP_INITIALIZE, LDAP_DC, LDAP_CREDENTIALS_USER, LDAP_CREDENTIALS_PASSWORD, LDAP_MANAGER_PASSWORD, LDAP_SSL, LDAP_PASSWORD_DEFAULT_HASH,\
-    LDAP_INITIALIZE_SSL, CACERTDIR
+    LDAP_INITIALIZE_SSL, CACERTDIR, LDAP_MANAGER_USER
 
 
 class LDAPError(Exception):
@@ -97,7 +97,6 @@ class Ldap():
         Returns LDAP connection
         """
         try:
-
             if LDAP_SSL:
                 ldap.set_option(
                     ldap.OPT_X_TLS_CACERTFILE, CACERTDIR + 'glb_cacert.pem')
@@ -117,8 +116,10 @@ class Ldap():
             return conn
 
         except SERVER_DOWN, e:
+            self.logger.error("server down %s" % e)
             raise LDAPConnectionError()
         except Exception, e:
+            self.logger.error("exception %s" % e)
             raise LDAPError(e)
 
     def _get_conn_manager(self):
@@ -138,7 +139,7 @@ class Ldap():
             raise LDAPError(e)
 
     def _get_manager(self):
-        strng = "cn=Manager,%s" % LDAP_DC
+        strng = "cn=%s,ou=%s,%s" % (LDAP_MANAGER_USER, CN_TYPES.USER, LDAP_DC)
         return strng
 
     def _get_str(self, cn, ou):
@@ -167,7 +168,6 @@ class Ldap():
         :param cn_type: Type of CN to be searched (CN_TYPES) 
         """
         try:
-
             conn = self._get_conn()
 
             dn = self._get_str(cn, cn_type)
@@ -176,7 +176,6 @@ class Ldap():
 
             dic = {}
             for k in ob[1]:
-
                 if cn_type == CN_TYPES.SUDOERS:
                     if len(ob[1][k]) == 1 and k != "sudoCommand" and k != "sudoUser":
                         dic[k] = ob[1][k][0]
@@ -200,8 +199,10 @@ class Ldap():
             return dic
 
         except NO_SUCH_OBJECT, e:
+            self.logger.error("NO SUCH OBJECT %s" % e)
             raise LDAPNotFoundError(e)
         except Exception, e:
+            self.logger.error("Exception %s" % e)
             raise LDAPError(e)
 
     def _parse_groups(self, member_uid):
@@ -321,12 +322,14 @@ class Ldap():
         field: String with field to be passed in command
         """
         try:
-
             cmd = """ldapsearch -x -h %s -D "%s" -b "%s" -w %s "cn=%s" %s""" % (
-                LDAP_INITIALIZE, self._get_manager(), LDAP_DC, LDAP_MANAGER_PASSWORD, cn, field)
-
+                LDAP_INITIALIZE,
+                self._get_manager(),
+                "ou="+CN_TYPES.USER+","+LDAP_DC,
+                LDAP_MANAGER_PASSWORD,
+                cn,
+                field)
             resp = commands.getstatusoutput(cmd)
-
             dic = {}
             dic[field] = ""
 
@@ -341,6 +344,7 @@ class Ldap():
                     dic[field] = values[1]
 
             else:
+
                 raise LDAPMethodError(resp[0])
 
             return dic
@@ -412,6 +416,7 @@ class Ldap():
             return groups
 
         except Exception, e:
+            self.logger.error("get_groups exception %s" % e)
             raise LDAPError(e)
 
     def rem_group(self, cn):
