@@ -187,14 +187,14 @@ class Ldap():
                     else:
                         dic[k] = ob[1][k]
 
-            if cn_type == CN_TYPES.USER:
+            # if cn_type == CN_TYPES.USER:
 
-                pol = self._cmd_line(cn, "pwdPolicySubentry")
+            #     pol = self._cmd_line(cn, "pwdPolicySubentry")
 
-                polName = pol["pwdPolicySubentry"].split("=")[1]
-                polName = polName.split(",")[0]
-                dic["pwdPolicySubentry"] = pol["pwdPolicySubentry"]
-                dic["policy"] = polName
+            #     polName = pol["pwdPolicySubentry"].split("=")[1]
+            #     polName = polName.split(",")[0]
+            #     dic["pwdPolicySubentry"] = pol["pwdPolicySubentry"]
+            #     dic["policy"] = polName
 
             return dic
 
