@@ -847,7 +847,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         timeout = form_options.cleaned_data["timeout"]
         caches = form_options.cleaned_data["caches"]
         persistence = form_options.cleaned_data["persistence"]
-        trafficreturn = form_options.cleaned_data["traffic_return"]
+        trafficreturn = form_options.cleaned_data["trafficreturn"]
         # balancing = form_options.cleaned_data["balancing"]
 
         rule_id = form_options.cleaned_data["rules"]
@@ -2328,7 +2328,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             timeout = vip.get("timeout")
             caches = vip.get("cache")
             persistence = vip.get("persistencia")
-            traffic_return = vip.get("traffic_return")
+            trafficreturn = vip.get("trafficreturn")
             rule = vip.get('rule_id')
 
             finality = vip.get("finalidade", "")
@@ -2408,7 +2408,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     "timeout": timeout,
                     "caches": caches,
                     "persistence": persistence,
-                    "traffic_return": traffic_return,
+                    "trafficreturn": trafficreturn,
                     "rules": rule
                 }
             )
@@ -2563,7 +2563,7 @@ def popular_options_shared(request, client_api):
             client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
         lists['persistence'] = validates_dict(
             client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
-        lists['traffic_return'] = validates_dict(
+        lists['trafficreturn'] = validates_dict(
             client_ovip.buscar_trafficreturn_opcvip(environment_vip), 'trafficreturn_opt')
         lists['rules'] = validates_dict(
             client_ovip.buscar_rules(environment_vip, id_vip), 'name_rule_opt')

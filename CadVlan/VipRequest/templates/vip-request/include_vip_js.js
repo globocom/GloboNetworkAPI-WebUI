@@ -204,7 +204,7 @@
 				else {
 
 					$("#id_caches").html(data.caches);
-					$("#id_trafficreturn").html(data.traffic_return);
+					$("#id_trafficreturn").html(data.trafficreturn);
 					$("#id_persistence").html(data.persistence);
 					$("#id_timeout").html(data.timeout);
 					$("#id_balancing").html(data.balancing);

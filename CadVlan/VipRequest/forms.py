@@ -23,6 +23,7 @@ from CadVlan.Util.forms.decorators import autostrip
 from CadVlan.messages import error_messages, request_vip_messages
 from django import forms
 from django.contrib import messages
+from networkapiclient.exception import InvalidParameterError
 
 
 class SearchVipRequestForm(forms.Form):
@@ -148,13 +149,17 @@ class RequestVipFormOptions(forms.Form):
 
             trafficreturns = validates_dict(
                 client_ovip.buscar_trafficreturn_opcvip(environment_vip), 'trafficreturn_opt')
+
+
             if trafficreturns is not None:
-                self.fields['traffic_return'].choices = [
+                self.fields['trafficreturn'].choices = [
                     (st['trafficreturn_opt'], st['trafficreturn_opt']) for st in trafficreturns]
+
             else:
+                raise InvalidParameterError( "ALOU"+str(trafficreturns))
                 if 'initial' in kwargs:
                     trafficreturn = kwargs.get('initial').get(
-                        'traffic_return') if "traffic_return" in kwargs.get('initial') else ''
+                        'trafficreturn') if "trafficreturn" in kwargs.get('initial') else 'VAZIO'
                     messages.add_message(request, messages.ERROR, request_vip_messages.get(
                         "error_existing_trafficreturn") % trafficreturn)
 
