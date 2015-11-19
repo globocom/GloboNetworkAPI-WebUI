@@ -365,7 +365,7 @@
 					{% endif %}
 					
 					{% has_perm USER_ADMINISTRATION True None %}
-					{% if has_perm %}
+					{% if has_perm %}<!--
 					<li>
 						<a href="#" class="ldap">LDAP</a>
 						<ul class="sub_menu">
@@ -375,7 +375,7 @@
 							<li><a href="{% url ldap.sudoer.list %}">Sudoers</a></li>
 							
 						</ul>
-					</li>
+					</li>-->
 					{% endif %}
 					
 					{% has_perm ADMINISTRATION True None %}

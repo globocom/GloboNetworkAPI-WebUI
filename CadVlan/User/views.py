@@ -68,7 +68,8 @@ def ajax_ldap_pop_name_mail(request, cn):
         response.status_code = 200
         return response
 
-    except LDAPError:
+    except LDAPError, e:
+        logger.error("LDAP Error on ajax_ldap_pop_name_mail %s" % e)
         lists['ldap_name'] = ' '
         lists['ldap_email'] = ' '
         lists[

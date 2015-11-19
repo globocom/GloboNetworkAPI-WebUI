@@ -28,7 +28,7 @@ class LoginForm(forms.Form):
     redirect = forms.CharField(
         widget=forms.HiddenInput(), label='', required=False)
     is_ldap_user = forms.BooleanField(
-        label=u"Autenticar com usuário da rede", required=False)
+        widget=forms.HiddenInput(), label='', required=False)
 
 
 class PassForm(forms.Form):
@@ -39,9 +39,9 @@ class PassForm(forms.Form):
 
 
 class ChangePassForm(forms.Form):
-    new_pass = forms.CharField(label=u'Nova senha', min_length=6, max_length=20, required=True,
+    new_pass = forms.CharField(label=u'Nova senha (somente autenticacao local)', min_length=6, max_length=20, required=True,
                                error_messages=error_messages, widget=forms.PasswordInput(attrs={'style': "width: 200px"}))
-    confirm_new_password = forms.CharField(label=u'Confirme a nova senha', min_length=6, max_length=20,
+    confirm_new_password = forms.CharField(label=u'Confirme a nova senha (somente autenticacao local)', min_length=6, max_length=20,
                                            required=True, error_messages=error_messages, widget=forms.PasswordInput(attrs={'style': "width: 200px"}))
 
     def clean_confirm_new_password(self):
