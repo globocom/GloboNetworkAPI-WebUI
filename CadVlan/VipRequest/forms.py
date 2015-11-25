@@ -149,17 +149,13 @@ class RequestVipFormOptions(forms.Form):
 
             trafficreturns = validates_dict(
                 client_ovip.buscar_trafficreturn_opcvip(environment_vip), 'trafficreturn_opt')
-
-
             if trafficreturns is not None:
                 self.fields['trafficreturn'].choices = [
                     (st['trafficreturn_opt'], st['trafficreturn_opt']) for st in trafficreturns]
-
             else:
-                raise InvalidParameterError( "ALOU"+str(trafficreturns))
                 if 'initial' in kwargs:
                     trafficreturn = kwargs.get('initial').get(
-                        'trafficreturn') if "trafficreturn" in kwargs.get('initial') else 'VAZIO'
+                        'trafficreturn') if "trafficreturn" in kwargs.get('initial') else ''
                     messages.add_message(request, messages.ERROR, request_vip_messages.get(
                         "error_existing_trafficreturn") % trafficreturn)
 

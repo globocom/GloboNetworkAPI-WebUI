@@ -24,6 +24,7 @@ from CadVlan.Util.Enum import NETWORK_TYPES
 from random import choice
 import copy
 import re
+from networkapiclient.exception import InvalidParameterError
 
 
 class IP_VERSION:
