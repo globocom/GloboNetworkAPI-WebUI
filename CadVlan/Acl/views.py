@@ -16,7 +16,7 @@
 # limitations under the License.
 
 
-from CadVlan.Acl.acl import alterAclCvs, deleteAclCvs, getAclCvs, createAclCvs, scriptAclCvs, script_template, applyAcl,\
+from CadVlan.Acl.acl import alterAclGit, deleteAclGit, getAclGit, createAclGit, scriptAclGit, script_template, applyAcl,\
     PATH_ACL_TEMPLATES, get_templates, get_template_edit, alter_template,\
     create_template, check_template, delete_template
 from CadVlan.Acl.forms import AclForm, TemplateForm, TemplateAddForm
@@ -24,7 +24,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.Util.converters.util import split_to_array, replace_id_to_name
-from CadVlan.Util.cvs import CVSError, Cvs
+from CadVlan.Util.git import GITError, Git
 from CadVlan.Util.utility import validates_dict, clone, acl_key, IP_VERSION
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import acl_messages, error_messages
@@ -62,13 +62,13 @@ def create(request, id_vlan, network):
 
         key_acl = acl_key(network)
 
-        createAclCvs(vlan.get(key_acl), environment, network,
+        createAclGit(vlan.get(key_acl), environment, network,
                      AuthSession(request.session).get_user())
 
         messages.add_message(
             request, messages.SUCCESS, acl_messages.get("success_create"))
 
-    except (NetworkAPIClientError, CVSError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -102,13 +102,13 @@ def remove(request, id_vlan, network):
         else:
             client.create_vlan().invalidate_ipv6(id_vlan)
 
-        deleteAclCvs(vlan.get(key_acl), environment, network,
+        deleteAclGit(vlan.get(key_acl), environment, network,
                      AuthSession(request.session).get_user())
 
         messages.add_message(
             request, messages.SUCCESS, acl_messages.get("success_remove"))
 
-    except (NetworkAPIClientError, CVSError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -142,10 +142,10 @@ def script(request, id_vlan, network):
         else:
             template_name = environment['ipv6_template']
 
-        scriptAclCvs(vlan.get(key_acl), vlan, environment, network, AuthSession(
+        scriptAclGit(vlan.get(key_acl), vlan, environment, network, AuthSession(
             request.session).get_user(), template_name)
 
-    except (NetworkAPIClientError, CVSError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -199,7 +199,7 @@ def edit(request, id_vlan, network):
                 comments = form.cleaned_data['comments']
                 apply_acl = form.cleaned_data['apply_acl']
 
-                alterAclCvs(vlan.get(key_acl), acl, environment, comments, network, AuthSession(
+                alterAclGit(vlan.get(key_acl), acl, environment, comments, network, AuthSession(
                     request.session).get_user())
 
                 #Remove Draft
@@ -222,7 +222,7 @@ def edit(request, id_vlan, network):
 
         else:
 
-            content = getAclCvs(vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
+            content = getAclGit(vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
             lists['form'] = AclForm(initial={'acl': content, 'comments': ''})
 
             if network == NETWORK_TYPES.v4:
@@ -263,7 +263,7 @@ def edit(request, id_vlan, network):
         vlan['network'] = replace_id_to_name(list_ips, client.create_tipo_rede(
         ).listar().get('net_type'), "network_type", "id", "name")
 
-    except (NetworkAPIClientError, CVSError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -405,7 +405,7 @@ def apply_acl(request, id_vlan, network):
 
         lists["equipments"] = list_equipments
 
-    except (NetworkAPIClientError, CVSError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -468,7 +468,7 @@ def template_list(request):
             lists['templates'].append(
                 {'name': template['name'], 'network': template['network'], 'envs': envs})
 
-    except (NetworkAPIClientError, CVSError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -541,7 +541,7 @@ def template_add(request):
                         request, messages.SUCCESS, acl_messages.get("success_template_edit"))
                     return redirect('acl.template.list')
 
-    except (NetworkAPIClientError, CVSError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -603,7 +603,7 @@ def template_edit(request, template_name, network):
                     request, messages.SUCCESS, acl_messages.get("success_template_edit"))
 
                 return redirect('acl.template.list')
-    except (NetworkAPIClientError, CVSError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError), e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
