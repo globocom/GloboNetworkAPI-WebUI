@@ -849,7 +849,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         persistence = form_options.cleaned_data["persistence"]
         trafficreturn = form_options.cleaned_data["trafficreturn"]
         trafficreturnid = client_api.create_option_vip().buscar_idtrafficreturn_opcvip(trafficreturn)
-        trafficreturnid = trafficreturnid.get("id")
+        trafficreturnid = trafficreturnid.get("trafficreturn").get("id")
 
         # balancing = form_options.cleaned_data["balancing"]
 
