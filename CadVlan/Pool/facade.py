@@ -66,6 +66,12 @@ def find_servicedownaction_id(client, option_name):
         if obj['name'] == option_name:
             return obj['id']
 
+def find_servicedownaction_object(client, option_name):
+    optionspool = client.create_option_pool().get_all_option_pool(option_type='ServiceDownAction')
+    for obj in optionspool:
+        if obj['name'] == option_name:
+            return obj
+
 def populate_optionspool_choices(client, environment):
     optionspool_choices = [('', '-')]
     if environment:

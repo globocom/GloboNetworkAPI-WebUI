@@ -276,7 +276,7 @@ LOGGING = {
         'django.request': {
             'handlers': ['handlers-view'],
             'propagate': True,
-            'level': 'ERROR',
+            'level': 'INFO',
         },
         'CadVlan.Util': {
             'handlers': ['handlers-request'],
