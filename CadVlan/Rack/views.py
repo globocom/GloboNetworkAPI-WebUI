@@ -30,7 +30,7 @@ from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
 from django.shortcuts import render_to_response, redirect
 from CadVlan.messages import error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
-from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm
+from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm, AlocarForm
 
 
 logger = logging.getLogger(__name__)
@@ -100,12 +100,16 @@ def get_msg(request, var, nome, operation):
     if var=="True":
         if operation=='CONFIG':
             msg = rack_messages.get('sucess_create_config') % nome 
+        elif operation=='ALOCAR':
+            msg = rack_messages.get('sucess_alocar_config') % nome
         elif operation=='APLICAR':
             msg = rack_messages.get('sucess_aplicar_config') % nome
         messages.add_message(request, messages.SUCCESS, msg)
     else:
         if operation=='CONFIG':
             msg = rack_messages.get('can_not_create_all') % nome    
+        elif operation=='ALOCAR':
+            msg = rack_messages.get('can_not_alocar_config') % nome
         elif operation=='APLICAR':
             msg = rack_messages.get('can_not_aplicar_config') % nome
         messages.add_message(request, messages.ERROR, msg)
@@ -120,7 +124,8 @@ def rack_config_delete (request, client, form, operation):
                 id = 'ids'
             elif operation=='APLICAR':
                 id = 'ids_aplicar'
-
+            elif operation=='ALOCAR':
+                id = 'ids_alocar'
 
             # All ids selected
             ids = split_to_array(form.cleaned_data[id])
@@ -150,7 +155,11 @@ def rack_config_delete (request, client, form, operation):
                         var = var.get('sucesso')
                         get_msg(request, var, nome, operation)
                     elif operation=='APLICAR':
-                        var = client.create_rack().aplicar_configuracao(id_rack)
+                        var = client.create_apirack().rack_deploy(id_rack)
+                        var = var.get('sucesso')
+                        get_msg(request, var, nome, 'APLICAR')
+                    elif operation=='ALOCAR':
+                        var = client.create_rack().alocar_configuracao(id_rack)
                         var = var.get('sucesso')
                         get_msg(request, var, nome, operation)
                 except RackAllreadyConfigError, e:
@@ -190,9 +199,8 @@ def rack_config_delete (request, client, form, operation):
 
                 messages.add_message(request, messages.WARNING, msg)
 
-            elif (not operation=='CONFIG') and (not operation=='APLICAR') and (have_errors == False):
-                messages.add_message(
-                    request, messages.SUCCESS, rack_messages.get(msg_sucess))
+            elif (not operation=='CONFIG') and (not operation=='ALOCAR') and (not operation=='APLICAR') and (have_errors == False):
+                messages.add_message(request, messages.SUCCESS, rack_messages.get(msg_sucess))
 
             return redirect("ajax.view.rack")
 
@@ -249,7 +257,7 @@ def rack_form(request):
                 id_sw2 = buscar_id_equip(client,nome_sw2)
                 id_ilo = buscar_id_equip(client,nome_ilo)
  
-                rack = client.create_rack().insert_rack(rack_number, rack_name, mac_sw1, mac_sw2, mac_ilo, id_sw1, id_sw2, id_ilo)
+                rack = client.create_apirack().insert_rack(rack_number, rack_name, mac_sw1, mac_sw2, mac_ilo, id_sw1, id_sw2, id_ilo)
                 messages.add_message(request, messages.SUCCESS, rack_messages.get("success_insert"))
 
                 form = RackForm()
@@ -312,6 +320,7 @@ def ajax_rack_view(request, client_api):
         racks['config_form'] = ConfigForm()
         racks['aplicar_form'] = AplicarForm()
         racks['criar_vlan_amb_form'] = CriarVlanAmbForm()
+        racks['alocar_form'] = AlocarForm()
 
 
     except NetworkAPIClientError, e:
@@ -398,7 +407,7 @@ def rack_config (request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        rack_config_delete (request, client, form, 'CONFIG')
+        rack_config_delete(request, client, form, 'CONFIG')
 
     return redirect("ajax.view.rack")
 
@@ -415,7 +424,7 @@ def rack_delete (request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        rack_config_delete (request, client, form, 'DELETE')
+        rack_config_delete(request, client, form, 'DELETE')
 
     return redirect("ajax.view.rack")
 
@@ -423,7 +432,23 @@ def rack_delete (request):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
-def rack_aplicar_config(request):
+def rack_alocar(request):
+
+    if request.method == 'POST':
+
+        form = AlocarForm(request.POST)
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        rack_config_delete(request, client, form, 'ALOCAR')
+
+    return redirect("ajax.view.rack")
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def rack_deploy(request):
 
     if request.method == 'POST':
 
@@ -432,7 +457,6 @@ def rack_aplicar_config(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        rack_config_delete (request, client, form, 'APLICAR')
+        rack_config_delete(request, client, form, 'APLICAR')
 
     return redirect("ajax.view.rack")
-

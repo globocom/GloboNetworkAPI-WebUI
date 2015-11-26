@@ -170,6 +170,7 @@ INSTALLED_APPS = (
     'CadVlan.Rack',
     'CadVlan.Script',
     'CadVlan.ScriptType',
+    'CadVlan.System',
     'CadVlan.User',
     'CadVlan.UserGroup',
     'CadVlan.Util',
@@ -222,15 +223,16 @@ PATH_ACL = os.path.join(PROJECT_ROOT_PATH, 'ACLS/')
 PATH_PERMLISTS = os.path.join(PROJECT_ROOT_PATH, 'permissions')
 
 CACERTDIR = '/etc/pki/globocom/'
-LDAP_DC = "dc=globoi,dc=com"
-LDAP_SSL = True
-LDAP_INITIALIZE = "192.168.24.14:389"
-LDAP_INITIALIZE_SSL = "globoi.com:636"
-LDAP_CREDENTIALS_USER = "ldapweb"
-LDAP_CREDENTIALS_PASSWORD = "senha"
-LDAP_MANAGER_PASSWORD = "senha"
-LDAP_PASSWORD_DEFAULT_HASH = "{MD5}a5FE2fqsjiUZ6q41LBDswQ=="
-LDAP_PASSWORD_DEFAULT = "globocom"
+LDAP_DC = "dc=dcgit,dc=com"
+LDAP_SSL = False
+LDAP_INITIALIZE = "ldap.address.com:389"
+LDAP_INITIALIZE_SSL = "ldap.address.com:636"
+LDAP_CREDENTIALS_USER = "ldap_user"
+LDAP_CREDENTIALS_PASSWORD = "ldap_password"
+LDAP_MANAGER_USER = "ldap_user"
+LDAP_MANAGER_PASSWORD = "ldap_password"
+LDAP_PASSWORD_DEFAULT_HASH = "{MD5}a5BE2fasdfwUZ8q82LTDvcQ=="
+LDAP_PASSWORD_DEFAULT = "ldap_password_default"
 
 ACCESS_EXTERNAL_TTL = 1800  # Values in seconds
 
@@ -271,7 +273,7 @@ LOGGING = {
         'django': {
             'handlers': ['handlers-view'],
             'propagate': True,
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'django.request': {
             'handlers': ['handlers-view'],

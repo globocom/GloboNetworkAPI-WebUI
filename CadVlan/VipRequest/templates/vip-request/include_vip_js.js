@@ -132,6 +132,7 @@
 		$("#id_environment_content").html('');
 		$("#id_caches").html('');
 		$("#id_persistence").html('');
+		$("#id_trafficreturn").html('');
 		$("#id_timeout").html('');
 		$("#id_balancing").html('');
 		$("#id_servicedownaction").html('');
@@ -170,6 +171,7 @@
 		
 		$("#id_caches").html('');
 		$("#id_persistence").html('');
+		$("#id_trafficreturn").html('');
 		$("#id_timeout").html('');
 		$("#id_balancing").html('');
 		$("#id_servicedownaction").html('');
@@ -203,6 +205,7 @@
 
 					$("#id_caches").html(data.caches);
 					$("#id_persistence").html(data.persistence);
+					$("#id_trafficreturn").html(data.trafficreturn);
 					$("#id_timeout").html(data.timeout);
 					$("#id_balancing").html(data.balancing);
 					$("#id_servicedownaction").html(data.servicedownaction);

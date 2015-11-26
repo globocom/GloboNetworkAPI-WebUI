@@ -73,7 +73,7 @@
         if (confirm('Deseja realmente Habilitar os Real servers selecionados ?')){ 
             var data = getSelectionData(oTable);
             $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'status_change' %}" )
-            $("#action").val('10');
+            $("#action").val('x1x');
             $("#id_ids").val(data).parent().submit();
         }
     });
@@ -82,7 +82,7 @@
         if (confirm('Deseja realmente Desabilitar os Real servers selecionados ?')){ 
             var data = getSelectionData(oTable);
             $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'status_change' %}" )
-            $("#action").val('-10');
+            $("#action").val('x0x');
             $("#id_ids").val(data).parent().submit();
         }
     });
@@ -91,7 +91,7 @@
         if (confirm('Deseja realmente colocar como "user-up" o(s) Pool(s) Member(s) selecionado(s)?')){ 
             var data = getSelectionData(oTable);
             $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'status_change' %}" )
-            $("#action").val('1');
+            $("#action").val('xx1');
             $("#id_ids").val(data).parent().submit();
         }
     });
@@ -100,7 +100,7 @@
         if (confirm('Deseja realmente colocar como "user-down" o(s) Pool(s) Member(s) selecionado(s)?')){ 
             var data = getSelectionData(oTable);
             $("#status_form").attr('action', "{% url vip-request.tab.real.server.status vip.id 'status_change' %}" )
-            $("#action").val('-1');
+            $("#action").val('xx0');
             $("#id_ids").val(data).parent().submit();
         }
     });

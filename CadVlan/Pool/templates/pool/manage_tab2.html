@@ -50,7 +50,7 @@ $(document).ready(function() {
             if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
-                $("#action").val('10');
+                $("#action").val('x1x');
 
                 $('#delete_form').attr('action','{% url pool.status_change %}').submit();
             }
@@ -63,7 +63,7 @@ $(document).ready(function() {
             if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
-                $("#action").val('-10');
+                $("#action").val('x0x');
 
                 $('#delete_form').attr('action','{% url pool.status_change %}').submit();
             }
@@ -76,7 +76,7 @@ $(document).ready(function() {
             if (confirm('Deseja realmente colocar como "user-up" o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
-                $("#action").val('1');
+                $("#action").val('xx1');
 
                 $('#delete_form').attr('action','{% url pool.status_change %}').submit();
             }
@@ -89,7 +89,7 @@ $(document).ready(function() {
             if (confirm('Deseja realmente colocar como "user-down" o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
-                $("#action").val('-1');
+                $("#action").val('xx0');
 
                 $('#delete_form').attr('action','{% url pool.status_change %}').submit();
             }

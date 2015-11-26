@@ -62,24 +62,8 @@ def login(request):
                 client = ClientFactory(
                     NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD)
 
-                if form.cleaned_data['is_ldap_user']:
-                    user = Ldap("").get_user(form.cleaned_data['username'])
-                    pwd_ldap = user['userPassword']
-                    activate = user.get('nsaccountlock')
-                    pwd = form.cleaned_data['password']
-
-                    if re.match("\{(MD|md)5\}.*", pwd_ldap, 0):
-                        pwd = base64.b64encode(hashlib.md5(pwd).digest())
-                        pwd_ldap = pwd_ldap[pwd_ldap.index("}") + 1:]
-
-                    if pwd == pwd_ldap and (activate is None or activate.upper() == 'FALSE'):
-                        user = client.create_usuario().authenticate(form.cleaned_data[
-                            'username'], form.cleaned_data['password'], form.cleaned_data['is_ldap_user'])
-                    else:
-                        user = None
-                else:
-                    user = client.create_usuario().authenticate(form.cleaned_data[
-                        'username'], form.cleaned_data['password'], form.cleaned_data['is_ldap_user'])
+                user = client.create_usuario().authenticate(form.cleaned_data[
+                    'username'], form.cleaned_data['password'], form.cleaned_data['is_ldap_user'])
 
                 if user is None:
                     messages.add_message(

@@ -65,10 +65,12 @@ rack_messages = {
     'error_equal_number':     u'Numero já cadastrado.',
     'success_edit':         u'Rack alterado com sucesso.',
     'sucess_create_config':	u'Os arquivos de configuracao do rack %s foram criados com sucesso.',
-    'sucess_aplicar_config':	 u'A configuracao do rack %s foi aplicada.',    
     'can_not_create_all':	u'Os arquivos de configuracao do rack %s nao foram gerados.',
     'can_not_create_config':       u'Os arquivos de configuracao do %s nao pode(m) ser gerado(s)',
-    'can_not_aplicar_config':	u'A configuracao do rack %s nao pode ser aplicada.',
+    'sucess_aplicar_config':	 u'A configuracao foi aplicada nos equipamentos do rack %s.',
+    'can_not_aplicar_config':	u'A configuracao não pode ser aplicada nos equipamentos do rack.',
+    'sucess_alocar_config':	 u'Os ambientes, vlans e redes do rack %s foram alocadas com sucesso.',
+    'can_not_alocar_config':	u'Os ambientes, vlans e redes do rack %s não puderam ser alocadas.',
 }
 
 equip_access_messages = {
@@ -77,7 +79,6 @@ equip_access_messages = {
     'already_association':  u'Equipamento e Protocolo já associados',
     'invalid_equip_acess':  u'Equipamento Acesso inválido',
     'success_edit':         u'Acesso alterado com sucesso.',
-    'success_remove':       u'Todos os acesso de equipamentos foram excluídos com sucesso.',
     'no_equip':             u'Selecione um equipamento.',
 }
 
@@ -387,4 +388,10 @@ pool_messages = {
     'error_same_port':          u'Ips com portas iguais',
     'error_update':             u'Erro ao alterar pool',
     'select_one':               u'Deve adicionar ao menos um pool '
+}
+
+system_variable_messages = {
+    'success_insert': u'Variável incluída com sucesso!',
+    'success_update': u'Variável alterada com sucesso',
+    'success_delete':  u'Variável removida com sucesso'
 }
