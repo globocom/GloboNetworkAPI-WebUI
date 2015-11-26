@@ -58,6 +58,7 @@ def mkdir_divison_dc(divison_dc, user, acl_path=None):
 
     :raise GITCommandError: Failed to execute
     '''
+    folder = ""
     try:
 
         divison_dc = str(divison_dc).upper()
@@ -89,19 +90,15 @@ def mkdir_divison_dc(divison_dc, user, acl_path=None):
                 if folder:
                     if not os.path.exists(folder):
                         os.mkdir(folder)
-                        Git.add(folder)
-                        Git.commit(folder, "Criação do diretório de divisão dc %s/%s pelo usuário: %s" % (
-                            path, folder, user.get_username()))
                         logger.info(
                             "%s criou no Git o diretório: %s/%s" % (user.get_username(), path, folder))
-                        Git.synchronization()
 
                     path = "%s/%s" % (path, folder)
                     os.chdir(path)
 
     except Exception, e:
         logger.error("Erro quando o usuário %s tentou criar o diretório: %s no Git" % (
-            user.get_username(), dir))
+            user.get_username(), path+folder))
         logger.error(e)
         raise GITCommandError(e)
 
@@ -253,7 +250,6 @@ def checkAclGit(acl_file_name, environment, network, user):
     :return: True case created
     '''
     try:
-
         acl = check_name_file(acl_file_name)
 
         path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"],
@@ -266,12 +262,7 @@ def checkAclGit(acl_file_name, environment, network, user):
 
         Git.synchronization()
 
-        File.read(acl)
-
-        return True
-
-    except FileError, e:
-        return False
+        return os.path.exists(acl)
 
     except (GITCommandError, Exception), e:
         logger.error(
@@ -341,6 +332,7 @@ def alterAclGit(acl_name, acl_content, environment, comment, network, user):
         File.write(acl, acl_content)
 
         Git.commit(acl, "%s comentou: %s" % (user.get_username(), comment))
+        Git.push()
 
         logger.info("%s alterou no GIT o arquivo: %s Comentário do Usuário: %s" % (
             user.get_username(), (path + acl), comment))
@@ -382,6 +374,7 @@ def createAclGit(acl_name, environment, network, user):
 
         Git.commit(acl, "Criação do Arquivo %s pelo usuário: %s" %
                    (acl, user.get_username()))
+        Git.push()
 
         logger.info("%s criou no GIT o arquivo: %s" %
                     (user.get_username(), (path + acl)))
@@ -394,7 +387,7 @@ def createAclGit(acl_name, environment, network, user):
 
 
 def deleteAclGit(acl_name, environment, network, user):
-    '''Delete acl file and creates a backup file
+    '''Delete acl file
 
     :param acl_name: acl name
     :param environment: Environment
@@ -404,46 +397,27 @@ def deleteAclGit(acl_name, environment, network, user):
     :raise GITCommandError:  Failed to execute command
     '''
     try:
-
         acl = check_name_file(acl_name)
 
         path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"],
                         environment["acl_path"])
 
-        chdir(PATH_TYPES.ACL, network, path)
+        os.chdir(PATH_ACL)
 
         Git.synchronization()
 
-        content_bkp = File.read(acl)
+        path_to_acl = "%s/%s/%s" % (network, path, acl)
+        Git.remove(path_to_acl)
 
-        File.remove(acl)
-
-        Git.remove(acl)
-
-        Git.commit(acl, "Exclusão do Arquivo %s pelo usuário:%s" %
+        Git.commit(path_to_acl, "Exclusão do Arquivo %s pelo usuário:%s" %
                    (acl, user.get_username()))
 
-        Git.synchronization()
+        Git.push()
 
         logger.info("%s excluiu no GIT o arquivo: %s" %
                     (user.get_username(), (path + acl)))
 
-        # Backup ACL
-        acl_bkp = check_name_file_bkp(acl_name)
-
-        File.create(acl_bkp)
-
-        File.write(acl_bkp, content_bkp)
-
-        Git.add(acl_bkp)
-
-        Git.commit(acl_bkp, "Criação do Arquivo de Backup %s pelo usuário: %s" % (
-            acl, user.get_username()))
-
-        logger.info("%s criou no GIT o arquivo de Backup: %s" %
-                    (user.get_username(), (path + acl)))
-
-    except (GitCommandError, FileError, Exception), e:
+    except (GITCommandError, FileError, Exception), e:
         logger.error("Erro quando o usuário %s tentou excluiu o arquivo: %s no Git" % (
             user.get_username(), (path + acl)))
         logger.error(e)
@@ -551,6 +525,7 @@ def scriptAclGit(acl_name, vlan, environment, network, user, template_name):
 
             Git.commit(acl, "%s gerou Script para a acl %s" %
                        (user.get_username(), acl))
+            Git.push()
 
             logger.info("%s alterou no GIT o arquivo: %s" %
                         (user.get_username(), acl))
@@ -585,6 +560,7 @@ def scriptAclGit(acl_name, vlan, environment, network, user, template_name):
 
                 Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
                 logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
@@ -618,6 +594,7 @@ def scriptAclGit(acl_name, vlan, environment, network, user, template_name):
 
                 Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
                 logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
@@ -655,6 +632,7 @@ def scriptAclGit(acl_name, vlan, environment, network, user, template_name):
 
                 Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
                 logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
@@ -688,6 +666,7 @@ def scriptAclGit(acl_name, vlan, environment, network, user, template_name):
 
                 Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
                 logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
@@ -721,6 +700,7 @@ def scriptAclGit(acl_name, vlan, environment, network, user, template_name):
 
                 Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
                 logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
@@ -962,6 +942,7 @@ def alter_template(template_name, network, content, user):
 
         Git.commit(template_name, "%s alterou o arquivo %s" %
                    (user.get_username(), template_name))
+        Git.push()
 
         logger.info("%s alterou no GIT o arquivo: %s" %
                     (user.get_username(), (path + template_name)))
@@ -1001,6 +982,7 @@ def create_template(template_name, network, content, user):
 
         Git.commit(template_name, "Criação do Arquivo %s pelo usuário: %s" % (
             template_name, user.get_username()))
+        Git.push()
 
         logger.info("%s criou no GIT o arquivo: %s" %
                     (user.get_username(), (path + template_name)))
@@ -1041,7 +1023,7 @@ def check_template(template_name, network, user):
             os.mkdir('templates')
             Git.add('templates')
             Git.commit('templates', "Criação ")
-            Git.synchronization()
+            Git.push()
 
         chdir(PATH_TYPES.TEMPLATE, ip_version, path)
 
@@ -1089,7 +1071,7 @@ def delete_template(template_name, network, user):
         Git.commit(template_name, "Exclusão do Arquivo %s pelo usuário:%s" % (
             template_name, user.get_username()))
 
-        Git.synchronization()
+        Git.push()
 
         logger.info("%s excluiu no GIT o arquivo: %s" %
                     (user.get_username(), (path + template_name)))

@@ -36,7 +36,6 @@ class GITCommandError(GITError):
 
 logger = logging.getLogger(__name__)
 
-
 class Git():
     @classmethod
     def remove(cls, archive):
@@ -91,11 +90,6 @@ class Git():
         '''
         try:
             (status, output) = commands.getstatusoutput("git commit -m '%s' %s" % (comment, archive))
-            #cls.push(archive)
-
-        except GITCommandError, e:
-            #Exception trhrown by cls.push method
-            raise e
 
         except Exception, e:
             (status, output) = (1, e)
@@ -108,7 +102,7 @@ class Git():
                 raise GITCommandError(msg)
 
     @classmethod
-    def push(cls, archive):
+    def push(cls):
         '''Execute command push in git
 
         :param archive: file to be committed

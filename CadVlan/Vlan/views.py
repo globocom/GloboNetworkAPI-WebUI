@@ -368,7 +368,6 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def vlan_form(request):
-
     lists = dict()
     try:
 
@@ -417,7 +416,6 @@ def vlan_form(request):
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
-
     lists = dict()
     lists['id_vlan'] = id_vlan
     lists['acl_created_v4'] = "False"
@@ -739,7 +737,6 @@ def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_netty
 
                     except GITError, e:
                         messages.add_message(
-                            request, messages.WARNING, vlan_messages.get("vlan_git_error"))
                             request, messages.WARNING, vlan_messages.get("vlan_git_error"))
 
                 except VipIpError, e:
