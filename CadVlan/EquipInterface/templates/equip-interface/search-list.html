@@ -94,7 +94,7 @@ $(document).ready(function() {
 	{% has_perm EQUIPMENT_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del_chan").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('O Channel será excluido mas a configuração das interfaces permanecerá igual. Deseja excluir o channel?')){
+		if (confirm('Deseja realmente excluir o channel?')){
 			var data = getSelectionData(oTable);
 			$("#id_ids_chan").val(data).parent().submit();
 		}
