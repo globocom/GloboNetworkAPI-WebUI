@@ -175,7 +175,6 @@ class RequestVipFormOptions(forms.Form):
 
     timeout = forms.ChoiceField(label="Timeout", required=True, error_messages=error_messages, widget=forms.Select(
         attrs={"style": "width: 300px"}))
-
     caches = forms.ChoiceField(label="Grupos de caches", required=True,
                                error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
     persistence = forms.ChoiceField(
