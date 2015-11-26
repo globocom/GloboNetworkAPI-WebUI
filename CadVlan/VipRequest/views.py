@@ -2242,7 +2242,6 @@ def add_form_shared(request, client_api, form_acess="", external=False):
                     return redirect('vip-request.list')
 
         else:
-
             lists['form_inputs'] = forms.RequestVipFormInputs()
             lists['form_environment'] = forms.RequestVipFormEnvironment(finality_list)
             lists['form_real'] = forms.RequestVipFormReal()
@@ -2255,6 +2254,7 @@ def add_form_shared(request, client_api, form_acess="", external=False):
         messages.add_message(request, messages.ERROR, e)
 
     template = templates.VIPREQUEST_FORM_EXTERNAL if external else templates.VIPREQUEST_FORM
+
 
     return render_to_response(
         template,
@@ -2290,7 +2290,6 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             .listar_healtchcheck_expect_distinct().get("healthcheck_expect")
 
         if request.method == "POST":
-
             is_valid, id_vip = valid_form_and_submit(
                 request,
                 lists,
