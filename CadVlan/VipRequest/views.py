@@ -847,6 +847,10 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
         timeout = form_options.cleaned_data["timeout"]
         caches = form_options.cleaned_data["caches"]
         persistence = form_options.cleaned_data["persistence"]
+        trafficreturn = form_options.cleaned_data["trafficreturn"]
+        trafficreturnid = client_api.create_option_vip().buscar_idtrafficreturn_opcvip(trafficreturn)
+        trafficreturnid = trafficreturnid.get("trafficreturn").get("id")
+
         # balancing = form_options.cleaned_data["balancing"]
 
         rule_id = form_options.cleaned_data["rules"]
@@ -918,7 +922,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                         caches, persistence, timeout, name, business,
                         service, filter_l7, vip_ports_to_pools=vip_ports_to_pools,
                         rule_id=rule_id,
-                        pk=vip_id
+                        pk=vip_id, trafficreturn=trafficreturnid
                     )
 
                 else:
@@ -926,7 +930,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                         ipv4, ipv6, finality, client, environment,
                         caches, persistence, timeout, name, business,
                         service, filter_l7, vip_ports_to_pools=vip_ports_to_pools,
-                        rule_id=rule_id
+                        rule_id=rule_id, trafficreturn=trafficreturnid
                     )
 
                 id_vip_created = vip.get("id")
@@ -2327,6 +2331,8 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
             timeout = vip.get("timeout")
             caches = vip.get("cache")
             persistence = vip.get("persistencia")
+            trafficreturn = vip.get("trafficreturn")
+            trafficreturn_id = client_api.create_option_vip().buscar_idtrafficreturn_opcvip(trafficreturn).get("id")
             rule = vip.get('rule_id')
 
             finality = vip.get("finalidade", "")
@@ -2352,6 +2358,8 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     messages.ERROR,
                     request_vip_messages.get("error_existing_environment_vip") % (finality, client, environment)
                 )
+
+
 
             pools = client_api.create_pool().list_by_environmet_vip(
                 environment_vip["environment_vip"]["id"]
@@ -2406,6 +2414,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     "timeout": timeout,
                     "caches": caches,
                     "persistence": persistence,
+                    "trafficreturn": trafficreturn,
                     "rules": rule
                 }
             )
@@ -2560,6 +2569,8 @@ def popular_options_shared(request, client_api):
             client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
         lists['persistence'] = validates_dict(
             client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
+        lists['trafficreturn'] = validates_dict(
+            client_ovip.buscar_trafficreturn_opcvip(environment_vip), 'trafficreturn_opt')
         lists['rules'] = validates_dict(
             client_ovip.buscar_rules(environment_vip, id_vip), 'name_rule_opt')
         # lists['rules'] = [{u'content': u''}, {u'content': u'haieie'}]
