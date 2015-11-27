@@ -51,9 +51,11 @@ def add_variable(request):
 
         if request.method == 'GET':
             form = VariableForm()
+            lists['form'] = form
 
         if request.method == 'POST':
             form = VariableForm(request.POST)
+            lists['form'] = form
 
             if form.is_valid():
                 name = request.POST.get('name')
@@ -65,11 +67,10 @@ def add_variable(request):
 
                 return redirect('variables.list')
 
-        lists['form'] = form
-
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        return render_to_response(VARIABLES_FORM, lists, context_instance=RequestContext(request))
 
     return render_to_response(VARIABLES_FORM, lists, context_instance=RequestContext(request))
 
