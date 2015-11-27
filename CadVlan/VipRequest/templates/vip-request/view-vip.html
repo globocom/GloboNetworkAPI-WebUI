@@ -130,6 +130,12 @@
 					<td><label for="trafficreturn">Traffic Return</label></td>
 					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.trafficreturn}}</label></td>
 				</tr>
+                {% if vip.dsrl3  %}
+                    <tr>
+                        <td><label for="dscp">DSCP Value</label></td>
+                        <td><label style="width: 350px;color: blue;text-align: center;" >{{vip.dsrl3}}</label></td>
+                    </tr>
+                {% endif %}
 				<tr>
 					<td><label for="metodo_bal">Método Bal</label></td>
 					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.metodo_bal}}</label></td>
