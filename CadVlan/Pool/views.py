@@ -1191,6 +1191,9 @@ def manage_tab3(request, id_server_pool):
                 pool["pools"][0]["server_pool"]["lb_method"] = sv_balancing
                 pool["pools"][0]["server_pool"]["servicedownaction"] = sv_servicedownaction_obj
 
+                for i, m in enumerate(pool["pools"][0]["server_pool_members"]):
+                    pool["pools"][0]["server_pool_members"][i]['limit'] = sv_max_con
+
                 client.create_pool().save_pool(pool["pools"])
 
                 messages.add_message(
