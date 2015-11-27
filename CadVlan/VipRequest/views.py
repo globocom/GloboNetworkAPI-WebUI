@@ -2415,7 +2415,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
                     "caches": caches,
                     "persistence": persistence,
                     "trafficreturn": trafficreturn,
-                    "rules": rule
+                    "rules": rule,
                 }
             )
 
