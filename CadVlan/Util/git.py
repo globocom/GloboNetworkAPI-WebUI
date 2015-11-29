@@ -97,9 +97,12 @@ class Git():
         finally:
 
             if (status):
-                msg = "GIT error: commit the file %s: %s" % (archive, output)
-                logger.error(msg)
-                raise GITCommandError(msg)
+                if (status == 256):
+                    logger.warning("No changes to commit on git")
+                else:
+                    msg = "GIT error: commit the file %s: %s" % (archive, output)
+                    logger.error(msg)
+                    raise GITCommandError(msg)
 
     @classmethod
     def push(cls):
