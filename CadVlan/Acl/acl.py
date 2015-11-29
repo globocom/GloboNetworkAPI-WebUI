@@ -58,7 +58,6 @@ def mkdir_divison_dc(divison_dc, user, acl_path=None):
 
     :raise GITCommandError: Failed to execute
     '''
-    folder = ""
     try:
 
         divison_dc = str(divison_dc).upper()
