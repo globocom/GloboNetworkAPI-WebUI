@@ -40,8 +40,8 @@ from CadVlan.Util.shortcuts import render_to_response_ajax, render_json
 from CadVlan.messages import vlan_messages, error_messages, network_ip_messages, \
     acl_messages
 from django.core.urlresolvers import reverse
-from CadVlan.Acl.acl import checkAclCvs, deleteAclCvs
-from CadVlan.Util.cvs import CVSCommandError, CVSError
+from CadVlan.Acl.acl import checkAclGit, deleteAclGit
+from CadVlan.Util.git import GITCommandError, GITError
 from CadVlan.Util.Enum import NETWORK_TYPES
 from __builtin__ import Exception
 import json
@@ -368,7 +368,6 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def vlan_form(request):
-
     lists = dict()
     try:
 
@@ -417,7 +416,6 @@ def vlan_form(request):
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
-
     lists = dict()
     lists['id_vlan'] = id_vlan
     lists['acl_created_v4'] = "False"
@@ -500,7 +498,7 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
 
         if vlan.get('acl_file_name') is not None:
 
-            is_acl_created = checkAclCvs(vlan.get(
+            is_acl_created = checkAclGit(vlan.get(
                 'acl_file_name'), environment, NETWORK_TYPES.v4, AuthSession(request.session).get_user())
 
             lists[
@@ -508,13 +506,13 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
 
         if vlan.get('acl_file_name_v6') is not None:
 
-            is_acl_created = checkAclCvs(vlan.get(
+            is_acl_created = checkAclGit(vlan.get(
                 'acl_file_name_v6'), environment, NETWORK_TYPES.v6, AuthSession(request.session).get_user())
 
             lists[
                 'acl_created_v6'] = "False" if is_acl_created == False else "True"
 
-    except CVSCommandError, e:
+    except GITCommandError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -728,18 +726,18 @@ def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_netty
 
                     try:
                         if vlan.get(key_acl_v4) is not None:
-                            if checkAclCvs(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user):
-                                deleteAclCvs(
+                            if checkAclGit(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user):
+                                deleteAclGit(
                                     vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
 
                         if vlan.get(key_acl_v6) is not None:
-                            if checkAclCvs(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user):
-                                deleteAclCvs(
+                            if checkAclGit(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user):
+                                deleteAclGit(
                                     vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
 
-                    except CVSError, e:
+                    except GITError, e:
                         messages.add_message(
-                            request, messages.WARNING, vlan_messages.get("vlan_cvs_error"))
+                            request, messages.WARNING, vlan_messages.get("vlan_git_error"))
 
                 except VipIpError, e:
                     logger.error(e)

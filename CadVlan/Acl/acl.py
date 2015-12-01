@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from CadVlan.Util.cvs import Cvs, CVSCommandError
+from CadVlan.Util.git import Git, GITCommandError
 from CadVlan.Util.file import File, FileError
 from CadVlan.Util.Enum import Enum
 from CadVlan.settings import PATH_ACL
@@ -51,12 +51,12 @@ hexa = lambda x: hex(x)[2:]
 
 
 def mkdir_divison_dc(divison_dc, user, acl_path=None):
-    '''Creates the directory division dc in cvs
+    '''Creates the directory division dc in git
 
     :param divison_dc: division dc to be created
     :param user: user
 
-    :raise CVSCommandError: Failed to execute
+    :raise GITCommandError: Failed to execute
     '''
     try:
 
@@ -72,7 +72,7 @@ def mkdir_divison_dc(divison_dc, user, acl_path=None):
         if acl_path:
             directory = acl_path
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         # Set path - Ipv4 - Ipv6
         list_path = []
@@ -89,21 +89,17 @@ def mkdir_divison_dc(divison_dc, user, acl_path=None):
                 if folder:
                     if not os.path.exists(folder):
                         os.mkdir(folder)
-                        Cvs.add(folder)
-                        Cvs.commit(folder, "Criação do diretório de divisão dc %s/%s pelo usuário: %s" % (
-                            path, folder, user.get_username()))
                         logger.info(
-                            "%s criou no CVS o diretório: %s/%s" % (user.get_username(), path, folder))
-                        Cvs.synchronization()
+                            "%s criou no Git o diretório: %s/%s" % (user.get_username(), path, folder))
 
                     path = "%s/%s" % (path, folder)
                     os.chdir(path)
 
     except Exception, e:
-        logger.error("Erro quando o usuário %s tentou criar o diretório: %s no Cvs" % (
-            user.get_username(), dir))
+        logger.error("Erro quando o usuário %s tentou criar o diretório: %s no Git" % (
+            user.get_username(), path+folder))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
 def script_template(environment_logical, divison_dc, group_l3, template_name):
@@ -145,7 +141,7 @@ def chdir(type_path, network, path=None):
     :param network: v4 or v6
     :param path: path
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
     try:
 
@@ -240,7 +236,7 @@ def replace_to_correct(value):
     return value.replace('_', '-')
 
 
-def checkAclCvs(acl_file_name, environment, network, user):
+def checkAclGit(acl_file_name, environment, network, user):
     '''Validates if the file is created acl.
 
     :param acl_file_name: acl name
@@ -248,12 +244,11 @@ def checkAclCvs(acl_file_name, environment, network, user):
     :param network: v4 or v6
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
 
     :return: True case created
     '''
     try:
-
         acl = check_name_file(acl_file_name)
 
         path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"],
@@ -264,23 +259,18 @@ def checkAclCvs(acl_file_name, environment, network, user):
 
         chdir(PATH_TYPES.ACL, network, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
-        File.read(acl)
+        return os.path.exists(acl)
 
-        return True
-
-    except FileError, e:
-        return False
-
-    except (CVSCommandError, Exception), e:
+    except (GITCommandError, Exception), e:
         logger.error(
-            "Erro quando o usuário %s tentou sincronizar no Cvs" % (user.get_username()))
+            "Erro quando o usuário %s tentou sincronizar no Git" % (user.get_username()))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
-def getAclCvs(acl_file_name, environment, network, user):
+def getAclGit(acl_file_name, environment, network, user):
     '''Retrieves the contents of the file acl.
 
     :param acl_file_name: acl name
@@ -288,7 +278,7 @@ def getAclCvs(acl_file_name, environment, network, user):
     :param network: v4 or v6
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
     try:
 
@@ -302,20 +292,20 @@ def getAclCvs(acl_file_name, environment, network, user):
 
         chdir(PATH_TYPES.ACL, network, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         content = File.read(acl)
 
         return content
 
-    except (CVSCommandError, FileError, Exception), e:
+    except (GITCommandError, FileError, Exception), e:
         logger.error(
-            "Erro quando o usuário %s tentou sincronizar no Cvs" % (user.get_username()))
+            "Erro quando o usuário %s tentou sincronizar no Git" % (user.get_username()))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
-def alterAclCvs(acl_name, acl_content, environment, comment, network, user):
+def alterAclGit(acl_name, acl_content, environment, comment, network, user):
     '''Change the contents of the file acl.
 
     :param acl_name: acl name
@@ -325,7 +315,7 @@ def alterAclCvs(acl_name, acl_content, environment, comment, network, user):
     :param network: v4 or v6
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
     try:
 
@@ -336,23 +326,24 @@ def alterAclCvs(acl_name, acl_content, environment, comment, network, user):
 
         chdir(PATH_TYPES.ACL, network, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         File.write(acl, acl_content)
 
-        Cvs.commit(acl, "%s comentou: %s" % (user.get_username(), comment))
+        Git.commit(acl, "%s comentou: %s" % (user.get_username(), comment))
+        Git.push()
 
-        logger.info("%s alterou no CVS o arquivo: %s Comentário do Usuário: %s" % (
+        logger.info("%s alterou no GIT o arquivo: %s Comentário do Usuário: %s" % (
             user.get_username(), (path + acl), comment))
 
-    except (CVSCommandError, FileError, Exception), e:
-        logger.error("Erro quando o usuário %s tentou atualizar o arquivo: %s no Cvs" % (
+    except (GITCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou atualizar o arquivo: %s no Git" % (
             user.get_username(), (path + acl)))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
-def createAclCvs(acl_name, environment, network, user):
+def createAclGit(acl_name, environment, network, user):
     '''Create the file acl.
 
     :param acl_name: acl name
@@ -360,7 +351,7 @@ def createAclCvs(acl_name, environment, network, user):
     :param network: v4 or v6
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
     try:
 
@@ -374,80 +365,62 @@ def createAclCvs(acl_name, environment, network, user):
 
         chdir(PATH_TYPES.ACL, network, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         File.create(acl)
 
-        Cvs.add(acl)
+        Git.add(acl)
 
-        Cvs.commit(acl, "Criação do Arquivo %s pelo usuário: %s" %
+        Git.commit(acl, "Criação do Arquivo %s pelo usuário: %s" %
                    (acl, user.get_username()))
+        Git.push()
 
-        logger.info("%s criou no CVS o arquivo: %s" %
+        logger.info("%s criou no GIT o arquivo: %s" %
                     (user.get_username(), (path + acl)))
 
-    except (CVSCommandError, FileError, Exception), e:
-        logger.error("Erro quando o usuário %s tentou criar o arquivo: %s no Cvs" % (
+    except (GITCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou criar o arquivo: %s no Git" % (
             user.get_username(), (path + acl)))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
-def deleteAclCvs(acl_name, environment, network, user):
-    '''Delete acl file and creates a backup file
+def deleteAclGit(acl_name, environment, network, user):
+    '''Delete acl file
 
     :param acl_name: acl name
     :param environment: Environment
     :param network: v4 or v6
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
     try:
-
         acl = check_name_file(acl_name)
 
         path = path_acl(environment["nome_ambiente_logico"], environment["nome_divisao"],
                         environment["acl_path"])
 
-        chdir(PATH_TYPES.ACL, network, path)
+        os.chdir(PATH_ACL)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
-        content_bkp = File.read(acl)
+        path_to_acl = "%s/%s/%s" % (network, path, acl)
+        Git.remove(path_to_acl)
 
-        File.remove(acl)
-
-        Cvs.remove(acl)
-
-        Cvs.commit(acl, "Exclusão do Arquivo %s pelo usuário:%s" %
+        Git.commit(path_to_acl, "Exclusão do Arquivo %s pelo usuário:%s" %
                    (acl, user.get_username()))
 
-        Cvs.synchronization()
+        Git.push()
 
-        logger.info("%s excluiu no CVS o arquivo: %s" %
+        logger.info("%s excluiu no GIT o arquivo: %s" %
                     (user.get_username(), (path + acl)))
 
-        # Backup ACL
-        acl_bkp = check_name_file_bkp(acl_name)
-
-        File.create(acl_bkp)
-
-        File.write(acl_bkp, content_bkp)
-
-        Cvs.add(acl_bkp)
-
-        Cvs.commit(acl_bkp, "Criação do Arquivo de Backup %s pelo usuário: %s" % (
-            acl, user.get_username()))
-
-        logger.info("%s criou no CVS o arquivo de Backup: %s" %
-                    (user.get_username(), (path + acl)))
-
-    except (CVSCommandError, FileError, Exception), e:
-        logger.error("Erro quando o usuário %s tentou excluiu o arquivo: %s no Cvs" % (
+    except (GITCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou excluiu o arquivo: %s no Git" % (
             user.get_username(), (path + acl)))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
 def applyAcl(equipments, vlan, environment, network, user):
@@ -506,7 +479,7 @@ def applyAcl(equipments, vlan, environment, network, user):
         raise Exception(e)
 
 
-def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
+def scriptAclGit(acl_name, vlan, environment, network, user, template_name):
     '''Generates the acl based on a template
 
     :param acl_name: acl name
@@ -516,7 +489,7 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
     :param user: user
     :param temple_name: Template Name
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
     try:
 
@@ -530,7 +503,7 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
 
             chdir(PATH_TYPES.ACL, network, path_env)
 
-            Cvs.synchronization()
+            Git.synchronization()
 
             arquivo = open("./%s" % acl, "w")
 
@@ -549,10 +522,11 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
             arquivo.close()
             file_template.close()
 
-            Cvs.commit(acl, "%s gerou Script para a acl %s" %
+            Git.commit(acl, "%s gerou Script para a acl %s" %
                        (user.get_username(), acl))
+            Git.push()
 
-            logger.info("%s alterou no CVS o arquivo: %s" %
+            logger.info("%s alterou no GIT o arquivo: %s" %
                         (user.get_username(), acl))
 
         else:
@@ -563,7 +537,7 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
 
                 chdir(PATH_TYPES.ACL, network, path_env)
 
-                Cvs.synchronization()
+                Git.synchronization()
 
                 arquivo = open("./%s" % acl, "w")
 
@@ -583,10 +557,11 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
                 arquivo.close()
                 file_template.close()
 
-                Cvs.commit(acl, "%s gerou Script para a acl %s" %
+                Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
-                logger.info("%s alterou no CVS o arquivo: %s" %
+                logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
 
             if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.HOMOLOGACAO) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
@@ -596,7 +571,7 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
 
                 chdir(PATH_TYPES.ACL, network, path_env)
 
-                Cvs.synchronization()
+                Git.synchronization()
 
                 arquivo = open("./%s" % acl, "w")
 
@@ -616,10 +591,11 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
                 arquivo.close()
                 file_template.close()
 
-                Cvs.commit(acl, "%s gerou Script para a acl %s" %
+                Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
-                logger.info("%s alterou no CVS o arquivo: %s" %
+                logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
 
             if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.PORTAL) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
@@ -629,7 +605,7 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
 
                 chdir(PATH_TYPES.ACL, network, path_env)
 
-                Cvs.synchronization()
+                Git.synchronization()
 
                 arquivo = open("./%s" % acl, "w")
 
@@ -653,10 +629,11 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
                 arquivo.close()
                 file_template.close()
 
-                Cvs.commit(acl, "%s gerou Script para a acl %s" %
+                Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
-                logger.info("%s alterou no CVS o arquivo: %s" %
+                logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
 
             if ((environment["nome_divisao"] == DIVISON_DC.FE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.APLICATIVOS) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
@@ -666,7 +643,7 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
 
                 chdir(PATH_TYPES.ACL, network, path_env)
 
-                Cvs.synchronization()
+                Git.synchronization()
 
                 arquivo = open("./%s" % acl, "w")
 
@@ -686,10 +663,11 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
                 arquivo.close()
                 file_template.close()
 
-                Cvs.commit(acl, "%s gerou Script para a acl %s" %
+                Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
-                logger.info("%s alterou no CVS o arquivo: %s" %
+                logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
 
             if ((environment["nome_divisao"] == DIVISON_DC.BE) and (environment["nome_ambiente_logico"] == ENVIRONMENT_LOGICAL.HOMOLOGACAO) and (environment["nome_grupo_l3"] == "CORE/DENSIDADE")):
@@ -699,7 +677,7 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
 
                 chdir(PATH_TYPES.ACL, network, path_env)
 
-                Cvs.synchronization()
+                Git.synchronization()
 
                 arquivo = open("./%s" % acl, "w")
 
@@ -719,17 +697,18 @@ def scriptAclCvs(acl_name, vlan, environment, network, user, template_name):
                 arquivo.close()
                 file_template.close()
 
-                Cvs.commit(acl, "%s gerou Script para a acl %s" %
+                Git.commit(acl, "%s gerou Script para a acl %s" %
                            (user.get_username(), acl))
+                Git.push()
 
-                logger.info("%s alterou no CVS o arquivo: %s" %
+                logger.info("%s alterou no GIT o arquivo: %s" %
                             (user.get_username(), acl))
 
-    except (CVSCommandError, FileError, Exception), e:
-        logger.error("Erro quando o usuário %s tentou gerar o arquivo: %s no Cvs" % (
+    except (GITCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou gerar o arquivo: %s no Git" % (
             user.get_username(), acl))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
 def parse_template(vlan, network):
@@ -863,12 +842,12 @@ def get_templates(user, return_as_dict=False):
         "ipv6": [{'name': < template_name >, 'network': < template_network >},...]
         }
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     """
     try:
         os.chdir(PATH_ACL)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         aux = dict()
         aux['ipv4'] = list()
@@ -898,11 +877,11 @@ def get_templates(user, return_as_dict=False):
 
         return templates
 
-    except (CVSCommandError, FileError, Exception), e:
+    except (GITCommandError, FileError, Exception), e:
         logger.error(
-            "Erro quando o usuário %s tentou sincronizar no Cvs" % (user.get_username()))
+            "Erro quando o usuário %s tentou sincronizar no Git" % (user.get_username()))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
 def get_template_edit(template_name, network, user):
@@ -912,7 +891,7 @@ def get_template_edit(template_name, network, user):
     :param network: IPv4 or IPv6
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
 
     try:
@@ -923,17 +902,17 @@ def get_template_edit(template_name, network, user):
 
         chdir(PATH_TYPES.TEMPLATE, ip_version, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         content = File.read(template_name)
 
         return content
 
-    except (CVSCommandError, FileError, Exception), e:
+    except (GITCommandError, FileError, Exception), e:
         logger.error(
-            "Erro quando o usuário %s tentou sincronizar no Cvs" % (user.get_username()))
+            "Erro quando o usuário %s tentou sincronizar no Git" % (user.get_username()))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
 def alter_template(template_name, network, content, user):
@@ -944,7 +923,7 @@ def alter_template(template_name, network, content, user):
     :param content: content
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
 
     try:
@@ -956,21 +935,22 @@ def alter_template(template_name, network, content, user):
 
         chdir(PATH_TYPES.TEMPLATE, ip_version, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         File.write(template_name, content)
 
-        Cvs.commit(template_name, "%s alterou o arquivo %s" %
+        Git.commit(template_name, "%s alterou o arquivo %s" %
                    (user.get_username(), template_name))
+        Git.push()
 
-        logger.info("%s alterou no CVS o arquivo: %s" %
+        logger.info("%s alterou no GIT o arquivo: %s" %
                     (user.get_username(), (path + template_name)))
 
-    except (CVSCommandError, FileError, Exception), e:
-        logger.error("Erro quando o usuário %s tentou atualizar o arquivo: %s no Cvs" % (
+    except (GITCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou atualizar o arquivo: %s no Git" % (
             user.get_username(), (path + template_name)))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
 def create_template(template_name, network, content, user):
@@ -981,7 +961,7 @@ def create_template(template_name, network, content, user):
     :param content: content
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
     try:
 
@@ -993,25 +973,26 @@ def create_template(template_name, network, content, user):
 
         chdir(PATH_TYPES.TEMPLATE, ip_version, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         File.create(template_name)
 
-        Cvs.add(template_name)
+        Git.add(template_name)
 
-        Cvs.commit(template_name, "Criação do Arquivo %s pelo usuário: %s" % (
+        Git.commit(template_name, "Criação do Arquivo %s pelo usuário: %s" % (
             template_name, user.get_username()))
+        Git.push()
 
-        logger.info("%s criou no CVS o arquivo: %s" %
+        logger.info("%s criou no GIT o arquivo: %s" %
                     (user.get_username(), (path + template_name)))
 
         alter_template(template_name, network, content, user)
 
-    except (CVSCommandError, FileError, Exception), e:
-        logger.error("Erro quando o usuário %s tentou criar o arquivo: %s no Cvs" % (
+    except (GITCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou criar o arquivo: %s no Git" % (
             user.get_username(), (path + template_name)))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
 def check_template(template_name, network, user):
@@ -1021,7 +1002,7 @@ def check_template(template_name, network, user):
     :param network: IPv4 or IPv6
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
 
     :return: True case created
     '''
@@ -1039,13 +1020,13 @@ def check_template(template_name, network, user):
 
             os.chdir(path_net_version)
             os.mkdir('templates')
-            Cvs.add('templates')
-            Cvs.commit('templates', "Criação ")
-            Cvs.synchronization()
+            Git.add('templates')
+            Git.commit('templates', "Criação ")
+            Git.push()
 
         chdir(PATH_TYPES.TEMPLATE, ip_version, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         File.read(template_name)
 
@@ -1054,11 +1035,11 @@ def check_template(template_name, network, user):
     except FileError, e:
         return False
 
-    except (CVSCommandError, Exception), e:
+    except (GITCommandError, Exception), e:
         logger.error(
-            "Erro quando o usuário %s tentou sincronizar no Cvs" % (user.get_username()))
+            "Erro quando o usuário %s tentou sincronizar no Git" % (user.get_username()))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
 
 
 def delete_template(template_name, network, user):
@@ -1068,7 +1049,7 @@ def delete_template(template_name, network, user):
     :param network: IPv4 or IPv6
     :param user: user
 
-    :raise CVSCommandError:  Failed to execute command
+    :raise GITCommandError:  Failed to execute command
     '''
     try:
 
@@ -1080,22 +1061,22 @@ def delete_template(template_name, network, user):
 
         chdir(PATH_TYPES.TEMPLATE, ip_version, path)
 
-        Cvs.synchronization()
+        Git.synchronization()
 
         File.remove(template_name)
 
-        Cvs.remove(template_name)
+        Git.remove(template_name)
 
-        Cvs.commit(template_name, "Exclusão do Arquivo %s pelo usuário:%s" % (
+        Git.commit(template_name, "Exclusão do Arquivo %s pelo usuário:%s" % (
             template_name, user.get_username()))
 
-        Cvs.synchronization()
+        Git.push()
 
-        logger.info("%s excluiu no CVS o arquivo: %s" %
+        logger.info("%s excluiu no GIT o arquivo: %s" %
                     (user.get_username(), (path + template_name)))
 
-    except (CVSCommandError, FileError, Exception), e:
-        logger.error("Erro quando o usuário %s tentou excluiu o arquivo: %s no Cvs" % (
+    except (GITCommandError, FileError, Exception), e:
+        logger.error("Erro quando o usuário %s tentou excluiu o arquivo: %s no Git" % (
             user.get_username(), (path + template_name)))
         logger.error(e)
-        raise CVSCommandError(e)
+        raise GITCommandError(e)
