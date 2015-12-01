@@ -32,9 +32,9 @@ from CadVlan.Environment.forms import AmbienteLogicoForm, DivisaoDCForm, Grupol3
     IpConfigForm
 from CadVlan.messages import environment_messages, vlan_messages
 from django.core.urlresolvers import reverse
-from CadVlan.Acl.acl import mkdir_divison_dc, deleteAclCvs, checkAclCvs, \
+from CadVlan.Acl.acl import mkdir_divison_dc, deleteAclGit, checkAclGit, \
     get_templates
-from CadVlan.Util.cvs import CVSCommandError, CVSError
+from CadVlan.Util.git import GITCommandError, GITError
 from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.Util.utility import acl_key
 from CadVlan.Util.shortcuts import render_to_response_ajax
@@ -118,18 +118,18 @@ def remove_environment(request):
 
                         try:
                             if vlan.get(key_acl_v4) is not None:
-                                if checkAclCvs(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user):
-                                    deleteAclCvs(
+                                if checkAclGit(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user):
+                                    deleteAclGit(
                                         vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
 
                             if vlan.get(key_acl_v6) is not None:
-                                if checkAclCvs(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user):
-                                    deleteAclCvs(
+                                if checkAclGit(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user):
+                                    deleteAclGit(
                                         vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
 
-                        except CVSError, e:
+                        except GITError, e:
                             messages.add_message(
-                                request, messages.WARNING, vlan_messages.get("vlan_cvs_error"))
+                                request, messages.WARNING, vlan_messages.get("vlan_git_error"))
 
                 except DetailedEnvironmentError, e:
                     # Detailed message for VLAN errors
@@ -668,7 +668,7 @@ def insert_divisao_dc(request):
                 # If invalid, send all error messages in fields
                 lists['divisaodc_form'] = divisao_dc_form
 
-        except (NetworkAPIClientError, CVSCommandError), e:
+        except (NetworkAPIClientError, GITCommandError), e:
             logger.error(e)
             lists['divisaodc_form'] = divisao_dc_form
             messages.add_message(request, messages.ERROR, e)

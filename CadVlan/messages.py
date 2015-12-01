@@ -166,7 +166,7 @@ vlan_messages = {
     'success_remove_network': u'Todas as redes selecionadas foram excluídas com sucesso.',
     'vlan_edit_sucess':     u'Vlan alterada com sucesso.',
     'name_vlan_error':      u'Nome da Vlan contém caracteres inválidos.',
-    'vlan_cvs_error':       u'Vlan excluída com sucesso mas ocorreu um erro de CVS, contate o administrador.',
+    'vlan_git_error':       u'Vlan excluída com sucesso mas ocorreu um erro de GIT, contate o administrador.',
     'vlan_create_success':  u'Vlan criada com sucesso.',
 }
 

@@ -578,7 +578,7 @@ def delete(request):
 
             ids = split_to_array(form.cleaned_data['ids'])
 
-            client.create_pool().delete(ids)
+            client.create_pool().delete_pool(ids)
 
             messages.add_message(
                 request,
