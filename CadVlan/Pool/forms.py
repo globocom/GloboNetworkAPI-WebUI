@@ -32,7 +32,7 @@ class PoolForm(forms.Form):
 
     id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
 
-    identifier = forms.CharField(label=u'Identifier', min_length=3, max_length=40, required=True,
+    identifier = forms.CharField(label=u'Identifier', min_length=3, max_length=200, required=True,
                                  error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     default_port = forms.CharField(label=u'Default Port', min_length=2, max_length=5, required=True,
                                    error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
