@@ -69,7 +69,9 @@ $(document).ready(function() {
     var obj_btn_new_port = $("#btn_new_port");
     var obj_btn_new_real = $("#btn_new_real");
 
-    obj_btn_sav.button({icons: {primary: "ui-icon-disk"}});
+    obj_btn_sav.button({icons: {primary: "ui-icon-disk"}}).click(function(){
+            if (confirm('NÃO ALTERAR VIPS que usem servidores da CLOUD.')){}
+        });
     obj_btn_can.button({icons: {primary: "ui-icon-cancel"}});
     obj_btn_new_real.button({icons: {primary: "ui-icon-disk"}});
 

@@ -47,7 +47,7 @@ $(document).ready(function() {
     {% has_perm POOL_ALTER_SCRIPT True None %}
     {% if has_perm %}
         $("#btn_enable").button({ icons: {primary: "ui-icon-power"} }).click(function(){
-            if (confirm('Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+            if (confirm('NÃO ALTERAR VIPS que usem servidores da CLOUD. Deseja realmente habilitar o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
                 $("#action").val('x1x');
@@ -60,7 +60,7 @@ $(document).ready(function() {
     {% has_perm POOL_ALTER_SCRIPT True None %}
     {% if has_perm %}
         $("#btn_disable").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-            if (confirm('Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
+            if (confirm('NÃO ALTERAR VIPS que usem servidores da CLOUD. Deseja realmente desabilitar o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
                 $("#action").val('x0x');
@@ -73,7 +73,7 @@ $(document).ready(function() {
     {% has_perm POOL_ALTER_SCRIPT True None %}
     {% if has_perm %}
         $("#btn_enable_user").button({ icons: {primary: "ui-icon-power"} }).click(function(){
-            if (confirm('Deseja realmente colocar como "user-up" o(s) Pool(s) Member(s) selecionado(s)?')){
+            if (confirm('NÃO ALTERAR VIPS que usem servidores da CLOUD. Deseja realmente colocar como "user-up" o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
                 $("#action").val('xx1');
@@ -86,7 +86,7 @@ $(document).ready(function() {
     {% has_perm POOL_ALTER_SCRIPT True None %}
     {% if has_perm %}
         $("#btn_disable_user").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-            if (confirm('Deseja realmente colocar como "user-down" o(s) Pool(s) Member(s) selecionado(s)?')){
+            if (confirm('NÃO ALTERAR VIPS que usem servidores da CLOUD. Deseja realmente colocar como "user-down" o(s) Pool(s) Member(s) selecionado(s)?')){
                 var data = getSelectionData(oTableSpm);
                 $("#ids").val(data);
                 $("#action").val('xx0');
