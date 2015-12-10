@@ -206,11 +206,6 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
         return false;
     }
 
-    if ($("input:hidden[value="+portVip+"]").length > 0){
-        alert('Porta Vip já cadastrada.');
-        return false;
-    }
-
     loadPoolMembers(poolId, portVip);
 });
 
