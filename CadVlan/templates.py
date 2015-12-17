@@ -82,6 +82,7 @@ EQUIPMENT_INTERFACE_EDIT = 'equip-interface/edit-port.html'
 EQUIPMENT_INTERFACE_ADD_CHANNEL = 'equip-interface/add-channel.html'
 EQUIPMENT_INTERFACE_EDIT_CHANNEL = 'equip-interface/edit-channel.html'
 EQUIPMENT_INTERFACES = 'equip-interface/equipinterfaces.html'
+ENV_VLANS = 'equip-interface/vlan.html'
 
 # Equipment
 EQUIPMENT_SEARCH_LIST = 'equipment/search-list.html'

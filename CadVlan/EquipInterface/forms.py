@@ -166,6 +166,15 @@ class AddEnvInterfaceForm(forms.Form):
     environment = forms.MultipleChoiceField(label=u'Ambientes Disponiveis (Range de Vlans)', required=False, error_messages=error_messages,
                                   widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
 
+class AmbVlans(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(AmbVlans, self).__init__(*args, **kwargs)
+
+    ambiente = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}), label="Ambiente", required=True,
+                               error_messages=error_messages, min_length=1, max_length=200)
+    vlan_max = forms.CharField(label="Vlan", required=True, error_messages=error_messages, min_length=1, max_length=4)
+    vlan_min = forms.CharField(label="", required=True, error_messages=error_messages, min_length=1, max_length=4)
+
 class AddSeveralInterfaceForm(forms.Form):
 
     def __init__(self, marca, *args, **kwargs):

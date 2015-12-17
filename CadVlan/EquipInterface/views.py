@@ -20,7 +20,7 @@ import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_ADD_CHANNEL,\
                               EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM,\
-                              EQUIPMENT_INTERFACE_EDIT_CHANNEL, EQUIPMENT_INTERFACES
+                              EQUIPMENT_INTERFACE_EDIT_CHANNEL, EQUIPMENT_INTERFACES, ENV_VLANS
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect, render
 from django.template.context import RequestContext
@@ -34,7 +34,7 @@ from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, AddSeveralInterfaceForm, ConnectForm, \
-                                         EditForm, ChannelAddForm
+                                         EditForm, ChannelAddForm, AmbVlans
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
 
@@ -851,6 +851,20 @@ def channel(request):
 
     return redirect("home")
 
+
+def __env_vlans(request, envs, environment_list):
+
+    lists = dict()
+    for e in envs:
+        for env in environment_list:
+            if e in env.values():
+                ambiente = env.get("divisao_dc_name")+" - "+env.get("ambiente_logico_name")+" - "+env.get("grupo_l3_name")
+                form = AmbVlans(initial={'ambiente': ambiente, 'vlan_max': env.get("max_num_vlan_1"), 'vlan_min':  env.get("min_num_vlan_1")})
+                lists['form'] = form
+
+    return redirect("env.vlan")
+
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
@@ -953,7 +967,7 @@ def add_channel(request, equip_name=None):
                     int_type = "trunk"
 
                 try:
-                    client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlan, envs)
+                    #client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlan, envs)
                     messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert_channel"))
                 except NetworkAPIClientError, e:
                     logger.error(e)
@@ -962,6 +976,9 @@ def add_channel(request, equip_name=None):
                 except Exception, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
+
+                if envs:
+                    __env_vlans(request, envs, environment_list.get("ambiente"))
 
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_nam) > 2:
@@ -1114,6 +1131,23 @@ def channel_insert_interface(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+
+
+def env_vlans(request):
+    try:
+        auth = AuthSession(request.session)
+        client_api = auth.get_clientFactory()
+        lists = dict()
+
+        form = AmbVlans()
+        lists['form'] = form
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(ENV_VLANS, lists, context_instance=RequestContext(request))
+
 
 def config_sync_all(request, equip_name, is_channel, ids):
 
