@@ -393,12 +393,21 @@ def vlan_form(request):
                 network_ipv4 = form.cleaned_data['network_ipv4']
                 network_ipv6 = form.cleaned_data['network_ipv6']
 
-                # Salva a Vlan
-                vlan = client.create_vlan().insert_vlan(environment_id, name, number,
-                                                        description, acl_file, acl_file_v6, network_ipv4, network_ipv6)
-                messages.add_message(
-                    request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
-                id_vlan = vlan.get('vlan').get('id')
+                # Criar a Vlan
+                if number:
+                    vlan = client.create_vlan().insert_vlan(environment_id, name, number, description, acl_file,
+                                                            acl_file_v6, network_ipv4, network_ipv6)
+                    id_vlan = vlan.get('vlan').get('id')
+                else:
+                    vlan = client.create_vlan().allocate_without_network(environment_id, name, description, None)
+                    id_vlan = vlan.get('vlan').get('id')
+                    if int(network_ipv4):
+                        client.create_network().add_network_ipv4(id_vlan, None, None, None)
+                    if int(network_ipv6):
+                        client.create_network().add_network_ipv6(id_vlan, None, None, None)
+
+                messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
+
                 # redireciona para a listagem de vlans
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
         # Get
@@ -1180,15 +1189,16 @@ def ajax_get_available_ip_config_by_environment_id(request):
         context = {}
         available_environment_config_ipv4 = False
         available_environment_config_ipv6 = False
+        vlan_range = False
+        hide_vlan_range = True
 
         if int(environment_id):
 
             try:
-
                 auth = AuthSession(request.session)
                 client = auth.get_clientFactory()
-                env_list = client.create_ambiente().configuration_list_all(
-                    environment_id)
+                hide_vlan_range = False
+                env_list = client.create_ambiente().configuration_list_all(environment_id)
 
                 lists_configuration = env_list.get('lists_configuration')
 
@@ -1198,6 +1208,12 @@ def ajax_get_available_ip_config_by_environment_id(request):
                     if config.get('type', '').upper() == 'V6':
                         available_environment_config_ipv6 = True
 
+                # if range:
+                ambiente = client.create_ambiente().buscar_por_id(environment_id)
+                ambiente = ambiente.get("ambiente")
+                if ambiente.get('min_num_vlan_1'):
+                    vlan_range = True
+
             except NetworkAPIClientError, e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
@@ -1205,9 +1221,9 @@ def ajax_get_available_ip_config_by_environment_id(request):
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
 
-    context[
-        'available_environment_config_ipv4'] = available_environment_config_ipv4
-    context[
-        'available_environment_config_ipv6'] = available_environment_config_ipv6
+    context['available_environment_config_ipv4'] = available_environment_config_ipv4
+    context['available_environment_config_ipv6'] = available_environment_config_ipv6
+    context['vlan_range'] = vlan_range
+    context['hide_vlan_range'] = hide_vlan_range
 
     return render_json(json.dumps(context))

@@ -89,24 +89,25 @@ class VlanForm(forms.Form):
 
         self.fields['environment'].choices = env_choices
 
-    name = forms.CharField(label="Nome", required=True, min_length=3, max_length=50,
-                           error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
-    number = forms.IntegerField(label="Número", required=True, error_messages=error_messages, widget=forms.TextInput(
-        attrs={"style": "width: 150px", "maxlength": "9"}))
     environment = forms.ChoiceField(label="Ambiente", required=True, choices=[(
         0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 400px"}))
+    name = forms.CharField(label="Nome", required=True, min_length=3, max_length=50,
+                           error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     acl_file = forms.CharField(label="Acl - IPv4", required=False, min_length=3, max_length=200,
                                error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     acl_file_v6 = forms.CharField(label="Acl - IPv6", required=False, min_length=3, max_length=200,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
+    vlan_number = forms.BooleanField(label="O número da Vlan será setado automaticamente. Click se deseja especificar o Número da Vlan.", required=False, error_messages=error_messages)
+    number = forms.IntegerField(label="Número", required=False, error_messages=error_messages, widget=forms.TextInput(
+        attrs={"style": "width: 150px", "maxlength": "9"}))
     description = forms.CharField(label="Descrição", required=False, min_length=3, max_length=200,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
-    apply_vlan = forms.BooleanField(
-        widget=forms.HiddenInput(), label='', required=False)
-    network_ipv4 = forms.ChoiceField(
-        label='Adicionar rede IPv4 automaticamente', required=False, choices=CHOICES_NETWORK, widget=forms.Select())
-    network_ipv6 = forms.ChoiceField(
-        label='Adicionar rede IPv6 automaticamente', required=False, choices=CHOICES_NETWORK, widget=forms.Select())
+    apply_vlan = forms.BooleanField(widget=forms.HiddenInput(), label='', required=False)
+
+    network_ipv4 = forms.ChoiceField(label='Adicionar rede IPv4 automaticamente', required=False,
+                                     choices=CHOICES_NETWORK, widget=forms.Select())
+    network_ipv6 = forms.ChoiceField(label='Adicionar rede IPv6 automaticamente', required=False,
+                                     choices=CHOICES_NETWORK, widget=forms.Select())
 
     def clean_environment(self):
         if int(self.cleaned_data['environment']) <= 0:
