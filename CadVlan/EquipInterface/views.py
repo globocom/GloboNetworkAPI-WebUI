@@ -1059,20 +1059,16 @@ def edit_channel(request, channel_name, equip_name):
                     try:
                         int_envs = client.create_interface().get_env_by_id(channel['id'])
                         int_envs = int_envs.get('ambiente')
-                        env_list =[]
-                        for amb in int_envs:
-                            env_list.append(int(amb['id']))
-                        envform = AddEnvInterfaceForm(environment_list, initial={'environment': env_list})
+                        envform = AddEnvInterfaceForm(environment_list, initial={'environment': int(int_envs.get('id')), 'vlans': channel['vlans']})
                     except:
                         envform = AddEnvInterfaceForm(environment_list)
                         pass
-                    lists['envform'] = envform
                 else:
                     envform = AddEnvInterfaceForm(environment_list)
-                    lists['envform'] = envform
+
+                lists['envform'] = envform
             else:
                 messages.add_message(request, messages.WARNING, "O equipamento não possui ambientes cadastrados.")
-
 
         if request.method == "POST":
 
@@ -1090,7 +1086,6 @@ def edit_channel(request, channel_name, equip_name):
                 int_type = form.cleaned_data['int_type']
                 vlan = form.cleaned_data['vlan']
                 ids_interface = request.POST.getlist('idsInterface')
-                equip_nam = form.cleaned_data['equip_name']
 
                 vlans = dict()
                 vlans['vlan_nativa'] = vlan
@@ -1117,11 +1112,6 @@ def edit_channel(request, channel_name, equip_name):
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     return render_to_response(EQUIPMENT_INTERFACE_EDIT_CHANNEL, lists, context_instance=RequestContext(request))
-
-                url_param = reverse("equip.interface.search.list")
-                if len(equip_nam) > 2:
-                    url_param = url_param + "?equip_name=" + equip_nam
-                return HttpResponseRedirect(url_param)
 
     except NetworkAPIClientError, e:
         logger.error(e)
