@@ -64,14 +64,6 @@ $(document).ready(function() {
 	});
 	{% endif %}
 
-	$("#id_environment").pickList();
-	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
-	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
-	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
-	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
-
-	$("#ambiente").hide();
-
 	$("#id_int_type_0").click( function() {
 		$("#ambiente").hide();
 	});
@@ -125,6 +117,18 @@ $(document).ready(function() {
     $("#id_name").mouseover(function() {
             $(this).attr("title","Formato: <numero do channel>");
     });
+
+    $("#id_vlans").mouseover(function() {
+            $(this).attr("title","Especifique as vlans no Formato: Intervalo_1 ; Intervalo2 ");
+    });
+
+    $("#id_vlans").keyup(function() {
+            var valor = $(this).val().replace(/[^0-9-;]+/g,'');
+            $(this).val(valor);
+    });
+
+    $("#ambiente").hide();
+
 });
 </script>
 {% endblock %}
@@ -198,21 +202,7 @@ $(document).ready(function() {
                         <div class="separator spacer"></div>
                         <div style="clear: both; margin: 20px"></div>
                         <div style="clear: both;"></div>
-                        <h> CONFIGURAÇÃO DAS INTERFACES: </h>
                         <div style="clear: both; margin: 10px"></div>
-
-                        <div>
-                            <div><label for="{{ form.int_type.auto_id }}">{{ form.int_type.label_tag }}{% if form.int_type.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-                            {{ form.int_type }}
-                            <p id="error">
-                            {% if form.int_type.errors %}
-                                {% for error in form.int_type.errors %}
-                                    {{ error|escape }}
-                                {% endfor %}
-                            {% endif %}
-                            </p>
-                        </div>
-
                         <div>
                             <div><label for="{{ form.vlan.auto_id }}">{{ form.vlan.label_tag }}{% if form.int_type.vlan.required %}<span style="color: red;">*</span>{% endif %}</label></div>
                             {{ form.vlan }} <a href="{% url vlan.search.list %}" target="blank"><button type="button" id="btn_addvlan">Pesquisar Vlan</button></a>
@@ -224,9 +214,19 @@ $(document).ready(function() {
                             {% endif %}
                             </p>
                         </div>
-
+                        <div>
+                            <div><label for="{{ form.int_type.auto_id }}">{{ form.int_type.label_tag }}{% if form.int_type.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                            {{ form.int_type }}
+                            <p id="error">
+                            {% if form.int_type.errors %}
+                                {% for error in form.int_type.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            </p>
+                        </div>
                         <div id="ambiente">
-                            {% include "equip-interface/add-env-form.html" %}
+                            {% include "equip-interface/add-env-form.html" with form=envform amb_list=envs%}
                         </div>
 
                         <div style="clear: both; margin: 20px"></div>

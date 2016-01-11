@@ -16,32 +16,15 @@
 -->
 {% load util %}
 
-<style>
-#ambiente ul li {
-	display: block;
-}
-</style>
-
 <script type="text/javascript">
-$(document).ready(function() {
-});
+$(document).ready(function() {});
 </script>
-
-<div style="position: relative; background-color: {% if rowcolors %}{{ rowcolors }}{% else %}#fefefe{% endif %};">
-    <div style="float: left; padding-top: 4px; padding-left: 10px; width: 50%;">
-    {% csrf_token %}
-    {% for field in envform %}
-        <div><label for="{{ field.auto_id }}">
-             {{ field.label_tag }}
-         </label></div> 
-        {{ field }}
-         <p id="error"> 
-            {% if field.errors %} 
-                {% for error in field.errors %} 
-                    {{ error|escape }} 
-                {% endfor %} 
-            {% endif %} 
-        </p>
+<div>
+    {% for field in form %}
+        <div>
+            <div><label>{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+            {{ field }}
+        </div>
+        <div style="clear: both; margin: 20px"></div>
     {% endfor %}
-    </div>
 </div>

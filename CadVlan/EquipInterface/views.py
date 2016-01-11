@@ -20,12 +20,13 @@ import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_ADD_CHANNEL,\
                               EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM,\
-                              EQUIPMENT_INTERFACE_EDIT_CHANNEL, EQUIPMENT_INTERFACES, ENV_VLANS
+                              EQUIPMENT_INTERFACE_EDIT_CHANNEL, EQUIPMENT_INTERFACES
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect, render
 from django.template.context import RequestContext
 from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, InterfaceNaoExisteError, NomeInterfaceDuplicadoParaEquipamentoError
+from networkapiclient.exception import NetworkAPIClientError, InterfaceNaoExisteError, InvalidParameterError, \
+                                       NomeInterfaceDuplicadoParaEquipamentoError
 from django.contrib import messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm, AplicarForm
@@ -34,12 +35,23 @@ from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, AddSeveralInterfaceForm, ConnectForm, \
-                                         EditForm, ChannelAddForm, AmbVlans
+                                         EditForm, ChannelAddForm
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
 
 
 logger = logging.getLogger(__name__)
+
+def verificar_range_vlan(env_list, env_id, range):
+    for env in env_list:
+        if env.get('id') == env_id:
+            if env.get('range'):
+                for intervalo in range.split(';'):
+                    for int in intervalo.split('-'):
+                        if not (int >= env.get('min_num_vlan_1') and int <=env.get('max_num_vlan_1')):
+                            if not (int >= env.get('min_num_vlan_2') and int <=env.get('max_num_vlan_2')):
+                                raise InvalidParameterError(u'Numero de vlan fora do range definido para o ambiente: %s'\
+                                                            %(env.get('range')))
 
 def get_equip_environment(client, equip_id):
 
@@ -825,11 +837,7 @@ def channel(request):
 
     if request.method == 'POST':
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
         form = ChannelForm(request.POST)
-
         equip_nam = request.POST['equip_name']
 
         if form.is_valid():
@@ -851,18 +859,6 @@ def channel(request):
 
     return redirect("home")
 
-
-def __env_vlans(request, envs, environment_list):
-
-    lists = dict()
-    for e in envs:
-        for env in environment_list:
-            if e in env.values():
-                ambiente = env.get("divisao_dc_name")+" - "+env.get("ambiente_logico_name")+" - "+env.get("grupo_l3_name")
-                form = AmbVlans(initial={'ambiente': ambiente, 'vlan_max': env.get("max_num_vlan_1"), 'vlan_min':  env.get("min_num_vlan_1")})
-                lists['form'] = form
-
-    return redirect("env.vlan")
 
 
 @log
@@ -918,10 +914,13 @@ def add_channel(request, equip_name=None):
             else:
                 tipo = 1
 
-            form = ChannelAddForm(equip_interface_list, initial={'ids': ids, 'equip_name': equip_name, 'int_type': tipo, 'vlan': interface['vlan']})
+            form = ChannelAddForm(equip_interface_list, initial={'ids': ids, 'equip_name': equip_name, 'int_type': tipo,
+                                                                 'vlan': interface['vlan']})
             lists['form'] = form
 
             if environment_list is not None:
+                envs = environment_list.get('ambiente')
+                lists['environment_list'] = envs
                 if tipo:
                     try:
                         int_envs = client.create_interface().get_env_by_id(interface['id'])
@@ -945,6 +944,7 @@ def add_channel(request, equip_name=None):
 
             form = ChannelAddForm(equip_interface_list, request.POST)
             lists['form'] = form
+
             if environment_list is not None:
                 envform = AddEnvInterfaceForm(environment_list, request.POST)
 
@@ -957,17 +957,22 @@ def add_channel(request, equip_name=None):
                 interfaces_ids = form.cleaned_data['ids']
                 equip_nam = form.cleaned_data['equip_name']
 
-                envs = None
-                if environment_list is not None and envform.is_valid():
-                    envs = envform.cleaned_data['environment']
+                vlans = dict()
+                vlans['vlan_nativa'] = vlan
 
                 if int_type=="0":
                     int_type = "access"
+                    environment = None
                 else:
                     int_type = "trunk"
+                    if envform.is_valid():
+                        environment = envform.cleaned_data['environment']
+                        vlan_range = envform.cleaned_data['vlans']
+                        verificar_range_vlan(environment_list.get("ambiente"), environment, vlan_range)
+                        vlans['range'] = vlan_range
 
                 try:
-                    #client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlan, envs)
+                    client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlans, environment)
                     messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert_channel"))
                 except NetworkAPIClientError, e:
                     logger.error(e)
@@ -976,9 +981,7 @@ def add_channel(request, equip_name=None):
                 except Exception, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
-
-                if envs:
-                    __env_vlans(request, envs, environment_list.get("ambiente"))
+                    return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
 
                 url_param = reverse("equip.interface.search.list")
                 if len(equip_nam) > 2:
@@ -1050,6 +1053,8 @@ def edit_channel(request, channel_name, equip_name):
             lists['form'] = form
 
             if environment_list is not None:
+                envs = environment_list.get('ambiente')
+                lists['environment_list'] = envs
                 if tipo:
                     try:
                         int_envs = client.create_interface().get_env_by_id(channel['id'])
@@ -1071,7 +1076,6 @@ def edit_channel(request, channel_name, equip_name):
 
         if request.method == "POST":
 
-
             form = ChannelAddForm(equip_interface_list, request.POST)
             lists['form'] = form
 
@@ -1086,23 +1090,38 @@ def edit_channel(request, channel_name, equip_name):
                 int_type = form.cleaned_data['int_type']
                 vlan = form.cleaned_data['vlan']
                 ids_interface = request.POST.getlist('idsInterface')
+                equip_nam = form.cleaned_data['equip_name']
 
-                envs = None
-                if environment_list is not None and envform.is_valid():
-                    envs = envform.cleaned_data['environment']
+                vlans = dict()
+                vlans['vlan_nativa'] = vlan
 
                 if int_type=="0":
                     int_type = "access"
+                    environment = None
                 else:
                     int_type = "trunk"
+                    if envform.is_valid():
+                        environment = envform.cleaned_data['environment']
+                        vlan_range = envform.cleaned_data['vlans']
+                        verificar_range_vlan(environment_list.get("ambiente"), environment, vlan_range)
+                        vlans['range'] = vlan_range
 
                 try:
-                    client.create_interface().editar_channel(id_channel, name, lacp, int_type, vlan, envs, ids_interface)
+                    client.create_interface().editar_channel(id_channel, name, lacp, int_type, vlans, environment, ids_interface)
                     messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit_channel"))
                 except NetworkAPIClientError, e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
+                    return render_to_response(EQUIPMENT_INTERFACE_EDIT_CHANNEL, lists, context_instance=RequestContext(request))
+                except Exception, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    return render_to_response(EQUIPMENT_INTERFACE_EDIT_CHANNEL, lists, context_instance=RequestContext(request))
 
+                url_param = reverse("equip.interface.search.list")
+                if len(equip_nam) > 2:
+                    url_param = url_param + "?equip_name=" + equip_nam
+                return HttpResponseRedirect(url_param)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -1131,22 +1150,6 @@ def channel_insert_interface(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-
-
-def env_vlans(request):
-    try:
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-        lists = dict()
-
-        form = AmbVlans()
-        lists['form'] = form
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    return render_to_response(ENV_VLANS, lists, context_instance=RequestContext(request))
 
 
 def config_sync_all(request, equip_name, is_channel, ids):
