@@ -165,7 +165,7 @@ class AddEnvInterfaceForm(forms.Form):
 
     environment = forms.ChoiceField(label="Ambiente (Range Permitido de Vlans)", required=True, widget=forms.Select(
                                     attrs={'style': "width: 400px"}), error_messages=error_messages)
-    vlans = forms.CharField(label="Defina o range de vlans:", required=True, error_messages=error_messages, min_length=1,
+    vlans = forms.CharField(label="Defina o range de vlans:", required=False, error_messages=error_messages, min_length=1,
                             max_length=200)
 
 class AddSeveralInterfaceForm(forms.Form):

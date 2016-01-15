@@ -42,16 +42,30 @@ from CadVlan.Util.extends.formsets import formset_factory
 
 logger = logging.getLogger(__name__)
 
-def verificar_range_vlan(env_list, env_id, range):
-    for env in env_list:
-        if env.get('id') == env_id:
-            if env.get('range'):
-                for intervalo in range.split(';'):
-                    for int in intervalo.split('-'):
-                        if not (int >= env.get('min_num_vlan_1') and int <=env.get('max_num_vlan_1')):
-                            if not (int >= env.get('min_num_vlan_2') and int <=env.get('max_num_vlan_2')):
-                                raise InvalidParameterError(u'Numero de vlan fora do range definido para o ambiente: %s'\
-                                                            %(env.get('range')))
+def env_vlans(env_list, env_id, range):
+
+    env_vlans_list = []
+
+    for i, env in enumerate(env_id):
+        #verifica se o numero das vlans está dentro do intervalo do ambiente
+        for e in env_list:
+            if e.get('id') == env:
+                if e.get('range'):
+                    for intervalo in range[i].split(';'):
+                        for int in intervalo.split('-'):
+                            if int is u'':
+                                range[i] = e.get('range')
+                            else:
+                                if not (int >= e.get('min_num_vlan_1') and int <=e.get('max_num_vlan_1')):
+                                    if not (int >= e.get('min_num_vlan_2') and int <=e.get('max_num_vlan_2')):
+                                        raise InvalidParameterError(u'Numero de vlan fora do range definido para o '
+                                                                    u'ambiente: %s'%(e.get('range')))
+        env_vlans_dict = dict()
+        env_vlans_dict["vlans"] = range[i]
+        env_vlans_dict["env"] = env
+        env_vlans_list.append(env_vlans_dict)
+
+    return env_vlans_list
 
 def get_equip_environment(client, equip_id):
 
@@ -919,23 +933,11 @@ def add_channel(request, equip_name=None):
             lists['form'] = form
 
             if environment_list is not None:
-                envs = environment_list.get('ambiente')
-                lists['environment_list'] = envs
                 if tipo:
-                    try:
-                        int_envs = client.create_interface().get_env_by_id(interface['id'])
-                        int_envs = int_envs.get('ambiente')
-                        env_list =[]
-                        for amb in int_envs:
-                            env_list.append(int(amb['id']))
-                        envform = AddEnvInterfaceForm(environment_list, initial={'environment': env_list})
-                    except:
-                        envform = AddEnvInterfaceForm(environment_list)
-                        pass
-                    lists['envform'] = envform
+                    envform = AddEnvInterfaceForm(environment_list)
                 else:
                     envform = AddEnvInterfaceForm(environment_list)
-                    lists['envform'] = envform
+                lists['envform'] = envform
             else:
                 messages.add_message(request, messages.WARNING, "O equipamento não possui ambientes cadastrados.")
 
@@ -953,26 +955,22 @@ def add_channel(request, equip_name=None):
                 name = form.cleaned_data['name']
                 lacp = form.cleaned_data['lacp']
                 int_type = form.cleaned_data['int_type']
-                vlan = form.cleaned_data['vlan']
+                vlan_nativa = form.cleaned_data['vlan']
                 interfaces_ids = form.cleaned_data['ids']
                 equip_nam = form.cleaned_data['equip_name']
 
-                vlans = dict()
-                vlans['vlan_nativa'] = vlan
-
                 if int_type=="0":
                     int_type = "access"
-                    environment = None
+                    env_vlans_list = []
                 else:
                     int_type = "trunk"
                     if envform.is_valid():
-                        environment = envform.cleaned_data['environment']
-                        vlan_range = envform.cleaned_data['vlans']
-                        verificar_range_vlan(environment_list.get("ambiente"), environment, vlan_range)
-                        vlans['range'] = vlan_range
+                        environment = request.POST.getlist('environment')
+                        vlan_range = request.POST.getlist('vlans')
+                        env_vlans_list = env_vlans(environment_list.get("ambiente"), environment, vlan_range)
 
                 try:
-                    client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlans, environment)
+                    client.create_interface().inserir_channel(interfaces_ids, name, lacp, int_type, vlan_nativa, env_vlans_list)
                     messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert_channel"))
                 except NetworkAPIClientError, e:
                     logger.error(e)
