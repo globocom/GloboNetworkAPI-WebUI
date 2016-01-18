@@ -50,7 +50,7 @@ def env_vlans(env_list, env_id, range):
         #verifica se o numero das vlans está dentro do intervalo do ambiente
         for e in env_list:
             if e.get('id') == env:
-                if e.get('range'):
+                if not "None" in e.get('range') :
                     for intervalo in range[i].split(';'):
                         for int in intervalo.split('-'):
                             if int is u'':
@@ -60,6 +60,9 @@ def env_vlans(env_list, env_id, range):
                                     if not (int >= e.get('min_num_vlan_2') and int <=e.get('max_num_vlan_2')):
                                         raise InvalidParameterError(u'Numero de vlan fora do range definido para o '
                                                                     u'ambiente: %s'%(e.get('range')))
+                elif not range[i]:
+                    raise InvalidParameterError(u'Ambiente sem Vlan cadastrada. Especifique o numero da Vlan.')
+
         env_vlans_dict = dict()
         env_vlans_dict["vlans"] = range[i]
         env_vlans_dict["env"] = env
@@ -964,6 +967,9 @@ def add_channel(request, equip_name=None):
                     env_vlans_list = []
                 else:
                     int_type = "trunk"
+                    if environment_list is None:
+                        messages.add_message(request, messages.ERROR, "O equipamento não possui ambientes cadastrados.")
+                        return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
                     if envform.is_valid():
                         environment = request.POST.getlist('environment')
                         vlan_range = request.POST.getlist('vlans')
