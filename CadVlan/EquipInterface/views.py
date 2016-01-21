@@ -1088,25 +1088,25 @@ def edit_channel(request, channel_name, equip_name):
                 name = form.cleaned_data['name']
                 lacp = form.cleaned_data['lacp']
                 int_type = form.cleaned_data['int_type']
-                vlan = form.cleaned_data['vlan']
-                ids_interface = request.POST.getlist('idsInterface')
-
-                vlans = dict()
-                vlans['vlan_nativa'] = vlan
+                vlan_nativa = form.cleaned_data['vlan']
+                interfaces_ids = request.POST.getlist('idsInterface')
 
                 if int_type=="0":
                     int_type = "access"
-                    environment = None
+                    env_vlans_list = []
                 else:
                     int_type = "trunk"
+                    if environment_list is None:
+                        messages.add_message(request, messages.ERROR, "O equipamento não possui ambientes cadastrados.")
+                        return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
                     if envform.is_valid():
-                        environment = envform.cleaned_data['environment']
-                        vlan_range = envform.cleaned_data['vlans']
-                        verificar_range_vlan(environment_list.get("ambiente"), environment, vlan_range)
-                        vlans['range'] = vlan_range
+                        environment = request.POST.getlist('environment')
+                        vlan_range = request.POST.getlist('vlans')
+                        env_vlans_list = env_vlans(environment_list.get("ambiente"), environment, vlan_range)
 
                 try:
-                    client.create_interface().editar_channel(id_channel, name, lacp, int_type, vlans, environment, ids_interface)
+                    client.create_interface().editar_channel(id_channel, name, lacp, int_type, vlan_nativa, env_vlans_list,
+                                                             interfaces_ids)
                     messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_edit_channel"))
                 except NetworkAPIClientError, e:
                     logger.error(e)
