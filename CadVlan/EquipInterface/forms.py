@@ -353,4 +353,5 @@ class ChannelAddForm(forms.Form):
     int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")],
                                  error_messages=error_messages, widget=forms.RadioSelect)
     id = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    type = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)

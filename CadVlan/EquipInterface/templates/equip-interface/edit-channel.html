@@ -37,6 +37,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
 
+
 	$("#page_tab").tabs();
 
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
@@ -72,6 +73,12 @@ $(document).ready(function() {
 		$("#ambiente").show();
 	});
 
+	if ($("#id_type").val() == 1) {
+	    $("#ambiente").show();
+	} else {
+	    $("#ambiente").hide();
+	};
+
     $("#btn_add_int").button({ icons: {primary: "ui-icon-plus"}, text: false });
 
     $("#btn_add_int").mouseover(function() {
@@ -82,11 +89,6 @@ $(document).ready(function() {
 
     $("#btn_addvlan").mouseover(function() {
             $("#btn_addvlan").attr("title","Pesquisar Vlan");
-    });
-
-    $("span[id^=removeInt]").live("click", function(){
-	    var $this = $(this);
-	    $this.parents('tr').remove();
     });
 
     $("#btn_add_interface").button({ icons: {primary: "ui-icon-plus"}, text: false}).live("click", function() {
@@ -128,19 +130,25 @@ $(document).ready(function() {
     });
 
     $("#btn_add_env").button({ icons: {primary: "ui-icon-plus"}, text: false });
+    $("#btn_del_env").button({ icons: {primary: "ui-icon-trash"}, text: false });
 
 	btn_add_env = '<div class="envs">'+$(".envs").html()+'</div>';
 
-	$("#btn_add_env").click(function(){
-    	$("#ambiente").append(btn_add_env);
+	$("#btn_add_env").click(function(html){
+    	$("#ambiente").html()
+	});
+
+	$("#btn_del_env").click(function(){
+    	$(this).parents('.envs_form').remove();
 	});
 
     $("#btn_add_env").mouseover(function() {
             $("#btn_add_env").attr("title","Adicionar outro ambiente");
     });
 
-    $("#ambiente").hide();
-
+    $("#btn_del_env").mouseover(function() {
+            $("#btn_del_env").attr("title","Remover ambiente");
+    });
 });
 </script>
 {% endblock %}
@@ -239,7 +247,7 @@ $(document).ready(function() {
                         </div>
                         <div id="ambiente">
                             <div class="envs">
-                                {% include "equip-interface/add-env-form.html" with envform=envform %}
+                                {% include "equip-interface/add-env-form-2.html" with envform=envsform %}
                             </div>
                         </div>
                         {% if form.int_type.value == 1 %}

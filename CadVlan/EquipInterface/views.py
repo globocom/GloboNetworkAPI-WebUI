@@ -1052,7 +1052,7 @@ def edit_channel(request, channel_name, equip_name):
                 lacp = 0
 
             form = ChannelAddForm(equip_interface_list, initial={'id': channel['id_channel'], 'name': channel['channel'],
-                                                                 'lacp': lacp, 'equip_name': equip_name,
+                                                                 'lacp': lacp, 'equip_name': equip_name, 'type':tipo,
                                                                  'int_type': tipo, 'vlan': channel['vlan_nativa']})
             lists['form'] = form
 
@@ -1079,6 +1079,7 @@ def edit_channel(request, channel_name, equip_name):
                 else:
                     envform = AddEnvInterfaceForm(environment_list)
                     lists['envform'] = envform
+                lists['envsform'] = AddEnvInterfaceForm(environment_list)
             else:
                 messages.add_message(request, messages.WARNING, "O equipamento não possui ambientes cadastrados.")
 
