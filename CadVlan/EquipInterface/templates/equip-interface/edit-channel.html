@@ -67,15 +67,16 @@ $(document).ready(function() {
 
 	$("#id_int_type_0").click( function() {
 		$("#ambiente").hide();
+
 	});
 
 	$("#id_int_type_1").click( function() {
-		$("#ambiente").show();
+	    if ($("#id_type").val() == 0) {
+            $("#ambiente").show();
+        }
 	});
 
-	if ($("#id_type").val() == 1) {
-	    $("#ambiente").show();
-	} else {
+	if ($("#id_type").val() == 0) {
 	    $("#ambiente").hide();
 	};
 
