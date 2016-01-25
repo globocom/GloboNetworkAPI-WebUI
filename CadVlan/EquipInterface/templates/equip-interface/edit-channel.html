@@ -127,8 +127,6 @@ $(document).ready(function() {
             $(this).val(valor);
     });
 
-    $("#ambiente").hide();
-
     $("#btn_add_env").button({ icons: {primary: "ui-icon-plus"}, text: false });
 
 	btn_add_env = '<div class="envs">'+$(".envs").html()+'</div>';
@@ -140,6 +138,8 @@ $(document).ready(function() {
     $("#btn_add_env").mouseover(function() {
             $("#btn_add_env").attr("title","Adicionar outro ambiente");
     });
+
+    $("#ambiente").hide();
 
 });
 </script>
@@ -242,6 +242,15 @@ $(document).ready(function() {
                                 {% include "equip-interface/add-env-form.html" with envform=envform %}
                             </div>
                         </div>
+                        {% if form.int_type.value == 1 %}
+                            {% for var in envform %}
+                                <div id="env_form">
+                                    <div class="envs_form">
+                                        {% include "equip-interface/add-env-form.html" with envform=var %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                         <div style="clear: both; margin: 20px"></div>
                     </div>
                 </form>

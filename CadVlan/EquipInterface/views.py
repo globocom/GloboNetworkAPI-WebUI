@@ -52,12 +52,12 @@ def env_vlans(env_list, env_id, range):
             if e.get('id') == env:
                 if not "None" in e.get('range') :
                     for intervalo in range[i].split(';'):
-                        for int in intervalo.split('-'):
-                            if int is u'':
+                        for a in intervalo.split('-'):
+                            if a is u'':
                                 range[i] = e.get('range')
                             else:
-                                if not (int >= e.get('min_num_vlan_1') and int <=e.get('max_num_vlan_1')):
-                                    if not (int >= e.get('min_num_vlan_2') and int <=e.get('max_num_vlan_2')):
+                                if not (int(a) >= int(e.get('min_num_vlan_1')) and int(a) <= int(e.get('max_num_vlan_1'))):
+                                    if not (int(a) >= int(e.get('min_num_vlan_2')) and int(a) <= int(e.get('max_num_vlan_2'))):
                                         raise InvalidParameterError(u'Numero de vlan fora do range definido para o '
                                                                     u'ambiente: %s'%(e.get('range')))
                 elif not range[i]:
@@ -67,7 +67,6 @@ def env_vlans(env_list, env_id, range):
         env_vlans_dict["vlans"] = range[i]
         env_vlans_dict["env"] = env
         env_vlans_list.append(env_vlans_dict)
-
     return env_vlans_list
 
 def get_equip_environment(client, equip_id):
@@ -1052,8 +1051,9 @@ def edit_channel(request, channel_name, equip_name):
             else:
                 lacp = 0
 
-            form = ChannelAddForm(equip_interface_list, initial={'id': channel['id_channel'], 'name': channel['channel'], 'lacp': lacp, 'equip_name': equip_name,
-                                           'int_type': tipo, 'vlan': channel['vlan']})
+            form = ChannelAddForm(equip_interface_list, initial={'id': channel['id_channel'], 'name': channel['channel'],
+                                                                 'lacp': lacp, 'equip_name': equip_name,
+                                                                 'int_type': tipo, 'vlan': channel['vlan_nativa']})
             lists['form'] = form
 
             if environment_list is not None:
@@ -1063,14 +1063,22 @@ def edit_channel(request, channel_name, equip_name):
                     try:
                         int_envs = client.create_interface().get_env_by_id(channel['id'])
                         int_envs = int_envs.get('ambiente')
-                        envform = AddEnvInterfaceForm(environment_list, initial={'environment': int(int_envs.get('id')), 'vlans': channel['vlans']})
+                        if type(int_envs) is not list:
+                            i = int_envs
+                            int_envs = []
+                            int_envs.append(i)
+                        envform_list = []
+                        for i in int_envs:
+                            envform = AddEnvInterfaceForm(environment_list, initial={'environment': int(i.get('id')), 'vlans': i.get('vlans')})
+                            envform_list.append(envform)
                     except:
                         envform = AddEnvInterfaceForm(environment_list)
+                        envform_list.append(envform)
                         pass
+                    lists['envform'] = envform_list
                 else:
                     envform = AddEnvInterfaceForm(environment_list)
-
-                lists['envform'] = envform
+                    lists['envform'] = envform
             else:
                 messages.add_message(request, messages.WARNING, "O equipamento não possui ambientes cadastrados.")
 
@@ -1098,12 +1106,11 @@ def edit_channel(request, channel_name, equip_name):
                     int_type = "trunk"
                     if environment_list is None:
                         messages.add_message(request, messages.ERROR, "O equipamento não possui ambientes cadastrados.")
-                        return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
+                        return render_to_response(EQUIPMENT_INTERFACE_EDIT_CHANNEL, lists, context_instance=RequestContext(request))
                     if envform.is_valid():
                         environment = request.POST.getlist('environment')
                         vlan_range = request.POST.getlist('vlans')
                         env_vlans_list = env_vlans(environment_list.get("ambiente"), environment, vlan_range)
-
                 try:
                     client.create_interface().editar_channel(id_channel, name, lacp, int_type, vlan_nativa, env_vlans_list,
                                                              interfaces_ids)
