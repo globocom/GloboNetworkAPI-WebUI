@@ -68,6 +68,7 @@ $(document).ready(function() {
 
 	$("#id_int_type_1").click( function() {
 		$("#ambiente").show();
+		$("#btn_add_env_2").click();
 	});
 
     $("#id_vlans").mouseover(function() {
@@ -79,16 +80,22 @@ $(document).ready(function() {
             $(this).val(valor);
     });
 
-    $("#btn_add_env").button({ icons: {primary: "ui-icon-plus"}, text: false });
-
-	btn_add_env = '<div class="envs">'+$(".envs").html()+'</div>';
-
-	$("#btn_add_env").click(function(){
-    	$("#ambiente").append(btn_add_env);
+    $("#btn_add_env_2").button({ icons: {primary: "ui-icon-plus"}, text: false });
+	btn_add_env_2 = '<div class="envs">'+$(".envs").html()+'</div>';
+	$(document).on('click', '#btn_add_env_2',function(){
+	    $("#ambiente").show();
+    	$("#ambiente").append(btn_add_env_2);
 	});
+    $("#btn_add_env_2").mouseover(function() {
+            $("#btn_add_env_2").attr("title","Adicionar outro ambiente");
+    });
 
-    $("#btn_add_env").mouseover(function() {
-            $("#btn_add_env").attr("title","Adicionar outro ambiente");
+    $("#btn_del_env").button({ icons: {primary: "ui-icon-trash"}, text: false });
+    $(document).on('click', '#btn_del_env',function(){
+    	$(this).parents('.envs').remove();
+	});
+    $("#btn_del_env").mouseover(function() {
+            $("#btn_del_env").attr("title","Remover ambiente");
     });
 });
 </script>
