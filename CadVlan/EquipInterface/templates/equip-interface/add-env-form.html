@@ -1,17 +1,8 @@
-
-<script type="text/javascript">
-$(document).ready(function() {
-});
-</script>
-<div id="sortable">
-    <div class="sorting">
-    {% for field in envform %}
-        <div>
-            <div><label>{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-            {{ field }} {% ifequal field.name 'environment' %}<button type="button" id="btn_add_env">Adicionar Ambiente</button>
-            <button type="button" id="btn_del_env">Remover Ambiente</button>{% endifequal %}
-        </div>
-        <div style="clear: both; margin: 20px"></div>
-    {% endfor %}
+{% for field in envform %}
+    <div>
+        <div><label>{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+        {{ field }} {% ifequal field.name 'environment' %}<button type="button" id="btn_add_env_2">Adicionar Ambiente</button>
+        <button type="button" id="btn_del_env">Remover Ambiente</button>{% endifequal %}
     </div>
-</div>
+    <div style="clear: both; margin: 20px"></div>
+{% endfor %}

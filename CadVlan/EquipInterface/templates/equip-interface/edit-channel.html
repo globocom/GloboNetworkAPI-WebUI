@@ -36,8 +36,6 @@
 </style>
 <script type="text/javascript">
 $(document).ready(function() {
-
-
 	$("#page_tab").tabs();
 
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
@@ -45,7 +43,6 @@ $(document).ready(function() {
 			$("#add_form").submit();
 		}
 	});
-
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
 		equip = $("#id_equip_name").val();
@@ -67,6 +64,7 @@ $(document).ready(function() {
 
 	$("#id_int_type_0").click( function() {
 		$("#ambiente").hide();
+		$("#env_form").hide();
 
 	});
 
@@ -74,11 +72,20 @@ $(document).ready(function() {
 	    if ($("#id_type").val() == 0) {
             $("#ambiente").show();
         }
+	    if ($("#id_type").val() == 1) {
+	        $("#ambiente").show();
+            $("#env_form").show();
+        }
 	});
 
 	if ($("#id_type").val() == 0) {
 	    $("#ambiente").hide();
 	};
+
+	if ($("#id_type").val() == 1) {
+	    $("#ambiente").hide();
+	};
+
 
     $("#btn_add_int").button({ icons: {primary: "ui-icon-plus"}, text: false });
 
@@ -130,25 +137,41 @@ $(document).ready(function() {
             $(this).val(valor);
     });
 
+
+
     $("#btn_add_env").button({ icons: {primary: "ui-icon-plus"}, text: false });
-    $("#btn_del_env").button({ icons: {primary: "ui-icon-trash"}, text: false });
-
-	btn_add_env = '<div class="envs">'+$(".envs").html()+'</div>';
-
-	$("#btn_add_env").click(function(html){
-    	$("#ambiente").html()
+	btn_add_env = '<div class="envs">'+$(".envs").html()+'</div>'
+	$(document).on('click', '#btn_add_env',function(){
+	    $("#ambiente").show();
+    	$("#ambiente").append(btn_add_env);
 	});
-
-	$("#btn_del_env").click(function(){
-    	$(this).parents('.envs_form').remove();
-	});
-
     $("#btn_add_env").mouseover(function() {
             $("#btn_add_env").attr("title","Adicionar outro ambiente");
     });
 
+    $("#btn_del_env").button({ icons: {primary: "ui-icon-trash"}, text: false });
+    $(document).on('click', '#btn_del_env',function(){
+    	$(this).parents('.envs_form').remove();
+	});
     $("#btn_del_env").mouseover(function() {
             $("#btn_del_env").attr("title","Remover ambiente");
+    });
+
+    $("#btn_add_env_2").button({ icons: {primary: "ui-icon-plus"}, text: false });
+	$(document).on('click', '#btn_add_env_2',function(){
+	    $("#ambiente").show();
+    	$("#ambiente").append(btn_add_env);
+	});
+    $("#btn_add_env_2").mouseover(function() {
+            $("#btn_add_env_2").attr("title","Adicionar outro ambiente");
+    });
+
+    $("#btn_del_env_2").button({ icons: {primary: "ui-icon-trash"}, text: false });
+    $(document).on('click', '#btn_del_env_2',function(){
+    	$(this).parents('.envs').remove();
+	});
+    $("#btn_del_env_2").mouseover(function() {
+            $("#btn_del_env_2").attr("title","Remover ambiente");
     });
 });
 </script>
@@ -252,13 +275,13 @@ $(document).ready(function() {
                             </div>
                         </div>
                         {% if form.int_type.value == 1 %}
-                            {% for var in envform %}
-                                <div id="env_form">
+                            <div id="env_form">
+                                {% for var in envform %}
                                     <div class="envs_form">
                                         {% include "equip-interface/add-env-form.html" with envform=var %}
                                     </div>
-                                </div>
-                            {% endfor %}
+                                {% endfor %}
+                            </div>
                         {% endif %}
                         <div style="clear: both; margin: 20px"></div>
                     </div>
