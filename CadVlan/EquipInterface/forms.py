@@ -168,6 +168,18 @@ class AddEnvInterfaceForm(forms.Form):
     vlans = forms.CharField(label="Defina o range de vlans:", required=False, error_messages=error_messages, min_length=1,
                             max_length=200)
 
+class EnvInterfaceForm(forms.Form):
+
+    def __init__(self, envs, *args, **kwargs):
+        super(EnvInterfaceForm, self).__init__(*args, **kwargs)
+
+        ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " +
+                         env["grupo_l3_name"] + " ( " + env["range"] + " ) ")  for env in envs["ambiente"]])
+        self.fields['environment'].choices = ambiente_choice
+
+    environment = forms.MultipleChoiceField(label="Ambiente (Range Permitido de Vlans)", required=True, widget=forms.SelectMultiple(
+                                    attrs={'style': "width: 400px"}), error_messages=error_messages)
+
 class AddSeveralInterfaceForm(forms.Form):
 
     def __init__(self, marca, *args, **kwargs):
@@ -316,7 +328,7 @@ class EditForm(forms.Form):
     equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
-
+    type = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
 
     def clean_name(self):
         name = self.cleaned_data['name']

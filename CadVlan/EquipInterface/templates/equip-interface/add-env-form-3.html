@@ -1,0 +1,7 @@
+{% for field in envform %}
+    <div>
+        <div><label>{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+        {{ field }}
+    </div>
+    <div style="clear: both; margin: 20px"></div>
+{% endfor %}

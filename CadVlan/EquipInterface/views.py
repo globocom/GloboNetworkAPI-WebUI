@@ -35,7 +35,7 @@ from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, AddSeveralInterfaceForm, ConnectForm, \
-                                         EditForm, ChannelAddForm
+                                         EditForm, ChannelAddForm, EnvInterfaceForm
 from CadVlan.EquipInterface.business import make_initials_and_params
 from CadVlan.Util.extends.formsets import formset_factory
 
@@ -595,6 +595,7 @@ def edit(request, id_interface):
     lists['int_type'] = int_type_list
     lists['id_interface'] = interface.get('id')
 
+
     if request.method == "GET":
 
         tipo = 0
@@ -606,11 +607,29 @@ def edit(request, id_interface):
             protegida = 0
 
         lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'], 'equip_id': equip['id'],
-                                         'name': interface.get('interface'), 'description': interface.get('descricao'), 'protected': protegida, 'int_type': tipo,
-                                         'vlan': interface.get('vlan') })
+                                         'name': interface.get('interface'), 'description': interface.get('descricao'),
+                                         'protected': protegida, 'int_type': tipo, 'vlan': interface.get('vlan'), 'type': tipo})
         if environment_list is not None:
-            lists['envform'] = AddEnvInterfaceForm(environment_list)
-
+            if tipo:
+                try:
+                    int_envs = client.create_interface().get_env_by_id(id_interface)
+                    int_envs = int_envs.get('ambiente')
+                    envs_list = []
+                    if type(int_envs) is not list:
+                        i = int_envs
+                        int_envs = []
+                        int_envs.append(i)
+                    envform_list = []
+                    for i in int_envs:
+                        envs_list.append(int(i.get('id')))
+                    envform = EnvInterfaceForm(environment_list, initial={'environment': envs_list})
+                except:
+                    envform = EnvInterfaceForm(environment_list)
+                    pass
+                lists['envform'] = envform
+            else:
+                envform = EnvInterfaceForm(environment_list)
+                lists['envform'] = envform
 
     if request.method == "POST":
 
@@ -630,7 +649,7 @@ def edit(request, id_interface):
 
             envs = None
             if environment_list is not None and envform.is_valid():
-                envs = envform.cleaned_data['environment']
+                envs = request.POST.getlist('environment')
 
             trunk = 0
             if int_type=="0":

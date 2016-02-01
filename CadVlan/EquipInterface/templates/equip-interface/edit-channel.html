@@ -269,11 +269,6 @@ $(document).ready(function() {
                             {% endif %}
                             </p>
                         </div>
-                        <div id="ambiente">
-                            <div class="envs">
-                                {% include "equip-interface/add-env-form-2.html" with envform=envsform %}
-                            </div>
-                        </div>
                         {% if form.int_type.value == 1 %}
                             <div id="env_form">
                                 {% for var in envform %}
@@ -283,6 +278,11 @@ $(document).ready(function() {
                                 {% endfor %}
                             </div>
                         {% endif %}
+                        <div id="ambiente">
+                            <div class="envs">
+                                {% include "equip-interface/add-env-form-2.html" with envform=envsform %}
+                            </div>
+                        </div>
                         <div style="clear: both; margin: 20px"></div>
                     </div>
                 </form>
