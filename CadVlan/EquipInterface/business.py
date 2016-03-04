@@ -62,7 +62,7 @@ def get_initial(interf):
     return {'combo': combo, 'name': interf['interface'], 'description': interf['descricao'],
             'protected': prot, 'equip_name': interf['equipamento_nome'],
             'equip_id': interf['equipamento'], 'inter_id': interf['id'], 'int_type': interf['tipo'],
-            'channel': interf['sw_router']}
+            'channel': interf['sw_router'], 'back': interf['ligacao_back'], 'front': interf['ligacao_front']}
 
 
 def next_interface(interface, interfs, last_id, first_time):

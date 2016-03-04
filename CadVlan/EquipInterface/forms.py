@@ -327,6 +327,8 @@ class EditForm(forms.Form):
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    front = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    back = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     type = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
 

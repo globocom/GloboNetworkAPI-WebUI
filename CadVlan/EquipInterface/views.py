@@ -850,15 +850,10 @@ def connect(request, id_interface, front_or_back):
 def disconnect(request, id_interface, back_or_front, equip_name, id_interf_edit):
 
     try:
-
-        # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-
-        # Business
-        client.create_interface().remove_connection(id_interface, back_or_front)
+        client.create_api_interface_request().remove_connection(id_interface, back_or_front)
         messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_disconnect"))
-
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
