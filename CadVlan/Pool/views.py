@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 from CadVlan.Pool.facade import populate_enviroments_choices, populate_optionsvips_choices, \
     populate_expectstring_choices, populate_optionspool_choices, populate_pool_members_by_lists, \
     populate_pool_members_by_obj, populate_servicedownaction_choices, find_servicedownaction_id, \
-    find_servicedownaction_object
+    find_servicedownaction_object, populate_pool_members_by_obj_
 from CadVlan.Util.Decorators import log, login_required, has_perm, has_perm_external
 from django.views.decorators.csrf import csrf_exempt
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
@@ -157,31 +157,12 @@ def spm_datatable(request, id_server_pool, checkstatus):
         }
 
         dtp = DataTablePaginator(request, columnIndexNameMap)
-
         dtp.build_server_side_list()
 
-        pagination = Pagination(
-            dtp.start_record,
-            dtp.end_record,
-            dtp.asorting_cols,
-            dtp.searchable_columns,
-            dtp.custom_search
-        )
+        pools = client.create_pool().get_pool_members( id_server_pool, checkstatus)
+        members = pools["server_pools"][0]["server_pool_members"]
 
-        pools = client.create_pool().list_all_members(
-            [id_server_pool],
-            bool(int(checkstatus))
-            # pagination
-        )
-
-        logger.info(pools)
-
-        return dtp.build_response(
-            pools["pools"][0]["server_pool_members"],
-            len(pools["pools"][0]["server_pool_members"]),
-            POOL_SPM_DATATABLE,
-            request
-        )
+        return dtp.build_response( members, len(members), POOL_SPM_DATATABLE, request)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -264,14 +245,15 @@ def add_form(request):
 
         if request.method == 'POST':
 
-            id_pool_member = request.POST.getlist('id_pool_member')
-            id_equips = request.POST.getlist('id_equip')
-            priorities = request.POST.getlist('priority')
-            ports_reals = request.POST.getlist('ports_real_reals')
-            weight = request.POST.getlist('weight')
-            id_ips = request.POST.getlist('id_ip')
-            ips = request.POST.getlist('ip')
-            environment = request.POST.get('environment')
+            members = dict()
+            members["id_pool_member"] = request.POST.getlist('id_pool_member')
+            members["id_equips"] = request.POST.getlist('id_equip')
+            members["priorities"] = request.POST.getlist('priority')
+            members["ports_reals"] = request.POST.getlist('ports_real_reals')
+            members["weight"] = request.POST.getlist('weight')
+            members["id_ips"] = request.POST.getlist('id_ip')
+            members["ips"] = request.POST.getlist('ip')
+            members["environment"] = request.POST.get('environment')
             healthcheck_type = request.POST.get('health_check')
 
             if healthcheck_type != 'HTTP' and healthcheck_type != 'HTTPS':
@@ -281,19 +263,17 @@ def add_form(request):
                 lists["healthcheck_expect"] = request.POST.get('expect')
                 lists["healthcheck_request"] = request.POST.get('health_check_request')
 
-            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, ports_reals, ips, id_ips, id_equips,
-                                                                        id_pool_member, priorities, weight)
-
-            optionspool_choices = populate_optionspool_choices(client, environment)
+            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, members)
+            optionspool_choices = populate_optionspool_choices(client, members.get("environment"))
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
                             request.POST)
 
-            server_pool_members = format_server_pool_members(request)
-            healthcheck = format_healthcheck(request)
-
             if form.is_valid():
 
+                limit = form.cleaned_data['max_con']
+                server_pool_members = format_server_pool_members(request, limit)
+                healthcheck = format_healthcheck(request)
                 pool = format_pool(client, form, server_pool_members, healthcheck)
                 client.create_pool().save_pool(pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_insert'))
@@ -312,69 +292,6 @@ def add_form(request):
     return render_to_response(POOL_FORM, lists, context_instance=RequestContext(request))
 
 
-def format_pool(client, form, server_pool_members, healthcheck, created=False, id=None):
-
-    pool = dict()
-    pool["id"] = id
-    pool["identifier"] = str(form.cleaned_data['identifier'])
-    pool["default_port"] = int(form.cleaned_data['default_port'])
-    pool["environment"] = int(form.cleaned_data['environment'])
-    pool["servicedownaction"] = int(find_servicedownaction_id(client, form.cleaned_data['servicedownaction']))
-    pool["lb_method"] = str(form.cleaned_data['balancing'])
-    pool["healthcheck"] = healthcheck
-    pool["default_limit"] = int(form.cleaned_data['max_con'])
-    pool["server_pool_members"] = server_pool_members
-    pool["pool_created"] = created
-
-    return pool
-
-def format_server_pool_members(request):
-
-    pool_members = []
-    equips = request.POST.getlist('id_equip')
-    for i in range(0, len(equips)):
-        server_pool_members = dict()
-        server_pool_members["id"] = None
-        server_pool_members["identifier"] = str(request.POST.getlist('equip')[i])
-        server_pool_members["priority"] = int(request.POST.getlist('priority')[i])
-        server_pool_members["equipment"] = format_equipments(request, i)
-        server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
-        server_pool_members["limit"] = 0
-        server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
-        server_pool_members["member_status"] = 0
-        server_pool_members["ip"] = format_ips(request, i)
-        server_pool_members["ipv6"] = None
-        pool_members.append(server_pool_members)
-
-    return pool_members
-
-def format_equipments(request, i):
-
-    equipments = dict()
-    equipments["id"] = int(request.POST.getlist('id_equip')[i])
-    equipments["nome"] = str(request.POST.getlist('equip')[i])
-
-    return equipments
-
-def format_ips(request, i):
-
-    ips = dict()
-    ips["id"] = int(request.POST.getlist('id_ip')[i])
-    ips["ip_formated"] = str(request.POST.getlist('ip')[i])
-
-    return ips
-
-def format_healthcheck(request):
-
-    healthcheck = dict()
-    healthcheck["id"] = None
-    healthcheck["identifier"] = ""
-    healthcheck["healthcheck_type"] = str(request.POST.get('health_check'))
-    healthcheck["healthcheck_request"] = str(request.POST.get('health_check_request'))
-    healthcheck["healthcheck_expect"] = str(request.POST.get('expect'))
-    healthcheck["destination"] = "*:*"
-
-    return healthcheck
 @log
 @login_required
 @has_perm([
@@ -398,55 +315,55 @@ def edit_form(request, id_server_pool):
         lists["label_tab"] = u'Edição de Pool'
         lists["id_server_pool"] = id_server_pool
 
+        pool = client.create_pool().get_pool(id_server_pool)
+        server_pools = pool['server_pools'][0]
+        pool_created = lists["pool_created"] = server_pools['pool_created']
+
         if request.method == 'GET':
 
-            pool = client.create_pool().get_by_pk(id_server_pool)
-
-            lists["pool_created"] = pool['server_pool']['pool_created']
-
             optionspool_choices = [('', '-')]
-            if pool['server_pool']['environment']:
-                optionspool_choices = populate_optionspool_choices(
-                    client, pool['server_pool']['environment']['id'])
 
-            environment = pool['server_pool']['environment'][
-                'id'] if pool['server_pool']['environment'] else None
+            environment = server_pools['environment']
 
-            lists["healthcheck_expect"] = pool['server_pool']['healthcheck']['healthcheck_expect'] \
-                if pool['server_pool']['healthcheck'] else ''
+            if environment:
+                optionspool_choices = populate_optionspool_choices(client, environment)
 
-            lists["healthcheck_request"] = pool['server_pool']['healthcheck']['healthcheck_request'] \
-                if pool['server_pool']['healthcheck'] else ''
+            lists["healthcheck_expect"] = server_pools['healthcheck']['healthcheck_expect'] \
+                if server_pools['healthcheck'] else ''
 
-            health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
-                if pool['server_pool']['healthcheck'] else None
+            lists["healthcheck_request"] = server_pools['healthcheck']['healthcheck_request'] \
+                if server_pools['healthcheck'] else ''
+
+            health_check = server_pools['healthcheck']['healthcheck_type'] \
+                if server_pools['healthcheck'] else None
 
             initial_pool = {
-                'id': pool['server_pool']['id'],
-                'identifier': pool['server_pool']['identifier'],
-                'default_port': pool['server_pool']['default_port'],
+                'id': server_pools['id'],
+                'identifier': server_pools['identifier'],
+                'default_port': server_pools['default_port'],
                 'environment': environment,
-                'balancing': pool['server_pool']['lb_method'],
+                'balancing': server_pools['lb_method'],
                 'health_check': health_check,
-                'max_con': pool['server_pool']['default_limit'],
-                'servicedownaction': pool['server_pool']['servicedownaction'][u'name']
+                'max_con': server_pools['default_limit'],
+                'servicedownaction': server_pools['servicedownaction']
             }
 
-            lists["pool_members"] = populate_pool_members_by_obj(client, pool['server_pool_members'])
+            lists["pool_members"] = populate_pool_members_by_obj_(server_pools['server_pool_members'])
 
-            lists["form"] = PoolForm(enviroments_choices, optionsvips_choices,
-                            servicedownaction_choices, optionspool_choices, initial=initial_pool)
+            lists["form"] = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices,
+                                     optionspool_choices, initial=initial_pool)
+
         if request.method == 'POST':
 
-            id_pool_member = request.POST.getlist('id_pool_member')
-            id_equips = request.POST.getlist('id_equip')
-            priorities = request.POST.getlist('priority')
-            ports_reals = request.POST.getlist('ports_real_reals')
-            weight = request.POST.getlist('weight')
-            id_ips = request.POST.getlist('id_ip')
-            ips = request.POST.getlist('ip')
-            lists["pool_created"] = request.POST.getlist('pool_created')
-            environment = request.POST.get('environment')
+            members = dict()
+            members["id_pool_member"] = request.POST.getlist('id_pool_member')
+            members["id_equips"] = request.POST.getlist('id_equip')
+            members["priorities"] = request.POST.getlist('priority')
+            members["ports_reals"] = request.POST.getlist('ports_real_reals')
+            members["weight"] = request.POST.getlist('weight')
+            members["id_ips"] = request.POST.getlist('id_ip')
+            members["ips"] = request.POST.getlist('ip')
+            members["environment"] = request.POST.get('environment')
             healthcheck_type = request.POST.get('health_check')
 
             if healthcheck_type != 'HTTP' and healthcheck_type != 'HTTPS':
@@ -456,23 +373,18 @@ def edit_form(request, id_server_pool):
                 lists["healthcheck_expect"] = request.POST.get('expect')
                 lists["healthcheck_request"] = request.POST.get('health_check_request')
 
-            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, ports_reals, ips, id_ips,
-                                                                                 id_equips, id_pool_member, priorities,
-                                                                                 weight)
-
-            optionspool_choices = populate_optionspool_choices(client, environment)
+            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, members)
+            optionspool_choices = populate_optionspool_choices(client, members.get("environment"))
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
                             request.POST)
 
-            server_pool_members = format_server_pool_members(request)
-            healthcheck = format_healthcheck(request)
-
             if form.is_valid():
 
-                pool = format_pool(client, form, server_pool_members, healthcheck, lists.get("pool_created"),
-                                   int(id_server_pool))
-                raise Exception(lists.get(""))
+                limit = form.cleaned_data['max_con']
+                server_pool_members = format_server_pool_members(request, limit)
+                healthcheck = format_healthcheck(request)
+                pool = format_pool(client, form, server_pool_members, healthcheck, pool_created, int(id_server_pool))
                 client.create_pool().update_pool(pool, id_server_pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
 
@@ -487,7 +399,7 @@ def edit_form(request, id_server_pool):
                         request.POST)
         lists["form"] = form
 
-    if lists["pool_created"]:
+    if pool_created:
         return redirect(reverse('pool.manage.tab1', args=[id_server_pool]))
 
     return render_to_response(POOL_FORM, lists, context_instance=RequestContext(request))
@@ -517,14 +429,9 @@ def ajax_modal_ip_real_server(request):
 
 def __modal_ip_list_real(request, client_api):
 
-    lists = {
-        'msg': str(),
-        'ips': []
-    }
-
+    lists = {'msg': str(), 'ips': []}
     ips = {}
     status_code = 200
-
     ambiente = get_param_in_request(request, 'id_environment')
     equip_name = get_param_in_request(request, 'equip_name')
 
@@ -550,7 +457,6 @@ def __modal_ip_list_real(request, client_api):
 
     ips['list_ipv4'] = ips_list['list_ipv4']
     ips['list_ipv6'] = ips_list['list_ipv6']
-
     lists['ips'] = ips
     lists['equip'] = equip
 
@@ -587,8 +493,7 @@ def __get_opcoes_pool_by_ambiente(request, client_api):
     try:
 
         ambiente = get_param_in_request(request, 'id_environment')
-        opcoes_pool = client_api.create_pool().get_opcoes_pool_by_ambiente(
-            ambiente)
+        opcoes_pool = client_api.create_pool().get_opcoes_pool_by_ambiente(ambiente)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -603,9 +508,8 @@ def __get_opcoes_pool_by_ambiente(request, client_api):
     {"permission": POOL_ALTER_SCRIPT, "write": True}]
 )
 def delete(request):
-    """
-        Delete Pool Into Database
-    """
+    """Delete Pool Into Database"""
+
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -613,23 +517,11 @@ def delete(request):
         form = DeleteForm(request.POST)
 
         if form.is_valid():
-
-            ids = split_to_array(form.cleaned_data['ids'])
-
+            ids = form.cleaned_data['ids']
             client.create_pool().delete_pool(ids)
-
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                pool_messages.get('success_delete')
-            )
-
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_delete'))
         else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                error_messages.get("select_one")
-            )
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -682,9 +574,8 @@ def remove(request):
 @login_required
 @has_perm([{"permission": POOL_CREATE_SCRIPT, "write": True}])
 def create(request):
-    """
-        Remove Pool Running Script and Update to Not Created
-    """
+    """Remove Pool Running Script and Update to Not Created"""
+
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -699,18 +590,10 @@ def create(request):
             logger.error(pools['pools'])
             client.create_pool().create(pools['pools'])
 
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                pool_messages.get('success_create')
-            )
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_create'))
 
         else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                error_messages.get("select_one")
-            )
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -723,9 +606,8 @@ def create(request):
 @login_required
 @has_perm([{"permission": POOL_ALTER_SCRIPT, "write": True}])
 def status_change(request):
-    """
-        Enable Pool Member Running Script
-    """
+    """Enable Pool Member Running Script"""
+
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -755,11 +637,9 @@ def status_change(request):
 
             if len(pools['pools'][i]['server_pool_members']) > 0:
                 client.create_pool().poolmember_state(pools['pools'])
-            messages.add_message(
-                request, messages.SUCCESS, pool_messages.get('success_status_change'))
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_status_change'))
         else:
-            messages.add_message(
-                request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -772,9 +652,8 @@ def status_change(request):
 @login_required
 @has_perm([{"permission": POOL_ALTER_SCRIPT, "write": True}])
 def enable(request):
-    """
-        Enable Pool Member Running Script
-    """
+    """Enable Pool Member Running Script"""
+
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -784,11 +663,9 @@ def enable(request):
 
         if id_server_pool and ids:
             client.create_pool().enable(split_to_array(ids))
-            messages.add_message(
-                request, messages.SUCCESS, pool_messages.get('success_enable'))
+            messages.add_message( request, messages.SUCCESS, pool_messages.get('success_enable'))
         else:
-            messages.add_message(
-                request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -853,8 +730,8 @@ def __add_healthcheck_expect_shared(request, client):
 
             if expect_string != '':
 
-                client.create_ambiente().add_healthcheck_expect(
-                    id_ambiente=id_environment, expect_string=expect_string, match_list=expect_string)
+                client.create_ambiente().add_healthcheck_expect(id_ambiente=id_environment, expect_string=expect_string,
+                                                                match_list=expect_string)
 
                 lists['expect_string'] = expect_string
                 lists['mensagem'] = healthcheck_messages.get('success_create')
@@ -881,11 +758,7 @@ def pool_member_items(request):
         pool_id = request.GET.get('pool_id')
         pool_data = client_api.create_pool().get_by_pk(pool_id)
 
-        return render(
-            request,
-            POOL_MEMBER_ITEMS,
-            pool_data
-        )
+        return render(request, POOL_MEMBER_ITEMS, pool_data)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -907,32 +780,29 @@ def manage_tab1(request, id_server_pool):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        pool = client.create_pool().get_by_pk(id_server_pool)
+        lists = dict()
+        lists["id_server_pool"] = id_server_pool
+        pool = client.create_pool().get_pool(id_server_pool)
+        server_pools = pool['server_pools'][0]
 
-        environment_desc = None
-        if pool['server_pool']['environment']:
-            environment = client.create_ambiente().buscar_por_id(
-                pool['server_pool']['environment']['id'])
-            environment_desc = environment['ambiente']['ambiente_rede']
+        lists["environment"] = None
+        if server_pools['environment']:
+            environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
+            lists["environment"] = environment['ambiente']['ambiente_rede']
 
-        health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
-            if pool['server_pool']['healthcheck'] else None
+        lists["health_check"] = server_pools['healthcheck']['healthcheck_type'] if server_pools['healthcheck'] else None
 
-        identifier = pool['server_pool']['identifier']
-        default_port = pool['server_pool']['default_port']
-        balancing = pool['server_pool']['lb_method']
-        servicedownaction = pool['server_pool']['servicedownaction'][u'name']
-        max_con = pool['server_pool']['default_limit']
+        lists["identifier"] = server_pools['identifier']
+        lists["default_port"] = server_pools['default_port']
+        lists["balancing"] = server_pools['lb_method']
+        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["max_con"] = server_pools['default_limit']
+        lists["pool_created"] = server_pools['pool_created']
 
-        pool_created = pool['server_pool']['pool_created']
-        if not pool_created:
+        if not lists['pool_created']:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
-        return render_to_response(POOL_MANAGE_TAB1, {'id_server_pool': id_server_pool, 'health_check': health_check,
-                                                     'environment': environment_desc, 'identifier': identifier,
-                                                     'default_port': default_port, 'balancing': balancing,
-                                                     'max_con': max_con, 'servicedownaction': servicedownaction},
-                                  context_instance=RequestContext(request))
+        return render_to_response(POOL_MANAGE_TAB1, lists, context_instance=RequestContext(request))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -952,32 +822,29 @@ def manage_tab2(request, id_server_pool):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        pool = client.create_pool().get_by_pk(id_server_pool)
+        lists = dict()
+        lists["id_server_pool"] = id_server_pool
+        pool = client.create_pool().get_pool(id_server_pool)
+        server_pools = pool['server_pools'][0]
 
-        environment_desc = None
-        if pool['server_pool']['environment']:
-            environment = client.create_ambiente().buscar_por_id(
-                pool['server_pool']['environment']['id'])
-            environment_desc = environment['ambiente']['ambiente_rede']
+        lists["environment"] = None
+        if server_pools['environment']:
+            environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
+            lists["environment"] = environment['ambiente']['ambiente_rede']
 
-        health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
-            if pool['server_pool']['healthcheck'] else None
+        lists["health_check"] = server_pools['healthcheck']['healthcheck_type'] if server_pools['healthcheck'] else None
 
-        identifier = pool['server_pool']['identifier']
-        default_port = pool['server_pool']['default_port']
-        balancing = pool['server_pool']['lb_method']
-        servicedownaction = pool['server_pool']['servicedownaction'][u'name']
-        max_con = pool['server_pool']['default_limit']
+        lists["identifier"] = server_pools['identifier']
+        lists["default_port"] = server_pools['default_port']
+        lists["balancing"] = server_pools['lb_method']
+        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["max_con"] = server_pools['default_limit']
+        lists["pool_created"] = server_pools['pool_created']
 
-        pool_created = pool['server_pool']['pool_created']
-        if not pool_created:
+        if not lists['pool_created']:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
-        return render_to_response(POOL_MANAGE_TAB2, {'id_server_pool': id_server_pool, 'health_check': health_check,
-                                                     'environment': environment_desc, 'identifier': identifier,
-                                                     'default_port': default_port, 'balancing': balancing,
-                                                     'max_con': max_con, 'servicedownaction': servicedownaction},
-                                  context_instance=RequestContext(request))
+        return render_to_response(POOL_MANAGE_TAB2, lists, context_instance=RequestContext(request))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -1116,8 +983,7 @@ def manage_tab3_(request, id_server_pool):
                 'max_con': pool['server_pool']['default_limit'],
             }
 
-            optionspool_choices = populate_optionspool_choices(
-                client, environment)
+            optionspool_choices = populate_optionspool_choices(client, environment)
 
             form = PoolForm(enviroments_choices, optionsvips_choices,
                             servicedownaction_choices, optionspool_choices, initial=initial_pool)
@@ -1148,47 +1014,43 @@ def manage_tab3(request, id_server_pool):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        #combos
+        lists = dict()
+
         enviroments_choices = populate_enviroments_choices(client)
         optionsvips_choices = populate_optionsvips_choices(client)
-        expectstring_choices = populate_expectstring_choices(client)
         servicedownaction_choices = populate_servicedownaction_choices(client)
+        lists["expectstring_choices"] = populate_expectstring_choices(client)
 
-        action = reverse('pool.manage.tab3', args=[id_server_pool])
+        lists["action"] = reverse('pool.manage.tab3', args=[id_server_pool])
+        lists["id_server_pool"] = id_server_pool
 
-        pool = client.create_pool().get_by_pk(id_server_pool)
+        pool = client.create_pool().get_pool(id_server_pool)
+        server_pools = pool['server_pools'][0]
 
-        #redirect
-        pool_created = pool['server_pool']['pool_created']
-        if not pool_created:
+        lists["environment"] = None
+        if server_pools['environment']:
+            environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
+            lists["environment"] = environment['ambiente']['ambiente_rede']
+
+        lists["pool_created"] = server_pools['pool_created']
+        if not lists['pool_created']:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
-        environment_desc = None
-        if pool['server_pool']['environment']:
-            environment = client.create_ambiente().buscar_por_id(
-                pool['server_pool']['environment']['id'])
-            environment_desc = environment['ambiente']['ambiente_rede']
+        lists["health_check"] = server_pools['healthcheck']['healthcheck_type'] \
+            if server_pools['healthcheck'] else None
+        lists['healthcheck_expect'] = server_pools['healthcheck']['healthcheck_expect'] \
+            if server_pools['healthcheck'] else ''
+        lists['healthcheck_request'] = server_pools['healthcheck']['healthcheck_request'] \
+            if server_pools['healthcheck'] else ''
 
-        health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
-            if pool['server_pool']['healthcheck'] else None
-
-        healthcheck_expect = pool['server_pool']['healthcheck']['healthcheck_expect'] \
-            if pool['server_pool']['healthcheck'] else ''
-
-        healthcheck_request = pool['server_pool']['healthcheck']['healthcheck_request'] \
-            if pool['server_pool']['healthcheck'] else ''
-
-        identifier = pool['server_pool']['identifier']
-        default_port = pool['server_pool']['default_port']
-        balancing = pool['server_pool']['lb_method']
-        servicedownaction = pool['server_pool']['servicedownaction'][u'name']
-        max_con = pool['server_pool']['default_limit']
-
-        environment = pool['server_pool']['environment'][
-            'id'] if pool['server_pool']['environment'] else None
+        lists["identifier"] = server_pools['identifier']
+        lists["default_port"] = server_pools['default_port']
+        lists["balancing"] = server_pools['lb_method']
+        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["max_con"] = server_pools['default_limit']
 
         if request.method == 'POST':
-                # Data post
+
             environment = request.POST.get('environment')
             healthcheck_type = request.POST.get('health_check')
             healthcheck_expect = request.POST.get('expect')
@@ -1198,13 +1060,13 @@ def manage_tab3(request, id_server_pool):
                 healthcheck_expect = ''
                 healthcheck_request = ''
 
-            optionspool_choices = populate_optionspool_choices(
-                client, environment)
+            optionspool_choices = populate_optionspool_choices(client, environment)
 
-            form = PoolForm(enviroments_choices, optionsvips_choices,
-                            servicedownaction_choices, optionspool_choices, request.POST)
+            form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
+                            request.POST)
+
             if form.is_valid():
-                # Data form
+
                 sv_id_server_pool = form.cleaned_data['id']
                 sv_identifier = form.cleaned_data['identifier']
                 sv_default_port = form.cleaned_data['default_port']
@@ -1212,11 +1074,9 @@ def manage_tab3(request, id_server_pool):
                 sv_balancing = form.cleaned_data['balancing']
                 sv_max_con = form.cleaned_data['max_con']
                 sv_servicedownaction = form.cleaned_data['servicedownaction']
-                sv_servicedownaction_obj = find_servicedownaction_object(
-                    client, sv_servicedownaction)
+                sv_servicedownaction_obj = find_servicedownaction_object(client, sv_servicedownaction)
 
                 environment = client.create_ambiente().buscar_por_id(sv_environment)
-
                 pool = client.create_pool().list_all_members([sv_id_server_pool])
 
                 pool["pools"][0]["server_pool"]["identifier"] = sv_identifier
@@ -1234,39 +1094,31 @@ def manage_tab3(request, id_server_pool):
 
                 client.create_pool().save_pool(pool["pools"])
 
-                messages.add_message(
-                    request, messages.SUCCESS, pool_messages.get('success_update'))
+                messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
                 return redirect(reverse('pool.manage.tab3', args=[id_server_pool]))
 
         else:
             initial_pool = {
-                'id': pool['server_pool']['id'],
-                'identifier': pool['server_pool']['identifier'],
-                'default_port': pool['server_pool']['default_port'],
-                'environment': environment,
-                'balancing': pool['server_pool']['lb_method'],
-                'servicedownaction': pool['server_pool']['servicedownaction'][u'name'],
-                'health_check': health_check,
-                'max_con': pool['server_pool']['default_limit'],
+                'id': server_pools['id'],
+                'identifier': server_pools['identifier'],
+                'default_port': server_pools['default_port'],
+                'environment': server_pools['environment'],
+                'balancing': server_pools['lb_method'],
+                'health_check': lists["health_check"],
+                'max_con': server_pools['default_limit'],
+                'servicedownaction': server_pools['servicedownaction']
             }
+            optionspool_choices = populate_optionspool_choices(client, server_pools['environment'])
+            form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
+                            initial=initial_pool)
 
-            optionspool_choices = populate_optionspool_choices(
-                client, environment)
-
-            form = PoolForm(enviroments_choices, optionsvips_choices,
-                            servicedownaction_choices, optionspool_choices, initial=initial_pool)
+        lists["form"] = form
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_MANAGE_TAB3, {'id_server_pool': id_server_pool, 'health_check': health_check,
-                                                 'environment': environment_desc, 'identifier': identifier,
-                                                 'default_port': default_port, 'balancing': balancing,
-                                                 'max_con': max_con, 'healthcheck_request': healthcheck_request,
-                                                 'form': form, 'healthcheck_expect': healthcheck_expect, 'action': action,
-                                                 'expectstring_choices': expectstring_choices, 'servicedownaction': servicedownaction},
-                              context_instance=RequestContext(request))
+    return render_to_response(POOL_MANAGE_TAB3, lists,context_instance=RequestContext(request))
 
 
 @log
@@ -1280,70 +1132,63 @@ def manage_tab3(request, id_server_pool):
 def manage_tab4_(request, id_server_pool):
 
     try:
+
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        action = reverse('pool.manage.tab4', args=[id_server_pool])
-        pool = client.create_pool().get_by_pk(id_server_pool)
+        lists = dict()
+        lists["action"] = reverse('pool.manage.tab4', args=[id_server_pool])
+        lists["id_server_pool"] = id_server_pool
 
-        pool_created = pool['server_pool']['pool_created']
+        pool = client.create_pool().get_pool(id_server_pool)
+        server_pools = pool['server_pools'][0]
+
+        pool_created = server_pools['pool_created']
         if not pool_created:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
-        environment_desc = None
-        if pool['server_pool']['environment']:
-            environment = client.create_ambiente().buscar_por_id(
-                pool['server_pool']['environment']['id'])
-            environment_desc = environment['ambiente']['ambiente_rede']
+        lists["environment"] = None
+        if server_pools['environment']:
+            environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
+            lists["environment"] = environment['ambiente']['ambiente_rede']
 
-        health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
-            if pool['server_pool']['healthcheck'] else None
+        lists["health_check"] = server_pools['healthcheck']['healthcheck_type'] if server_pools['healthcheck'] else None
 
-        identifier = pool['server_pool']['identifier']
-        default_port = pool['server_pool']['default_port']
-        balancing = pool['server_pool']['lb_method']
-        servicedownaction = pool['server_pool']['servicedownaction'][u'name']
-        max_con = pool['server_pool']['default_limit']
-        environment = pool['server_pool']['environment'][
-            'id'] if pool['server_pool']['environment'] else ''
+        lists["identifier"] = server_pools['identifier']
+        lists["default_port"] = server_pools['default_port']
+        lists["balancing"] = server_pools['lb_method']
+        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["max_con"] = server_pools['default_limit']
+        lists["pool_created"] = server_pools['pool_created']
 
         if request.method == 'POST':
-            # Data post list
-            id_pool_member = request.POST.getlist('id_pool_member')
-            id_equips = request.POST.getlist('id_equip')
-            nome_equips = request.POST.getlist('equip')
-            priorities = request.POST.getlist('priority')
-            ports_reals = request.POST.getlist('ports_real_reals')
-            weight = request.POST.getlist('weight')
-            id_ips = request.POST.getlist('id_ip')
-            ips = request.POST.getlist('ip')
 
-            # Rebuilding the reals list so we can display it again to the user
-            # if it raises an error
-            pool_members, ip_list_full = populate_pool_members_by_lists(client, ports_reals, ips, id_ips, id_equips,
-                                                                        id_pool_member, priorities, weight)
+            members = dict()
+            members["id_pool_member"] = request.POST.getlist('id_pool_member')
+            members["id_equips"] = request.POST.getlist('id_equip')
+            members["priorities"] = request.POST.getlist('priority')
+            members["ports_reals"] = request.POST.getlist('ports_real_reals')
+            members["weight"] = request.POST.getlist('weight')
+            members["id_ips"] = request.POST.getlist('id_ip')
+            members["ips"] = request.POST.getlist('ip')
 
-            client.create_pool().save_reals(id_server_pool, ip_list_full, nome_equips, id_equips, priorities,
-                                            weight, ports_reals, id_pool_member)
+            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, members)
 
-            messages.add_message(
-                request, messages.SUCCESS, pool_messages.get('success_update'))
+            client.create_pool().save_reals(id_server_pool, ip_list_full, members.get("nome_equips"), members.get("id_equips"),
+                                            members.get("priorities"), members.get("weight"), members.get("ports_reals"),
+                                            members.get("id_pool_member"))
 
-            return redirect(action)
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
+
+            return redirect(lists['action'])
         else:
-            pool_members = populate_pool_members_by_obj(
-                client, pool['server_pool_members'])
+            lists["pool_members"] = populate_pool_members_by_obj_(server_pools['server_pool_members'])
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_MANAGE_TAB4, {'id_server_pool': id_server_pool, 'health_check': health_check,
-                                                 'environment_desc': environment_desc, 'identifier': identifier,
-                                                 'default_port': default_port, 'balancing': balancing,
-                                                 'max_con': max_con, 'pool_members': pool_members, 'action': action,
-                                                 'environment': environment, 'servicedownaction': servicedownaction},
-                              context_instance=RequestContext(request))
+    return render_to_response(POOL_MANAGE_TAB4, lists, context_instance=RequestContext(request))
 
 
 @log
@@ -1357,35 +1202,38 @@ def manage_tab4_(request, id_server_pool):
 def manage_tab4(request, id_server_pool):
 
     try:
+
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        action = reverse('pool.manage.tab4', args=[id_server_pool])
-        pool = client.create_pool().get_by_pk(id_server_pool)
+        lists = dict()
+        lists["action"] = reverse('pool.manage.tab4', args=[id_server_pool])
+        lists["id_server_pool"] = id_server_pool
 
-        pool_created = pool['server_pool']['pool_created']
+        pool = client.create_pool().get_pool(id_server_pool)
+        server_pools = pool['server_pools'][0]
+
+        lists["pool_created"] = pool_created = server_pools['pool_created']
         if not pool_created:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
-        environment_desc = None
-        if pool['server_pool']['environment']:
-            environment = client.create_ambiente().buscar_por_id(
-                pool['server_pool']['environment']['id'])
-            environment_desc = environment['ambiente']['ambiente_rede']
+        lists["environment"] = None
+        if server_pools['environment']:
+            environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
+            lists["environment"] = environment['ambiente']['ambiente_rede']
 
-        health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
-            if pool['server_pool']['healthcheck'] else None
+        lists["health_check"] = server_pools['healthcheck']['healthcheck_type'] if server_pools['healthcheck'] else None
 
-        identifier = pool['server_pool']['identifier']
-        default_port = pool['server_pool']['default_port']
-        balancing = pool['server_pool']['lb_method']
-        servicedownaction = pool['server_pool']['servicedownaction'][u'name']
-        max_con = pool['server_pool']['default_limit']
-        environment = pool['server_pool']['environment'][
-            'id'] if pool['server_pool']['environment'] else ''
+        lists["identifier"] = server_pools['identifier']
+        lists["default_port"] = server_pools['default_port']
+        lists["balancing"] = server_pools['lb_method']
+        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["max_con"] = server_pools['default_limit']
+        #lists["environment"] = server_pools['environment']
+
 
         if request.method == 'POST':
-            # Data post list
+
             id_pool_member = request.POST.getlist('id_pool_member')
             id_equips = request.POST.getlist('id_equip')
             nome_equips = request.POST.getlist('equip')
@@ -1395,9 +1243,9 @@ def manage_tab4(request, id_server_pool):
             id_ips = request.POST.getlist('id_ip')
             ips = request.POST.getlist('ip')
 
-            pool = client.create_pool().list_all_members([id_server_pool])
-
+            pool = client.create_pool().list_all_members(id_server_pool)
             members = list()
+
             for idx, spm in enumerate(id_equips):
 
                 members.append({
@@ -1424,7 +1272,7 @@ def manage_tab4(request, id_server_pool):
                 members[idx]['priority'] = priorities[idx]
                 members[idx]['port_real'] = ports_reals[idx]
                 members[idx]['weight'] = weight[idx]
-                members[idx]['limit'] = pool["pools"][0]['server_pool']['default_limit']
+                members[idx]['limit'] = server_pools['server_pool_members'][idx]['limit']
 
                 if len(ips[idx]) <= 15:
                     ipv4 = client.create_ip().get_ipv4(id_ips[idx])
@@ -1451,29 +1299,92 @@ def manage_tab4(request, id_server_pool):
                     members[idx]['ipv6']['block8'] = ipv6['ipv6']['block8']
                     members[idx]['ipv6']['description'] = ipv6['ipv6']['description']
 
-                members[idx]['server_pool'] = pool["pools"][0]['server_pool']
+                members[idx]['server_pool'] = pool['server_pool_members'][0]['server_pool']
 
-            pool["pools"][0]['server_pool_members'] = members
-            pool_members = populate_pool_members_by_obj(
-                client, pool["pools"][0]['server_pool_members'])
-            client.create_pool().save_pool(pool["pools"])
+            pool["server_pool_members"][0]['server_pool'] = members
+
+            pool_members = populate_pool_members_by_obj(client, pool["server_pool_members"][0]['server_pool'])
+
+            client.create_pool().save_pool(pool["server_pool_members"])
 
 
             messages.add_message(
                 request, messages.SUCCESS, pool_messages.get('success_update'))
 
-            return redirect(action)
+            return redirect(lists['action'])
         else:
-            pool_members = populate_pool_members_by_obj(
-                client, pool['server_pool_members'])
+            pool_members = populate_pool_members_by_obj(client, pool['server_pool_members'])
+
+        lists["pool_members"] = pool_members
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_MANAGE_TAB4, {'id_server_pool': id_server_pool, 'health_check': health_check,
-                                                 'environment_desc': environment_desc, 'identifier': identifier,
-                                                 'default_port': default_port, 'balancing': balancing,
-                                                 'max_con': max_con, 'pool_members': pool_members, 'action': action,
-                                                 'environment': environment, 'servicedownaction': servicedownaction},
-                              context_instance=RequestContext(request))
+    return render_to_response(POOL_MANAGE_TAB4, lists, context_instance=RequestContext(request))
+
+
+def format_pool(client, form, server_pool_members, healthcheck, created=False, id=None):
+
+    pool = dict()
+    pool["id"] = id
+    pool["identifier"] = str(form.cleaned_data['identifier'])
+    pool["default_port"] = int(form.cleaned_data['default_port'])
+    pool["environment"] = int(form.cleaned_data['environment'])
+    pool["servicedownaction"] = int(find_servicedownaction_id(client, form.cleaned_data['servicedownaction']))
+    pool["lb_method"] = str(form.cleaned_data['balancing'])
+    pool["healthcheck"] = healthcheck
+    pool["default_limit"] = int(form.cleaned_data['max_con'])
+    pool["server_pool_members"] = server_pool_members
+    pool["pool_created"] = created
+
+    return pool
+
+def format_server_pool_members(request, limit=0):
+
+    pool_members = []
+    equips = request.POST.getlist('id_equip')
+    for i in range(0, len(equips)):
+        server_pool_members = dict()
+        server_pool_members["id"] = int(request.POST.getlist('id_pool_member')[i]) \
+            if request.POST.getlist('id_pool_member')[i] else None
+        server_pool_members["identifier"] = str(request.POST.getlist('equip')[i])
+        server_pool_members["priority"] = int(request.POST.getlist('priority')[i])
+        server_pool_members["equipment"] = format_equipments(request, i)
+        server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
+        server_pool_members["limit"] = limit
+        server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
+        server_pool_members["member_status"] = 0
+        server_pool_members["ip"] = format_ips(request, i)
+        server_pool_members["ipv6"] = None
+        pool_members.append(server_pool_members)
+
+    return pool_members
+
+def format_equipments(request, i):
+
+    equipments = dict()
+    equipments["id"] = int(request.POST.getlist('id_equip')[i])
+    equipments["nome"] = str(request.POST.getlist('equip')[i])
+
+    return equipments
+
+def format_ips(request, i):
+
+    ips = dict()
+    ips["id"] = int(request.POST.getlist('id_ip')[i])
+    ips["ip_formated"] = str(request.POST.getlist('ip')[i])
+
+    return ips
+
+def format_healthcheck(request):
+
+    healthcheck = dict()
+    healthcheck["id"] = None
+    healthcheck["identifier"] = ""
+    healthcheck["healthcheck_type"] = str(request.POST.get('health_check'))
+    healthcheck["healthcheck_request"] = str(request.POST.get('health_check_request'))
+    healthcheck["healthcheck_expect"] = str(request.POST.get('expect'))
+    healthcheck["destination"] = "*:*"
+
+    return healthcheck
