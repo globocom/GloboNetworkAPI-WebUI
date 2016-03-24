@@ -60,8 +60,12 @@ def find_servicedownaction_id(client, option_name):
         if obj['name'] == option_name:
             return obj['id']
 
-def find_servicedownaction_object(client, option_name):
+def find_servicedownaction_object(client, option_name=None, id=None):
     optionspool = client.create_option_pool().get_all_option_pool(option_type='ServiceDownAction')
+    if id:
+        for obj in optionspool:
+            if obj['id'] == id:
+                return obj['name']
     for obj in optionspool:
         if obj['name'] == option_name:
             return obj
@@ -121,19 +125,18 @@ def populate_pool_members_by_obj_(server_pool_members):
 def populate_pool_members_by_obj(client, server_pool_members):
     pool_members = []
 
-    if len(server_pool_members) > 0:
-        for obj in server_pool_members:
-            equip = client.create_equipamento().listar_por_nome(obj['equipment_name'])
+    for obj in server_pool_members:
+        equip = client.create_equipamento().listar_por_nome(obj['equipment_name'])
 
-            ip = ''
-            if obj['ip']:
-                ip = obj['ip']['ip_formated']
-            elif obj['ipv6']:
-                ip = obj['ipv6']['ip_formated']
+        ip = ''
+        if obj['ip']:
+            ip = obj['ip']['ip_formated']
+        elif obj['ipv6']:
+            ip = obj['ipv6']['ip_formated']
 
-            pool_members.append({'id': obj['id'], 'id_equip': equip['equipamento']['id'],
-                                 'nome_equipamento': equip['equipamento']['nome'], 'priority': obj['priority'],
-                                 'port_real': obj['port_real'], 'weight': obj['weight'], 'id_ip': obj['ip']['id'],
-                                 'ip': ip})
+        pool_members.append({'id': obj['id'], 'id_equip': equip['equipamento']['id'],
+                             'nome_equipamento': equip['equipamento']['nome'], 'priority': obj['priority'],
+                             'port_real': obj['port_real'], 'weight': obj['weight'], 'id_ip': obj['ip']['id'],
+                             'ip': ip})
 
     return pool_members

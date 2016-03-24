@@ -274,7 +274,8 @@ def add_form(request):
                 limit = form.cleaned_data['max_con']
                 server_pool_members = format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
-                pool = format_pool(client, form, server_pool_members, healthcheck)
+                servicedownaction = format_servicedownaction(client, form)
+                pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction)
                 client.create_pool().save_pool(pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_insert'))
 
@@ -345,7 +346,7 @@ def edit_form(request, id_server_pool):
                 'balancing': server_pools['lb_method'],
                 'health_check': health_check,
                 'max_con': server_pools['default_limit'],
-                'servicedownaction': server_pools['servicedownaction']
+                'servicedownaction': server_pools['servicedownaction']['id']
             }
 
             lists["pool_members"] = populate_pool_members_by_obj_(server_pools['server_pool_members'])
@@ -384,7 +385,8 @@ def edit_form(request, id_server_pool):
                 limit = form.cleaned_data['max_con']
                 server_pool_members = format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
-                pool = format_pool(client, form, server_pool_members, healthcheck, pool_created, int(id_server_pool))
+                servicedownaction = format_servicedownaction(client, form)
+                pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction, pool_created, int(id_server_pool))
                 client.create_pool().update_pool(pool, id_server_pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
 
@@ -795,7 +797,7 @@ def manage_tab1(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["servicedownaction"] = server_pools['servicedownaction']['id']
         lists["max_con"] = server_pools['default_limit']
         lists["pool_created"] = server_pools['pool_created']
 
@@ -837,7 +839,7 @@ def manage_tab2(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["servicedownaction"] = server_pools['servicedownaction']['id']
         lists["max_con"] = server_pools['default_limit']
         lists["pool_created"] = server_pools['pool_created']
 
@@ -1046,7 +1048,7 @@ def manage_tab3(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["servicedownaction"] = server_pools['servicedownaction']['id']
         lists["max_con"] = server_pools['default_limit']
 
         if request.method == 'POST':
@@ -1106,7 +1108,7 @@ def manage_tab3(request, id_server_pool):
                 'balancing': server_pools['lb_method'],
                 'health_check': lists["health_check"],
                 'max_con': server_pools['default_limit'],
-                'servicedownaction': server_pools['servicedownaction']
+                'servicedownaction': server_pools['servicedownaction']['id']
             }
             optionspool_choices = populate_optionspool_choices(client, server_pools['environment'])
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
@@ -1157,7 +1159,7 @@ def manage_tab4_(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["servicedownaction"] = server_pools['servicedownaction']['id']
         lists["max_con"] = server_pools['default_limit']
         lists["pool_created"] = server_pools['pool_created']
 
@@ -1227,7 +1229,7 @@ def manage_tab4(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["servicedownaction"] = server_pools['servicedownaction']['id']
         lists["max_con"] = server_pools['default_limit']
         #lists["environment"] = server_pools['environment']
 
@@ -1313,7 +1315,7 @@ def manage_tab4(request, id_server_pool):
 
             return redirect(lists['action'])
         else:
-            pool_members = populate_pool_members_by_obj(client, pool['server_pool_members'])
+            pool_members = populate_pool_members_by_obj_(server_pools['server_pool_members'])
 
         lists["pool_members"] = pool_members
 
@@ -1324,14 +1326,14 @@ def manage_tab4(request, id_server_pool):
     return render_to_response(POOL_MANAGE_TAB4, lists, context_instance=RequestContext(request))
 
 
-def format_pool(client, form, server_pool_members, healthcheck, created=False, id=None):
+def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, created=False, id=None):
 
     pool = dict()
     pool["id"] = id
     pool["identifier"] = str(form.cleaned_data['identifier'])
     pool["default_port"] = int(form.cleaned_data['default_port'])
     pool["environment"] = int(form.cleaned_data['environment'])
-    pool["servicedownaction"] = int(find_servicedownaction_id(client, form.cleaned_data['servicedownaction']))
+    pool["servicedownaction"] = servicedownaction
     pool["lb_method"] = str(form.cleaned_data['balancing'])
     pool["healthcheck"] = healthcheck
     pool["default_limit"] = int(form.cleaned_data['max_con'])
@@ -1377,10 +1379,10 @@ def format_ips(request, i):
 
     return ips
 
-def format_healthcheck(request):
+def format_healthcheck(request, id=None):
 
     healthcheck = dict()
-    healthcheck["id"] = None
+    healthcheck["id"] = id
     healthcheck["identifier"] = ""
     healthcheck["healthcheck_type"] = str(request.POST.get('health_check'))
     healthcheck["healthcheck_request"] = str(request.POST.get('health_check_request'))
@@ -1388,3 +1390,11 @@ def format_healthcheck(request):
     healthcheck["destination"] = "*:*"
 
     return healthcheck
+
+def format_servicedownaction(client, form):
+
+    servicedownaction = dict()
+    servicedownaction["id"] = int(form.cleaned_data['servicedownaction'])
+    servicedownaction["name"] = str(find_servicedownaction_object(client, id=servicedownaction['id']))
+
+    return servicedownaction
