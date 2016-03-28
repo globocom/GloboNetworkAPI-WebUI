@@ -1034,7 +1034,7 @@ def manage_tab3(request, id_server_pool):
             environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
             lists["environment"] = environment['ambiente']['ambiente_rede']
 
-        lists["pool_created"] = server_pools['pool_created']
+        pool_created = lists["pool_created"] = server_pools['pool_created']
         if not lists['pool_created']:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
@@ -1069,37 +1069,20 @@ def manage_tab3(request, id_server_pool):
 
             if form.is_valid():
 
-                sv_id_server_pool = form.cleaned_data['id']
-                sv_identifier = form.cleaned_data['identifier']
-                sv_default_port = form.cleaned_data['default_port']
-                sv_environment = form.cleaned_data['environment']
-                sv_balancing = form.cleaned_data['balancing']
-                sv_max_con = form.cleaned_data['max_con']
-                sv_servicedownaction = form.cleaned_data['servicedownaction']
-                sv_servicedownaction_obj = find_servicedownaction_object(client, sv_servicedownaction)
+                limit = form.cleaned_data['max_con']
+                server_pool_members = format_server_pool_members(request, limit)
+                healthcheck = format_healthcheck(request)
+                servicedownaction = format_servicedownaction(client, form)
 
-                environment = client.create_ambiente().buscar_por_id(sv_environment)
-                pool = client.create_pool().list_all_members([sv_id_server_pool])
+                pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction, pool_created, int(id_server_pool))
 
-                pool["pools"][0]["server_pool"]["identifier"] = sv_identifier
-                pool["pools"][0]["server_pool"]["default_port"] = sv_default_port
-                pool["pools"][0]["server_pool"]["environment"] = environment['ambiente']
-                pool["pools"][0]["server_pool"]["healthcheck"]['healthcheck_type'] = healthcheck_type
-                pool["pools"][0]["server_pool"]["healthcheck"]['healthcheck_request'] = healthcheck_request
-                pool["pools"][0]["server_pool"]["healthcheck"]['healthcheck_expect'] = healthcheck_expect
-                pool["pools"][0]["server_pool"]["default_limit"] = sv_max_con
-                pool["pools"][0]["server_pool"]["lb_method"] = sv_balancing
-                pool["pools"][0]["server_pool"]["servicedownaction"] = sv_servicedownaction_obj
-
-                for i, m in enumerate(pool["pools"][0]["server_pool_members"]):
-                    pool["pools"][0]["server_pool_members"][i]['limit'] = sv_max_con
-
-                client.create_pool().save_pool(pool["pools"])
+                client.create_pool().save_pool(pool, id_server_pool)
 
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
                 return redirect(reverse('pool.manage.tab3', args=[id_server_pool]))
 
-        else:
+        if request.method == 'GET':
+
             initial_pool = {
                 'id': server_pools['id'],
                 'identifier': server_pools['identifier'],
@@ -1120,7 +1103,7 @@ def manage_tab3(request, id_server_pool):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(POOL_MANAGE_TAB3, lists,context_instance=RequestContext(request))
+    return render_to_response(POOL_MANAGE_TAB3, lists, context_instance=RequestContext(request))
 
 
 @log
