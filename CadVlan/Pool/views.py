@@ -439,36 +439,26 @@ def __modal_ip_list_real(request, client_api):
 
     try:
         # Valid Equipament
-        equip = client_api.create_equipamento().listar_por_nome(
-            equip_name).get("equipamento")
-        ips_list = client_api.create_pool().get_available_ips_to_add_server_pool(
-            equip_name, ambiente)
+        equip = client_api.create_equipamento().listar_por_nome(equip_name).get("equipamento")
+        ips_list = client_api.create_pool().get_available_ips_to_add_server_pool(equip_name, ambiente)
     except NetworkAPIClientError, e:
         logger.error(e)
         status_code = 500
-        return HttpResponse(json.dumps({'message': e.error, 'status': 'error'}),
-                            status=status_code,
+        return HttpResponse(json.dumps({'message': e.error, 'status': 'error'}), status=status_code,
                             content_type='application/json')
 
     if not ips_list['list_ipv4'] and not ips_list['list_ipv6']:
         return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
                                                    u'possa ser utilizado nos pools desse ambiente.',
-                                        'status': 'error'}),
-                            status=status_code,
-                            content_type='application/json')
+                                        'status': 'error'}), status=status_code,content_type='application/json')
 
     ips['list_ipv4'] = ips_list['list_ipv4']
     ips['list_ipv6'] = ips_list['list_ipv6']
     lists['ips'] = ips
     lists['equip'] = equip
 
-    return HttpResponse(
-        loader.render_to_string(
-            AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML,
-            lists,
-            context_instance=RequestContext(request)
-        ), status=status_code
-    )
+    return HttpResponse( loader.render_to_string( AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, lists,
+                                                  context_instance=RequestContext(request)), status=status_code)
 
 
 @log
@@ -1126,10 +1116,10 @@ def manage_tab4_(request, id_server_pool):
         if not pool_created:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
-        lists["environment"] = None
+        lists["environment_desc"] = None
         if server_pools['environment']:
             environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
-            lists["environment"] = environment['ambiente']['ambiente_rede']
+            lists["environment_desc"] = environment['ambiente']['ambiente_rede']
 
         lists["health_check"] = server_pools['healthcheck']['healthcheck_type'] if server_pools['healthcheck'] else None
 
@@ -1186,39 +1176,36 @@ def manage_tab4(request, id_server_pool):
         client = auth.get_clientFactory()
 
         lists = dict()
-        pool_dict = dict()
-
         lists["action"] = reverse('pool.manage.tab4', args=[id_server_pool])
         lists["id_server_pool"] = id_server_pool
 
         pool = client.create_pool().get_pool(id_server_pool)
         server_pools = pool['server_pools'][0]
-        lists = _pool(pool, lists)
 
-        if not lists['pool_created']:
+
+        lists["pool_created"] = pool_created = server_pools['pool_created']
+        if not pool_created:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
-        if lists['environment']:
-            environment = client.create_ambiente().buscar_por_id(lists['environment'])
-            pool_dict["environment"] = environment['ambiente']['ambiente_rede']
-
-        lists["max_con"] = lists["default_limit"]
-        lists["servicedownaction"] = lists['servicedownaction']['id']
+        lists["environment_desc"] = None
+        if server_pools['environment']:
+            environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
+            lists["environment_desc"] = environment['ambiente']['ambiente_rede']
+        lists["health_check"] = server_pools['healthcheck']['healthcheck_type'] if server_pools['healthcheck'] else None
+        lists["identifier"] = server_pools['identifier']
+        lists["default_port"] = server_pools['default_port']
+        lists["balancing"] = server_pools['lb_method']
+        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["max_con"] = server_pools['default_limit']
+        lists["environment_id"] = server_pools['environment']
 
         if request.method == 'POST':
 
             server_pool_members = format_server_pool_members(request, lists["max_con"])
-            #healthcheck = format_healthcheck(request)
-            #servicedownaction = format_servicedownaction(client, form)
-            #pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction, pool_created, int(id_server_pool))
-            pools = _pool(pool, pool_dict)
-            pools['server_pool_members'] = server_pool_members
             lists["pool_members"] = populate_pool_members_by_obj_(server_pool_members)
-
-            client.create_pool().deploy_update_pool(pools, id_server_pool)
-
+            server_pools['server_pool_members'] = server_pool_members
+            client.create_pool().deploy_update_pool(server_pools, id_server_pool)
             messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
-
             return redirect(lists['action'])
 
         if request.method == 'GET':
@@ -1307,25 +1294,3 @@ def format_servicedownaction(client, form):
     servicedownaction["name"] = str(find_servicedownaction_object(client, id=servicedownaction['id']))
 
     return servicedownaction
-
-def _pool(client, pool, pool_dict):
-
-    pool_dict["id"] = pool["id"]
-    pool_dict["pool_created"] = pool['pool_created']
-    pool_dict["environment"] = None
-    pool_dict["environment"] = pool["environment"]
-    pool_dict["health_check"] = dict()
-    pool_dict["health_check"]["id"] = pool["health_check"]["id"]
-    pool_dict["health_check"]["identifier"] = pool["health_check"]["identifier"]
-    pool_dict["health_check"]["healthcheck_type"] = pool["health_check"]["healthcheck_type"]
-    pool_dict["health_check"]["healthcheck_request"] = pool["health_check"]["healthcheck_request"]
-    pool_dict["health_check"]["healthcheck_expect"] = pool["health_check"]["healthcheck_expect"]
-    pool_dict["health_check"]["destination"] = pool["health_check"]["destination"]
-    pool_dict["identifier"] = pool['identifier']
-    pool_dict["default_port"] = pool['default_port']
-    pool_dict["balancing"] = pool['lb_method']
-    pool_dict["servicedownaction"] = dict()
-    pool_dict["servicedownaction"]["id"] = pool['servicedownaction']['id']
-    pool_dict["servicedownaction"]["name"] = pool['servicedownaction']['name']
-    pool_dict["default_limit"] = pool['default_limit']
-    return pool_dict

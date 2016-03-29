@@ -95,7 +95,7 @@ $(document).ready(function() {
         var val_equip_name = $.trim($('#id_equip_name').val());
         if ( val_equip_name != '' ) {
             $.ajax({
-                data: { id_environment: $('#environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
+                data: { id_environment: $('#environment_id').val(), equip_name: val_equip_name, token: $("#id_token").val() },
                 url: "{% url pool.modal.ips.ajax %}",
                 success: function(data, textStatus, xhr) {
                     if(data.message && data.status == "error"){
