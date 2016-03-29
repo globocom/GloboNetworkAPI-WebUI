@@ -609,26 +609,21 @@ def status_change(request):
         action = request.POST.get('action')
 
         if id_server_pool and ids:
-            
-            pools = client.create_pool().list_all_members([id_server_pool])
-            for i, pool in enumerate(pools['pools']):
-                pl = pool['server_pool_members']
-                pools['pools'][i]['server_pool_members'] = []
-                for j, p in enumerate(pl):
-                    member_status = list(bin(p['member_status']))
-                    if action[-2] != 'x':
-                        member_status[-2] = action[-2]
-                    else:
-                        member_status[-1] = action[-1]
+            pools = client.create_pool().get_pool_members( id_server_pool)
+            members = pools["server_pools"][0]["server_pool_members"]
 
-                    member_status = int(''.join(member_status),2)
+            for member in members:
+                member_status = list(bin(member['member_status']))
+                if action[-2] != 'x':
+                    member_status[-2] = action[-2]
+                else:
+                    member_status[-1] = action[-1]
+                member_status = int(''.join(member_status),2)
+                if member_status != member['member_status'] and str(member['id']) in ids.split(';'):
+                    member['member_status'] = member_status
 
-                    if member_status != p['member_status'] and str(p['id']) in ids.split(';'):
-                        p['member_status'] = member_status
-                        pools['pools'][i]['server_pool_members'].append(p)
+            client.create_pool().deploy_update_pool_members(id_server_pool, pools["server_pools"][0])
 
-            if len(pools['pools'][i]['server_pool_members']) > 0:
-                client.create_pool().poolmember_state(pools['pools'])
             messages.add_message(request, messages.SUCCESS, pool_messages.get('success_status_change'))
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
