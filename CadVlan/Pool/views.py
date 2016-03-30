@@ -386,7 +386,7 @@ def edit_form(request, id_server_pool):
                 server_pool_members = format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
                 servicedownaction = format_servicedownaction(client, form)
-                pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction, pool_created, int(id_server_pool))
+                pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction, int(id_server_pool))
                 client.create_pool().update_pool(pool, id_server_pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
 
@@ -526,9 +526,8 @@ def delete(request):
 @login_required
 @has_perm([{"permission": POOL_REMOVE_SCRIPT, "write": True}])
 def remove(request):
-    """
-        Remove Pool Running Script and Update to Not Created
-    """
+    """Remove Pool Running Script and Update to Not Created"""
+
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -536,24 +535,11 @@ def remove(request):
         form = DeleteForm(request.POST)
 
         if form.is_valid():
-
-            ids = split_to_array(form.cleaned_data['ids'])
-
-            pools = client.create_pool().list_all_members(ids)
-            client.create_pool().remove(pools['pools'])
-
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                pool_messages.get('success_remove')
-            )
-
+            ids = form.cleaned_data['ids']
+            client.create_pool().deploy_remove_pool(ids)
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_remove'))
         else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                error_messages.get("select_one")
-            )
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -575,15 +561,9 @@ def create(request):
         form = DeleteForm(request.POST)
 
         if form.is_valid():
-
-            ids = split_to_array(form.cleaned_data['ids'])
-
-            pools = client.create_pool().list_all_members(ids)
-            logger.error(pools['pools'])
-            client.create_pool().create(pools['pools'])
-
+            ids = form.cleaned_data['ids']
+            client.create_pool().deploy_create_pool(ids)
             messages.add_message(request, messages.SUCCESS, pool_messages.get('success_create'))
-
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
@@ -1053,7 +1033,7 @@ def manage_tab3(request, id_server_pool):
                 #server_pool_members = format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
                 servicedownaction = format_servicedownaction(client, form)
-                pool = format_pool(client, form, members, healthcheck, servicedownaction, pool_created, int(id_server_pool))
+                pool = format_pool(client, form, members, healthcheck, servicedownaction, int(id_server_pool))
                 client.create_pool().deploy_update_pool(pool, id_server_pool)
 
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
@@ -1213,7 +1193,7 @@ def manage_tab4(request, id_server_pool):
     return render_to_response(POOL_MANAGE_TAB4, lists, context_instance=RequestContext(request))
 
 
-def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, created=False, id=None):
+def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, id=None):
 
     pool = dict()
     pool["id"] = id
@@ -1225,7 +1205,6 @@ def format_pool(client, form, server_pool_members, healthcheck, servicedownactio
     pool["healthcheck"] = healthcheck
     pool["default_limit"] = int(form.cleaned_data['max_con'])
     pool["server_pool_members"] = server_pool_members
-    pool["pool_created"] = created
 
     return pool
 
