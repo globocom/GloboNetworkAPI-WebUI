@@ -1047,7 +1047,7 @@ def manage_tab3(request, id_server_pool):
                 'balancing': server_pools['lb_method'],
                 'health_check': lists["health_check"],
                 'max_con': server_pools['default_limit'],
-                'servicedownaction': server_pools['servicedownaction']['name']
+                'servicedownaction': server_pools['servicedownaction']['id']
             }
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
@@ -1203,6 +1203,8 @@ def format_pool(client, form, server_pool_members, healthcheck, servicedownactio
     pool["healthcheck"] = healthcheck
     pool["default_limit"] = int(form.cleaned_data['max_con'])
     pool["server_pool_members"] = server_pool_members
+    for member in server_pool_members:
+        member['limit'] = pool['default_limit']
 
     return pool
 
