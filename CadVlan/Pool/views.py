@@ -762,7 +762,7 @@ def manage_tab1(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']['id']
+        lists["servicedownaction"] = server_pools['servicedownaction']['name']
         lists["max_con"] = server_pools['default_limit']
         lists["pool_created"] = server_pools['pool_created']
 
@@ -804,7 +804,7 @@ def manage_tab2(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']['id']
+        lists["servicedownaction"] = server_pools['servicedownaction']['name']
         lists["max_con"] = server_pools['default_limit']
         lists["pool_created"] = server_pools['pool_created']
 
@@ -1002,7 +1002,7 @@ def manage_tab3(request, id_server_pool):
             environment = client.create_ambiente().buscar_por_id(server_pools['environment'])
             lists["environment"] = environment['ambiente']['ambiente_rede']
 
-        pool_created = lists["pool_created"] = server_pools['pool_created']
+        lists["pool_created"] = server_pools['pool_created']
         if not lists['pool_created']:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
 
@@ -1016,7 +1016,7 @@ def manage_tab3(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']['id']
+        lists["servicedownaction"] = server_pools['servicedownaction']['name']
         lists["max_con"] = server_pools['default_limit']
 
         if request.method == 'POST':
@@ -1029,8 +1029,6 @@ def manage_tab3(request, id_server_pool):
 
             if form.is_valid():
 
-                #limit = form.cleaned_data['max_con']
-                #server_pool_members = format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
                 servicedownaction = format_servicedownaction(client, form)
                 pool = format_pool(client, form, members, healthcheck, servicedownaction, int(id_server_pool))
@@ -1049,7 +1047,7 @@ def manage_tab3(request, id_server_pool):
                 'balancing': server_pools['lb_method'],
                 'health_check': lists["health_check"],
                 'max_con': server_pools['default_limit'],
-                'servicedownaction': server_pools['servicedownaction']['id']
+                'servicedownaction': server_pools['servicedownaction']['name']
             }
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
@@ -1101,7 +1099,7 @@ def manage_tab4_(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']['id']
+        lists["servicedownaction"] = server_pools['servicedownaction']['name']
         lists["max_con"] = server_pools['default_limit']
         lists["pool_created"] = server_pools['pool_created']
 
@@ -1170,7 +1168,7 @@ def manage_tab4(request, id_server_pool):
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
-        lists["servicedownaction"] = server_pools['servicedownaction']
+        lists["servicedownaction"] = server_pools['servicedownaction']['name']
         lists["max_con"] = server_pools['default_limit']
         lists["environment_id"] = server_pools['environment']
 
