@@ -1,8 +1,7 @@
 {% for field in envform %}
     <div>
         <div><label>{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-        {{ field }} {% ifequal field.name 'environment' %}<button type="button" id="btn_add_env_2">Adicionar Ambiente</button>
-        <button type="button" id="btn_del_env">Remover Ambiente</button>{% endifequal %}
+        {{ field }}
     </div>
     <div style="clear: both; margin: 20px"></div>
 {% endfor %}

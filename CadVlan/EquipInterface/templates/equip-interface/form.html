@@ -180,7 +180,9 @@ $(document).ready(function() {
 	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
 	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
 
-	$("#ambiente").hide();
+	if ($("#id_type").val() == 0) {
+	    $("#ambiente").hide();
+	};
 
 	$("#id_int_type_0").click( function() {
 		$("#ambiente").hide();
@@ -218,7 +220,7 @@ $(document).ready(function() {
                     {% include "equip-interface/add-form.html" %}
                 </div>
                 <div id="ambiente">
-                    {% include "equip-interface/add-env-form.html" %}
+                    {% include "equip-interface/add-env-form-3.html" %}
                 </div>
             </form>
 			<div style="clear: both;"></div>

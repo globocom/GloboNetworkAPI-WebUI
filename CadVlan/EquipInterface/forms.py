@@ -163,8 +163,22 @@ class AddEnvInterfaceForm(forms.Form):
                          env["grupo_l3_name"] + " ( " + env["range"] + " ) ")  for env in envs["ambiente"]])
         self.fields['environment'].choices = ambiente_choice
 
-    environment = forms.MultipleChoiceField(label=u'Ambientes Disponiveis (Range de Vlans)', required=False, error_messages=error_messages,
-                                  widget=forms.SelectMultiple(attrs={'style': "width: 250px"}))
+    environment = forms.ChoiceField(label="Ambiente (Range Permitido de Vlans)", required=True, widget=forms.Select(
+                                    attrs={'style': "width: 400px"}), error_messages=error_messages)
+    vlans = forms.CharField(label="Defina o range de vlans:", required=False, error_messages=error_messages, min_length=1,
+                            max_length=200)
+
+class EnvInterfaceForm(forms.Form):
+
+    def __init__(self, envs, *args, **kwargs):
+        super(EnvInterfaceForm, self).__init__(*args, **kwargs)
+
+        ambiente_choice = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] + " - " +
+                         env["grupo_l3_name"] + " ( " + env["range"] + " ) ")  for env in envs["ambiente"]])
+        self.fields['environment'].choices = ambiente_choice
+
+    environment = forms.MultipleChoiceField(label="Ambiente (Range Permitido de Vlans)", required=True, widget=forms.SelectMultiple(
+                                    attrs={'style': "width: 400px"}), error_messages=error_messages)
 
 class AddSeveralInterfaceForm(forms.Form):
 
@@ -313,8 +327,10 @@ class EditForm(forms.Form):
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     inter_id = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    front = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
+    back = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
-
+    type = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
 
     def clean_name(self):
         name = self.cleaned_data['name']
@@ -338,15 +354,18 @@ class ChannelAddForm(forms.Form):
 
         self.fields['equip_interface'].choices = equip_interface
 
-    name = forms.CharField(label="Numero do Channel", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    name = forms.CharField(label="Numero do Channel", required=True, error_messages=error_messages, min_length=1,
+                           max_length=20)
     lacp = forms.ChoiceField(label="LACP", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
                                   widget=forms.RadioSelect(), initial=1)
     equip_interface = forms.ChoiceField(label="Equipamento/Interface", required=False, error_messages=error_messages,
                                         widget=forms.Select(attrs={'style': "width: 400px"}))
     ids = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
-    int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")], error_messages=error_messages,
-                                  widget=forms.RadioSelect)
-    vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1, max_length=5)
+    vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1,
+                           max_length=5)
+    int_type = forms.ChoiceField(label="Tipo de Interface", required=True, choices=[(0, "Access"), (1, "Trunk")],
+                                 error_messages=error_messages, widget=forms.RadioSelect)
     id = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+    type = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)

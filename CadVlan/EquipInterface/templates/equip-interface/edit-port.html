@@ -88,7 +88,11 @@ $(document).ready(function() {
         </div>
     {% endifequal %}
     {% ifequal up 1 %}
-        <a onclick="javascript: if(!confirm('Deseja realmente remover esta ligação ?')){return false;}" href="{% url equip.interface.disconnect form.inter_id.value f_b equip_name id_interface %}" class="btn_close ui-state-error" lang="{{ counter }}" style="width: 24px; height: 24px; margin-top: -12px;">Remover Ligação</a>
+        {% ifequal front_or_back 'front' %}
+            <a onclick="javascript: if(!confirm('Deseja realmente remover esta ligação ?')){return false;}" href="{% url equip.interface.disconnect form.inter_id.value form.front.value equip_name id_interface %}" class="btn_close ui-state-error" lang="{{ counter }}" style="width: 24px; height: 24px; margin-top: -12px;">Remover Ligação</a>
+        {% else %}
+            <a onclick="javascript: if(!confirm('Deseja realmente remover esta ligação ?')){return false;}" href="{% url equip.interface.disconnect form.inter_id.value form.back.value equip_name id_interface %}" class="btn_close ui-state-error" lang="{{ counter }}" style="width: 24px; height: 24px; margin-top: -12px;">Remover Ligação</a>
+        {% endifequal %}
     {% endifequal %}
     {% ifnotequal up 2 %}
         <div class="line_{{ counter }}" style="height: {% ifequal equip_type '8' %}65{% else %}60{% endifequal %}px;{% ifequal up 1 %} width: 3px; margin: -12px auto 0px auto; background-color: black;{% endifequal %}">

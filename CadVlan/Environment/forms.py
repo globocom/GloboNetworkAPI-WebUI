@@ -322,9 +322,8 @@ class IpConfigForm(forms.Form):
                 v4oct5 = self.cleaned_data.get('v4oct5', '')
 
                 try:
-                    if int(v4oct5) >= int(prefix):
-                        self._errors['prefix'] = self.error_class(
-                            [environment_messages.get('invalid_prefix')])
+                    if int(v4oct5) > int(prefix):
+                        self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix')])
                 except Exception:
                     pass
 
@@ -333,8 +332,7 @@ class IpConfigForm(forms.Form):
 
             else:
                 if prefix not in range(129):
-                    self._errors['prefix'] = self.error_class(
-                        [environment_messages.get('invalid_prefix_ipv6')])
+                    self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix_ipv6')])
 
                 v6oct1 = self.cleaned_data.get('v6oct1', '')
                 v6oct2 = self.cleaned_data.get('v6oct2', '')
@@ -347,9 +345,8 @@ class IpConfigForm(forms.Form):
                 v6oct9 = self.cleaned_data.get('v6oct9', '')
 
                 try:
-                    if int(v6oct9) >= int(prefix):
-                        self._errors['prefix'] = self.error_class(
-                            [environment_messages.get('invalid_prefix')])
+                    if int(v6oct9) > int(prefix):
+                        self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix')])
                 except Exception:
                     pass
 

@@ -354,11 +354,37 @@ def rack_edit(request, id_rack):
                 rack = var
 
         if request.method == 'GET':
-            lists['numero'] = rack.get('numero')
-            nome_sw1 = client.create_equipamento().listar_por_id(rack.get('id_sw1'))['equipamento']['nome']
-            nome_sw2 = client.create_equipamento().listar_por_id(rack.get('id_sw2'))['equipamento']['nome']
-            nome_ilo = client.create_equipamento().listar_por_id(rack.get('id_ilo'))['equipamento']['nome']
-            lists['form'] = RackForm(initial={'rack_number': rack.get('numero'), 'rack_name': rack.get('nome'), "mac_address_sw1": rack.get('mac_sw1'), "mac_address_sw2": rack.get("mac_sw2"), "mac_address_ilo": rack.get('mac_ilo'), "nome_sw1": nome_sw1, "nome_sw2": nome_sw2, "nome_ilo": nome_ilo})
+            try:
+                rack_num = rack.get('numero')
+                rack_name = rack.get('nome')
+            except:
+                rack_num = None
+                pass
+            lists['numero'] = rack_num
+            try:
+                nome_sw1 = client.create_equipamento().listar_por_id(rack.get('id_sw1'))['equipamento']['nome']
+                mac_sw1 = rack.get('mac_sw1')
+            except:
+                nome_sw1 = None
+                mac_sw1 = None
+                pass
+            try:
+                nome_sw2 = client.create_equipamento().listar_por_id(rack.get('id_sw2'))['equipamento']['nome']
+                mac_sw2 = rack.get("mac_sw2")
+            except:
+                nome_sw2 = None
+                mac_sw2 = None
+                pass
+            try:
+                nome_ilo = client.create_equipamento().listar_por_id(rack.get('id_ilo'))['equipamento']['nome']
+                mac_ilo = rack.get('mac_ilo')
+            except:
+                nome_ilo = None
+                mac_ilo = None
+                pass
+            lists['form'] = RackForm(initial={'rack_number': rack_num, 'rack_name': rack_name, "nome_sw1": nome_sw1,
+                                              'mac_address_sw1': mac_sw1, 'mac_address_sw2': mac_sw2, 'nome_sw2': nome_sw2,
+                                              'mac_address_ilo': mac_ilo, 'nome_ilo': nome_ilo})
     
         if request.method == 'POST':
             form = RackForm(request.POST)
