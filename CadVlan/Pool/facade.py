@@ -117,12 +117,14 @@ def populate_pool_members_by_obj(client, server_pool_members):
             ip = ''
             if obj['ip']:
                 ip = obj['ip']['ip_formated']
+                id_ip = obj['ip']['id']
             elif obj['ipv6']:
                 ip = obj['ipv6']['ip_formated']
+                id_ip = obj['ipv6']['id']
 
             pool_members.append({'id': obj['id'], 'id_equip': equip['equipamento']['id'],
                                  'nome_equipamento': equip['equipamento']['nome'], 'priority': obj['priority'],
-                                 'port_real': obj['port_real'], 'weight': obj['weight'], 'id_ip': obj['ip']['id'],
+                                 'port_real': obj['port_real'], 'weight': obj['weight'], 'id_ip': id_ip,
                                  'ip': ip})
 
     return pool_members
