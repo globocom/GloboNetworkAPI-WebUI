@@ -1369,7 +1369,7 @@ def manage_tab4(request, id_server_pool):
                     "id": '',
                     "identifier": '',
                     "ip": dict(),
-                    "ipv6": '',
+                    "ipv6": dict(),
                     "last_status_update": '',
                     "last_status_update_formated": '',
                     "limit": '',
@@ -1401,8 +1401,8 @@ def manage_tab4(request, id_server_pool):
                 else:
                     ipv6 = client.create_ip().get_ipv6(id_ips[idx])
                     members[idx]['ipv6']['ip_formated'] = ips[idx]
-                    members[idx]['ipv6']['id'] = ipv6['id']
-                    members[idx]['ipv6']['networkipv6'] = ipv6['networkipv6']
+                    members[idx]['ipv6']['id'] = ipv6['ipv6']['id']
+                    members[idx]['ipv6']['networkipv6'] = ipv6['ipv6']['networkipv6']
                     members[idx]['ipv6']['block1'] = ipv6['ipv6']['block1']
                     members[idx]['ipv6']['block2'] = ipv6['ipv6']['block2']
                     members[idx]['ipv6']['block3'] = ipv6['ipv6']['block3']
