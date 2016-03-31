@@ -394,6 +394,14 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td>
+                                    <label for="health_destination">Porta</label>
+                                </td>
+                                <td style="padding-left: 5px;">
+                                    <input value="{{health_destination}}" id="health_destination" style="width: 100px" type="text" name="health_destination" maxlength="5" />
+                                </td>
+                            </tr>
+                            <tr>
                                 <td></td>
                                 <td style="padding-left: 5px;"><p id="error"></p></td>
                             </tr>
@@ -485,14 +493,20 @@
                                     {% for field in pool_members %}
                                         <tr class='remove_port'>
                                             <td>
-                                                <label>{% if field.nome_equipamento != "-" %}{{field.nome_equipamento}}{% endif %}</label>
-                                                <input type='hidden' name='equip' value='{{field.nome_equipamento}}' />
-                                                <input type='hidden' name='id_equip' value='{{field.id_equip}}' />
+                                                <label>{% if field.equipment %}{{field.equipment.nome}}{% endif %}</label>
+                                                <input type='hidden' name='equip' value='{{field.equipment.nome}}' />
+                                                <input type='hidden' name='id_equip' value='{{field.equipment.id}}' />
                                             </td>
                                             <td>
-                                                <label>{% if field.ip != "-" %}{{field.ip}}{% endif %}</label>
-                                                <input type='hidden' name='ip' value='{{field.ip}}'>
-                                                <input type='hidden' name='id_ip' value='{{field.id_ip}}'>
+                                                {% if field.ipv6 %}
+                                                <label>{{field.ip.ip_formated}}</label>
+                                                <input type='hidden' name='ip' value='{{field.ipv6.ip_formated}}'>
+                                                <input type='hidden' name='id_ip' value='{{field.ipv6.id}}'>
+                                                {% elif field.ip %}
+                                                <label>{{field.ip.ip_formated}}</label>
+                                                <input type='hidden' name='ip' value='{{field.ip.ip_formated}}'>
+                                                <input type='hidden' name='id_ip' value='{{field.ip.id}}'>
+                                                {% endif %}
                                             </td>
                                             <td>
                                                 <label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>
