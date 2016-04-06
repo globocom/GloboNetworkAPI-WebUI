@@ -1223,8 +1223,9 @@ def format_server_pool_members(request, limit=0):
         server_pool_members["limit"] = limit
         server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
         server_pool_members["member_status"] = 0
-        server_pool_members["ip"] = format_ips(request, i)
-        server_pool_members["ipv6"] = None
+        v4, v6 = format_ips(request, i)
+        server_pool_members["ip"] = v4
+        server_pool_members["ipv6"] = v6
         pool_members.append(server_pool_members)
 
     return pool_members
@@ -1243,7 +1244,10 @@ def format_ips(request, i):
     ips["id"] = int(request.POST.getlist('id_ip')[i])
     ips["ip_formated"] = str(request.POST.getlist('ip')[i])
 
-    return ips
+    v4 = ips if "." in ips['ip_formated'] else None
+    v6 = ips if ":" in ips['ip_formated'] else None
+
+    return v4, v6
 
 def format_healthcheck(request, id=None):
 
