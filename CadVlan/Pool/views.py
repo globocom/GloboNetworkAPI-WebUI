@@ -57,27 +57,63 @@ def list_all(request):
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
- 
+
         environments = client.create_pool().list_environments_with_pools()
 
-        delete_form = DeleteForm()
+        lists = dict()
+        lists["delete_form"] = DeleteForm()
+        lists["search_form"] = SearchPoolForm(environments)
 
-        search_form = SearchPoolForm(environments)
-
-        return render_to_response(
-            POOL_LIST,
-            {
-                'form': delete_form,
-                'search_form': search_form
-            },
-            context_instance=RequestContext(request)
-        )
+        return render_to_response(POOL_LIST, lists, context_instance=RequestContext(request))
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return redirect('home')
 
+"""
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
+def datatable(request):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        #environment_id = int(request.GET.get('pEnvironment'))9
+
+        columnIndexNameMap = {
+            0: '',
+            1: 'identifier',
+            2: 'default_port',
+            3: 'healthcheck__healthcheck_type',
+            4: 'environment',
+            5: 'pool_created',
+            6: ''
+        }
+
+        dtp = DataTablePaginator(request, columnIndexNameMap)
+
+        dtp.build_server_side_list()
+
+        dtp.searchable_columns = [
+            'identifier',
+            'default_port',
+            'pool_created',
+            'healthcheck__healthcheck_type',
+        ]
+
+
+        pools = client.create_pool().list_pool()
+
+        return dtp.build_response(pools["server_pools"], pools["total"], POOL_DATATABLE, request )
+
+    except NetworkAPIClientError, e:
+        logger.error(e.error)
+        return render_message_json(e.error, messages.ERROR)
+"""
 
 @log
 @login_required
@@ -132,7 +168,7 @@ def datatable(request):
     except NetworkAPIClientError, e:
         logger.error(e.error)
         return render_message_json(e.error, messages.ERROR)
-
+    
 
 @log
 @login_required
@@ -161,6 +197,7 @@ def spm_datatable(request, id_server_pool, checkstatus):
 
         pools = client.create_pool().get_pool_members( id_server_pool, checkstatus)
         members = pools["server_pools"][0]["server_pool_members"]
+
 
         return dtp.build_response( members, len(members), POOL_SPM_DATATABLE, request)
 
@@ -800,7 +837,6 @@ def manage_tab2(request, id_server_pool):
             lists["environment"] = environment['ambiente']['ambiente_rede']
 
         lists["health_check"] = server_pools['healthcheck']['healthcheck_type'] if server_pools['healthcheck'] else None
-
         lists["identifier"] = server_pools['identifier']
         lists["default_port"] = server_pools['default_port']
         lists["balancing"] = server_pools['lb_method']
