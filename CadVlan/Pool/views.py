@@ -71,49 +71,6 @@ def list_all(request):
         messages.add_message(request, messages.ERROR, e)
         return redirect('home')
 
-"""
-@log
-@login_required
-@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
-def datatable(request):
-
-    try:
-
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        #environment_id = int(request.GET.get('pEnvironment'))9
-
-        columnIndexNameMap = {
-            0: '',
-            1: 'identifier',
-            2: 'default_port',
-            3: 'healthcheck__healthcheck_type',
-            4: 'environment',
-            5: 'pool_created',
-            6: ''
-        }
-
-        dtp = DataTablePaginator(request, columnIndexNameMap)
-
-        dtp.build_server_side_list()
-
-        dtp.searchable_columns = [
-            'identifier',
-            'default_port',
-            'pool_created',
-            'healthcheck__healthcheck_type',
-        ]
-
-
-        pools = client.create_pool().list_pool()
-
-        return dtp.build_response(pools["server_pools"], pools["total"], POOL_DATATABLE, request )
-
-    except NetworkAPIClientError, e:
-        logger.error(e.error)
-        return render_message_json(e.error, messages.ERROR)
-"""
 
 @log
 @login_required
@@ -156,12 +113,18 @@ def datatable(request):
             dtp.custom_search
         )
 
-        pools = client.create_pool().list_all(environment_id, pagination)
+        data = dict()
+        data["start_record"] = pagination.start_record
+        data["end_record"] = pagination.end_record
+        data["asorting_cols"] = pagination.asorting_cols
+        data["searchable_columns"] = pagination.searchable_columns
+        data["custom_search"] = pagination.custom_search or ""
+        data["extends_search"] = [{"environment": environment_id}] if environment_id else []
 
-        #        pools = client.create_pool().list_pool()
+        pools = client.create_pool().list_pool(data)
 
         return dtp.build_response(
-            pools["pools"],
+            pools["server_pools"],
             pools["total"],
             POOL_DATATABLE,
             request
