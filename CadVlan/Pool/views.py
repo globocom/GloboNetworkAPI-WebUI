@@ -158,6 +158,8 @@ def datatable(request):
 
         pools = client.create_pool().list_all(environment_id, pagination)
 
+        #        pools = client.create_pool().list_pool()
+
         return dtp.build_response(
             pools["pools"],
             pools["total"],
@@ -991,7 +993,6 @@ def manage_tab4(request, id_server_pool):
         if request.method == 'POST':
 
             server_pool_members = format_server_pool_members(request, lists["max_con"])
-            lists["pool_members"] = populate_pool_members_by_obj(server_pool_members)
             server_pools['server_pool_members'] = server_pool_members
             client.create_pool().deploy_update_pool(server_pools, id_server_pool)
             messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
