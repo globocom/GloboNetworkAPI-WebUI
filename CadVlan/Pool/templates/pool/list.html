@@ -226,7 +226,7 @@ input {
 
 		<form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
-			{% for field in form %}
+			{% for field in delete_form %}
 				{{ field }}
 			{% endfor %}
 		</form>

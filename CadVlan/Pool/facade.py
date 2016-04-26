@@ -107,44 +107,19 @@ def populate_pool_members_by_lists(client, members):
     return pool_members, ip_list_full
 
 
-def populate_pool_members_by_obj_(server_pool_members):
+def populate_pool_members_by_obj(server_pool_members):
     pool_members = []
 
     for obj in server_pool_members:
 
-        ip = ''
-        if obj['ip']:
-            ip = obj['ip']['ip_formated']
-        elif obj['ipv6']:
-            ip = obj['ipv6']['ip_formated']
-
+        ip = obj['ip'] if obj['ip'] else obj['ipv6']
         pool_members.append({'id': obj['id'],
                              'id_equip': obj['equipment']['id'],
-                             'nome_equipamento': obj['equipment']['nome'],
+                             'nome_equipamento': obj['equipment']['name'],
                              'priority': obj['priority'],
                              'port_real': obj['port_real'],
                              'weight': obj['weight'],
-                             'id_ip': obj['ip']['id'],
-                             'ip': ip})
-
-    return pool_members
-
-
-def populate_pool_members_by_obj(client, server_pool_members):
-    pool_members = []
-
-    for obj in server_pool_members:
-        equip = client.create_equipamento().listar_por_nome(obj['equipment_name'])
-
-        ip = ''
-        if obj['ip']:
-            ip = obj['ip']['ip_formated']
-        elif obj['ipv6']:
-            ip = obj['ipv6']['ip_formated']
-
-        pool_members.append({'id': obj['id'], 'id_equip': equip['equipamento']['id'],
-                             'nome_equipamento': equip['equipamento']['nome'], 'priority': obj['priority'],
-                             'port_real': obj['port_real'], 'weight': obj['weight'], 'id_ip': obj['ip']['id'],
-                             'ip': ip})
+                             'id_ip': ip['id'] if ip else '',
+                             'ip': ip['ip_formated'] if ip else ''})
 
     return pool_members
