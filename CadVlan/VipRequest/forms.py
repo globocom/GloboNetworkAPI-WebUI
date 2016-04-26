@@ -197,14 +197,16 @@ class RequestVipFormHealthcheck(forms.Form):
         self.fields['healthcheck_type'].choices = [
             (healthcheck['name'], healthcheck['name']) for healthcheck in healthcheck_options]
 
-    healthcheck_type = forms.ChoiceField(
-        label=u'Healthcheck', required=True, error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
+    healthcheck_type = forms.ChoiceField(label=u'Healthcheck', required=True, error_messages=error_messages,
+                                         widget=forms.RadioSelect(renderer=RadioCustomRenderer))
     healthcheck = forms.CharField(label=u'Healthcheck', min_length=3, max_length=100, required=False,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    excpect = forms.ChoiceField(label=u'HTTP Expect String', required=True,
-                                error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 185px"}))
-    excpect_new = forms.CharField(
-        label=u'', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 185px"}))
+    excpect = forms.ChoiceField(label=u'HTTP Expect String', required=True, error_messages=error_messages,
+                                  widget=forms.Select(attrs={"style": "width: 185px"}))
+    excpect_new = forms.CharField(label=u'', required=False, widget=forms.TextInput(attrs={'style': "width: 185px"}),
+                                  error_messages=error_messages)
+    destination = forms.ChoiceField(label=u'Destination', required=True, error_messages=error_messages,
+                                  widget=forms.Select(attrs={"style": "width: 185px"}))
 
     def clean(self):
         cleaned_data = self.cleaned_data

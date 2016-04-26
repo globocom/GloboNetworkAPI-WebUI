@@ -75,7 +75,7 @@ $(document).ready(function() {
     obj_btn_can.button({icons: {primary: "ui-icon-cancel"}});
     obj_btn_new_real.button({icons: {primary: "ui-icon-disk"}});
 
-    if($('#environment').val() == ''){
+    if($('#environment_desc').val() == ''){
         $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
     }
 
@@ -95,7 +95,7 @@ $(document).ready(function() {
         var val_equip_name = $.trim($('#id_equip_name').val());
         if ( val_equip_name != '' ) {
             $.ajax({
-                data: { id_environment: $('#environment').val(), equip_name: val_equip_name, token: $("#id_token").val() },
+                data: { id_environment: {{ environment_id }}, equip_name: val_equip_name, token: $("#id_token").val() },
                 url: "{% url pool.modal.ips.ajax %}",
                 success: function(data, textStatus, xhr) {
                     if(data.message && data.status == "error"){
