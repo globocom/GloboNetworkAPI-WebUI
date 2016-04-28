@@ -114,5 +114,4 @@ def populate_pool_members_by_obj(server_pool_members):
                              'weight': obj['weight'],
                              'id_ip': ip['id'] if ip else '',
                              'ip': ip['ip_formated'] if ip else ''})
-
     return pool_members
