@@ -250,6 +250,7 @@ def add_form(request):
             members = dict()
             members["id_pool_member"] = request.POST.getlist('id_pool_member')
             members["id_equips"] = request.POST.getlist('id_equip')
+            members["member_status"] = request.POST.getlist('member_status')
             members["priorities"] = request.POST.getlist('priority')
             members["ports_reals"] = request.POST.getlist('ports_real_reals')
             members["weight"] = request.POST.getlist('weight')
@@ -361,6 +362,7 @@ def edit_form(request, id_server_pool):
             members = dict()
             members["id_pool_member"] = request.POST.getlist('id_pool_member')
             members["id_equips"] = request.POST.getlist('id_equip')
+            members["member_status"] = request.POST.getlist('member_status')
             members["priorities"] = request.POST.getlist('priority')
             members["ports_reals"] = request.POST.getlist('ports_real_reals')
             members["weight"] = request.POST.getlist('weight')
@@ -1002,7 +1004,7 @@ def format_server_pool_members(request, limit=0):
         server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
         server_pool_members["limit"] = limit
         server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
-        server_pool_members["member_status"] = 7 if request.POST.getlist('id_pool_member')[i] else 0
+        server_pool_members["member_status"] = int(request.POST.getlist('member_status')[i]) if request.POST.getlist('id_pool_member')[i] else 2
         v4, v6 = format_ips(request, i)
         server_pool_members["ip"] = v4
         server_pool_members["ipv6"] = v6
