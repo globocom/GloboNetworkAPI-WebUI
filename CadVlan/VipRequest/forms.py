@@ -14,16 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 
-
+from CadVlan.messages import error_messages, request_vip_messages
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
-from CadVlan.Util.utility import validates_dict
+from CadVlan.Util.forms import fields
 from CadVlan.Util.forms.customRenderer import RadioCustomRenderer
 from CadVlan.Util.forms.decorators import autostrip
-from CadVlan.messages import error_messages, request_vip_messages
+from CadVlan.Util.utility import validates_dict
+
 from django import forms
 from django.contrib import messages
-from networkapiclient.exception import InvalidParameterError
 
 
 class SearchVipRequestForm(forms.Form):
@@ -42,7 +43,7 @@ class SearchVipRequestForm(forms.Form):
         ipv4 = cleaned_data.get("ipv4")
         ipv6 = cleaned_data.get("ipv6")
 
-        if ipv4 != None and ipv6 != None:
+        if ipv4 is not None and ipv6 is not None:
             if len(ipv4) > 0 and len(ipv6) > 0:
                 # Only one must be filled
                 raise forms.ValidationError("Preencha apenas um: IPv4 ou IPv6")
@@ -143,11 +144,11 @@ class RequestVipFormOptions(forms.Form):
                     trafficreturn = kwargs.get('initial').get('trafficreturn') if "trafficreturn" in kwargs.get('initial') else ''
                     messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_trafficreturn") % trafficreturn)
 
-
             rules = validates_dict(client_ovip.buscar_rules(environment_vip, vip_id), 'name_rule_opt')
 
             if rules is not None:
                 self.fields['rules'].choices = [(st['id'] if st['id'] != None else '', st['name_rule_opt'] if st['name_rule_opt'] != None else '') for st in rules]
+
             else:
                 if 'initial' in kwargs:
                     rules = kwargs.get('initial').get('rules') if "rules" in kwargs.get('initial') else ''
@@ -182,11 +183,11 @@ class RequestVipFormHealthcheck(forms.Form):
     healthcheck = forms.CharField(label=u'Healthcheck', min_length=3, max_length=100, required=False,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     excpect = forms.ChoiceField(label=u'HTTP Expect String', required=True, error_messages=error_messages,
-                                  widget=forms.Select(attrs={"style": "width: 185px"}))
+                                widget=forms.Select(attrs={"style": "width: 185px"}))
     excpect_new = forms.CharField(label=u'', required=False, widget=forms.TextInput(attrs={'style': "width: 185px"}),
                                   error_messages=error_messages)
     destination = forms.ChoiceField(label=u'Destination', required=True, error_messages=error_messages,
-                                  widget=forms.Select(attrs={"style": "width: 185px"}))
+                                    widget=forms.Select(attrs={"style": "width: 185px"}))
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -220,6 +221,7 @@ class RequestVipFormReal(forms.Form):
 
     maxcom = forms.IntegerField(label=u'Número máximo de conexões (maxconn)', required=True,
                                 error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
+
 
 @autostrip
 class RequestVipFormIP(forms.Form):
@@ -313,8 +315,8 @@ class RuleForm(forms.Form):
 
     def __init__(self, rules, *args, **kwargs):
         super(RuleForm, self).__init__(*args, **kwargs)
-        self.fields['rules'].choices = [(st['id'] if st['id'] != None else '', st[
-                                         'name_rule_opt'] if st['name_rule_opt'] != None else '') for st in rules]
+        self.fields['rules'].choices = [(st['id'] if st['id'] is not None else '', st[
+                                         'name_rule_opt'] if st['name_rule_opt'] is not None else '') for st in rules]
 
     rules = forms.ChoiceField(label=u'Regras', required=False, error_messages=error_messages, widget=forms.Select(
         attrs={"style": "width: 300px"}))
@@ -381,7 +383,7 @@ class ServerPoolForm(forms.Form):
 
 class PoolForm(forms.Form):
 
-    def __init__(self, enviroments_choices, optionsvips_choices,servicedownaction_choices, healthcheck_choices, *args, **kwargs):
+    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices, healthcheck_choices, *args, **kwargs):
         super(PoolForm, self).__init__(*args, **kwargs)
 
         self.fields['environment'].choices = enviroments_choices
@@ -445,3 +447,335 @@ class PoolForm(forms.Form):
         error_messages=error_messages,
         widget=forms.TextInput(attrs={'style': "width: 231px"})
     )
+
+
+@autostrip
+class RequestVipBasicForm(forms.Form):
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(RequestVipBasicForm, self).__init__(*args, **kwargs)
+
+    business = forms.CharField(
+        label=u'Área de negócio',
+        min_length=3,
+        max_length=100,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"}))
+
+    service = forms.CharField(
+        label=u'Nome do serviço',
+        min_length=3,
+        max_length=100,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"}))
+
+    name = forms.CharField(
+        label=u'Nome do VIP (Host FQDN)',
+        min_length=3,
+        max_length=100,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"}))
+
+    created = forms.BooleanField(
+        label="",
+        required=False,
+        widget=forms.HiddenInput(),
+        error_messages=error_messages)
+
+    validated = forms.BooleanField(
+        label="",
+        required=False,
+        widget=forms.HiddenInput(),
+        error_messages=error_messages)
+
+
+@autostrip
+class RequestVipEnvironmentVipForm(forms.Form):
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(RequestVipEnvironmentVipForm, self).__init__(*args, **kwargs)
+
+        if forms_aux.get('finalities'):
+            self.fields['finality'].choices = \
+                [(env['finalidade_txt'], env["finalidade_txt"]) for env in forms_aux["finalities"]]
+            self.fields['finality'].choices.insert(0, ('', ''))
+
+        if forms_aux.get('clients'):
+            self.fields['client'].choices = \
+                [(env['cliente_txt'], env["cliente_txt"]) for env in forms_aux["clients"]]
+            self.fields['client'].choices.insert(0, ('', ''))
+
+        if forms_aux.get('environments'):
+            self.fields['environment'].choices = \
+                [(env['ambiente_p44_txt'], {'label': env["ambiente_p44_txt"], 'attrs':{'attr': env["id"]}}) for env in forms_aux["environments"]]
+            self.fields['environment'].choices.insert(0, ('', ''))
+
+    finality = forms.ChoiceField(
+        label=u'Finalidade',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    client = forms.ChoiceField(
+        label=u'Cliente',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    environment = forms.ChoiceField(
+        label=u'Ambiente',
+        required=True,
+        error_messages=error_messages,
+        widget=fields.SelectWithAttr(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    environment_vip = forms.IntegerField(
+        label="",
+        required=False,
+        widget=forms.HiddenInput(),
+        error_messages=error_messages)
+
+
+@autostrip
+class RequestVipOptionVipForm(forms.Form):
+
+    logger = logging.getLogger(__name__)
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(RequestVipOptionVipForm, self).__init__(*args, **kwargs)
+
+        if forms_aux.get('timeout'):
+            self.fields['timeout'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["timeout"]]
+
+        if forms_aux.get('caches'):
+            self.fields['caches'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["caches"]]
+
+        if forms_aux.get('persistence'):
+            self.fields['persistence'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["persistence"]]
+
+        if forms_aux.get('trafficreturn'):
+            self.fields['trafficreturn'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["trafficreturn"]]
+
+        if forms_aux.get('l7_protocol'):
+            self.fields['l7_protocol'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_protocol"]]
+
+        if forms_aux.get('l4_protocol'):
+            self.fields['l4_protocol'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l4_protocol"]]
+
+    timeout = forms.ChoiceField(
+        label="Timeout",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    caches = forms.ChoiceField(
+        label="Grupos de caches",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    persistence = forms.ChoiceField(
+        label="Persistência",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    trafficreturn = forms.ChoiceField(
+        label="Traffic Return",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    l7_protocol = forms.ChoiceField(
+        label="Protocol L4",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    l4_protocol = forms.ChoiceField(
+        label="Protocolo L7",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+
+###########
+# V3
+###########
+class VipPoolFormV2(forms.Form):
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(VipPoolFormV2, self).__init__(*args, **kwargs)
+
+        if forms_aux.get('pools'):
+            self.fields['pools'].choices = \
+                [(env['id'], env["identifier"]) for env in forms_aux["pools"]['server_pools']]
+        self.fields['pools'].choices.insert(0, ('', ''))
+
+    pools = forms.ChoiceField(
+        label=u'Pools',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+
+@autostrip
+class RequestVipIPForm(forms.Form):
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(RequestVipIPForm, self).__init__(*args, **kwargs)
+
+    CHOICES = (('0', 'Alocar automaticamente'), ('1', 'Especificar IP'))
+
+    ipv4_check = forms.BooleanField(
+        label=u'IPv4',
+        required=False,
+        error_messages=error_messages)
+
+    ipv4_type = forms.ChoiceField(
+        label=u'',
+        required=False,
+        error_messages=error_messages,
+        choices=CHOICES,
+        widget=forms.RadioSelect())
+
+    ipv4_specific = forms.CharField(
+        label=u'',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 231px"}))
+
+    ipv6_check = forms.BooleanField(
+        label=u'IPv6',
+        required=False,
+        error_messages=error_messages)
+
+    ipv6_type = forms.ChoiceField(
+        label=u'',
+        required=False,
+        error_messages=error_messages,
+        choices=CHOICES,
+        widget=forms.RadioSelect())
+
+    ipv6_specific = forms.CharField(
+        label=u'',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 231px"}))
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+
+        ipv4_check = cleaned_data.get("ipv4_check")
+        ipv6_check = cleaned_data.get("ipv6_check")
+
+        if not ipv4_check and not ipv6_check:
+            self._errors["ipv4_check"] = self.error_class(
+                ["Pelo menos uma opção de IP tem que ser selecionada"])
+
+        else:
+
+            if ipv4_check:
+
+                ipv4_type = cleaned_data.get("ipv4_type")
+                ipv4_specific = cleaned_data.get("ipv4_specific")
+
+                if ipv4_type == '1' and ipv4_specific is None:
+                    self._errors["ipv4_specific"] = self.error_class(
+                        ["Este campo é obrigatório com a opção Especificar IP selecionada."])
+
+                elif ipv4_type == '1' and ipv4_specific is not None:
+                    if not is_valid_ipv4(ipv4_specific):
+                        self._errors["ipv4_specific"] = self.error_class(
+                            ["Ip não informado ou informado de forma incorreta. \
+                            IPv4 deve ser informado no formato xxx.xxx.xxx.xxx"])
+
+            if ipv6_check:
+
+                ipv6_type = cleaned_data.get("ipv6_type")
+                ipv6_specific = cleaned_data.get("ipv6_specific")
+
+                if ipv6_type == '1' and ipv6_specific is None:
+                    self._errors["ipv6_specific"] = self.error_class(
+                        ["Este campo é obrigatório com a opção Especificar IP selecionada."])
+
+                elif ipv6_type == '1' and ipv6_specific is not None:
+                    if not is_valid_ipv6(ipv6_specific):
+                        self._errors["ipv6_specific"] = self.error_class(
+                            ["Ip não informado ou informado de forma incorreta. \
+                            IPv6 deve ser informado no formato xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx"])
+
+        return cleaned_data
+
+
+class SearchVipRequestV3Form(forms.Form):
+
+    id_request = forms.IntegerField(
+        label="Id Requisição",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={"style": "width: 40px"}))
+
+    ipv4 = forms.CharField(
+        label="IPv4",
+        required=False,
+        min_length=1,
+        max_length=15,
+        error_messages=error_messages,
+        widget=forms.HiddenInput())
+
+    ipv6 = forms.CharField(
+        label="IPv6",
+        required=False,
+        min_length=1,
+        max_length=39,
+        error_messages=error_messages,
+        widget=forms.HiddenInput())
+
+    vip_created = forms.BooleanField(
+        label="Buscar apenas vips criados",
+        required=False,
+        error_messages=error_messages)
+
+    def clean(self):
+        cleaned_data = super(SearchVipRequestV3Form, self).clean()
+        ipv4 = cleaned_data.get("ipv4")
+        ipv6 = cleaned_data.get("ipv6")
+
+        if ipv4 is not None and ipv6 is not None:
+            if len(ipv4) > 0 and len(ipv6) > 0:
+                # Only one must be filled
+                raise forms.ValidationError("Preencha apenas um: IPv4 ou IPv6")
+
+        return cleaned_data
