@@ -832,24 +832,29 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     if form_inputs.is_valid() & form_environment.is_valid() & form_options.is_valid() & form_ip.is_valid() & is_valid_ports & is_valid_pools:
 
         # Inputs
-        business = form_inputs.cleaned_data["business"]
-        service = form_inputs.cleaned_data["service"]
-        name = form_inputs.cleaned_data["name"]
-        filter_l7 = form_inputs.cleaned_data["filter_l7"]
+        #business = form_inputs.cleaned_data["business"]
+        #service = form_inputs.cleaned_data["service"]
+        #name = form_inputs.cleaned_data["name"]
+        #filter_l7 = form_inputs.cleaned_data["filter_l7"]
 
-        # Environment
-        finality = form_environment.cleaned_data["finality"]
-        client = form_environment.cleaned_data["client"]
-        environment = form_environment.cleaned_data["environment"]
+        ###
+        options = _options(form_options)
         environment_vip = form_environment.cleaned_data["environment_vip"]
 
+
+        # Environment
+        #finality = form_environment.cleaned_data["finality"]
+        #client = form_environment.cleaned_data["client"]
+        #environment = form_environment.cleaned_data["environment"]
+        #environment_vip = form_environment.cleaned_data["environment_vip"]
+
         # Options
-        timeout = form_options.cleaned_data["timeout"]
-        caches = form_options.cleaned_data["caches"]
-        persistence = form_options.cleaned_data["persistence"]
-        trafficreturn = form_options.cleaned_data["trafficreturn"]
-        trafficreturnid = client_api.create_option_vip().buscar_idtrafficreturn_opcvip(trafficreturn)
-        trafficreturnid = trafficreturnid.get("trafficreturn").get("id")
+        #timeout = form_options.cleaned_data["timeout"]
+        #caches = form_options.cleaned_data["caches"]
+        #persistence = form_options.cleaned_data["persistence"]
+        #trafficreturn = form_options.cleaned_data["trafficreturn"]
+        #trafficreturnid = client_api.create_option_vip().buscar_idtrafficreturn_opcvip(trafficreturn)
+        #trafficreturnid = trafficreturnid.get("trafficreturn").get("id")
 
         # balancing = form_options.cleaned_data["balancing"]
 
@@ -871,20 +876,16 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
                 try:
                     if ipv4_type == '0':
-                        ipv4 = client_api.create_ip().get_available_ip4_for_vip(
-                            environment_vip, name
-                        ).get("ip").get("id")
-
+                        ipv4 = client_api.create_ip().get_available_ip4_for_vip(environment_vip, None).get("ip").get("id")
                     else:
-                        ipv4 = client_api.create_ip().check_vip_ip(
-                            ipv4_specific, environment_vip
-                        ).get("ip").get("id")
-
+                        ipv4 = client_api.create_ip().check_vip_ip(ipv4_specific, environment_vip).get("ip").get("id")
                 except NetworkAPIClientError, e:
                     is_valid = False
                     is_error = True
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
+
+            v4 = _ipv4(ipv4) if ipv4 else None
 
             if ipv6_check:
 
@@ -893,17 +894,16 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
                 try:
                     if ipv6_type == '0':
-                        ipv6 = client_api.create_ip().get_available_ip6_for_vip(
-                            environment_vip, name).get("ip").get("id")
-
+                        ipv6 = client_api.create_ip().get_available_ip6_for_vip(environment_vip, None).get("ip").get("id")
                     else:
-                        ipv6 = client_api.create_ip().check_vip_ip(
-                            ipv6_specific, environment_vip).get("ip").get("id")
+                        ipv6 = client_api.create_ip().check_vip_ip(ipv6_specific, environment_vip).get("ip").get("id")
                 except NetworkAPIClientError, e:
                     is_valid = False
                     is_error = True
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
+
+            v6 = _ipv6(ipv6) if ipv6 else None
 
             if not is_error:
 
@@ -916,6 +916,16 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                         'id': safe_list_get(vip_port_ids, index) or None
                     })
 
+                pools = list()
+
+                for i in range(len(pool_ids)):
+                    pools.append(_pool_dict(pool_ids[i], ports_vip[i]))
+
+                vip = _vip_dict(form_inputs, environment_vip, options, v4, v6, pools)
+                raise Exception(vip)
+                vip = client_api.create_api_vip_request().save_vip_request(vip)
+
+                """
                 if edit:
                     vip = client_api.create_api_vip_request().save(
                         ipv4, ipv6, finality, client, environment,
@@ -934,7 +944,7 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                     )
 
                 id_vip_created = vip.get("id")
-
+                """
         except NetworkAPIClientError, e:
             is_valid = False
             is_error = True
@@ -943,30 +953,21 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
 
         finally:
             try:
-
                 if is_error and ipv4_check and ipv4_type == '0' and ipv4 is not None:
                     client_api.create_ip().delete_ip4(ipv4)
-
                 if is_error and ipv6_check and ipv6_type == '0' and ipv6 is not None:
                     client_api.create_ip().delete_ip6(ipv6)
-
                 if environment_vip:
-                    pools = client_api.create_pool().list_by_environmet_vip(
-                        environment_vip
-                    )
-
+                    pools = client_api.create_pool().list_by_environmet_vip(environment_vip)
                     for pool in pools:
                         pool_choices.append((pool.get('id'), pool.get('identifier')))
-
             except NetworkAPIClientError, e:
                 logger.error(e)
     else:
         is_valid = False
 
     if not is_valid and environment_vip:
-        pools = client_api.create_pool().list_by_environmet_vip(
-            environment_vip
-        )
+        pools = client_api.create_pool().list_by_environmet_vip(environment_vip)
 
         for pool in pools:
             pool_choices.append((pool.get('id'), pool.get('identifier')))
@@ -2567,8 +2568,7 @@ def popular_options_shared(request, client_api):
             client_ovip.buscar_balanceamento_opcvip(environment_vip), 'balanceamento_opt')
         lists['caches'] = validates_dict(
             client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
-        lists['persistence'] = validates_dict(
-            client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
+        lists['persistence'] = validates_dict(client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
         lists['trafficreturn'] = validates_dict(
             client_ovip.buscar_trafficreturn_opcvip(environment_vip), 'trafficreturn_opt')
         lists['rules'] = validates_dict(
@@ -2593,14 +2593,8 @@ def popular_options_shared(request, client_api):
 
     # Returns Json
     try:
-        return HttpResponse(
-            loader.render_to_string(
-                templates.AJAX_VIPREQUEST_OPTIONS,
-                lists,
-                context_instance=RequestContext(request)
-            ),
-            status=status_code
-        )
+        return HttpResponse(loader.render_to_string(templates.AJAX_VIPREQUEST_OPTIONS,lists,
+                                                    context_instance= RequestContext(request)), status=status_code)
     except Exception, e:
         print e
 
@@ -3339,3 +3333,51 @@ def _format_form_error(forms):
             errors.append('<b>%s</b>: %s' % (field, ', '.join(error)))
 
     return errors
+
+
+def _ipv4(v4):
+    ipv4 = dict()
+    ipv4["id"] = int(v4)
+    #ipv4["ip_formated"] = str(v4['ip']['description'])
+    return ipv4
+
+def _ipv6(v6):
+    ipv6 = dict()
+    ipv6["id"] = int(v6)
+    #ipv6["ip_formated"] = str(v6['ip']['description'])
+    return ipv6
+
+def _pool_dict(pool, port):
+    pool_dict = dict()
+    pool_dict["port"] = int(port)
+    pool_dict["options"] = dict()
+    pool_dict["options"]["l4_protocol"] = 51
+    pool_dict["options"]["l7_protocol"] = 57
+    pool_dict["pools"] = dict()
+    options = dict()
+    options["server_pool"] = int(pool)
+    options["l7_rule"] = 55
+    options["l7_value"] = None
+    pool_dict["pools"] = [options]
+    return pool_dict
+
+def _options(form):
+    options = dict()
+    options["cache_group"] = form.cleaned_data["caches"]
+    options["traffic_return"] = form.cleaned_data["trafficreturn"]
+    options["timeout"] = int(form.cleaned_data["timeout"])
+    options["persistence"] = form.cleaned_data["persistence"]
+    raise Exception(options)
+    return options
+
+def _vip_dict(form, envvip, options, v4, v6, pools):
+    vip = dict()
+    vip["name"] = str(form.cleaned_data["name"])
+    vip["service"] = str(form.cleaned_data["service"])
+    vip["business"] = str(form.cleaned_data["business"])
+    vip["environmentvip"] = int(envvip)
+    vip["ipv4"] = v4
+    vip["ipv6"] = v6
+    vip["ports"] = pools
+    vip["options"] = options
+    return vip
