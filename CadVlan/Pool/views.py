@@ -133,7 +133,7 @@ def datatable(request):
     except NetworkAPIClientError, e:
         logger.error(e.error)
         return render_message_json(e.error, messages.ERROR)
-    
+
 
 @log
 @login_required
@@ -160,11 +160,10 @@ def spm_datatable(request, id_server_pool, checkstatus):
         dtp = DataTablePaginator(request, columnIndexNameMap)
         dtp.build_server_side_list()
 
-        pools = client.create_pool().get_pool_members( id_server_pool, checkstatus)
+        pools = client.create_pool().get_pool_members(id_server_pool, checkstatus)
         members = pools["server_pools"][0]["server_pool_members"]
 
-
-        return dtp.build_response( members, len(members), POOL_SPM_DATATABLE, request)
+        return dtp.build_response(members, len(members), POOL_SPM_DATATABLE, request)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -238,7 +237,6 @@ def add_form(request):
         lists["label_tab"] = u'Cadastro de Pool'
         lists["pool_created"] = False
 
-
         if request.method == 'GET':
             lists["pool_members"] = list()
             lists["healthcheck_expect"] = ''
@@ -290,7 +288,7 @@ def add_form(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
-                            request.POST)
+                        request.POST)
         lists["form"] = form
 
     return render_to_response(POOL_FORM, lists, context_instance=RequestContext(request))
@@ -454,15 +452,15 @@ def __modal_ip_list_real(request, client_api):
     if not ips_list['list_ipv4'] and not ips_list['list_ipv6']:
         return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
                                                    u'possa ser utilizado nos pools desse ambiente.',
-                                        'status': 'error'}), status=status_code,content_type='application/json')
+                                        'status': 'error'}), status=status_code, content_type='application/json')
 
     ips['list_ipv4'] = ips_list['list_ipv4']
     ips['list_ipv6'] = ips_list['list_ipv6']
     lists['ips'] = ips
     lists['equip'] = equip
 
-    return HttpResponse( loader.render_to_string( AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, lists,
-                                                  context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(loader.render_to_string(AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, lists,
+                                                context_instance=RequestContext(request)), status=status_code)
 
 
 @log
@@ -593,7 +591,7 @@ def status_change(request):
         action = request.POST.get('action')
 
         if id_server_pool and ids:
-            pools = client.create_pool().get_pool_members( id_server_pool)
+            pools = client.create_pool().get_pool_members(id_server_pool)
             members = pools["server_pools"][0]["server_pool_members"]
 
             for member in members:
@@ -602,7 +600,7 @@ def status_change(request):
                     member_status[-2] = action[-2]
                 else:
                     member_status[-1] = action[-1]
-                member_status = int(''.join(member_status),2)
+                member_status = int(''.join(member_status), 2)
                 if member_status != member['member_status'] and str(member['id']) in ids.split(';'):
                     member['member_status'] = member_status
 
@@ -634,7 +632,7 @@ def enable(request):
 
         if id_server_pool and ids:
             client.create_pool().enable(split_to_array(ids))
-            messages.add_message( request, messages.SUCCESS, pool_messages.get('success_enable'))
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_enable'))
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
@@ -938,7 +936,6 @@ def manage_tab4(request, id_server_pool):
         pool = client.create_pool().get_pool(id_server_pool)
         server_pools = pool['server_pools'][0]
 
-
         lists["pool_created"] = pool_created = server_pools['pool_created']
         if not pool_created:
             return redirect(reverse('pool.edit.form', args=[id_server_pool]))
@@ -990,6 +987,7 @@ def format_pool(client, form, server_pool_members, healthcheck, servicedownactio
 
     return pool
 
+
 def format_server_pool_members(request, limit=0):
 
     pool_members = []
@@ -1004,13 +1002,15 @@ def format_server_pool_members(request, limit=0):
         server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
         server_pool_members["limit"] = limit
         server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
-        server_pool_members["member_status"] = int(request.POST.getlist('member_status')[i]) if request.POST.getlist('id_pool_member')[i] else 2
+        server_pool_members["member_status"] = int(request.POST.getlist('member_status')[i]) \
+            if request.POST.getlist('id_pool_member')[i] else 7
         v4, v6 = format_ips(request, i)
         server_pool_members["ip"] = v4
         server_pool_members["ipv6"] = v6
         pool_members.append(server_pool_members)
 
     return pool_members
+
 
 def format_equipments(request, i):
 
@@ -1019,6 +1019,7 @@ def format_equipments(request, i):
     equipments["nome"] = str(request.POST.getlist('equip')[i])
 
     return equipments
+
 
 def format_ips(request, i):
 
@@ -1030,6 +1031,7 @@ def format_ips(request, i):
     v6 = ips if ":" in ips['ip_formated'] else None
 
     return v4, v6
+
 
 def format_healthcheck(request, id=None):
 
@@ -1046,6 +1048,7 @@ def format_healthcheck(request, id=None):
     healthcheck["destination"] = "*:*"
 
     return healthcheck
+
 
 def format_servicedownaction(client, form):
 
