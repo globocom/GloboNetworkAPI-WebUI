@@ -1,5 +1,7 @@
 	var oldPortVip;
 
+    var opt_empty = '<option></option>'
+
 	$("#page_tab").tabs();
 
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
@@ -107,7 +109,7 @@
 	}
 
 	
-	$("input[name=finality]").change(function(){
+	$("select[name=finality]").change(function(){
 		$.ajax({
 			data: { finality: $(this).val(), token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.client.ajax.external %}{% else %}{% url vip-request.client.ajax %}{% endif %}",
@@ -121,7 +123,10 @@
                     alert(data);
                 }
 				else {
-                    $("#id_client_content").html(data);
+                    $("select[name=client]").html(opt_empty + data);
+
+                    $("select[name=environment]").empty().select2(select2_basic);
+                    options_reset()
                 }
 			},
 			error: function (xhr, error, thrown) {
@@ -129,27 +134,12 @@
 			}	
 		});
 		
-		$("#id_environment_content").html('');
-		$("#id_caches").html('');
-		$("#id_persistence").html('');
-		$("#id_trafficreturn").html('');
-		$("#id_timeout").html('');
-		$("#id_balancing").html('');
-		$("#id_servicedownaction").html('');
-		$("#id_environment_vip").val('');
-		$("#id_rules").html('');
-		$("#id_healthcheck_type_content").html('');
-		$("#table_healthcheck").hide();
-		
-		$("#id_filter_l7").removeAttr('disabled');
-		$("#table_real tbody tr").remove();
-		
 	});
 	
 	
-	$("input[name=client]").live("change", function(){  
+	$("select[name=client]").live("change", function(){  
 		$.ajax({
-			data: { client: $(this).val(), finality: $('input:radio[name=finality]:checked').val(),  token: $("#id_token").val() },
+			data: { client: $(this).val(), finality: $('select[name=finality]	').val(),  token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.environment.ajax.external %}{% else %}{% url vip-request.environment.ajax %}{% endif %}",
 			dataType: 'text',
 			success: function(data, textStatus, xhr) {
@@ -160,7 +150,9 @@
                     alert(data);
                 }
 				else {
-                    $("#id_environment_content").html(data);
+                    $("select[name=environment]").html(opt_empty + data).select2(select2_basic);
+
+                    options_reset()
 
                 }
 			},
@@ -169,24 +161,10 @@
 			}	
 		});
 		
-		$("#id_caches").html('');
-		$("#id_persistence").html('');
-		$("#id_trafficreturn").html('');
-		$("#id_timeout").html('');
-		$("#id_balancing").html('');
-		$("#id_servicedownaction").html('');
-		$("#id_environment_vip").val('');
-		$("#id_rules").html('');
-		$("#id_healthcheck_type_content").html('');
-		$("#table_healthcheck").hide();
-		
-		$("#id_filter_l7").removeAttr('disabled');
-		$("#table_real tbody tr").remove();
-		
 	});
 	
-	$("input[name=environment]").live("change", function(){
-		var id_environment_vip = $('input:radio[name=environment]:checked').attr("attr");
+	$("select[name=environment]").live("change", function(){
+		var id_environment_vip = $('select[name=environment] option:selected').attr("attr");
 
 		$.ajax({
 			data: { environment_vip: id_environment_vip, id_vip: '{{id_vip}}', token: $("#id_token").val() },
@@ -203,23 +181,16 @@
                 }
 				else {
 
-					$("#id_caches").html(data.caches);
-					$("#id_persistence").html(data.persistence);
-					$("#id_trafficreturn").html(data.trafficreturn);
-					$("#id_timeout").html(data.timeout);
-					$("#id_balancing").html(data.balancing);
-					$("#id_servicedownaction").html(data.servicedownaction);
+                    $("#id_caches").html(opt_empty+data.caches).select2(select2_basic);
+                    $("#id_persistence").html(opt_empty+data.persistence).select2(select2_basic);
+                    $("#id_trafficreturn").html(opt_empty+data.trafficreturn).select2(select2_basic);
+                    $("#id_timeout").html(opt_empty+data.timeout).select2(select2_basic);
+                    $("#id_l4_protocol").html(opt_empty+data.l4_protocol).select2(select2_basic);
+                    $("#id_l7_protocol").html(opt_empty+data.l7_protocol).select2(select2_basic);
+                    $("#id_l7_rule").html(opt_empty+data.l7_rule).select2(select2_basic);
 
-					$("#id_environment_vip").val(id_environment_vip);
-					$("#id_rules").html(data.rules);
-					$("#id_healthcheck_type_content").html(data.healthcheck_list);
-					$("#table_healthcheck").hide();
-					
-					if ( $("#id_balancing").val() != null && $('#id_balancing').val().toLowerCase() == "weighted".toLowerCase())
-						$('.weighted').show();
-					else{
-						$('.weighted').hide();
-					}
+                    $("#id_environment_vip").val(id_environment_vip);
+
 					loadPools(id_environment_vip);
 				}
 			},
@@ -230,82 +201,6 @@
 		})
 	});
 	
-	// RULES
-	
-	$("#id_rules").change(function(){
-		if ($(this).val())
-			$.ajax({
-				data: { rule_id: $(this).val(),  token: $("#id_token").val() },
-				url: "{% if external %}{% url vip-request.rule.ajax.external %}{% else %}{% url vip-request.rule.ajax %}{% endif %}",
-				dataType: 'json',
-				success: function(data, textStatus, xhr) {
-					if (xhr.status == 278) {
-                        window.location = xhr.getResponseHeader('Location');
-                    }
-					else if (xhr.status == 203) {
-                        alert(data);
-                    }
-					else {
-						$("#id_filter_l7").val(data.rule);
-					}
-				},
-				error: function (xhr, error, thrown) {
-					location.reload();
-				}	
-			});
-		else
-			$("#id_filter_l7").val('');
-	
-		if ($(this).val() == '' || $(this).val() == null)
-			$("#id_filter_l7").removeAttr('disabled');
-		else
-			$("#id_filter_l7").attr('disabled', 'disabled');
-	});
-
-	url_arr = window.location.pathname.split('/');
-	
-	if (isNaN(url_arr[url_arr.length - 1])){
-		if ($("#id_rules").val() != '')
-			$("#id_rules").change();
-	}	
-	else{
-		if ($("#id_rules").val() != '')
-			$("#id_filter_l7").attr('disabled', 'disabled');
-	}		
-		
-	
-	// RULES END
-			
-	$("input[name=healthcheck_type]").live("change", function(){
-		if ($(this).val() == "HTTP") {
-			$("#table_healthcheck").show();
-		} else {
-			$("#table_healthcheck").hide();
-		}
-	});
-	
-	if ( $("#id_balancing").val() != null &&  $("#id_balancing").val().toLowerCase() == "weighted".toLowerCase()){
-		$('.weighted').show();
-	}else{
-		
-		$('.weighted').hide();
-	}
-		
-	if ( $("input[name=healthcheck_type]:checked").val() == "HTTP" ) {
-		$("#table_healthcheck").show();
-	} else {
-		$("#table_healthcheck").hide();
-	}
-	
-	$("#id_balancing").live("change", function(){
-		if ( $(this).val().toLowerCase() == "weighted".toLowerCase())
-			$('.weighted').show();
-		else{
-			$('input[name=weight]').val('-');
-			$("label[for=weighted]").text('Click para editar.');
-			$('.weighted').hide();
-		}
-	});
 
 	function loadPools(envVipId){
 
@@ -352,4 +247,19 @@
             return false;
         }
 
+    }
+
+    function options_reset(){
+        $("#id_timeout").empty().select2(select2_basic);
+        $("#id_caches").empty().select2(select2_basic);
+        $("#id_persistence").empty().select2(select2_basic);
+        $("#id_trafficreturn").empty().select2(select2_basic);
+        $("#id_l4_protocol").empty().select2(select2_basic);
+        $("#id_l7_protocol").empty().select2(select2_basic);
+        $("#id_l7_rule").empty().select2(select2_basic);
+        $("#id_pools").empty().select2(select2_basic);
+        
+        $("#id_environment_vip").val('');
+    
+        $("#table_real tbody tr").remove();
     }

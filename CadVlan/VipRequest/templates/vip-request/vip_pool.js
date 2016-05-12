@@ -300,33 +300,33 @@ $('#btn_new_expect').live("click", function(){
     }
 });
 
-$('#id_environment').live("change", function(){
-    $('#id_health_check').html('<option value=""> - </option>');
+// $('#id_environment').live("change", function(){
+//     $('#id_health_check').html('<option value=""> - </option>');
 
-    var environmentId = this.value;
+//     var environmentId = this.value;
 
-    if (environmentId != ''){
-        $("#id_equip_name, #btn_new_real").prop('disabled', false);
-        var tokenId = $("#id_token").val();
-        $.ajax({
-                url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+//     if (environmentId != ''){
+//         $("#id_equip_name, #btn_new_real").prop('disabled', false);
+//         var tokenId = $("#id_token").val();
+//         $.ajax({
+//                 url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
 
-                data: {
-                    'id_environment': environmentId,
-                    'token': tokenId
-                },
-                success: function(data, textStatus, xhr) {
-                    if(xhr.status == 200) {
-                        for (var i = 0; i < data.length; i++) {
-                            $('#id_health_check').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
-                        }
-                    }
-                    else if(xhr.status == 203){
-                       alert(data);
-                    }
-                }
-            });
-    }else{
-        $("#id_equip_name, #btn_new_real").prop('disabled', true);
-    }
-});
+//                 data: {
+//                     'id_environment': environmentId,
+//                     'token': tokenId
+//                 },
+//                 success: function(data, textStatus, xhr) {
+//                     if(xhr.status == 200) {
+//                         for (var i = 0; i < data.length; i++) {
+//                             $('#id_health_check').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
+//                         }
+//                     }
+//                     else if(xhr.status == 203){
+//                        alert(data);
+//                     }
+//                 }
+//             });
+//     }else{
+//         $("#id_equip_name, #btn_new_real").prop('disabled', true);
+//     }
+// });

@@ -568,14 +568,6 @@ class RequestVipOptionVipForm(forms.Form):
             self.fields['trafficreturn'].choices = \
                 [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["trafficreturn"]]
 
-        if forms_aux.get('l7_protocol'):
-            self.fields['l7_protocol'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_protocol"]]
-
-        if forms_aux.get('l4_protocol'):
-            self.fields['l4_protocol'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l4_protocol"]]
-
     timeout = forms.ChoiceField(
         label="Timeout",
         required=True,
@@ -602,22 +594,6 @@ class RequestVipOptionVipForm(forms.Form):
 
     trafficreturn = forms.ChoiceField(
         label="Traffic Return",
-        required=True,
-        error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "width: 300px",
-            'class': 'select2'}))
-
-    l7_protocol = forms.ChoiceField(
-        label="Protocol L4",
-        required=True,
-        error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "width: 300px",
-            'class': 'select2'}))
-
-    l4_protocol = forms.ChoiceField(
-        label="Protocolo L7",
         required=True,
         error_messages=error_messages,
         widget=forms.Select(attrs={

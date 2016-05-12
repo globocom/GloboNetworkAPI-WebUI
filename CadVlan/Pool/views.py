@@ -133,7 +133,7 @@ def datatable(request):
     except NetworkAPIClientError, e:
         logger.error(e.error)
         return render_message_json(e.error, messages.ERROR)
-
+    
 
 @log
 @login_required
@@ -450,7 +450,8 @@ def __modal_ip_list_real(request, client_api):
     if not ips_list['list_ipv4'] and not ips_list['list_ipv6']:
         return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
                                                    u'possa ser utilizado nos pools desse ambiente.',
-                                        'status': 'error'}), status=status_code, content_type='application/json')
+
+                                        'status': 'error'}), status=status_code,content_type='application/json')
 
     ips['list_ipv4'] = ips_list['list_ipv4']
     ips['list_ipv6'] = ips_list['list_ipv6']
@@ -934,6 +935,7 @@ def manage_tab4(request, id_server_pool):
 
         pool = client.create_pool().get_pool(id_server_pool)
         server_pools = pool['server_pools'][0]
+
 
         lists["pool_created"] = pool_created = server_pools['pool_created']
         if not pool_created:

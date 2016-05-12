@@ -15,5 +15,5 @@
   limitations under the License.
 -->
 {% for environment in environments %}
-	<label><input type="radio" value="{{environment.ambiente_p44}}" attr="{{environment.id}}"  name="environment">{{environment.ambiente_p44}}{% if environment.description %} <abbr style="font-weight:bold;">({{environment.description}})</abbr> {% endif %}</label>
+  <option value="{{environment.ambiente_p44_txt}}" attr="{{environment.id}}">{{environment.ambiente_p44_txt}}{% if environment.description %} <abbr style="font-weight:bold;">({{environment.description}})</abbr> {% endif %}</option>
 {% endfor %}
