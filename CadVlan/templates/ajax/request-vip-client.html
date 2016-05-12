@@ -15,5 +15,5 @@
   limitations under the License.
 -->
 {% for client in clients %}
-	<label><input type="radio" id="id_client_0" value="{{client.cliente_txt}}" name="client">{{client.cliente_txt}}</label>
+  <option value="{{client.cliente_txt}}">{{client.cliente_txt}}</option>
 {% endfor %}

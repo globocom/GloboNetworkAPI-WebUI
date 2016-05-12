@@ -3362,7 +3362,7 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
         if external:
             lists['token'] = form_acess.initial.get("token")
 
-        vip = client_api.create_api_vip_request().get_vip_request(id_vip)
+        vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
 
         finality_list = client_api.create_api_environment_vip().environmentvip_step()
 
@@ -3401,16 +3401,15 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
 
         else:
 
-            for option in vip.get("options"):
-                opt = option.get("optionvip").get("tipo_opcao")
-                val = option.get("optionvip").get("id")
+            for opt in vip.get("options"):
+                val = vip.get("options").get(opt).get('id')
                 if opt == 'timeout':
                     timeout = val
-                elif opt == 'cache':
+                elif opt == 'cache_group':
                     caches = val
-                elif opt == 'Persistencia':
+                elif opt == 'persistence':
                     persistence = val
-                elif opt == 'Retorno de trafego':
+                elif opt == 'traffic_return':
                     trafficreturn = val
 
             if vip.get("ipv4"):
@@ -3435,9 +3434,11 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
             client_apipool = client_api.create_api_pool()
             client_apienv = client_api.create_api_environment_vip()
 
-            finality = vip.get("environmentvip").get("finalidade_txt")
-            client = vip.get("environmentvip").get("cliente_txt")
-            environment = vip.get("environmentvip").get("ambiente_p44_txt")
+            environment_vip = vip.get("environmentvip").get('id')
+
+            finality = vip.get("environmentvip").get('finalidade_txt')
+            client = vip.get("environmentvip").get('cliente_txt')
+            environment = vip.get("environmentvip").get('ambiente_p44_txt')
 
             forms_aux['finalities'] = client_apienv.environmentvip_step()
             if finality:
@@ -3445,12 +3446,10 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
                 if client:
                     forms_aux['environments'] = client_apienv.environmentvip_step(finality, client)
 
-            environment_vip = vip.get("environmentvip").get("id")
-
-            forms_aux['timeout'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'timeout')
-            forms_aux['caches'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'cache')
-            forms_aux['persistence'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'persistencia')
-            forms_aux['trafficreturn'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'trafficreturn')
+            forms_aux['timeout'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'timeout').get('optionsvip')[0]
+            forms_aux['caches'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'cache').get('optionsvip')[0]
+            forms_aux['persistence'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'Persistencia').get('optionsvip')[0]
+            forms_aux['trafficreturn'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'Retorno de trafego').get('optionsvip')[0]
 
             forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
@@ -3460,8 +3459,7 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
                     "business": vip.get("business"),
                     "service": vip.get("service"),
                     "name": vip.get("name"),
-                    "created": vip.get("created"),
-                    "validated": vip.get("validated")
+                    "created": vip.get("created")
                 }
             )
 
@@ -3487,11 +3485,18 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
 
             lists['form_pool'] = forms.VipPoolFormV2(forms_aux)
 
-            pools_add = []
-            for pool in vip.get("pool"):
-                pool["server_pool"]["port_vip"] = pool['port']
-                pool["server_pool"]["port_vip_id"] = pool['id']
-                pools_add.append(pool)
+            # for port in vip.get("ports"):
+            #     for pool in port.get('pools'):
+            #         pool.get('server_pool')
+            #         pl = dict()
+            #         pl["server_pool"] =  pool.get('server_pool')
+            # #         pl["server_pool"]["port_vip"] = pool['port']
+
+            pools_add = vip.get("ports")
+            # for pool in vip.get("pool"):
+            #     pool["server_pool"]["port_vip"] = pool['port']
+            #     pool["server_pool"]["port_vip_id"] = pool['id']
+            #     pools_add.append(pool)
 
             lists['pools_add'] = pools_add
 
@@ -3577,19 +3582,19 @@ def popular_options_shared(request, client_api):
 
     try:
         environment_vip = get_param_in_request(request, 'environment_vip')
-        id_vip = get_param_in_request(request, 'id_vip')
         if environment_vip is None:
             raise InvalidParameterError(
                 "Parâmetro inválido: O campo Ambiente Vip inválido ou não foi informado.")
 
         client_apiovip = client_api.create_api_option_vip()
-        client_apirule = client_api.create_api_block_rule()
 
-        lists['timeout'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'timeout')
-        lists['caches'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'cache')
-        lists['persistence'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'persistencia')
-        lists['trafficreturn'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'trafficreturn')
-        lists['rules'] = client_apirule.rule_by_environment_vip_id_vip_id(environment_vip, id_vip)
+        lists['timeout'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'timeout')['optionsvip'][0]
+        lists['caches'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'cache')['optionsvip'][0]
+        lists['persistence'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'Persistencia')['optionsvip'][0]
+        lists['trafficreturn'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'Retorno de trafego')['optionsvip'][0]
+        lists['l4_protocol'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol')['optionsvip'][0]
+        lists['l7_protocol'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol')['optionsvip'][0]
+        lists['l7_rule'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'l7_rule')['optionsvip'][0]
 
     except NetworkAPIClientError, e:
         logger.error(e)
