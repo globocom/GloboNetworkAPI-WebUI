@@ -1,5 +1,5 @@
 
-function loadPoolMembers(poolId, portVip){
+function loadPoolMembers(poolId, portVip, l4_protocol, l7_protocol){
     if (poolId !=  0 && poolId != null){
         var tokenId = $("#id_token").val();
         $.ajax({
@@ -12,9 +12,13 @@ function loadPoolMembers(poolId, portVip){
                 if(xhr.status == 200) {
                     $("#divMembers").append(data);
                     $(".tablePoolMembers:last-child .portVip").html(portVip);
+                    $(".tablePoolMembers:last-child .vip_port").html(portVip);
+                    $(".tablePoolMembers:last-child .vip_port").html(portVip);
+                    $(".tablePoolMembers:last-child .vip_port_l4_protocol").html(l4_protocol);
+                    $(".tablePoolMembers:last-child .vip_port_l7_protocol").html(l7_protocol);
                     $(".tablePoolMembers:last-child .ports_vip").val(portVip);
                     $(".tablePoolMembers:last-child .portVip").editableTable();
-                    $("#idPort, #id_pools").val('');
+                    $("#id_port_vip, #id_pools").val('');
                 }
                 else if(xhr.status == 203){
                    alert(data);
@@ -75,7 +79,7 @@ function buildContentEditPool(data) {
 
         objTable.remove();
 
-        loadPoolMembers(idPool, portVip);
+        loadPoolMembers(poolId, portVip, l4_protocol, l7_protocol);
         loadOptionsPool(false);
     });
 
@@ -193,11 +197,13 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
 $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
 
     var poolId = $("#id_pools").val();
-    var portVip = $("#idPort").val().trim();
+    var portVip = $("#id_port_vip").val().trim();
+    var l4_protocol = $('#id_l4_protocol option:checked').html()
+    var l7_protocol = $('#id_l7_protocol option:checked').html();
 
     if(isNaN(portVip)){
         alert('Porta Vip deve ser um número.');
-        $("#idPort").val('');
+        $("#id_port_vip").val('');
         return false;
     }
 
@@ -206,7 +212,7 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
         return false;
     }
 
-    loadPoolMembers(poolId, portVip);
+    loadPoolMembers(poolId, portVip, l4_protocol, l7_protocol);
 });
 
 $("span[id^=editPool]").live("click", function(){

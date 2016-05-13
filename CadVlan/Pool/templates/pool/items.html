@@ -1,13 +1,10 @@
 {% load util %}
-
-<label>Porta: {{ port.port }}</label>
-<label>Protocolo L7: {{ port.options.l4_protocol.nome_opcao_txt }}</label>
-<label>Protocolo L4: {{ port.options.l7_protocol.nome_opcao_txt }}</label>
 <table id="tablePoolMembers_{{ server_pool.id }}" class="tablePoolMembers bordasimplesReal">
 <thead>
 
     <tr >
-        <th colspan="6">
+        <th colspan="6" style="text-align: left;">
+            
 
             <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
 
@@ -53,10 +50,18 @@
                 {% endif %}
            {%endif%}
 
-            <b>{{ server_pool.identifier }}</b>
+            <label>Porta: <b><span class="vip_port">{{ port.port }}</span></b></label>
+            <br>
+            <label>Protocolo L4: <b><span class="vip_port_l4_protocol">{{ port.options.l4_protocol.nome_opcao_txt }}</b></span></label>
+            <br>
+            <label>Protocolo L7: <b><span class="vip_port_l7_protocol">{{ port.options.l7_protocol.nome_opcao_txt }}</b></span></label>
+            <br>
+            <label>Pool: <b>{{ server_pool.identifier }}</b></label>
             <input name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>
             <input class="ports_vip" name="ports_vip" type="hidden" value='{{ server_pool.port_vip }}'/>
             <input name="vip_port_id" id="vip_port_id" type="hidden" value='{{server_pool.port_vip_id}}'/>
+            <input name="vip_port_l4_protocol" id="vip_port_l4_protocol" type="hidden" value='{{port.options.l4_protocol.nome_opcao_txt}}'/>
+            <input name="vip_port_l7_protocol" id="vip_port_l7_protocol" type="hidden" value='{{port.options.l7_protocol.nome_opcao_txt}}'/>
 
         </th>
     </tr>
