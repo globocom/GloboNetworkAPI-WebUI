@@ -23,13 +23,13 @@
 
 table.bordarack {
         width: 480px;
-        border:0px solid black;
+        border:0px solid #CCC;
         padding: 15px 15px 15px 15px;
 }
 
 table.bordasimples {
 	width: 480px;
-	border:1px solid black;
+	border:1px solid #CCC;
 	padding: 15px 15px 15px 15px;
 }
 
@@ -37,8 +37,9 @@ table.bordasimplesReal {
 	width: 480px;
 	text-align:center;
 	border-collapse: collapse;
-	border:1px solid black;
+	border:1px solid #CCC;
 	padding: 15px 15px 15px 15px;
+	margin-top: 10px;
 }
 
 table.bordasimplesReal thead tr td {
@@ -46,7 +47,7 @@ table.bordasimplesReal thead tr td {
 }
 
 table.bordasimplesReal tr td {
-	border:1px solid black;
+	border:1px solid #CCC;
 }
 
 
@@ -54,7 +55,7 @@ table.bordasimplesIP {
 	width: 480px;
 	text-align:center;
 	border-collapse: collapse;
-	border:1px solid black;
+	border:1px solid #CCC;
 	padding: 15px 15px 15px 15px;
 }
 
@@ -67,14 +68,14 @@ table.bordasimplesPerm {
 	height: 100%;
 	text-align:center;
 	border-collapse: collapse;
-	border:1px solid black;
+	border:1px solid #CCC;
 	padding: 0px 5px 0px 5px;
 }
 
 table.bordasimplesPerm tbody tr td {
 	text-align:center;
 	border-collapse: collapse;
-	border:1px solid black;
+	border:1px solid #CCC;
 }
 
 table.bordasimplesPerm thead tr th {

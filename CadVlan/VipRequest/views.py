@@ -3328,7 +3328,7 @@ def add_form_shared_v2(request, client_api, form_acess="", external=False):
             lists['form_basic'] = forms.RequestVipBasicForm(forms_aux)
             lists['form_environment'] = forms.RequestVipEnvironmentVipForm(forms_aux)
             lists['form_option'] = forms.RequestVipOptionVipForm(forms_aux)
-            lists['form_pool'] = forms.VipPoolFormV2(forms_aux)
+            lists['form_port_option'] = forms.RequestVipPortOptionVipForm(forms_aux)
             lists['form_ip'] = forms.RequestVipIPForm(forms_aux)
 
     except NetworkAPIClientError, e:
@@ -3402,7 +3402,7 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
         else:
 
             for opt in vip.get("options"):
-                val = vip.get("options").get(opt).get('id')
+                val = vip.get("options").get(opt).get('id') if vip.get("options").get(opt) else None
                 if opt == 'timeout':
                     timeout = val
                 elif opt == 'cache_group':
@@ -3451,6 +3451,9 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
             forms_aux['persistence'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'Persistencia').get('optionsvip')[0]
             forms_aux['trafficreturn'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'Retorno de trafego').get('optionsvip')[0]
 
+            forms_aux['l4_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol').get('optionsvip')[0]
+            forms_aux['l7_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol').get('optionsvip')[0]
+
             forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
             lists['form_basic'] = forms.RequestVipBasicForm(
@@ -3483,7 +3486,7 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
                 }
             )
 
-            lists['form_pool'] = forms.VipPoolFormV2(forms_aux)
+            lists['form_port_option'] = forms.RequestVipPortOptionVipForm(forms_aux)
 
             # for port in vip.get("ports"):
             #     for pool in port.get('pools'):
@@ -3652,13 +3655,15 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
         forms_aux['caches'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'cache')
         forms_aux['persistence'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'persistencia')
         forms_aux['trafficreturn'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'trafficreturn')
+        forms_aux['l4_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol')
+        forms_aux['l7_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol')
         forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
     # forms with data and request by POST
     form_basic = forms.RequestVipBasicForm(forms_aux, request.POST)
     form_environment = forms.RequestVipEnvironmentVipForm(forms_aux, request.POST)
     form_option = forms.RequestVipOptionVipForm(forms_aux, request.POST)
-    form_pool = forms.VipPoolFormV2(forms_aux, request.POST)
+    form_port_option = forms.RequestVipPortOptionVipForm(forms_aux, request.POST)
     form_ip = forms.RequestVipIPForm(forms_aux, request.POST)
 
     lists, is_valid_ports = valid_ports(lists, ports_vip)
@@ -3804,7 +3809,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
     lists['form_basic'] = form_basic
     lists['form_environment'] = form_environment
     lists['form_option'] = form_option
-    lists['form_pool'] = form_pool
+    lists['form_port_option'] = form_port_option
     lists['form_ip'] = form_ip
 
     return lists, is_valid, id_vip_created

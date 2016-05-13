@@ -623,15 +623,48 @@ class RequestVipOptionVipForm(forms.Form):
 ###########
 # V3
 ###########
-class VipPoolFormV2(forms.Form):
+class RequestVipPortOptionVipForm(forms.Form):
+
+    logger = logging.getLogger(__name__)
 
     def __init__(self, forms_aux, *args, **kwargs):
-        super(VipPoolFormV2, self).__init__(*args, **kwargs)
+        super(RequestVipPortOptionVipForm, self).__init__(*args, **kwargs)
+
+        if forms_aux.get('l4_protocol'):
+            self.fields['l4_protocol'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l4_protocol"]]
+
+        if forms_aux.get('l7_protocol'):
+            self.fields['l7_protocol'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_protocol"]]
 
         if forms_aux.get('pools'):
             self.fields['pools'].choices = \
                 [(env['id'], env["identifier"]) for env in forms_aux["pools"]['server_pools']]
         self.fields['pools'].choices.insert(0, ('', ''))
+
+    port_vip = forms.ChoiceField(
+        label="Porta Vip",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={
+            "style": "width: 50px"}))
+
+    l4_protocol = forms.ChoiceField(
+        label="Protocolo L4",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 150px",
+            'class': 'select2'}))
+
+    l7_protocol = forms.ChoiceField(
+        label="Protocolo L7",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 150px",
+            'class': 'select2'}))
 
     pools = forms.ChoiceField(
         label=u'Pools',
