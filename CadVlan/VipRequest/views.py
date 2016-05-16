@@ -119,23 +119,51 @@ def ajax_list_vips(request):
                 ipv6 = search_form.cleaned_data["ipv6"]
                 vip_create = search_form.cleaned_data["vip_create"]
 
+                extends_search = dict()
                 if len(ipv4) > 0:
-                    ip = ipv4
+                    if request.GET["oct1"]:
+                        extends_search.update({'ipv4__oct1': request.GET["oct1"]})
+                    if request.GET["oct2"]:
+                        extends_search.update({'ipv4__oct2': request.GET["oct2"]})
+                    if request.GET["oct3"]:
+                        extends_search.update({'ipv4__oct3': request.GET["oct3"]})
+                    if request.GET["oct4"]:
+                        extends_search.update({'ipv4__oct4': request.GET["oct4"]})
                 elif len(ipv6) > 0:
-                    ip = ipv6
-                else:
-                    ip = None
+                    extends_search = dict()
+                    if request.GET["oct1"]:
+                        extends_search.update({'ipv6__block1__iexact': request.GET["oct1"]})
+                    if request.GET["oct2"]:
+                        extends_search.update({'ipv6__block2__iexact': request.GET["oct2"]})
+                    if request.GET["oct3"]:
+                        extends_search.update({'ipv6__block3__iexact': request.GET["oct3"]})
+                    if request.GET["oct4"]:
+                        extends_search.update({'ipv6__block4__iexact': request.GET["oct4"]})
+                    if request.GET["oct5"]:
+                        extends_search.update({'ipv6__block5__iexact': request.GET["oct5"]})
+                    if request.GET["oct6"]:
+                        extends_search.update({'ipv6__block6__iexact': request.GET["oct6"]})
+                    if request.GET["oct7"]:
+                        extends_search.update({'ipv6__block7__iexact': request.GET["oct7"]})
+                    if request.GET["oct8"]:
+                        extends_search.update({'ipv6__block8__iexact': request.GET["oct8"]})
+
+                if vip_create:
+                    extends_search.update({'created': vip_create})
+                if id_vip:
+                    extends_search.update({"id": id_vip})
+
 
                 # Pagination
                 column_index_name_map = {
                     0: '',
                     1: 'id',
-                    2: 'ip',
-                    3: 'descricao_ipv4',
-                    4: 'descricao_ipv6',
-                    5: 'equipamento',
-                    6: 'ambiente',
-                    7: 'valido',
+                    2: 'ipv4',
+                    4: 'description',
+                    3: 'ipv6',
+                    5: 'description',
+                    6: 'equipamento',
+                    7: 'ambiente',
                     8: 'criado',
                     9: ''}
                 dtp = DataTablePaginator(request, column_index_name_map)
@@ -144,20 +172,26 @@ def ajax_list_vips(request):
                 dtp.build_server_side_list()
 
                 # Set params in simple Pagination class
-                pag = Pagination(dtp.start_record, dtp.end_record,
-                                 dtp.asorting_cols, dtp.searchable_columns, dtp.custom_search)
+                pagination = Pagination(
+                    dtp.start_record, 
+                    dtp.end_record,
+                    dtp.asorting_cols,
+                    dtp.searchable_columns,
+                    dtp.custom_search)
 
                 # Call API passing all params
-                vips = client.create_vip().find_vip_requests(
-                    id_vip, ip, pag, vip_create)
+                # vips = client.create_vip().list_vip_requests(
+                #     id_vip, ip, pag, vip_create)
 
-                if 'vips' in vips:
-                    vips["vips"] = []
+                data = dict()
+                data["start_record"] = pagination.start_record
+                data["end_record"] = pagination.end_record
+                data["asorting_cols"] = pagination.asorting_cols
+                data["searchable_columns"] = pagination.searchable_columns
+                data["custom_search"] = pagination.custom_search or ""
+                data["extends_search"] = [extends_search] if extends_search else []
 
-                aux_vip = vips.get('vips')
-
-                if type(aux_vip) == dict:
-                    vips['vips'] = [aux_vip]
+                vips = client.create_api_vip_request().list_vip_request(data)
 
                 # Returns JSON
                 return dtp.build_response(
@@ -3762,13 +3796,14 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
                         "cache": int(cache),
                         "trafficreturn": int(trafficreturn)
                     },
-                    "combination": None,
-                    "trafficroup": None,
-                    "pool": pool,
-                    "ip": {
-                        "ipv4": ipv4,
-                        "ipv6": ipv6
-                    }
+                    "ports": {
+                        # "id":
+                        # "options":
+                        # "pools":
+                        # "port":
+                    },
+                    "ipv4": ipv4,
+                    "ipv6": ipv6
 
                 }
                 if edit:

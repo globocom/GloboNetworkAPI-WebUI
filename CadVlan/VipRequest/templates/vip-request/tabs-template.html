@@ -32,9 +32,7 @@ $(document).ready(function() {
 		$("#page_tab_lists").tabs();
 	{% endblock tab_select %}
 
-	$(".pools_tab").attr("href", "{% url vip-request.tab.pools vip.id %}");
-	$(".realserver_status_tab").attr("href", "{% url vip-request.tab.real.server.status.edit vip.id %}");
-	$(".l7-filter_tab").attr("href", "{% url vip-request.tab.l7filter vip.id %}");
+	
 
 	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
