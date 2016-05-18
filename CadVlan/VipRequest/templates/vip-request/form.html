@@ -160,7 +160,7 @@ $(document).ready(function() {
             <div style="margin-top:20px">
                 <div>
 
-                    <div><label>IP do VIP</label></div>
+                    <div style="clear: left;"><label>IP do VIP</label></div>
                     {% if form_ip.ipv4_check.errors %}
                         <p id="error">
                         {% for error in form_ip.ipv4_check.errors %}
@@ -169,7 +169,7 @@ $(document).ready(function() {
                         </p>
                     {% endif %}
                     <div>
-                        <div>
+                        <div style="float: left;margin-right: 1%;">
                             {{form_ip.ipv4_check}}{{form_ip.ipv4_check.label_tag}}
                             {{form_ip.ipv4_type}}
                             {{form_ip.ipv4_specific}}
