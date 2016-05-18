@@ -3131,14 +3131,14 @@ def _format_form_error(forms):
 
 def _ipv4(v4):
     ipv4 = dict()
-    ipv4["id"] = int(v4)
-    #ipv4["ip_formated"] = str(v4['ip']['description'])
+    ipv4["id"] = int(v4.get("ip").get("id"))
+    ipv4["ip_formated"] = str(v4.get("ip_formated"))
     return ipv4
 
 def _ipv6(v6):
     ipv6 = dict()
-    ipv6["id"] = int(v6)
-    #ipv6["ip_formated"] = str(v6['ip']['description'])
+    ipv6["id"] = int(v6.get("ip").get("id"))
+    ipv6["ip_formated"] = str(v6.get("ip_formated"))
     return ipv6
 
 def _pool_dict(pool, port):
@@ -3157,11 +3157,10 @@ def _pool_dict(pool, port):
 
 def _options(form):
     options = dict()
-    options["cache_group"] = form.cleaned_data["caches"]
-    options["traffic_return"] = form.cleaned_data["trafficreturn"]
+    options["cache_group"] = int(form.cleaned_data["caches"])
+    options["traffic_return"] = int(form.cleaned_data["trafficreturn"])
     options["timeout"] = int(form.cleaned_data["timeout"])
-    options["persistence"] = form.cleaned_data["persistence"]
-    raise Exception(options)
+    options["persistence"] = int(form.cleaned_data["persistence"])
     return options
 
 def _vip_dict(form, envvip, options, v4, v6, pools):
@@ -3353,7 +3352,6 @@ def add_form_shared(request, client_api, form_acess="", external=False):
                     return redirect('vip-request.list')
 
         else:
-
             lists['form_inputs'] = forms.RequestVipFormInputs()
             lists['form_environment'] = forms.RequestVipFormEnvironment(finality_list)
             lists['form_real'] = forms.RequestVipFormReal()
@@ -3755,7 +3753,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
         forms_aux['timeout'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'timeout')
         forms_aux['caches'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'cache')
         forms_aux['persistence'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'persistencia')
-        forms_aux['trafficreturn'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'trafficreturn')
+        forms_aux['trafficreturn'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'Retorno de trafego')
         forms_aux['l4_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol')
         forms_aux['l7_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol')
         forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
@@ -3773,6 +3771,8 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
     if form_basic.is_valid() and form_environment.is_valid() and form_option.is_valid() and \
             form_ip.is_valid() and is_valid_ports and is_valid_pools:
+
+        options = _options(form_option)
 
         # field of basic form
         business = form_basic.cleaned_data["business"]
@@ -3803,20 +3803,25 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
                 try:
                     if ipv4_type == '0':
-                        ipv4 = int(client_api.create_ip().get_available_ip4_for_vip(
+
+                        ips = client_api.create_ip().get_available_ip4_for_vip(
                             environment_vip, name
-                        ).get("ip").get("id"))
+                        )
+                        ipv4 = int(ips.get("ip").get("id"))
 
                     else:
-                        ipv4 = int(client_api.create_api_network_ipv4().check_vip_ip(
+                        ips = client_api.create_api_network_ipv4().check_vip_ip(
                             ipv4_specific, environment_vip
-                        ).get("ip").get("id"))
+                        )
+                        ipv4 = int(ips.get("ip").get("id"))
 
                 except NetworkAPIClientError, e:
                     is_valid = False
                     is_error = True
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
+
+            v4 = _ipv4(ips) if ipv4 else None
 
             if ipv6_check:
 
@@ -3825,17 +3830,21 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
                 try:
                     if ipv6_type == '0':
-                        ipv6 = int(client_api.create_ip().get_available_ip6_for_vip(
-                            environment_vip, name).get("ip").get("id"))
+                        ips6 = client_api.create_ip().get_available_ip6_for_vip(
+                            environment_vip, name)
+                        ipv6 = int(ips6.get("ip").get("id"))
 
                     else:
-                        ipv6 = int(client_api.create_api_network_ipv6().check_vip_ip(
-                            ipv6_specific, environment_vip).get("ip").get("id"))
+                        ips6 = client_api.create_api_network_ipv6().check_vip_ip(
+                            ipv6_specific, environment_vip)
+                        ipv6 = int(ips6.get("ip").get("id"))
                 except NetworkAPIClientError, e:
                     is_valid = False
                     is_error = True
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
+
+            v6 = _ipv6(ips6.get("ip_formated")) if ipv6 else None
 
             if not is_error:
 
@@ -3870,13 +3879,19 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
                         "ipv4": ipv4,
                         "ipv6": ipv6
                     }
-
                 }
+
+                pools = list()
+                for i in range(len(pool_ids)):
+                    pools.append(_pool_dict(pool_ids[i], ports_vip[i]))
+
                 if edit:
                     vip_request_dict['id'] = vip_id
                     vip = client_api.create_api_vip_request().edit_vip_request(vip_request_dict)
                 else:
-                    vip = client_api.create_api_vip_request().save_vip_request(vip_request_dict)
+                    vip = _vip_dict(form_basic, environment_vip, options, v4, v6, pools)
+                    #raise Exception (vip)
+                    vip = client_api.create_api_vip_request().save_vip_request(vip)
 
                 id_vip_created = vip.get("id")
 
@@ -3889,7 +3904,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
         finally:
             try:
                 if is_error and ipv4_check and ipv4_type == '0' and ipv4 is not None:
-                    client_api.create_api_network_ipv4().delete_ipv4(ipv4)
+                    client_api.create_ip().delete_ip4(ipv4)
 
                 if is_error and ipv6_check and ipv6_type == '0' and ipv6 is not None:
                     client_api.create_api_network_ipv6().delete_ipv6(ipv6)
@@ -3902,6 +3917,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
     pools_add = []
     for index in range(len(pool_ids)):
         raw_server_pool = client_api.create_api_pool().pool_by_id(pool_ids[index])
+        raw_server_pool["server_pool"] = dict()
         raw_server_pool["server_pool"]["port_vip"] = safe_list_get(ports_vip, index)
         raw_server_pool["server_pool"]["port_vip_id"] = safe_list_get(vip_port_ids, index)
         pools_add.append(raw_server_pool)
