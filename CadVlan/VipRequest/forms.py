@@ -147,7 +147,7 @@ class RequestVipFormOptions(forms.Form):
             rules = validates_dict(client_ovip.buscar_rules(environment_vip, vip_id), 'name_rule_opt')
 
             if rules is not None:
-                self.fields['rules'].choices = [(st['id'] if st['id'] != None else '', st['name_rule_opt'] if st['name_rule_opt'] != None else '') for st in rules]
+                self.fields['rules'].choices = [(st['id'] if st['id'] is not None else '', st['name_rule_opt'] if st['name_rule_opt'] is not None else '') for st in rules]
 
             else:
                 if 'initial' in kwargs:
@@ -554,19 +554,19 @@ class RequestVipOptionVipForm(forms.Form):
 
         if forms_aux.get('timeout'):
             self.fields['timeout'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["timeout"]["optionsvip"][0]]
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["timeout"]]
 
         if forms_aux.get('caches'):
             self.fields['caches'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["caches"]["optionsvip"][0]]
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["caches"]]
 
         if forms_aux.get('persistence'):
             self.fields['persistence'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["persistence"]["optionsvip"][0]]
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["persistence"]]
 
         if forms_aux.get('trafficreturn'):
             self.fields['trafficreturn'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["trafficreturn"]["optionsvip"][0]]
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["trafficreturn"]]
 
     timeout = forms.ChoiceField(
         label="Timeout",
@@ -613,11 +613,13 @@ class RequestVipPortOptionVipForm(forms.Form):
 
         if forms_aux.get('l4_protocol'):
             self.fields['l4_protocol'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l4_protocol"]["optionsvip"][0]]
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l4_protocol"]]
+        self.fields['l4_protocol'].choices.insert(0, ('', ''))
 
         if forms_aux.get('l7_protocol'):
             self.fields['l7_protocol'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_protocol"]["optionsvip"][0]]
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_protocol"]]
+        self.fields['l7_protocol'].choices.insert(0, ('', ''))
 
         if forms_aux.get('pools'):
             self.fields['pools'].choices = \

@@ -101,6 +101,10 @@ def search_list(request):
 @has_perm([{"permission": VIPS_REQUEST, "read": True}, ])
 def ajax_list_vips(request):
 
+    '''
+        Return list of vip request by search field
+    '''
+
     try:
 
         # If form was submited
@@ -153,7 +157,6 @@ def ajax_list_vips(request):
                 if id_vip:
                     extends_search.update({"id": id_vip})
 
-
                 # Pagination
                 column_index_name_map = {
                     0: '',
@@ -173,7 +176,7 @@ def ajax_list_vips(request):
 
                 # Set params in simple Pagination class
                 pagination = Pagination(
-                    dtp.start_record, 
+                    dtp.start_record,
                     dtp.end_record,
                     dtp.asorting_cols,
                     dtp.searchable_columns,
@@ -868,33 +871,32 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
     if form_inputs.is_valid() & form_environment.is_valid() & form_options.is_valid() & form_ip.is_valid() & is_valid_ports & is_valid_pools:
 
         # Inputs
-        #business = form_inputs.cleaned_data["business"]
-        #service = form_inputs.cleaned_data["service"]
-        #name = form_inputs.cleaned_data["name"]
-        #filter_l7 = form_inputs.cleaned_data["filter_l7"]
+        # business = form_inputs.cleaned_data["business"]
+        # service = form_inputs.cleaned_data["service"]
+        # name = form_inputs.cleaned_data["name"]
+        # filter_l7 = form_inputs.cleaned_data["filter_l7"]
 
         ###
         options = _options(form_options)
         environment_vip = form_environment.cleaned_data["environment_vip"]
 
-
         # Environment
-        #finality = form_environment.cleaned_data["finality"]
-        #client = form_environment.cleaned_data["client"]
-        #environment = form_environment.cleaned_data["environment"]
-        #environment_vip = form_environment.cleaned_data["environment_vip"]
+        # finality = form_environment.cleaned_data["finality"]
+        # client = form_environment.cleaned_data["client"]
+        # environment = form_environment.cleaned_data["environment"]
+        # environment_vip = form_environment.cleaned_data["environment_vip"]
 
         # Options
-        #timeout = form_options.cleaned_data["timeout"]
-        #caches = form_options.cleaned_data["caches"]
-        #persistence = form_options.cleaned_data["persistence"]
-        #trafficreturn = form_options.cleaned_data["trafficreturn"]
-        #trafficreturnid = client_api.create_option_vip().buscar_idtrafficreturn_opcvip(trafficreturn)
-        #trafficreturnid = trafficreturnid.get("trafficreturn").get("id")
+        # timeout = form_options.cleaned_data["timeout"]
+        # caches = form_options.cleaned_data["caches"]
+        # persistence = form_options.cleaned_data["persistence"]
+        # trafficreturn = form_options.cleaned_data["trafficreturn"]
+        # trafficreturnid = client_api.create_option_vip().buscar_idtrafficreturn_opcvip(trafficreturn)
+        # trafficreturnid = trafficreturnid.get("trafficreturn").get("id")
 
         # balancing = form_options.cleaned_data["balancing"]
 
-        rule_id = form_options.cleaned_data["rules"]
+        # rule_id = form_options.cleaned_data["rules"]
 
         # IP
         ipv4_check = form_ip.cleaned_data["ipv4_check"]
@@ -2375,7 +2377,6 @@ def popular_rule_shared(request, client_api):
     )
 
 
-
 def popular_options_shared(request, client_api):
 
     lists = dict()
@@ -2421,8 +2422,8 @@ def popular_options_shared(request, client_api):
 
     # Returns Json
     try:
-        return HttpResponse(loader.render_to_string(templates.AJAX_VIPREQUEST_OPTIONS,lists,
-                                                    context_instance= RequestContext(request)), status=status_code)
+        return HttpResponse(loader.render_to_string(templates.AJAX_VIPREQUEST_OPTIONS, lists,
+                                                    context_instance=RequestContext(request)), status=status_code)
     except Exception, e:
         print e
 
@@ -3162,18 +3163,19 @@ def _format_form_error(forms):
     return errors
 
 
-
 def _ipv4(v4):
     ipv4 = dict()
     ipv4["id"] = int(v4.get("ip").get("id"))
     ipv4["ip_formated"] = str(v4.get("ip_formated"))
     return ipv4
 
+
 def _ipv6(v6):
     ipv6 = dict()
     ipv6["id"] = int(v6.get("ip").get("id"))
     ipv6["ip_formated"] = str(v6.get("ip_formated"))
     return ipv6
+
 
 def _pool_dict(pool, port):
     pool_dict = dict()
@@ -3189,6 +3191,7 @@ def _pool_dict(pool, port):
     pool_dict["pools"] = [options]
     return pool_dict
 
+
 def _options(form):
     options = dict()
     options["cache_group"] = int(form.cleaned_data["caches"])
@@ -3196,6 +3199,7 @@ def _options(form):
     options["timeout"] = int(form.cleaned_data["timeout"])
     options["persistence"] = int(form.cleaned_data["persistence"])
     return options
+
 
 def _vip_dict(form, envvip, options, v4, v6, pools):
     vip = dict()
@@ -3212,6 +3216,8 @@ def _vip_dict(form, envvip, options, v4, v6, pools):
 ############
 # Forms
 #############
+
+
 @log
 @login_required
 @has_perm([
@@ -3587,6 +3593,8 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
             forms_aux['l4_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol').get('optionsvip')[0]
             forms_aux['l7_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol').get('optionsvip')[0]
 
+            forms_aux['l7_rule'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_rule').get('optionsvip')[0]
+
             forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
             lists['form_basic'] = forms.RequestVipBasicForm(
@@ -3784,12 +3792,13 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
     # Options - data
     if environment_vip:
-        forms_aux['timeout'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'timeout')
-        forms_aux['caches'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'cache')
-        forms_aux['persistence'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'persistencia')
-        forms_aux['trafficreturn'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'Retorno de trafego')
-        forms_aux['l4_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol')
-        forms_aux['l7_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol')
+        forms_aux['timeout'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'timeout').get('optionsvip')[0]
+        forms_aux['caches'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'cache').get('optionsvip')[0]
+        forms_aux['persistence'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'persistencia').get('optionsvip')[0]
+        forms_aux['trafficreturn'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'Retorno de trafego').get('optionsvip')[0]
+        forms_aux['l4_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol').get('optionsvip')[0]
+        forms_aux['l7_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol').get('optionsvip')[0]
+        forms_aux['l7_rule'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_rule').get('optionsvip')[0]
         forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
     # forms with data and request by POST
@@ -3925,7 +3934,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
                     vip = client_api.create_api_vip_request().edit_vip_request(vip_request_dict)
                 else:
                     vip = _vip_dict(form_basic, environment_vip, options, v4, v6, pools)
-                    #raise Exception (vip)
+                    # raise Exception (vip)
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
 
                 id_vip_created = vip.get("id")
@@ -4076,4 +4085,3 @@ def ajax_list_vips_v3(request):
     except BaseException, e:
         logger.error(e)
         return HttpResponseServerError(e, mimetype='application/javascript')
-
