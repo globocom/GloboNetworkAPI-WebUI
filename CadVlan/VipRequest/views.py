@@ -955,10 +955,10 @@ def valid_form_and_submit(request, lists, finality_list, healthcheck_list, clien
                 pools = list()
 
                 for i in range(len(pool_ids)):
-                    pools.append(_pool_dict(pool_ids[i], ports_vip[i]))
+                    pools.append(_pool_dict(pool_ids[i], ports_vip[i], None, None))
 
                 vip = _vip_dict(form_inputs, environment_vip, options, v4, v6, pools)
-                raise Exception(vip)
+                #raise Exception(vip)
                 vip = client_api.create_api_vip_request().save_vip_request(vip)
 
                 """
@@ -3175,16 +3175,19 @@ def _ipv6(v6):
     ipv6["ip_formated"] = str(v6.get("ip_formated"))
     return ipv6
 
-def _pool_dict(pool, port):
+def _pool_dict(pool, port, form, l7_rule):
     pool_dict = dict()
     pool_dict["port"] = int(port)
     pool_dict["options"] = dict()
-    pool_dict["options"]["l4_protocol"] = 51
-    pool_dict["options"]["l7_protocol"] = 57
+    pool_dict["options"]["l4_protocol"] = int(form.get("l4_protocol")) or None
+    pool_dict["options"]["l7_protocol"] = int(form.get("l7_protocol")) or None
     pool_dict["pools"] = dict()
     options = dict()
     options["server_pool"] = int(pool)
-    options["l7_rule"] = 55
+    options["l7_rule"] = None
+    for l7 in l7_rule["optionsvip"][0]:
+        if l7["nome_opcao_txt"] == "(nenhum)":
+            options["l7_rule"] = int(l7["id"])
     options["l7_value"] = None
     pool_dict["pools"] = [options]
     return pool_dict
@@ -3791,6 +3794,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
         forms_aux['l4_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol')
         forms_aux['l7_protocol'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol')
         forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
+        forms_aux['l7_rule'] = client_apiopt.option_vip_by_environment_vip_type(environment_vip, 'l7_rule')
 
     # forms with data and request by POST
     form_basic = forms.RequestVipBasicForm(forms_aux, request.POST)
@@ -3800,7 +3804,6 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
     form_ip = forms.RequestVipIPForm(forms_aux, request.POST)
 
     lists, is_valid_ports = valid_ports(lists, ports_vip)
-
     lists, is_valid_pools = _validate_pools(lists, pool_ids)
 
     if form_basic.is_valid() and form_environment.is_valid() and form_option.is_valid() and \
@@ -3808,21 +3811,8 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
         options = _options(form_option)
 
-        # field of basic form
-        business = form_basic.cleaned_data["business"]
-        service = form_basic.cleaned_data["service"]
         name = form_basic.cleaned_data["name"]
-
-        # field of Environment form
         environment_vip = form_environment.cleaned_data["environment_vip"]
-
-        # field of Options form
-        timeout = form_option.cleaned_data["timeout"]
-        cache = form_option.cleaned_data["caches"]
-        persistence = form_option.cleaned_data["persistence"]
-        trafficreturn = form_option.cleaned_data["trafficreturn"]
-
-        # field of IP form
         ipv4_check = form_ip.cleaned_data["ipv4_check"]
         ipv6_check = form_ip.cleaned_data["ipv6_check"]
 
@@ -3895,40 +3885,18 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
                         'val_optionvip': ''
                     })
 
-                vip_request_dict = {
-                    "name": name,
-                    "service": service,
-                    "business": business,
-                    "environmentvip": environment_vip,
-                    "options": {
-                        "timeout": int(timeout),
-                        "persistence": int(persistence),
-                        "cache": int(cache),
-                        "trafficreturn": int(trafficreturn)
-                    },
-                    "ports": {
-                        # "id":
-                        # "options":
-                        # "pools":
-                        # "port":
-                    },
-                    "ipv4": ipv4,
-                    "ipv6": ipv6
-                }
-
                 pools = list()
                 for i in range(len(pool_ids)):
-                    pools.append(_pool_dict(pool_ids[i], ports_vip[i]))
+                    pools.append(_pool_dict(pool_ids[i], ports_vip[i], request.POST, forms_aux['l7_rule']))
 
                 if edit:
-                    vip_request_dict['id'] = vip_id
-                    vip = client_api.create_api_vip_request().edit_vip_request(vip_request_dict)
+                    vip = _vip_dict(form_basic, environment_vip, options, v4, v6, pools)
+                    vip = client_api.create_api_vip_request().edit_vip_request(vip)
                 else:
                     vip = _vip_dict(form_basic, environment_vip, options, v4, v6, pools)
-                    #raise Exception (vip)
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
 
-                id_vip_created = vip.get("id")
+                id_vip_created = vip[0].get("id")
 
         except NetworkAPIClientError, e:
             is_valid = False
