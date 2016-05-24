@@ -3842,7 +3842,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
                         ipv4 = int(ips.get("ip").get("id"))
 
                     else:
-                        ips = client_api.create_api_network_ipv4().check_vip_ip(
+                        ips = client_api.create_ip().check_vip_ip(
                             ipv4_specific, environment_vip
                         )
                         ipv4 = int(ips.get("ip").get("id"))
@@ -3867,7 +3867,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
                         ipv6 = int(ips6.get("ip").get("id"))
 
                     else:
-                        ips6 = client_api.create_api_network_ipv6().check_vip_ip(
+                        ips6 = client_api.create_ip().check_vip_ip(
                             ipv6_specific, environment_vip)
                         ipv6 = int(ips6.get("ip").get("id"))
                 except NetworkAPIClientError, e:
@@ -3899,7 +3899,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
                 if edit:
                     vip = _vip_dict(form_basic, environment_vip, options, v4, v6, pools)
-                    vip = client_api.create_api_vip_request().edit_vip_request(vip)
+                    vip = client_api.create_api_vip_request().update_vip_request(vip, vip_id)
                 else:
                     vip = _vip_dict(form_basic, environment_vip, options, v4, v6, pools)
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
