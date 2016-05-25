@@ -96,6 +96,139 @@ def search_list(request):
     )
 
 
+@log
+@login_required
+@has_perm([{"permission": VIPS_REQUEST, "read": True}, ])
+def ajax_list_vips(request):
+
+    '''
+        Return list of vip request by search field
+    '''
+
+    try:
+
+        # If form was submited
+        if request.method == "GET":
+
+            # Get user auth
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            search_form = forms.SearchVipRequestForm(request.GET)
+
+            if search_form.is_valid():
+
+                id_vip = search_form.cleaned_data['id_request']
+                ipv4 = search_form.cleaned_data["ipv4"]
+                ipv6 = search_form.cleaned_data["ipv6"]
+                vip_create = search_form.cleaned_data["vip_create"]
+
+                extends_search = dict()
+                if len(ipv4) > 0:
+                    if request.GET["oct1"]:
+                        extends_search.update({'ipv4__oct1': request.GET["oct1"]})
+                    if request.GET["oct2"]:
+                        extends_search.update({'ipv4__oct2': request.GET["oct2"]})
+                    if request.GET["oct3"]:
+                        extends_search.update({'ipv4__oct3': request.GET["oct3"]})
+                    if request.GET["oct4"]:
+                        extends_search.update({'ipv4__oct4': request.GET["oct4"]})
+                elif len(ipv6) > 0:
+                    extends_search = dict()
+                    if request.GET["oct1"]:
+                        extends_search.update({'ipv6__block1__iexact': request.GET["oct1"]})
+                    if request.GET["oct2"]:
+                        extends_search.update({'ipv6__block2__iexact': request.GET["oct2"]})
+                    if request.GET["oct3"]:
+                        extends_search.update({'ipv6__block3__iexact': request.GET["oct3"]})
+                    if request.GET["oct4"]:
+                        extends_search.update({'ipv6__block4__iexact': request.GET["oct4"]})
+                    if request.GET["oct5"]:
+                        extends_search.update({'ipv6__block5__iexact': request.GET["oct5"]})
+                    if request.GET["oct6"]:
+                        extends_search.update({'ipv6__block6__iexact': request.GET["oct6"]})
+                    if request.GET["oct7"]:
+                        extends_search.update({'ipv6__block7__iexact': request.GET["oct7"]})
+                    if request.GET["oct8"]:
+                        extends_search.update({'ipv6__block8__iexact': request.GET["oct8"]})
+
+                if vip_create:
+                    extends_search.update({'created': vip_create})
+                if id_vip:
+                    extends_search.update({"id": id_vip})
+
+                # Pagination
+                column_index_name_map = {
+                    0: '',
+                    1: 'id',
+                    2: 'ipv4',
+                    4: 'description',
+                    3: 'ipv6',
+                    5: 'description',
+                    6: 'equipamento',
+                    7: 'ambiente',
+                    8: 'criado',
+                    9: ''}
+                dtp = DataTablePaginator(request, column_index_name_map)
+
+                # Make params
+                dtp.build_server_side_list()
+
+                # Set params in simple Pagination class
+                pagination = Pagination(
+                    dtp.start_record,
+                    dtp.end_record,
+                    dtp.asorting_cols,
+                    dtp.searchable_columns,
+                    dtp.custom_search)
+
+                # Call API passing all params
+                # vips = client.create_vip().list_vip_requests(
+                #     id_vip, ip, pag, vip_create)
+
+                data = dict()
+                data["start_record"] = pagination.start_record
+                data["end_record"] = pagination.end_record
+                data["asorting_cols"] = pagination.asorting_cols
+                data["searchable_columns"] = pagination.searchable_columns
+                data["custom_search"] = pagination.custom_search or ""
+                data["extends_search"] = [extends_search] if extends_search else []
+
+                vips = client.create_api_vip_request().search_vip_request_details(data)
+
+                # Returns JSON
+                return dtp.build_response(
+                    vips["vips"],
+                    vips["total"],
+                    templates.AJAX_VIPREQUEST_LIST,
+                    request
+                )
+
+            else:
+                # Remake search form
+                lists = dict()
+                lists["search_form"] = search_form
+
+                # Returns HTML
+                response = HttpResponse(
+                    loader.render_to_string(
+                        templates.SEARCH_FORM_ERRORS,
+                        lists,
+                        context_instance=RequestContext(request)
+                    )
+                )
+                # Send response status with error
+                response.status_code = 412
+                return response
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        return HttpResponseServerError(e, mimetype='application/javascript')
+    except BaseException, e:
+        logger.error(e)
+        return HttpResponseServerError(e, mimetype='application/javascript')
+
+
 def ajax_shared_view_vip(request, id_vip, lists):
 
     lists['id_vip'] = id_vip
@@ -291,7 +424,7 @@ def delete_validate_create_remove(request, operation):
 @login_required
 @has_perm([{"permission": VIP_CREATE_SCRIPT, "write": True}])
 def create_vip(request):
-    delete_validate_create_remove(request, 2)
+    delete_validate_create_remove_2(request, 2)
     # Redirect to list_all action
     return redirect('vip-request.list')
 
@@ -300,7 +433,7 @@ def create_vip(request):
 @login_required
 @has_perm([{"permission": VIP_REMOVE_SCRIPT, "write": True}])
 def remove_vip(request):
-    delete_validate_create_remove(request, 3)
+    delete_validate_create_remove_2(request, 3)
     # Redirect to list_all action
     return redirect('vip-request.list')
 
@@ -309,7 +442,7 @@ def remove_vip(request):
 @login_required
 @has_perm([{"permission": VIP_VALIDATION, "write": True}])
 def validate_vip(request):
-    delete_validate_create_remove(request, 1)
+    delete_validate_create_remove_2(request, 1)
     # Redirect to list_all action
     return redirect('vip-request.list')
 
@@ -318,7 +451,7 @@ def validate_vip(request):
 @login_required
 @has_perm([{"permission": VIPS_REQUEST, "write": True}])
 def delete_vip(request):
-    delete_validate_create_remove(request, 0)
+    delete_validate_create_remove_2(request, 0)
     # Redirect to list_all action
     return redirect('vip-request.list')
 
@@ -2318,7 +2451,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 ])
 def external_load_new_pool(request, form_acess, client):
 
-    return shared_load_new_pool(request, client, form_acess, external=True)
+    return shared_load_new_pool_2(request, client, form_acess, external=True)
 
 
 @log
@@ -2332,7 +2465,7 @@ def load_new_pool(request):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
-    return shared_load_new_pool(request, client)
+    return shared_load_new_pool_2(request, client)
 
 
 def shared_load_new_pool(request, client, form_acess=None, external=False):
@@ -3004,6 +3137,182 @@ def popular_options_shared(request, client_api):
         print e
 
 
+@log
+@login_required
+@has_perm([{"permission": VIPS_REQUEST, "read": True}, ])
+def delete_validate_create_remove_2(request, operation):
+
+    operation_text = OPERATION.get(int(operation))
+
+    if request.method == 'POST':
+
+        form = DeleteForm(request.POST) if operation_text == 'DELETE' else ValidateForm(
+            request.POST) if operation_text == 'VALIDATE' else CreateForm(request.POST) if operation_text == 'CREATE' else RemoveForm(request.POST)
+        id = 'ids' if operation_text == 'DELETE' else 'ids_val' if operation_text == 'VALIDATE' else 'ids_create' if operation_text == 'CREATE' else 'ids_remove'
+
+        if form.is_valid():
+
+            # Get user
+            auth = AuthSession(request.session)
+            client_vip = auth.get_clientFactory().create_vip()
+            client_api_vip = auth.get_clientFactory().create_api_vip_request()
+
+            # All ids to be deleted
+            ids = split_to_array(form.cleaned_data[id])
+            vip_id = form.cleaned_data[id]
+
+            # All messages to display
+            error_list = list()
+            error_list_created = list()
+            error_list_not_validate = list()
+
+            # Control others exceptions
+            have_errors = False
+
+            # FLAG only for  ERROR  in create
+            all_ready_msg_script_error = False
+
+            # For each script selected to remove
+            try:
+                if operation_text == 'DELETE':
+                    client_api_vip.delete_vip_request(vip_id)
+                elif operation_text == 'REMOVE':
+                    client_api_vip.remove_vip(vip_id)
+                elif operation_text == 'CREATE':
+                    client_api_vip.create_vip(vip_id)
+
+            except VipAllreadyCreateError, e:
+                logger.error(e)
+                error_list_created.append(vip_id)
+            except VipError, e:
+                logger.error(e)
+                error_list_not_validate.append(vip_id)
+            except ScriptError, e:
+                logger.error(e)
+                if not all_ready_msg_script_error:
+                    messages.add_message(request, messages.ERROR, e)
+                all_ready_msg_script_error = True
+                error_list.append(vip_id)
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+                error_list.append(vip_id)
+
+            for id_vip in ids:
+                try:
+                    if operation_text == 'VALIDATE':
+                        client_vip.validate(id_vip)
+                except VipAllreadyCreateError, e:
+                    logger.error(e)
+                    error_list_created.append(id_vip)
+                except VipError, e:
+                    logger.error(e)
+                    error_list_not_validate.append(id_vip)
+                except ScriptError, e:
+                    logger.error(e)
+                    if not all_ready_msg_script_error:
+                        messages.add_message(request, messages.ERROR, e)
+                    all_ready_msg_script_error = True
+                    error_list.append(id_vip)
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                    error_list.append(id_vip)
+
+            msg_error_call, msg_sucess_call, msg_some_error_call = get_error_mesages(
+                operation_text)
+
+            if len(error_list_not_validate) > 0:
+
+                msg = ""
+                for id_error in error_list_not_validate:
+                    msg = msg + id_error + ','
+
+                if operation_text == 'REMOVE':
+                    msg = request_vip_messages.get('not_created') % msg[:-1]
+                else:
+                    msg = request_vip_messages.get(
+                        'validate_before') % msg[:-1]
+                messages.add_message(request, messages.WARNING, msg)
+                have_errors = True
+
+            if len(error_list_created) > 0:
+
+                msg = ""
+                for id_error in error_list_created:
+                    msg = msg + id_error + ','
+
+                msg = request_vip_messages.get('all_ready_create') % msg[:-1]
+                messages.add_message(request, messages.WARNING, msg)
+                have_errors = True
+
+            # If cant remove nothing
+            if len(error_list) == len(ids):
+                messages.add_message(
+                    request, messages.ERROR, request_vip_messages.get(msg_error_call))
+
+            # If cant remove someones
+            elif len(error_list) > 0:
+                msg = ""
+                for id_error in error_list:
+                    msg = msg + id_error + ", "
+
+                msg = request_vip_messages.get(msg_some_error_call) % msg[:-2]
+
+                messages.add_message(request, messages.WARNING, msg)
+
+            # If all has ben removed
+            elif have_errors is False:
+                messages.add_message(
+                    request, messages.SUCCESS, request_vip_messages.get(msg_sucess_call))
+
+        else:
+            messages.add_message(
+                request, messages.ERROR, error_messages.get("select_one"))
+
+    # Redirect to list_all action
+    return redirect('vip-request.list')
+
+
+def shared_load_new_pool_2(request, client, form_acess=None, external=False):
+
+    try:
+
+        pool_members = list()
+
+        env_vip_id = request.GET.get('env_vip_id')
+
+        action = reverse('external.save.pool') if external else reverse('save.pool')
+        load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
+
+        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
+
+        options_vip_choices = _create_options_vip(client)
+        servicedownaction_choices = populate_servicedownaction_choices(client)
+        choices_environment = _create_options_environment(
+            client,
+            env_vip_id
+        )
+
+        form = PoolForm(choices_environment, options_vip_choices, servicedownaction_choices)
+
+        return render(
+            request,
+            templates.VIPREQUEST_POOL_FORM, {
+                'form': form,
+                'action': action,
+                'load_pool_url': load_pool_url,
+                'pool_members': pool_members,
+                'expect_strings': expect_string_list,
+                'show_environment': True
+            }
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        return render_message_json(str(e), messages.ERROR)
+
+
 ##########
 # functions
 #######
@@ -3154,7 +3463,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
                 if edit:
                     vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools)
-                    vip = client_api.create_api_vip_request().edit_vip_request(vip)
+                    vip = client_api.create_api_vip_request().update_vip_request(vip, vip_id)
                 else:
                     vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools)
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
@@ -3298,7 +3607,7 @@ def ajax_list_vips(request):
                 data["custom_search"] = pagination.custom_search or ""
                 data["extends_search"] = [extends_search] if extends_search else []
 
-                vips = client.create_api_vip_request().list_vip_request(data)
+                vips = client.create_api_vip_request().search_vip_request_details(data)
 
                 # Returns JSON
                 return dtp.build_response(

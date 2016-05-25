@@ -193,15 +193,15 @@ $(document).ready(function() {
 	});
 	{% endif %}
 	
-	{% has_perm VIP_VALIDATION True None %}
-	{% if has_perm %}
-	$("#btn_validate").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-		if (confirm('Deseja realmente validar as Requisições Vip selecionadas ?')){ 
-			var data = getSelectionData(oTable);
-			$("#id_ids_val").val(data).parent().submit();
-		}
-	});
-	{% endif %}
+	//{% has_perm VIP_VALIDATION True None %}
+	//{% if has_perm %}
+	//$("#btn_validate").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+	//	if (confirm('Deseja realmente validar as Requisições Vip selecionadas ?')){
+	//		var data = getSelectionData(oTable);
+	//		$("#id_ids_val").val(data).parent().submit();
+	//	}
+	//});
+	//{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
@@ -299,9 +299,9 @@ input {
 				<button id="btn_new">Novo Registro</button>
 			{% endif %}
 			{% has_perm VIP_VALIDATION True None %}
-			{% if has_perm %}
+			<!--{% if has_perm %}
 				<button id="btn_validate">Validar</button>
-			{% endif %}
+			{% endif %}-->
 			{% has_perm VIP_CREATE_SCRIPT True None %}
 			{% if has_perm %}
 				<button id="btn_create">Criar VIP</button>
