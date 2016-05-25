@@ -194,7 +194,7 @@ def ajax_list_vips(request):
                 data["custom_search"] = pagination.custom_search or ""
                 data["extends_search"] = [extends_search] if extends_search else []
 
-                vips = client.create_api_vip_request().list_vip_request(data)
+                vips = client.create_api_vip_request().search_vip_request_details(data)
 
                 # Returns JSON
                 return dtp.build_response(
@@ -4011,7 +4011,7 @@ def ajax_list_vips_v3(request):
                     },
                     "vip_created": vip_created
                 }
-                vips = client.create_api_vip_request().list_vip_request(search)
+                vips = client.create_api_vip_request().search_vip_request_details(search)
 
                 if 'vips' in vips:
                     vips["vips"] = []
