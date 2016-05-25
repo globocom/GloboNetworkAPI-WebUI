@@ -18,7 +18,7 @@
 
 def populate_expectstring_choices(client):
     expectstring_choices = client.create_ambiente().listar_healtchcheck_expect_distinct()
-    expectstring_choices['healthcheck_expect'].insert(0, {'expect_string': u'-', 'id': u''})
+    expectstring_choices['healthcheck_expect'].insert(0, ('', '-'))
 
     return expectstring_choices
 
@@ -91,16 +91,16 @@ def populate_pool_members_by_lists(client, members):
     ip_list_full = []
     if len(members.get("ports_reals")) > 0 and len(members.get("ips")) > 0:
         for i in range(0, len(members.get("ports_reals"))):
-            nome_equipamento = client.create_equipamento().listar_por_id(members.get("id_equips")[i])
-            pool_members.append({'id': members.get("id_pool_member")[i],
-                                 'id_equip': members.get("id_equips")[i],
-                                 'nome_equipamento': nome_equipamento['equipamento']['nome'],
-                                 'priority': members.get("priorities")[i],
-                                 'port_real': members.get("ports_reals")[i],
-                                 'weight': members.get("weight")[i],
-                                 'id_ip': members.get("id_ips")[i],
-                                 'ip': members.get("ips")[i]
-                                 })
+            pool_members.append({
+                'id': members.get("id_pool_member")[i],
+                'id_equip': members.get("id_equips")[i],
+                'nome_equipamento': members.get("name_equips")[i],
+                'priority': members.get("priorities")[i],
+                'port_real': members.get("ports_reals")[i],
+                'weight': members.get("weight")[i],
+                'id_ip': members.get("id_ips")[i],
+                'ip': members.get("ips")[i]
+            })
 
             ip_list_full.append({'id': members.get("id_ips")[i], 'ip': members.get("ips")[i]})
 
@@ -123,4 +123,3 @@ def populate_pool_members_by_obj(server_pool_members):
                              'ip': ip['ip_formated'] if ip else ''})
 
     return pool_members
-

@@ -17,33 +17,36 @@
 
 import json
 import logging
-from django.core.urlresolvers import reverse
+
+
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.forms import DeleteForm
+from CadVlan.messages import error_messages, healthcheck_messages, pool_messages
+from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from CadVlan.Pool.facade import populate_enviroments_choices, populate_optionsvips_choices, \
     populate_expectstring_choices, populate_optionspool_choices, populate_pool_members_by_lists, \
-    populate_pool_members_by_obj, populate_servicedownaction_choices, find_servicedownaction_id, \
+    populate_pool_members_by_obj, populate_servicedownaction_choices, \
     find_servicedownaction_object
-from CadVlan.Util.Decorators import log, login_required, has_perm, has_perm_external
-from django.views.decorators.csrf import csrf_exempt
+from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
+    HEALTH_CHECK_EXPECT, EQUIPMENT_MANAGEMENT, VIPS_REQUEST, ENVIRONMENT_MANAGEMENT
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
     POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_REQVIP_DATATABLE, POOL_MEMBER_ITEMS, POOL_MANAGE_TAB1, \
     POOL_MANAGE_TAB2, POOL_MANAGE_TAB3, POOL_MANAGE_TAB4
-from django.shortcuts import render_to_response, redirect, render
-from django.http import HttpResponseServerError, HttpResponse
+from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import has_perm, has_perm_external, log, login_required
+from CadVlan.Util.shortcuts import render_message_json
+from CadVlan.Util.utility import DataTablePaginator, get_param_in_request
+
+from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseServerError
+from django.shortcuts import redirect, render, render_to_response
 from django.template import loader
 from django.template.context import RequestContext
-from CadVlan.Auth.AuthSession import AuthSession
+from django.views.decorators.csrf import csrf_exempt
+
 from networkapiclient.exception import NetworkAPIClientError
-from django.contrib import messages
-from CadVlan.messages import healthcheck_messages
-from CadVlan.messages import error_messages, pool_messages
-from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
-    HEALTH_CHECK_EXPECT, EQUIPMENT_MANAGEMENT, VIPS_REQUEST, ENVIRONMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm
-from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from networkapiclient.Pagination import Pagination
-from CadVlan.Util.utility import DataTablePaginator, get_param_in_request
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.shortcuts import render_message_json
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +87,7 @@ def datatable(request):
 
         environment_id = int(request.GET.get('pEnvironment'))
 
-        columnIndexNameMap = {
+        column_index_name_map = {
             0: '',
             1: 'identifier',
             2: 'default_port',
@@ -94,7 +97,7 @@ def datatable(request):
             6: ''
         }
 
-        dtp = DataTablePaginator(request, columnIndexNameMap)
+        dtp = DataTablePaginator(request, column_index_name_map)
 
         dtp.build_server_side_list()
 
@@ -133,7 +136,7 @@ def datatable(request):
     except NetworkAPIClientError, e:
         logger.error(e.error)
         return render_message_json(e.error, messages.ERROR)
-    
+
 
 @log
 @login_required
@@ -145,7 +148,7 @@ def spm_datatable(request, id_server_pool, checkstatus):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        columnIndexNameMap = {
+        column_index_name_map = {
             0: '',
             1: 'identifier',
             2: 'ip',
@@ -157,7 +160,7 @@ def spm_datatable(request, id_server_pool, checkstatus):
             8: 'last_status_update'
         }
 
-        dtp = DataTablePaginator(request, columnIndexNameMap)
+        dtp = DataTablePaginator(request, column_index_name_map)
         dtp.build_server_side_list()
 
         pools = client.create_pool().get_pool_members(id_server_pool, checkstatus)
@@ -181,10 +184,19 @@ def reqvip_datatable(request, id_server_pool):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        columnIndexNameMap = {0: '', 1: 'id', 2: 'ip', 3: 'descricao_ipv4',
-                              4: 'descricao_ipv6', 5: 'ambiente', 6: 'valido', 7: 'criado', 8: ''}
+        column_index_name_map = {
+            0: '',
+            1: 'id',
+            2: 'ip',
+            3: 'descricao_ipv4',
+            4: 'descricao_ipv6',
+            5: 'ambiente',
+            6: 'valido',
+            7: 'criado',
+            8: ''
+        }
 
-        dtp = DataTablePaginator(request, columnIndexNameMap)
+        dtp = DataTablePaginator(request, column_index_name_map)
 
         dtp.build_server_side_list()
 
@@ -248,6 +260,7 @@ def add_form(request):
             members = dict()
             members["id_pool_member"] = request.POST.getlist('id_pool_member')
             members["id_equips"] = request.POST.getlist('id_equip')
+            members["name_equips"] = request.POST.getlist('equip')
             members["priorities"] = request.POST.getlist('priority')
             members["ports_reals"] = request.POST.getlist('ports_real_reals')
             members["weight"] = request.POST.getlist('weight')
@@ -359,6 +372,7 @@ def edit_form(request, id_server_pool):
             members = dict()
             members["id_pool_member"] = request.POST.getlist('id_pool_member')
             members["id_equips"] = request.POST.getlist('id_equip')
+            members["name_equips"] = request.POST.getlist('equip')
             members["priorities"] = request.POST.getlist('priority')
             members["ports_reals"] = request.POST.getlist('ports_real_reals')
             members["weight"] = request.POST.getlist('weight')
@@ -414,7 +428,7 @@ def edit_form(request, id_server_pool):
     {"permission": EQUIPMENT_MANAGEMENT, "read": True, }
 ])
 def ajax_modal_ip_real_server_external(request, form_acess, client):
-    return __modal_ip_list_real(request, client)
+    return _modal_ip_list_real(request, client)
 
 
 @log
@@ -426,10 +440,10 @@ def ajax_modal_ip_real_server_external(request, form_acess, client):
 def ajax_modal_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return __modal_ip_list_real(request, client_api)
+    return _modal_ip_list_real(request, client_api)
 
 
-def __modal_ip_list_real(request, client_api):
+def _modal_ip_list_real(request, client_api):
 
     lists = {'msg': str(), 'ips': []}
     ips = {}
@@ -451,22 +465,26 @@ def __modal_ip_list_real(request, client_api):
         return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
                                                    u'possa ser utilizado nos pools desse ambiente.',
 
-                                        'status': 'error'}), status=status_code,content_type='application/json')
+                                        'status': 'error'}), status=status_code, content_type='application/json')
 
     ips['list_ipv4'] = ips_list['list_ipv4']
     ips['list_ipv6'] = ips_list['list_ipv6']
     lists['ips'] = ips
     lists['equip'] = equip
 
-    return HttpResponse( loader.render_to_string( AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, lists,
-                                                  context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML,
+            lists,
+            context_instance=RequestContext(request)
+        ), status=status_code)
 
 
 @log
 @csrf_exempt
 @has_perm_external([{"permission": POOL_MANAGEMENT, "read": True}])
 def ajax_get_opcoes_pool_by_ambiente_external(request, form_acess, client):
-    return __get_opcoes_pool_by_ambiente(request, client)
+    return _get_opcoes_pool_by_ambiente(request, client)
 
 
 @log
@@ -475,10 +493,10 @@ def ajax_get_opcoes_pool_by_ambiente_external(request, form_acess, client):
 def ajax_get_opcoes_pool_by_ambiente(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return __get_opcoes_pool_by_ambiente(request, client_api)
+    return _get_opcoes_pool_by_ambiente(request, client_api)
 
 
-def __get_opcoes_pool_by_ambiente(request, client_api):
+def _get_opcoes_pool_by_ambiente(request, client_api):
 
     lists = dict()
     lists['opcoes_pool'] = ''
@@ -676,7 +694,7 @@ def disable(request):
 @csrf_exempt
 @has_perm_external([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
 def add_healthcheck_expect_external(request, form_acess, client):
-    return __add_healthcheck_expect_shared(request, client)
+    return _add_healthcheck_expect_shared(request, client)
 
 
 @log
@@ -686,10 +704,10 @@ def add_healthcheck_expect(request):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
-    return __add_healthcheck_expect_shared(request, client)
+    return _add_healthcheck_expect_shared(request, client)
 
 
-def __add_healthcheck_expect_shared(request, client):
+def _add_healthcheck_expect_shared(request, client):
     lists = dict()
     try:
         if request.method == 'GET':
@@ -935,7 +953,6 @@ def manage_tab4(request, id_server_pool):
 
         pool = client.create_pool().get_pool(id_server_pool)
         server_pools = pool['server_pools'][0]
-
 
         lists["pool_created"] = pool_created = server_pools['pool_created']
         if not pool_created:

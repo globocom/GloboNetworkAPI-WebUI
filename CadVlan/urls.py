@@ -474,12 +474,12 @@ urlpatterns += patterns(
         'remove_vip', name='vip.remove',),
 
 
-    url('^vip-request/l7/operation/valid?$',
-        'validate_l7', name='l7.valid'),
-    url('^vip-request/l7/operation/apply?$',
-        'apply_l7', name='l7.apply'),
-    url('^vip-request/l7/operation/rollback?$',
-        'apply_rollback_l7', name='l7.rollback'),
+    # url('^vip-request/l7/operation/valid?$',
+    #     'validate_l7', name='l7.valid'),
+    # url('^vip-request/l7/operation/apply?$',
+    #     'apply_l7', name='l7.apply'),
+    # url('^vip-request/l7/operation/rollback?$',
+    #     'apply_rollback_l7', name='l7.rollback'),
 
 
     url('^vip-request/form[/]?$',
@@ -522,8 +522,8 @@ urlpatterns += patterns(
         'tab_healthcheck', name='vip-request.tab.healthcheck',),
     url('^vip-request/tab/maxcon/(?P<id_vip>\d+)[/]?$',
         'tab_maxcon', name='vip-request.tab.maxcon',),
-    url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$',
-        'tab_l7filter', name='vip-request.tab.l7filter',),
+    # url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$',
+    #     'tab_l7filter', name='vip-request.tab.l7filter',),
     url('^vip-request/tab/pools/(?P<id_vip>\d+)[/]?$',
         'tab_pools', name='vip-request.tab.pools',),
     url('^vip-request/pool_datatable/(?P<id_vip>\d+)[/]?$', 'pool_datatable', name='vip-request.pool_datatable',),

@@ -22,7 +22,7 @@ from CadVlan.messages import error_messages
 
 class PoolForm(forms.Form):
 
-    def __init__(self, enviroments_choices, optionsvips_choices,servicedownaction_choices, healthcheck_choices=[('', '-')], *args, **kwargs):
+    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices, healthcheck_choices=[('', '')], *args, **kwargs):
         super(PoolForm, self).__init__(*args, **kwargs)
 
         self.fields['environment'].choices = enviroments_choices
@@ -32,21 +32,70 @@ class PoolForm(forms.Form):
 
     id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
 
-    identifier = forms.CharField(label=u'Identifier', min_length=3, max_length=200, required=True,
-                                 error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    default_port = forms.CharField(label=u'Default Port', min_length=2, max_length=5, required=True,
-                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
-    environment = forms.ChoiceField(label=u'Environment', choices=[], required=True,
-                                    error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
-    balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
-                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
-    servicedownaction = forms.ChoiceField(label=u'Action on ServiceDown', choices=[], required=True,
-                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
-    health_check = forms.ChoiceField(label=u'HealthCheck', choices=[], required=True,
-                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
-    max_con = forms.IntegerField(label=u'Número máximo de conexões (maxconn)', required=True,
-                                error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
-
+    identifier = forms.CharField(
+        label=u'Identifier',
+        min_length=3,
+        max_length=200,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 300px"}
+        )
+    )
+    default_port = forms.CharField(
+        label=u'Default Port',
+        min_length=2,
+        max_length=5,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 100px"}
+        )
+    )
+    environment = forms.ChoiceField(
+        label=u'Environment',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={'style': "width: 310px"}
+        )
+    )
+    balancing = forms.ChoiceField(
+        label=u'Balanceamento',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={'style': "width: 310px"}
+        )
+    )
+    servicedownaction = forms.ChoiceField(
+        label=u'Action on ServiceDown',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={'style': "width: 310px"}
+        )
+    )
+    health_check = forms.ChoiceField(
+        label=u'HealthCheck',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={'style': "width: 310px"}
+        )
+    )
+    max_con = forms.IntegerField(
+        label=u'Número máximo de conexões (maxconn)',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 231px"}
+        )
+    )
 
 
 class SearchPoolForm(forms.Form):
@@ -64,25 +113,49 @@ class SearchPoolForm(forms.Form):
         required=False,
         choices=[(0, "Selecione")],
         error_messages=error_messages,
-        widget=forms.Select(attrs={"style": "width: 300px"})
+        widget=forms.Select(
+            attrs={"style": "width: 300px"}
+        )
     )
 
 
 class PoolFormEdit(forms.Form):
 
-    def __init__(self, choices_opvip,servicedownaction_choices, *args, **kwargs):
+    def __init__(self, choices_opvip, servicedownaction_choices, *args, **kwargs):
 
         super(PoolFormEdit, self).__init__(*args, **kwargs)
 
         self.fields['balancing'].choices = choices_opvip
-        self.fields['balancing'].choices.insert(0, ('',''))
+        self.fields['balancing'].choices.insert(0, ('', ''))
 
         self.fields['servicedownaction'].choices = servicedownaction_choices
-        self.fields['servicedownaction'].choices.insert(0, ('',''))
+        self.fields['servicedownaction'].choices.insert(0, ('', ''))
 
-    default_port = forms.CharField(label=u'Default Port', min_length=2, max_length=5, required=True,
-                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
-    balancing = forms.ChoiceField(label=u'Balanceamento', choices=[], required=True,
-                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
-    servicedownaction = forms.ChoiceField(label=u'Action on ServiceDown', choices=[], required=True,
-                                  error_messages=error_messages, widget=forms.Select(attrs={'style': "width: 310px"}))
+    default_port = forms.CharField(
+        label=u'Default Port',
+        min_length=2,
+        max_length=5,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 100px"}
+        )
+    )
+    balancing = forms.ChoiceField(
+        label=u'Balanceamento',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={'style': "width: 310px"}
+        )
+    )
+    servicedownaction = forms.ChoiceField(
+        label=u'Action on ServiceDown',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={'style': "width: 310px"}
+        )
+    )
