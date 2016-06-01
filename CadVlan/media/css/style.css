@@ -30,7 +30,8 @@ table.bordarack {
 table.vip_v3 {
 	width: 100%;
 	height: 100%;
-	text-align:center;
+	text-align:left;
+	border:1px solid #CCC;
 	padding: 15px 15px 15px 15px;
 }
 
@@ -41,7 +42,7 @@ table.bordasimples {
 }
 
 table.bordasimplesReal {
-	width: 480px;
+	width: 100%;
 	text-align:center;
 	border-collapse: collapse;
 	border:1px solid #CCC;
