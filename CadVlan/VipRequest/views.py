@@ -239,24 +239,18 @@ def ajax_shared_view_vip(request, id_vip, lists):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        lists['vip'] = client.create_vip().get_by_id(id_vip).get('vip')
+        lists['vip'] = vip = client.create_api_vip_request().get_vip_request_details(id_vip).get('vips')[0]
 
-        if 'reals' in lists['vip']:
-            if type(lists['vip']['reals']['real']) is not list:
-                lists['vip']['reals']['real'] = [lists['vip']['reals']['real']]
+        #apenas reals
+        reals = []
+        for ports  in vip['ports']:
+            for pool in ports['pools']:
+                for real in pool['server_pool']['server_pool_members']:
+                    reals.append(real)
 
-        # *** Change this verification in next Sprint, it need to be adjusted ***
-        if 'portas_servicos' in lists['vip']:
-            if type(lists['vip']['portas_servicos']['porta']) is not list:
-                lists['vip']['portas_servicos']['porta'] = [
-                    lists['vip']['portas_servicos']['porta']]
-
-        # *** Change this verification in next Sprint, it need to be adjusted ***
-        if 'portas_servicos' in lists['vip']:
-            lists['len_porta'] = int(
-                len(lists['vip']['portas_servicos']['porta']))
-
-        lists['len_equip'] = int(len(lists['vip']['equipamento']))
+        lists['reals'] = reals
+        lists['len_porta'] = int(len(vip['ports']))
+        lists['len_equip'] = int(len(vip['equipments']))
 
         # Returns HTML
         response = HttpResponse(
@@ -603,9 +597,7 @@ def valid_ports(lists, ports_vip):
     is_valid = True
 
     if ports_vip is not None:
-
-        invalid_port_vip = [
-            i for i in ports_vip if int(i) > 65535 or int(i) < 1]
+        invalid_port_vip = [i for i in ports_vip if int(i) > 65535 or int(i) < 1]
 
         if invalid_port_vip:
             lists['pools_error'] = request_vip_messages.get("invalid_port")
@@ -618,7 +610,6 @@ def valid_ports(lists, ports_vip):
         if ports_vip is None or not ports_vip:
             lists['pools_error'] = request_vip_messages.get("error_ports")
             is_valid = False
-
     else:
         lists['pools_error'] = request_vip_messages.get("error_ports_required")
         is_valid = False
