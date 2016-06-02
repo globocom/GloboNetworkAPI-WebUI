@@ -132,6 +132,61 @@
             }
         });
 
+        obj_btn_new_expect.click(function(){
+            var expect_string = $.trim($('#expect_string').val());
+            var id_environment = $('#id_environment').val();
+            var id_token = $("#id_token").val();
+
+            if(expect_string) {
+                $.ajax({
+                        data: { 'expect_string': expect_string, 'id_environment': id_environment, token:id_token },
+                        url: "{% url pool.add.healthcheck.expect %}",
+                        success: function(data, xhr) {
+
+                            $('#msg_new_health_check').fadeIn(1000);
+                            $("#id_expect").append('<option value="'+data['expect_string']+'">'+data['expect_string']+'</option>');
+                            $("#msg_new_health_check").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">'+data['mensagem']+'</td>');
+                            $("#msg_new_health_check").delay(15000).fadeOut('slow');
+                            $("#id_expect option:last").attr('selected', 'selected');
+                            $("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
+                            $("#expect_string").val('');
+                        }
+                    });
+            }
+        });
+
+
+        $('#id_environment').live("change", function(){
+            $('#id_health_check').html('<option value=""> - </option>');
+
+            var environmentId = this.value;
+
+            if (environmentId != ''){
+                $("#id_equip_name, #btn_new_real").prop('disabled', false);
+                var tokenId = $("#id_token").val();
+                $.ajax({
+                    url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+
+                    data: {
+                        'id_environment': environmentId,
+                        'token': tokenId
+                    },
+                    success: function(data, textStatus, xhr) {
+                        if(xhr.status == 200) {
+                            for (var i = 0; i < data.length; i++) {
+                                $('#id_health_check').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
+                            }
+                        }
+                        else if(xhr.status == 203){
+                           alert(data);
+                        }
+                    }
+                });
+            }else{
+                $("#id_equip_name, #btn_new_real").prop('disabled', true);
+            }
+        });
+
         $("#id_health_check").live("change", function(){
             if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
                 $("#table_health_check").show();
@@ -174,9 +229,6 @@
     <form id="add_form_vip_pool" method="post" action="{{action}}">
         {% csrf_token %}
 
-        {% if environment_id %}
-            <input type="hidden" name="environment" id="id_environment" value="{{ environment_id }}">
-        {% endif %}
 
         {% if not is_copy %}
             {{ form.id }}
