@@ -32,9 +32,6 @@ $(document).ready(function() {
 		$("#page_tab_lists").tabs();
 	{% endblock tab_select %}
 
-	
-
-	
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 	$("#btn_sav").button("disable");
 	
@@ -71,28 +68,30 @@ $(document).ready(function() {
 		<div id="fields" class="ui-widget-content">
 			<table border="5">
 				<tr>
-					<td style="width: 120px"><label for="nome_ambiente">Id</label></td>
+					<td style="width: 120px"><label for="vip_id">Id VIP</label></td>
 					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.id}}</label></td>
 				</tr>
 				<tr>
-					<td><label>Ip</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% for ip in vip.ips %}{{ip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+					<td><label>IPv4</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% if vip.ipv4 %}{{vip.ipv4.ip_formated}}{% else %} - {% endif %}</label></td>
 				</tr>
 				<tr>
-					<td><label>Descrição Ipv4</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv4_description %}{%else%}{{vip.ipv4_description}}{% endifequal %}</label></td>
+					<td><label>IPv6</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% if vip.ipv6 %}{{vip.ipv6.ip_formated}}{% else %} - {% endif %}</label></td>
 				</tr>
+				{% for equip in vip.equipments %}
 				<tr>
-					<td><label>Descrição Ipv6</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal None vip.ipv6_description %}{%else%}{{vip.ipv6_description}}{% endifequal %}</label></td>
+					{% ifequal forloop.counter 1 %}
+						<td><label>Equipamento(s)</label></td>
+					{% else %}
+						<td></td>
+					{% endifequal %}
+					<td><label style="width: 350px;color: blue;text-align: center;" > {{equip.name}} </label> </td>
 				</tr>
+				{% endfor %}
 				<tr>
-					<td><label>Equipamento</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% for equip in vip.equipamento %}{{equip}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
-				</tr>
-				<tr>
-					<td style="width: 120px"><label>Ambiente</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% for environment in vip.environments %}{{environment}}{% if not forloop.last %}<label style="color: red;"> / </label>{% endif %}{% endfor %}</label></td>
+					<td style="width: 120px"><label>Ambiente VIP</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.environmentvip.finalidade_txt}} - {{vip.environmentvip.cliente_txt}} - {{vip.environmentvip.ambiente_p44_txt}}</label></td>
 				</tr>
 			</table>
 		</div>
@@ -104,7 +103,7 @@ $(document).ready(function() {
 			<div id="page_tab_lists">
 				<ul>
                     <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-1" class="pools_tab">Pools</a></li>
-					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3" class="l7-filter_tab">Filtro L7</a></li>
+					<!--li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3" class="l7-filter_tab">Filtro L7</a></li-->
 					
 				</ul>
 				

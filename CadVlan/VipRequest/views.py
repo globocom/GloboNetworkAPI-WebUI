@@ -1067,25 +1067,19 @@ def tab_real_server_status(request, id_vip):
 @has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True}, ])
 def tab_pools(request, id_vip):
 
+    lists = dict()
+    lists['idt'] = id_vip
+    lists['status_form'] = DeleteForm()
+
     try:
-
-        lists = dict()
-        lists['idt'] = id_vip
-        lists['status_form'] = DeleteForm()
-
-        # Get user
         auth = AuthSession(request.session)
         client_api = auth.get_clientFactory()
 
-        vip = client_api.create_vip().get_by_id(id_vip).get("vip")
-        vip['equipamento'] = validates_dict(vip, 'equipamento')
-        vip['environments'] = validates_dict(vip, 'environments')
-        vip['balancing'] = str(vip.get("metodo_bal")).upper()
-        lists['vip'] = vip
+        lists['vip'] = vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
 
-        finality = vip.get("finalidade")
-        client = vip.get("cliente")
-        environment = vip.get("ambiente")
+        finality = vip["environmentvip"]["finalidade_txt"]
+        client = vip["environmentvip"]["cliente_txt"]
+        environment = vip["environmentvip"]["ambiente_p44_txt"]
 
     except EnvironmentVipNotFoundError, e:
         logger.error(e)

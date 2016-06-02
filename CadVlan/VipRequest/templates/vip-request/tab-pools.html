@@ -23,8 +23,6 @@
 
 {% block js %}
     oTable = $("#poolDatatable").dataTable({
-        "sAjaxSource": "{% url vip-request.pool_datatable idt %}",
-        "bServerSide": true,
         "aaSorting": [[ 1, "asc" ]],
         "bAutoWidth": false,
         "bJQueryUI": true,
@@ -40,10 +38,9 @@
         location.href = "{% url vip-request.list %}";
     });
 
-    oTable.on('init', function() {
-        $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
-        $(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false });
-    });
+    $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+    $(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+    $(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false });
 
     $("#checkAll").click( function() {
         if ($(this).attr('checked')) {
@@ -61,7 +58,6 @@
 
 {% block tab-data %}
 <div id="tabs-1">
-
         <table id="poolDatatable">
             <col width="30%" />
             <col width="10%" />
@@ -80,7 +76,18 @@
                 </tr>
             </thead>
             <tbody>
-
+            {% for port in vip.ports %}
+                {% for pool in port.pools %}
+                    <tr>
+                        <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.identifier}}</label></td>
+                        <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.default_port}}</label></td>
+                        <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_type}}</label></td>
+                        <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.environment}}</label></td>
+                        <td class='text_center'>{% ifequal pool.server_pool.pool_created 1 %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NAO'></span> {% endifequal %}</td>
+                        <td class='text_center'>{% if pool.server_pool.pool_created %} <a href='{% url pool.edit.form pool.server_pool.id %}' style='width: 20px; height: 20px;' class='btn_manager' title='Gerênciar'></a>{% else %}<a href='{% url pool.edit.form pool.server_pool.id %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'></a>{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
             </tbody>
         </table>
     <div class="buttons-l ui-widget-header">
