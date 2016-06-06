@@ -10,20 +10,20 @@
         }
     }
     function update_port_vips(element){
-            if(element.parent().parent().next().attr('name') == 'ports_vip'){
-                new_port_vip = element.val();
+        if(element.parent().parent().next().attr('name') == 'ports_vip'){
+            new_port_vip = element.val();
 
-                $("input[name=ports_vip_reals]").each(function(){
-                      if ($(this).val() == port_vip){
-                          if (new_port_vip == ''){
-                              $(this).val('-');
-                          }else{
-                              $(this).val(new_port_vip);
-                          }
-                          $(this).parent().find('label').text(new_port_vip);
-                      }
-                  });
-            }
+            $("input[name=ports_vip_reals]").each(function(){
+                if ($(this).val() == port_vip){
+                    if (new_port_vip == ''){
+                        $(this).val('-');
+                    }else{
+                        $(this).val(new_port_vip);
+                    }
+                    $(this).parent().find('label').text(new_port_vip);
+                }
+            });
+        }
     }
     $(document).ready(function() {
         $('#id_environment').select2(select2_basic)
@@ -115,7 +115,8 @@
               $(this).val($(this).val().replace(/[^0-9]+/g,''));
         });
 
-        $('#table_ports tbody tr span').live("click", function(){
+        $("#table_ports").off("click", "tbody tr span")
+        $("#table_ports").on("click", "tbody tr span", function(e) {
             port_vip_value = $(this).parents().find('input=[name=ports_vip]').val();
 
             if (confirm('Deseja realmente excluir a(s) Portas selecionada(s)?')){
@@ -131,23 +132,57 @@
             }
         });
 
-        $('#table_real tbody tr span').die("click");
-        $('#table_real tbody tr span').live("click", function(e){
+        $("#table_real").off("click", "tbody tr span")
+        $("#table_real").on("change", "tbody tr span", function(e) {
             if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){
             $(this).parents(".remove_port").remove();
             return false;
             }
         });
 
-        $("#id_healthcheck").live("change", function(){
-            if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
-                $("#table_health_check").show();
-            } else {
-                $("#table_health_check").hide();
+        $("body").off("click", "#id_environment")
+        $("body").on("change", "#id_environment", function() {
+            $('#id_healthcheck').html('<option value=""> - </option>');
+
+            var environmentId = this.value;
+
+            if (environmentId != ''){
+                $("#id_equip_name, #btn_new_real").prop('disabled', false);
+                var tokenId = $("#id_token").val();
+                $.ajax({
+                    url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+
+                    data: {
+                        'id_environment': environmentId,
+                        'token': tokenId
+                    },
+                    success: function(data, textStatus, xhr) {
+                        if(xhr.status == 200) {
+                            for (var i = 0; i < data.length; i++) {
+                                $('#id_healthcheck').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
+                            }
+                        }
+                        else if(xhr.status == 203){
+                           alert(data);
+                        }
+                    }
+                });
+            }else{
+                $("#id_equip_name, #btn_new_real").prop('disabled', true);
             }
         });
 
-        $("#id_balancing").live("change", function(){
+        $("body").off("change", "#id_healthcheck")
+        $("body").on("change", "#id_healthcheck", function() {
+            if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
+                $("#table_healthcheck").show();
+            } else {
+                $("#table_healthcheck").hide();
+            }
+        });
+
+        $("body").off("change", "#id_balancing")
+        $("body").on("change", "#id_balancing", function() {
             if ( $.trim($('option:selected', $(this)).text()).toLowerCase() == balancing)
                 $('.weighted').show();
             else{
@@ -157,47 +192,14 @@
             }
         });
 
-        // calls in new pool popup
-        $("body").on("change", "#id_environment", function() {
-            // change healthcheck 
-            $('#id_healthcheck').html('<option value=""> - </option>');
-
-            var environmentId = this.value;
-
-            if (environmentId != ''){
-                $("#id_equip_name, #btn_new_real").prop('disabled', false);
-                var tokenId = $("#id_token").val();
-                $.ajax({
-                        url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
-
-                        data: {
-                            'id_environment': environmentId,
-                            'token': tokenId
-                        },
-                        success: function(data, textStatus, xhr) {
-                            if(xhr.status == 200) {
-                                for (var i = 0; i < data.length; i++) {
-                                    $('#id_healthcheck').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
-                                }
-                            }
-                            else if(xhr.status == 203){
-                               alert(data);
-                            }
-                        }
-                    });
-            }else{
-                $("#id_equip_name, #btn_new_real").prop('disabled', true);
-            }
-        });
-
         var env_val = $("#id_environment").val();
         if (env_val != '' ){
             $("#id_equip_name, #btn_new_real").prop('disabled', '');
         }
 
-        var health_check_val = $("#id_healthcheck").val();
-        if (health_check_val == 'HTTP' || health_check_val == 'HTTPS'){
-            $("#table_health_check").show();
+        var healthcheck_val = $("#id_healthcheck").val();
+        if (healthcheck_val == 'HTTP' || healthcheck_val == 'HTTPS'){
+            $("#table_healthcheck").show();
         }
 
         verifyWeight();
@@ -214,9 +216,6 @@
     <form id="add_form_vip_pool" method="post" action="{{action}}">
         {% csrf_token %}
 
-        {% if environment_id %}
-            <input type="hidden" name="environment" id="id_environment" value="{{ environment_id }}">
-        {% endif %}
 
         {% if not is_copy %}
             {{ form.id }}
@@ -240,7 +239,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <div style="margin-top:20px" style="display:none;" id="table_health_check" class="bordasimples">
+            <div style="margin-top:20px" style="display:none;" id="table_healthcheck" class="bordasimples">
                 {% for field in form_healthcheck %}
                 <div>
                     <div>

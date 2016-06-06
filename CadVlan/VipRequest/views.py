@@ -26,17 +26,18 @@ from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import CreateForm, DeleteForm, RemoveForm, ValidateForm
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
-from CadVlan.messages import auth_messages, equip_group_messages, error_messages, healthcheck_messages, pool_messages, request_vip_messages
+from CadVlan.messages import auth_messages, equip_group_messages, error_messages, healthcheck_messages, \
+    pool_messages, request_vip_messages
 from CadVlan.permissions import POOL_ALTER_SCRIPT, POOL_CREATE_SCRIPT, POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, \
     VIP_ALTER_SCRIPT, VIP_CREATE_SCRIPT, VIP_REMOVE_SCRIPT, VIPS_REQUEST
-from CadVlan.Pool.facade import find_servicedownaction_id, \
-    populate_optionspool_choices, populate_optionsvips_choices, \
-    populate_servicedownaction_choices
+from CadVlan.Pool import facade as facade_pool
+from CadVlan.Pool.facade import populate_optionsvips_choices, populate_servicedownaction_choices
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_PASSWORD, NETWORK_API_URL, NETWORK_API_USERNAME
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.Decorators import has_perm, has_perm_external, log, login_required
 from CadVlan.Util.shortcuts import render_message_json
-from CadVlan.Util.utility import clone, DataTablePaginator, get_param_in_request, IP_VERSION, is_valid_int_param, safe_list_get, validates_dict
+from CadVlan.Util.utility import clone, DataTablePaginator, get_param_in_request, IP_VERSION, \
+    is_valid_int_param, safe_list_get, validates_dict
 from CadVlan.VipRequest import forms
 from CadVlan.VipRequest.encryption import Encryption
 
@@ -1900,7 +1901,7 @@ def shared_load_pool(request, client, form_acess=None, external=False):
                     'ip': ip_obj.get('ip_formated')}
                 )
 
-        health_check = pool['server_pool']['healthcheck']['healthcheck_type'] \
+        healthcheck = pool['server_pool']['healthcheck']['healthcheck_type'] \
             if pool['server_pool']['healthcheck'] else None
 
         healthcheck_expect = pool['server_pool']['healthcheck']['healthcheck_expect'] \
@@ -1915,7 +1916,7 @@ def shared_load_pool(request, client, form_acess=None, external=False):
             'default_port': server_pool.get('default_port'),
             'balancing': server_pool.get('lb_method'),
             'servicedownaction': sda.get('name'),
-            'health_check': health_check,
+            'healthcheck': healthcheck,
             'max_con': server_pool.get('default_limit'),
             'identifier': server_pool.get('identifier')
         }
@@ -2000,105 +2001,6 @@ def _create_options_vip(client):
             ))
 
     return options_vip_choices
-
-
-def shared_save_pool(request, client, form_acess=None, external=False):
-
-    try:
-
-        error_list = list()
-        ip_list_full = list()
-
-        env_vip_id = request.POST.get('environment_vip')
-
-        # Get Data From Request Post To Save
-        pool_id = request.POST.get('id')
-        environment_id = request.POST.get('environment')
-        healthcheck_type = request.POST.get('health_check')
-        healthcheck_expect = request.POST.get('expect')
-        healthcheck_request = request.POST.get('health_check_request')
-
-        pool_member_ids = request.POST.getlist('id_pool_member')
-        equipment_ids = request.POST.getlist('id_equip')
-        equipment_names = request.POST.getlist('equip')
-        priorities = request.POST.getlist('priority')
-        ports_reals = request.POST.getlist('ports_real_reals')
-        weight = request.POST.getlist('weight')
-        id_ips = request.POST.getlist('id_ip')
-        ips = request.POST.getlist('ip')
-
-        if healthcheck_type != 'HTTP' and healthcheck_type != 'HTTPS':
-            healthcheck_expect = ''
-            healthcheck_request = ''
-
-        options_pool_choices = _create_options_pool_as_healthcheck(client, environment_id)
-        options_environment = _create_options_environment(client, env_vip_id)
-        options_vip_choices = _create_options_vip(client)
-
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-
-        form = forms.PoolForm(
-            options_environment,
-            options_vip_choices,
-            servicedownaction_choices,
-            options_pool_choices,
-            request.POST
-        )
-
-        if form.is_valid():
-            for i in range(len(ips)):
-                ip_list_full.append({'id': id_ips[i], 'ip': ips[i]})
-
-            identifier = form.cleaned_data['identifier']
-            default_port = form.cleaned_data['default_port']
-            balancing = form.cleaned_data['balancing']
-            servicedownaction = form.cleaned_data['servicedownaction']
-            maxcom = form.cleaned_data['max_con']
-
-            servicedownaction_id = find_servicedownaction_id(client, servicedownaction)
-
-            is_valid, error_list = valid_reals(
-                equipment_ids,
-                ports_reals,
-                priorities,
-                id_ips,
-                default_port
-            )
-
-            is_valid_healthcheck, error_healthcheck = valid_realthcheck(healthcheck_type)
-
-            error_list.extend(error_healthcheck)
-
-            if is_valid and is_valid_healthcheck:
-                param_dic = {}
-
-                sp_id = client.create_pool().save(
-                    pool_id, identifier, default_port,
-                    environment_id, balancing, healthcheck_type,
-                    healthcheck_expect, healthcheck_request, maxcom,
-                    ip_list_full, equipment_names, equipment_ids,
-                    priorities, weight, ports_reals, pool_member_ids, servicedownaction_id
-                )
-
-                if pool_id:
-                    param_dic['message'] = pool_messages.get('success_update')
-                else:
-                    param_dic['message'] = pool_messages.get('success_insert')
-
-                param_dic['id'] = sp_id
-
-                return HttpResponse(json.dumps(param_dic), content_type="application/json")
-
-        erros = _format_form_error([form])
-
-        if error_list:
-            erros.extend(error_list)
-
-        return render_message_json('<br>'.join(erros), messages.ERROR)
-
-    except Exception, e:
-        logger.error(e)
-        return render_message_json(str(e), messages.ERROR)
 
 
 @log
@@ -2815,10 +2717,10 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         environment_choices = _create_options_environment(client, env_vip_id)
         lb_method_choices = populate_optionsvips_choices(client)
         servicedownaction_choices = populate_servicedownaction_choices(client)
-        healthcheck_choices = populate_optionspool_choices(client, env_vip_id)
 
         lists = dict()
-        lists["form_pool"] = forms.PoolForm(environment_choices, lb_method_choices, servicedownaction_choices, healthcheck_choices)
+        lists["form_pool"] = forms.PoolForm(
+            environment_choices, lb_method_choices, servicedownaction_choices)
         lists["form_healthcheck"] = forms.PoolHealthcheckForm()
         lists["action"] = action
         lists["load_pool_url"] = load_pool_url
@@ -2972,6 +2874,75 @@ def delete_validate_create_remove_2(request, operation):
     return redirect('vip-request.list')
 
 
+def shared_save_pool(request, client, form_acess=None, external=False):
+
+    try:
+
+        env_vip_id = request.POST.get('environment_vip')
+
+        # Get Data From Request Post To Save
+        pool_id = request.POST.get('id')
+        environment_id = request.POST.get('environment')
+
+        members = dict()
+        members["id_pool_member"] = request.POST.getlist('id_pool_member')
+        members["id_equips"] = request.POST.getlist('id_equip')
+        members["name_equips"] = request.POST.getlist('equip')
+        members["priorities"] = request.POST.getlist('priority')
+        members["ports_reals"] = request.POST.getlist('ports_real_reals')
+        members["weight"] = request.POST.getlist('weight')
+        members["id_ips"] = request.POST.getlist('id_ip')
+        members["ips"] = request.POST.getlist('ip')
+        members["environment"] = environment_id
+
+        environment_choices = _create_options_environment(client, env_vip_id)
+        lb_method_choices = populate_optionsvips_choices(client)
+        servicedownaction_choices = populate_servicedownaction_choices(client)
+        healthcheck_choices = _create_options_pool_as_healthcheck(client, environment_id)
+
+        form = forms.PoolForm(
+            environment_choices,
+            lb_method_choices,
+            servicedownaction_choices,
+            healthcheck_choices,
+            request.POST
+        )
+
+        if form.is_valid():
+
+            param_dic = {}
+
+            pool = dict()
+            pool["id"] = pool_id
+
+            servicedownaction = facade_pool.format_servicedownaction(client, form)
+            healthcheck = facade_pool.format_healthcheck(request)
+
+            pool["identifier"] = str(form.cleaned_data['identifier'])
+            pool["default_port"] = int(form.cleaned_data['default_port'])
+            pool["environment"] = int(form.cleaned_data['environment'])
+            pool["servicedownaction"] = servicedownaction
+            pool["lb_method"] = str(form.cleaned_data['balancing'])
+            pool["healthcheck"] = healthcheck
+            pool["default_limit"] = int(form.cleaned_data['maxcom'])
+            server_pool_members = facade_pool.format_server_pool_members(request, pool["default_limit"])
+            pool["server_pool_members"] = server_pool_members
+
+            client.create_pool().save_pool(pool)
+            if pool_id:
+                param_dic['message'] = pool_messages.get('success_update')
+            else:
+                param_dic['message'] = pool_messages.get('success_insert')
+
+            return HttpResponse(json.dumps(param_dic), content_type="application/json")
+
+        return render_message_json('<br>'.join(form.errors), messages.ERROR)
+
+    except Exception, e:
+        logger.error(e)
+        return render_message_json(str(e), messages.ERROR)
+
+
 ##########
 # functions
 #######
@@ -3039,8 +3010,8 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
     lists, is_valid_pools = _validate_pools(lists, pool_ids)
 
     # Environment - request by POST
-    finality = request.POST.get("finality")
-    client = request.POST.get("client")
+    finality = request.POST.get("step_finality")
+    client = request.POST.get("step_client")
     environment_vip = request.POST.get("environment_vip")
 
     # environments - data
@@ -3252,7 +3223,7 @@ def ajax_list_vips(request):
                 id_vip = search_form.cleaned_data['id_request']
                 ipv4 = search_form.cleaned_data["ipv4"]
                 ipv6 = search_form.cleaned_data["ipv6"]
-                vip_create = search_form.cleaned_data["vip_create"]
+                vip_created = search_form.cleaned_data["vip_created"]
 
                 extends_search = dict()
                 if len(ipv4) > 0:
@@ -3283,8 +3254,8 @@ def ajax_list_vips(request):
                     if request.GET["oct8"]:
                         extends_search.update({'ipv6__block8__iexact': request.GET["oct8"]})
 
-                if vip_create:
-                    extends_search.update({'created': vip_create})
+                if vip_created:
+                    extends_search.update({'created': vip_created})
                 if id_vip:
                     extends_search.update({"id": id_vip})
 

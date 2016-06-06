@@ -164,7 +164,7 @@
 	});
 	
 	$("select[name=step_environment]").live("change", function(){
-		var id_environment_vip = $('select[name=environment] option:selected').attr("attr");
+		var id_environment_vip = $('select[name=step_environment] option:selected').attr("attr");
 
 		$.ajax({
 			data: { environment_vip: id_environment_vip, id_vip: '{{id_vip}}', token: $("#id_token").val() },

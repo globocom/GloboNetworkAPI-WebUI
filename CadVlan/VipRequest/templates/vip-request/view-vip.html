@@ -66,6 +66,16 @@
 			<td style="width: 235px"><label for="vip_id">Id VIP</label></td>
 			<td><label style="width: 350px;color: black;text-align: center;" >{{vip.id}}</label></td>
 		</tr>
+		{% for name in vip.default_names %}
+		<tr>
+			{% ifequal forloop.counter 1 %}
+				<td><label>Nome(s) do VIP</label></td>
+			{% else %}
+				<td></td>
+			{% endifequal %}
+			<td><label style="width: 350px;color: black;text-align: center;" >{% if name %}{{name}}{% else %} - {% endif %}</label> </td>
+		</tr>
+		{% endfor %}
 		<tr>
 			<td ><label for="ipv4">IPv4</label></td>
 			{% if vip.ipv4 %}

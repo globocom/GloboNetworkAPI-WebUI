@@ -22,11 +22,8 @@ import logging
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import error_messages, healthcheck_messages, pool_messages
+from CadVlan.Pool import facade
 from CadVlan.Pool.forms import PoolForm, SearchPoolForm
-from CadVlan.Pool.facade import format_servicedownaction, populate_enviroments_choices, populate_optionsvips_choices, \
-    populate_expectstring_choices, populate_optionspool_choices, populate_pool_members_by_lists, \
-    populate_pool_members_by_obj, populate_servicedownaction_choices, \
-    find_servicedownaction_object
 from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
     HEALTH_CHECK_EXPECT, EQUIPMENT_MANAGEMENT, VIPS_REQUEST, ENVIRONMENT_MANAGEMENT
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
@@ -241,10 +238,10 @@ def add_form(request):
 
         lists = dict()
 
-        enviroments_choices = populate_enviroments_choices(client)
-        optionsvips_choices = populate_optionsvips_choices(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-        lists["expect_strings"] = populate_expectstring_choices(client)
+        enviroments_choices = facade.populate_enviroments_choices(client)
+        optionsvips_choices = facade.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade.populate_servicedownaction_choices(client)
+        lists["expect_strings"] = facade.populate_expectstring_choices(client)
         lists["action"] = reverse('pool.add.form')
         lists["label_tab"] = u'Cadastro de Pool'
         lists["pool_created"] = False
@@ -276,8 +273,8 @@ def add_form(request):
                 lists["healthcheck_expect"] = request.POST.get('expect')
                 lists["healthcheck_request"] = request.POST.get('health_check_request')
 
-            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, members)
-            optionspool_choices = populate_optionspool_choices(client, members.get("environment"))
+            lists["pool_members"], ip_list_full = facade.populate_pool_members_by_lists(client, members)
+            optionspool_choices = facade.populate_optionspool_choices(client, members.get("environment"))
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
                             request.POST)
@@ -285,9 +282,9 @@ def add_form(request):
             if form.is_valid():
 
                 limit = form.cleaned_data['max_con']
-                server_pool_members = format_server_pool_members(request, limit)
+                server_pool_members = facade.format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
-                servicedownaction = format_servicedownaction(client, form)
+                servicedownaction = facade.format_servicedownaction(client, form)
                 pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction)
                 client.create_pool().save_pool(pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_insert'))
@@ -321,10 +318,10 @@ def edit_form(request, id_server_pool):
 
         lists = dict()
 
-        enviroments_choices = populate_enviroments_choices(client)
-        optionsvips_choices = populate_optionsvips_choices(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-        lists["expect_strings"] = populate_expectstring_choices(client)
+        enviroments_choices = facade.populate_enviroments_choices(client)
+        optionsvips_choices = facade.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade.populate_servicedownaction_choices(client)
+        lists["expect_strings"] = facade.populate_expectstring_choices(client)
         lists["action"] = reverse('pool.edit.form', args=[id_server_pool])
         lists["label_tab"] = u'Edição de Pool'
         lists["id_server_pool"] = id_server_pool
@@ -340,7 +337,7 @@ def edit_form(request, id_server_pool):
             environment = server_pools['environment']
 
             if environment:
-                optionspool_choices = populate_optionspool_choices(client, environment)
+                optionspool_choices = facade.populate_optionspool_choices(client, environment)
 
             lists["healthcheck_expect"] = server_pools['healthcheck']['healthcheck_expect'] \
                 if server_pools['healthcheck'] else ''
@@ -362,7 +359,7 @@ def edit_form(request, id_server_pool):
                 'servicedownaction': server_pools['servicedownaction']['id']
             }
 
-            lists["pool_members"] = populate_pool_members_by_obj(server_pools['server_pool_members'])
+            lists["pool_members"] = facade.populate_pool_members_by_obj(server_pools['server_pool_members'])
 
             lists["form"] = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices,
                                      optionspool_choices, initial=initial_pool)
@@ -388,8 +385,8 @@ def edit_form(request, id_server_pool):
                 lists["healthcheck_expect"] = request.POST.get('expect')
                 lists["healthcheck_request"] = request.POST.get('health_check_request')
 
-            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, members)
-            optionspool_choices = populate_optionspool_choices(client, members.get("environment"))
+            lists["pool_members"], ip_list_full = facade.populate_pool_members_by_lists(client, members)
+            optionspool_choices = facade.populate_optionspool_choices(client, members.get("environment"))
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
                             request.POST)
@@ -397,9 +394,9 @@ def edit_form(request, id_server_pool):
             if form.is_valid():
 
                 limit = form.cleaned_data['max_con']
-                server_pool_members = format_server_pool_members(request, limit)
+                server_pool_members = facade.format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
-                servicedownaction = format_servicedownaction(client, form)
+                servicedownaction = facade.format_servicedownaction(client, form)
                 pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction, int(id_server_pool))
                 client.create_pool().update_pool(pool, id_server_pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
@@ -852,10 +849,10 @@ def manage_tab3(request, id_server_pool):
 
         lists = dict()
 
-        enviroments_choices = populate_enviroments_choices(client)
-        optionsvips_choices = populate_optionsvips_choices(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-        lists["expectstring_choices"] = populate_expectstring_choices(client)
+        enviroments_choices = facade.populate_enviroments_choices(client)
+        optionsvips_choices = facade.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade.populate_servicedownaction_choices(client)
+        lists["expectstring_choices"] = facade.populate_expectstring_choices(client)
 
         lists["action"] = reverse('pool.manage.tab3', args=[id_server_pool])
         lists["id_server_pool"] = id_server_pool
@@ -864,7 +861,7 @@ def manage_tab3(request, id_server_pool):
         server_pools = pool['server_pools'][0]
         members = server_pools['server_pool_members']
 
-        optionspool_choices = populate_optionspool_choices(client, server_pools['environment'])
+        optionspool_choices = facade.populate_optionspool_choices(client, server_pools['environment'])
 
         lists["environment"] = None
         if server_pools['environment']:
@@ -891,7 +888,7 @@ def manage_tab3(request, id_server_pool):
         if request.method == 'POST':
 
             environment = request.POST.get('environment')
-            optionspool_choices = populate_optionspool_choices(client, environment)
+            optionspool_choices = facade.populate_optionspool_choices(client, environment)
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
                             request.POST)
@@ -899,7 +896,7 @@ def manage_tab3(request, id_server_pool):
             if form.is_valid():
 
                 healthcheck = format_healthcheck(request)
-                servicedownaction = format_servicedownaction(client, form)
+                servicedownaction = facade.format_servicedownaction(client, form)
                 pool = format_pool(client, form, members, healthcheck, servicedownaction, int(id_server_pool))
                 client.create_pool().deploy_update_pool(pool, id_server_pool)
 
@@ -972,14 +969,14 @@ def manage_tab4(request, id_server_pool):
 
         if request.method == 'POST':
 
-            server_pool_members = format_server_pool_members(request, lists["max_con"])
+            server_pool_members = facade.format_server_pool_members(request, lists["max_con"])
             server_pools['server_pool_members'] = server_pool_members
             client.create_pool().deploy_update_pool(server_pools, id_server_pool)
             messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
             return redirect(lists['action'])
 
         if request.method == 'GET':
-            lists["pool_members"] = populate_pool_members_by_obj(server_pools['server_pool_members'])
+            lists["pool_members"] = facade.populate_pool_members_by_obj(server_pools['server_pool_members'])
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -1004,50 +1001,6 @@ def format_pool(client, form, server_pool_members, healthcheck, servicedownactio
         member['limit'] = pool['default_limit']
 
     return pool
-
-
-def format_server_pool_members(request, limit=0):
-
-    pool_members = []
-    equips = request.POST.getlist('id_equip')
-    for i in range(0, len(equips)):
-        server_pool_members = dict()
-        server_pool_members["id"] = int(request.POST.getlist('id_pool_member')[i]) \
-            if request.POST.getlist('id_pool_member')[i] else None
-        server_pool_members["identifier"] = str(request.POST.getlist('equip')[i])
-        server_pool_members["priority"] = int(request.POST.getlist('priority')[i])
-        server_pool_members["equipment"] = format_equipments(request, i)
-        server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
-        server_pool_members["limit"] = limit
-        server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
-        server_pool_members["member_status"] = 0
-        v4, v6 = format_ips(request, i)
-        server_pool_members["ip"] = v4
-        server_pool_members["ipv6"] = v6
-        pool_members.append(server_pool_members)
-
-    return pool_members
-
-
-def format_equipments(request, i):
-
-    equipments = dict()
-    equipments["id"] = int(request.POST.getlist('id_equip')[i])
-    equipments["nome"] = str(request.POST.getlist('equip')[i])
-
-    return equipments
-
-
-def format_ips(request, i):
-
-    ips = dict()
-    ips["id"] = int(request.POST.getlist('id_ip')[i])
-    ips["ip_formated"] = str(request.POST.getlist('ip')[i])
-
-    v4 = ips if "." in ips['ip_formated'] else None
-    v6 = ips if ":" in ips['ip_formated'] else None
-
-    return v4, v6
 
 
 def format_healthcheck(request, id=None):

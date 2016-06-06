@@ -154,13 +154,13 @@ class GenerateTokenForm(forms.Form):
 @autostrip
 class PoolForm(forms.Form):
 
-    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices, healthcheck_choices, *args, **kwargs):
+    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices, healthcheck_choices=[], *args, **kwargs):
         super(PoolForm, self).__init__(*args, **kwargs)
 
         self.fields['environment'].choices = enviroments_choices
         self.fields['balancing'].choices = optionsvips_choices
         self.fields['servicedownaction'].choices = servicedownaction_choices
-        self.fields['health_check'].choices = healthcheck_choices
+        self.fields['healthcheck'].choices = healthcheck_choices
 
     identifier = forms.CharField(
         label=u'Identifier',

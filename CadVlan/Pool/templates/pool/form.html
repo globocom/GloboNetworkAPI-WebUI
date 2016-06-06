@@ -131,10 +131,6 @@
             }
         });
 
-        //var port_vip;
-        //$(".numbersOnly").live('focus', function(){
-            //port_vip = $(this).val();
-        //});
 
         $(".numbersOnly").live('focusout', function(){
             this_element = $(this);
@@ -293,7 +289,8 @@
                             {{ form.identifier.label }}{% if form.identifier.field.required %}<span style="color: red;">*</span>{% endif %}
                         </label>
                     </div>
-                    {{ form.identifier }}                    <p id="error">
+                    {{ form.identifier }}
+                    <p id="error">
                     {% if form.identifier.errors %}
                         {% for error in form.identifier.errors %}
                             {{ error|escape }}

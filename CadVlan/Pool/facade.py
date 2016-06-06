@@ -134,9 +134,10 @@ def format_healthcheck(request):
         healthcheck["healthcheck_expect"] = ''
         healthcheck["healthcheck_request"] = ''
     else:
-        healthcheck["healthcheck_request"] = str(request.POST.get('healthcheck_request'))
-        healthcheck["healthcheck_expect"] = str(request.POST.get('healthcheck_expect'))
-    healthcheck["destination"] = "*:%s" % healthcheck["healthcheck_destination"] if healthcheck["healthcheck_destination"] else '*:*'
+        healthcheck["healthcheck_request"] = request.POST.get('healthcheck_request')
+        healthcheck["healthcheck_expect"] = request.POST.get('healthcheck_expect')
+    healthcheck_destination = request.POST.get('healthcheck_expect')
+    healthcheck["destination"] = ("*:%s" % healthcheck_destination) if healthcheck_destination else '*:*'
 
     return healthcheck
 
@@ -148,3 +149,47 @@ def format_servicedownaction(client, form):
     servicedownaction["name"] = str(find_servicedownaction_object(client, id=servicedownaction['id']))
 
     return servicedownaction
+
+
+def format_server_pool_members(request, limit=0):
+
+    pool_members = []
+    equips = request.POST.getlist('id_equip')
+    for i in range(0, len(equips)):
+        server_pool_members = dict()
+        server_pool_members["id"] = int(request.POST.getlist('id_pool_member')[i]) \
+            if request.POST.getlist('id_pool_member')[i] else None
+        server_pool_members["identifier"] = str(request.POST.getlist('equip')[i])
+        server_pool_members["priority"] = int(request.POST.getlist('priority')[i])
+        server_pool_members["equipment"] = _format_equipments(request, i)
+        server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
+        server_pool_members["limit"] = limit
+        server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
+        server_pool_members["member_status"] = 0
+        v4, v6 = _format_ips(request, i)
+        server_pool_members["ip"] = v4
+        server_pool_members["ipv6"] = v6
+        pool_members.append(server_pool_members)
+
+    return pool_members
+
+
+def _format_equipments(request, i):
+
+    equipments = dict()
+    equipments["id"] = int(request.POST.getlist('id_equip')[i])
+    equipments["nome"] = str(request.POST.getlist('equip')[i])
+
+    return equipments
+
+
+def _format_ips(request, i):
+
+    ips = dict()
+    ips["id"] = int(request.POST.getlist('id_ip')[i])
+    ips["ip_formated"] = str(request.POST.getlist('ip')[i])
+
+    v4 = ips if "." in ips['ip_formated'] else None
+    v6 = ips if ":" in ips['ip_formated'] else None
+
+    return v4, v6
