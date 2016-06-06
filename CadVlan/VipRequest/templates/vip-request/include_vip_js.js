@@ -109,7 +109,7 @@
 	}
 
 	
-	$("select[name=finality]").change(function(){
+	$("select[name=step_finality]").change(function(){
 		$.ajax({
 			data: { finality: $(this).val(), token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.client.ajax.external %}{% else %}{% url vip-request.client.ajax %}{% endif %}",
@@ -123,9 +123,9 @@
                     alert(data);
                 }
 				else {
-                    $("select[name=client]").html(opt_empty + data);
+                    $("select[name=step_client]").html(opt_empty + data);
 
-                    $("select[name=environment]").empty().select2(select2_basic);
+                    $("select[name=step_environment]").empty().select2(select2_basic);
                     options_reset()
                 }
 			},
@@ -137,9 +137,9 @@
 	});
 	
 	
-	$("select[name=client]").live("change", function(){  
+	$("select[name=step_client]").live("change", function(){  
 		$.ajax({
-			data: { client: $(this).val(), finality: $('select[name=finality]	').val(),  token: $("#id_token").val() },
+			data: { client: $(this).val(), finality: $('select[name=step_finality]').val(),  token: $("#id_token").val() },
 			url: "{% if external %}{% url vip-request.environment.ajax.external %}{% else %}{% url vip-request.environment.ajax %}{% endif %}",
 			dataType: 'text',
 			success: function(data, textStatus, xhr) {
@@ -150,7 +150,7 @@
                     alert(data);
                 }
 				else {
-                    $("select[name=environment]").html(opt_empty + data).select2(select2_basic);
+                    $("select[name=step_environment]").html(opt_empty + data).select2(select2_basic);
 
                     options_reset()
 
@@ -163,7 +163,7 @@
 		
 	});
 	
-	$("select[name=environment]").live("change", function(){
+	$("select[name=step_environment]").live("change", function(){
 		var id_environment_vip = $('select[name=environment] option:selected').attr("attr");
 
 		$.ajax({

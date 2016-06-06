@@ -16,156 +16,13 @@
 # limitations under the License.
 import logging
 
-from CadVlan.messages import error_messages, request_vip_messages
+from CadVlan.messages import error_messages
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
 from CadVlan.Util.forms import fields
 from CadVlan.Util.forms.customRenderer import RadioCustomRenderer
 from CadVlan.Util.forms.decorators import autostrip
-from CadVlan.Util.utility import validates_dict
 
 from django import forms
-from django.contrib import messages
-
-
-class SearchVipRequestForm(forms.Form):
-
-    id_request = forms.IntegerField(label="Id Requisição", required=False,
-                                    error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 40px"}))
-    ipv4 = forms.CharField(label="IPv4", required=False, min_length=1,
-                           max_length=15, error_messages=error_messages, widget=forms.HiddenInput())
-    ipv6 = forms.CharField(label="IPv6", required=False, min_length=1,
-                           max_length=39, error_messages=error_messages, widget=forms.HiddenInput())
-    vip_create = forms.BooleanField(
-        label="Buscar apenas vips criados", required=False, error_messages=error_messages)
-
-    def clean(self):
-        cleaned_data = super(SearchVipRequestForm, self).clean()
-        ipv4 = cleaned_data.get("ipv4")
-        ipv6 = cleaned_data.get("ipv6")
-
-        if ipv4 is not None and ipv6 is not None:
-            if len(ipv4) > 0 and len(ipv6) > 0:
-                # Only one must be filled
-                raise forms.ValidationError("Preencha apenas um: IPv4 ou IPv6")
-
-        return cleaned_data
-
-
-@autostrip
-class RequestVipFormInputs(forms.Form):
-
-    business = forms.CharField(label=u'Área de negócio', min_length=3, max_length=100, required=True,
-                               error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    service = forms.CharField(label=u'Nome do serviço', min_length=3, max_length=100, required=True,
-                              error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    name = forms.CharField(label=u'Nome do VIP (Host FQDN)', min_length=3, max_length=100, required=True,
-                           error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    filter_l7 = forms.CharField(label=u'Filtro L7', required=False, error_messages=error_messages, widget=forms.Textarea(
-        attrs={'style': "width: 300px", 'rows': 10}))
-    created = forms.BooleanField(
-        label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
-    validated = forms.BooleanField(
-        label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
-
-
-@autostrip
-class RequestVipFormEnvironment(forms.Form):
-
-    def __init__(self, finality_list, finality=None, client=None, environment=None, client_api=None, *args, **kwargs):
-        super(RequestVipFormEnvironment, self).__init__(*args, **kwargs)
-        self.fields['finality'].choices = [
-            (st['finality'], st['finality']) for st in finality_list]
-
-        if finality is not None and client is not None:
-
-            client_evip = client_api.create_environment_vip()
-
-            clients = validates_dict(
-                client_evip.buscar_cliente_por_finalidade(finality), 'cliente_txt')
-            self.fields['client'].choices = [
-                (st['cliente_txt'], st['cliente_txt']) for st in clients]
-
-            if environment is not None:
-
-                environments = validates_dict(client_evip.buscar_ambientep44_por_finalidade_cliente(
-                    finality, client), 'ambiente_p44')
-                self.fields['environment'].choices = [
-                    (st['ambiente_p44'], st['ambiente_p44']) for st in environments]
-
-    finality = forms.ChoiceField(label=u'Finalidade', required=True,
-                                 error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
-    client = forms.ChoiceField(label=u'Cliente', required=True,
-                               error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
-    environment = forms.ChoiceField(
-        label=u'Ambiente', required=True, error_messages=error_messages, widget=forms.RadioSelect(renderer=RadioCustomRenderer))
-    environment_vip = forms.IntegerField(
-        label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
-
-
-@autostrip
-class RequestVipFormOptions(forms.Form):
-
-    def __init__(self, request=None, environment_vip=None, client=None, vip_id=None, *args, **kwargs):
-        super(RequestVipFormOptions, self).__init__(*args, **kwargs)
-
-        if environment_vip is not None and environment_vip != '':
-
-            client_ovip = client.create_option_vip()
-
-            timeouts = validates_dict(client_ovip.buscar_timeout_opcvip(environment_vip), 'timeout_opt')
-            if timeouts is not None:
-                self.fields['timeout'].choices = [(st['timeout_opt'], st['timeout_opt']) for st in timeouts]
-            else:
-                if 'initial' in kwargs:
-                    timeout = kwargs.get('initial').get('timeout') if "timeout" in kwargs.get('initial') else ''
-                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_timeout") % timeout)
-
-            gcaches = validates_dict(client_ovip.buscar_grupo_cache_opcvip(environment_vip), 'grupocache_opt')
-            if timeouts is not None:
-                self.fields['caches'].choices = [(st['grupocache_opt'], st['grupocache_opt']) for st in gcaches]
-            else:
-                if 'initial' in kwargs:
-                    caches = kwargs.get('initial').get('caches') if "caches" in kwargs.get('initial') else ''
-                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_cache") % caches)
-
-            persistences = validates_dict(client_ovip.buscar_persistencia_opcvip(environment_vip), 'persistencia_opt')
-            if persistences is not None:
-                self.fields['persistence'].choices = [(st['persistencia_opt'], st['persistencia_opt']) for st in persistences]
-            else:
-                if 'initial' in kwargs:
-                    persistence = kwargs.get('initial').get('persistence') if "persistence" in kwargs.get('initial') else ''
-                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_persistence") % persistence)
-
-            trafficreturns = validates_dict(client_ovip.buscar_trafficreturn_opcvip(environment_vip), 'trafficreturn_opt')
-            if trafficreturns is not None:
-                self.fields['trafficreturn'].choices = [(st['trafficreturn_opt'], st['trafficreturn_opt']) for st in trafficreturns]
-            else:
-                if 'initial' in kwargs:
-                    trafficreturn = kwargs.get('initial').get('trafficreturn') if "trafficreturn" in kwargs.get('initial') else ''
-                    messages.add_message(request, messages.ERROR, request_vip_messages.get("error_existing_trafficreturn") % trafficreturn)
-
-            rules = validates_dict(client_ovip.buscar_rules(environment_vip, vip_id), 'name_rule_opt')
-
-            if rules is not None:
-                self.fields['rules'].choices = [(st['id'] if st['id'] is not None else '', st['name_rule_opt'] if st['name_rule_opt'] is not None else '') for st in rules]
-
-            else:
-                if 'initial' in kwargs:
-                    rules = kwargs.get('initial').get('rules') if "rules" in kwargs.get('initial') else ''
-                    messages.add_message(request, messages.ERROR, "Existing Rule")
-
-    timeout = forms.ChoiceField(label="Timeout", required=True, error_messages=error_messages,
-                                widget=forms.Select(attrs={"style": "width: 300px"}))
-    caches = forms.ChoiceField(label="Grupos de caches", required=True, error_messages=error_messages,
-                               widget=forms.Select(attrs={"style": "width: 300px"}))
-    persistence = forms.ChoiceField(label="Persistência", required=True, error_messages=error_messages,
-                                    widget=forms.Select(attrs={"style": "width: 300px"}))
-
-    trafficreturn = forms.ChoiceField(label="Traffic Return", required=True, error_messages=error_messages,
-                                      widget=forms.Select(attrs={"style": "width: 300px"}))
-
-    rules = forms.ChoiceField(label=u'Regras', required=False, error_messages=error_messages,
-                              widget=forms.Select(attrs={"style": "width: 300px"}))
 
 
 @autostrip
@@ -295,92 +152,6 @@ class GenerateTokenForm(forms.Form):
 
 
 @autostrip
-class FilterL7Form(forms.Form):
-    filter_applied = forms.CharField(label=u'Filtro L7 atual',
-                                     required=False, error_messages=error_messages,
-                                     widget=forms.Textarea(attrs={'style': "width: 300px",
-                                                                  'rows': 10, 'disabled': 'disabled'}))
-    filter_l7 = forms.CharField(label=u'Novo Filtro L7 a ser aplicado',
-                                required=False, error_messages=error_messages,
-                                widget=forms.Textarea(attrs={'style': "width: 300px",
-                                                             'rows': 10}))
-    filter_rollback = forms.CharField(label=u'Rollback (última configuração válida)',
-                                      required=False, error_messages=error_messages,
-                                      widget=forms.Textarea(attrs={'style': "width: 300px",
-                                                                   'rows': 10, 'disabled': 'disabled'}))
-
-
-@autostrip
-class RuleForm(forms.Form):
-
-    def __init__(self, rules, *args, **kwargs):
-        super(RuleForm, self).__init__(*args, **kwargs)
-        self.fields['rules'].choices = [(st['id'] if st['id'] is not None else '', st[
-                                         'name_rule_opt'] if st['name_rule_opt'] is not None else '') for st in rules]
-
-    rules = forms.ChoiceField(label=u'Regras', required=False, error_messages=error_messages, widget=forms.Select(
-        attrs={"style": "width: 300px"}))
-
-
-class VipPoolForm(forms.Form):
-
-    def __init__(self, pools_choice, *args, **kwargs):
-        super(VipPoolForm, self).__init__(*args, **kwargs)
-        pools_choice.insert(0, (0, "-"))
-        self.fields['pools'].choices = pools_choice
-
-    pools = forms.ChoiceField(
-        label=u'Pools',
-        required=False,
-        error_messages=error_messages,
-        widget=forms.Select(
-            attrs={
-                "style": "width: 300px",
-            }
-        )
-    )
-
-
-class ServerPoolForm(forms.Form):
-
-    def __init__(self, choices_opvip, *args, **kwargs):
-        super(ServerPoolForm, self).__init__(*args, **kwargs)
-
-        self.fields['balancing'].choices = choices_opvip
-
-    identifier = forms.CharField(
-        label=u'Identifier',
-        min_length=3,
-        max_length=40,
-        required=True,
-        error_messages=error_messages,
-        widget=forms.TextInput(
-            attrs={'style': "width: 300px"}
-        )
-    )
-
-    default_port = forms.CharField(
-        label=u'Default Port',
-        min_length=2,
-        max_length=5,
-        required=True,
-        error_messages=error_messages,
-        widget=forms.TextInput(
-            attrs={'style': "width: 100px"}
-        )
-    )
-
-    balancing = forms.ChoiceField(
-        label=u'Balanceamento',
-        choices=[],
-        required=True,
-        error_messages=error_messages,
-        widget=forms.Select(
-            attrs={'style': "width: 310px"}
-        )
-    )
-
-
 class PoolForm(forms.Form):
 
     def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices, healthcheck_choices, *args, **kwargs):
@@ -397,7 +168,10 @@ class PoolForm(forms.Form):
         max_length=40,
         required=True,
         error_messages=error_messages,
-        widget=forms.TextInput(attrs={'style': "width: 300px"})
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 300px"}
+        )
     )
 
     default_port = forms.CharField(
@@ -406,7 +180,10 @@ class PoolForm(forms.Form):
         max_length=5,
         required=True,
         error_messages=error_messages,
-        widget=forms.TextInput(attrs={'style': "width: 100px"})
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 100px"}
+        )
     )
 
     environment = forms.ChoiceField(
@@ -414,7 +191,10 @@ class PoolForm(forms.Form):
         choices=[],
         required=True,
         error_messages=error_messages,
-        widget=forms.Select(attrs={'style': "width: 310px"})
+        widget=forms.Select(attrs={
+            "style": "width: 310px",
+            'class': 'select2'}
+        )
     )
 
     balancing = forms.ChoiceField(
@@ -422,7 +202,10 @@ class PoolForm(forms.Form):
         choices=[],
         required=True,
         error_messages=error_messages,
-        widget=forms.Select(attrs={'style': "width: 310px"})
+        widget=forms.Select(attrs={
+            "style": "width: 310px",
+            'class': 'select2'}
+        )
     )
 
     servicedownaction = forms.ChoiceField(
@@ -430,22 +213,69 @@ class PoolForm(forms.Form):
         choices=[],
         required=True,
         error_messages=error_messages,
-        widget=forms.Select(attrs={'style': "width: 310px"})
-    )
-
-    health_check = forms.ChoiceField(
-        label=u'HealthCheck',
-        choices=[],
-        required=False,
-        error_messages=error_messages,
-        widget=forms.Select(attrs={'style': "width: 310px"})
+        widget=forms.Select(attrs={
+            "style": "width: 310px",
+            'class': 'select2'}
+        )
     )
 
     maxcom = forms.IntegerField(
         label=u'Número máximo de conexões (maxconn)',
         required=True,
         error_messages=error_messages,
-        widget=forms.TextInput(attrs={'style': "width: 231px"})
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 100px"}
+        )
+    )
+
+    healthcheck = forms.ChoiceField(
+        label=u'HealthCheck',
+        choices=[],
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 310px",
+            'class': 'select2'}
+        )
+    )
+
+
+@autostrip
+class PoolHealthcheckForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super(PoolHealthcheckForm, self).__init__(*args, **kwargs)
+
+    healthcheck_request = forms.CharField(
+        label=u'Healthcheck Request',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 310px"}
+        )
+    )
+
+    healthcheck_expect = forms.CharField(
+        label=u'HTTP Expect String',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 310px"}
+        )
+    )
+
+    healthcheck_destination = forms.CharField(
+        label=u'Porta',
+        max_length=5,
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 100px"}
+        )
     )
 
 
@@ -499,21 +329,24 @@ class RequestVipEnvironmentVipForm(forms.Form):
         super(RequestVipEnvironmentVipForm, self).__init__(*args, **kwargs)
 
         if forms_aux.get('finalities'):
-            self.fields['finality'].choices = \
+            self.fields['step_finality'].choices = \
                 [(env['finalidade_txt'], env["finalidade_txt"]) for env in forms_aux["finalities"]]
-            self.fields['finality'].choices.insert(0, ('', ''))
+            self.fields['step_finality'].choices.insert(0, ('', ''))
 
         if forms_aux.get('clients'):
-            self.fields['client'].choices = \
+            self.fields['step_client'].choices = \
                 [(env['cliente_txt'], env["cliente_txt"]) for env in forms_aux["clients"]]
-            self.fields['client'].choices.insert(0, ('', ''))
+            self.fields['step_client'].choices.insert(0, ('', ''))
 
         if forms_aux.get('environments'):
-            self.fields['environment'].choices = \
-                [(env['ambiente_p44_txt'], {'label': env["ambiente_p44_txt"], 'attrs':{'attr': env["id"]}}) for env in forms_aux["environments"]]
-            self.fields['environment'].choices.insert(0, ('', ''))
+            self.fields['step_environment'].choices = \
+                [(env['ambiente_p44_txt'], {
+                    'label': env["ambiente_p44_txt"],
+                    'attrs':{'attr': env["id"]}
+                }) for env in forms_aux["environments"]]
+            self.fields['step_environment'].choices.insert(0, ('', ''))
 
-    finality = forms.ChoiceField(
+    step_finality = forms.ChoiceField(
         label=u'Finalidade',
         required=True,
         error_messages=error_messages,
@@ -521,7 +354,7 @@ class RequestVipEnvironmentVipForm(forms.Form):
             "style": "width: 300px",
             'class': 'select2'}))
 
-    client = forms.ChoiceField(
+    step_client = forms.ChoiceField(
         label=u'Cliente',
         required=True,
         error_messages=error_messages,
@@ -529,7 +362,7 @@ class RequestVipEnvironmentVipForm(forms.Form):
             "style": "width: 300px",
             'class': 'select2'}))
 
-    environment = forms.ChoiceField(
+    step_environment = forms.ChoiceField(
         label=u'Ambiente',
         required=True,
         error_messages=error_messages,
@@ -601,9 +434,6 @@ class RequestVipOptionVipForm(forms.Form):
             'class': 'select2'}))
 
 
-###########
-# V3
-###########
 class RequestVipPortOptionVipForm(forms.Form):
 
     logger = logging.getLogger(__name__)
@@ -612,18 +442,15 @@ class RequestVipPortOptionVipForm(forms.Form):
         super(RequestVipPortOptionVipForm, self).__init__(*args, **kwargs)
 
         if forms_aux.get('l4_protocol'):
-            self.fields['l4_protocol'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l4_protocol"]]
+            self.fields['l4_protocol'].choices = [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l4_protocol"]]
         self.fields['l4_protocol'].choices.insert(0, ('', ''))
 
         if forms_aux.get('l7_protocol'):
-            self.fields['l7_protocol'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_protocol"]]
+            self.fields['l7_protocol'].choices = [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_protocol"]]
         self.fields['l7_protocol'].choices.insert(0, ('', ''))
 
         if forms_aux.get('pools'):
-            self.fields['pools'].choices = \
-                [(env['id'], env["identifier"]) for env in forms_aux["pools"]['server_pools']]
+            self.fields['pools'].choices = [(env['id'], env["identifier"]) for env in forms_aux["pools"]['server_pools']]
         self.fields['pools'].choices.insert(0, ('', ''))
 
     port_vip = forms.ChoiceField(
@@ -749,7 +576,7 @@ class RequestVipIPForm(forms.Form):
         return cleaned_data
 
 
-class SearchVipRequestV3Form(forms.Form):
+class SearchVipRequestForm(forms.Form):
 
     id_request = forms.IntegerField(
         label="Id Requisição",
@@ -780,7 +607,7 @@ class SearchVipRequestV3Form(forms.Form):
         error_messages=error_messages)
 
     def clean(self):
-        cleaned_data = super(SearchVipRequestV3Form, self).clean()
+        cleaned_data = super(SearchVipRequestForm, self).clean()
         ipv4 = cleaned_data.get("ipv4")
         ipv6 = cleaned_data.get("ipv6")
 

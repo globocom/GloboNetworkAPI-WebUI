@@ -25,33 +25,19 @@
 ul {
 list-style-type: none;
 }
-.tablePoolMembers {
+#tablePoolMembers{
     width: 600px;
     margin-bottom: 1%;
 }
 </style>
 <script type="text/javascript">
 $(document).ready(function() {
-
     {% include "vip-request/include_vip_js.js" %}
     {% include "vip-request/vip_pool.js" %}
-    
+
     autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
-    
-    if ( $("#id_created").val() == "1") {
-        $('#add_form').disabledForm();
-        $('#add_form').find('button').attr('disabled', 'disabled');
-        $('#btn_can').removeAttr("disabled");
-        
-    } else {
-        $('.editable').editableTable();
-    }
-    
-    $("#add_form").submit( function () {
-        $("#add_form").disabledRemoveForm();
-        return true
-    } );
-    
+
+    $('.editable').editableTable();
 })
 </script>
 {% endblock %}
@@ -72,287 +58,144 @@ $(document).ready(function() {
         <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Requisição VIP </a></li>
     </ul>
     <div id="tabs-1">
-        <form id="add_form" method="post" action="{% url vip-request.edit idt %}">
+        <form id="add_form" method="post" action="{% url vip-request.edit %}">
             {% csrf_token %}
-            {% for field in form_acess %}
-                {{ field }}
-            {% endfor %}
-            <div id="fields" class="ui-widget-content">
-
-            <!-- FORM INPUTS -->
-            <div>
-                <div><label for="{{ form_inputs.business.auto_id }}">{{ form_inputs.business.label_tag }}{% if form_inputs.business.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-                {{ form_inputs.business }}
-                <p id="error">
-                {% if form_inputs.business.errors %} 
-                    {% for error in form_inputs.business.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-            
-            <div>
-                <div><label for="{{ form_inputs.service.auto_id }}">{{ form_inputs.service.label_tag }}{% if form_inputs.service.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-                {{ form_inputs.service }}
-                <p id="error">
-                {% if form_inputs.service.errors %} 
-                    {% for error in form_inputs.service.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-            
-            <div>
-                <div><label for="{{ form_inputs.name.auto_id }}">{{ form_inputs.name.label_tag }}{% if form_inputs.name.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-                {{ form_inputs.name }}
-                <p id="error">
-                {% if form_inputs.name.errors %} 
-                    {% for error in form_inputs.name.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>    
-            
-            <div>
-                <div><label for="{{ form_inputs.created.auto_id }}">{{ form_inputs.created.label_tag }}{% if form_inputs.created.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-                {{ form_inputs.created }}
-                <p id="error">
-                {% if form_inputs.created.errors %} 
-                    {% for error in form_inputs.created.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>    
-            
-            <div>
-                <div><label for="{{ form_inputs.validated.auto_id }}">{{ form_inputs.validated.label_tag }}{% if form_inputs.validated.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-                {{ form_inputs.validated }}
-                <p id="error">
-                {% if form_inputs.validated.errors %} 
-                    {% for error in form_inputs.validated.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>                                                        
-
-            <!--   ENDFORM INPUTS -->
-
-            <!-- 
-            {% for field in form_inputs %}
+            <div style="margin-top:20px">
+                {% for field in form_basic %}
                 <div>
-                    <div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                    <div>
+                        <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                    </div>
                     {{ field }}
-                    <p id="error">
                     {% if field.errors %} 
+                    <p id="error">
                         {% for error in field.errors %}
                             {{ error|escape }}
                         {% endfor %}
-                    {% endif %}
                     </p>
+                    {% endif %}
                 </div>
-            {% endfor %}
-             -->
-            
-            {% for field in form_environment %}
+                {% endfor %}
+            </div>
+
+            <div style="margin-top:20px">
+                {% for field in form_environment %}
                 <div>
-                    <div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+                    <div>
+                        <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                    </div>
                     {{ field }}
-                    <p id="error">
                     {% if field.errors %} 
+                    <p id="error">
                         {% for error in field.errors %}
                             {{ error|escape }}
                         {% endfor %}
-                    {% endif %}
                     </p>
-                </div>
-            {% endfor %}
-            
-            <table>
-                {% for field in form_options %}
-
-                    {% if field.name != "balancing"%}
-
-                        <tr>
-                            <td>
-                                <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
-                            </td>
-                            <td  style="padding-left: 5px;" align="right">
-                                {{ field }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td id="error" style="padding-left: 5px;">
-                                {% if field.errors %} 
-                                    {% for error in field.errors %}
-                                        {{ error|escape }}
-                                    {% endfor %}
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                    {% endif %}
-
-                {% endfor %}
-            </table>
-            
-            <br>
-            
-            <!--  FILTER L7 -->    
-            <div>
-                <div><label for="{{ form_inputs.filter_l7.auto_id }}">{{ form_inputs.filter_l7.label_tag }}{% if form_inputs.filter_l7.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
-                {{ form_inputs.filter_l7 }}
-                <p id="error">
-                {% if form_inputs.filter_l7.errors %} 
-                    {% for error in form_inputs.filter_l7.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-
-            <br>
-
-            {% has_perm POOL_MANAGEMENT True False %}
-            {% with has_perm as has_pool_write %}
-
-            {% has_perm POOL_CREATE_SCRIPT True False %}
-            {% with has_perm as has_pool_script_create %}
-            {% has_perm POOL_ALTER_SCRIPT True False %}
-            {% with has_perm as has_pool_script_alter %}
-            {% has_perm POOL_REMOVE_SCRIPT True False %}
-            {% with has_perm as has_pool_script_remove %}
-
-            <div id="divPools" class="bordasimples">
-
-                <div style="float: left; width: 7%;">
-                    <label for="idPort">Porta Vip</label>
-                    <br>
-                    <input id="idPort" name="idPort" type="text" style="width: 60%"/>
-                </div>
-
-                <div style="float: left;">
-                    <label for="id_pools">Pools</label>
-                    <br>
-                    {{ vip_pool_form.pools }}
-                    <button id="btn_add_pool" type="button">Selecionar Pool</button>
-
-                    {% if has_pool_write and has_pool_script_create and has_pool_script_alter and has_pool_script_remove %}
-                        <button id="btn_copy" type="button">Copiar Pool</button>
-                        <button id="btn_new_pool" type="button">Novo Pool</button>
                     {% endif %}
                 </div>
-
-                <br>
-                <br>
-            </div>
-            {% endwith %}
-            {% endwith %}
-            {% endwith %}
-            {% endwith %}
-
-            <br>
-            <br>
-
-            {% if pools_error %}
-            <div><p id="error">{{pools_error}}</p></div>
-            {% endif %}
-
-            <div  id="divMembers" class="bordasimples" >
-                <div class="tablesMembers"></div>
-                {% if pools %}
-                {% for pool in pools %}
-                {% include "pool/items.html" with server_pool=pool server_pool_members=pool.server_pool_members %}
                 {% endfor %}
-                {% endif %}
-                
-                <!-- retrive of invalidation post-->
-                {% if pools_add %}
-                {% for pool in pools_add %}
-                {% include "pool/items.html" with server_pool=pool.server_pool server_pool_members=pool.server_pool_members %}
-                {% endfor %}
-                {% endif %}
-                <!-- /retrive of invalidation -->
-
-                <!-- Will add pool members -->
-                
             </div>
-            <table>
-                <tr>
-                    <td colspan="3" style="text-align:left;">IP do VIP</td>
-                </tr>
-                {% if form_ip.ipv4_check.errors %}
-                    <tr>
-                        <td  id="error" style="text-align:left;">
-                            {% for error in form_ip.ipv4_check.errors %}
+
+            <div style="margin-top:20px;">
+                {% for field in form_option %}
+                <div>
+                    <div>
+                        <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                    </div>
+                    {{ field }}
+                    {% if field.errors %} 
+                    <p id="error">
+                        {% for error in field.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div style="margin-top:20px;">
+                {% for field in form_port_option %}
+                    <div style="float: left; margin-right:1%">
+                        <div>
+                            <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                        </div>
+                        {{ field }}
+                        {% if field.errors %} 
+                        <p id="error">
+                            {% for error in field.errors %}
                                 {{ error|escape }}
                             {% endfor %}
-                        </td>
-                    </tr>
-                {% endif %}
-                <tr>
-                    <td colspan="3">{{form_ip.ipv4_check}}{{form_ip.ipv4_check.label_tag}}</td>
-                </tr>
-                <tr id="ipv4">
-                    <td colspan="3">
-                        <table class="bordasimplesIP">
-                            <tr>
-                                <td  style="text-align:left;">{{form_ip.ipv4_type}}</td>
-                            </tr>
-                            <tr id="input_ipv4">
-                                <td  style="text-align:left;padding-left: 10px;">{{form_ip.ipv4_specific}}</td>
-                            </tr>
-                            <tr>
-                                <td  style="text-align:left;padding-left: 10px;">
-                                    <p id="error">
-                                    {% if form_ip.ipv4_specific.errors %} 
-                                        {% for error in form_ip.ipv4_specific.errors %}
-                                            {{ error|escape }}
-                                        {% endfor %}
-                                    {% endif %}
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3">&nbsp</td>
-                </tr>
-                <tr>
-                    <td colspan="3">{{form_ip.ipv6_check}}{{form_ip.ipv6_check.label_tag}}</td>
-                </tr>
-                <tr id="ipv6">
-                    <td colspan="3">
-                        <table class="bordasimplesIP">
-                            <tr>
-                                <td  style="text-align:left;">{{form_ip.ipv6_type}}</td>
-                            </tr>
-                            <tr id="input_ipv6">
-                                <td  style="text-align:left;padding-left: 10px;">{{form_ip.ipv6_specific}}</td>
-                            </tr>
-                            <tr>
-                                <td  style="text-align:left;padding-left: 10px;">
-                                    <p id="error">
-                                    {% if form_ip.ipv6_specific.errors %} 
-                                        {% for error in form_ip.ipv6_specific.errors %}
-                                            {{ error|escape }}
-                                        {% endfor %}
-                                    {% endif %}
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                
-            </table>
-            
+                        </p>
+                        {% endif %}
+                    </div>  
+                {% endfor %}
+                <div style="float: left; margin-top:18px;">
+                    <button id="btn_add_pool" type="button">Selecionar Pool</button>
+                    <button id="btn_copy" type="button">Copiar Pool</button>
+                    <button id="btn_new_pool" type="button">Novo Pool</button>
+                </div>
+            </div>
+
+
+            {% if pools_error %}
+                <div style="margin-top:20px">
+                    <div><p id="error">{{pools_error}}</p></div>
+                </div>
+            {% endif %}
+
+            <div style="margin-top:20px;">
+                <div id="divMembers" class="bordasimples" style="padding-top: 10px; clear: left;">
+                    {% if pools_add %}
+                        {% for port in pools_add %}
+                            {% for pool in port.pools %}
+                                {% include "pool/items.html" with port=port server_pool=pool.server_pool %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
+                    <!-- Will add pool members -->
+                </div>
+            </div>
+
+            <div style="margin-top:20px">
+                <div>
+
+                    <div style="clear: left;"><label>IP do VIP</label></div>
+                    {% if form_ip.ipv4_check.errors %}
+                        <p id="error">
+                        {% for error in form_ip.ipv4_check.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                        </p>
+                    {% endif %}
+                    <div>
+                        <div style="float: left;margin-right: 1%;">
+                            {{form_ip.ipv4_check}}{{form_ip.ipv4_check.label_tag}}
+                            {{form_ip.ipv4_type}}
+                            {{form_ip.ipv4_specific}}
+                            {% if form_ip.ipv4_specific.errors %} 
+                            <p id="error">
+                            {% for error in form_ip.ipv4_specific.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            {{form_ip.ipv6_check}}{{form_ip.ipv6_check.label_tag}}
+                            {{form_ip.ipv6_type}}
+                            {{form_ip.ipv6_specific}}
+                    
+                            {% if form_ip.ipv6_specific.errors %} 
+                            <p id="error">
+                                {% for error in form_ip.ipv6_specific.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="separator spacer"></div>

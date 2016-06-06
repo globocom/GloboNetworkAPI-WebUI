@@ -325,15 +325,6 @@ input {
 			{% endfor %}
 		</form>
 		{% endif %}
-		{% has_perm VIP_VALIDATION True True %}
-		{% if has_perm %}
-		<form id="valid_form" method="post" action="{% url vip.valid %}" style="visibility: hidden;">
-			{% csrf_token %}
-			{% for field in validate_form %}
-				{{ field }}
-			{% endfor %}
-		</form>
-		{% endif %}
 		{% has_perm VIP_CREATE_SCRIPT True True %}
 		{% if has_perm %}
 		<form id="create_form" method="post" action="{% url vip.create %}" style="visibility: hidden;">

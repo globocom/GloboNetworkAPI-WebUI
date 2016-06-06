@@ -28,10 +28,10 @@ from CadVlan.forms import CreateForm, DeleteForm, RemoveForm, ValidateForm
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
 from CadVlan.messages import auth_messages, equip_group_messages, error_messages, healthcheck_messages, pool_messages, request_vip_messages
 from CadVlan.permissions import POOL_ALTER_SCRIPT, POOL_CREATE_SCRIPT, POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, \
-    VIP_ALTER_SCRIPT, VIP_CREATE_SCRIPT, VIP_REMOVE_SCRIPT, VIP_VALIDATION, VIPS_REQUEST
-from CadVlan.Pool.facade import find_servicedownaction_id
-from CadVlan.Pool.facade import populate_servicedownaction_choices
-from CadVlan.Pool.forms import PoolForm
+    VIP_ALTER_SCRIPT, VIP_CREATE_SCRIPT, VIP_REMOVE_SCRIPT, VIPS_REQUEST
+from CadVlan.Pool.facade import find_servicedownaction_id, \
+    populate_optionspool_choices, populate_optionsvips_choices, \
+    populate_servicedownaction_choices
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_PASSWORD, NETWORK_API_URL, NETWORK_API_USERNAME
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.Decorators import has_perm, has_perm_external, log, login_required
@@ -94,190 +94,6 @@ def search_list(request):
         lists,
         context_instance=RequestContext(request)
     )
-
-
-@log
-@login_required
-@has_perm([{"permission": VIPS_REQUEST, "read": True}, ])
-def ajax_list_vips(request):
-
-    '''
-        Return list of vip request by search field
-    '''
-
-    try:
-
-        # If form was submited
-        if request.method == "GET":
-
-            # Get user auth
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
-
-            search_form = forms.SearchVipRequestForm(request.GET)
-
-            if search_form.is_valid():
-
-                id_vip = search_form.cleaned_data['id_request']
-                ipv4 = search_form.cleaned_data["ipv4"]
-                ipv6 = search_form.cleaned_data["ipv6"]
-                vip_create = search_form.cleaned_data["vip_create"]
-
-                extends_search = dict()
-                if len(ipv4) > 0:
-                    if request.GET["oct1"]:
-                        extends_search.update({'ipv4__oct1': request.GET["oct1"]})
-                    if request.GET["oct2"]:
-                        extends_search.update({'ipv4__oct2': request.GET["oct2"]})
-                    if request.GET["oct3"]:
-                        extends_search.update({'ipv4__oct3': request.GET["oct3"]})
-                    if request.GET["oct4"]:
-                        extends_search.update({'ipv4__oct4': request.GET["oct4"]})
-                elif len(ipv6) > 0:
-                    extends_search = dict()
-                    if request.GET["oct1"]:
-                        extends_search.update({'ipv6__block1__iexact': request.GET["oct1"]})
-                    if request.GET["oct2"]:
-                        extends_search.update({'ipv6__block2__iexact': request.GET["oct2"]})
-                    if request.GET["oct3"]:
-                        extends_search.update({'ipv6__block3__iexact': request.GET["oct3"]})
-                    if request.GET["oct4"]:
-                        extends_search.update({'ipv6__block4__iexact': request.GET["oct4"]})
-                    if request.GET["oct5"]:
-                        extends_search.update({'ipv6__block5__iexact': request.GET["oct5"]})
-                    if request.GET["oct6"]:
-                        extends_search.update({'ipv6__block6__iexact': request.GET["oct6"]})
-                    if request.GET["oct7"]:
-                        extends_search.update({'ipv6__block7__iexact': request.GET["oct7"]})
-                    if request.GET["oct8"]:
-                        extends_search.update({'ipv6__block8__iexact': request.GET["oct8"]})
-
-                if vip_create:
-                    extends_search.update({'created': vip_create})
-                if id_vip:
-                    extends_search.update({"id": id_vip})
-
-                # Pagination
-                column_index_name_map = {
-                    0: '',
-                    1: 'id',
-                    2: 'ipv4',
-                    4: 'description',
-                    3: 'ipv6',
-                    5: 'description',
-                    6: 'equipamento',
-                    7: 'ambiente',
-                    8: 'criado',
-                    9: ''}
-                dtp = DataTablePaginator(request, column_index_name_map)
-
-                # Make params
-                dtp.build_server_side_list()
-
-                # Set params in simple Pagination class
-                pagination = Pagination(
-                    dtp.start_record,
-                    dtp.end_record,
-                    dtp.asorting_cols,
-                    dtp.searchable_columns,
-                    dtp.custom_search)
-
-                # Call API passing all params
-                # vips = client.create_vip().list_vip_requests(
-                #     id_vip, ip, pag, vip_create)
-
-                data = dict()
-                data["start_record"] = pagination.start_record
-                data["end_record"] = pagination.end_record
-                data["asorting_cols"] = pagination.asorting_cols
-                data["searchable_columns"] = pagination.searchable_columns
-                data["custom_search"] = pagination.custom_search or ""
-                data["extends_search"] = [extends_search] if extends_search else []
-
-                vips = client.create_api_vip_request().search_vip_request_details(data)
-
-                # Returns JSON
-                return dtp.build_response(
-                    vips["vips"],
-                    vips["total"],
-                    templates.AJAX_VIPREQUEST_LIST,
-                    request
-                )
-
-            else:
-                # Remake search form
-                lists = dict()
-                lists["search_form"] = search_form
-
-                # Returns HTML
-                response = HttpResponse(
-                    loader.render_to_string(
-                        templates.SEARCH_FORM_ERRORS,
-                        lists,
-                        context_instance=RequestContext(request)
-                    )
-                )
-                # Send response status with error
-                response.status_code = 412
-                return response
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        return HttpResponseServerError(e, mimetype='application/javascript')
-    except BaseException, e:
-        logger.error(e)
-        return HttpResponseServerError(e, mimetype='application/javascript')
-
-
-def ajax_shared_view_vip(request, id_vip, lists):
-
-    lists['id_vip'] = id_vip
-
-    try:
-
-        # Get user
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        lists['vip'] = vip = client.create_api_vip_request().get_vip_request_details(id_vip).get('vips')[0]
-
-        #apenas reals
-        reals = []
-        for ports  in vip['ports']:
-            for pool in ports['pools']:
-                for real in pool['server_pool']['server_pool_members']:
-                    reals.append(real)
-
-        lists['reals'] = reals
-        lists['len_porta'] = int(len(vip['ports']))
-        lists['len_equip'] = int(len(vip['equipments']))
-
-        # Returns HTML
-        response = HttpResponse(
-            loader.render_to_string(
-                templates.VIPREQUEST_VIEW_AJAX,
-                lists,
-                context_instance=RequestContext(request)
-            )
-        )
-        response.status_code = 200
-        return response
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    # Returns HTML
-    response = HttpResponse(
-        loader.render_to_string(
-            templates.VIPREQUEST_VIEW_AJAX,
-            lists,
-            context_instance=RequestContext(request)
-        )
-    )
-    # Send response status with error
-    response.status_code = 412
-    return response
 
 
 @log
@@ -434,15 +250,6 @@ def remove_vip(request):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_VALIDATION, "write": True}])
-def validate_vip(request):
-    delete_validate_create_remove_2(request, 1)
-    # Redirect to list_all action
-    return redirect('vip-request.list')
-
-
-@log
-@login_required
 @has_perm([{"permission": VIPS_REQUEST, "write": True}])
 def delete_vip(request):
     delete_validate_create_remove_2(request, 0)
@@ -589,25 +396,25 @@ def _validate_pools(lists, pools):
     return lists, is_valid
 
 
-def valid_ports(lists, ports_vip):
+def _valid_ports(lists, ports_vip_ports):
     '''
         Valid ports
     '''
 
     is_valid = True
 
-    if ports_vip is not None:
-        invalid_port_vip = [i for i in ports_vip if int(i) > 65535 or int(i) < 1]
+    if ports_vip_ports is not None:
+        invalid_port_vip = [i for i in ports_vip_ports if int(i) > 65535 or int(i) < 1]
 
         if invalid_port_vip:
             lists['pools_error'] = request_vip_messages.get("invalid_port")
             is_valid = False
 
-        if len(ports_vip) != len(set(ports_vip)):
+        if len(ports_vip_ports) != len(set(ports_vip_ports)):
             lists['pools_error'] = request_vip_messages.get("duplicate_vip")
             is_valid = False
 
-        if ports_vip is None or not ports_vip:
+        if ports_vip_ports is None or not ports_vip_ports:
             lists['pools_error'] = request_vip_messages.get("error_ports")
             is_valid = False
     else:
@@ -782,35 +589,6 @@ def reals_(id_equip, id_ip, equip, ip, ports_vip_reals, ports_real_reals):
                          i], "id_ip": id_ip[i], "port_real": ports_real_reals[i]})
 
     return reals
-
-
-def mount_ips(id_ipv4, id_ipv6, client_api):
-
-    ipv4_check = False
-    ipv4_type = None
-    ipv4_specific = None
-    if id_ipv4 is not None:
-        ipv4 = client_api.create_ip().get_ipv4(id_ipv4).get("ipv4")
-        ipv4_check = True
-        ipv4_type = '1'
-        ipv4_specific = "%s.%s.%s.%s" % (
-            ipv4.get('oct1'), ipv4.get('oct2'), ipv4.get('oct3'), ipv4.get('oct4'))
-
-    ipv6_check = False
-    ipv6_type = None
-    ipv6_specific = None
-    if id_ipv6 is not None and id_ipv6 != '0':
-
-        ipv6 = client_api.create_ip().get_ipv6(id_ipv6).get("ipv6")
-        ipv6_check = True
-        ipv6_type = '1'
-        ipv6_specific = "%s:%s:%s:%s:%s:%s:%s:%s" % (ipv6['block1'], ipv6['block2'], ipv6[
-                                                     'block3'], ipv6['block4'], ipv6['block5'], ipv6['block6'], ipv6['block7'], ipv6['block8'])
-
-    form_ip = forms.RequestVipFormIP(initial={"ipv4_check": ipv4_check, "ipv4_type": ipv4_type, "ipv4_specific":
-                                              ipv4_specific, "ipv6_check": ipv6_check, "ipv6_type": ipv6_type, "ipv6_specific": ipv6_specific})
-
-    return form_ip
 
 
 @log
@@ -2007,113 +1785,55 @@ def model_ip_real_server_shared(request, client_api):
     )
 
 
-@log
-@login_required
-@has_perm([{"permission": VIP_VALIDATION, "write": True}, ])
-def validate_l7(request):
+def ajax_shared_view_vip(request, id_vip, lists):
+
+    lists['id_vip'] = id_vip
+
     try:
+
         # Get user
         auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
+        client = auth.get_clientFactory()
 
-        if request.method == 'POST':
-            id_vip = request.POST['id_vip']
+        lists['vip'] = vip = client.create_api_vip_request().get_vip_request_details(id_vip).get('vips')[0]
 
-            if id_vip is not None and not is_valid_int_param(id_vip):
-                raise Exception(
-                    error_messages.get("invalid_param") % "requestVip")
+        # apenas reals
+        reals = []
+        for ports in vip['ports']:
+            for pool in ports['pools']:
+                for real in pool['server_pool']['server_pool_members']:
+                    reals.append(real)
 
-            # mudar flag l7_valid para true
-            try:
-                client_api.create_vip().validate_l7(id_vip)
-                messages.add_message(
-                    request, messages.SUCCESS, request_vip_messages.get('success_l7_validate'))
-            except Exception, e:
-                raise Exception(e)
+        lists['reals'] = reals
+        lists['len_porta'] = int(len(vip['ports']))
+        lists['len_equip'] = int(len(vip['equipments']))
 
-            return redirect('vip-request.tab.l7filter', id_vip)
-
-    except VipNaoExisteError, e:
-        logger.error(e)
-        messages.add_message(
-            request, messages.ERROR, request_vip_messages.get("invalid_vip"))
-        return redirect('vip-request.form')
+        # Returns HTML
+        response = HttpResponse(
+            loader.render_to_string(
+                templates.VIPREQUEST_VIEW_AJAX,
+                lists,
+                context_instance=RequestContext(request)
+            )
+        )
+        response.status_code = 200
+        return response
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-
-@log
-@login_required
-@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True}, {"permission": VIP_ALTER_SCRIPT, "write": True}])
-def apply_l7(request):
-    try:
-        # Get user
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-
-        if request.method == 'POST':
-            id_vip = request.POST['id_vip']
-
-            if id_vip is not None and not is_valid_int_param(id_vip):
-                raise Exception(
-                    error_messages.get("invalid_param") % "requestVip")
-
-            try:
-                client_api.create_vip().apply_l7(id_vip)
-                messages.add_message(
-                    request, messages.SUCCESS, request_vip_messages.get('success_l7_alter'))
-            except Exception, e:
-                messages.add_message(request, messages.ERROR, e)
-
-            return redirect('vip-request.tab.l7filter', id_vip)
-
-    except VipNaoExisteError, e:
-        logger.error(e)
-        messages.add_message(
-            request, messages.ERROR, request_vip_messages.get("invalid_vip"))
-        return redirect('vip-request.form')
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-
-@log
-@login_required
-@has_perm([{"permission": VIP_ALTER_SCRIPT, "read": True}, {"permission": VIP_ALTER_SCRIPT, "write": True}])
-def apply_rollback_l7(request):
-    try:
-        # Get user
-        auth = AuthSession(request.session)
-        client_api = auth.get_clientFactory()
-
-        if request.method == 'POST':
-            id_vip = request.POST['id_vip']
-
-            if id_vip is not None and not is_valid_int_param(id_vip):
-                raise Exception(
-                    error_messages.get("invalid_param") % "requestVip")
-
-            try:
-                client_api.create_vip().rollback_l7(id_vip)
-                messages.add_message(
-                    request, messages.SUCCESS, request_vip_messages.get('success_l7_rollback'))
-            except Exception, e:
-                messages.add_message(request, messages.ERROR, e)
-
-            return redirect('vip-request.tab.l7filter', id_vip)
-
-    except VipNaoExisteError, e:
-        logger.error(e)
-        messages.add_message(
-            request, messages.ERROR, request_vip_messages.get("invalid_vip"))
-        return redirect('vip-request.form')
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+    # Returns HTML
+    response = HttpResponse(
+        loader.render_to_string(
+            templates.VIPREQUEST_VIEW_AJAX,
+            lists,
+            context_instance=RequestContext(request)
+        )
+    )
+    # Send response status with error
+    response.status_code = 412
+    return response
 
 
 @log
@@ -2148,7 +1868,7 @@ def shared_load_pool(request, client, form_acess=None, external=False):
         action = reverse('external.save.pool') if external else reverse('save.pool')
         load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
 
-        pool = client.create_pool().get_by_pk(pool_id)
+        pool = client.create_api_pool().pool_by_id(pool_id)
         server_pool = pool.get('server_pool')
         environment_id = server_pool['environment']['id']
 
@@ -2203,7 +1923,7 @@ def shared_load_pool(request, client, form_acess=None, external=False):
         options_vip_choices = _create_options_vip(client)
         options_pool_as_healthcheck_choices = _create_options_pool_as_healthcheck(client, environment_id)
 
-        form = PoolForm(
+        form = forms.PoolForm(
             list(),
             options_vip_choices,
             servicedownaction_choices,
@@ -2282,53 +2002,6 @@ def _create_options_vip(client):
     return options_vip_choices
 
 
-def _create_options_environment(client, env_vip_id):
-
-    choices_environment = [('', '-')]
-
-    environments = client.create_api_vip_request()\
-        .list_environment_by_environmet_vip(env_vip_id)
-
-    for env in environments:
-        choices_environment.append(
-            (env['id'], env['name'])
-        )
-
-    return choices_environment
-
-
-@log
-@login_required
-@require_http_methods(["POST"])
-@has_perm([
-    {"permission": VIPS_REQUEST, "read": True, "write": True},
-    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
-    {"permission": POOL_ALTER_SCRIPT, "write": True},
-    {"permission": POOL_CREATE_SCRIPT, "write": True},
-    {"permission": POOL_REMOVE_SCRIPT, "write": True},
-])
-def save_pool(request):
-
-    auth = AuthSession(request.session)
-    client = auth.get_clientFactory()
-
-    return shared_save_pool(request, client)
-
-
-@csrf_exempt
-@log
-@has_perm_external([
-    {"permission": VIPS_REQUEST, "read": True, "write": True},
-    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
-    {"permission": POOL_ALTER_SCRIPT, "write": True},
-    {"permission": POOL_CREATE_SCRIPT, "write": True},
-    {"permission": POOL_REMOVE_SCRIPT, "write": True},
-])
-def external_save_pool(request, form_acess, client):
-
-    return shared_save_pool(request, client, form_acess, external=True)
-
-
 def shared_save_pool(request, client, form_acess=None, external=False):
 
     try:
@@ -2364,7 +2037,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 
         servicedownaction_choices = populate_servicedownaction_choices(client)
 
-        form = PoolForm(
+        form = forms.PoolForm(
             options_environment,
             options_vip_choices,
             servicedownaction_choices,
@@ -2424,72 +2097,6 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         return render_message_json('<br>'.join(erros), messages.ERROR)
 
     except Exception, e:
-        logger.error(e)
-        return render_message_json(str(e), messages.ERROR)
-
-
-@log
-@csrf_exempt
-@has_perm_external([
-    {"permission": VIPS_REQUEST, "read": True, "write": True},
-    {"permission": POOL_MANAGEMENT, "read": True},
-])
-def external_load_new_pool(request, form_acess, client):
-
-    return shared_load_new_pool_2(request, client, form_acess, external=True)
-
-
-@log
-@login_required
-@has_perm([
-    {"permission": VIPS_REQUEST, "read": True, "write": True},
-    {"permission": POOL_MANAGEMENT, "read": True},
-])
-def load_new_pool(request):
-
-    auth = AuthSession(request.session)
-    client = auth.get_clientFactory()
-
-    return shared_load_new_pool_2(request, client)
-
-
-def shared_load_new_pool(request, client, form_acess=None, external=False):
-
-    try:
-
-        pool_members = list()
-
-        env_vip_id = request.GET.get('env_vip_id')
-
-        action = reverse('external.save.pool') if external else reverse('save.pool')
-        load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
-
-        expect_string_list = client.create_ambiente()\
-            .listar_healtchcheck_expect_distinct()
-
-        options_vip_choices = _create_options_vip(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-
-        choices_environment = _create_options_environment(
-            client,
-            env_vip_id
-        )
-
-        form = PoolForm(choices_environment, options_vip_choices, servicedownaction_choices)
-
-        return render(
-            request,
-            templates.VIPREQUEST_POOL_FORM, {
-                'form': form,
-                'action': action,
-                'load_pool_url': load_pool_url,
-                'pool_members': pool_members,
-                'expect_strings': expect_string_list,
-                'show_environment': True
-            }
-        )
-
-    except NetworkAPIClientError, e:
         logger.error(e)
         return render_message_json(str(e), messages.ERROR)
 
@@ -2577,8 +2184,11 @@ def shared_pool_member_items(request, client, form_acess=None, external=False):
     try:
 
         pool_id = request.GET.get('pool_id')
-        pool_data = client.create_pool().get_by_pk(pool_id)
-        pool_data.update({'external': external})
+        pool = client.create_api_pool().get_pool_details(pool_id)
+        pool_data = {
+            'server_pool': pool['server_pools'][0],
+            'external': external
+        }
 
         if external:
             token = form_acess.initial.get("token")
@@ -2617,25 +2227,22 @@ def _ipv6(v6):
     return ipv6
 
 
-def _pool_dict(pool, port, form, l7_rule):
-    pool_dict = dict()
-    pool_dict["port"] = int(port)
-    pool_dict["options"] = dict()
-    pool_dict["options"]["l4_protocol"] = int(form.get("l4_protocol")) or None
-    pool_dict["options"]["l7_protocol"] = int(form.get("l7_protocol")) or None
-    pool_dict["pools"] = dict()
-    options = dict()
-    options["server_pool"] = int(pool)
+def _pool_dict(port_id, port, l4_protocol, l7_protocol, pool, l7_rule):
 
-    # l7 rule not implemented yet, set value default
-    options["l7_rule"] = None
-    for l7 in l7_rule:
-        if l7["nome_opcao_txt"] == "(nenhum)":
-            options["l7_rule"] = int(l7["id"])
-            break
-    options["l7_value"] = None
+    pool_dict = {
+        "id": int(port_id) if port_id else None,
+        "port": int(port),
+        "options": {
+            "l4_protocol": int(l4_protocol),
+            "l7_protocol": int(l7_protocol)
+        },
+        "pools": [{
+            "server_pool": int(pool),
+            "l7_rule": int(l7_rule),
+            "l7_value": None
+        }]
+    }
 
-    pool_dict["pools"] = [options]
     return pool_dict
 
 
@@ -2648,16 +2255,18 @@ def _options(form):
     return options
 
 
-def _vip_dict(form, envvip, options, v4, v6, pools):
-    vip = dict()
-    vip["name"] = str(form.cleaned_data["name"])
-    vip["service"] = str(form.cleaned_data["service"])
-    vip["business"] = str(form.cleaned_data["business"])
-    vip["environmentvip"] = int(envvip)
-    vip["ipv4"] = v4
-    vip["ipv6"] = v6
-    vip["ports"] = pools
-    vip["options"] = options
+def _vip_dict(form, envvip, options, v4, v6, pools, vip_id):
+    vip = {
+        "id": int(vip_id) if vip_id else None,
+        "name": str(form.cleaned_data["name"]),
+        "service": str(form.cleaned_data["service"]),
+        "business": str(form.cleaned_data["business"]),
+        "environmentvip": int(envvip),
+        "ipv4": v4,
+        "ipv6": v6,
+        "ports": pools,
+        "options": options
+    }
     return vip
 
 ############
@@ -2673,11 +2282,11 @@ def _vip_dict(form, envvip, options, v4, v6, pools):
 ])
 def edit_form(request, id_vip):
     """
-    Method to call edit_form_shared_v2
+    Method to call edit_form_shared
     """
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return edit_form_shared_v2(request, id_vip, client_api)
+    return edit_form_shared(request, id_vip, client_api)
 
 
 @log
@@ -2703,11 +2312,11 @@ def ajax_popular_environment(request):
 ])
 def add_form(request):
     """
-    Method to call add_form_shared_v2
+    Method to call add_form_shared
     """
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return add_form_shared_v2(request, client_api)
+    return add_form_shared(request, client_api)
 
 
 @log
@@ -2726,9 +2335,44 @@ def ajax_popular_options(request):
     return popular_options_shared(request, client_api)
 
 
+@log
+@login_required
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
+def load_new_pool(request):
+    """
+    Method to call shared_load_new_pool
+    """
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    return shared_load_new_pool(request, client)
+
+
+@log
+@login_required
+@require_http_methods(["POST"])
+@has_perm([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": POOL_CREATE_SCRIPT, "write": True},
+    {"permission": POOL_REMOVE_SCRIPT, "write": True},
+])
+def save_pool(request):
+    """
+    Method to call shared_save_pool
+    """
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    return shared_save_pool(request, client)
+
 #############
 # Forms external
 #############
+
+
 @log
 @csrf_exempt
 @has_perm_external([
@@ -2739,7 +2383,7 @@ def edit_form_external(request, id_vip, form_acess, client):
     """
     Method to call edit_form_shared when use by external way
     """
-    return edit_form_shared_v2(request, id_vip, client, form_acess, True)
+    return edit_form_shared(request, id_vip, client, form_acess, True)
 
 
 @log
@@ -2778,13 +2422,42 @@ def add_form_external(request, form_acess, client):
     """
     Method to call add_form_shared when use by external way
     """
-    return add_form_shared_v2(request, client, form_acess, True)
+    return add_form_shared(request, client, form_acess, True)
+
+
+@log
+@csrf_exempt
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True},
+])
+def external_load_new_pool(request, form_acess, client):
+    """
+    Method to call shared_load_new_pool when use by external way
+    """
+    return shared_load_new_pool(request, client, form_acess, external=True)
+
+
+@csrf_exempt
+@log
+@has_perm_external([
+    {"permission": VIPS_REQUEST, "read": True, "write": True},
+    {"permission": POOL_MANAGEMENT, "read": True, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True},
+    {"permission": POOL_CREATE_SCRIPT, "write": True},
+    {"permission": POOL_REMOVE_SCRIPT, "write": True},
+])
+def external_save_pool(request, form_acess, client):
+    """
+    Method to call shared_save_pool when use by external way
+    """
+    return shared_save_pool(request, client, form_acess, external=True)
 
 
 ############
 # methods shared
 #############
-def add_form_shared_v2(request, client_api, form_acess="", external=False):
+def add_form_shared(request, client_api, form_acess="", external=False):
     """
     Method to render form request vip
     """
@@ -2792,6 +2465,7 @@ def add_form_shared_v2(request, client_api, form_acess="", external=False):
     try:
         lists = dict()
 
+        lists["action"] = reverse('vip-request.form')
         lists['ports'] = ''
         lists['ports_error'] = ''
         lists['reals_error'] = ''
@@ -2809,7 +2483,7 @@ def add_form_shared_v2(request, client_api, form_acess="", external=False):
 
         if request.method == "POST":
 
-            lists, is_valid, id_vip = valid_form_and_submit_v2(
+            lists, is_valid, id_vip = _valid_form_and_submit(
                 forms_aux,
                 request,
                 lists,
@@ -2856,7 +2530,7 @@ def add_form_shared_v2(request, client_api, form_acess="", external=False):
     )
 
 
-def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=False):
+def edit_form_shared(request, id_vip, client_api, form_acess="", external=False):
     """
     Method to render form request vip
     """
@@ -2865,6 +2539,7 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
         lists = dict()
 
         lists['id_vip'] = id_vip
+        lists["action"] = reverse('vip-request.edit', args=[id_vip])
         lists['ports'] = ''
         lists['ports_error'] = ''
         lists['reals_error'] = ''
@@ -2884,13 +2559,13 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
 
         if request.method == "POST":
 
-            lists, is_valid, id_vip = valid_form_and_submit_v2(
+            lists, is_valid, id_vip = _valid_form_and_submit(
                 forms_aux,
                 request,
                 lists,
                 client_api,
-                edit=True,
-                vip_id=id_vip
+                True,
+                id_vip
             )
 
             if is_valid:
@@ -2957,14 +2632,14 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
                 if client:
                     forms_aux['environments'] = client_apienv.environmentvip_step(finality, client)
 
-            lists = get_optionsvip_by_environmentvip(environment_vip, client_api)
-            forms_aux['timeout'] = lists['timeout']
-            forms_aux['caches'] = lists['caches']
-            forms_aux['persistence'] = lists['persistence']
-            forms_aux['trafficreturn'] = lists['trafficreturn']
-            forms_aux['l4_protocol'] = lists['l4_protocol']
-            forms_aux['l7_protocol'] = lists['l7_protocol']
-            forms_aux['l7_rule'] = lists['l7_rule']
+            options_list = _get_optionsvip_by_environmentvip(environment_vip, client_api)
+            forms_aux['timeout'] = options_list['timeout']
+            forms_aux['caches'] = options_list['caches']
+            forms_aux['persistence'] = options_list['persistence']
+            forms_aux['trafficreturn'] = options_list['trafficreturn']
+            forms_aux['l4_protocol'] = options_list['l4_protocol']
+            forms_aux['l7_protocol'] = options_list['l7_protocol']
+            forms_aux['l7_rule'] = options_list['l7_rule']
 
             forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
@@ -2981,9 +2656,9 @@ def edit_form_shared_v2(request, id_vip, client_api, form_acess="", external=Fal
             lists['form_environment'] = forms.RequestVipEnvironmentVipForm(
                 forms_aux,
                 initial={
-                    "finality": finality,
-                    "client": client,
-                    "environment": environment,
+                    "step_finality": finality,
+                    "step_client": client,
+                    "step_environment": environment,
                     "environment_vip": environment_vip
                 }
             )
@@ -3101,7 +2776,7 @@ def popular_options_shared(request, client_api):
             raise InvalidParameterError(
                 "Parâmetro inválido: O campo Ambiente Vip inválido ou não foi informado.")
 
-        lists = get_optionsvip_by_environmentvip(environment_vip, client_api)
+        lists = _get_optionsvip_by_environmentvip(environment_vip, client_api)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -3120,6 +2795,44 @@ def popular_options_shared(request, client_api):
         )
     except Exception, e:
         print e
+
+
+def shared_load_new_pool(request, client, form_acess=None, external=False):
+    """
+    Method to return options pool list by environment
+    Param: request.GET.get('env_vip_id')
+    """
+
+    try:
+
+        pool_members = list()
+
+        env_vip_id = request.GET.get('env_vip_id')
+
+        action = reverse('external.save.pool') if external else reverse('save.pool')
+        load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
+
+        environment_choices = _create_options_environment(client, env_vip_id)
+        lb_method_choices = populate_optionsvips_choices(client)
+        servicedownaction_choices = populate_servicedownaction_choices(client)
+        healthcheck_choices = populate_optionspool_choices(client, env_vip_id)
+
+        lists = dict()
+        lists["form_pool"] = forms.PoolForm(environment_choices, lb_method_choices, servicedownaction_choices, healthcheck_choices)
+        lists["form_healthcheck"] = forms.PoolHealthcheckForm()
+        lists["action"] = action
+        lists["load_pool_url"] = load_pool_url
+        lists["pool_members"] = pool_members
+        lists["show_environment"] = True
+        return render(
+            request,
+            templates.VIPREQUEST_POOL_FORM,
+            lists
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        return render_message_json(str(e), messages.ERROR)
 
 
 @log
@@ -3259,85 +2972,78 @@ def delete_validate_create_remove_2(request, operation):
     return redirect('vip-request.list')
 
 
-def shared_load_new_pool_2(request, client, form_acess=None, external=False):
-
-    try:
-
-        pool_members = list()
-
-        env_vip_id = request.GET.get('env_vip_id')
-
-        action = reverse('external.save.pool') if external else reverse('save.pool')
-        load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
-
-        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
-
-        options_vip_choices = _create_options_vip(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-        choices_environment = _create_options_environment(
-            client,
-            env_vip_id
-        )
-
-        form = PoolForm(choices_environment, options_vip_choices, servicedownaction_choices)
-
-        return render(
-            request,
-            templates.VIPREQUEST_POOL_FORM, {
-                'form': form,
-                'action': action,
-                'load_pool_url': load_pool_url,
-                'pool_members': pool_members,
-                'expect_strings': expect_string_list,
-                'show_environment': True
-            }
-        )
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        return render_message_json(str(e), messages.ERROR)
-
-
 ##########
 # functions
 #######
-def get_optionsvip_by_environmentvip(environment_vip, client_api):
+def _get_optionsvip_by_environmentvip(environment_vip, client_api):
     '''
         Return list of optionvip by environmentvip
     '''
-    lists = dict()
+    lists = {
+        "timeout": list(),
+        "caches": list(),
+        "persistence": list(),
+        "trafficreturn": list(),
+        "l4_protocol": list(),
+        "l7_protocol": list(),
+        "l7_rule": list()
+    }
     client_apiovip = client_api.create_api_option_vip()
-    lists['timeout'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'timeout')['optionsvip'][0]
-    lists['caches'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'cache')['optionsvip'][0]
-    lists['persistence'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'Persistencia')['optionsvip'][0]
-    lists['trafficreturn'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'Retorno de trafego')['optionsvip'][0]
-    lists['l4_protocol'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'l4_protocol')['optionsvip'][0]
-    lists['l7_protocol'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'l7_protocol')['optionsvip'][0]
-    lists['l7_rule'] = client_apiovip.option_vip_by_environment_vip_type(environment_vip, 'l7_rule')['optionsvip'][0]
+    optionsvip = client_apiovip.option_vip_by_environment(environment_vip)
+
+    for optionvip in optionsvip:
+        if optionvip["option"]["tipo_opcao"] == 'timeout':
+            lists['timeout'].append(optionvip["option"])
+        if optionvip["option"]["tipo_opcao"] == 'cache':
+            lists['caches'].append(optionvip["option"])
+        if optionvip["option"]["tipo_opcao"] == 'Persistencia':
+            lists['persistence'].append(optionvip["option"])
+        if optionvip["option"]["tipo_opcao"] == 'Retorno de trafego':
+            lists['trafficreturn'].append(optionvip["option"])
+        if optionvip["option"]["tipo_opcao"] == 'l4_protocol':
+            lists['l4_protocol'].append(optionvip["option"])
+        if optionvip["option"]["tipo_opcao"] == 'l7_protocol':
+            lists['l7_protocol'].append(optionvip["option"])
+        if optionvip["option"]["tipo_opcao"] == 'l7_rule':
+            lists['l7_rule'].append(optionvip["option"])
 
     return lists
 
 
-def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, vip_id=False):
+def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vip_id=False):
+    '''
+        Valid form of vip request(new and edit)
+    '''
+    # instances
+    client_apienv = client_api.create_api_environment_vip()
+    client_apipool = client_api.create_api_pool()
 
     is_valid = True
     is_error = False
     id_vip_created = None
 
-    # Pool - data
-    pool_ids = request.POST.getlist('idsPool')
-    ports_vip = valid_field_table_dynamic(request.POST.getlist('ports_vip'))
-    vip_port_ids = request.POST.getlist('vip_port_id')
+    # Pools - request by POST
+    # list of pools
+    pool_ids = valid_field_table_dynamic(request.POST.getlist('idsPool'))
+    # list of port's ids
+    ports_vip_ids = valid_field_table_dynamic(request.POST.getlist('ports_vip_ids'))
+    # ports
+    ports_vip_ports = valid_field_table_dynamic(request.POST.getlist('ports_vip_ports'))
+    # list of l4 protocols
+    ports_vip_l4_protocols = valid_field_table_dynamic(request.POST.getlist('ports_vip_l4_protocols'))
+    # list of l7 protocols
+    ports_vip_l7_protocols = valid_field_table_dynamic(request.POST.getlist('ports_vip_l7_protocols'))
 
-    # Environment - data
+    # valid ports and pools
+    lists, is_valid_ports = _valid_ports(lists, ports_vip_ports)
+    lists, is_valid_pools = _validate_pools(lists, pool_ids)
+
+    # Environment - request by POST
     finality = request.POST.get("finality")
     client = request.POST.get("client")
     environment_vip = request.POST.get("environment_vip")
 
-    # instances
-    client_apienv = client_api.create_api_environment_vip()
-    client_apipool = client_api.create_api_pool()
-
+    # environments - data
     forms_aux['finalities'] = client_apienv.environmentvip_step()
     if finality:
         forms_aux['clients'] = client_apienv.environmentvip_step(finality)
@@ -3346,7 +3052,7 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
     # Options - data
     if environment_vip:
-        lists_options = get_optionsvip_by_environmentvip(environment_vip, client_api)
+        lists_options = _get_optionsvip_by_environmentvip(environment_vip, client_api)
         forms_aux['timeout'] = lists_options['timeout']
         forms_aux['caches'] = lists_options['caches']
         forms_aux['persistence'] = lists_options['persistence']
@@ -3363,9 +3069,6 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
     form_option = forms.RequestVipOptionVipForm(forms_aux, request.POST)
     form_port_option = forms.RequestVipPortOptionVipForm(forms_aux, request.POST)
     form_ip = forms.RequestVipIPForm(forms_aux, request.POST)
-
-    lists, is_valid_ports = valid_ports(lists, ports_vip)
-    lists, is_valid_pools = _validate_pools(lists, pool_ids)
 
     if form_basic.is_valid() and form_environment.is_valid() and form_option.is_valid() and \
             form_ip.is_valid() and is_valid_ports and is_valid_pools:
@@ -3429,31 +3132,33 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
 
             if not is_error:
 
-                pool = list()
-
-                for index in range(len(pool_ids)):
-                    item = safe_list_get(vip_port_ids, index)
-                    item = int(item) if item else item
-                    pool.append({
-                        'server_pool': int(pool_ids[index]),
-                        'port': int(ports_vip[index]),
-                        'id': item,
-                        'optionvip': 61,
-                        'val_optionvip': ''
-                    })
-
+                # l7 rule not implemented yet, set value default
+                l7_rule = None
+                for l7 in forms_aux['l7_rule']:
+                    if l7["nome_opcao_txt"] == "(nenhum)":
+                        l7_rule = int(l7["id"])
+                        break
                 pools = list()
-                for i in range(len(pool_ids)):
-                    pools.append(_pool_dict(pool_ids[i], ports_vip[i], request.POST, forms_aux['l7_rule']))
+                for i, pool_id in enumerate(pool_ids):
+                    pools.append(
+                        _pool_dict(
+                            ports_vip_ids[i],
+                            ports_vip_ports[i],
+                            ports_vip_l4_protocols[i],
+                            ports_vip_l7_protocols[i],
+                            pool_ids[i],
+                            l7_rule
+                        )
+                    )
 
                 if edit:
-                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools)
+                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
                     vip = client_api.create_api_vip_request().update_vip_request(vip, vip_id)
+                    id_vip_created = vip_id
                 else:
-                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools)
+                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
-
-                id_vip_created = vip[0].get("id")
+                    id_vip_created = vip[0].get("id")
 
         except NetworkAPIClientError, e:
             is_valid = False
@@ -3474,13 +3179,24 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
     else:
         is_valid = False
 
-    pools_add = []
-    for index in range(len(pool_ids)):
-        raw_server_pool = client_api.create_api_pool().pool_by_id(pool_ids[index])
-        raw_server_pool["server_pool"] = dict()
-        raw_server_pool["server_pool"]["port_vip"] = safe_list_get(ports_vip, index)
-        raw_server_pool["server_pool"]["port_vip_id"] = safe_list_get(vip_port_ids, index)
-        pools_add.append(raw_server_pool)
+    pools_add = list()
+    if pool_ids:
+        pools_json = client_api.create_api_pool().get_pool_details(';'.join(pool_ids))["server_pools"]
+        for index, pool_id in enumerate(pool_ids):
+            l4_protocol = [env for env in forms_aux["l4_protocol"] if int(ports_vip_l4_protocols[index]) == int(env["id"])][0]
+            l7_protocol = [env for env in forms_aux["l7_protocol"] if int(ports_vip_l7_protocols[index]) == int(env["id"])][0]
+            raw_server_pool = {
+                "id": ports_vip_ids[index],
+                "port": ports_vip_ports[index],
+                "options": {
+                    "l4_protocol": l4_protocol,
+                    "l7_protocol": l7_protocol
+                },
+                "pools": [{
+                    "server_pool": pools_json[index]
+                }]
+            }
+            pools_add.append(raw_server_pool)
 
     lists['pools_add'] = pools_add
     lists['form_basic'] = form_basic
@@ -3490,6 +3206,23 @@ def valid_form_and_submit_v2(forms_aux, request, lists, client_api, edit=False, 
     lists['form_ip'] = form_ip
 
     return lists, is_valid, id_vip_created
+
+
+def _create_options_environment(client, env_vip_id):
+    '''
+        Return list of environments by environment vip
+    '''
+    choices_environment = [('', '-')]
+
+    environments = client.create_api_vip_request()\
+        .list_environment_by_environmet_vip(env_vip_id)
+
+    for env in environments:
+        choices_environment.append(
+            (env['id'], env['name'])
+        )
+
+    return choices_environment
 
 
 #######

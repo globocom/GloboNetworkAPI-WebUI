@@ -401,15 +401,6 @@ def remove_vip(request):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_VALIDATION, "write": True}])
-def validate_vip(request):
-    delete_validate_create_remove(request, 1)
-    # Redirect to list_all action
-    return redirect('vip-request.list')
-
-
-@log
-@login_required
 @has_perm([{"permission": VIPS_REQUEST, "write": True}])
 def delete_vip(request):
     delete_validate_create_remove(request, 0)

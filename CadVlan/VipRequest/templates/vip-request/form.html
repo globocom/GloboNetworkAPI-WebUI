@@ -58,7 +58,7 @@ $(document).ready(function() {
         <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Requisição VIP </a></li>
     </ul>
     <div id="tabs-1">
-        <form id="add_form" method="post" action="{% url vip-request.form %}">
+        <form id="add_form" method="post" action="{{action}}">
             {% csrf_token %}
             <div style="margin-top:20px">
                 {% for field in form_basic %}
@@ -149,7 +149,7 @@ $(document).ready(function() {
                     {% if pools_add %}
                         {% for port in pools_add %}
                             {% for pool in port.pools %}
-                                {% include "pool/items.html" with port=port server_pool=pool.server_pool server_pool_members=pool.server_pool.server_pool_members %}
+                                {% include "pool/items.html" with port=port server_pool=pool.server_pool %}
                             {% endfor %}
                         {% endfor %}
                     {% endif %}

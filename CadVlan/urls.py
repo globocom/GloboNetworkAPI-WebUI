@@ -466,23 +466,14 @@ urlpatterns += patterns(
 
     url('^vip-request/operation/delete?$',
         'delete_vip', name='vip.delete',),
-    url('^vip-request/operation/valid?$',
-        'validate_vip', name='vip.valid',),
     url('^vip-request/operation/create?$',
         'create_vip', name='vip.create',),
     url('^vip-request/operation/remove?$',
         'remove_vip', name='vip.remove',),
 
 
-    # url('^vip-request/l7/operation/valid?$',
-    #     'validate_l7', name='l7.valid'),
-    # url('^vip-request/l7/operation/apply?$',
-    #     'apply_l7', name='l7.apply'),
-    # url('^vip-request/l7/operation/rollback?$',
-    #     'apply_rollback_l7', name='l7.rollback'),
-
-
-    url('^vip-request/form[/]?$',
+    url(
+        '^vip-request/form[/]?$',
         'add_form', name='vip-request.form',),
     url('^vip-request/form/external[/]?$',
         'add_form_external', name='vip-request.form.external',),

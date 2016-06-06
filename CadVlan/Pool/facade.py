@@ -123,3 +123,28 @@ def populate_pool_members_by_obj(server_pool_members):
                              'ip': ip['ip_formated'] if ip else ''})
 
     return pool_members
+
+
+def format_healthcheck(request):
+
+    healthcheck = dict()
+    healthcheck["identifier"] = ""
+    healthcheck["healthcheck_type"] = str(request.POST.get('healthcheck'))
+    if healthcheck["healthcheck_type"] != 'HTTP' and healthcheck["healthcheck_type"] != 'HTTPS':
+        healthcheck["healthcheck_expect"] = ''
+        healthcheck["healthcheck_request"] = ''
+    else:
+        healthcheck["healthcheck_request"] = str(request.POST.get('healthcheck_request'))
+        healthcheck["healthcheck_expect"] = str(request.POST.get('healthcheck_expect'))
+    healthcheck["destination"] = "*:%s" % healthcheck["healthcheck_destination"] if healthcheck["healthcheck_destination"] else '*:*'
+
+    return healthcheck
+
+
+def format_servicedownaction(client, form):
+
+    servicedownaction = dict()
+    servicedownaction["id"] = int(form.cleaned_data['servicedownaction'])
+    servicedownaction["name"] = str(find_servicedownaction_object(client, id=servicedownaction['id']))
+
+    return servicedownaction

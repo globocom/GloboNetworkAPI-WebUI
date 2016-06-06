@@ -57,11 +57,11 @@
             <label>Protocolo L7: <b><span class="vip_port_l7_protocol">{{ port.options.l7_protocol.nome_opcao_txt }}</b></span></label>
             <br>
             <label>Pool: <b>{{ server_pool.identifier }}</b></label>
-            <input name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>
-            <input class="ports_vip" name="ports_vip" type="hidden" value='{{ port.port_vip }}'/>
-            <input name="vip_port_id" id="vip_port_id" type="hidden" value='{{port.port_vip_id}}'/>
-            <input name="vip_port_l4_protocol" id="vip_port_l4_protocol" type="hidden" value='{{port.options.l4_protocol.nome_opcao_txt}}'/>
-            <input name="vip_port_l7_protocol" id="vip_port_l7_protocol" type="hidden" value='{{port.options.l7_protocol.nome_opcao_txt}}'/>
+            <input class="idsPool" name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>
+            <input class="ports_vip_ports" name="ports_vip_ports" type="hidden" value='{{ port.port }}'/>
+            <input class="ports_vip_ids" name="ports_vip_ids" type="hidden" value='{{port.id}}'/>
+            <input class="ports_vip_l4_protocols" name="ports_vip_l4_protocols" type="hidden" value='{{port.options.l4_protocol.id}}'/>
+            <input class="ports_vip_l7_protocols" name="ports_vip_l7_protocols" type="hidden" value='{{port.options.l7_protocol.id}}'/>
 
         </th>
     </tr>
@@ -73,7 +73,7 @@
     <td>Porta Real</td>
     <td>Prioridade</td>
 </tr>
-{% for pool_member in server_pool_members %}
+{% for pool_member in server_pool.server_pool_members %}
 <tr>
     <td>{{ pool_member.equipment.name }}</td>
     <td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>

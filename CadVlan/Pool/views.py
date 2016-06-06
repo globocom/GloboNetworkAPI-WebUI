@@ -23,7 +23,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import error_messages, healthcheck_messages, pool_messages
 from CadVlan.Pool.forms import PoolForm, SearchPoolForm
-from CadVlan.Pool.facade import populate_enviroments_choices, populate_optionsvips_choices, \
+from CadVlan.Pool.facade import format_servicedownaction, populate_enviroments_choices, populate_optionsvips_choices, \
     populate_expectstring_choices, populate_optionspool_choices, populate_pool_members_by_lists, \
     populate_pool_members_by_obj, populate_servicedownaction_choices, \
     find_servicedownaction_object
@@ -988,10 +988,10 @@ def manage_tab4(request, id_server_pool):
     return render_to_response(POOL_MANAGE_TAB4, lists, context_instance=RequestContext(request))
 
 
-def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, id=None):
+def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, pool_id=None):
 
     pool = dict()
-    pool["id"] = id
+    pool["id"] = pool_id
     pool["identifier"] = str(form.cleaned_data['identifier'])
     pool["default_port"] = int(form.cleaned_data['default_port'])
     pool["environment"] = int(form.cleaned_data['environment'])
@@ -1065,12 +1065,3 @@ def format_healthcheck(request, id=None):
     healthcheck["destination"] = "*:*"
 
     return healthcheck
-
-
-def format_servicedownaction(client, form):
-
-    servicedownaction = dict()
-    servicedownaction["id"] = int(form.cleaned_data['servicedownaction'])
-    servicedownaction["name"] = str(find_servicedownaction_object(client, id=servicedownaction['id']))
-
-    return servicedownaction
