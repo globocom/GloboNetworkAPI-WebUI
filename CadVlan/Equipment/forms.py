@@ -46,7 +46,7 @@ class SearchEquipmentForm(forms.Form):
     iexact = forms.BooleanField(
         label="Buscar nomes exatos", required=False, error_messages=error_messages)
     environment = forms.ChoiceField(label="Ambiente", required=False, choices=[(
-        0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
+        0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"class": "select2", "style": "width: 300px"}))
     type_equip = forms.ChoiceField(label="Tipo", required=False, choices=[(
         0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 180px"}))
     group = forms.ChoiceField(label="Grupo", required=False, choices=[(
@@ -100,7 +100,7 @@ class EquipForm(forms.Form):
         attrs={'style': "width: 400px"}), error_messages=error_messages)
     marca = forms.ChoiceField(label="Marca", required=True, widget=forms.Select(
         attrs={'style': "width: 400px"}), error_messages=error_messages)
-    modelo = forms.ChoiceField(label=u'Modelo', required=True,  widget=forms.Select(
+    modelo = forms.ChoiceField(label=u'Modelo', required=True, widget=forms.Select(
         attrs={'style': "width: 400px"}), error_messages=error_messages)
     grupo = forms.MultipleChoiceField(label="Grupos Disponíveis", required=True, widget=forms.SelectMultiple(
         attrs={'style': "width: 400px"}), error_messages=error_messages)

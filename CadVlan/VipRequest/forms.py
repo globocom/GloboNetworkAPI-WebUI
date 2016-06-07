@@ -64,19 +64,12 @@ class RequestVipFormHealthcheck(forms.Form):
 
 
 @autostrip
-class HealthcheckForm(forms.Form):
-
-    excpect_new = forms.CharField(label=u'', min_length=3, max_length=100, required=True,
-                                  error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 185px"}))
-
-
-@autostrip
 class RequestVipFormReal(forms.Form):
 
     equip_name = forms.CharField(label=u'Buscar novo', min_length=3, required=False, widget=forms.TextInput(
         attrs={'style': "width: 250px;", 'autocomplete': "off"}), error_messages=error_messages)
 
-    maxcom = forms.IntegerField(label=u'Número máximo de conexões (maxconn)', required=True,
+    maxcon = forms.IntegerField(label=u'Número máximo de conexões (maxconn)', required=True,
                                 error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
 
 
@@ -154,7 +147,8 @@ class GenerateTokenForm(forms.Form):
 @autostrip
 class PoolForm(forms.Form):
 
-    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices, healthcheck_choices=[], *args, **kwargs):
+    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices,
+                 healthcheck_choices=[], *args, **kwargs):
         super(PoolForm, self).__init__(*args, **kwargs)
 
         self.fields['environment'].choices = enviroments_choices
@@ -192,6 +186,7 @@ class PoolForm(forms.Form):
         required=True,
         error_messages=error_messages,
         widget=forms.Select(attrs={
+            "style": "",
             "style": "width: 310px",
             'class': 'select2'}
         )
@@ -219,7 +214,7 @@ class PoolForm(forms.Form):
         )
     )
 
-    maxcom = forms.IntegerField(
+    maxcon = forms.IntegerField(
         label=u'Número máximo de conexões (maxconn)',
         required=True,
         error_messages=error_messages,

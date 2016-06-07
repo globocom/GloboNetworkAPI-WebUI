@@ -26,12 +26,11 @@ from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import CreateForm, DeleteForm, RemoveForm, ValidateForm
 from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
-from CadVlan.messages import auth_messages, equip_group_messages, error_messages, healthcheck_messages, \
+from CadVlan.messages import auth_messages, equip_group_messages, error_messages, \
     pool_messages, request_vip_messages
 from CadVlan.permissions import POOL_ALTER_SCRIPT, POOL_CREATE_SCRIPT, POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, \
     VIP_ALTER_SCRIPT, VIP_CREATE_SCRIPT, VIP_REMOVE_SCRIPT, VIPS_REQUEST
 from CadVlan.Pool import facade as facade_pool
-from CadVlan.Pool.facade import populate_optionsvips_choices, populate_servicedownaction_choices
 from CadVlan.settings import ACCESS_EXTERNAL_TTL, NETWORK_API_PASSWORD, NETWORK_API_URL, NETWORK_API_USERNAME
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.Decorators import has_perm, has_perm_external, log, login_required
@@ -642,28 +641,6 @@ def ajax_popular_rule(request):
     {"permission": VIPS_REQUEST, "read": True, "write": True},
     {"permission": POOL_MANAGEMENT, "read": True},
 ])
-def ajax_add_healthcheck_external(request, form_acess, client):
-    return popular_add_healthcheck_shared(request, client)
-
-
-@log
-@login_required
-@has_perm([
-    {"permission": VIPS_REQUEST, "read": True, "write": True},
-    {"permission": POOL_MANAGEMENT, "read": True},
-])
-def ajax_add_healthcheck(request):
-    auth = AuthSession(request.session)
-    client_api = auth.get_clientFactory()
-    return popular_add_healthcheck_shared(request, client_api)
-
-
-@log
-@csrf_exempt
-@has_perm_external([
-    {"permission": VIPS_REQUEST, "read": True, "write": True},
-    {"permission": POOL_MANAGEMENT, "read": True},
-])
 def ajax_model_ip_real_server_external(request, form_acess, client):
     return model_ip_real_server_shared(request, client)
 
@@ -966,7 +943,7 @@ def tab_real_server(request, id_vip):
         balancing = vip.get("metodo_bal")
         lists['balancing'] = balancing
 
-        form_real = forms.RequestVipFormReal(initial={"maxcom": maxcon})
+        form_real = forms.RequestVipFormReal(initial={"maxcon": maxcon})
         lists['form_real'] = form_real
 
         parse = True
@@ -1270,7 +1247,7 @@ def tab_maxcon(request, id_vip):
 
             if form_real.is_valid():
 
-                maxcon = form_real.cleaned_data["maxcom"]
+                maxcon = form_real.cleaned_data["maxcon"]
                 # equip_name = form_real.cleaned_data["equip_name"]
 
                 try:
@@ -1332,7 +1309,7 @@ def tab_maxcon(request, id_vip):
             equip_name = vip.get("equip_name")
 
             form_real = forms.RequestVipFormReal(
-                initial={"equip_name": equip_name, "maxcom": maxcon})
+                initial={"equip_name": equip_name, "maxcon": maxcon})
             lists['form_real'] = form_real
 
     except VipNaoExisteError, e:
@@ -1647,50 +1624,6 @@ def popular_rule_shared(request, client_api):
     )
 
 
-def popular_add_healthcheck_shared(request, client_api):
-
-    lists = dict()
-    status_code = None
-    form = forms.HealthcheckForm()
-
-    try:
-
-        client = client_api.create_ambiente()
-
-        if request.method == "GET":
-            form = forms.HealthcheckForm(request.GET)
-
-        else:
-            form = forms.HealthcheckForm(request.POST)
-
-        if form.is_valid():
-
-            excpect = form.cleaned_data['excpect_new']
-
-            client.add_expect_string_healthcheck(excpect)
-
-            lists['success'] = healthcheck_messages.get("success_create")
-
-        lists['healthchecks'] = client.listar_healtchcheck_expect_distinct().get(
-            "healthcheck_expect")
-        lists['form'] = form
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-        status_code = 500
-
-    # Returns Json
-    return HttpResponse(
-        loader.render_to_string(
-            templates.AJAX_VIPREQUEST_HEALTHCHECK,
-            lists,
-            context_instance=RequestContext(request)
-        ),
-        status=status_code
-    )
-
-
 def model_ip_real_server_shared(request, client_api):
 
     lists = dict()
@@ -1869,11 +1802,8 @@ def shared_load_pool(request, client, form_acess=None, external=False):
         action = reverse('external.save.pool') if external else reverse('save.pool')
         load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
 
-        pool = client.create_api_pool().pool_by_id(pool_id)
-        server_pool = pool.get('server_pool')
-        environment_id = server_pool['environment']['id']
-
-        servicedownaction_choices = populate_servicedownaction_choices(client)
+        pool = client.create_api_pool().get_pool_details(pool_id)['server_pools'][0]
+        environment_id = pool['environment']['id']
 
         server_pool_members = list()
         server_pool_members_raw = pool.get('server_pool_members')
@@ -1888,52 +1818,57 @@ def shared_load_pool(request, client, form_acess=None, external=False):
 
                 # get_equip_by_ip method can return many equipments related with those Ips,
                 # this is an error, because the equipment returned cannot be the same
-                equipment = client.create_equipamento().listar_por_nome(obj_member['equipment_name'])
 
                 server_pool_members.append({
                     'id': obj_member['id'],
-                    'id_equip': equipment['equipamento']['id'],
-                    'nome_equipamento': equipment['equipamento']['nome'],
+                    'id_equip': obj_member['equipment']['id'],
+                    'nome_equipamento': obj_member['equipment']['name'],
                     'priority': obj_member['priority'],
                     'port_real': obj_member['port_real'],
                     'weight': obj_member['weight'],
-                    'id_ip': obj_member['ip']['id'],
+                    'id_ip': ip_obj.get('id'),
                     'ip': ip_obj.get('ip_formated')}
                 )
 
-        healthcheck = pool['server_pool']['healthcheck']['healthcheck_type'] \
-            if pool['server_pool']['healthcheck'] else None
+        healthcheck = pool['healthcheck']['healthcheck_type']
+        healthcheck_expect = pool['healthcheck']['healthcheck_expect']
+        healthcheck_request = pool['healthcheck']['healthcheck_request']
+        healthcheck_destination = pool['healthcheck']['destination'].split(':')[1]
+        healthcheck_destination = healthcheck_destination if healthcheck_destination != '*' else ''
 
-        healthcheck_expect = pool['server_pool']['healthcheck']['healthcheck_expect'] \
-            if pool['server_pool']['healthcheck'] else ''
-
-        healthcheck_request = pool['server_pool']['healthcheck']['healthcheck_request'] \
-            if pool['server_pool']['healthcheck'] else ''
-
-        sda = server_pool.get('servicedownaction')
         form_initial = {
             'id': pool_id,
-            'default_port': server_pool.get('default_port'),
-            'balancing': server_pool.get('lb_method'),
-            'servicedownaction': sda.get('name'),
+            'environment': environment_id,
+            'default_port': pool.get('default_port'),
+            'balancing': pool.get('lb_method'),
+            'servicedownaction': pool.get('servicedownaction').get('id'),
             'healthcheck': healthcheck,
-            'max_con': server_pool.get('default_limit'),
-            'identifier': server_pool.get('identifier')
+            'maxcon': pool.get('default_limit'),
+            'identifier': pool.get('identifier')
         }
 
-        options_vip_choices = _create_options_vip(client)
-        options_pool_as_healthcheck_choices = _create_options_pool_as_healthcheck(client, environment_id)
+        lb_method_choices = facade_pool.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
+        healthcheck_choices = _create_options_pool_as_healthcheck(client, environment_id)
 
-        form = forms.PoolForm(
-            list(),
-            options_vip_choices,
+        environment_choices = [(pool.get('environment').get('id'), pool.get('environment').get('name'))]
+        form_pool = forms.PoolForm(
+            environment_choices,
+            lb_method_choices,
             servicedownaction_choices,
-            options_pool_as_healthcheck_choices,
+            healthcheck_choices,
             initial=form_initial
         )
 
-        env = client.create_ambiente().buscar_por_id(environment_id)
-        expect_string_list = client.create_ambiente().listar_healtchcheck_expect_distinct()
+        form_initial = {
+            'healthcheck_request': healthcheck_request,
+            'healthcheck_expect': healthcheck_expect,
+            'healthcheck_destination': healthcheck_destination
+        }
+
+        form_healthcheck = forms.PoolHealthcheckForm(
+            initial=form_initial
+        )
 
         if external:
             action = reverse('external.save.pool')
@@ -1941,16 +1876,12 @@ def shared_load_pool(request, client, form_acess=None, external=False):
             action = reverse('save.pool')
 
         context_attrs = {
-            'form': form,
+            'form_pool': form_pool,
+            'form_healthcheck': form_healthcheck,
             'action': action,
             'load_pool_url': load_pool_url,
             'pool_members': server_pool_members,
             'selection_form': DeleteForm(),
-            'environment_id': environment_id,
-            'expect_strings': expect_string_list,
-            'healthcheck_request': healthcheck_request,
-            'healthcheck_expect': healthcheck_expect,
-            'env_name': env['ambiente']['ambiente_rede'],
             'show_environment': False,
             'is_copy': bool(int(is_copy))
         }
@@ -2715,8 +2646,8 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
 
         environment_choices = _create_options_environment(client, env_vip_id)
-        lb_method_choices = populate_optionsvips_choices(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
+        lb_method_choices = facade_pool.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
 
         lists = dict()
         lists["form_pool"] = forms.PoolForm(
@@ -2896,8 +2827,8 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         members["environment"] = environment_id
 
         environment_choices = _create_options_environment(client, env_vip_id)
-        lb_method_choices = populate_optionsvips_choices(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
+        lb_method_choices = facade_pool.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
         healthcheck_choices = _create_options_pool_as_healthcheck(client, environment_id)
 
         form = forms.PoolForm(
@@ -2924,7 +2855,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
             pool["servicedownaction"] = servicedownaction
             pool["lb_method"] = str(form.cleaned_data['balancing'])
             pool["healthcheck"] = healthcheck
-            pool["default_limit"] = int(form.cleaned_data['maxcom'])
+            pool["default_limit"] = int(form.cleaned_data['maxcon'])
             server_pool_members = facade_pool.format_server_pool_members(request, pool["default_limit"])
             pool["server_pool_members"] = server_pool_members
 

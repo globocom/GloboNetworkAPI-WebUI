@@ -45,7 +45,7 @@ class SearchVlanForm(forms.Form):
     iexact = forms.BooleanField(
         label="Buscar nomes exatos", required=False, error_messages=error_messages)
     environment = forms.ChoiceField(label="Ambiente", required=False, choices=[(
-        0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 300px"}))
+        0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"class": "select2", "style": "width: 300px"}))
     net_type = forms.ChoiceField(label="Tipo", required=False, choices=[(
         0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 180px"}))
     ip_version = forms.IntegerField(
@@ -90,7 +90,7 @@ class VlanForm(forms.Form):
         self.fields['environment'].choices = env_choices
 
     environment = forms.ChoiceField(label="Ambiente", required=True, choices=[(
-        0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 400px"}))
+        0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"class": "select2", "style": "width: 400px"}))
     name = forms.CharField(label="Nome", required=True, min_length=3, max_length=50,
                            error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     acl_file = forms.CharField(label="Acl - IPv4", required=False, min_length=3, max_length=200,

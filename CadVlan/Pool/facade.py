@@ -136,7 +136,7 @@ def format_healthcheck(request):
     else:
         healthcheck["healthcheck_request"] = request.POST.get('healthcheck_request')
         healthcheck["healthcheck_expect"] = request.POST.get('healthcheck_expect')
-    healthcheck_destination = request.POST.get('healthcheck_expect')
+    healthcheck_destination = request.POST.get('healthcheck_destination')
     healthcheck["destination"] = ("*:%s" % healthcheck_destination) if healthcheck_destination else '*:*'
 
     return healthcheck
