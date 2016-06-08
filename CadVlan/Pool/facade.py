@@ -94,6 +94,7 @@ def populate_pool_members_by_lists(client, members):
             nome_equipamento = client.create_equipamento().listar_por_id(members.get("id_equips")[i])
             pool_members.append({'id': members.get("id_pool_member")[i],
                                  'id_equip': members.get("id_equips")[i],
+                                 'member_status': members.get("member_status")[i],
                                  'nome_equipamento': nome_equipamento['equipamento']['nome'],
                                  'priority': members.get("priorities")[i],
                                  'port_real': members.get("ports_reals")[i],
@@ -115,6 +116,7 @@ def populate_pool_members_by_obj(server_pool_members):
         ip = obj['ip'] if obj['ip'] else obj['ipv6']
         pool_members.append({'id': obj['id'],
                              'id_equip': obj['equipment']['id'],
+                             'member_status': obj["member_status"],
                              'nome_equipamento': obj['equipment']['name'],
                              'priority': obj['priority'],
                              'port_real': obj['port_real'],
