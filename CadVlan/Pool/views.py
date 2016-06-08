@@ -17,33 +17,33 @@
 
 import json
 import logging
-from django.core.urlresolvers import reverse
-from CadVlan.Pool.facade import populate_enviroments_choices, populate_optionsvips_choices, \
-    populate_expectstring_choices, populate_optionspool_choices, populate_pool_members_by_lists, \
-    populate_pool_members_by_obj, populate_servicedownaction_choices, find_servicedownaction_id, \
-    find_servicedownaction_object
-from CadVlan.Util.Decorators import log, login_required, has_perm, has_perm_external
-from django.views.decorators.csrf import csrf_exempt
+
+
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.forms import DeleteForm
+from CadVlan.messages import error_messages, healthcheck_messages, pool_messages
+from CadVlan.Pool import facade
+from CadVlan.Pool.forms import PoolForm, SearchPoolForm
+from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
+    HEALTH_CHECK_EXPECT, EQUIPMENT_MANAGEMENT, VIPS_REQUEST, ENVIRONMENT_MANAGEMENT
 from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
     POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_REQVIP_DATATABLE, POOL_MEMBER_ITEMS, POOL_MANAGE_TAB1, \
     POOL_MANAGE_TAB2, POOL_MANAGE_TAB3, POOL_MANAGE_TAB4
-from django.shortcuts import render_to_response, redirect, render
-from django.http import HttpResponseServerError, HttpResponse
+from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import has_perm, has_perm_external, log, login_required
+from CadVlan.Util.shortcuts import render_message_json
+from CadVlan.Util.utility import DataTablePaginator, get_param_in_request
+
+from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseServerError
+from django.shortcuts import redirect, render, render_to_response
 from django.template import loader
 from django.template.context import RequestContext
-from CadVlan.Auth.AuthSession import AuthSession
+from django.views.decorators.csrf import csrf_exempt
+
 from networkapiclient.exception import NetworkAPIClientError
-from django.contrib import messages
-from CadVlan.messages import healthcheck_messages
-from CadVlan.messages import error_messages, pool_messages
-from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
-    HEALTH_CHECK_EXPECT, EQUIPMENT_MANAGEMENT, VIPS_REQUEST, ENVIRONMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm
-from CadVlan.Pool.forms import PoolForm, SearchPoolForm
 from networkapiclient.Pagination import Pagination
-from CadVlan.Util.utility import DataTablePaginator, get_param_in_request
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.shortcuts import render_message_json
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,7 @@ def datatable(request):
 
         environment_id = int(request.GET.get('pEnvironment'))
 
-        columnIndexNameMap = {
+        column_index_name_map = {
             0: '',
             1: 'identifier',
             2: 'default_port',
@@ -94,7 +94,7 @@ def datatable(request):
             6: ''
         }
 
-        dtp = DataTablePaginator(request, columnIndexNameMap)
+        dtp = DataTablePaginator(request, column_index_name_map)
 
         dtp.build_server_side_list()
 
@@ -145,7 +145,7 @@ def spm_datatable(request, id_server_pool, checkstatus):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        columnIndexNameMap = {
+        column_index_name_map = {
             0: '',
             1: 'identifier',
             2: 'ip',
@@ -157,7 +157,7 @@ def spm_datatable(request, id_server_pool, checkstatus):
             8: 'last_status_update'
         }
 
-        dtp = DataTablePaginator(request, columnIndexNameMap)
+        dtp = DataTablePaginator(request, column_index_name_map)
         dtp.build_server_side_list()
 
         pools = client.create_pool().get_pool_members(id_server_pool, checkstatus)
@@ -181,10 +181,19 @@ def reqvip_datatable(request, id_server_pool):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        columnIndexNameMap = {0: '', 1: 'id', 2: 'ip', 3: 'descricao_ipv4',
-                              4: 'descricao_ipv6', 5: 'ambiente', 6: 'valido', 7: 'criado', 8: ''}
+        column_index_name_map = {
+            0: '',
+            1: 'id',
+            2: 'ip',
+            3: 'descricao_ipv4',
+            4: 'descricao_ipv6',
+            5: 'ambiente',
+            6: 'valido',
+            7: 'criado',
+            8: ''
+        }
 
-        dtp = DataTablePaginator(request, columnIndexNameMap)
+        dtp = DataTablePaginator(request, column_index_name_map)
 
         dtp.build_server_side_list()
 
@@ -229,10 +238,10 @@ def add_form(request):
 
         lists = dict()
 
-        enviroments_choices = populate_enviroments_choices(client)
-        optionsvips_choices = populate_optionsvips_choices(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-        lists["expect_strings"] = populate_expectstring_choices(client)
+        enviroments_choices = facade.populate_enviroments_choices(client)
+        optionsvips_choices = facade.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade.populate_servicedownaction_choices(client)
+        lists["expect_strings"] = facade.populate_expectstring_choices(client)
         lists["action"] = reverse('pool.add.form')
         lists["label_tab"] = u'Cadastro de Pool'
         lists["pool_created"] = False
@@ -249,6 +258,7 @@ def add_form(request):
             members["id_pool_member"] = request.POST.getlist('id_pool_member')
             members["id_equips"] = request.POST.getlist('id_equip')
             members["member_status"] = request.POST.getlist('member_status')
+            members["name_equips"] = request.POST.getlist('equip')
             members["priorities"] = request.POST.getlist('priority')
             members["ports_reals"] = request.POST.getlist('ports_real_reals')
             members["weight"] = request.POST.getlist('weight')
@@ -264,8 +274,8 @@ def add_form(request):
                 lists["healthcheck_expect"] = request.POST.get('expect')
                 lists["healthcheck_request"] = request.POST.get('health_check_request')
 
-            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, members)
-            optionspool_choices = populate_optionspool_choices(client, members.get("environment"))
+            lists["pool_members"], ip_list_full = facade.populate_pool_members_by_lists(client, members)
+            optionspool_choices = facade.populate_optionspool_choices(client, members.get("environment"))
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
                             request.POST)
@@ -273,9 +283,9 @@ def add_form(request):
             if form.is_valid():
 
                 limit = form.cleaned_data['max_con']
-                server_pool_members = format_server_pool_members(request, limit)
+                server_pool_members = facade.format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
-                servicedownaction = format_servicedownaction(client, form)
+                servicedownaction = facade.format_servicedownaction(client, form)
                 pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction)
                 client.create_pool().save_pool(pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_insert'))
@@ -309,10 +319,10 @@ def edit_form(request, id_server_pool):
 
         lists = dict()
 
-        enviroments_choices = populate_enviroments_choices(client)
-        optionsvips_choices = populate_optionsvips_choices(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-        lists["expect_strings"] = populate_expectstring_choices(client)
+        enviroments_choices = facade.populate_enviroments_choices(client)
+        optionsvips_choices = facade.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade.populate_servicedownaction_choices(client)
+        lists["expect_strings"] = facade.populate_expectstring_choices(client)
         lists["action"] = reverse('pool.edit.form', args=[id_server_pool])
         lists["label_tab"] = u'Edição de Pool'
         lists["id_server_pool"] = id_server_pool
@@ -328,7 +338,7 @@ def edit_form(request, id_server_pool):
             environment = server_pools['environment']
 
             if environment:
-                optionspool_choices = populate_optionspool_choices(client, environment)
+                optionspool_choices = facade.populate_optionspool_choices(client, environment)
 
             lists["healthcheck_expect"] = server_pools['healthcheck']['healthcheck_expect'] \
                 if server_pools['healthcheck'] else ''
@@ -350,7 +360,7 @@ def edit_form(request, id_server_pool):
                 'servicedownaction': server_pools['servicedownaction']['id']
             }
 
-            lists["pool_members"] = populate_pool_members_by_obj(server_pools['server_pool_members'])
+            lists["pool_members"] = facade.populate_pool_members_by_obj(server_pools['server_pool_members'])
 
             lists["form"] = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices,
                                      optionspool_choices, initial=initial_pool)
@@ -361,6 +371,7 @@ def edit_form(request, id_server_pool):
             members["id_pool_member"] = request.POST.getlist('id_pool_member')
             members["id_equips"] = request.POST.getlist('id_equip')
             members["member_status"] = request.POST.getlist('member_status')
+            members["name_equips"] = request.POST.getlist('equip')
             members["priorities"] = request.POST.getlist('priority')
             members["ports_reals"] = request.POST.getlist('ports_real_reals')
             members["weight"] = request.POST.getlist('weight')
@@ -376,8 +387,8 @@ def edit_form(request, id_server_pool):
                 lists["healthcheck_expect"] = request.POST.get('expect')
                 lists["healthcheck_request"] = request.POST.get('health_check_request')
 
-            lists["pool_members"], ip_list_full = populate_pool_members_by_lists(client, members)
-            optionspool_choices = populate_optionspool_choices(client, members.get("environment"))
+            lists["pool_members"], ip_list_full = facade.populate_pool_members_by_lists(client, members)
+            optionspool_choices = facade.populate_optionspool_choices(client, members.get("environment"))
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
                             request.POST)
@@ -385,9 +396,9 @@ def edit_form(request, id_server_pool):
             if form.is_valid():
 
                 limit = form.cleaned_data['max_con']
-                server_pool_members = format_server_pool_members(request, limit)
+                server_pool_members = facade.format_server_pool_members(request, limit)
                 healthcheck = format_healthcheck(request)
-                servicedownaction = format_servicedownaction(client, form)
+                servicedownaction = facade.format_servicedownaction(client, form)
                 pool = format_pool(client, form, server_pool_members, healthcheck, servicedownaction, int(id_server_pool))
                 client.create_pool().update_pool(pool, id_server_pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
@@ -416,7 +427,7 @@ def edit_form(request, id_server_pool):
     {"permission": EQUIPMENT_MANAGEMENT, "read": True, }
 ])
 def ajax_modal_ip_real_server_external(request, form_acess, client):
-    return __modal_ip_list_real(request, client)
+    return _modal_ip_list_real(request, client)
 
 
 @log
@@ -428,10 +439,10 @@ def ajax_modal_ip_real_server_external(request, form_acess, client):
 def ajax_modal_ip_real_server(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return __modal_ip_list_real(request, client_api)
+    return _modal_ip_list_real(request, client_api)
 
 
-def __modal_ip_list_real(request, client_api):
+def _modal_ip_list_real(request, client_api):
 
     lists = {'msg': str(), 'ips': []}
     ips = {}
@@ -452,6 +463,7 @@ def __modal_ip_list_real(request, client_api):
     if not ips_list['list_ipv4'] and not ips_list['list_ipv6']:
         return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
                                                    u'possa ser utilizado nos pools desse ambiente.',
+
                                         'status': 'error'}), status=status_code, content_type='application/json')
 
     ips['list_ipv4'] = ips_list['list_ipv4']
@@ -459,15 +471,19 @@ def __modal_ip_list_real(request, client_api):
     lists['ips'] = ips
     lists['equip'] = equip
 
-    return HttpResponse(loader.render_to_string(AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, lists,
-                                                context_instance=RequestContext(request)), status=status_code)
+    return HttpResponse(
+        loader.render_to_string(
+            AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML,
+            lists,
+            context_instance=RequestContext(request)
+        ), status=status_code)
 
 
 @log
 @csrf_exempt
 @has_perm_external([{"permission": POOL_MANAGEMENT, "read": True}])
 def ajax_get_opcoes_pool_by_ambiente_external(request, form_acess, client):
-    return __get_opcoes_pool_by_ambiente(request, client)
+    return _get_opcoes_pool_by_ambiente(request, client)
 
 
 @log
@@ -476,10 +492,10 @@ def ajax_get_opcoes_pool_by_ambiente_external(request, form_acess, client):
 def ajax_get_opcoes_pool_by_ambiente(request):
     auth = AuthSession(request.session)
     client_api = auth.get_clientFactory()
-    return __get_opcoes_pool_by_ambiente(request, client_api)
+    return _get_opcoes_pool_by_ambiente(request, client_api)
 
 
-def __get_opcoes_pool_by_ambiente(request, client_api):
+def _get_opcoes_pool_by_ambiente(request, client_api):
 
     lists = dict()
     lists['opcoes_pool'] = ''
@@ -601,6 +617,7 @@ def status_change(request):
                 else:
                     member_status[-1] = action[-1]
                 member_status = int(''.join(member_status), 2)
+
                 if member_status != member['member_status'] and str(member['id']) in ids.split(';'):
                     member['member_status'] = member_status
 
@@ -676,7 +693,7 @@ def disable(request):
 @csrf_exempt
 @has_perm_external([{'permission': HEALTH_CHECK_EXPECT, "write": True}])
 def add_healthcheck_expect_external(request, form_acess, client):
-    return __add_healthcheck_expect_shared(request, client)
+    return _add_healthcheck_expect_shared(request, client)
 
 
 @log
@@ -686,10 +703,10 @@ def add_healthcheck_expect(request):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
-    return __add_healthcheck_expect_shared(request, client)
+    return _add_healthcheck_expect_shared(request, client)
 
 
-def __add_healthcheck_expect_shared(request, client):
+def _add_healthcheck_expect_shared(request, client):
     lists = dict()
     try:
         if request.method == 'GET':
@@ -834,10 +851,10 @@ def manage_tab3(request, id_server_pool):
 
         lists = dict()
 
-        enviroments_choices = populate_enviroments_choices(client)
-        optionsvips_choices = populate_optionsvips_choices(client)
-        servicedownaction_choices = populate_servicedownaction_choices(client)
-        lists["expectstring_choices"] = populate_expectstring_choices(client)
+        enviroments_choices = facade.populate_enviroments_choices(client)
+        optionsvips_choices = facade.populate_optionsvips_choices(client)
+        servicedownaction_choices = facade.populate_servicedownaction_choices(client)
+        lists["expectstring_choices"] = facade.populate_expectstring_choices(client)
 
         lists["action"] = reverse('pool.manage.tab3', args=[id_server_pool])
         lists["id_server_pool"] = id_server_pool
@@ -846,7 +863,7 @@ def manage_tab3(request, id_server_pool):
         server_pools = pool['server_pools'][0]
         members = server_pools['server_pool_members']
 
-        optionspool_choices = populate_optionspool_choices(client, server_pools['environment'])
+        optionspool_choices = facade.populate_optionspool_choices(client, server_pools['environment'])
 
         lists["environment"] = None
         if server_pools['environment']:
@@ -873,7 +890,7 @@ def manage_tab3(request, id_server_pool):
         if request.method == 'POST':
 
             environment = request.POST.get('environment')
-            optionspool_choices = populate_optionspool_choices(client, environment)
+            optionspool_choices = facade.populate_optionspool_choices(client, environment)
 
             form = PoolForm(enviroments_choices, optionsvips_choices, servicedownaction_choices, optionspool_choices,
                             request.POST)
@@ -881,7 +898,7 @@ def manage_tab3(request, id_server_pool):
             if form.is_valid():
 
                 healthcheck = format_healthcheck(request)
-                servicedownaction = format_servicedownaction(client, form)
+                servicedownaction = facade.format_servicedownaction(client, form)
                 pool = format_pool(client, form, members, healthcheck, servicedownaction, int(id_server_pool))
                 client.create_pool().deploy_update_pool(pool, id_server_pool)
 
@@ -954,14 +971,14 @@ def manage_tab4(request, id_server_pool):
 
         if request.method == 'POST':
 
-            server_pool_members = format_server_pool_members(request, lists["max_con"])
+            server_pool_members = facade.format_server_pool_members(request, lists["max_con"])
             server_pools['server_pool_members'] = server_pool_members
             client.create_pool().deploy_update_pool(server_pools, id_server_pool)
             messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
             return redirect(lists['action'])
 
         if request.method == 'GET':
-            lists["pool_members"] = populate_pool_members_by_obj(server_pools['server_pool_members'])
+            lists["pool_members"] = facade.populate_pool_members_by_obj(server_pools['server_pool_members'])
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -970,10 +987,10 @@ def manage_tab4(request, id_server_pool):
     return render_to_response(POOL_MANAGE_TAB4, lists, context_instance=RequestContext(request))
 
 
-def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, id=None):
+def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, pool_id=None):
 
     pool = dict()
-    pool["id"] = id
+    pool["id"] = pool_id
     pool["identifier"] = str(form.cleaned_data['identifier'])
     pool["default_port"] = int(form.cleaned_data['default_port'])
     pool["environment"] = int(form.cleaned_data['environment'])
@@ -986,51 +1003,6 @@ def format_pool(client, form, server_pool_members, healthcheck, servicedownactio
         member['limit'] = pool['default_limit']
 
     return pool
-
-
-def format_server_pool_members(request, limit=0):
-
-    pool_members = []
-    equips = request.POST.getlist('id_equip')
-    for i in range(0, len(equips)):
-        server_pool_members = dict()
-        server_pool_members["id"] = int(request.POST.getlist('id_pool_member')[i]) \
-            if request.POST.getlist('id_pool_member')[i] else None
-        server_pool_members["identifier"] = str(request.POST.getlist('equip')[i])
-        server_pool_members["priority"] = int(request.POST.getlist('priority')[i])
-        server_pool_members["equipment"] = format_equipments(request, i)
-        server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
-        server_pool_members["limit"] = limit
-        server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
-        server_pool_members["member_status"] = int(request.POST.getlist('member_status')[i]) \
-            if request.POST.getlist('id_pool_member')[i] else 7
-        v4, v6 = format_ips(request, i)
-        server_pool_members["ip"] = v4
-        server_pool_members["ipv6"] = v6
-        pool_members.append(server_pool_members)
-
-    return pool_members
-
-
-def format_equipments(request, i):
-
-    equipments = dict()
-    equipments["id"] = int(request.POST.getlist('id_equip')[i])
-    equipments["nome"] = str(request.POST.getlist('equip')[i])
-
-    return equipments
-
-
-def format_ips(request, i):
-
-    ips = dict()
-    ips["id"] = int(request.POST.getlist('id_ip')[i])
-    ips["ip_formated"] = str(request.POST.getlist('ip')[i])
-
-    v4 = ips if "." in ips['ip_formated'] else None
-    v6 = ips if ":" in ips['ip_formated'] else None
-
-    return v4, v6
 
 
 def format_healthcheck(request, id=None):
@@ -1048,12 +1020,3 @@ def format_healthcheck(request, id=None):
     healthcheck["destination"] = "*:*"
 
     return healthcheck
-
-
-def format_servicedownaction(client, form):
-
-    servicedownaction = dict()
-    servicedownaction["id"] = int(form.cleaned_data['servicedownaction'])
-    servicedownaction["name"] = str(find_servicedownaction_object(client, id=servicedownaction['id']))
-
-    return servicedownaction

@@ -47,15 +47,15 @@
 						<table>
 							<tr>
 								<td>
-									<label for="{{ form_real.maxcom.auto_id }}">{{ form_real.maxcom.label_tag }}{% if form_real.maxcom.field.required %}<span style="color: red;padding-right: 5px;">*</span>{% endif %}</label>
+									<label for="{{ form_real.maxcon.auto_id }}">{{ form_real.maxcon.label_tag }}{% if form_real.maxcon.field.required %}<span style="color: red;padding-right: 5px;">*</span>{% endif %}</label>
 								</td>
 								<td>
-									{{ form_real.maxcom }}
+									{{ form_real.maxcon }}
 								</td>
 							</tr>
 							<tr>
 							 	<td></td>
-								<td style="padding-left: 5px;"><p id="error">{% if form_real.maxcom.errors %}{% for error in form_real.maxcom.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
+								<td style="padding-left: 5px;"><p id="error">{% if form_real.maxcon.errors %}{% for error in form_real.maxcon.errors %}{{ error|escape }}{% endfor %}{% endif %}</p></td>
 							</tr>
 						</table>
 					

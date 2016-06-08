@@ -131,10 +131,6 @@
             }
         });
 
-        //var port_vip;
-        //$(".numbersOnly").live('focus', function(){
-            //port_vip = $(this).val();
-        //});
 
         $(".numbersOnly").live('focusout', function(){
             this_element = $(this);
@@ -293,7 +289,8 @@
                             {{ form.identifier.label }}{% if form.identifier.field.required %}<span style="color: red;">*</span>{% endif %}
                         </label>
                     </div>
-                    {{ form.identifier }}                    <p id="error">
+                    {{ form.identifier }}
+                    <p id="error">
                     {% if form.identifier.errors %}
                         {% for error in form.identifier.errors %}
                             {{ error|escape }}
@@ -493,20 +490,14 @@
                                     {% for field in pool_members %}
                                         <tr class='remove_port'>
                                             <td>
-                                                <label>{% if field.equipment %}{{field.equipment.nome}}{% endif %}</label>
-                                                <input type='hidden' name='equip' value='{{field.equipment.nome}}' />
-                                                <input type='hidden' name='id_equip' value='{{field.equipment.id}}' />
+                                                <label>{{field.nome_equipamento}}</label>
+                                                <input type='hidden' name='equip' value='{{field.nome_equipamento}}' />
+                                                <input type='hidden' name='id_equip' value='{{field.id_equip}}' />
                                             </td>
                                             <td>
-                                                {% if field.ipv6 %}
-                                                <label>{{field.ip.ip_formated}}</label>
-                                                <input type='hidden' name='ip' value='{{field.ipv6.ip_formated}}'>
-                                                <input type='hidden' name='id_ip' value='{{field.ipv6.id}}'>
-                                                {% elif field.ip %}
-                                                <label>{{field.ip.ip_formated}}</label>
-                                                <input type='hidden' name='ip' value='{{field.ip.ip_formated}}'>
-                                                <input type='hidden' name='id_ip' value='{{field.ip.id}}'>
-                                                {% endif %}
+                                                <label>{{field.ip}}</label>
+                                                <input type='hidden' name='ip' value='{{field.ip}}'>
+                                                <input type='hidden' name='id_ip' value='{{field.id_ip}}'>
                                             </td>
                                             <td>
                                                 <label class='editable'>{% if field.priority != "-" %}{{field.priority}}{% endif %}</label>

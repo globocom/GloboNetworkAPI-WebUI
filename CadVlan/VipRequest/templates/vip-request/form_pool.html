@@ -10,22 +10,27 @@
         }
     }
     function update_port_vips(element){
-            if(element.parent().parent().next().attr('name') == 'ports_vip'){
-                new_port_vip = element.val();
+        if(element.parent().parent().next().attr('name') == 'ports_vip'){
+            new_port_vip = element.val();
 
-                $("input[name=ports_vip_reals]").each(function(){
-                      if ($(this).val() == port_vip){
-                          if (new_port_vip == ''){
-                              $(this).val('-');
-                          }else{
-                              $(this).val(new_port_vip);
-                          }
-                          $(this).parent().find('label').text(new_port_vip);
-                      }
-                  });
-            }
+            $("input[name=ports_vip_reals]").each(function(){
+                if ($(this).val() == port_vip){
+                    if (new_port_vip == ''){
+                        $(this).val('-');
+                    }else{
+                        $(this).val(new_port_vip);
+                    }
+                    $(this).parent().find('label').text(new_port_vip);
+                }
+            });
+        }
     }
     $(document).ready(function() {
+        $('#id_environment').select2(select2_basic)
+        $('#id_balancing').select2(select2_basic)
+        $('#id_servicedownaction').select2(select2_basic)
+        $('#id_healthcheck').select2(select2_basic)
+
         var obj_btn_sav = $("#btn_sav");
         var obj_btn_can = $("#btn_can");
         var obj_btn_new_port = $("#btn_new_port");
@@ -44,12 +49,14 @@
         $('.editable').editableTable();
         $("textarea").maxlength();
 
-        obj_btn_new_port.live("click", function(){
+        $("body").off("click", "#btn_new_port")
+        $("body").on("click", "#btn_new_port", function() {
             $('#table_ports tbody').append("<tr class='remove_port'><td><label class='editable'></label> <input type='hidden' name='ports_vip' value='-'></td><td><label class='editable'></label> <input type='hidden' name='ports_real' value='-'></td><td><span class='ui-icon ui-icon-closethick' style='cursor: pointer;'></span></td></tr>");
             $('.editable').editableTable();
         });
 
-        obj_btn_new_real.live("click", function(){
+        $("body").off("click", "#btn_new_real")
+        $("body").on("click", "#btn_new_real", function() {
             var val_equip_name = $.trim($('#id_equip_name').val());
             if ( val_equip_name != '' ) {
                 $.ajax({
@@ -108,7 +115,8 @@
               $(this).val($(this).val().replace(/[^0-9]+/g,''));
         });
 
-        $('#table_ports tbody tr span').live("click", function(){
+        $("#table_ports").off("click", "tbody tr span")
+        $("#table_ports").on("click", "tbody tr span", function(e) {
             port_vip_value = $(this).parents().find('input=[name=ports_vip]').val();
 
             if (confirm('Deseja realmente excluir a(s) Portas selecionada(s)?')){
@@ -124,23 +132,57 @@
             }
         });
 
-        $('#table_real tbody tr span').die("click");
-        $('#table_real tbody tr span').live("click", function(e){
+        $("#table_real").off("click", "tbody tr span")
+        $("#table_real").on("change", "tbody tr span", function(e) {
             if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){
             $(this).parents(".remove_port").remove();
             return false;
             }
         });
 
-        $("#id_health_check").live("change", function(){
-            if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
-                $("#table_health_check").show();
-            } else {
-                $("#table_health_check").hide();
+        $("body").off("click", "#id_environment")
+        $("body").on("change", "#id_environment", function() {
+            $('#id_healthcheck').html('<option value=""> - </option>');
+
+            var environmentId = this.value;
+
+            if (environmentId != ''){
+                $("#id_equip_name, #btn_new_real").prop('disabled', false);
+                var tokenId = $("#id_token").val();
+                $.ajax({
+                    url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+
+                    data: {
+                        'id_environment': environmentId,
+                        'token': tokenId
+                    },
+                    success: function(data, textStatus, xhr) {
+                        if(xhr.status == 200) {
+                            for (var i = 0; i < data.length; i++) {
+                                $('#id_healthcheck').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
+                            }
+                        }
+                        else if(xhr.status == 203){
+                           alert(data);
+                        }
+                    }
+                });
+            }else{
+                $("#id_equip_name, #btn_new_real").prop('disabled', true);
             }
         });
 
-        $("#id_balancing").live("change", function(){
+        $("body").off("change", "#id_healthcheck")
+        $("body").on("change", "#id_healthcheck", function() {
+            if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
+                $("#table_healthcheck").show();
+            } else {
+                $("#table_healthcheck").hide();
+            }
+        });
+
+        $("body").off("change", "#id_balancing")
+        $("body").on("change", "#id_balancing", function() {
             if ( $.trim($('option:selected', $(this)).text()).toLowerCase() == balancing)
                 $('.weighted').show();
             else{
@@ -155,9 +197,9 @@
             $("#id_equip_name, #btn_new_real").prop('disabled', '');
         }
 
-        var health_check_val = $("#id_health_check").val();
-        if (health_check_val == 'HTTP' || health_check_val == 'HTTPS'){
-            $("#table_health_check").show();
+        var healthcheck_val = $("#id_healthcheck").val();
+        if (healthcheck_val == 'HTTP' || healthcheck_val == 'HTTPS'){
+            $("#table_healthcheck").show();
         }
 
         verifyWeight();
@@ -174,190 +216,48 @@
     <form id="add_form_vip_pool" method="post" action="{{action}}">
         {% csrf_token %}
 
-        {% if environment_id %}
-            <input type="hidden" name="environment" id="id_environment" value="{{ environment_id }}">
-        {% endif %}
 
         {% if not is_copy %}
             {{ form.id }}
         {% endif %}
 
         <div id="fields" class="ui-widget-content">
-            {% if env_name %}
+            <div style="margin-top:20px">
+                {% for field in form_pool %}
                 <div>
-                    <div><label for="env">Ambiente:</label></div>
-                    <input id="env" type="text" disabled="disabled" value="{{ env_name }}" style="width: 300px;">
+                    <div>
+                        <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                    </div>
+                    {{ field }}
+                    {% if field.errors %} 
+                    <p id="error">
+                        {% for error in field.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
                 </div>
-                <br/>
-            {% endif %}
-            <div>
+                {% endfor %}
+            </div>
+            <div style="margin-top:20px; display:none;" id="table_healthcheck" class="bordasimples">
+                {% for field in form_healthcheck %}
                 <div>
-                    <label for="{{ form.identifier.auto_id }}">
-                        {{ form.identifier.label }}{% if form.identifier.field.required %}<span style="color: red;">*</span>{% endif %}
-                    </label>
+                    <div>
+                        <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                    </div>
+                    {{ field }}
+                    {% if field.errors %} 
+                    <p id="error">
+                        {% for error in field.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
                 </div>
-                {{ form.identifier }}
-                <p id="error">
-                {% if form.identifier.errors %}
-                    {% for error in form.identifier.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
+                {% endfor %}
             </div>
 
-            <div>
-                <div>
-                    <label for="{{ form.default_port.auto_id }}">
-                        {{ form.default_port.label }}{% if form.default_port.field.required %}<span style="color: red;">*</span>{% endif %}
-                    </label>
-                </div>
-                {{ form.default_port }}
-                <p id="error">
-                {% if form.default_port.errors %}
-                    {% for error in form.default_port.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-
-            {% if show_environment %}
-            <div>
-                <div>
-                    <label for="{{ form.environment.auto_id }}">
-                        {{ form.environment.label }}{% if form.environment.field.required %}<span style="color: red;">*</span>{% endif %}
-                    </label>
-                </div>
-                {{ form.environment }}
-                <p id="error">
-                {% if form.environment.errors %}
-                    {% for error in form.environment.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-            {% endif %}
-
-            <div>
-                <div>
-                    <label for="{{ form.identifier.auto_id }}">
-                        {{ form.balancing.label }}{% if form.balancing.field.required %}<span style="color: red;">*</span>{% endif %}
-                    </label>
-                </div>
-                {{ form.balancing }}
-                <p id="error">
-                {% if form.balancing.errors %}
-                    {% for error in form.balancing.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-
-            <div>
-                <div>
-                    <label for="{{ form.identifier.auto_id }}">
-                        {{ form.servicedownaction.label }}{% if form.servicedownaction.field.required %}<span style="color: red;">*</span>{% endif %}
-                    </label>
-                </div>
-                {{ form.servicedownaction }}
-                <p id="error">
-                {% if form.servicedownaction.errors %}
-                    {% for error in form.servicedownaction.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-
-            <div>
-                <div>
-                    <label for="{{ form.health_check.auto_id }}">
-                        {{ form.health_check.label }}{% if form.health_check.field.required %}<span style="color: red;">*</span>{% endif %}
-                    </label>
-                </div>
-                {{ form.health_check }}
-                <p id="error">
-                {% if form.health_check.errors %}
-                    {% for error in form.health_check.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-
-            <div>
-                <table id="table_health_check" class="bordasimples" style="width:511px;display:none;">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <label for="health_check_request">Healthcheck</label>
-                            </td>
-                            <td style="padding-left: 5px;">
-                                <input value="{{healthcheck_request}}" id="health_check_request" style="width: 300px" type="text" name="health_check_request" maxlength="100" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td style="padding-left: 5px;"><p id="error"></p></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="id_expect">
-                                    <label for="id_expect">HTTP Expect String</label>
-                                </label>
-                            </td>
-                            <td style="padding-left: 5px;">
-                                <select style="width: 185px" name="expect" id="id_expect">
-                                    {% for exp_string in expect_strings.healthcheck_expect %}
-                                        {% if exp_string.expect_string == healthcheck_expect %}
-                                            <option selected="selected" value="{{exp_string.expect_string}}">{{exp_string.expect_string}}</option>
-                                        {% else %}
-                                            <option value="{{exp_string.expect_string}}">{{exp_string.expect_string}}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td style="padding-left: 5px;"><p id="error"></p></td>
-                        </tr>
-                        <tr id="add_new_health_check">
-                            <td></td>
-                            <td style="padding-left: 5px;">
-                                <input id="expect_string" type="text" name="expect_string" maxlength="100">
-                                <input type="button" id="btn_new_expect" value="Adicionar Novo" />
-                            </td>
-                        </tr>
-                        <tr id="msg_new_health_check" style="display:none;">
-                            <td></td>
-                            <td style="color: #0073EA;font-weight: bold;padding-left: 5px;">Healtcheck Expect cadastrado com sucesso.</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <br>
-            </div>
-
-            <div>
-                <div>
-                    <label for="{{ form.max_con.auto_id }}">
-                        {{ form.max_con.label }}{% if form.max_con.field.required %}<span style="color: red;">*</span>{% endif %}
-                    </label>
-                </div>
-                {{ form.max_con }}
-                <p id="error">
-                {% if form.max_con.errors %}
-                    {% for error in form.max_con.errors %}
-                        {{ error|escape }}
-                    {% endfor %}
-                {% endif %}
-                </p>
-            </div>
-
-            <div>
+            <div style="margin-top:20px">
                 <table  class="bordasimples" >
                     <tr>
                         <td>Buscar novo</td>

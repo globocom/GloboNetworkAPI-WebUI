@@ -341,10 +341,10 @@ $('#btn_new_expect').live("click", function(){
                 success: function(data, textStatus, xhr) {
 
                     if(xhr.status == 200) {
-                        $('#msg_new_health_check').fadeIn(1000);
+                        $('#msg_new_healthcheck').fadeIn(1000);
                         $("#id_expect").append('<option value="' + data['expect_string'] + '">' + data['expect_string'] + '</option>');
-                        $("#msg_new_health_check").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">' + data['mensagem'] + '</td>');
-                        $("#msg_new_health_check").delay(15000).fadeOut('slow');
+                        $("#msg_new_healthcheck").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">' + data['mensagem'] + '</td>');
+                        $("#msg_new_healthcheck").delay(15000).fadeOut('slow');
                         $("#id_expect option:last").attr('selected', 'selected');
                         $("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
                         $("#expect_string").val('')
@@ -358,7 +358,7 @@ $('#btn_new_expect').live("click", function(){
 });
 
 $('#id_environment').live("change", function(){
-    $('#id_health_check').html('<option value=""> - </option>');
+    $('#id_healthcheck').html('<option value=""> - </option>');
 
     var environmentId = this.value;
 
@@ -376,7 +376,7 @@ $('#id_environment').live("change", function(){
                     //alert(data);
                     if(xhr.status == 200) {
                         for (var i = 0; i < data.length; i++) {
-                            $('#id_health_check').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
+                            $('#id_healthcheck').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
                         }
                     }
                     else if(xhr.status == 203){

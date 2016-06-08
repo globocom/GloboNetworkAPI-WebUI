@@ -466,23 +466,14 @@ urlpatterns += patterns(
 
     url('^vip-request/operation/delete?$',
         'delete_vip', name='vip.delete',),
-    url('^vip-request/operation/valid?$',
-        'validate_vip', name='vip.valid',),
     url('^vip-request/operation/create?$',
         'create_vip', name='vip.create',),
     url('^vip-request/operation/remove?$',
         'remove_vip', name='vip.remove',),
 
 
-    url('^vip-request/l7/operation/valid?$',
-        'validate_l7', name='l7.valid'),
-    url('^vip-request/l7/operation/apply?$',
-        'apply_l7', name='l7.apply'),
-    url('^vip-request/l7/operation/rollback?$',
-        'apply_rollback_l7', name='l7.rollback'),
-
-
-    url('^vip-request/form[/]?$',
+    url(
+        '^vip-request/form[/]?$',
         'add_form', name='vip-request.form',),
     url('^vip-request/form/external[/]?$',
         'add_form_external', name='vip-request.form.external',),
@@ -502,10 +493,6 @@ urlpatterns += patterns(
         'ajax_popular_options', name='vip-request.options.ajax',),
     url('^vip-request/ajax_options/external[/]?$',
         'ajax_popular_options_external', name='vip-request.options.ajax.external',),
-    url('^vip-request/ajax_add_healthcheck[/]?$',
-        'ajax_add_healthcheck', name='vip-request.add.healthcheck.ajax',),
-    url('^vip-request/ajax_add_healthcheck/external[/]?$',
-        'ajax_add_healthcheck_external', name='vip-request.add.healthcheck.ajax.external',),
     url('^vip-request/ajax_modal_real_server[/]?$',
         'ajax_model_ip_real_server', name='vip-request.modal.real.server.ajax',),
     url('^vip-request/ajax_modal_real_server/external[/]?$',
@@ -522,8 +509,8 @@ urlpatterns += patterns(
         'tab_healthcheck', name='vip-request.tab.healthcheck',),
     url('^vip-request/tab/maxcon/(?P<id_vip>\d+)[/]?$',
         'tab_maxcon', name='vip-request.tab.maxcon',),
-    url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$',
-        'tab_l7filter', name='vip-request.tab.l7filter',),
+    # url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$',
+    #     'tab_l7filter', name='vip-request.tab.l7filter',),
     url('^vip-request/tab/pools/(?P<id_vip>\d+)[/]?$',
         'tab_pools', name='vip-request.tab.pools',),
     url('^vip-request/pool_datatable/(?P<id_vip>\d+)[/]?$', 'pool_datatable', name='vip-request.pool_datatable',),

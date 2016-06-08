@@ -36,30 +36,6 @@
 		}
 	});	
 	
-	$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} }).live("click", function(){  
-		
-		$("#err_new_healthcheck").html("");
-		
-		$.ajax({
-			data: { excpect_new:  $("#id_excpect_new").val() },
-			url: "{% url vip-request.add.healthcheck.ajax %}",
-			dataType: "json",
-			success: function(data, textStatus, xhr) {
-				if (xhr.status == "278")
-					window.location = xhr.getResponseHeader('Location');
-				
-				$("#id_excpect").html(data.healthcheck);
-				$("#add_new_healthcheck").html(data.form);
-				$("#msg_new_healthcheck").html(data.msg);
-				$("#msg_new_healthcheck").delay(15000).animate({ opacity: 'toggle', height: 'toggle' }, "slow");
-				$("#btn_new_excpect").button({ icons: {primary: "ui-icon-disk"} });
-			},
-			error: function (xhr, error, thrown) {
-				location.reload();
-			}	
-		});
-		
-	});
 {% endblock %}
 
 {% block title %}[Requisição VIP - Healthcheck]{% endblock %}

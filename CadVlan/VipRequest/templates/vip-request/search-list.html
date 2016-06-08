@@ -78,7 +78,7 @@ $(document).ready(function() {
 		"bFilter": false,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{"bSortable": false, "aTargets": [0,2,3,4,5,6,7,8,9]}]
+		"aoColumnDefs": [{"bSortable": false, "aTargets": [0,1,2,3,4,5,6,7,8]}]
 	});
 	
 	$("#checkAll").click( function() {
@@ -193,15 +193,15 @@ $(document).ready(function() {
 	});
 	{% endif %}
 	
-	{% has_perm VIP_VALIDATION True None %}
-	{% if has_perm %}
-	$("#btn_validate").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
-		if (confirm('Deseja realmente validar as Requisições Vip selecionadas ?')){ 
-			var data = getSelectionData(oTable);
-			$("#id_ids_val").val(data).parent().submit();
-		}
-	});
-	{% endif %}
+	//{% has_perm VIP_VALIDATION True None %}
+	//{% if has_perm %}
+	//$("#btn_validate").button({ icons: {primary: "ui-icon-notice"} }).click(function(){
+	//	if (confirm('Deseja realmente validar as Requisições Vip selecionadas ?')){
+	//		var data = getSelectionData(oTable);
+	//		$("#id_ids_val").val(data).parent().submit();
+	//	}
+	//});
+	//{% endif %}
 	
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
@@ -280,7 +280,7 @@ input {
 							<tr>
 								<td>{{ search_form.id_request }}</td>
 								<td><input type="text" class="ip_input ipv6 ipv4" name="oct1" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct2" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct3" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct4" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input style="display: none;" type="text" class="ip_input ipv6" name="oct5" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct6" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct7" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, false)" /></td>	
-								<td>{{ search_form.vip_create }}<label for="id_iexact"> Buscar apenas Vips criados</label></td>							
+								<td>{{ search_form.vip_created }}<label for="id_iexact"> Buscar apenas Vips criados</label></td>							
 								<td style="padding-top: 4px; float: right; width: 10.5%"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
 							</tr>
 						</tbody>
@@ -299,9 +299,9 @@ input {
 				<button id="btn_new">Novo Registro</button>
 			{% endif %}
 			{% has_perm VIP_VALIDATION True None %}
-			{% if has_perm %}
+			<!--{% if has_perm %}
 				<button id="btn_validate">Validar</button>
-			{% endif %}
+			{% endif %}-->
 			{% has_perm VIP_CREATE_SCRIPT True None %}
 			{% if has_perm %}
 				<button id="btn_create">Criar VIP</button>
@@ -321,15 +321,6 @@ input {
 		<form id="delete_form" method="post" action="{% url vip.delete %}" style="visibility: hidden;">
 			{% csrf_token %}
 			{% for field in delete_form %}
-				{{ field }}
-			{% endfor %}
-		</form>
-		{% endif %}
-		{% has_perm VIP_VALIDATION True True %}
-		{% if has_perm %}
-		<form id="valid_form" method="post" action="{% url vip.valid %}" style="visibility: hidden;">
-			{% csrf_token %}
-			{% for field in validate_form %}
 				{{ field }}
 			{% endfor %}
 		</form>
@@ -356,25 +347,22 @@ input {
 		
 		<table id="vip_list">
 			<col width="3%" />
-			<col width="3%" />
+			<col width="6%" />
+			<col width="20%" />
 			<col width="15%" />
-			<col width="20%" />
-			<col width="20%" />
-			<col width="8%" />
-			<col width="19%" />
-			<col width="5%" />
-			<col width="4%" />
+			<col width="15%" />
+			<col width="10%" />
+			<col width="28%" />
 			<col width="3%" />
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th>Id</th>
-					<th>IP</th>
-					<th>Descrição Ipv4</th>
-					<th>Descrição Ipv6</th>
-					<th>Equipamento</th>
+					<th>Nome(s) do VIP</th>
+					<th>IPv4</th>
+					<th>IPv6</th>
+					<th>Equipamento(s)</th>
 					<th>Ambiente VIP</th>
-					<th>Validado</th>
 					<th>Criado</th>
 					<th></th>
 				</tr>
