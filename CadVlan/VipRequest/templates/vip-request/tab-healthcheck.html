@@ -60,7 +60,7 @@
 			<table id="table_healthcheck" class="bordasimples" style="width: 511px;">
 				{% for field in form_healthcheck %}
 
-					{% if field.name != "healthcheck_type"  and field.name != "excpect_new" %} 
+					{% if field.name != "healthcheck_type"  and field.name != "expect_new" %}
 						<tr>
 							<td><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></td>
 							<td style="padding-left: 5px;">{{ field }}</td>
@@ -71,10 +71,10 @@
 						</tr>
 					{% endif %}
 
-					{% if field.name == "excpect_new" %}
+					{% if field.name == "expect_new" %}
 						<tr id="add_new_healthcheck">
 							<td></td>
-							<td style="padding-left: 5px;">{{ field }}<input type="button" id="btn_new_excpect" value="Adicionar Novo" /></td>
+							<td style="padding-left: 5px;">{{ field }}<input type="button" id="btn_new_expect" value="Adicionar Novo" /></td>
 						</tr>
 					{% endif %}
 

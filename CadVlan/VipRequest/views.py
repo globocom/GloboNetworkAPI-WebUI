@@ -1139,10 +1139,10 @@ def tab_healthcheck(request, id_vip):
                 healthcheck_type = form_healthcheck.cleaned_data[
                     "healthcheck_type"]
                 healthcheck = form_healthcheck.cleaned_data["healthcheck"]
-                excpect = form_healthcheck.cleaned_data["excpect"]
+                expect = form_healthcheck.cleaned_data["expect"]
 
-                if excpect is not None:
-                    excpect = int(excpect)
+                if expect is not None:
+                    expect = int(expect)
 
                 try:
 
@@ -1150,7 +1150,7 @@ def tab_healthcheck(request, id_vip):
                         raise EnvironmentVipError(environment_vip)
 
                     client_api.create_vip().alter_healthcheck(
-                        id_vip, healthcheck_type, healthcheck, excpect)
+                        id_vip, healthcheck_type, healthcheck, expect)
                     messages.add_message(request, messages.SUCCESS, request_vip_messages.get(
                         "tab_edit_success") % 'healthcheck')
 
@@ -1194,12 +1194,12 @@ def tab_healthcheck(request, id_vip):
 
         # Request to edit
         else:
-            excpect = vip.get("id_healthcheck_expect")
+            expect = vip.get("id_healthcheck_expect")
             healthcheck_type = vip.get("healthcheck_type")
             healthcheck = vip.get("healthcheck")
 
             form_healthcheck = forms.RequestVipFormHealthcheck(healthcheck_list, healthcheck_options, initial={
-                "healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "excpect": excpect})
+                "healthcheck_type": healthcheck_type, "healthcheck": healthcheck, "expect": expect})
 
             lists['form_healthcheck'] = form_healthcheck
 

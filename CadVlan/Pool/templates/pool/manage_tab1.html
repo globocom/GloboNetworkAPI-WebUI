@@ -27,14 +27,13 @@ $(document).ready(function() {
     oTableReq = $("#requisicoes_list").dataTable({
         "sAjaxSource": "{% url pool.reqvip_datatable id_server_pool%}",
         "bServerSide": true,
-        "aaSorting": [[ 1, "asc" ]],
         "bAutoWidth": false,
         "bJQueryUI": true,
         "bFilter": false,
         "sPaginationType": "full_numbers",
         "iDisplayLength": {% max_results %},
         "aoColumnDefs": [
-            { "bSortable": false, "aTargets": [ 0, 4] }
+            { "bSortable": false, "aTargets": [0,1,2,3,4,5,6,7,8]}
          ]
     });
 
@@ -100,27 +99,27 @@ $(document).ready(function() {
         <div id="tabs-1">
             <table id="requisicoes_list">
                 <col width="3%" />
-                <col width="12%" />
-                <col width="15%" />
-                <col width="15%" />
+                <col width="6%" />
                 <col width="20%" />
-                <col width="6%" />
-                <col width="6%" />
-                <col width="2%" />
+                <col width="15%" />
+                <col width="15%" />
+                <col width="10%" />
+                <col width="28%" />
+                <col width="3%" />
                 <thead>
                     <tr>
+                        <th><input id="checkAll" type="checkbox" /></th>
                         <th>Id</th>
-                        <th>IP</th>
-                        <th>Descrição Ipv4</th>
-                        <th>Descrição Ipv6</th>
+                        <th>Nome(s) do VIP</th>
+                        <th>IPv4</th>
+                        <th>IPv6</th>
+                        <th>Equipamento(s)</th>
                         <th>Ambiente VIP</th>
-                        <th>Validado</th>
                         <th>Criado</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-
                 </tbody>
             </table>
         </div>

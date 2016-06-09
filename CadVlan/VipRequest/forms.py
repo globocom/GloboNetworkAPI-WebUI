@@ -30,7 +30,7 @@ class RequestVipFormHealthcheck(forms.Form):
 
     def __init__(self, healthcheck_list, healthcheck_options, *args, **kwargs):
         super(RequestVipFormHealthcheck, self).__init__(*args, **kwargs)
-        self.fields['excpect'].choices = [
+        self.fields['expect'].choices = [
             (st['id'], st['expect_string']) for st in healthcheck_list]
         self.fields['healthcheck_type'].choices = [
             (healthcheck['name'], healthcheck['name']) for healthcheck in healthcheck_options]
@@ -39,9 +39,9 @@ class RequestVipFormHealthcheck(forms.Form):
                                          widget=forms.RadioSelect(renderer=RadioCustomRenderer))
     healthcheck = forms.CharField(label=u'Healthcheck', min_length=3, max_length=100, required=False,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    excpect = forms.ChoiceField(label=u'HTTP Expect String', required=True, error_messages=error_messages,
+    expect = forms.ChoiceField(label=u'HTTP Expect String', required=True, error_messages=error_messages,
                                 widget=forms.Select(attrs={"style": "width: 185px"}))
-    excpect_new = forms.CharField(label=u'', required=False, widget=forms.TextInput(attrs={'style': "width: 185px"}),
+    expect_new = forms.CharField(label=u'', required=False, widget=forms.TextInput(attrs={'style': "width: 185px"}),
                                   error_messages=error_messages)
     destination = forms.ChoiceField(label=u'Destination', required=True, error_messages=error_messages,
                                     widget=forms.Select(attrs={"style": "width: 185px"}))
@@ -57,7 +57,7 @@ class RequestVipFormHealthcheck(forms.Form):
                 self._errors["healthcheck"] = self.error_class(
                     ["Este campo é obrigatório com a opção HTTP selecionada."])
         else:
-            cleaned_data["excpect"] = None
+            cleaned_data["expect"] = None
             cleaned_data["healthcheck"] = None
 
         return cleaned_data

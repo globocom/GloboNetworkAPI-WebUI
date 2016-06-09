@@ -18,6 +18,8 @@
 
 from django import forms
 from CadVlan.messages import error_messages
+from CadVlan.Util.forms.decorators import autostrip
+
 
 
 class PoolForm(forms.Form):
@@ -97,6 +99,107 @@ class PoolForm(forms.Form):
         )
     )
 
+@autostrip
+class PoolFormV3(forms.Form):
+
+    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices,
+                 healthcheck_choices=[], *args, **kwargs):
+        super(PoolFormV3, self).__init__(*args, **kwargs)
+
+        self.fields['environment'].choices = enviroments_choices
+        self.fields['balancing'].choices = optionsvips_choices
+        self.fields['servicedownaction'].choices = servicedownaction_choices
+        self.fields['healthcheck'].choices = healthcheck_choices
+
+    id = forms.IntegerField(
+        widget=forms.HiddenInput(),
+        required=False
+    )
+
+    pool_created = forms.IntegerField(
+        widget=forms.HiddenInput(),
+        required=False
+    )
+
+    identifier = forms.CharField(
+        label=u'Identifier',
+        min_length=3,
+        max_length=40,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 300px"}
+        )
+    )
+
+    default_port = forms.CharField(
+        label=u'Default Port',
+        min_length=2,
+        max_length=5,
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 100px"}
+        )
+    )
+
+    environment = forms.ChoiceField(
+        label=u'Environment',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "",
+            "style": "width: 310px",
+            'class': 'select2'}
+        )
+    )
+
+    balancing = forms.ChoiceField(
+        label=u'Balanceamento',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 310px",
+            'class': 'select2'}
+        )
+    )
+
+    servicedownaction = forms.ChoiceField(
+        label=u'Action on ServiceDown',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 310px",
+            'class': 'select2'}
+        )
+    )
+
+    maxcon = forms.IntegerField(
+        label=u'Número máximo de conexões (maxconn)',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 100px"}
+        )
+    )
+
+    healthcheck = forms.ChoiceField(
+        label=u'HealthCheck',
+        choices=[],
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 310px",
+            'class': 'select2'}
+        )
+    )
+
 
 class SearchPoolForm(forms.Form):
 
@@ -159,3 +262,41 @@ class PoolFormEdit(forms.Form):
             attrs={'style': "width: 310px"}
         )
     )
+
+@autostrip
+class PoolHealthcheckForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super(PoolHealthcheckForm, self).__init__(*args, **kwargs)
+
+    healthcheck_request = forms.CharField(
+        label=u'Healthcheck Request',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 310px"}
+        )
+    )
+
+    healthcheck_expect = forms.CharField(
+        label=u'HTTP Expect String',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 310px"}
+        )
+    )
+
+    healthcheck_destination = forms.CharField(
+        label=u'Porta',
+        max_length=5,
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 100px"}
+        )
+    )
+

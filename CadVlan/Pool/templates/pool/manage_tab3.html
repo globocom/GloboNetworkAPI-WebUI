@@ -13,7 +13,6 @@ $(document).ready(function() {
     var obj_btn_can = $("#btn_can");
     var obj_btn_new_port = $("#btn_new_port");
     var obj_btn_new_real = $("#btn_new_real");
-    var obj_btn_new_expect = $("#btn_new_expect");
 
     obj_btn_sav.button({icons: {primary: "ui-icon-disk"}}).click(function(){
             if (confirm('NÃO ALTERAR VIPS que usem servidores da CLOUD.')){}
@@ -21,7 +20,6 @@ $(document).ready(function() {
     obj_btn_can.button({icons: {primary: "ui-icon-cancel"}});
     obj_btn_new_port.button({icons: {primary: "ui-icon-disk"}});
     obj_btn_new_real.button({icons: {primary: "ui-icon-disk"}});
-    obj_btn_new_expect.button({ icons: {primary: "ui-icon-disk"} });
 
     $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
 
@@ -70,29 +68,6 @@ $(document).ready(function() {
         }
     });
 
-    obj_btn_new_expect.click(function(){
-        var expect_string = $.trim($('#expect_string').val());
-        var id_environment = $('#id_environment').val();
-        var id_token = $("#id_token").val();
-
-        if(expect_string) {
-            $.ajax({
-                    data: { 'expect_string': expect_string, 'id_environment': id_environment, token:id_token },
-                    url: "{% url pool.add.healthcheck.expect %}",
-                    success: function(data, xhr) {
-
-                        $('#msg_new_health_check').fadeIn(1000);
-                        $("#id_expect").append('<option value="'+data['expect_string']+'">'+data['expect_string']+'</option>');
-                        $("#msg_new_health_check").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">'+data['mensagem']+'</td>');
-                        $("#msg_new_health_check").delay(15000).fadeOut('slow');
-                        $("#id_expect option:last").attr('selected', 'selected');
-                        $("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
-                        $("#expect_string").val('');
-                    }
-                });
-        }
-    });
-
     $('#id_environment').live("change", function(){
         $('#id_health_check').html('<option value="">-</option>');
 
@@ -106,7 +81,7 @@ $(document).ready(function() {
                     url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
                     success: function(data, xhr) {
                         for (var i = 0; i < data.length; i++) {
-                            $('#id_health_check').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
+                            $('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
                         }
                     }
                 });
@@ -115,11 +90,11 @@ $(document).ready(function() {
         }
     });
 
-    $("#id_health_check").live("change", function(){
+    $("#id_healthcheck").live("change", function(){
         if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
-            $("#table_health_check").show();
+            $("#table_healthcheck").show();
         } else {
-            $("#table_health_check").hide();
+            $("#table_healthcheck").hide();
         }
     });
 
@@ -128,9 +103,9 @@ $(document).ready(function() {
         $("#id_equip_name, #btn_new_real").prop('disabled', '');
     }
 
-    var health_check_val = $("#id_health_check").val();
-    if (health_check_val == 'HTTP' || health_check_val == 'HTTPS'){
-        $("#table_health_check").show();
+    var healthcheck_val = $("#id_healthcheck").val();
+    if (healthcheck_val == 'HTTP' || healthcheck_val == 'HTTPS'){
+        $("#table_healthcheck").show();
     }
 
     autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
@@ -145,7 +120,7 @@ $(document).ready(function() {
         <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-10">Detalhes do Server Pool</a></li>
     </ul>
     <div id="tabs-10">
-        <div id="fields" class="ui-widget-content">
+        <div id="fields_pool" class="ui-widget-content">
             <table border="5">
                 <tbody>
                     <tr>
@@ -174,7 +149,7 @@ $(document).ready(function() {
                     </tr>
                     <tr>
                         <td><label>Healthcheck:</label></td>
-                        <td><label style="width:350px;color:blue;text-align:center;">{% if health_check %} {{ health_check }} {% endif %}</label></td>
+                        <td><label style="width:350px;color:blue;text-align:center;">{% if healthcheck %} {{ healthcheck }} {% endif %}</label></td>
                     </tr>
                     <tr>
                         <td><label>Default Maxconn:</label></td>
@@ -198,178 +173,45 @@ $(document).ready(function() {
         </div>
 
         <form id="add_form" method="post" action="{{action}}">
-            <input type='hidden' name='pool_created' value='{{pool_created}}' />
-            <input type="hidden" name="environment" value="{{ id_environment }}">
-
-            {{ form.id }}
             {% csrf_token %}
-
             <div id="tabs-3">
-
                 <div id="fields" class="ui-widget-content">
-                    <div>
+                    <div style="margin-top:20px">
+                        {% for field in form_pool.visible_fields %}
                         <div>
-                            <label for="{{ form.identifier.auto_id }}">
-                                {{ form.identifier.label }}{% if form.identifier.field.required %}<span style="color: red;">*</span>{% endif %}
-                            </label>
+                            <div>
+                                <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                            </div>
+                            {{ field }}
+                            {% if field.errors %}
+                            <p id="error">
+                                {% for error in field.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            </p>
+                            {% endif %}
                         </div>
-                        {{ form.identifier }}
-                        <p id="error">
-                        {% if form.identifier.errors %}
-                            {% for error in form.identifier.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        {% endif %}
-                        </p>
+                        {% endfor %}
+                        {% for field in form.hidden_fields %}
+                        <div style="display:none;">{{ field }}</div>
+                        {% endfor %}
                     </div>
-
-                    <div>
+                    <div style="margin-top:20px; display:none;" id="table_healthcheck" class="bordasimples">
+                        {% for field in form_healthcheck %}
                         <div>
-                            <label for="{{ form.default_port.auto_id }}">
-                                {{ form.default_port.label }}{% if form.default_port.field.required %}<span style="color: red;">*</span>{% endif %}
-                            </label>
+                            <div>
+                                <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                            </div>
+                            {{ field }}
+                            {% if field.errors %}
+                            <p id="error">
+                                {% for error in field.errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            </p>
+                            {% endif %}
                         </div>
-                        {{ form.default_port }}
-                        <p id="error">
-                        {% if form.default_port.errors %}
-                            {% for error in form.default_port.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        {% endif %}
-                        </p>
-                    </div>
-
-                    <div>
-                        <div>
-                            <label for="{{ form.environment.auto_id }}">
-                                {{ form.environment.label }}{% if form.environment.field.required %}<span style="color: red;">*</span>{% endif %}
-                            </label>
-                        </div>
-                        {{ form.environment }}
-                        <p id="error">
-                        {% if form.environment.errors %}
-                            {% for error in form.environment.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        {% endif %}
-                        </p>
-                    </div>
-
-                    <div>
-                        <div>
-                            <label for="{{ form.identifier.auto_id }}">
-                                {{ form.balancing.label }}{% if form.balancing.field.required %}<span style="color: red;">*</span>{% endif %}
-                            </label>
-                        </div>
-                        {{ form.balancing }}
-                        <p id="error">
-                        {% if form.balancing.errors %}
-                            {% for error in form.balancing.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        {% endif %}
-                        </p>
-                    </div>
-
-                    <div>
-                        <div>
-                            <label for="{{ form.identifier.auto_id }}">
-                                {{ form.servicedownaction.label }}{% if form.servicedownaction.field.required %}<span style="color: red;">*</span>{% endif %}
-                            </label>
-                        </div>
-                        {{ form.servicedownaction }}
-                        <p id="error">
-                        {% if form.servicedownaction.errors %}
-                            {% for error in form.servicedownaction.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        {% endif %}
-                        </p>
-                    </div>
-
-                    <div>
-                        <div>
-                            <label for="{{ form.health_check.auto_id }}">
-                                {{ form.health_check.label }}{% if form.health_check.field.required %}<span style="color: red;">*</span>{% endif %}
-                            </label>
-                        </div>
-                        {{ form.health_check }}
-                        <p id="error">
-                        {% if form.health_check.errors %}
-                            {% for error in form.health_check.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        {% endif %}
-                        </p>
-                    </div>
-
-                    <div>
-                        <table id="table_health_check" class="bordasimples" style="width:511px;display:none;">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <label for="health_check_request">Healthcheck</label>
-                                    </td>
-                                    <td style="padding-left: 5px;">
-                                        <input value="{{healthcheck_request}}" id="health_check_request" style="width: 300px" type="text" name="health_check_request" maxlength="100" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td style="padding-left: 5px;"><p id="error"></p></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <label for="id_expect">
-                                            <label for="id_expect">HTTP Expect String</label>
-                                        </label>
-                                    </td>
-                                    <td style="padding-left: 5px;">
-                                        <select style="width: 185px" name="expect" id="id_expect">
-                                            {% for exp_string in expectstring_choices.healthcheck_expect %}
-                                                {% if exp_string.expect_string == healthcheck_expect %}
-                                                    <option selected="selected" value="{{exp_string.expect_string}}">{{exp_string.expect_string}}</option>
-                                                {% else %}
-                                                    <option value="{{exp_string.expect_string}}">{{exp_string.expect_string}}</option>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td style="padding-left: 5px;"><p id="error"></p></td>
-                                </tr>
-                                <tr id="add_new_health_check">
-                                    <td></td>
-                                    <td style="padding-left: 5px;">
-                                        <input id="expect_string" type="text" name="expect_string" maxlength="100">
-                                        <input type="button" id="btn_new_expect" value="Adicionar Novo" />
-                                    </td>
-                                </tr>
-                                <tr id="msg_new_health_check" style="display:none;">
-                                    <td></td>
-                                    <td style="color: #0073EA;font-weight: bold;padding-left: 5px;">Healtcheck Expect cadastrado com sucesso.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <br>
-                    </div>
-
-                    <div>
-                        <div>
-                            <label for="{{ form.max_con.auto_id }}">
-                                {{ form.max_con.label }}{% if form.max_con.field.required %}<span style="color: red;">*</span>{% endif %}
-                            </label>
-                        </div>
-                        {{ form.max_con }}
-                        <p id="error">
-                        {% if form.max_con.errors %}
-                            {% for error in form.max_con.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        {% endif %}
-                        </p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
