@@ -1849,7 +1849,7 @@ def shared_load_pool(request, client, form_acess=None, external=False):
 
         lb_method_choices = facade_pool.populate_optionsvips_choices(client)
         servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
-        healthcheck_choices = _create_options_pool_as_healthcheck(client, environment_id)
+        healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
 
         environment_choices = [(pool.get('environment').get('id'), pool.get('environment').get('name'))]
         form_pool = forms.PoolForm(
@@ -1903,7 +1903,7 @@ def _create_options_pool_as_healthcheck(client, environment_id):
 
     if environment_id:
 
-        options_pool = client.create_pool().get_opcoes_pool_by_ambiente(
+        options_pool = client.create_pool().get_opcoes_pool_by_environment(
             environment_id
         ).get('opcoes_pool')
 
@@ -2648,10 +2648,10 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         environment_choices = _create_options_environment(client, env_vip_id)
         lb_method_choices = facade_pool.populate_optionsvips_choices(client)
         servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
+        healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
 
         lists = dict()
-        lists["form_pool"] = forms.PoolForm(
-            environment_choices, lb_method_choices, servicedownaction_choices)
+        lists["form_pool"] = forms.PoolForm(environment_choices, lb_method_choices, servicedownaction_choices, healthcheck_choices)
         lists["form_healthcheck"] = forms.PoolHealthcheckForm()
         lists["action"] = action
         lists["load_pool_url"] = load_pool_url
@@ -2829,7 +2829,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         environment_choices = _create_options_environment(client, env_vip_id)
         lb_method_choices = facade_pool.populate_optionsvips_choices(client)
         servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
-        healthcheck_choices = _create_options_pool_as_healthcheck(client, environment_id)
+        healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
 
         form = forms.PoolForm(
             environment_choices,

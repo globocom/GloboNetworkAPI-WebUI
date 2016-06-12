@@ -159,7 +159,7 @@
                     success: function(data, textStatus, xhr) {
                         if(xhr.status == 200) {
                             for (var i = 0; i < data.length; i++) {
-                                $('#id_healthcheck').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
+                                $('#id_healthcheck').append('<option value="' + data[i]['name'] + '">' + data[i]['name'] + '</option>');
                             }
                         }
                         else if(xhr.status == 203){

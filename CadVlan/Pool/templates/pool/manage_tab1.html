@@ -25,7 +25,7 @@ $(document).ready(function() {
     });
 
     oTableReq = $("#requisicoes_list").dataTable({
-        "sAjaxSource": "{% url pool.reqvip_datatable id_server_pool%}",
+        "sAjaxSource": "{% url pool.reqvip_datatable id_server_pool %}",
         "bServerSide": true,
         "bAutoWidth": false,
         "bJQueryUI": true,

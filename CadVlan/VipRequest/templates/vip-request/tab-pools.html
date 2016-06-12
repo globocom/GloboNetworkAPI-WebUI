@@ -82,7 +82,7 @@
                         <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.identifier}}</label></td>
                         <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.default_port}}</label></td>
                         <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_type}}</label></td>
-                        <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.environment}}</label></td>
+                        <td class='text_center'><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.environment.name}}</label></td>
                         <td class='text_center'>{% ifequal pool.server_pool.pool_created 1 %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NAO'></span> {% endifequal %}</td>
                         <td class='text_center'>{% if pool.server_pool.pool_created %} <a href='{% url pool.edit.form pool.server_pool.id %}' style='width: 20px; height: 20px;' class='btn_manager' title='Gerênciar'></a>{% else %}<a href='{% url pool.edit.form pool.server_pool.id %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'></a>{% endif %}</td>
                     </tr>

@@ -57,6 +57,14 @@ def populate_servicedownaction_choices(client, tips='ServiceDownAction'):
 
     return servicedownaction_choices
 
+def populate_healthcheck_choices(client):
+    optionspool = client.create_option_pool().get_all_option_pool(option_type='HealthCheck')
+
+    healthcheck_choices = [('', '-')]
+    for obj in optionspool:
+        healthcheck_choices.append((obj['name'], obj['name']))
+
+    return healthcheck_choices
 
 def find_servicedownaction_id(client, option_name):
     optionspool = client.create_option_pool().get_all_option_pool(option_type='ServiceDownAction')
@@ -78,10 +86,10 @@ def find_servicedownaction_object(client, option_name=None, id=None):
 
 def populate_optionspool_choices(client, environment):
     optionspool_choices = [('', '-')]
-    if environment:
-        optionspools = client.create_pool().get_opcoes_pool_by_ambiente(environment)
-        for obj in optionspools['opcoes_pool']:
-            optionspool_choices.append((obj['opcao_pool']['description'], obj['opcao_pool']['description']))
+    optionspools = client.create_pool().get_opcoes_pool_by_environment(environment["id"]) if type(environment) is not int else \
+        client.create_pool().get_opcoes_pool_by_environment(environment)
+    for obj in optionspools['options_pool']:
+        optionspool_choices.append((obj['id'], obj['name']))
 
     return optionspool_choices
 
