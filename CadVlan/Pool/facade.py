@@ -57,6 +57,7 @@ def populate_servicedownaction_choices(client, tips='ServiceDownAction'):
 
     return servicedownaction_choices
 
+
 def populate_healthcheck_choices(client):
     optionspool = client.create_option_pool().get_all_option_pool(option_type='HealthCheck')
 
@@ -65,6 +66,7 @@ def populate_healthcheck_choices(client):
         healthcheck_choices.append((obj['name'], obj['name']))
 
     return healthcheck_choices
+
 
 def find_servicedownaction_id(client, option_name):
     optionspool = client.create_option_pool().get_all_option_pool(option_type='ServiceDownAction')
@@ -122,15 +124,16 @@ def populate_pool_members_by_obj(server_pool_members):
     for obj in server_pool_members:
 
         ip = obj['ip'] if obj['ip'] else obj['ipv6']
-        pool_members.append({'id': obj['id'],
-                             'id_equip': obj['equipment']['id'],
-                             'member_status': obj["member_status"],
-                             'nome_equipamento': obj['equipment']['name'],
-                             'priority': obj['priority'],
-                             'port_real': obj['port_real'],
-                             'weight': obj['weight'],
-                             'id_ip': ip['id'] if ip else '',
-                             'ip': ip['ip_formated'] if ip else ''})
+        pool_members.append(
+            {'id': obj['id'],
+             'id_equip': obj['equipment']['id'],
+             'member_status': obj["member_status"],
+             'nome_equipamento': obj['equipment']['name'],
+             'priority': obj['priority'],
+             'port_real': obj['port_real'],
+             'weight': obj['weight'],
+             'id_ip': ip['id'] if ip else '',
+             'ip': ip['ip_formated'] if ip else ''})
 
     return pool_members
 
@@ -140,14 +143,11 @@ def format_healthcheck(request):
     healthcheck = dict()
     healthcheck["identifier"] = ""
     healthcheck["healthcheck_type"] = str(request.POST.get('healthcheck'))
-    if healthcheck["healthcheck_type"] != 'HTTP' and healthcheck["healthcheck_type"] != 'HTTPS':
-        healthcheck["healthcheck_expect"] = ''
-        healthcheck["healthcheck_request"] = ''
-    else:
-        healthcheck["healthcheck_request"] = request.POST.get('healthcheck_request')
-        healthcheck["healthcheck_expect"] = request.POST.get('healthcheck_expect')
+    healthcheck["healthcheck_request"] = request.POST.get('healthcheck_request')
+    healthcheck["healthcheck_expect"] = request.POST.get('healthcheck_expect')
     healthcheck_destination = request.POST.get('healthcheck_destination')
-    healthcheck["destination"] = ("*:%s" % healthcheck_destination) if healthcheck_destination else '*:*'
+    healthcheck["destination"] = ("*:%s" % healthcheck_destination) \
+        if healthcheck_destination else '*:*'
 
     return healthcheck
 

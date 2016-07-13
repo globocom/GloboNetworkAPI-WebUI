@@ -2072,6 +2072,7 @@ def _pool_dict(port_id, port, l4_protocol, l7_protocol, pool, l7_rule):
         "pools": [{
             "server_pool": int(pool),
             "l7_rule": int(l7_rule),
+            "order": None,
             "l7_value": None
         }]
     }
@@ -3037,7 +3038,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                 # l7 rule not implemented yet, set value default
                 l7_rule = None
                 for l7 in forms_aux['l7_rule']:
-                    if l7["nome_opcao_txt"] == "(nenhum)":
+                    if l7["nome_opcao_txt"] == "default_vip":
                         l7_rule = int(l7["id"])
                         break
                 pools = list()
