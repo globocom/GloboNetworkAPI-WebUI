@@ -1,79 +1,126 @@
 {% load util %}
+{% if port %}
+  <table id="tablePoolMembers_{{ server_pool.id }}" class="tablePoolMembers bordasimplesReal">
+    <tbody>
+      <tr>
+        <td rowspan='{{ port.pools|length|sum }}' style="text-align: left; width:200px">
+          
+
+          <span id="removePort" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
+
+          <label>Porta: <b><span class="vip_port">{{ port.port }}</span></b></label>
+          <br>
+          <label>Protocolo L4: <b><span class="vip_port_l4_protocol">{{ port.options.l4_protocol.nome_opcao_txt }}</b></span></label>
+          <br>
+          <label>Protocolo L7: <b><span class="vip_port_l7_protocol">{{ port.options.l7_protocol.nome_opcao_txt }}</b></span></label>
+
+          <input class="ports_vip_ports" name="ports_vip_ports" type="hidden" value='{{ port.port }}'/>
+          <input class="ports_vip_ids" name="ports_vip_ids" type="hidden" value='{{port.id}}'/>
+          <input class="ports_vip_l4_protocols" name="ports_vip_l4_protocols" type="hidden" value='{{port.options.l4_protocol.id}}'/>
+          <input class="ports_vip_l7_protocols" name="ports_vip_l7_protocols" type="hidden" value='{{port.options.l7_protocol.id}}'/>
+        </td>
+      </tr>
+      {% for pool in port.pools %}
+      <tr id="vip_port_{{ port.port }}_pool_{{ pool.server_pool.id }}_{{ pool.id }}">
+        <td colspan="4" style="text-align: left;">
+          <table class="tablePoolMembers bordasimplesReal2">
+            <tr>
+              <th colspan="4" style="text-align: left;">
+                <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
+
+                <label>Pool: <b>{{ pool.server_pool.identifier }}</b></label>
+                <br>
+                {% if pool.l7_rule.nome_opcao_txt != 'default_vip' %}
+                  <label>Tipo Regra L7: <b><span class="pool_l7_rule">{{ pool.l7_rule.nome_opcao_txt }}<span></b></label>
+                  <br>
+                  <label>Regra L7 <b><span class="pool_l7_value">{{ pool.l7_value }}<span></b></label>
+                  <br>
+                  <label>Ordem: <b><span class="pool_l7_order">{{ pool.order }}<span></b></label>
+                {% endif %} 
+                <input class="idsPool" name="idsPool_{{ port.port }}" id="idsPool" type="hidden" value="{{ pool.server_pool.id }}"/>
+                <input class="ports_vip_pool_id" name="ports_vip_pool_id_{{ port.port }}" id="ports_vip_pool_id" type="hidden" value="{{ pool.id }}"/>
+                <input class="ports_vip_l7_rules" name="ports_vip_l7_rules_{{ port.port }}" type="hidden" value='{{pool.l7_rule.id}}'/>
+                <input class="ports_vip_l7_rules_orders" name="ports_vip_l7_rules_orders_{{ port.port }}" type="hidden" value="{% if pool.order %}{{pool.order }}{%endif%}"/>
+                <input class="ports_vip_l7_rules_values" name="ports_vip_l7_rules_values_{{ port.port }}" type="hidden" value="{% if pool.l7_value %}{{pool.l7_value }}{%endif%}"/>
+              </th>
+            </tr>
+            <tr>
+              <td>Nome do Real</td>
+              <td>Ip do Real</td>
+              <td>Porta Real</td>
+              <td>Prioridade</td>
+            </tr>
+            {% for pool_member in pool.server_pool.server_pool_members %}
+            <tr>
+              <td>{{ pool_member.equipment.name }}</td>
+              <td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
+              <td>{{ pool_member.port_real }}</td>
+              <td>{{ pool_member.priority }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% else %}
 <table id="tablePoolMembers_{{ server_pool.id }}" class="tablePoolMembers bordasimplesReal">
-<thead>
-
-    <tr >
-        <th colspan="6" style="text-align: left;">
-            
-
-            <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
-
-            {% if external %}
-                {% if not server_pool.pool_created%}
-                    {% has_external_perm POOL_MANAGEMENT True False token %}
-                    {% with has_external_perm as has_pool_write %}
-
-                    {% has_external_perm POOL_CREATE_SCRIPT True False token %}
-                    {% with has_external_perm as has_pool_script_create %}
-                    {% has_external_perm POOL_ALTER_SCRIPT True False token %}
-                    {% with has_external_perm as has_pool_script_alter %}
-                    {% has_external_perm POOL_REMOVE_SCRIPT True False token %}
-                    {% with has_external_perm as has_pool_script_remove %}
-
-                    {% endwith %}
-                    {% endwith %}
-                    {% endwith %}
-                    {% endwith %}
-                {% endif %}
-            {% else %}
-                {% if not server_pool.pool_created%}
-                    {% has_perm POOL_MANAGEMENT True False %}
-                    {% with has_perm as has_pool_write %}
-
-                    {% has_perm POOL_CREATE_SCRIPT True False %}
-                    {% with has_perm as has_pool_script_create %}
-                    {% has_perm POOL_ALTER_SCRIPT True False %}
-                    {% with has_perm as has_pool_script_alter %}
-                    {% has_perm POOL_REMOVE_SCRIPT True False %}
-                    {% with has_perm as has_pool_script_remove %}
-
-                    {% endwith %}
-                    {% endwith %}
-                    {% endwith %}
-                    {% endwith %}
-                {% endif %}
-           {%endif%}
-
-            <label>Porta: <b><span class="vip_port">{{ port.port }}</span></b></label>
-            <br>
-            <label>Protocolo L4: <b><span class="vip_port_l4_protocol">{{ port.options.l4_protocol.nome_opcao_txt }}</b></span></label>
-            <br>
-            <label>Protocolo L7: <b><span class="vip_port_l7_protocol">{{ port.options.l7_protocol.nome_opcao_txt }}</b></span></label>
-            <br>
-            <label>Pool: <b>{{ server_pool.identifier }}</b></label>
-            <input class="idsPool" name="idsPool" id="idsPool" type="hidden" value="{{ server_pool.id }}"/>
-            <input class="ports_vip_ports" name="ports_vip_ports" type="hidden" value='{{ port.port }}'/>
-            <input class="ports_vip_ids" name="ports_vip_ids" type="hidden" value='{{port.id}}'/>
-            <input class="ports_vip_l4_protocols" name="ports_vip_l4_protocols" type="hidden" value='{{port.options.l4_protocol.id}}'/>
-            <input class="ports_vip_l7_protocols" name="ports_vip_l7_protocols" type="hidden" value='{{port.options.l7_protocol.id}}'/>
-
-        </th>
+  <tbody>
+    <tr>
+      <td rowspan="2" style="text-align: left; width:200px">
+        <span id="removePort" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
+        <label>Porta: <b><span class="vip_port"></span></b></label>
+        <br>
+        <label>Protocolo L4: <b><span class="vip_port_l4_protocol"></b></span></label>
+        <br>
+        <label>Protocolo L7: <b><span class="vip_port_l7_protocol">{</b></span></label>
+        <input class="ports_vip_ports" name="ports_vip_ports" type="hidden"/>
+        <input class="ports_vip_ids" name="ports_vip_ids" type="hidden"/>
+        <input class="ports_vip_l4_protocols" name="ports_vip_l4_protocols" type="hidden" />
+        <input class="ports_vip_l7_protocols" name="ports_vip_l7_protocols" type="hidden" />
+      </td>
     </tr>
-</thead>
-<tbody>
-<tr>
-    <td>Nome do Real</td>
-    <td>Ip do Real</td>
-    <td>Porta Real</td>
-    <td>Prioridade</td>
-</tr>
-{% for pool_member in server_pool.server_pool_members %}
-<tr>
-    <td>{{ pool_member.equipment.name }}</td>
-    <td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
-    <td>{{ pool_member.port_real }}</td>
-    <td>{{ pool_member.priority }}</td>
-</tr>
-{% endfor %}
-</tbody>
+    <tr id="vip_port_pool_{{ server_pool.id }}">
+      <td colspan="4" style="text-align: left;">
+        <table class="tablePoolMembers bordasimplesReal2">
+          <tr>
+            <th colspan="4" style="text-align: left;">
+              <span id="removePool" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
+              <label>Pool: <b>{{ server_pool.identifier }}</b></label>
+              <br>
+              <div class="l7_rule" style="display:none">
+                <label>Tipo Regra L7: <b><span class="vip_port_pool_l7_rule"></span></b></label>
+                <br>
+                <label>Regra L7 <b><span class="vip_port_pool_l7_value"></span></b></label>
+                <br>
+                <label>Ordem: <b><span class="vip_port_pool_l7_ordem"></span></b></label>
+              </div>
+              <input class="idsPool" type="hidden" value="{{ server_pool.id }}"/>
+              <input class="ports_vip_pool_id" type="hidden" />
+              <input class="ports_vip_l7_rules" name="ports_vip_l7_rules" type="hidden"/>
+              <input class="ports_vip_l7_rules_orders" name="ports_vip_l7_rules_orders" type="hidden" />
+              <input class="ports_vip_l7_rules_values" name="ports_vip_l7_rules_values" type="hidden" />
+            </th>
+          </tr>
+          <tr>
+            <td>Nome do Real</td>
+            <td>Ip do Real</td>
+            <td>Porta Real</td>
+            <td>Prioridade</td>
+          </tr>
+          {% for pool_member in server_pool.server_pool_members %}
+          <tr>
+            <td>{{ pool_member.equipment.name }}</td>
+            <td>{%if pool_member.ip %}{{ pool_member.ip.ip_formated }}{%else%}{{ pool_member.ipv6.ip_formated }}{% endif %}</td>
+            <td>{{ pool_member.port_real }}</td>
+            <td>{{ pool_member.priority }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </td>
+    </tr>
+  </tbody>
 </table>
+{% endif %}

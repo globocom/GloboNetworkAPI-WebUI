@@ -68,44 +68,45 @@ $(document).ready(function() {
         }
     });
 
-    $('#id_environment').live("change", function(){
-        $('#id_health_check').html('<option value="">-</option>');
+    $("body").on("change", "#id_environment", function() {
+        $('#id_healthcheck').html('<option value=""> - </option>');
 
         var environmentId = this.value;
 
         if (environmentId != ''){
-            $("#id_equip_name, #btn_new_real").prop('disabled', '');
-
+            $("#id_equip_name, #btn_new_real").prop('disabled', false);
+            var tokenId = $("#id_token").val();
             $.ajax({
-                    data: { id_environment: environmentId},
-                    url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
-                    success: function(data, xhr) {
+                url: "{% url pool.ajax.get.opcoes.pool.by.ambiente %}",
+
+                data: {
+                    'id_environment': environmentId,
+                    'token': tokenId
+                },
+                success: function(data, textStatus, xhr) {
+
+                    $('#id_healthcheck').empty().select2(select2_basic);
+                    if(xhr.status == 200) {
                         for (var i = 0; i < data.length; i++) {
-                            $('#id_healthcheck').append('<option value="'+data[i]['opcao_pool']['description']+'">'+data[i]['opcao_pool']['description']+'</option>');
+                            if(data[i]['type'] == 'HealthCheck'){
+                                $('#id_healthcheck').append('<option value="' + data[i]['name'] + '">' + data[i]['name'] + '</option>');
+                            }
                         }
                     }
-                });
+                    else if(xhr.status == 203){
+                       alert(data);
+                    }
+                }
+            });
         }else{
-            $("#id_equip_name, #btn_new_real").prop('disabled', 'disabled');
+            $("#id_equip_name, #btn_new_real").prop('disabled', true);
         }
     });
 
-    $("#id_healthcheck").live("change", function(){
-        if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
-            $("#table_healthcheck").show();
-        } else {
-            $("#table_healthcheck").hide();
-        }
-    });
 
     var env_val = $("#id_environment").val();
     if (env_val != '' ){
         $("#id_equip_name, #btn_new_real").prop('disabled', '');
-    }
-
-    var healthcheck_val = $("#id_healthcheck").val();
-    if (healthcheck_val == 'HTTP' || healthcheck_val == 'HTTPS'){
-        $("#table_healthcheck").show();
     }
 
     autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
@@ -177,13 +178,13 @@ $(document).ready(function() {
             <div id="tabs-3">
                 <div id="fields" class="ui-widget-content">
                     <div style="margin-top:20px">
-                        {% for field in form_pool.visible_fields %}
+                        {% for field in form_pool %}
                         <div>
                             <div>
                                 <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
                             </div>
                             {{ field }}
-                            {% if field.errors %}
+                            {% if field.errors %} 
                             <p id="error">
                                 {% for error in field.errors %}
                                     {{ error|escape }}
@@ -192,18 +193,15 @@ $(document).ready(function() {
                             {% endif %}
                         </div>
                         {% endfor %}
-                        {% for field in form.hidden_fields %}
-                        <div style="display:none;">{{ field }}</div>
-                        {% endfor %}
                     </div>
-                    <div style="margin-top:20px; display:none;" id="table_healthcheck" class="bordasimples">
+                    <div style="margin-top:20px;" id="table_healthcheck" class="bordasimples">
                         {% for field in form_healthcheck %}
                         <div>
                             <div>
                                 <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
                             </div>
                             {{ field }}
-                            {% if field.errors %}
+                            {% if field.errors %} 
                             <p id="error">
                                 {% for error in field.errors %}
                                     {{ error|escape }}

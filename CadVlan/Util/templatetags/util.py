@@ -14,18 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.settings import MAX_RESULT_DEFAULT
+from CadVlan.Util.models import IncrementVarNode, Permission, PermissionExternal,\
+    PermissionMenu, SetVariable
 
 from django import template
-from django.template.defaultfilters import stringfilter
-from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Util.models import Permission, PermissionMenu, SetVariable,\
-    IncrementVarNode, PermissionExternal
-from CadVlan.settings import MAX_RESULT_DEFAULT
-from django.utils.safestring import mark_safe
-from django.db.models.query import QuerySet
 from django.core.serializers import serialize
+from django.db.models.query import QuerySet
+from django.template.defaultfilters import stringfilter
 from django.utils import simplejson
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -151,3 +150,8 @@ def jsonify(json_object):
 @register.filter
 def int_to_str(par_int):
     return str(par_int)
+
+
+@register.filter
+def sum(value, value2=1):
+    return int(value) + int(value2)

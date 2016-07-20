@@ -385,11 +385,11 @@ def valid_field_table_dynamic(field):
     return field
 
 
-def _validate_pools(lists, pools):
+def _validate_pools(lists, pool):
 
     is_valid = True
 
-    if not pools:
+    if not pool:
         lists['pools_error'] = pool_messages.get("select_one")
         is_valid = False
 
@@ -1641,9 +1641,11 @@ def model_ip_real_server_shared(request, client_api):
         balancing = get_param_in_request(request, 'balancing')
 
         # equip_real = split_to_array(get_param_in_request(
-        #     request, 'equip_real')) if get_param_in_request(request, 'equip_real') is not None else None
+        #     request, 'equip_real')) if get_param_in_request(request, 'equip_real')
+        # is not None else None
         # ips_real = split_to_array(get_param_in_request(
-        #     request, 'ips_real')) if get_param_in_request(request, 'ips_real') is not None else None
+        #     request, 'ips_real')) if get_param_in_request(request, 'ips_real')
+        # is not None else None
 
         # Valid Equipament
         equip = client_api.create_equipamento().listar_por_nome(
@@ -1842,7 +1844,6 @@ def shared_load_pool(request, client, form_acess=None, external=False):
             'default_port': pool.get('default_port'),
             'balancing': pool.get('lb_method'),
             'servicedownaction': pool.get('servicedownaction').get('id'),
-            'healthcheck': healthcheck,
             'maxcon': pool.get('default_limit'),
             'identifier': pool.get('identifier')
         }
@@ -1856,17 +1857,18 @@ def shared_load_pool(request, client, form_acess=None, external=False):
             environment_choices,
             lb_method_choices,
             servicedownaction_choices,
-            healthcheck_choices,
             initial=form_initial
         )
 
         form_initial = {
+            'healthcheck': healthcheck,
             'healthcheck_request': healthcheck_request,
             'healthcheck_expect': healthcheck_expect,
             'healthcheck_destination': healthcheck_destination
         }
 
         form_healthcheck = forms.PoolHealthcheckForm(
+            healthcheck_choices,
             initial=form_initial
         )
 
@@ -2058,26 +2060,6 @@ def _ipv6(v6):
     ipv6["id"] = int(v6.get("ip").get("id"))
     ipv6["ip_formated"] = str(v6.get("ip_formated"))
     return ipv6
-
-
-def _pool_dict(port_id, port, l4_protocol, l7_protocol, pool, l7_rule):
-
-    pool_dict = {
-        "id": int(port_id) if port_id else None,
-        "port": int(port),
-        "options": {
-            "l4_protocol": int(l4_protocol),
-            "l7_protocol": int(l7_protocol)
-        },
-        "pools": [{
-            "server_pool": int(pool),
-            "l7_rule": int(l7_rule),
-            "order": None,
-            "l7_value": None
-        }]
-    }
-
-    return pool_dict
 
 
 def _options(form):
@@ -2652,8 +2634,9 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
 
         lists = dict()
-        lists["form_pool"] = forms.PoolForm(environment_choices, lb_method_choices, servicedownaction_choices, healthcheck_choices)
-        lists["form_healthcheck"] = forms.PoolHealthcheckForm()
+        lists["form_pool"] = forms.PoolForm(environment_choices, lb_method_choices,
+                                            servicedownaction_choices)
+        lists["form_healthcheck"] = forms.PoolHealthcheckForm(healthcheck_choices)
         lists["action"] = action
         lists["load_pool_url"] = load_pool_url
         lists["pool_members"] = pool_members
@@ -2832,31 +2815,35 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
         healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
 
-        form = forms.PoolForm(
+        form_pool = forms.PoolForm(
             environment_choices,
             lb_method_choices,
             servicedownaction_choices,
+            request.POST
+        )
+
+        form_healthcheck = forms.PoolHealthcheckForm(
             healthcheck_choices,
             request.POST
         )
 
-        if form.is_valid():
+        if form_pool.is_valid() and form_healthcheck.is_valid():
 
             param_dic = {}
 
             pool = dict()
             pool["id"] = pool_id
 
-            servicedownaction = facade_pool.format_servicedownaction(client, form)
+            servicedownaction = facade_pool.format_servicedownaction(client, form_pool)
             healthcheck = facade_pool.format_healthcheck(request)
 
-            pool["identifier"] = str(form.cleaned_data['identifier'])
-            pool["default_port"] = int(form.cleaned_data['default_port'])
-            pool["environment"] = int(form.cleaned_data['environment'])
+            pool["identifier"] = str(form_pool.cleaned_data['identifier'])
+            pool["default_port"] = int(form_pool.cleaned_data['default_port'])
+            pool["environment"] = int(form_pool.cleaned_data['environment'])
             pool["servicedownaction"] = servicedownaction
-            pool["lb_method"] = str(form.cleaned_data['balancing'])
+            pool["lb_method"] = str(form_pool.cleaned_data['balancing'])
             pool["healthcheck"] = healthcheck
-            pool["default_limit"] = int(form.cleaned_data['maxcon'])
+            pool["default_limit"] = int(form_pool.cleaned_data['maxcon'])
             server_pool_members = facade_pool.format_server_pool_members(request, pool["default_limit"])
             pool["server_pool_members"] = server_pool_members
 
@@ -2868,7 +2855,9 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 
             return HttpResponse(json.dumps(param_dic), content_type="application/json")
 
-        return render_message_json('<br>'.join(form.errors), messages.ERROR)
+        errors = form_pool.errors + form_healthcheck.errors
+
+        return render_message_json('<br>'.join(errors), messages.ERROR)
 
     except Exception, e:
         logger.error(e)
@@ -2926,20 +2915,57 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
     id_vip_created = None
 
     # Pools - request by POST
-    # list of pools
-    pool_ids = valid_field_table_dynamic(request.POST.getlist('idsPool'))
     # list of port's ids
-    ports_vip_ids = valid_field_table_dynamic(request.POST.getlist('ports_vip_ids'))
+    ports_vip_ids = valid_field_table_dynamic(
+        request.POST.getlist('ports_vip_ids'))
     # ports
-    ports_vip_ports = valid_field_table_dynamic(request.POST.getlist('ports_vip_ports'))
+    ports_vip_ports = valid_field_table_dynamic(
+        request.POST.getlist('ports_vip_ports'))
     # list of l4 protocols
-    ports_vip_l4_protocols = valid_field_table_dynamic(request.POST.getlist('ports_vip_l4_protocols'))
+    ports_vip_l4_protocols = valid_field_table_dynamic(
+        request.POST.getlist('ports_vip_l4_protocols'))
     # list of l7 protocols
-    ports_vip_l7_protocols = valid_field_table_dynamic(request.POST.getlist('ports_vip_l7_protocols'))
+    ports_vip_l7_protocols = valid_field_table_dynamic(
+        request.POST.getlist('ports_vip_l7_protocols'))
 
     # valid ports and pools
-    lists, is_valid_ports = _valid_ports(lists, ports_vip_ports)
-    lists, is_valid_pools = _validate_pools(lists, pool_ids)
+    pool_ids = list()
+    ports_vip_pool_id = list()
+    ports_vip_l7_rules = list()
+    ports_vip_l7_rules_orders = list()
+    ports_vip_l7_rules_values = list()
+
+    class GetOutOfLoop(Exception):
+        pass
+    is_valid_pools = True
+    is_valid_ports = True
+    try:
+        for i, port in enumerate(ports_vip_ports):
+
+            pool_ids.append(valid_field_table_dynamic(
+                request.POST.getlist('idsPool_' + port)))
+            ports_vip_pool_id.append(valid_field_table_dynamic(
+                request.POST.getlist('ports_vip_pool_id_' + port)))
+            ports_vip_l7_rules.append(valid_field_table_dynamic(
+                request.POST.getlist('ports_vip_l7_rules_' + port)))
+            ports_vip_l7_rules_orders.append(valid_field_table_dynamic(
+                request.POST.getlist('ports_vip_l7_rules_orders_' + port)))
+            ports_vip_l7_rules_values.append(valid_field_table_dynamic(
+                request.POST.getlist('ports_vip_l7_rules_values_' + port)))
+
+            for pool in pool_ids[i]:
+                lists, is_valid_pool = _validate_pools(lists, pool)
+                if not is_valid_pool:
+                    is_valid_pools = is_valid_pool
+                    raise GetOutOfLoop
+
+        lists, is_valid_port = _valid_ports(lists, ports_vip_ports)
+        if not is_valid_port:
+            is_valid_ports = is_valid_port
+            raise GetOutOfLoop
+
+    except GetOutOfLoop:
+        pass
 
     # Environment - request by POST
     finality = request.POST.get("step_finality")
@@ -3027,32 +3053,39 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                         ips6 = client_api.create_ip().check_vip_ip(
                             ipv6_specific, environment_vip)
                         ipv6 = int(ips6.get("ip").get("id"))
-                except NetworkAPIClientError, e:
+                except NetworkAPIClientError, error:
                     is_valid = False
                     is_error = True
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
+                    logger.error(error)
+                    messages.add_message(request, messages.ERROR, error)
 
             if not is_error:
 
-                # l7 rule not implemented yet, set value default
-                l7_rule = None
-                for l7 in forms_aux['l7_rule']:
-                    if l7["nome_opcao_txt"] == "default_vip":
-                        l7_rule = int(l7["id"])
-                        break
                 pools = list()
-                for i, pool_id in enumerate(pool_ids):
-                    pools.append(
-                        _pool_dict(
-                            ports_vip_ids[i],
-                            ports_vip_ports[i],
-                            ports_vip_l4_protocols[i],
-                            ports_vip_l7_protocols[i],
-                            pool_ids[i],
-                            l7_rule
-                        )
-                    )
+                for i, port in enumerate(ports_vip_ports):
+
+                    port_dict = {
+                        "id": int(ports_vip_ids[i]) if ports_vip_ids[i] else None,
+                        "port": int(port),
+                        "options": {
+                            "l4_protocol": int(ports_vip_l4_protocols[i]),
+                            "l7_protocol": int(ports_vip_l7_protocols[i])
+                        },
+                        "pools": []
+                    }
+
+                    for j, pool in enumerate(pool_ids[i]):
+
+                        pool_dict = {
+                            "id": int(ports_vip_pool_id[i][j]) if ports_vip_pool_id[i][j] else None,
+                            "server_pool": int(pool_ids[i][j]),
+                            "l7_rule": int(ports_vip_l7_rules[i][j]),
+                            "order": ports_vip_l7_rules_orders[i][j] if ports_vip_l7_rules_orders[i][j] else None,
+                            "l7_value": ports_vip_l7_rules_values[i][j] if ports_vip_l7_rules_values[i][j] else None
+                        }
+                        port_dict['pools'].append(pool_dict)
+
+                    pools.append(port_dict)
 
                 if edit:
                     vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
@@ -3063,11 +3096,11 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
                     id_vip_created = vip[0].get("id")
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError, error:
             is_valid = False
             is_error = True
-            logger.error(e)
-            messages.add_message(request, messages.ERROR, e)
+            logger.error(error)
+            messages.add_message(request, messages.ERROR, error)
 
         finally:
             try:
@@ -3077,17 +3110,18 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                 if is_error and ipv6_check and ipv6_type == '0' and ipv6 is not None:
                     client_api.create_api_network_ipv6().delete_ipv6(ipv6)
 
-            except NetworkAPIClientError, e:
-                logger.error(e)
+            except NetworkAPIClientError, error:
+                logger.error(error)
     else:
         is_valid = False
 
     pools_add = list()
     if pool_ids:
-        pools_json = client_api.create_api_pool().get_pool_details(';'.join(pool_ids))["server_pools"]
-        for index, pool_id in enumerate(pool_ids):
-            l4_protocol = [env for env in forms_aux["l4_protocol"] if int(ports_vip_l4_protocols[index]) == int(env["id"])][0]
-            l7_protocol = [env for env in forms_aux["l7_protocol"] if int(ports_vip_l7_protocols[index]) == int(env["id"])][0]
+        for index, port in enumerate(ports_vip_ports):
+            l4_protocol = [env for env in forms_aux["l4_protocol"]
+                           if int(ports_vip_l4_protocols[index]) == int(env["id"])][0]
+            l7_protocol = [env for env in forms_aux["l7_protocol"]
+                           if int(ports_vip_l7_protocols[index]) == int(env["id"])][0]
             raw_server_pool = {
                 "id": ports_vip_ids[index],
                 "port": ports_vip_ports[index],
@@ -3095,10 +3129,21 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                     "l4_protocol": l4_protocol,
                     "l7_protocol": l7_protocol
                 },
-                "pools": [{
-                    "server_pool": pools_json[index]
-                }]
+                "pools": []
             }
+
+            for index_pool, pool_id in enumerate(pool_ids[index]):
+                pool_json = client_api.create_api_pool()\
+                    .get_pool_details(pool_id)["server_pools"][0]
+
+                raw_server_pool["pools"].append({
+                    "id": int(ports_vip_pool_id[i][j]) if ports_vip_pool_id[i][j] else None,
+                    "server_pool": pool_json,
+                    "l7_rule": int(ports_vip_l7_rules[index][index_pool]),
+                    "order": ports_vip_l7_rules_orders[i][j] if ports_vip_l7_rules_orders[i][j] else None,
+                    "l7_value": ports_vip_l7_rules_values[i][j] if ports_vip_l7_rules_values[i][j] else None
+                })
+
             pools_add.append(raw_server_pool)
 
     lists['pools_add'] = pools_add
@@ -3255,9 +3300,9 @@ def ajax_list_vips(request):
                 response.status_code = 412
                 return response
 
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        return HttpResponseServerError(e, mimetype='application/javascript')
-    except BaseException, e:
-        logger.error(e)
-        return HttpResponseServerError(e, mimetype='application/javascript')
+    except NetworkAPIClientError, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
+    except BaseException, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')

@@ -50,12 +50,25 @@ table.bordasimplesReal {
 	margin-top: 10px;
 }
 
+table.bordasimplesReal2 {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+    padding: 15px 15px 15px 15px;
+    margin: 0 0 40px 0;
+}
+
 table.bordasimplesReal thead tr td {
 	font-weight: bold;
 }
 
 table.bordasimplesReal tr td {
 	border:1px solid #CCC;
+}
+
+table.bordasimplesReal2 tr td {
+    border: 1px solid #CCC;
+    border-left: 0;
 }
 
 
@@ -96,6 +109,14 @@ body {
 	font-size: 12px;
 	margin: 0px;
 }
+
+
+div.bordasimples {
+	width: 480px;
+	border:1px solid #CCC;
+	padding: 15px 15px 15px 15px;
+}
+
 
 #header {
 	width: 100%;
@@ -286,7 +307,7 @@ form #error {
 	margin: 0 0 15px;
 }
 
-input[type="text"], input[type="password"], textarea {
+input[type="text"], input[type="number"], input[type="password"], textarea {
 	border-color:#EEEEEE #CCCCCC #CCCCCC #EEEEEE;
 	border-right:1px solid #CCCCCC;
 	border-style:solid;
@@ -296,7 +317,7 @@ input[type="text"], input[type="password"], textarea {
 	padding:5px;
 }
 
-input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+input[type="text"]:focus, input[type="number"], input[type="password"]:focus, textarea:focus {
 	border-color: royalBlue;
 }
 

@@ -157,9 +157,13 @@
                         'token': tokenId
                     },
                     success: function(data, textStatus, xhr) {
+
+                        $('#id_healthcheck').empty().select2(select2_basic);
                         if(xhr.status == 200) {
                             for (var i = 0; i < data.length; i++) {
-                                $('#id_healthcheck').append('<option value="' + data[i]['name'] + '">' + data[i]['name'] + '</option>');
+                                if(data[i]['type'] == 'HealthCheck'){
+                                    $('#id_healthcheck').append('<option value="' + data[i]['name'] + '">' + data[i]['name'] + '</option>');
+                                }
                             }
                         }
                         else if(xhr.status == 203){
@@ -169,15 +173,6 @@
                 });
             }else{
                 $("#id_equip_name, #btn_new_real").prop('disabled', true);
-            }
-        });
-
-        $("body").off("change", "#id_healthcheck")
-        $("body").on("change", "#id_healthcheck", function() {
-            if ($(this).val() == 'HTTP' || $(this).val() == 'HTTPS') {
-                $("#table_healthcheck").show();
-            } else {
-                $("#table_healthcheck").hide();
             }
         });
 
@@ -198,10 +193,6 @@
         }
 
         var healthcheck_val = $("#id_healthcheck").val();
-        if (healthcheck_val == 'HTTP' || healthcheck_val == 'HTTPS'){
-            $("#table_healthcheck").show();
-        }
-
         verifyWeight();
     });
 </script>
@@ -239,7 +230,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <div style="margin-top:20px; display:none;" id="table_healthcheck" class="bordasimples">
+            <div style="margin-top:20px;" id="table_healthcheck" class="bordasimples">
                 {% for field in form_healthcheck %}
                 <div>
                     <div>

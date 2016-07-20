@@ -34,7 +34,7 @@
 		<tr>
 			<td style="width: 235px"><label for="criado">Vip Criado</label></td>
 			<td>
-				<label style="width: 350px;color: black;text-align: center;" >
+				<label style="width: 350px;color: blue;text-align: center;" >
 					{% ifequal 'True' vip.created %}
 						Sim
 					{% else %}
@@ -45,26 +45,26 @@
 		</tr>
 		<tr>
 			<td><label for="negocio">Área Negócio</label></td>
-			<td><label style="width: 350px;color: black;text-align: center;" >{{vip.service}}</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.service}}</label></td>
 		</tr>
 		<tr>
 			<td><label for="servico">Nome Serviço</label></td>
-			<td><label style="width: 350px;color: black;text-align: center;" >{{vip.name}}</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.name}}</label></td>
 		</tr>
 		<tr>
 			<td><label for="host">Host</label></td>
-			<td><label style="width: 350px;color: black;text-align: center;" >{{vip.business}}</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.business}}</label></td>
 		</tr>
 		<tr>
 			<td><label for="ambientevip">Ambiente VIP</label></td>
-			<td><label style="width: 350px;color: black;text-align: center;" >{{vip.environmentvip.finalidade_txt}} - {{vip.environmentvip.cliente_txt}} - {{vip.environmentvip.ambiente_p44_txt}}</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.environmentvip.finalidade_txt}} - {{vip.environmentvip.cliente_txt}} - {{vip.environmentvip.ambiente_p44_txt}}</label></td>
 		</tr>
 	</table>
 	<br/>
 	<table id="vip_principal">
 		<tr>
 			<td style="width: 235px"><label for="vip_id">Id VIP</label></td>
-			<td><label style="width: 350px;color: black;text-align: center;" >{{vip.id}}</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.id}}</label></td>
 		</tr>
 		{% for name in vip.default_names %}
 		<tr>
@@ -73,23 +73,23 @@
 			{% else %}
 				<td></td>
 			{% endifequal %}
-			<td><label style="width: 350px;color: black;text-align: center;" >{% if name %}{{name}}{% else %} - {% endif %}</label> </td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{% if name %}{{name}}{% else %} - {% endif %}</label> </td>
 		</tr>
 		{% endfor %}
 		<tr>
 			<td ><label for="ipv4">IPv4</label></td>
 			{% if vip.ipv4 %}
-				<td><label style="width: 350px;color: black;text-align: center;" >{{vip.ipv4.ip_formated}}</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.ipv4.ip_formated}}</label></td>
 			{% else %}
-				<td><label style="width: 350px;color: black;text-align: center;" > - </label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" > - </label></td>
 			{% endif %}
 		</tr>
 		<tr>
 			<td ><label for="ipv6">IPv6</label></td>
 			{% if vip.ipv6 %}
-				<td><label style="width: 350px;color: black;text-align: center;" >{{vip.ipv6.ip_formated}}</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.ipv6.ip_formated}}</label></td>
 			{% else %}
-				<td><label style="width: 350px;color: black;text-align: center;" > - </label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" > - </label></td>
 			{% endif %}
 		</tr>
 		{% for equip in vip.equipments %}
@@ -99,39 +99,39 @@
 			{% else %}
 				<td></td>
 			{% endifequal %}
-			<td><label style="width: 350px;color: black;text-align: center;" > {{equip.name}} </label> </td>
+			<td><label style="width: 350px;color: blue;text-align: center;" > {{equip.name}} </label> </td>
 		</tr>
 		{% endfor %}
 		<tr>
 			<td><label for="cache">Cache</label></td>
 			{% if vip.options.cache_group %}
-				<td><label style="width: 350px;color: black;text-align: center;" >{{vip.options.cache_group.nome_opcao_txt}}</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.options.cache_group.nome_opcao_txt}}</label></td>
 			{% else %}
-				<td><label style="width: 350px;color: black;text-align: center;" > - </label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" > - </label></td>
 			{% endif %}
 		</tr>
 		<tr>
 			<td><label for="trafficreturn">Traffic Return</label></td>
 			{% if vip.options.traffic_return %}
-				<td><label style="width: 350px;color: black;text-align: center;" >{{vip.options.traffic_return.nome_opcao_txt}}</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.options.traffic_return.nome_opcao_txt}}</label></td>
 			{% else %}
-				<td><label style="width: 350px;color: black;text-align: center;" > - </label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" > - </label></td>
 			{% endif %}
 		</tr>
 		<tr>
 			<td><label for="persistencia">Persistencia</label></td>
 			{% if vip.options.persistence %}
-				<td><label style="width: 350px;color: black;text-align: center;" >{{vip.options.persistence.nome_opcao_txt}}</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.options.persistence.nome_opcao_txt}}</label></td>
 			{% else %}
-				<td><label style="width: 350px;color: black;text-align: center;" > - </label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" > - </label></td>
 			{% endif %}
 		</tr>
 		<tr>
 			<td><label for="timeout">Timeout</label></td>
 			{% if vip.options.timeout %}
-				<td><label style="width: 350px;color: black;text-align: center;" >{{vip.options.timeout.nome_opcao_txt}} min</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.options.timeout.nome_opcao_txt}} min</label></td>
 			{% else %}
-				<td><label style="width: 350px;color: black;text-align: center;" > - </label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" > - </label></td>
 			{% endif %}
 		</tr>
 	</table>
@@ -141,43 +141,61 @@
 		<table  class="vip_v3" >
 			<tr>
 				<td style="width: 235px"><label for="porta">Porta VIP</label></td>
-				<td><label style="width: 350px;color: black;text-align: center;" >{{port.port}}</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{port.port}}</label></td>
 			</tr>
 			<tr>
 				<td><label for="l4_protocol">Protocolo L4</label></td>
-				<td><label style="width: 350px;color: black;text-align: center;" >{{port.options.l4_protocol.nome_opcao_txt}}</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{port.options.l4_protocol.nome_opcao_txt}}</label></td>
 			</tr>
 			<tr>
 				<td><label for="l7_protocol">Protocolo L7</label></td>
-				<td><label style="width: 350px;color: black;text-align: center;" >{{port.options.l7_protocol.nome_opcao_txt}}</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{port.options.l7_protocol.nome_opcao_txt}}</label></td>
 			</tr>
+			<tr><td colspan="2"><br></td></tr>
 			{% for pool in port.pools %}
 				<tr>
 					<td><label for="pool_identifier">Identificador do Pool</label></td>
-					<td><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.identifier}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{pool.server_pool.identifier}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="servicedownaction">Action on ServiceDown</label></td>
-					<td><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.servicedownaction.name}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{pool.server_pool.servicedownaction.name}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="metodo_bal">Balanceamento</label></td>
-					<td><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.lb_method}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{pool.server_pool.lb_method}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="hc_type">Healthcheck </label></td>
-					<td><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_type}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_type}}</label></td>
 				</tr>
 				{% ifequal "HTTP" pool.server_pool.healthcheck.healthcheck_type %}
 					<tr>
 						<td><label for="hc_send">Healthcheck Request</label></td>
-						<td><label style="width: 500px;color: black;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_request}}</label></td>
+						<td><label style="width: 500px;color: blue;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_request}}</label></td>
 					</tr>
 					<tr>
 						<td><label for="hc_recv">Healthcheck Expect</label></td>
-						<td><label style="width: 350px;color: black;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_expect}}</label></td>
+						<td><label style="width: 350px;color: blue;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_expect}}</label></td>
 					</tr>
 				{% endifequal %}
+				{% ifnotequal "default_vip" pool.l7_rule.nome_opcao_txt %}
+					<tr>
+						<td><label>Tipo Regra L7</label></td>
+						<td><label style="width: 500px;color: blue;text-align: center;" >{{pool.l7_rule.nome_opcao_txt}}</label></td>
+					</tr>
+
+					{% ifnotequal "default_glob" pool.l7_rule.nome_opcao_txt %}
+					<tr>
+						<td><label>Regra L7</label></td>
+						<td><label style="width: 500px;color: blue;text-align: center;" >{{pool.l7_value}}</label></td>
+					</tr>
+					<tr>
+						<td><label>Ordem Regra L7</label></td>
+						<td><label style="width: 500px;color: blue;text-align: center;" >{{pool.order}}</label></td>
+					</tr>
+					{% endifnotequal %}
+				{% endifnotequal %}
 				<tr>
 					<td colspan="3">
 						<table id="table_real" class="bordasimplesReal">
@@ -194,12 +212,12 @@
 							<tbody>
 								{% for real in pool.server_pool.server_pool_members %}
 									<tr>
-										<td><label style="width: 350px;color: black;text-align: center;" >{{real.identifier}}</label></td>
-										<td><label style="width: 350px;color: black;text-align: center;" >{% if real.ip %}{{real.ip.ip_formated}}{% else %}{% if real.ipv6 %}{{real.ipv6.ip_formated}}{% endif %}{% endif %}</label></td>
-										<td><label style="width: 350px;color: black;text-align: center;" >{{real.priority}}</label></td>
-										<td><label style="width: 350px;color: black;text-align: center;" >{{real.weight}}</label></td>
-										<td><label style="width: 350px;color: black;text-align: center;" >{{real.port_real}}</label></td>
-										<td><label style="width: 350px;color: black;text-align: center;" >{{real.limit}}</label></td>
+										<td><label style="width: 350px;color: blue;text-align: center;" >{{real.identifier}}</label></td>
+										<td><label style="width: 350px;color: blue;text-align: center;" >{% if real.ip %}{{real.ip.ip_formated}}{% else %}{% if real.ipv6 %}{{real.ipv6.ip_formated}}{% endif %}{% endif %}</label></td>
+										<td><label style="width: 350px;color: blue;text-align: center;" >{{real.priority}}</label></td>
+										<td><label style="width: 350px;color: blue;text-align: center;" >{{real.weight}}</label></td>
+										<td><label style="width: 350px;color: blue;text-align: center;" >{{real.port_real}}</label></td>
+										<td><label style="width: 350px;color: blue;text-align: center;" >{{real.limit}}</label></td>
 									</tr>
 								{% endfor %}
 							</tbody>

@@ -242,7 +242,7 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
     }
 });
 
-$("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
+$("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).click(function(){
 
     var poolId = $("#id_pools").val();
     var portVip = $("#idPort").val().trim();
@@ -325,37 +325,6 @@ $("#btn_new_real").live("click", function(){
     }
 });
 
-$('#btn_new_expect').live("click", function(){
-    var expect_string = $.trim($('#expect_string').val());
-    var id_environment = $('#id_environment').val();
-
-    if(expect_string) {
-        var tokenId = $("#id_token").val();
-        $.ajax({
-                url: "{% url pool.add.healthcheck.expect.external %}",
-                data: {
-                    'expect_string': expect_string,
-                    'id_environment': id_environment,
-                    'token': tokenId
-                },
-                success: function(data, textStatus, xhr) {
-
-                    if(xhr.status == 200) {
-                        $('#msg_new_healthcheck').fadeIn(1000);
-                        $("#id_expect").append('<option value="' + data['expect_string'] + '">' + data['expect_string'] + '</option>');
-                        $("#msg_new_healthcheck").html('<td></td><td style="color: #0073EA;font-weight: bold;padding-left: 5px;">' + data['mensagem'] + '</td>');
-                        $("#msg_new_healthcheck").delay(15000).fadeOut('slow');
-                        $("#id_expect option:last").attr('selected', 'selected');
-                        $("#btn_new_expect").button({ icons: {primary: "ui-icon-disk"} });
-                        $("#expect_string").val('')
-                    }
-                    else if(xhr.status == 203){
-                       alert(data);
-                    }
-                }
-            });
-    }
-});
 
 $('#id_environment').live("change", function(){
     $('#id_healthcheck').html('<option value=""> - </option>');
@@ -374,9 +343,12 @@ $('#id_environment').live("change", function(){
                 },
                 success: function(data, textStatus, xhr) {
                     //alert(data);
+                    $('#id_healthcheck').empty().select2(select2_basic);
                     if(xhr.status == 200) {
                         for (var i = 0; i < data.length; i++) {
-                            $('#id_healthcheck').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
+                            if(data[i]['opcao_pool']['type']) == 'HealthCheck'){
+                                $('#id_healthcheck').append('<option value="' + data[i]['opcao_pool']['description'] + '">' + data[i]['opcao_pool']['description'] + '</option>');
+                            }
                         }
                     }
                     else if(xhr.status == 203){
