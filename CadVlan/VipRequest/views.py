@@ -3137,11 +3137,13 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                     .get_pool_details(pool_id)["server_pools"][0]
 
                 raw_server_pool["pools"].append({
-                    "id": int(ports_vip_pool_id[i][j]) if ports_vip_pool_id[i][j] else None,
+                    "id": int(ports_vip_pool_id[index][index_pool]) if ports_vip_pool_id[index][index_pool] else None,
                     "server_pool": pool_json,
-                    "l7_rule": int(ports_vip_l7_rules[index][index_pool]),
-                    "order": ports_vip_l7_rules_orders[i][j] if ports_vip_l7_rules_orders[i][j] else None,
-                    "l7_value": ports_vip_l7_rules_values[i][j] if ports_vip_l7_rules_values[i][j] else None
+                    "l7_rule": {
+                        "id": int(ports_vip_l7_rules[index][index_pool]),
+                    },
+                    "order": ports_vip_l7_rules_orders[index][index_pool] if ports_vip_l7_rules_orders[index][index_pool] else None,
+                    "l7_value": ports_vip_l7_rules_values[index][index_pool] if ports_vip_l7_rules_values[index][index_pool] else None
                 })
 
             pools_add.append(raw_server_pool)

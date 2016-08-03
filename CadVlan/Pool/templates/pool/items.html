@@ -38,7 +38,7 @@
                   <label>Ordem: <b><span class="pool_l7_order">{{ pool.order }}<span></b></label>
                 {% endif %} 
                 <input class="idsPool" name="idsPool_{{ port.port }}" id="idsPool" type="hidden" value="{{ pool.server_pool.id }}"/>
-                <input class="ports_vip_pool_id" name="ports_vip_pool_id_{{ port.port }}" id="ports_vip_pool_id" type="hidden" value="{{ pool.id }}"/>
+                <input class="ports_vip_pool_id" name="ports_vip_pool_id_{{ port.port }}" id="ports_vip_pool_id" type="hidden" value="{% if pool.id %}{{pool.id }}{%endif%}"/>
                 <input class="ports_vip_l7_rules" name="ports_vip_l7_rules_{{ port.port }}" type="hidden" value='{{pool.l7_rule.id}}'/>
                 <input class="ports_vip_l7_rules_orders" name="ports_vip_l7_rules_orders_{{ port.port }}" type="hidden" value="{% if pool.order %}{{pool.order }}{%endif%}"/>
                 <input class="ports_vip_l7_rules_values" name="ports_vip_l7_rules_values_{{ port.port }}" type="hidden" value="{% if pool.l7_value %}{{pool.l7_value }}{%endif%}"/>

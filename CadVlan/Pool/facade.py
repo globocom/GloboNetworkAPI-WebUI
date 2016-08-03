@@ -175,7 +175,8 @@ def format_server_pool_members(request, limit=0):
         server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
         server_pool_members["limit"] = limit
         server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
-        server_pool_members["member_status"] = 0
+        server_pool_members["member_status"] = int(request.POST.getlist('member_status')[i]) \
+            if request.POST.getlist('member_status')[i] else 7
         v4, v6 = _format_ips(request, i)
         server_pool_members["ip"] = v4
         server_pool_members["ipv6"] = v6
