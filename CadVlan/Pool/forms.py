@@ -290,7 +290,7 @@ class PoolHealthcheckForm(forms.Form):
     )
 
     healthcheck_destination = forms.CharField(
-        label=u'Porta',
+        label=u'Porta para healthcheck (Preencha com a porta para forçar o healthcheck em uma porta diferente do membro. Deixe em branco para utilizadar a porta de serviço do membro no pool)',
         max_length=5,
         required=False,
         error_messages=error_messages,
