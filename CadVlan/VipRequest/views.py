@@ -1829,6 +1829,7 @@ def shared_load_pool(request, client, form_acess=None, external=False):
                     'port_real': obj_member['port_real'],
                     'weight': obj_member['weight'],
                     'id_ip': ip_obj.get('id'),
+                    'member_status': obj_member.get('member_status'),
                     'ip': ip_obj.get('ip_formated')}
                 )
 
