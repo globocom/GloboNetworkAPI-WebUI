@@ -4,6 +4,9 @@ function loadPoolMembers(){
     var portVip = $("#id_port_vip").val().trim();
     var l4_protocol = $('#id_l4_protocol option:checked');
     var l7_protocol = $('#id_l7_protocol option:checked');
+    var l7_rule = $('#id_l7_rule option:checked');
+    var l7_rule_value = $('#id_l7_value');
+    var l7_order = $('#id_order');
 
     if(isNaN(portVip)){
         alert('Porta Vip deve ser um número.');
@@ -26,16 +29,55 @@ function loadPoolMembers(){
             },
             success: function(data, textStatus, xhr) {
                 if(xhr.status == 200) {
-                    $("#divMembers").append(data);
-                    $(".tablePoolMembers:last-child .vip_port").html(portVip);
-                    $(".tablePoolMembers:last-child .vip_port_l4_protocol").html(l4_protocol.html());
-                    $(".tablePoolMembers:last-child .vip_port_l7_protocol").html(l7_protocol.html());
-                    $(".tablePoolMembers:last-child .ports_vip_ports").val(portVip);
-                    $(".tablePoolMembers:last-child .ports_vip_id").val('');
-                    $(".tablePoolMembers:last-child .ports_vip_l4_protocols").val(l4_protocol.val());
-                    $(".tablePoolMembers:last-child .ports_vip_l7_protocols").val(l7_protocol.val());
-                    $("#id_pools, #id_l7_protocol, #id_l4_protocol").val('').select2(select2_basic);
-                    $("#id_port_vip").val('')
+                    new_table = $(data)
+                    new_table.find(".vip_port_pool_l7_rule").html(l7_rule.html());
+                    new_table.find(".vip_port_pool_l7_value").html(l7_rule_value.val());
+                    new_table.find(".vip_port_pool_l7_ordem").html(l7_order.val());
+                    new_table.find(".idsPool")
+                        .attr('name', 'idsPool_'+portVip);
+                    new_table.find(".ports_vip_pool_id")
+                        .attr('name', 'ports_vip_pool_id_'+portVip);
+                    new_table.find(".ports_vip_l7_rules")
+                        .attr('name', 'ports_vip_l7_rules_'+portVip)
+                        .val(l7_rule.val());
+                    new_table.find(".ports_vip_l7_rules_orders")
+                        .attr('name', 'ports_vip_l7_rules_orders_'+portVip)
+                        .val(l7_rule_value.val());
+                    new_table.find(".ports_vip_l7_rules_values")
+                        .attr('name', 'ports_vip_l7_rules_values_'+portVip)
+                        .val(l7_order.val());
+                    if($('#id_l7_rule_check:checked').length > 0){
+                        new_table.find('.l7_rule').show()
+                    }
+                    if($('.ports_vip_ports[value='+portVip+']').length > 0){
+                        tr = new_table.find('#vip_port_pool_'+poolId)
+                        
+                        table = $('.ports_vip_ports[value='+portVip+']')
+                            .parents("table:first")
+                            .find('tbody:first');
+                        
+                        table.append(tr)
+
+                        td = table.find('tr:first').find('td');
+                        
+                        td.attr('rowspan',parseInt(td.attr('rowspan'))+1);
+
+                    }
+                    else{
+                        $(new_table).find(".vip_port").html(portVip);
+                        $(new_table).find(".vip_port_l4_protocol").html(l4_protocol.html());
+                        $(new_table).find(".vip_port_l7_protocol").html(l7_protocol.html());
+                        $(new_table).find(".ports_vip_ports").val(portVip);
+                        $(new_table).find(".ports_vip_id").val('');
+                        $(new_table).find(".ports_vip_l4_protocols").val(l4_protocol.val());
+                        $(new_table).find(".ports_vip_l7_protocols").val(l7_protocol.val());
+                        $("#divMembers").append(new_table);
+                    }
+
+                    // clear fields of pool select
+                    $("#id_pools, #id_l7_protocol, #id_l4_protocol, #id_l7_rule").val('').select2(select2_basic);
+                    $("#id_port_vip, #id_l7_value, #id_order").val('')
+                    $('#id_l7_rule_check').removeAttr('checked')
                 }
                 else if(xhr.status == 203){
                    alert(data);
@@ -199,5 +241,15 @@ $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", fu
 
 
 $("span[id^=removePool]").live("click", function(){
+    $(this).parents("table:first").parents("tr:first").remove();
+    td = $(this).parents("table:first")
+        .parents("tr:first")
+        .parents("table:first")
+        .find('tr:first')
+        .find('td');
+    td.attr('rowspan',parseInt(td.attr('rowspan'))-1);
+});
+
+$("span[id^=removePort]").live("click", function(){
     $(this).parents("table:first").remove();
 });

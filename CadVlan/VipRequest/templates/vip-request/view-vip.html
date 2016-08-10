@@ -151,6 +151,7 @@
 				<td><label for="l7_protocol">Protocolo L7</label></td>
 				<td><label style="width: 350px;color: blue;text-align: center;" >{{port.options.l7_protocol.nome_opcao_txt}}</label></td>
 			</tr>
+			<tr><td colspan="2"><br></td></tr>
 			{% for pool in port.pools %}
 				<tr>
 					<td><label for="pool_identifier">Identificador do Pool</label></td>
@@ -171,13 +172,30 @@
 				{% ifequal "HTTP" pool.server_pool.healthcheck.healthcheck_type %}
 					<tr>
 						<td><label for="hc_send">Healthcheck Request</label></td>
-						<td><label style="width: 350px;color: blue;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_request}}</label></td>
+						<td><label style="width: 500px;color: blue;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_request}}</label></td>
 					</tr>
 					<tr>
 						<td><label for="hc_recv">Healthcheck Expect</label></td>
 						<td><label style="width: 350px;color: blue;text-align: center;" >{{pool.server_pool.healthcheck.healthcheck_expect}}</label></td>
 					</tr>
 				{% endifequal %}
+				{% ifnotequal "default_vip" pool.l7_rule.nome_opcao_txt %}
+					<tr>
+						<td><label>Tipo Regra L7</label></td>
+						<td><label style="width: 500px;color: blue;text-align: center;" >{{pool.l7_rule.nome_opcao_txt}}</label></td>
+					</tr>
+
+					{% ifnotequal "default_glob" pool.l7_rule.nome_opcao_txt %}
+					<tr>
+						<td><label>Regra L7</label></td>
+						<td><label style="width: 500px;color: blue;text-align: center;" >{{pool.l7_value}}</label></td>
+					</tr>
+					<tr>
+						<td><label>Ordem Regra L7</label></td>
+						<td><label style="width: 500px;color: blue;text-align: center;" >{{pool.order}}</label></td>
+					</tr>
+					{% endifnotequal %}
+				{% endifnotequal %}
 				<tr>
 					<td colspan="3">
 						<table id="table_real" class="bordasimplesReal">

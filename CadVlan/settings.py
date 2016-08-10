@@ -19,10 +19,14 @@
 # Django settings for CadVlan project.
 
 import os
+import sys
+
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+PDB = os.getenv('NETWORKAPI_PDB', '0') == '1'
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -132,6 +136,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
+if PDB:
+    MIDDLEWARE_CLASSES += (
+        'django_pdb.middleware.PdbMiddleware',
+    )
+
 ROOT_URLCONF = 'CadVlan.urls'
 
 TEMPLATE_DIRS = (
@@ -145,6 +154,14 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+)
+
+if PDB:
+    INSTALLED_APPS += (
+        'django_pdb',
+    )
+
+PROJECT_APPS = (
     'CadVlan.AccessType',
     'CadVlan.Acl',
     'CadVlan.Auth',
@@ -177,6 +194,8 @@ INSTALLED_APPS = (
     'CadVlan.VipRequest',
     'CadVlan.Vlan',
 )
+
+INSTALLED_APPS += PROJECT_APPS
 
 SESSION_ENGINE = (
     'django.contrib.sessions.backends.file'
@@ -349,6 +368,5 @@ LOGGING = {
     }
 }
 
-import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')

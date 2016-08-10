@@ -16,7 +16,6 @@
 # limitations under the License.
 
 
-
 class Enum(set):
 
     def __getattr__(self, name):

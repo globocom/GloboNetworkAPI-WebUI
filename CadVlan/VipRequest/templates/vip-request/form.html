@@ -145,12 +145,10 @@ $(document).ready(function() {
             {% endif %}
 
             <div style="margin-top:20px;">
-                <div id="divMembers" class="bordasimples" style="padding-top: 10px; clear: left;">
+                <div id="divMembers" style="padding-top: 10px; clear: left;">
                     {% if pools_add %}
                         {% for port in pools_add %}
-                            {% for pool in port.pools %}
-                                {% include "pool/items.html" with port=port server_pool=pool.server_pool %}
-                            {% endfor %}
+                            {% include "pool/items.html" with port=port %}
                         {% endfor %}
                     {% endif %}
                     <!-- Will add pool members -->

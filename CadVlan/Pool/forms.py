@@ -15,11 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from django import forms
 from CadVlan.messages import error_messages
 from CadVlan.Util.forms.decorators import autostrip
 
+from django import forms
 
 
 class PoolForm(forms.Form):
@@ -32,7 +31,10 @@ class PoolForm(forms.Form):
         self.fields['servicedownaction'].choices = servicedownaction_choices
         self.fields['health_check'].choices = healthcheck_choices
 
-    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    id = forms.IntegerField(
+        widget=forms.HiddenInput(),
+        required=False
+    )
 
     identifier = forms.CharField(
         label=u'Identifier',
@@ -44,6 +46,7 @@ class PoolForm(forms.Form):
             attrs={'style': "width: 300px"}
         )
     )
+
     default_port = forms.CharField(
         label=u'Default Port',
         min_length=2,
@@ -99,27 +102,17 @@ class PoolForm(forms.Form):
         )
     )
 
+
 @autostrip
 class PoolFormV3(forms.Form):
 
-    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices,
-                 healthcheck_choices=[], *args, **kwargs):
+    def __init__(self, enviroments_choices, optionsvips_choices,
+                 servicedownaction_choices, *args, **kwargs):
         super(PoolFormV3, self).__init__(*args, **kwargs)
 
         self.fields['environment'].choices = enviroments_choices
         self.fields['balancing'].choices = optionsvips_choices
         self.fields['servicedownaction'].choices = servicedownaction_choices
-        self.fields['healthcheck'].choices = healthcheck_choices
-
-    id = forms.IntegerField(
-        widget=forms.HiddenInput(),
-        required=False
-    )
-
-    pool_created = forms.IntegerField(
-        widget=forms.HiddenInput(),
-        required=False
-    )
 
     identifier = forms.CharField(
         label=u'Identifier',
@@ -150,10 +143,12 @@ class PoolFormV3(forms.Form):
         choices=[],
         required=True,
         error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "",
-            "style": "width: 310px",
-            'class': 'select2'}
+        widget=forms.Select(
+            attrs={
+                "style": "",
+                "style": "width: 310px",
+                'class': 'select2'
+            }
         )
     )
 
@@ -162,9 +157,11 @@ class PoolFormV3(forms.Form):
         choices=[],
         required=True,
         error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "width: 310px",
-            'class': 'select2'}
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
         )
     )
 
@@ -173,9 +170,10 @@ class PoolFormV3(forms.Form):
         choices=[],
         required=True,
         error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "width: 310px",
-            'class': 'select2'}
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'}
         )
     )
 
@@ -189,14 +187,55 @@ class PoolFormV3(forms.Form):
         )
     )
 
+
+@autostrip
+class PoolHealthcheckForm(forms.Form):
+
+    def __init__(self, healthcheck_choices=[], *args, **kwargs):
+        super(PoolHealthcheckForm, self).__init__(*args, **kwargs)
+
+        self.fields['healthcheck'].choices = healthcheck_choices
+
     healthcheck = forms.ChoiceField(
         label=u'HealthCheck',
         choices=[],
         required=False,
         error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "width: 310px",
-            'class': 'select2'}
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'}
+        )
+    )
+
+    healthcheck_request = forms.CharField(
+        label=u'Healthcheck Request',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 310px"}
+        )
+    )
+
+    healthcheck_expect = forms.CharField(
+        label=u'HTTP Expect String',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 310px"}
+        )
+    )
+
+    healthcheck_destination = forms.CharField(
+        label=u'Porta',
+        max_length=5,
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={
+                "style": "width: 100px"}
         )
     )
 
@@ -262,41 +301,3 @@ class PoolFormEdit(forms.Form):
             attrs={'style': "width: 310px"}
         )
     )
-
-@autostrip
-class PoolHealthcheckForm(forms.Form):
-
-    def __init__(self, *args, **kwargs):
-        super(PoolHealthcheckForm, self).__init__(*args, **kwargs)
-
-    healthcheck_request = forms.CharField(
-        label=u'Healthcheck Request',
-        required=False,
-        error_messages=error_messages,
-        widget=forms.TextInput(
-            attrs={
-                "style": "width: 310px"}
-        )
-    )
-
-    healthcheck_expect = forms.CharField(
-        label=u'HTTP Expect String',
-        required=False,
-        error_messages=error_messages,
-        widget=forms.TextInput(
-            attrs={
-                "style": "width: 310px"}
-        )
-    )
-
-    healthcheck_destination = forms.CharField(
-        label=u'Porta para healthcheck (Preencha com a porta para forçar o healthcheck em uma porta diferente do membro. Deixe em branco para utilizadar a porta de serviço do membro no pool)',
-        max_length=5,
-        required=False,
-        error_messages=error_messages,
-        widget=forms.TextInput(
-            attrs={
-                "style": "width: 100px"}
-        )
-    )
-

@@ -40,9 +40,9 @@ class RequestVipFormHealthcheck(forms.Form):
     healthcheck = forms.CharField(label=u'Healthcheck', min_length=3, max_length=100, required=False,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
     expect = forms.ChoiceField(label=u'HTTP Expect String', required=True, error_messages=error_messages,
-                                widget=forms.Select(attrs={"style": "width: 185px"}))
+                               widget=forms.Select(attrs={"style": "width: 185px"}))
     expect_new = forms.CharField(label=u'', required=False, widget=forms.TextInput(attrs={'style': "width: 185px"}),
-                                  error_messages=error_messages)
+                                 error_messages=error_messages)
     destination = forms.ChoiceField(label=u'Destination', required=True, error_messages=error_messages,
                                     widget=forms.Select(attrs={"style": "width: 185px"}))
 
@@ -147,14 +147,13 @@ class GenerateTokenForm(forms.Form):
 @autostrip
 class PoolForm(forms.Form):
 
-    def __init__(self, enviroments_choices, optionsvips_choices, servicedownaction_choices,
-                 healthcheck_choices=[], *args, **kwargs):
+    def __init__(self, enviroments_choices, optionsvips_choices,
+                 servicedownaction_choices, *args, **kwargs):
         super(PoolForm, self).__init__(*args, **kwargs)
 
         self.fields['environment'].choices = enviroments_choices
         self.fields['balancing'].choices = optionsvips_choices
         self.fields['servicedownaction'].choices = servicedownaction_choices
-        self.fields['healthcheck'].choices = healthcheck_choices
 
     identifier = forms.CharField(
         label=u'Identifier',
@@ -224,6 +223,15 @@ class PoolForm(forms.Form):
         )
     )
 
+
+@autostrip
+class PoolHealthcheckForm(forms.Form):
+
+    def __init__(self, healthcheck_choices=[], *args, **kwargs):
+        super(PoolHealthcheckForm, self).__init__(*args, **kwargs)
+
+        self.fields['healthcheck'].choices = healthcheck_choices
+
     healthcheck = forms.ChoiceField(
         label=u'HealthCheck',
         choices=[],
@@ -234,13 +242,6 @@ class PoolForm(forms.Form):
             'class': 'select2'}
         )
     )
-
-
-@autostrip
-class PoolHealthcheckForm(forms.Form):
-
-    def __init__(self, *args, **kwargs):
-        super(PoolHealthcheckForm, self).__init__(*args, **kwargs)
 
     healthcheck_request = forms.CharField(
         label=u'Healthcheck Request',
@@ -444,6 +445,10 @@ class RequestVipPortOptionVipForm(forms.Form):
             self.fields['l7_protocol'].choices = [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_protocol"]]
         self.fields['l7_protocol'].choices.insert(0, ('', ''))
 
+        if forms_aux.get('l7_rule'):
+            self.fields['l7_rule'].choices = [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["l7_rule"]]
+        self.fields['l7_rule'].choices.insert(0, ('', ''))
+
         if forms_aux.get('pools'):
             self.fields['pools'].choices = [(env['id'], env["identifier"]) for env in forms_aux["pools"]['server_pools']]
         self.fields['pools'].choices.insert(0, ('', ''))
@@ -470,6 +475,31 @@ class RequestVipPortOptionVipForm(forms.Form):
         widget=forms.Select(attrs={
             "style": "width: 150px",
             'class': 'select2'}))
+
+    l7_rule_check = forms.BooleanField(
+        label=u'Tem regra de L7?', required=False, error_messages=error_messages)
+
+    order = forms.ChoiceField(
+        label="Posição do L7",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={
+            "style": "width: 50px"}))
+
+    l7_rule = forms.ChoiceField(
+        label="Tipo Regra de L7",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 150px",
+            'class': 'select2'}))
+
+    l7_value = forms.ChoiceField(
+        label="Valor de L7",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={
+            "style": "width: 50px"}))
 
     pools = forms.ChoiceField(
         label=u'Pools',
