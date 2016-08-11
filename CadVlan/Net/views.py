@@ -24,7 +24,7 @@ from CadVlan.Auth.AuthSession import AuthSession
 from networkapiclient.exception import NetworkAPIClientError, VipIpError, IpEquipCantDissociateFromVip
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP, IPS
-from CadVlan.templates import  NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, IP4ASSOC, IP6ASSOC, NET_FORM, NET6_EDIT, NET4_EDIT,\
+from CadVlan.templates import NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, IP4ASSOC, IP6ASSOC, NET_FORM, NET6_EDIT, NET4_EDIT,\
     NET_EVIP_OPTIONS, AJAX_IPLIST_EQUIPMENT_DHCP_SERVER_HTML
 from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
 from CadVlan.Net.forms import IPForm, IPEditForm, IPAssocForm, NetworkForm, NetworkEditForm
@@ -70,7 +70,6 @@ def add_network_form(request):
         net_type_list = client.create_tipo_rede().listar()
         env_vip_list = {"environment_vip": []}
 
-
         # Forms
         lists['form'] = NetworkForm(net_type_list, env_vip_list)
 
@@ -92,11 +91,15 @@ def add_network_form(request):
                 net_version = form.cleaned_data['ip_version']
                 networkv4 = form.cleaned_data['networkv4']
                 networkv6 = form.cleaned_data['networkv6']
+                if env_vip:
+                    cluster_unit = form.cleaned_data['cluster_unit']
+                    cluster_unit = cluster_unit if cluster_unit else 'cluster-unit-1'
+                else:
+                    cluster_unit = None
                 id_equips = request.POST.getlist('id_equip')
                 nome_equips = request.POST.getlist('equip')
                 id_ips = request.POST.getlist('id_ip')
                 ips = request.POST.getlist('ip')
-
 
                 # Business
                 client.create_vlan().get(vlan_id)
@@ -104,14 +107,14 @@ def add_network_form(request):
                 if net_version == "0":
                     network = networkv4
                     network_obj = client.create_network().add_network(
-                        network, vlan_id, net_type, env_vip)
+                        network, vlan_id, net_type, env_vip, cluster_unit)
                     net = network_obj.get('network')
                     for id_ip in id_ips:
                         client.create_dhcprelay_ipv4().add(net.get("id"), id_ip)
                 else:
                     network = networkv6
                     network_obj = client.create_network().add_network(
-                        network, vlan_id, net_type, env_vip)
+                        network, vlan_id, net_type, env_vip, cluster_unit)
                     net = network_obj.get('network')
                     for id_ip in id_ips:
                         client.create_dhcprelay_ipv4().add(net.get("id"), id_ip)
@@ -182,6 +185,11 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
                 net_version = form.cleaned_data['ip_version']
                 networkv4 = form.cleaned_data['networkv4']
                 networkv6 = form.cleaned_data['networkv6']
+                if env_vip:
+                    cluster_unit = form.cleaned_data['cluster_unit']
+                    cluster_unit = cluster_unit if cluster_unit else 'cluster-unit-1'
+                else:
+                    cluster_unit = None
                 id_equips = request.POST.getlist('id_equip')
                 nome_equips = request.POST.getlist('equip')
                 id_ips = request.POST.getlist('id_ip')
@@ -190,14 +198,14 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
                 if net_version == "0":
                     network = networkv4
                     network_obj = client.create_network().add_network(
-                        network, vlan_id, net_type, env_vip)
+                        network, vlan_id, net_type, env_vip, cluster_unit)
                     net = network_obj.get('network')
                     for id_ip in id_ips:
                         client.create_dhcprelay_ipv4().add(net.get("id"), id_ip)
                 else:
                     network = networkv6
                     network_obj = client.create_network().add_network(
-                        network, vlan_id, net_type, env_vip)
+                        network, vlan_id, net_type, env_vip, cluster_unit)
                     net = network_obj.get('network')
                     for id_ip in id_ips:
                         client.create_dhcprelay_ipv4().add(net.get("id"), id_ip)
@@ -236,6 +244,7 @@ def vlan_add_network_form(request, id_vlan='0', sf_number='0', sf_name='0', sf_e
             pass
 
     return render_to_response(NET_FORM, lists, context_instance=RequestContext(request))
+
 
 def ajax_modal_ip_dhcp_server(request):
     auth = AuthSession(request.session)
@@ -342,14 +351,14 @@ def list_netip4_by_id(request, id_net='0', id_vlan='0', sf_number='0', sf_name='
 
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
         lists['vlan_id'] = vlan['vlan']['id']
-        
+
         dhcp_relays = client.create_dhcprelay_ipv4().list(networkipv4=id_net)
         for dhcp in dhcp_relays:
             lists['dhcp_relays'].append(dhcp['ipv4'])
 
-	lists['num_vlan'] = vlan['vlan']['num_vlan']
-	
-	net['network']['vlan'] = vlan.get('vlan').get('nome')
+        lists['num_vlan'] = vlan['vlan']['num_vlan']
+
+        net['network']['vlan'] = vlan.get('vlan').get('nome')
 
         net_type = client.create_tipo_rede().listar()
 
@@ -484,7 +493,7 @@ def list_netip6_by_id(request, id_net='0', id_vlan='0', sf_number='0', sf_name='
 
         net['network']['vlan'] = vlan.get('vlan').get('nome')
 
-	lists['num_vlan'] = vlan['vlan']['num_vlan']
+        lists['num_vlan'] = vlan['vlan']['num_vlan']
         net_type = client.create_tipo_rede().listar()
 
         id_vip = net.get('network').get("ambient_vip")
@@ -816,7 +825,6 @@ def edit_ip4(request, id_net, id_ip4, id_vlan='0', sf_number='0', sf_name='0', s
     lists['sf_iexact'] = sf_iexact
     lists['sf_acl'] = sf_acl
 
-
     try:
 
         auth = AuthSession(request.session)
@@ -943,7 +951,6 @@ def edit_ip6(request, id_net, id_ip6, id_vlan='0', sf_number='0', sf_name='0', s
     lists['sf_network'] = sf_network
     lists['sf_iexact'] = sf_iexact
     lists['sf_acl'] = sf_acl
-
 
     try:
 
@@ -1339,7 +1346,6 @@ def edit_network4_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
         lists['oct4'] = network.get("oct4")
         lists['block_net'] = network.get("block")
 
-
         if request.method == 'POST':
 
             form = NetworkEditForm(net_type_list, env_vip_list, request.POST)
@@ -1355,8 +1361,14 @@ def edit_network4_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
                 net_type = form.cleaned_data['net_type']
                 ip_type = 0
 
+                if env_vip:
+                    cluster_unit = form.cleaned_data['cluster_unit']
+                    cluster_unit = cluster_unit if cluster_unit else 'cluster-unit-1'
+                else:
+                    cluster_unit = None
+
                 client.create_network().edit_network(
-                    id_net, ip_type, net_type, env_vip)
+                    id_net, ip_type, net_type, env_vip, cluster_unit)
 
                 dhcp_list = client.create_dhcprelay_ipv4().list(networkipv4=network.get('id'))
                 dhcp_id_ip_list = list()
@@ -1373,7 +1385,7 @@ def edit_network4_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
                         dhcp_to_remove.append(id_ip)
 
                 for dhcp_id_ip in dhcp_to_add:
-                        client.create_dhcprelay_ipv4().add(network.get("id"), dhcp_id_ip)
+                    client.create_dhcprelay_ipv4().add(network.get("id"), dhcp_id_ip)
                 for dhcp_id_ip in dhcp_to_remove:
                     for dhcp in dhcp_list:
                         if dhcp_id_ip == dhcp['ipv4']['id']:
@@ -1389,6 +1401,7 @@ def edit_network4_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
 
             env_vip = network.get("ambient_vip")
             net_type = network.get("network_type")
+            cluster_unit = network.get("cluster_unit")
             ip_version = 0
             vlan_id = network.get('vlan')
             vlan = client.create_vlan().get(vlan_id)
@@ -1397,8 +1410,17 @@ def edit_network4_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
                 vlan.get("ambiente")).get("ambiente")
             vlan_nome = "%s | %s - %s - %s" % (vlan.get("num_vlan"), environment.get(
                 "nome_divisao"), environment.get("nome_ambiente_logico"), environment.get("nome_grupo_l3"))
-            lists['form'] = NetworkEditForm(net_type_list, env_vip_list, initial={
-                                            'vlan_name': vlan_nome, 'net_type': net_type, 'env_vip': env_vip, 'ip_version': ip_version})
+            lists['form'] = NetworkEditForm(
+                net_type_list,
+                env_vip_list,
+                initial={
+                    'vlan_name': vlan_nome, 
+                    'net_type': net_type,
+                    'env_vip': env_vip,
+                    'cluster_unit': cluster_unit,
+                    'ip_version': ip_version
+                }
+            )
 
             dhcp_relays_ipv4 = client.create_dhcprelay_ipv4().list(networkipv4=network.get('id'))
             dhcp_relays = list()
@@ -1478,8 +1500,14 @@ def edit_network6_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
                 net_type = form.cleaned_data['net_type']
                 ip_type = 1
 
+                if env_vip:
+                    cluster_unit = form.cleaned_data['cluster_unit']
+                    cluster_unit = cluster_unit if cluster_unit else 'cluster-unit-1'
+                else:
+                    cluster_unit = None
+
                 client.create_network().edit_network(
-                    id_net, ip_type, net_type, env_vip)
+                    id_net, ip_type, net_type, env_vip, cluster_unit)
 
                 dhcp_list = client.create_dhcprelay_ipv6().list(networkipv6=network.get('id'))
                 dhcp_id_ip_list = list()
@@ -1496,7 +1524,7 @@ def edit_network6_form(request, id_net='0', id_vlan='0', sf_number='0', sf_name=
                         dhcp_to_remove.append(id_ip)
 
                 for dhcp_id_ip in dhcp_to_add:
-                        client.create_dhcprelay_ipv6().add(network.get("id"), dhcp_id_ip)
+                    client.create_dhcprelay_ipv6().add(network.get("id"), dhcp_id_ip)
                 for dhcp_id_ip in dhcp_to_remove:
                     for dhcp in dhcp_list:
                         if dhcp_id_ip == dhcp['ipv6']['id']:
