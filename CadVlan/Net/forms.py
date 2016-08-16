@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,9 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 from django import forms
+
 from CadVlan.messages import error_messages
 
 NETWORK_IP_CHOICES = ((0, "IPv4"), (1, "IPv6"))
@@ -77,6 +75,7 @@ class NetworkForm(forms.Form):
         0, "Selecione")], error_messages=error_messages, widget=forms.Select(attrs={"style": "width: 340px"}))
     cluster_unit = forms.CharField(
         label="Cluster Unit",
+        required=False,
         error_messages=error_messages,
         widget=forms.TextInput(
             attrs={
@@ -157,6 +156,7 @@ class NetworkEditForm(forms.Form):
 
     cluster_unit = forms.CharField(
         label="Cluster Unit",
+        required=False,
         error_messages=error_messages,
         widget=forms.TextInput(
             attrs={

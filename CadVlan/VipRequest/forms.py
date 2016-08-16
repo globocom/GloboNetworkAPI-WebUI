@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -16,123 +15,13 @@
 # limitations under the License.
 import logging
 
-from CadVlan.messages import error_messages
-from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
-from CadVlan.Util.forms import fields
-from CadVlan.Util.forms.customRenderer import RadioCustomRenderer
-from CadVlan.Util.forms.decorators import autostrip
-
 from django import forms
 
-
-@autostrip
-class RequestVipFormHealthcheck(forms.Form):
-
-    def __init__(self, healthcheck_list, healthcheck_options, *args, **kwargs):
-        super(RequestVipFormHealthcheck, self).__init__(*args, **kwargs)
-        self.fields['expect'].choices = [
-            (st['id'], st['expect_string']) for st in healthcheck_list]
-        self.fields['healthcheck_type'].choices = [
-            (healthcheck['name'], healthcheck['name']) for healthcheck in healthcheck_options]
-
-    healthcheck_type = forms.ChoiceField(label=u'Healthcheck', required=True, error_messages=error_messages,
-                                         widget=forms.RadioSelect(renderer=RadioCustomRenderer))
-    healthcheck = forms.CharField(label=u'Healthcheck', min_length=3, max_length=100, required=False,
-                                  error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 300px"}))
-    expect = forms.ChoiceField(label=u'HTTP Expect String', required=True, error_messages=error_messages,
-                               widget=forms.Select(attrs={"style": "width: 185px"}))
-    expect_new = forms.CharField(label=u'', required=False, widget=forms.TextInput(attrs={'style': "width: 185px"}),
-                                 error_messages=error_messages)
-    destination = forms.ChoiceField(label=u'Destination', required=True, error_messages=error_messages,
-                                    widget=forms.Select(attrs={"style": "width: 185px"}))
-
-    def clean(self):
-        cleaned_data = self.cleaned_data
-
-        healthcheck_type = cleaned_data.get("healthcheck_type")
-        healthcheck = cleaned_data.get("healthcheck")
-
-        if healthcheck_type == 'HTTP':
-            if healthcheck == "":
-                self._errors["healthcheck"] = self.error_class(
-                    ["Este campo é obrigatório com a opção HTTP selecionada."])
-        else:
-            cleaned_data["expect"] = None
-            cleaned_data["healthcheck"] = None
-
-        return cleaned_data
-
-
-@autostrip
-class RequestVipFormReal(forms.Form):
-
-    equip_name = forms.CharField(label=u'Buscar novo', min_length=3, required=False, widget=forms.TextInput(
-        attrs={'style': "width: 250px;", 'autocomplete': "off"}), error_messages=error_messages)
-
-    maxcon = forms.IntegerField(label=u'Número máximo de conexões (maxconn)', required=True,
-                                error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
-
-
-@autostrip
-class RequestVipFormIP(forms.Form):
-
-    CHOICES = (('0', 'Alocar automaticamente'), ('1', 'Especificar IP'))
-
-    ipv4_check = forms.BooleanField(
-        label=u'IPv4', required=False, error_messages=error_messages)
-    ipv4_type = forms.ChoiceField(
-        label=u'', required=False, error_messages=error_messages, choices=CHOICES, widget=forms.RadioSelect())
-    ipv4_specific = forms.CharField(
-        label=u'', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
-
-    ipv6_check = forms.BooleanField(
-        label=u'IPv6', required=False, error_messages=error_messages)
-    ipv6_type = forms.ChoiceField(
-        label=u'', required=False, error_messages=error_messages, choices=CHOICES, widget=forms.RadioSelect())
-    ipv6_specific = forms.CharField(
-        label=u'', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 231px"}))
-
-    def clean(self):
-        cleaned_data = self.cleaned_data
-
-        ipv4_check = cleaned_data.get("ipv4_check")
-        ipv6_check = cleaned_data.get("ipv6_check")
-
-        if not ipv4_check and not ipv6_check:
-            self._errors["ipv4_check"] = self.error_class(
-                ["Pelo menos uma opção de IP tem que ser selecionada"])
-
-        else:
-
-            if ipv4_check:
-
-                ipv4_type = cleaned_data.get("ipv4_type")
-                ipv4_specific = cleaned_data.get("ipv4_specific")
-
-                if ipv4_type == '1' and ipv4_specific is None:
-                    self._errors["ipv4_specific"] = self.error_class(
-                        ["Este campo é obrigatório com a opção Especificar IP selecionada."])
-
-                elif ipv4_type == '1' and ipv4_specific is not None:
-                    if not is_valid_ipv4(ipv4_specific):
-                        self._errors["ipv4_specific"] = self.error_class(
-                            ["Ip não informado ou informado de forma incorreta. IPv4 deve ser informado no formato xxx.xxx.xxx.xxx"])
-
-            if ipv6_check:
-
-                ipv6_type = cleaned_data.get("ipv6_type")
-                ipv6_specific = cleaned_data.get("ipv6_specific")
-
-                if ipv6_type == '1' and ipv6_specific is None:
-                    self._errors["ipv6_specific"] = self.error_class(
-                        ["Este campo é obrigatório com a opção Especificar IP selecionada."])
-
-                elif ipv6_type == '1' and ipv6_specific is not None:
-                    if not is_valid_ipv6(ipv6_specific):
-                        self._errors["ipv6_specific"] = self.error_class(
-                            ["Ip não informado ou informado de forma incorreta. IPv6 deve ser informado no formato xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx"])
-
-        return cleaned_data
+from CadVlan.messages import error_messages
+from CadVlan.Net.business import is_valid_ipv4
+from CadVlan.Net.business import is_valid_ipv6
+from CadVlan.Util.forms import fields
+from CadVlan.Util.forms.decorators import autostrip
 
 
 @autostrip
@@ -158,7 +47,7 @@ class PoolForm(forms.Form):
     identifier = forms.CharField(
         label=u'Identifier',
         min_length=3,
-        max_length=40,
+        max_length=200,
         required=True,
         error_messages=error_messages,
         widget=forms.TextInput(
@@ -311,12 +200,6 @@ class RequestVipBasicForm(forms.Form):
         widget=forms.HiddenInput(),
         error_messages=error_messages)
 
-    validated = forms.BooleanField(
-        label="",
-        required=False,
-        widget=forms.HiddenInput(),
-        error_messages=error_messages)
-
 
 @autostrip
 class RequestVipEnvironmentVipForm(forms.Form):
@@ -428,6 +311,65 @@ class RequestVipOptionVipForm(forms.Form):
         widget=forms.Select(attrs={
             "style": "width: 300px",
             'class': 'select2'}))
+
+
+@autostrip
+class RequestVipOptionVipEditForm(forms.Form):
+
+    logger = logging.getLogger(__name__)
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(RequestVipOptionVipEditForm, self).__init__(*args, **kwargs)
+
+        if forms_aux.get('timeout'):
+            self.fields['timeout'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["timeout"]]
+
+        if forms_aux.get('caches'):
+            self.fields['caches'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["caches"]]
+
+        if forms_aux.get('persistence'):
+            self.fields['persistence'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["persistence"]]
+
+        if forms_aux.get('trafficreturn'):
+            self.fields['trafficreturn'].choices = \
+                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["trafficreturn"]]
+
+    timeout = forms.ChoiceField(
+        label="Timeout",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    caches = forms.ChoiceField(
+        label="Grupos de caches",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2',
+            "readonly": "true"}))
+
+    persistence = forms.ChoiceField(
+        label="Persistência",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    trafficreturn = forms.ChoiceField(
+        label="Traffic Return",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2',
+            "readonly": "true"}))
 
 
 class RequestVipPortOptionVipForm(forms.Form):

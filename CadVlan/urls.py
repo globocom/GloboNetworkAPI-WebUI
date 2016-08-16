@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,11 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-from django.conf.urls.defaults import patterns, url
-from django.http import HttpResponse
 import settings
+from django.conf.urls.defaults import patterns
+from django.conf.urls.defaults import url
+from django.http import HttpResponse
 
 handler404 = 'CadVlan.Auth.views.handler404'
 handler500 = 'CadVlan.Auth.views.handler500'
@@ -493,40 +491,51 @@ urlpatterns += patterns(
         'ajax_popular_options', name='vip-request.options.ajax',),
     url('^vip-request/ajax_options/external[/]?$',
         'ajax_popular_options_external', name='vip-request.options.ajax.external',),
-    url('^vip-request/ajax_modal_real_server[/]?$',
-        'ajax_model_ip_real_server', name='vip-request.modal.real.server.ajax',),
-    url('^vip-request/ajax_modal_real_server/external[/]?$',
-        'ajax_model_ip_real_server_external', name='vip-request.modal.real.server.ajax.external',),
-    url('^vip-request/operation/ajax/(?P<id_vip>\d+)/(?P<operation>\d+)[/]?$',
-        'ajax_validate_create_remove', name='vip.ajax.create.validate.remove',),
-    url('^vip-request/tab/real-server/(?P<id_vip>\d+)[/]?$',
-        'tab_real_server', name='vip-request.tab.real.server',),
-    url('^vip-request/tab/real-server/(?P<id_vip>\d+)/status[/]?$',
-        'tab_real_server_status', name='vip-request.tab.real.server.status.edit',),
-    url('^vip-request/tab/real-server/(?P<id_vip>\d+)/status/(?P<status>enable|disable)[/]?$',
-        'status_real_server', name='vip-request.tab.real.server.status',),
-    url('^vip-request/tab/healthcheck/(?P<id_vip>\d+)[/]?$',
-        'tab_healthcheck', name='vip-request.tab.healthcheck',),
-    url('^vip-request/tab/maxcon/(?P<id_vip>\d+)[/]?$',
-        'tab_maxcon', name='vip-request.tab.maxcon',),
+    # url('^vip-request/ajax_modal_real_server[/]?$',
+    #     'ajax_model_ip_real_server', name='vip-request.modal.real.server.ajax',),
+    # url('^vip-request/ajax_modal_real_server/external[/]?$',
+    #     'ajax_model_ip_real_server_external', name='vip-request.modal.real.server.ajax.external',),
+    # url('^vip-request/operation/ajax/(?P<id_vip>\d+)/(?P<operation>\d+)[/]?$',
+    #     'ajax_validate_create_remove', name='vip.ajax.create.validate.remove',),
+    # url('^vip-request/tab/real-server/(?P<id_vip>\d+)[/]?$',
+    #     'tab_real_server', name='vip-request.tab.real.server',),
+    # url('^vip-request/tab/real-server/(?P<id_vip>\d+)/status[/]?$',
+    #     'tab_real_server_status', name='vip-request.tab.real.server.status.edit',),
+    # url('^vip-request/tab/real-server/(?P<id_vip>\d+)/status/(?P<status>enable|disable)[/]?$',
+    #     'status_real_server', name='vip-request.tab.real.server.status',),
+    # url('^vip-request/tab/healthcheck/(?P<id_vip>\d+)[/]?$',
+    #     'tab_healthcheck', name='vip-request.tab.healthcheck',),
+    # url('^vip-request/tab/maxcon/(?P<id_vip>\d+)[/]?$',
+    #     'tab_maxcon', name='vip-request.tab.maxcon',),
     # url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$',
     #     'tab_l7filter', name='vip-request.tab.l7filter',),
+    # url('^vip-request/pool_datatable/(?P<id_vip>\d+)[/]?$',
+    #     'pool_datatable', name='vip-request.pool_datatable',),
+    # url('^vip-request/ajax_rule[/]?$',
+    #     'ajax_popular_rule', name='vip-request.rule.ajax',),
+    # url('^vip-request/ajax_rule/external[/]?$',
+    #     'ajax_popular_rule_external', name='vip-request.rule.ajax.external',),
+    # list of pools by vip
+
+    # tab with data of vips
+    url('^vip-request/tab/edit/(?P<id_vip>\d+)[/]?$',
+        'tab_vip_edit', name='vip-request.tab.edit',),
+    # tab with vips assoc to pool
     url('^vip-request/tab/pools/(?P<id_vip>\d+)[/]?$',
         'tab_pools', name='vip-request.tab.pools',),
-    url('^vip-request/pool_datatable/(?P<id_vip>\d+)[/]?$', 'pool_datatable', name='vip-request.pool_datatable',),
-    url('^vip-request/ajax_rule[/]?$',
-        'ajax_popular_rule', name='vip-request.rule.ajax',),
-    url('^vip-request/ajax_rule/external[/]?$',
-        'ajax_popular_rule_external', name='vip-request.rule.ajax.external',),
-
+    # load pool for copy
     url('^vip-request/load/pool[/]?$',
         'load_pool_for_copy', name='vip-request.load.pool',),
+    # save new pool
     url('^vip-request/save/pool[/]?$',
         'save_pool', name='save.pool',),
+    # load new form pool
     url('^vip-request/load/new/pool[/]?$',
         'load_new_pool', name='vip-request.load.new.pool',),
+    # load option pool
     url('^vip-request/load/options/pool[/]?$',
         'load_options_pool', name='vip-request.load.options.pool',),
+    # load pool members
     url('^vip-request/list/pool/members/items/$',
         'pool_member_items', name='vip-request.members.items',),
 

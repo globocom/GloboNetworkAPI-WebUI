@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,11 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from django import forms
 
 from CadVlan.messages import error_messages
 from CadVlan.Util.forms.decorators import autostrip
-
-from django import forms
 
 
 class PoolForm(forms.Form):
@@ -117,7 +115,7 @@ class PoolFormV3(forms.Form):
     identifier = forms.CharField(
         label=u'Identifier',
         min_length=3,
-        max_length=40,
+        max_length=200,
         required=True,
         error_messages=error_messages,
         widget=forms.TextInput(

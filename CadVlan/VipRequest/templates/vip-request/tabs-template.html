@@ -21,20 +21,24 @@
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
 	{% block js %}
-		
+
 	{%endblock js %}
-	
+
 	$("#page_tab").tabs();
-	
+
 	{% block tab_select %}
 		$("#page_tab_lists").tabs();
 	{% endblock tab_select %}
 
+
+	$(".pools_tab").attr("href", "{% url vip-request.tab.pools idt %}");
+	$(".vip_edit_tab").attr("href", "{% url vip-request.tab.edit idt %}");
+
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 	$("#btn_sav").button("disable");
-	
+
 	{% has_perm VIP_ALTER_SCRIPT True True %}
 	{% if has_perm %}
 	$("#btn_sav").button("enable");
@@ -42,7 +46,7 @@ $(document).ready(function() {
 		location.reload();
 	});
 	{% endif %}
-	
+
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
 		location.href = "{% url vip-request.list %}";
 	});
@@ -56,12 +60,12 @@ $(document).ready(function() {
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes do Requisição VIP</a></li>
 	</ul>
-	
+
 	<div id="dialog-ip" title="Selecionar IP do Real Server">
 		<div id="ip-view">
 		</div>
 	</div>
-	
+
 	<div id="tabs-1">
 		{% csrf_token %}
 
@@ -95,28 +99,27 @@ $(document).ready(function() {
 				</tr>
 			</table>
 		</div>
-		
+
 		<div class="separator spacer"></div>
-		
+
 		<div>
-		
+
 			<div id="page_tab_lists">
 				<ul>
                     <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon" ></span><a href="#tabs-1" class="pools_tab">Pools</a></li>
-					<!--li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-3" class="l7-filter_tab">Filtro L7</a></li-->
-					
+					<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-2" class="vip_edit_tab">Vip</a></li>
 				</ul>
-				
+
 				{% block tab-data %}
-					
+
 				{% endblock %}
-				
+
 			</div>
-				
-					
+
+
 		</div>
 	</div>
-		
+
 </div>
-				
+
 {% endblock %}

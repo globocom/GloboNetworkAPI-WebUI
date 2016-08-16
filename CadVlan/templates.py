@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 
 
 LOGIN = 'login.html'
@@ -167,12 +165,8 @@ VIPREQUEST_FORM = 'vip-request/form.html'
 VIPREQUEST_FORM_EXTERNAL = 'vip-request/form-external.html'
 VIPREQUEST_EDIT = 'vip-request/edit.html'
 VIPREQUEST_EDIT_EXTERNAL = 'vip-request/edit-external.html'
-VIPREQUEST_TAB_REAL_SERVER = 'vip-request/tab-real-server.html'
-VIPREQUEST_TAB_REAL_SERVER_STATUS = 'vip-request/tab-real-server-status.html'
 VIPREQUEST_TAB_POOLS = 'vip-request/tab-pools.html'
-VIPREQUEST_TAB_HEALTHCHECK = 'vip-request/tab-healthcheck.html'
-VIPREQUEST_TAB_MAXCON = 'vip-request/tab-maxcon.html'
-VIPREQUEST_TAB_L7FILTER = 'vip-request/tab-l7-filter.html'
+VIPREQUEST_TAB_VIP_EDIT = 'vip-request/tab-vip-edit.html'
 VIPREQUEST_TOKEN = 'vip-request/token.json'
 VIPREQUEST_POOL_FORM = 'vip-request/form_pool.html'
 VIPREQUEST_POOL_OPTIONS = 'vip-request/options_pool.html'
@@ -230,12 +224,12 @@ POOL_SPM_DATATABLE = 'pool/spm_datatable.json'
 POOL_REQVIP_DATATABLE = 'pool/reqvip_datatable.json'
 POOL_MEMBER_ITEMS = 'pool/items.html'
 
-#Rack
+# Rack
 RACK_FORM = 'rack/form.html'
 RACK_VIEW_AJAX = 'rack/view-rack.html'
 RACK_EDIT = 'rack/edit.html'
 
-#System
+# System
 VARIABLES_FORM = 'system/form.html'
 VARIABLES_EDIT = 'system/edit.html'
 VARIABLES_LIST = 'system/list.html'
