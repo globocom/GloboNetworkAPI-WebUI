@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,22 +13,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
+import logging
 
-
-from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.forms import DeleteForm
-from CadVlan.messages import error_messages, environment_vip_messages
-from CadVlan.permissions import ENVIRONMENT_VIP
-from CadVlan.templates import ENVIRONMENTVIP_LIST, ENVIRONMENTVIP_FORM, ENVIRONMENTVIP_EDIT
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import redirect
+from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError
-import logging
+
+from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.EnvironmentVip.form import EnvironmentVipForm
+from CadVlan.forms import DeleteForm
+from CadVlan.messages import environment_vip_messages
+from CadVlan.messages import error_messages
+from CadVlan.permissions import ENVIRONMENT_VIP
+from CadVlan.templates import ENVIRONMENTVIP_CONF_FORM
+from CadVlan.templates import ENVIRONMENTVIP_EDIT
+from CadVlan.templates import ENVIRONMENTVIP_FORM
+from CadVlan.templates import ENVIRONMENTVIP_LIST
+from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import has_perm
+from CadVlan.Util.Decorators import log
+from CadVlan.Util.Decorators import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +138,7 @@ def delete_all(request):
                 messages.add_message(request, messages.WARNING, msg)
 
             # If all has ben removed
-            elif have_errors == False:
+            elif have_errors is False:
                 messages.add_message(
                     request, messages.SUCCESS, environment_vip_messages.get("success_remove"))
 
@@ -207,6 +214,35 @@ def add_form(request):
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(ENVIRONMENTVIP_FORM, lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ENVIRONMENT_VIP, "write": True}])
+def conf_form(request, id_environmentvip):
+
+    try:
+
+        lists = dict()
+        # Get user
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists['id_vip'] = id_environmentvip
+
+        environment_vip = client.create_api_environment_vip().get_environment_vip(
+            id_environmentvip,
+            fields=['id', 'conf']
+        ).get('environments_vip')[0]
+        conf = json.loads(environment_vip.get("conf"))
+
+        lists['forms'] = conf.get('conf')
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(ENVIRONMENTVIP_CONF_FORM, lists, context_instance=RequestContext(request))
 
 
 @log
@@ -290,12 +326,12 @@ def edit_form(request, id_environmentvip):
                 opts.append(opt.get('id'))
 
             lists['form'] = EnvironmentVipForm(options_vip, environmnet_list, initial={"id": environment_vip.get("id"),
-                                                                     "finality": environment_vip.get("finalidade_txt"),
-                                                                     "client": environment_vip.get("cliente_txt"),
-                                                                     "environment_p44": environment_vip.get("ambiente_p44_txt"),
-                                                                     "description": environment_vip.get("description"),
-                                                                     "option_vip": opts,
-                                                                     "environment": environment_id_related_list})
+                                                                                       "finality": environment_vip.get("finalidade_txt"),
+                                                                                       "client": environment_vip.get("cliente_txt"),
+                                                                                       "environment_p44": environment_vip.get("ambiente_p44_txt"),
+                                                                                       "description": environment_vip.get("description"),
+                                                                                       "option_vip": opts,
+                                                                                       "environment": environment_id_related_list})
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)

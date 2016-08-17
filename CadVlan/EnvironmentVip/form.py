@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,9 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 from django import forms
+
 from CadVlan.messages import error_messages
 
 
@@ -82,4 +80,101 @@ class EnvironmentVipForm(forms.Form):
         required=False,
         error_messages=error_messages,
         widget=forms.SelectMultiple(attrs={'style': "width: 310px"})
+    )
+
+
+class ConfValidationEnvironmentVipForm(forms.Form):
+
+    CONF_OPER = (("eq", "EQ"), ("ne", "NE"))
+    CONF_TYPE = (
+        ("optionvip", "Opção Vip")
+    )
+    CONF_VARIABLE = (
+        ("persistence", "Persistência"),
+        ("traffic_return", "Retorno de Trafego")
+    )
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(ConfValidationEnvironmentVipForm, self).__init__(*args, **kwargs)
+
+        if forms_aux.get('value'):
+            self.fields['value'].choices = \
+                [(env['tipo_opcao'], env["tipo_opcao"]) for env in forms_aux["value"]]
+
+    type = forms.ChoiceField(
+        label="Tipo de Dado",
+        required=True,
+        choices=CONF_TYPE,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 300px",
+                'class': 'select2'
+            }
+        )
+    )
+
+    variable = forms.ChoiceField(
+        label="Variável",
+        required=True,
+        choices=CONF_VARIABLE,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 300px",
+                'class': 'select2'
+            }
+        )
+    )
+
+    operator = forms.ChoiceField(
+        label="Operador",
+        required=True,
+        choices=CONF_OPER,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 300px",
+                'class': 'select2'
+            }
+        )
+    )
+    value = forms.ChoiceField(
+        label="Valor",
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 300px",
+                'class': 'select2'
+            }
+        )
+    )
+
+
+class ConfUseEnvironmentVipForm(forms.Form):
+    CONF_TYPE = (
+        ("profile", "Profile"),
+        ("translate_port_state", "Translate Port"),
+        ("persistence", "Persistência")
+    )
+
+    type = forms.ChoiceField(
+        label="Tipo de Dado",
+        required=True,
+        choices=CONF_TYPE,
+        error_messages=error_messages,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 300px",
+                'class': 'select2'
+            }
+        )
+    )
+
+    value = forms.CharField(
+        label=u'Valor',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.TextInput(attrs={'style': "width: 300px"})
     )

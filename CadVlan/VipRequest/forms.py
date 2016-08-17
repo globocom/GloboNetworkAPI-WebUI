@@ -339,7 +339,7 @@ class RequestVipOptionVipEditForm(forms.Form):
 
     timeout = forms.ChoiceField(
         label="Timeout",
-        required=False,
+        required=True,
         error_messages=error_messages,
         widget=forms.Select(attrs={
             "style": "width: 300px",
@@ -347,7 +347,7 @@ class RequestVipOptionVipEditForm(forms.Form):
 
     caches = forms.ChoiceField(
         label="Grupos de caches",
-        required=True,
+        required=False,
         error_messages=error_messages,
         widget=forms.Select(attrs={
             "style": "width: 300px",

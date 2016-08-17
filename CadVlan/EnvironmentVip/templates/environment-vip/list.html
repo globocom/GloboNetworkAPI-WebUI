@@ -23,7 +23,7 @@
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
 	oTable = $("#script_list").dataTable({
 		"aaSorting": [],
 		"bJQueryUI": true,
@@ -31,7 +31,7 @@ $(document).ready(function() {
 		"iDisplayLength": {% max_results %},
 		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 5 ] }]
 	});
-	
+
 	$("#checkAll").click( function() {
 		if ($(this).attr('checked')) {
 			$(":checkbox").attr("checked", true);
@@ -39,38 +39,41 @@ $(document).ready(function() {
 			$(":checkbox").attr("checked", false);
 		}
 	});
-	
+
 	$(".fg-button").live("click", function(){
 		$(":checkbox").attr("checked", false);
 		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
 		$("#checkAll").attr("checked", false);
 	});
-	
+
 	$("#page_tab").tabs();
-	
+
 	$("#tool").buttonset();
-	
+
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 		location.href = "{% url environment-vip.form %}";
 	});
-	
+
 	{% has_perm SCRIPT_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir o(s) Ambientes Vip selecionado(s)?')){ 
+		if (confirm('Deseja realmente excluir o(s) Ambientes Vip selecionado(s)?')){
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
 	});
 	{% endif %}
-	
+
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 		location.reload();
 	});
-	
+
 	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
 	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
-	
+
+	$(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false });
+	$(".btn_manager", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-wrench"}, text: false });
+
 	$(".expand").live("click", function() {
 		id = $(this).attr("lang");
 		if ($(".expandable_" + id).css("max-height") != "999999px") {
@@ -81,7 +84,7 @@ $(document).ready(function() {
 			$("div[lang=" + id + "]").css("background", "url(/media/img/max.png) transparent bottom center no-repeat");
 		}
 	});
-	
+
 })
 </script>
 {% endblock %}
@@ -136,12 +139,15 @@ $(document).ready(function() {
 							<table style="width: 100%;">
 								{% for option in evip.option_vip %}<tr><td>{{option}}</td></tr>{% endfor %}
 							</table>
-						
+
 							{% ifequal evip.is_more "True" %}</div><div class="expand" lang="{{ evip.id|escapejs }}"/>{% endifequal %}
 
 						</div>
 					</td>
-					<td class="text_center"><a href="{% url environment-vip.edit evip.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td class="text_center">
+						<a href="{% url environment-vip.edit evip.id %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a>
+						<a href="{% url environment-vip.conf.form evip.id %}" style="width: 20px; height: 20px;" class="btn_manager" title="Editar Conf">Conf</a>
+					</td>
 				</tr>
 				{% endfor %}
 			</tbody>

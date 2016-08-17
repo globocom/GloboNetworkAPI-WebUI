@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,17 +13,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.settings import MAX_RESULT_DEFAULT
-from CadVlan.Util.models import IncrementVarNode, Permission, PermissionExternal,\
-    PermissionMenu, SetVariable
-
 from django import template
 from django.core.serializers import serialize
 from django.db.models.query import QuerySet
 from django.template.defaultfilters import stringfilter
 from django.utils import simplejson
 from django.utils.safestring import mark_safe
+
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.settings import MAX_RESULT_DEFAULT
+from CadVlan.Util.models import IncrementVarNode
+from CadVlan.Util.models import Permission
+from CadVlan.Util.models import PermissionExternal
+from CadVlan.Util.models import PermissionMenu
+from CadVlan.Util.models import SetVariable
 
 register = template.Library()
 
@@ -155,3 +157,8 @@ def int_to_str(par_int):
 @register.filter
 def sum(value, value2=1):
     return int(value) + int(value2)
+
+
+@register.filter(name='get')
+def get(d, k):
+    return d.get(k, None)

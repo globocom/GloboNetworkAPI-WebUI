@@ -114,6 +114,7 @@ OPTIONVIP_FORM = 'option-vip/form.html'
 ENVIRONMENTVIP_LIST = 'environment-vip/list.html'
 ENVIRONMENTVIP_FORM = 'environment-vip/form.html'
 ENVIRONMENTVIP_EDIT = 'environment-vip/edit.html'
+ENVIRONMENTVIP_CONF_FORM = 'environment-vip/conf.html'
 
 # Group Equipment
 GROUP_EQUIPMENT_LIST = 'group-equip/list.html'

@@ -333,6 +333,8 @@ urlpatterns += patterns(
         name='environment-vip.form',),
     url('^environment-vip/form/(?P<id_environmentvip>\d+)[/]?$',
         'edit_form', name='environment-vip.edit',),
+    url('^environment-vip/conf/(?P<id_environmentvip>\d+)[/]?$',
+        'conf_form', name='environment-vip.conf.form',),
 
 )
 
