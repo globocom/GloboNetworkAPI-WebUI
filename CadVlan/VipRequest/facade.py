@@ -572,6 +572,11 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
 
         forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
+    default_l7_rule = None
+    for opt in lists_options['l7_rule']:
+        if opt['nome_opcao_txt'] == 'default_vip':
+            default_l7_rule = opt['id']
+
     # forms with data and request by POST
     form_basic = forms.RequestVipBasicForm(forms_aux, request.POST)
     form_environment = forms.RequestVipEnvironmentVipForm(forms_aux, request.POST)
@@ -659,7 +664,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                         pool_dict = {
                             "id": int(ports_vip_pool_id[i][j]) if ports_vip_pool_id[i][j] else None,
                             "server_pool": int(pool_ids[i][j]),
-                            "l7_rule": int(ports_vip_l7_rules[i][j]),
+                            "l7_rule": int(ports_vip_l7_rules[i][j]) if ports_vip_l7_rules[i][j] else default_l7_rule,
                             "order": ports_vip_l7_rules_orders[i][j] if ports_vip_l7_rules_orders[i][j] else None,
                             "l7_value": ports_vip_l7_rules_values[i][j] if ports_vip_l7_rules_values[i][j] else None
                         }
@@ -720,7 +725,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                     "id": int(ports_vip_pool_id[index][index_pool]) if ports_vip_pool_id[index][index_pool] else None,
                     "server_pool": pool_json,
                     "l7_rule": {
-                        "id": int(ports_vip_l7_rules[index][index_pool]),
+                        "id": int(ports_vip_l7_rules[index][index_pool]) if ports_vip_l7_rules[index][index_pool] else default_l7_rule,
                     },
                     "order": ports_vip_l7_rules_orders[index][index_pool] if ports_vip_l7_rules_orders[index][index_pool] else None,
                     "l7_value": ports_vip_l7_rules_values[index][index_pool] if ports_vip_l7_rules_values[index][index_pool] else None
@@ -815,6 +820,11 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
     forms_aux['l7_protocol'] = lists_options['l7_protocol']
     forms_aux['l7_rule'] = lists_options['l7_rule']
 
+    default_l7_rule = None
+    for opt in lists_options['l7_rule']:
+        if opt['nome_opcao_txt'] == 'default_vip':
+            default_l7_rule = opt['id']
+
     forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
     # forms with data and request by POST
@@ -852,7 +862,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
                         pool_dict = {
                             "id": int(ports_vip_pool_id[i][j]) if ports_vip_pool_id[i][j] else None,
                             "server_pool": int(pool_ids[i][j]),
-                            "l7_rule": int(ports_vip_l7_rules[i][j]),
+                            "l7_rule": int(ports_vip_l7_rules[i][j]) if ports_vip_l7_rules[i][j] else default_l7_rule,
                             "order": ports_vip_l7_rules_orders[i][j] if ports_vip_l7_rules_orders[i][j] else None,
                             "l7_value": ports_vip_l7_rules_values[i][j] if ports_vip_l7_rules_values[i][j] else None
                         }
@@ -898,7 +908,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
                     "id": int(ports_vip_pool_id[index][index_pool]) if ports_vip_pool_id[index][index_pool] else None,
                     "server_pool": pool_json,
                     "l7_rule": {
-                        "id": int(ports_vip_l7_rules[index][index_pool]),
+                        "id": int(ports_vip_l7_rules[index][index_pool]) if ports_vip_l7_rules[index][index_pool] else default_l7_rule,
                     },
                     "order": ports_vip_l7_rules_orders[index][index_pool] if ports_vip_l7_rules_orders[index][index_pool] else None,
                     "l7_value": ports_vip_l7_rules_values[index][index_pool] if ports_vip_l7_rules_values[index][index_pool] else None
