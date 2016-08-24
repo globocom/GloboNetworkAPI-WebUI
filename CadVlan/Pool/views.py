@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,36 +13,58 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import json
 import logging
 
-
-from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.forms import DeleteForm
-from CadVlan.messages import error_messages, healthcheck_messages, pool_messages
-from CadVlan.Pool import facade
-from CadVlan.Pool.forms import SearchPoolForm, PoolHealthcheckForm, PoolFormV3
-from CadVlan.permissions import POOL_MANAGEMENT, POOL_REMOVE_SCRIPT, POOL_CREATE_SCRIPT, POOL_ALTER_SCRIPT, \
-    HEALTH_CHECK_EXPECT, EQUIPMENT_MANAGEMENT, VIPS_REQUEST, ENVIRONMENT_MANAGEMENT
-from CadVlan.templates import POOL_LIST, POOL_FORM, POOL_SPM_DATATABLE, \
-    POOL_DATATABLE, AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML, POOL_REQVIP_DATATABLE, POOL_MEMBER_ITEMS, POOL_MANAGE_TAB1, \
-    POOL_MANAGE_TAB2, POOL_MANAGE_TAB3, POOL_MANAGE_TAB4
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.Decorators import has_perm, has_perm_external, log, login_required
-from CadVlan.Util.shortcuts import render_message_json
-from CadVlan.Util.utility import DataTablePaginator, get_param_in_request
-
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseServerError
-from django.shortcuts import redirect, render, render_to_response
+from django.http import HttpResponse
+from django.http import HttpResponseServerError
+from django.shortcuts import redirect
+from django.shortcuts import render
+from django.shortcuts import render_to_response
 from django.template import loader
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_exempt
-
 from networkapiclient.exception import NetworkAPIClientError
 from networkapiclient.Pagination import Pagination
+
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.forms import DeleteForm
+from CadVlan.messages import error_messages
+from CadVlan.messages import healthcheck_messages
+from CadVlan.messages import pool_messages
+from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT
+from CadVlan.permissions import HEALTH_CHECK_EXPECT
+from CadVlan.permissions import POOL_ALTER_SCRIPT
+from CadVlan.permissions import POOL_CREATE_SCRIPT
+from CadVlan.permissions import POOL_MANAGEMENT
+from CadVlan.permissions import POOL_REMOVE_SCRIPT
+from CadVlan.permissions import VIPS_REQUEST
+from CadVlan.Pool import facade
+from CadVlan.Pool.forms import PoolFormV3
+from CadVlan.Pool.forms import PoolHealthcheckForm
+from CadVlan.Pool.forms import SearchPoolForm
+from CadVlan.templates import AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML
+from CadVlan.templates import POOL_DATATABLE
+from CadVlan.templates import POOL_FORM
+from CadVlan.templates import POOL_LIST
+from CadVlan.templates import POOL_MANAGE_TAB1
+from CadVlan.templates import POOL_MANAGE_TAB2
+from CadVlan.templates import POOL_MANAGE_TAB3
+from CadVlan.templates import POOL_MANAGE_TAB4
+from CadVlan.templates import POOL_MEMBER_ITEMS
+from CadVlan.templates import POOL_REQVIP_DATATABLE
+from CadVlan.templates import POOL_SPM_DATATABLE
+from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import has_perm
+from CadVlan.Util.Decorators import has_perm_external
+from CadVlan.Util.Decorators import log
+from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.shortcuts import render_message_json
+from CadVlan.Util.utility import DataTablePaginator
+from CadVlan.Util.utility import get_param_in_request
 
 logger = logging.getLogger(__name__)
 
@@ -366,6 +387,7 @@ def edit_form(request, id_server_pool):
                         'port_real': obj_member['port_real'],
                         'weight': obj_member['weight'],
                         'id_ip': ip_obj.get('id'),
+                        'member_status': obj_member.get('member_status'),
                         'ip': ip_obj.get('ip_formated')
                     })
 
@@ -418,6 +440,7 @@ def edit_form(request, id_server_pool):
             members["weight"] = request.POST.getlist('weight')
             members["id_ips"] = request.POST.getlist('id_ip')
             members["ips"] = request.POST.getlist('ip')
+            members["member_status"] = request.POST.getlist('member_status')
             members["environment"] = environment_id
 
             healthcheck_choices = facade.populate_healthcheck_choices(client)

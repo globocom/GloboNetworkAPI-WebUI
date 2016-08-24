@@ -290,7 +290,7 @@
                             <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
                         </div>
                         {{ field }}
-                        {% if field.errors %} 
+                        {% if field.errors %}
                         <p id="error">
                             {% for error in field.errors %}
                                 {{ error|escape }}
@@ -307,7 +307,7 @@
                             <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
                         </div>
                         {{ field }}
-                        {% if field.errors %} 
+                        {% if field.errors %}
                         <p id="error">
                             {% for error in field.errors %}
                                 {{ error|escape }}
@@ -376,6 +376,7 @@
                                                     {% else %}
                                                         <input type='hidden' name='id_pool_member' value='' />
                                                     {% endif %}
+                                                <input type='hidden' name='member_status' value='{{field.member_status}}' />
                                             </td>
                                             <td>
                                                 <span class='ui-icon ui-icon-closethick' style="cursor: pointer;"></span>
@@ -398,9 +399,9 @@
                 </div>
             </div>
             <br>
-            
+
             <div class="separator spacer"></div>
-            
+
             <div class="buttons-l ui-widget-header">
                 <button id="btn_sav" type="submit">Gravar</button>
                 <button id="btn_can" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary">Cancelar</button>

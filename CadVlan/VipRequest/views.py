@@ -270,6 +270,7 @@ def tab_vip_edit(request, id_vip):
             lists['form_option'] = forms.RequestVipOptionVipEditForm(
                 forms_aux,
                 initial={
+                    "environment_vip": vip.get('environmentvip').get('id'),
                     "timeout": vip.get('options').get('timeout').get('id')
                     if vip.get('options').get('timeout') else None,
                     "persistence": vip.get('options').get('persistence').get('id')

@@ -337,6 +337,12 @@ class RequestVipOptionVipEditForm(forms.Form):
             self.fields['trafficreturn'].choices = \
                 [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["trafficreturn"]]
 
+    environment_vip = forms.IntegerField(
+        label="",
+        required=False,
+        widget=forms.HiddenInput(),
+        error_messages=error_messages)
+
     timeout = forms.ChoiceField(
         label="Timeout",
         required=True,
