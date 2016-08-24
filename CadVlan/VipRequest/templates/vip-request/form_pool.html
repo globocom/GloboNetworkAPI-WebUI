@@ -98,7 +98,7 @@
 
         $(".numbersOnly").live('focusout', function(){
             this_element = $(this);
-            $(this).next().click(function(){                
+            $(this).next().click(function(){
                 update_port_vips(this_element);
             });
         });
@@ -133,14 +133,14 @@
         });
 
         $("#table_real").off("click", "tbody tr span")
-        $("#table_real").on("change", "tbody tr span", function(e) {
+        $("#table_real").on("click", "tbody tr span", function(e) {
             if (confirm('Deseja realmente excluir o(s) Real selecionado(s)?')){
             $(this).parents(".remove_port").remove();
             return false;
             }
         });
 
-        $("body").off("click", "#id_environment")
+        $("body").off("change", "#id_environment")
         $("body").on("change", "#id_environment", function() {
             $('#id_healthcheck').html('<option value=""> - </option>');
 
@@ -220,7 +220,7 @@
                         <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
                     </div>
                     {{ field }}
-                    {% if field.errors %} 
+                    {% if field.errors %}
                     <p id="error">
                         {% for error in field.errors %}
                             {{ error|escape }}
@@ -237,7 +237,7 @@
                         <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
                     </div>
                     {{ field }}
-                    {% if field.errors %} 
+                    {% if field.errors %}
                     <p id="error">
                         {% for error in field.errors %}
                             {{ error|escape }}
