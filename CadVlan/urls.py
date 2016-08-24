@@ -464,11 +464,11 @@ urlpatterns += patterns(
         'ajax_view_vip', name='vip.view.ajax',),
 
 
-    url('^vip-request/operation/delete?$',
+    url('^vip-request/operation/delete[/]?$',
         'delete_vip', name='vip.delete',),
-    url('^vip-request/operation/create?$',
+    url('^vip-request/operation/create[/]?$',
         'create_vip', name='vip.create',),
-    url('^vip-request/operation/remove?$',
+    url('^vip-request/operation/remove[/]?$',
         'remove_vip', name='vip.remove',),
 
 

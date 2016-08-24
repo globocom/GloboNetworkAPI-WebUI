@@ -44,7 +44,6 @@ from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import CreateForm
 from CadVlan.forms import DeleteForm
 from CadVlan.forms import RemoveForm
-from CadVlan.forms import ValidateForm
 from CadVlan.Ldap.model import Ldap
 from CadVlan.Ldap.model import LDAPNotFoundError
 from CadVlan.messages import auth_messages
@@ -91,7 +90,6 @@ def search_list(request):
 
         lists = dict()
         lists["delete_form"] = DeleteForm()
-        lists["validate_form"] = ValidateForm()
         lists["create_form"] = CreateForm()
         lists["remove_form"] = RemoveForm()
         lists["search_form"] = forms.SearchVipRequestForm()
@@ -124,7 +122,7 @@ def ajax_view_vip(request, id_vip):
     {"permission": VIP_CREATE_SCRIPT, "write": True}
 ])
 def create_vip(request):
-    delete_validate_create_remove(request, 2)
+    delete_validate_create_remove(request, 1)
     # Redirect to list_all action
     return redirect('vip-request.list')
 
