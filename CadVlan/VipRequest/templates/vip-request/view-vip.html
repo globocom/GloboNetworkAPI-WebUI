@@ -119,6 +119,12 @@
 			{% endif %}
 		</tr>
 		<tr>
+			{% if vip.dscp %}
+			<td><label for="dscp">DSCP</label></td>
+				<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.dscp}}</label></td>
+			{% endif %}
+		</tr>
+		<tr>
 			<td><label for="persistencia">Persistencia</label></td>
 			{% if vip.options.persistence %}
 				<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.options.persistence.nome_opcao_txt}}</label></td>
