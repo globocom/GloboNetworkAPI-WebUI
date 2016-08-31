@@ -26,6 +26,12 @@
         }
     }
     $(document).ready(function() {
+
+        $("#id_identifier").keyup(function() {
+                var valor = $(this).val().replace(/[^0-9A-Za-z-_.]+/g,'');
+                $(this).val(valor);
+        });
+
         $('#id_environment').select2(select2_basic)
         $('#id_balancing').select2(select2_basic)
         $('#id_servicedownaction').select2(select2_basic)

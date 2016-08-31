@@ -64,6 +64,11 @@
 
     $(document).ready(function() {
 
+        $("#id_identifier").keyup(function() {
+                var valor = $(this).val().replace(/[^0-9A-Za-z-_.]+/g,'');
+                $(this).val(valor);
+        });
+
         var obj_btn_sav = $("#btn_sav");
         var obj_btn_can = $("#btn_can");
         var obj_btn_new_port = $("#btn_new_port");
