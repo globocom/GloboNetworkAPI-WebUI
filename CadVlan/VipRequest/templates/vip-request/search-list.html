@@ -291,15 +291,15 @@ input {
 			{% endif %}
 			{% has_perm VIP_CREATE_SCRIPT True None %}
 			{% if has_perm %}
-				<button id="btn_create">Criar VIP</button>
+				<button id="btn_create">Deploy VIP</button>
 			{% endif %}
 			{% has_perm VIP_REMOVE_SCRIPT True None %}
 			{% if has_perm %}
-				<button id="btn_remove">Remover VIP</button>
+				<button id="btn_remove">Undeploy VIP</button>
 			{% endif %}
 			{% has_perm VIPS_REQUEST True True %}
 			{% if has_perm %}
-				<button id="btn_del">Excluir</button>
+				<button id="btn_del">Excluir Registro</button>
 			{% endif %}
 			</span>
 		</div>
