@@ -30,9 +30,10 @@ function loadPoolMembers(){
             success: function(data, textStatus, xhr) {
                 if(xhr.status == 200) {
                     new_table = $(data)
+
                     new_table.find(".vip_port_pool_l7_rule").html(l7_rule.html());
-                    new_table.find(".vip_port_pool_l7_value").html(l7_rule_value.val());
-                    new_table.find(".vip_port_pool_l7_ordem").html(l7_order.val());
+                    //new_table.find(".vip_port_pool_l7_value").html(l7_rule_value.val());
+                    //new_table.find(".vip_port_pool_l7_ordem").html(l7_order.val());
                     new_table.find(".idsPool")
                         .attr('name', 'idsPool_'+portVip);
                     new_table.find(".ports_vip_pool_id")
@@ -51,15 +52,15 @@ function loadPoolMembers(){
                     }
                     if($('.ports_vip_ports[value='+portVip+']').length > 0){
                         tr = new_table.find('#vip_port_pool_'+poolId)
-                        
+
                         table = $('.ports_vip_ports[value='+portVip+']')
                             .parents("table:first")
                             .find('tbody:first');
-                        
+
                         table.append(tr)
 
                         td = table.find('tr:first').find('td');
-                        
+
                         td.attr('rowspan',parseInt(td.attr('rowspan'))+1);
 
                     }
@@ -182,7 +183,7 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
         var tokenId = $("#id_token").val();
         $.ajax({
                 url: "{% url vip-request.load.pool %}",
-                data: { 
+                data: {
                     pool_id: poolId,
                     is_copy: 1,
                     token: tokenId
