@@ -432,7 +432,7 @@ def _options(form):
     return options
 
 
-def _vip_dict(form, envvip, options, v4, v6, pools, vip_id):
+def _vip_dict(form, envvip, options, v4, v6, pools, groups_permissions, vip_id=None):
     vip = {
         "id": int(vip_id) if vip_id else None,
         "name": str(form.cleaned_data["name"]),
@@ -442,7 +442,8 @@ def _vip_dict(form, envvip, options, v4, v6, pools, vip_id):
         "ipv4": v4,
         "ipv6": v6,
         "ports": pools,
-        "options": options
+        "options": options,
+        "groups_permissions": groups_permissions
     }
     return vip
 
@@ -583,9 +584,10 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
     form_option = forms.RequestVipOptionVipForm(forms_aux, request.POST)
     form_port_option = forms.RequestVipPortOptionVipForm(forms_aux, request.POST)
     form_ip = forms.RequestVipIPForm(forms_aux, request.POST)
+    form_user_group = forms.RequestVipGroupUsersForm(forms_aux, request.POST)
 
     if form_basic.is_valid() and form_environment.is_valid() and form_option.is_valid() and \
-            form_ip.is_valid() and is_valid_ports and is_valid_pools:
+            form_ip.is_valid() and form_user_group.is_valid() and is_valid_ports and is_valid_pools:
 
         options = _options(form_option)
 
@@ -593,6 +595,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
         environment_vip = form_environment.cleaned_data["environment_vip"]
         ipv4_check = form_ip.cleaned_data["ipv4_check"]
         ipv6_check = form_ip.cleaned_data["ipv6_check"]
+        group_users = form_user_group.cleaned_data['group_users']
 
         ipv4 = None
         ipv6 = None
@@ -672,12 +675,23 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
 
                     pools.append(port_dict)
 
+                groups_permissions = []
+                if len(group_users) > 0:
+                    for id in group_users:
+                        groups_permissions.append({
+                            "group": int(id),
+                            "read": True,
+                            "write": True,
+                            "change_config": True,
+                            "delete": True
+                        })
+
                 if edit:
-                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
+                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, vip_id)
                     vip = client_api.create_api_vip_request().update_vip_request(vip, vip_id)
                     id_vip_created = vip_id
                 else:
-                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
+                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, vip_id)
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
                     id_vip_created = vip[0].get("id")
 
@@ -739,7 +753,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
     lists['form_option'] = form_option
     lists['form_port_option'] = form_port_option
     lists['form_ip'] = form_ip
-
+    # lists['form_group_users'] = groups_permissions
     return lists, is_valid, id_vip_created
 
 
@@ -1033,11 +1047,12 @@ def add_form_shared(request, client_api, form_acess="", external=False):
 
         if external:
             lists['token'] = form_acess.initial.get("token")
-
+        group_users_list = client_api.create_grupo_usuario().listar()
         finality_list = client_api.create_api_environment_vip().environmentvip_step()
 
         forms_aux = dict()
         forms_aux['finalities'] = finality_list
+        forms_aux['group_users'] = group_users_list
         forms_aux['pools'] = list()
 
         if request.method == "POST":
@@ -1075,6 +1090,7 @@ def add_form_shared(request, client_api, form_acess="", external=False):
             lists['form_option'] = forms.RequestVipOptionVipForm(forms_aux)
             lists['form_port_option'] = forms.RequestVipPortOptionVipForm(forms_aux)
             lists['form_ip'] = forms.RequestVipIPForm(forms_aux)
+            lists['form_group_users'] = forms.RequestVipGroupUsersForm(forms_aux)
 
     except NetworkAPIClientError, e:
         logger.error(e)

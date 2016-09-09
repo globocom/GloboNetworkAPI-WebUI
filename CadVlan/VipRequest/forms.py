@@ -202,6 +202,22 @@ class RequestVipBasicForm(forms.Form):
 
 
 @autostrip
+class RequestVipGroupUsersForm(forms.Form):
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(RequestVipGroupUsersForm, self).__init__(*args, **kwargs)
+
+        self.fields['group_users'].choices = [(gu["id"], gu["nome"]) for gu in forms_aux["group_users"]["user_group"]]
+
+    group_users = forms.MultipleChoiceField(
+        label=u'Grupo de usuários',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.SelectMultiple(attrs={'style': "width: 310px"})
+    )
+
+
+@autostrip
 class RequestVipEnvironmentVipForm(forms.Form):
 
     def __init__(self, forms_aux, *args, **kwargs):
