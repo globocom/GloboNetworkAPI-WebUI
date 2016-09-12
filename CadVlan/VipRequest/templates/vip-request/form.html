@@ -38,6 +38,24 @@ $(document).ready(function() {
     autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 
     $('.editable').editableTable();
+
+
+
+	$("#page_tab").tabs();
+
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url environment-vip.list %}";
+	});
+
+	$("#id_group_users").pickList();
+
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+
 })
 </script>
 {% endblock %}
@@ -80,6 +98,7 @@ $(document).ready(function() {
 
             <div style="margin-top:20px">
                 {% for field in form_group_users %}
+
                 <div>
                     <div>
                         <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>

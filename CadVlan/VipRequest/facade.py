@@ -753,7 +753,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
     lists['form_option'] = form_option
     lists['form_port_option'] = form_port_option
     lists['form_ip'] = form_ip
-    # lists['form_group_users'] = groups_permissions
+    lists['form_group_users'] = form_user_group
     return lists, is_valid, id_vip_created
 
 
@@ -1086,11 +1086,12 @@ def add_form_shared(request, client_api, form_acess="", external=False):
         else:
 
             lists['form_basic'] = forms.RequestVipBasicForm(forms_aux)
+            lists['form_group_users'] = forms.RequestVipGroupUsersForm(forms_aux)
+
             lists['form_environment'] = forms.RequestVipEnvironmentVipForm(forms_aux)
             lists['form_option'] = forms.RequestVipOptionVipForm(forms_aux)
             lists['form_port_option'] = forms.RequestVipPortOptionVipForm(forms_aux)
             lists['form_ip'] = forms.RequestVipIPForm(forms_aux)
-            lists['form_group_users'] = forms.RequestVipGroupUsersForm(forms_aux)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -1125,6 +1126,12 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
 
         vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
 
+        group_users_list_selected = []
+        for group in vip["groups_permissions"]:
+            group_users_list_selected.append(group["group"]["id"])
+
+        group_users_list = client_api.create_grupo_usuario().listar()
+
         if vip.get('created') is True:
             return redirect(reverse('vip-request.tab.edit', args=[id_vip]))
 
@@ -1133,6 +1140,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         forms_aux = dict()
         forms_aux['finalities'] = finality_list
         forms_aux['pools'] = list()
+        forms_aux['group_users'] = group_users_list
 
         if request.method == "POST":
 
@@ -1220,6 +1228,14 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
 
             forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
+            lists['form_group_users'] = forms.RequestVipGroupUsersForm(
+                forms_aux,
+                initial={
+                    "group_users": group_users_list_selected
+                }
+
+            )
+
             lists['form_basic'] = forms.RequestVipBasicForm(
                 forms_aux,
                 initial={
@@ -1290,6 +1306,8 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         messages.add_message(request, messages.ERROR, e)
 
     template = templates.VIPREQUEST_EDIT_EXTERNAL if external else templates.VIPREQUEST_FORM
+
+    logger.error(" XXXXX TEM " + template)
 
     return render_to_response(template, lists, context_instance=RequestContext(request))
 
