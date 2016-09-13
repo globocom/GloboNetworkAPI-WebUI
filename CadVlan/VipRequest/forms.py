@@ -579,6 +579,11 @@ class SearchVipRequestForm(forms.Form):
         required=False,
         error_messages=error_messages)
 
+    vip_with_onwer = forms.BooleanField(
+        label="Buscar apenas \"Meus\" vips",
+        required=False,
+        error_messages=error_messages)
+
     def clean(self):
         cleaned_data = super(SearchVipRequestForm, self).clean()
         ipv4 = cleaned_data.get("ipv4")

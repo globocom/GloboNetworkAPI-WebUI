@@ -876,6 +876,7 @@ def ajax_list_vips(request):
                 ipv4 = search_form.cleaned_data["ipv4"]
                 ipv6 = search_form.cleaned_data["ipv6"]
                 vip_created = search_form.cleaned_data["vip_created"]
+                vip_with_onwer = search_form.cleaned_data["vip_with_onwer"]
 
                 extends_search = dict()
                 if len(ipv4) > 0:
@@ -910,6 +911,9 @@ def ajax_list_vips(request):
                     extends_search.update({'created': vip_created})
                 if id_vip:
                     extends_search.update({"id": id_vip})
+                if vip_with_onwer:
+                    user = auth.get_user().get_id()
+                    extends_search.update({'viprequestgrouppermission__user_group__usuario': user})
 
                 # Pagination
                 column_index_name_map = {
