@@ -845,14 +845,15 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
     form_basic = forms.RequestVipBasicForm(forms_aux, request.POST)
     form_option = forms.RequestVipOptionVipEditForm(forms_aux, request.POST)
     form_port_option = forms.RequestVipPortOptionVipForm(forms_aux, request.POST)
+    form_user_group = forms.RequestVipGroupUsersForm(forms_aux, request.POST)
 
-    if form_basic.is_valid() and form_option.is_valid() and is_valid_ports and is_valid_pools:
+    if form_basic.is_valid() and form_option.is_valid() and form_user_group.is_valid() and is_valid_ports and is_valid_pools:
 
         options = _options(form_option)
-
         environment_vip = vip.get('environmentvip').get('id')
         ipv4 = vip.get('ipv4').get('id') if vip.get('ipv4') else None
         ipv6 = vip.get('ipv6').get('id') if vip.get('ipv6') else None
+        group_users = form_user_group.cleaned_data["group_users"]
 
         try:
 
@@ -884,7 +885,18 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
 
                     pools.append(port_dict)
 
-                vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
+                groups_permissions = []
+                if len(group_users) > 0:
+                    for id in group_users:
+                        groups_permissions.append({
+                            "group": int(id),
+                            "read": True,
+                            "write": True,
+                            "change_config": True,
+                            "delete": True
+                        })
+
+                vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, vip_id)
                 vip = client_api.create_api_vip_request().update_vip(vip, vip_id)
                 id_vip_created = vip_id
 
@@ -934,6 +946,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
     lists['form_basic'] = form_basic
     lists['form_option'] = form_option
     lists['form_port_option'] = form_port_option
+    lists['form_group_users'] = form_user_group
 
     return lists, is_valid, id_vip_created
 

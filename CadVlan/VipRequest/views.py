@@ -222,8 +222,13 @@ def tab_vip_edit(request, id_vip):
 
         vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
 
+        group_users_list = client_api.create_grupo_usuario().listar()
+        forms_aux['group_users'] = group_users_list
+
         if vip.get('created') is not True:
             return redirect(reverse('vip-request.edit', args=[id_vip]))
+
+        lists['vip'] = vip
 
         if request.method == 'POST':
             lists, is_valid, id_vip = facade._valid_form_and_submit_update(
@@ -257,6 +262,10 @@ def tab_vip_edit(request, id_vip):
             forms_aux['l7_rule'] = options_list['l7_rule']
             forms_aux['pools'] = pools
 
+            group_users_list_selected = []
+            for group in vip["groups_permissions"]:
+                group_users_list_selected.append(group["group"]["id"])
+
             lists['form_basic'] = forms.RequestVipBasicForm(
                 forms_aux,
                 initial={
@@ -265,6 +274,14 @@ def tab_vip_edit(request, id_vip):
                     "name": vip.get("name"),
                     "created": vip.get("created")
                 }
+            )
+
+            lists['form_group_users'] = forms.RequestVipGroupUsersForm(
+                forms_aux,
+                initial={
+                    "group_users": group_users_list_selected
+                }
+
             )
 
             lists['form_option'] = forms.RequestVipOptionVipEditForm(
@@ -286,8 +303,6 @@ def tab_vip_edit(request, id_vip):
 
             pools_add = vip.get("ports")
             lists['pools_add'] = pools_add
-
-            lists['vip'] = vip
 
     except VipNaoExisteError, e:
         logger.error(e)
