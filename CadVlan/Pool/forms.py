@@ -105,13 +105,12 @@ class PoolForm(forms.Form):
 class PoolFormV3(forms.Form):
 
     def __init__(self, enviroments_choices, optionsvips_choices,
-                 servicedownaction_choices, group_users, *args, **kwargs):
+                 servicedownaction_choices, *args, **kwargs):
         super(PoolFormV3, self).__init__(*args, **kwargs)
 
         self.fields['environment'].choices = enviroments_choices
         self.fields['balancing'].choices = optionsvips_choices
         self.fields['servicedownaction'].choices = servicedownaction_choices
-        self.fields['group_users'].choices = [(gu["id"], gu["nome"]) for gu in group_users["user_group"]]
 
     identifier = forms.CharField(
         label=u'Identifier',
@@ -185,6 +184,15 @@ class PoolFormV3(forms.Form):
                 "style": "width: 100px"}
         )
     )
+
+
+@autostrip
+class PoolGroupUsersForm(forms.Form):
+
+    def __init__(self, forms_aux, *args, **kwargs):
+        super(PoolGroupUsersForm, self).__init__(*args, **kwargs)
+
+        self.fields['group_users'].choices = [(gu["id"], gu["nome"]) for gu in forms_aux["user_group"]]
 
     group_users = forms.MultipleChoiceField(
         label=u'Grupo de usuários',
