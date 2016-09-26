@@ -97,25 +97,6 @@ $(document).ready(function() {
             </div>
 
             <div style="margin-top:20px">
-                {% for field in form_group_users %}
-
-                <div>
-                    <div>
-                        <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
-                    </div>
-                    {{ field }}
-                    {% if field.errors %}
-                    <p id="error">
-                        {% for error in field.errors %}
-                            {{ error|escape }}
-                        {% endfor %}
-                    </p>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-
-            <div style="margin-top:20px">
                 {% for field in form_environment %}
                 <div>
                     <div>
@@ -231,6 +212,25 @@ $(document).ready(function() {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div style="margin-top:20px">
+                {% for field in form_group_users %}
+
+                <div>
+                    <div>
+                        <label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+                    </div>
+                    {{ field }}
+                    {% if field.errors %}
+                    <p id="error">
+                        {% for error in field.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
 
             <div class="separator spacer"></div>
