@@ -199,12 +199,12 @@ input {
 
 				{% has_perm POOL_CREATE_SCRIPT True None %}
 				{% if has_perm %}
-					<button id="btn_create">Criar Pool</button>
+					<button id="btn_create">Deploy Pool</button>
 				{% endif %}
 
 				{% has_perm POOL_REMOVE_SCRIPT True None %}
 				{% if has_perm %}
-					<button id="btn_remove">Remover Pool</button>
+					<button id="btn_remove">Undeploy Pool</button>
 				{% endif %}
 				
 				<!-- check permissions to render button <Excluir> -->
@@ -214,7 +214,7 @@ input {
 				{% with has_perm as has_perm_pool_script_alter_write %}
 				
 				{% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
-					<button id="btn_del">Excluir</button>
+					<button id="btn_del">Excluir Registro</button>
 				{% endif %}
 				
 				{% endwith %}

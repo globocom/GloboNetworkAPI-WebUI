@@ -64,6 +64,11 @@
 
     $(document).ready(function() {
 
+        $("#id_identifier").keyup(function() {
+                var valor = $(this).val().replace(/[^0-9A-Za-z-_.]+/g,'');
+                $(this).val(valor);
+        });
+
         var obj_btn_sav = $("#btn_sav");
         var obj_btn_can = $("#btn_can");
         var obj_btn_new_port = $("#btn_new_port");
@@ -443,8 +448,8 @@
             <div class="separator spacer"></div>
 
             <div class="buttons-l ui-widget-header">
-                <button id="btn_sav" type="submit">Gravar</button>
-                <button id="btn_can" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary">Cancelar</button>
+                <button id="btn_sav" type="submit">Salvar</button>
+                <button id="btn_can" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary">Voltar</button>
             </div>
         </form>
     </div>

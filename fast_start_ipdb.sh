@@ -1,4 +1,6 @@
 #!/bin/bash
+# source venvs/env_ipdb/bin/activate
+
 echo "exporting NETWORKAPI_PDB"
 export NETWORKAPI_PDB=1
 echo "exporting NETWORKAPI_DEBUG"

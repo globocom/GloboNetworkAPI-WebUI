@@ -42,10 +42,10 @@ function loadPoolMembers(){
                         .val(l7_rule.val());
                     new_table.find(".ports_vip_l7_rules_orders")
                         .attr('name', 'ports_vip_l7_rules_orders_'+portVip)
-                        .val(l7_rule_value.val());
+                        .val(l7_order.val());
                     new_table.find(".ports_vip_l7_rules_values")
                         .attr('name', 'ports_vip_l7_rules_values_'+portVip)
-                        .val(l7_order.val());
+                        .val(l7_rule_value.val());
                     if($('#id_l7_rule_check:checked').length > 0){
                         new_table.find('.l7_rule').show()
                     }

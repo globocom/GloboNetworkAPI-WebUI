@@ -9,3 +9,5 @@ Documentation/_build/*
 *.idea
 .vagrant*
 .DS_STORE
+build
+GloboNetworkAPI-client-python/*

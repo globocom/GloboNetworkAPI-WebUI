@@ -118,22 +118,22 @@ $(document).ready(function() {
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			
 			{% if vlan.ativada == 'False'%}
-			<button id="btn_create" >Criar VLan L2</button>
+			<button id="btn_create" >Deploy VLan</button>
 			{% endif %}
 
 			{% if exists_not_active_network == 1 %}
-			<button id="btn_create_networks" >Criar Rede(s) (Deploy)</button>
+			<button id="btn_create_networks" >Deploy Rede</button>
 			{% endif%}
 
 			{% if exists_active_network == 1 %}
-			<button id="btn_remove_networks" >Remover Rede(s) (Deploy)</button>
+			<button id="btn_remove_networks" >Undeploy Rede</button>
 			{% endif%}
 			
 			<span id="tool">
-			<button id="btn_new" type="button">Alocar Nova Rede</button>
+			<button id="btn_new" type="button"> Nova Rede</button>
 			{% has_perm VLAN_MANAGEMENT True None %}
 			{% if has_perm %}
-			<button id="btn_del">Desalocar Rede(s)</button>
+			<button id="btn_del">Excluir Rede</button>
 			{% endif %}
 			</span>
 		</div>
