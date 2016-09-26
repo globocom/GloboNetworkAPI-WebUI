@@ -261,6 +261,7 @@ def tab_vip_edit(request, id_vip):
             forms_aux['l7_protocol'] = options_list['l7_protocol']
             forms_aux['l7_rule'] = options_list['l7_rule']
             forms_aux['pools'] = pools
+            forms_aux['overwrite'] = False
 
             group_users_list_selected = []
             for group in vip["groups_permissions"]:
@@ -278,6 +279,7 @@ def tab_vip_edit(request, id_vip):
 
             lists['form_group_users'] = forms.RequestVipGroupUsersForm(
                 forms_aux,
+                edit=True,
                 initial={
                     "group_users": group_users_list_selected
                 }

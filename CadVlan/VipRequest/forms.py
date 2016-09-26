@@ -204,16 +204,27 @@ class RequestVipBasicForm(forms.Form):
 @autostrip
 class RequestVipGroupUsersForm(forms.Form):
 
-    def __init__(self, forms_aux, *args, **kwargs):
+    def __init__(self, forms_aux, edit, *args, **kwargs):
         super(RequestVipGroupUsersForm, self).__init__(*args, **kwargs)
 
         self.fields['group_users'].choices = [(gu["id"], gu["nome"]) for gu in forms_aux["group_users"]["user_group"]]
+        if not edit:
+            del self.fields['overwrite']
+        else:
+            self.fields['overwrite'].check_test = False
 
     group_users = forms.MultipleChoiceField(
         label=u'Grupo de usuários',
         required=False,
         error_messages=error_messages,
         widget=forms.SelectMultiple(attrs={'style': "width: 310px"})
+    )
+
+    overwrite = forms.BooleanField(
+        label='Sobrescrever permissões?',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.CheckboxInput()
     )
 
 

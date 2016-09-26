@@ -263,7 +263,7 @@ def add_form(request):
                 servicedownaction_choices
             )
 
-            lists["form_group_users"] = PoolGroupUsersForm(group_users_list)
+            lists["form_group_users"] = PoolGroupUsersForm(group_users_list, False)
             lists["form_healthcheck"] = PoolHealthcheckForm()
 
         if request.method == 'POST':
@@ -297,7 +297,7 @@ def add_form(request):
                 request.POST
             )
 
-            form_group_users = PoolGroupUsersForm(group_users_list, request.POST)
+            form_group_users = PoolGroupUsersForm(group_users_list, False, request.POST)
 
             if form_pool.is_valid() and form_healthcheck.is_valid() and form_group_users.is_valid():
                 pool = dict()
@@ -319,6 +319,8 @@ def add_form(request):
                             "delete": True
                         })
                 pool["groups_permissions"] = groups_permissions
+                pool["permissions"] = {"replace": False}
+
                 pool["identifier"] = str(form_pool.cleaned_data['identifier'])
                 pool["default_port"] = int(form_pool.cleaned_data['default_port'])
                 pool["environment"] = int(form_pool.cleaned_data['environment'])
@@ -447,7 +449,7 @@ def edit_form(request, id_server_pool):
                 'group_users': group_users_list_selected
             }
 
-            lists["form_group_users"] = PoolGroupUsersForm(group_users_list, initial=form_initial)
+            lists["form_group_users"] = PoolGroupUsersForm(group_users_list, True, initial=form_initial)
 
             form_initial = {
                 'healthcheck': healthcheck,
@@ -492,7 +494,7 @@ def edit_form(request, id_server_pool):
                 request.POST
             )
 
-            form_group_users = PoolGroupUsersForm(group_users_list, request.POST)
+            form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
 
             if form_pool.is_valid() and form_healthcheck.is_valid() and form_group_users.is_valid():
                 pool = dict()
@@ -523,6 +525,7 @@ def edit_form(request, id_server_pool):
                             "delete": True
                         })
                 pool["groups_permissions"] = groups_permissions
+                pool["permissions"] = {"replace": form_group_users.cleaned_data['overwrite']}
 
                 client.create_pool().update_pool(pool, id_server_pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
@@ -543,7 +546,7 @@ def edit_form(request, id_server_pool):
             request.POST
         )
 
-        form_group_users = PoolGroupUsersForm(group_users_list, request.POST)
+        form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
 
         form_healthcheck = PoolHealthcheckForm(
             request.POST
@@ -639,6 +642,7 @@ def _get_opcoes_pool_by_ambiente(request, client_api):
     try:
         ambiente = get_param_in_request(request, 'id_environment')
         opcoes_pool = client_api.create_pool().get_opcoes_pool_by_environment(ambiente)
+
     except NetworkAPIClientError, e:
         logger.error(e)
 
@@ -1035,7 +1039,7 @@ def manage_tab3(request, id_server_pool):
                 servicedownaction_choices,
                 request.POST)
 
-            form_group_users = PoolGroupUsersForm(group_users_list, request.POST)
+            form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
 
             form_healthcheck = PoolHealthcheckForm(
                 healthcheck_choices,
@@ -1056,8 +1060,10 @@ def manage_tab3(request, id_server_pool):
                             "change_config": True,
                             "delete": True
                         })
+                overwrite = form_group_users.cleaned_data['overwrite']
+
                 pool = format_pool(client, form, members, healthcheck,
-                                   servicedownaction, groups_permissions, int(id_server_pool))
+                                   servicedownaction, groups_permissions, overwrite, int(id_server_pool))
                 client.create_pool().deploy_update_pool(pool, id_server_pool)
 
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
@@ -1089,7 +1095,7 @@ def manage_tab3(request, id_server_pool):
 
             }
 
-            form_group_users = PoolGroupUsersForm(group_users_list, initial=form_initial_gu)
+            form_group_users = PoolGroupUsersForm(group_users_list, True, initial=form_initial_gu)
 
             form_initial_hc = {
                 'healthcheck': healthcheck,
@@ -1112,7 +1118,7 @@ def manage_tab3(request, id_server_pool):
             servicedownaction_choices,
             request.POST)
 
-        form_group_users = PoolGroupUsersForm(group_users_list, request.POST)
+        form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
 
     lists["form_pool"] = form
     lists["form_healthcheck"] = form_healthcheck
@@ -1176,7 +1182,7 @@ def manage_tab4(request, id_server_pool):
     return render_to_response(POOL_MANAGE_TAB4, lists, context_instance=RequestContext(request))
 
 
-def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, groups_permissions, pool_id=None):
+def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, groups_permissions, overwrite, pool_id=None):
 
     pool = dict()
     pool["id"] = pool_id
@@ -1189,6 +1195,7 @@ def format_pool(client, form, server_pool_members, healthcheck, servicedownactio
     pool["default_limit"] = int(form.cleaned_data['maxcon'])
     pool["server_pool_members"] = server_pool_members
     pool["groups_permissions"] = groups_permissions
+    pool["permissions"] = {"replace": overwrite}
     for member in server_pool_members:
         member['limit'] = pool['default_limit']
 

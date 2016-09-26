@@ -432,7 +432,7 @@ def _options(form):
     return options
 
 
-def _vip_dict(form, envvip, options, v4, v6, pools, groups_permissions, vip_id=None):
+def _vip_dict(form, envvip, options, v4, v6, pools, groups_permissions, overwrite, vip_id=None):
     vip = {
         "id": int(vip_id) if vip_id else None,
         "name": str(form.cleaned_data["name"]),
@@ -443,7 +443,8 @@ def _vip_dict(form, envvip, options, v4, v6, pools, groups_permissions, vip_id=N
         "ipv6": v6,
         "ports": pools,
         "options": options,
-        "groups_permissions": groups_permissions
+        "groups_permissions": groups_permissions,
+        "permissions": {"replace": overwrite}
     }
     return vip
 
@@ -584,7 +585,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
     form_option = forms.RequestVipOptionVipForm(forms_aux, request.POST)
     form_port_option = forms.RequestVipPortOptionVipForm(forms_aux, request.POST)
     form_ip = forms.RequestVipIPForm(forms_aux, request.POST)
-    form_user_group = forms.RequestVipGroupUsersForm(forms_aux, request.POST)
+    form_user_group = forms.RequestVipGroupUsersForm(forms_aux, edit, request.POST)
 
     if form_basic.is_valid() and form_environment.is_valid() and form_option.is_valid() and \
             form_ip.is_valid() and form_user_group.is_valid() and is_valid_ports and is_valid_pools:
@@ -596,6 +597,10 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
         ipv4_check = form_ip.cleaned_data["ipv4_check"]
         ipv6_check = form_ip.cleaned_data["ipv6_check"]
         group_users = form_user_group.cleaned_data['group_users']
+        if edit:
+            overwrite = form_user_group.cleaned_data['overwrite']
+        else:
+            overwrite = False
 
         ipv4 = None
         ipv6 = None
@@ -687,11 +692,11 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                         })
 
                 if edit:
-                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, vip_id)
+                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, overwrite, vip_id)
                     vip = client_api.create_api_vip_request().update_vip_request(vip, vip_id)
                     id_vip_created = vip_id
                 else:
-                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, vip_id)
+                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, overwrite, vip_id)
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
                     id_vip_created = vip[0].get("id")
 
@@ -845,7 +850,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
     form_basic = forms.RequestVipBasicForm(forms_aux, request.POST)
     form_option = forms.RequestVipOptionVipEditForm(forms_aux, request.POST)
     form_port_option = forms.RequestVipPortOptionVipForm(forms_aux, request.POST)
-    form_user_group = forms.RequestVipGroupUsersForm(forms_aux, request.POST)
+    form_user_group = forms.RequestVipGroupUsersForm(forms_aux, True, request.POST)
 
     if form_basic.is_valid() and form_option.is_valid() and form_user_group.is_valid() and is_valid_ports and is_valid_pools:
 
@@ -854,6 +859,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
         ipv4 = vip.get('ipv4').get('id') if vip.get('ipv4') else None
         ipv6 = vip.get('ipv6').get('id') if vip.get('ipv6') else None
         group_users = form_user_group.cleaned_data["group_users"]
+        overwrite = form_user_group.cleaned_data["overwrite"]
 
         try:
 
@@ -896,7 +902,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
                             "delete": True
                         })
 
-                vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, vip_id)
+                vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, overwrite, vip_id)
                 vip = client_api.create_api_vip_request().update_vip(vip, vip_id)
                 id_vip_created = vip_id
 
@@ -1099,7 +1105,7 @@ def add_form_shared(request, client_api, form_acess="", external=False):
         else:
 
             lists['form_basic'] = forms.RequestVipBasicForm(forms_aux)
-            lists['form_group_users'] = forms.RequestVipGroupUsersForm(forms_aux)
+            lists['form_group_users'] = forms.RequestVipGroupUsersForm(forms_aux, edit=False)
 
             lists['form_environment'] = forms.RequestVipEnvironmentVipForm(forms_aux)
             lists['form_option'] = forms.RequestVipOptionVipForm(forms_aux)
@@ -1243,6 +1249,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
 
             lists['form_group_users'] = forms.RequestVipGroupUsersForm(
                 forms_aux,
+                edit=True,
                 initial={
                     "group_users": group_users_list_selected
                 }
