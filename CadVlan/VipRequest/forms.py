@@ -590,6 +590,14 @@ class SearchVipRequestForm(forms.Form):
         error_messages=error_messages,
         widget=forms.HiddenInput())
 
+    hostname = forms.CharField(
+        label="Host",
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={"style": "width: 240px"})
+    )
+
     vip_created = forms.BooleanField(
         label="Buscar apenas vips criados",
         required=False,

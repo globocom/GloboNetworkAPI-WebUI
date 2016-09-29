@@ -16,6 +16,7 @@
 import base64
 import hashlib
 import logging
+import socket
 import re
 from time import strftime
 
@@ -892,9 +893,12 @@ def ajax_list_vips(request):
                 ipv6 = search_form.cleaned_data["ipv6"]
                 vip_created = search_form.cleaned_data["vip_created"]
                 vip_with_onwer = search_form.cleaned_data["vip_with_onwer"]
+                hostname = search_form.cleaned_data["hostname"]
 
                 extends_search = dict()
-                if len(ipv4) > 0:
+                if hostname:
+                    extends_search.update(prepare_hostname(hostname))
+                elif len(ipv4) > 0:
                     if request.GET["oct1"]:
                         extends_search.update({'ipv4__oct1': request.GET["oct1"]})
                     if request.GET["oct2"]:
@@ -904,7 +908,6 @@ def ajax_list_vips(request):
                     if request.GET["oct4"]:
                         extends_search.update({'ipv4__oct4': request.GET["oct4"]})
                 elif len(ipv6) > 0:
-                    extends_search = dict()
                     if request.GET["oct1"]:
                         extends_search.update({'ipv6__block1__iexact': request.GET["oct1"]})
                     if request.GET["oct2"]:
@@ -1000,3 +1003,19 @@ def ajax_list_vips(request):
     except BaseException, error:
         logger.error(error)
         return HttpResponseServerError(error, mimetype='application/javascript')
+
+
+def prepare_hostname(hostname):
+    try:
+        ip = socket.gethostbyname(hostname).split('.')
+        octs = {
+            'ipv4__oct1': ip[0],
+            'ipv4__oct2': ip[1],
+            'ipv4__oct3': ip[2],
+            'ipv4__oct4': ip[3]
+        }
+
+        return octs
+
+    except:
+        raise Exception('Não suportado')

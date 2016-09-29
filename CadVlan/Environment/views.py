@@ -83,6 +83,7 @@ def remove_environment(request):
             # Get user
             auth = AuthSession(request.session)
             client_env = auth.get_clientFactory().create_ambiente()
+            client_api_env = auth.get_clientFactory().create_api_environment()
             client_vlan = auth.get_clientFactory().create_vlan()
 
             # All ids to be removed
@@ -107,7 +108,7 @@ def remove_environment(request):
                         id_env).get("ambiente")
 
                     # Remove environment and its dependencies
-                    client_env.remover(id_env)
+                    client_api_env.delete_environment(id_env)
 
                     # Remove acl's
                     user = auth.get_user()
@@ -340,10 +341,10 @@ def insert_ambiente(request):
         templates = get_templates(auth.get_user(), True)
         ipv4 = templates["ipv4"]
         ipv6 = templates["ipv6"]
-
+        envs = client.create_ambiente().listar().get('ambiente')
         # Forms
         lists['ambiente'] = AmbienteForm(
-            env_logic, division_dc, group_l3, filters, ipv4, ipv6)
+            env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs)
         lists['divisaodc_form'] = DivisaoDCForm()
         lists['grupol3_form'] = Grupol3Form()
         lists['ambientelogico_form'] = AmbienteLogicoForm()
@@ -355,7 +356,7 @@ def insert_ambiente(request):
 
             # Set data in form
             ambiente_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, request.POST)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, request.POST)
 
             # Return data to form in case of error
             lists['ambiente'] = ambiente_form
@@ -367,13 +368,12 @@ def insert_ambiente(request):
                 ambiente_logico = ambiente_form.cleaned_data['ambiente_logico']
                 grupo_l3 = ambiente_form.cleaned_data['grupol3']
                 filter_ = ambiente_form.cleaned_data['filter']
-                if str(filter_) == str(None):
-                    filter_ = None
                 link = ambiente_form.cleaned_data['link']
                 acl_path = ambiente_form.cleaned_data['acl_path']
                 vrf = ambiente_form.cleaned_data['vrf']
                 if str(vrf) == str(None):
                     vrf = None
+                father_environment = ambiente_form.cleaned_data['father_environment']
 
                 ipv4_template = ambiente_form.cleaned_data.get(
                     'ipv4_template', None)
@@ -390,9 +390,25 @@ def insert_ambiente(request):
                     'max_num_vlan_2', None)
 
                 # Business
-                client.create_ambiente().inserir(grupo_l3, ambiente_logico, divisao_dc, link, filter_,
-                                                 acl_path, ipv4_template, ipv6_template, min_num_vlan_1,
-                                                 max_num_vlan_1, min_num_vlan_2, max_num_vlan_2, vrf)
+                dict_env = {
+                    "id": None,
+                    "grupo_l3": int(grupo_l3),
+                    "ambiente_logico": int(ambiente_logico),
+                    "divisao_dc": int(divisao_dc),
+                    "filter": int(filter_) if filter_ else None,
+                    "acl_path": acl_path,
+                    "ipv4_template": ipv4_template,
+                    "ipv6_template": ipv6_template,
+                    "link": link,
+                    "min_num_vlan_1": min_num_vlan_1,
+                    "max_num_vlan_1": max_num_vlan_1,
+                    "min_num_vlan_2": min_num_vlan_2,
+                    "max_num_vlan_2": max_num_vlan_2,
+                    "vrf": vrf,
+                    "father_environment": int(father_environment)
+                    if father_environment else None
+                }
+                client.create_api_environment().create_environment(dict_env)
                 messages.add_message(
                     request, messages.SUCCESS, environment_messages.get("success_insert"))
 
@@ -445,9 +461,11 @@ def edit(request, id_environment):
         ipv4 = templates["ipv4"]
         ipv6 = templates["ipv6"]
 
+        envs = client.create_ambiente().listar().get('ambiente')
+
         try:
-            env = client.create_ambiente().buscar_por_id(id_environment)
-            env = env.get("ambiente")
+            env = client.create_api_environment().get_environment(id_environment)
+            env = env.get("environments")[0]
         except NetworkAPIClientError, e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
@@ -456,26 +474,31 @@ def edit(request, id_environment):
         lists['id_environment'] = env.get("id")
 
         # Set Environment data
-        initial = {"id_env": env.get("id"), "divisao": env.get("id_divisao"),
-                   "ambiente_logico": env.get("id_ambiente_logico"),
-                   "grupol3": env.get("id_grupo_l3"),
-                   "filter": env.get("id_filter"),
-                   "acl_path": env.get("acl_path"),
-                   "vrf": env.get("vrf"),
-                   "ipv4_template": env.get("ipv4_template"),
-                   "ipv6_template": env.get("ipv6_template"),
-                   "min_num_vlan_1": env.get("min_num_vlan_1"),
-                   "max_num_vlan_1": env.get("max_num_vlan_1"),
-                   "min_num_vlan_2": env.get("min_num_vlan_2"),
-                   "max_num_vlan_2": env.get("max_num_vlan_2"),
-                   'link': env.get('link')}
+        initial = {
+            "id_env": env.get("id"),
+            "divisao": env.get("grupo_l3"),
+            "ambiente_logico": env.get("ambiente_logico"),
+            "grupol3": env.get("grupo_l3"),
+            "filter": env.get("filter"),
+            "acl_path": env.get("acl_path"),
+            "vrf": env.get("vrf"),
+            "ipv4_template": env.get("ipv4_template"),
+            "ipv6_template": env.get("ipv6_template"),
+            "min_num_vlan_1": env.get("min_num_vlan_1"),
+            "max_num_vlan_1": env.get("max_num_vlan_1"),
+            "min_num_vlan_2": env.get("min_num_vlan_2"),
+            "max_num_vlan_2": env.get("max_num_vlan_2"),
+            'link': env.get('link'),
+            'father_environment': env.get('father_environment'),
+        }
         env_form = AmbienteForm(
-            env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
+            env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, initial=initial)
 
         # Forms
         lists['ambiente'] = env_form
         lists['divisaodc_form'] = DivisaoDCForm(
-            initial={"id_env": id_environment})
+            initial={"id_env": id_environment}
+        )
         lists['grupol3_form'] = Grupol3Form(initial={"id_env": id_environment})
         lists['ambientelogico_form'] = AmbienteLogicoForm(
             initial={"id_env": id_environment})
@@ -486,7 +509,7 @@ def edit(request, id_environment):
 
             # Set data in form
             ambiente_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, request.POST)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, request.POST)
 
             # Return data to form in case of error
             lists['ambiente'] = ambiente_form
@@ -499,11 +522,10 @@ def edit(request, id_environment):
                 ambiente_logico = ambiente_form.cleaned_data['ambiente_logico']
                 grupo_l3 = ambiente_form.cleaned_data['grupol3']
                 filter_ = ambiente_form.cleaned_data['filter']
-                if str(filter_) == str(None):
-                    filter_ = None
                 link = ambiente_form.cleaned_data['link']
                 vrf = ambiente_form.cleaned_data['vrf']
                 acl_path = ambiente_form.cleaned_data['acl_path']
+                father_environment = ambiente_form.cleaned_data['father_environment']
 
                 ipv4_template = ambiente_form.cleaned_data.get(
                     'ipv4_template', None)
@@ -520,9 +542,25 @@ def edit(request, id_environment):
                     'max_num_vlan_2', None)
 
                 # Business
-                client.create_ambiente().alterar(id_env, grupo_l3, ambiente_logico, divisao_dc,
-                                                 link, filter_, acl_path, ipv4_template, ipv6_template,
-                                                 min_num_vlan_1, max_num_vlan_1, min_num_vlan_2, max_num_vlan_2, vrf)
+                dict_env = {
+                    "id": int(id_env),
+                    "grupo_l3": int(grupo_l3),
+                    "ambiente_logico": int(ambiente_logico),
+                    "divisao_dc": int(divisao_dc),
+                    "filter": int(filter_) if filter_ else None,
+                    "acl_path": acl_path,
+                    "ipv4_template": ipv4_template,
+                    "ipv6_template": ipv6_template,
+                    "link": link,
+                    "min_num_vlan_1": min_num_vlan_1,
+                    "max_num_vlan_1": max_num_vlan_1,
+                    "min_num_vlan_2": min_num_vlan_2,
+                    "max_num_vlan_2": max_num_vlan_2,
+                    "vrf": vrf,
+                    "father_environment": int(father_environment) if father_environment else None
+                }
+                client.create_api_environment().update_environment(dict_env, id_env)
+
                 messages.add_message(
                     request, messages.SUCCESS, environment_messages.get("success_edit"))
 
@@ -589,9 +627,10 @@ def insert_grupo_l3(request):
             templates = get_templates(auth.get_user(), True)
             ipv4 = templates["ipv4"]
             ipv6 = templates["ipv6"]
+            envs = client.create_ambiente().listar().get('ambiente')
             # Forms
             env_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs)
             div_form = DivisaoDCForm()
             amb_form = AmbienteLogicoForm()
             action = reverse("environment.form")
@@ -608,7 +647,7 @@ def insert_grupo_l3(request):
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -682,10 +721,11 @@ def insert_divisao_dc(request):
             templates = get_templates(auth.get_user(), True)
             ipv4 = templates["ipv4"]
             ipv6 = templates["ipv6"]
+            envs = client.create_ambiente().listar().get('ambiente')
 
             # Forms
             env_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs)
             gro_form = Grupol3Form()
             amb_form = AmbienteLogicoForm()
             action = reverse("environment.form")
@@ -702,7 +742,7 @@ def insert_divisao_dc(request):
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, initial=initial)
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -775,10 +815,11 @@ def insert_ambiente_logico(request):
             templates = get_templates(auth.get_user(), True)
             ipv4 = templates["ipv4"]
             ipv6 = templates["ipv6"]
+            envs = client.create_ambiente().listar().get('ambiente')
 
             # Forms
             env_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs)
             div_form = DivisaoDCForm()
             gro_form = Grupol3Form()
             action = reverse("environment.form")
@@ -795,7 +836,7 @@ def insert_ambiente_logico(request):
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])

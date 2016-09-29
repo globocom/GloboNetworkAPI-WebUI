@@ -263,6 +263,7 @@ input {
 							<tr>
 								<th>Id Requisição</th>
 								<th>IP <label for="ip_v4"><input type="radio" id="ip_v4" name="ip_version" checked="checked" value="0" />IPv4</label> <label for="ip_v6"><input type="radio" id="ip_v6" name="ip_version" value="1" />IPv6</label></th>
+								<th>Hostname</th>
 								<th></th>
 								<th></th>
 								<th></th>
@@ -295,6 +296,7 @@ input {
 									<label style="display: none;" class="ipv6">:</label>
 									<input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, false)" />
 								</td>
+								<td>{{ search_form.hostname }}</td>
 								<td>{{ search_form.vip_created }}<label for="id_vip_created"> Buscar apenas Vips criados</label>
 								<td>{{ search_form.vip_with_onwer }}<label for="id_vip_with_onwer">{{ search_form.vip_with_onwer.label_tag }}</label>
 								</td>

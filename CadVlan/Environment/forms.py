@@ -19,8 +19,6 @@
 from django import forms
 from CadVlan.messages import error_messages, environment_messages
 from CadVlan.Util.utility import check_regex
-import types
-from django.forms.util import ErrorList
 
 
 NETWORK_IP_CHOICES = (("v4", "IPv4"), ("v6", "IPv6"))
@@ -39,6 +37,7 @@ class DivisaoDCForm(forms.Form):
         return self.cleaned_data['nome']
     """
 
+
 class Grupol3Form(forms.Form):
     id_env = forms.IntegerField(
         label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
@@ -51,6 +50,7 @@ class Grupol3Form(forms.Form):
 
         return self.cleaned_data['nome']
     """
+
 
 class AmbienteLogicoForm(forms.Form):
     id_env = forms.IntegerField(
@@ -65,9 +65,10 @@ class AmbienteLogicoForm(forms.Form):
         return self.cleaned_data['nome']
     """
 
+
 class AmbienteForm(forms.Form):
 
-    def __init__(self, env_logic, division_dc, group_l3, filters, ipv4, ipv6, *args, **kwargs):
+    def __init__(self, env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, *args, **kwargs):
         super(AmbienteForm, self).__init__(*args, **kwargs)
         self.fields['divisao'].choices = [
             (div['id'], div['nome']) for div in division_dc["division_dc"]]
@@ -77,43 +78,173 @@ class AmbienteForm(forms.Form):
             (grupo['id'], grupo['nome']) for grupo in group_l3["group_l3"]]
         self.fields['filter'].choices = [
             (filter_['id'], filter_['name']) for filter_ in filters["filter"]]
-        self.fields['filter'].choices.insert(0, (None, '--------'))
+        self.fields['filter'].choices.insert(0, ('', '--------'))
         self.fields['ipv4_template'].choices = [
             (template['name'], template['name']) for template in ipv4]
         self.fields['ipv4_template'].choices.insert(0, ('', '--------'))
         self.fields['ipv6_template'].choices = [
             (template['name'], template['name']) for template in ipv6]
         self.fields['ipv6_template'].choices.insert(0, ('', '--------'))
+        self.fields['father_environment'].choices = [
+            (env['id'], '%s - %s - %s' % (
+                env['nome_divisao'],
+                env['nome_ambiente_logico'],
+                env['nome_grupo_l3'])) for env in envs]
+        self.fields['father_environment'].choices.insert(0, ('', '--------'))
 
     id_env = forms.IntegerField(
-        label="", required=False, widget=forms.HiddenInput(), error_messages=error_messages)
-    divisao = forms.ChoiceField(label="Divisão DC", choices=[(0, 'Selecione')], required=True, widget=forms.Select(
-        attrs={'style': "width: 160px"}), error_messages=error_messages)
-    ambiente_logico = forms.ChoiceField(label="Ambiente Lógico", required=True, choices=[(
-        0, 'Selecione')], widget=forms.Select(attrs={'style': "width: 210px"}), error_messages=error_messages)
-    grupol3 = forms.ChoiceField(label="Grupo Layer3", choices=[(0, 'Selecione')], required=True, widget=forms.Select(
-        attrs={'style': "width: 280px"}), error_messages=error_messages)
-    filter = forms.ChoiceField(label="Filtro", choices=[(
-        None, '--------')], required=False, widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
-    acl_path = forms.CharField(label=u'Path ACL', max_length=250, required=False, error_messages=error_messages, widget=forms.TextInput(
-        attrs={'style': "width: 280px", 'autocomplete': "off"}))
-    ipv4_template = forms.ChoiceField(label="Template ACL IPV4", choices=[(
-        '', '--------')], required=False, widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
-    ipv6_template = forms.ChoiceField(label="Template ACL IPV6", choices=[(
-        '', '--------')], required=False, widget=forms.Select(attrs={'style': "width: 280px"}), error_messages=error_messages)
-    link = forms.CharField(label=u'Link', max_length=200, required=False,
-                           error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 280px"}))
-    vrf = forms.CharField(label=u'Vrf', max_length=100, required=False,
-                           error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 280px"}))
+        label="",
+        required=False,
+        widget=forms.HiddenInput(),
+        error_messages=error_messages
+    )
+    divisao = forms.ChoiceField(
+
+        label="Divisão DC",
+        choices=[(0, 'Selecione')],
+        required=True,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
+        ),
+        error_messages=error_messages
+    )
+    ambiente_logico = forms.ChoiceField(
+        label="Ambiente Lógico",
+        required=True,
+        choices=[(
+            0, 'Selecione')],
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
+        ),
+        error_messages=error_messages
+    )
+    grupol3 = forms.ChoiceField(
+        label="Grupo Layer3",
+        choices=[(0, 'Selecione')],
+        required=True,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
+        ),
+        error_messages=error_messages
+    )
+    filter = forms.ChoiceField(
+        label="Filtro",
+        choices=[(
+            '', '--------')],
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
+        ),
+        error_messages=error_messages
+    )
+    acl_path = forms.CharField(
+        label=u'Path ACL',
+        max_length=250,
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 280px", 'autocomplete': "off"}
+        )
+    )
+    ipv4_template = forms.ChoiceField(
+        label="Template ACL IPV4",
+        choices=[(
+            '', '--------')],
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
+        ),
+        error_messages=error_messages)
+    ipv6_template = forms.ChoiceField(
+        label="Template ACL IPV6",
+        choices=[(
+            '', '--------')],
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
+        ),
+        error_messages=error_messages)
+    link = forms.CharField(
+        label=u'Link',
+        max_length=200,
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 280px"}
+        )
+    )
+    vrf = forms.CharField(
+        label=u'Vrf',
+        max_length=100,
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 280px"}
+        )
+    )
 
     max_num_vlan_1 = forms.IntegerField(
-        label=u'Max Vlan 1', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+        label=u'Max Vlan 1',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 100px"}
+        )
+    )
     min_num_vlan_1 = forms.IntegerField(
-        label=u'Min Vlan 1', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+        label=u'Min Vlan 1',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 100px"}
+        )
+    )
     max_num_vlan_2 = forms.IntegerField(
-        label=u'Max Vlan 2', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+        label=u'Max Vlan 2',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 100px"}
+        )
+    )
     min_num_vlan_2 = forms.IntegerField(
-        label=u'Min Vlan 2', required=False, error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 100px"}))
+        label=u'Min Vlan 2',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 100px"}
+        )
+    )
+    father_environment = forms.ChoiceField(
+        label="Father Environment",
+        choices=[(0, 'Selecione')],
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
+        ),
+        error_messages=error_messages
+    )
 
     def clean_min_num_vlan_1(self):
         max_num_vlan_1 = self.cleaned_data.get('max_num_vlan_1')
