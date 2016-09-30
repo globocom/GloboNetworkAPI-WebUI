@@ -977,7 +977,6 @@ def _create_options_environment(client, env_vip_id):
 def shared_save_pool(request, client, form_acess=None, external=False):
 
     try:
-
         env_vip_id = request.POST.get('environment_vip')
 
         # Get Data From Request Post To Save
@@ -994,6 +993,10 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         members["id_ips"] = request.POST.getlist('id_ip')
         members["ips"] = request.POST.getlist('ip')
         members["environment"] = environment_id
+
+        group_users_list = client.create_grupo_usuario().listar()
+        forms_aux = {}
+        forms_aux['group_users'] = group_users_list
 
         environment_choices = _create_options_environment(client, env_vip_id)
         lb_method_choices = facade_pool.populate_optionsvips_choices(client)
@@ -1012,7 +1015,24 @@ def shared_save_pool(request, client, form_acess=None, external=False):
             request.POST
         )
 
-        if form_pool.is_valid() and form_healthcheck.is_valid():
+        form_user_group = forms.PoolModalGroupUsersForm(
+            forms_aux,
+            False,
+            request.POST)
+
+        if form_pool.is_valid() and form_healthcheck.is_valid() and form_user_group.is_valid():
+            group_users = form_user_group.cleaned_data['group_users_modal']
+
+            groups_permissions = []
+            if len(group_users) > 0:
+                for id in group_users:
+                    groups_permissions.append({
+                        "group": int(id),
+                        "read": True,
+                        "write": True,
+                        "change_config": True,
+                        "delete": True
+                    })
 
             param_dic = {}
 
@@ -1031,6 +1051,9 @@ def shared_save_pool(request, client, form_acess=None, external=False):
             pool["default_limit"] = int(form_pool.cleaned_data['maxcon'])
             server_pool_members = facade_pool.format_server_pool_members(request, pool["default_limit"])
             pool["server_pool_members"] = server_pool_members
+            pool["groups_permissions"] = groups_permissions
+
+            # logger.error(json.dumps(pool, indent=4, sort_keys=True))
 
             client.create_pool().save_pool(pool)
             if pool_id:
@@ -1040,7 +1063,10 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 
             return HttpResponse(json.dumps(param_dic), content_type="application/json")
 
-        errors = form_pool.errors + form_healthcheck.errors
+        errors = ['{} - {}'.format(k, v) for k, v in form_pool.errors.iteritems()]
+        errors += ['{} - {}'.format(k, v) for k, v in form_healthcheck.errors.iteritems()]
+
+        # errors = unicode(str(form_pool.errors.as_ul() + form_healthcheck.errors.as_ul()), errors='replace')
 
         return render_message_json('<br>'.join(errors), messages.ERROR)
 
@@ -1431,6 +1457,9 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         lb_method_choices = facade_pool.populate_optionsvips_choices(client)
         servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
         healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
+        group_users_list = client.create_grupo_usuario().listar()
+        forms_aux = {}
+        forms_aux['group_users'] = group_users_list
 
         lists = dict()
         lists["form_pool"] = forms.PoolForm(environment_choices, lb_method_choices,
@@ -1440,6 +1469,8 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         lists["load_pool_url"] = load_pool_url
         lists["pool_members"] = pool_members
         lists["show_environment"] = True
+        lists['form_group_users'] = forms.PoolModalGroupUsersForm(forms_aux, edit=False)
+
         return render(
             request,
             templates.VIPREQUEST_POOL_FORM,

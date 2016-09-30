@@ -910,6 +910,7 @@ def pool_member_items(request):
 def manage_tab1(request, id_server_pool):
 
     try:
+
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
