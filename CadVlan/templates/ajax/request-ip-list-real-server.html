@@ -7,19 +7,19 @@
 			<table border="5">
 				<tr>
 					<td style="width: 60px"><label for="nome_ambiente">Nome</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.nome}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.name}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="nome_vlan">Tipo</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.nome_modelo}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.equipment_type.equipment_type}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="nome_vlan">Modelo</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.nome_tipo_equipamento}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.model.name}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="nome_vlan">Marca</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.nome_marca}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{{equip.model.brand.name}}</label></td>
 				</tr>
 			</table>
 		</div>
@@ -41,18 +41,18 @@
 				{% if ips %}
 					{% for ipv4 in ips.list_ipv4 %}
 						<tr>
-							<td class="text_center">{{ ipv4.ip }}</td>
-							<td class="text_center">{{ ipv4.network.network }}</td>
-							<td class="text_center">{{ ipv4.network.mask }}</td>
-							<td class="text_center"><span class="ui-icon ui-icon-plusthick" style="cursor: pointer;margin-left: 35%;"  onclick="javascript:setIpReal( '{{equip.nome}}', {{equip.id}}, '{{ipv4.ip}}', {{ipv4.id}} );"></span></td>
+							<td class="text_center">{{ ipv4.ip_formated }}</td>
+							<td class="text_center">{{ ipv4.networkipv4.networkv4 }}</td>
+							<td class="text_center">{{ ipv4.networkipv4.mask_formated }}</td>
+							<td class="text_center"><span class="ui-icon ui-icon-plusthick" style="cursor: pointer;margin-left: 35%;"  onclick="javascript:setIpReal( '{{equip.name}}', {{equip.id}}, '{{ipv4.ip_formated}}', {{ipv4.id}} );"></span></td>
 						</tr>
 					{% endfor %}
 					{% for ipv6 in ips.list_ipv6 %}
 						<tr>
-							<td class="text_center">{{ ipv6.ip }}</td>
-							<td class="text_center">{{ ipv6.network.network }}</td>
-							<td class="text_center">{{ ipv6.network.mask }}</td>
-							<td class="text_center"><span class="ui-icon ui-icon-plusthick" style="cursor: pointer;margin-left: 35%;" onclick="javascript:setIpReal( '{{equip.nome}}', {{equip.id}}, '{{ipv6.ip}}', {{ipv6.id}} );"></span></td>
+							<td class="text_center">{{ ipv6.ip_formated }}</td>
+							<td class="text_center">{{ ipv4.networkipv6.networkv6 }}</td>
+							<td class="text_center">{{ ipv4.networkipv6.mask_formated }}</td>
+							<td class="text_center"><span class="ui-icon ui-icon-plusthick" style="cursor: pointer;margin-left: 35%;" onclick="javascript:setIpReal( '{{equip.name}}', {{equip.id}}, '{{ipv6.ip_formated}}', {{ipv6.id}} );"></span></td>
 						</tr>
 					{% endfor %}
 				{% endif %}

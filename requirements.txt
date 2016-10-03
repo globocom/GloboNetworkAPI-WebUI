@@ -3,3 +3,4 @@ GloboNetworkAPI==0.6.25
 pycrypto==2.6
 python-ldap==2.3.13
 python-memcached==1.48
+py2-ipaddress==3.4.1

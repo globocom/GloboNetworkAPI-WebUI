@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import ipaddress
 
 
 def populate_expectstring_choices(client):
@@ -204,3 +205,35 @@ def _format_ips(request, i):
     v6 = ips if ":" in ips['ip_formated'] else None
 
     return v4, v6
+
+
+def format_name_ip_search(name):
+    try:
+        ip = ipaddress.ip_address(name)
+    except:
+        search = {'nome': name}
+    else:
+        if ip.version == 6:
+            ip = ip.compressed.split(':')
+
+            search = {
+                'ipv6equipament__ip__oct1': ip[0],
+                'ipv6equipament__ip__oct2': ip[1],
+                'ipv6equipament__ip__oct3': ip[2],
+                'ipv6equipament__ip__oct4': ip[3],
+                'ipv6equipament__ip__oct5': ip[4],
+                'ipv6equipament__ip__oct6': ip[5],
+                'ipv6equipament__ip__oct7': ip[6],
+                'ipv6equipament__ip__oct8': ip[7]
+            }
+        if ip.version == 4:
+            ip = ip.compressed.split('.')
+
+            search = {
+                'ipequipamento__ip__oct1': ip[0],
+                'ipequipamento__ip__oct2': ip[1],
+                'ipequipamento__ip__oct3': ip[2],
+                'ipequipamento__ip__oct4': ip[3]
+            }
+
+    return search

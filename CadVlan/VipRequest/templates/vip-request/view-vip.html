@@ -35,25 +35,25 @@
 			<td style="width: 235px"><label for="criado">Vip Criado</label></td>
 			<td>
 				<label style="width: 350px;color: blue;text-align: center;" >
-					{% ifequal 'True' vip.created %}
+					{% if vip.created %}
 						Sim
 					{% else %}
 						Não
-					{% endifequal %}
+					{% endif %}
 				</label>
 			</td>
 		</tr>
 		<tr>
 			<td><label for="negocio">Área Negócio</label></td>
-			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.service}}</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.business}}</label></td>
 		</tr>
 		<tr>
 			<td><label for="servico">Nome Serviço</label></td>
-			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.name}}</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.service}}</label></td>
 		</tr>
 		<tr>
 			<td><label for="host">Host</label></td>
-			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.business}}</label></td>
+			<td><label style="width: 350px;color: blue;text-align: center;" >{{vip.name}}</label></td>
 		</tr>
 		<tr>
 			<td><label for="ambientevip">Ambiente VIP</label></td>

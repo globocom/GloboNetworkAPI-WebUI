@@ -573,23 +573,57 @@ def _modal_ip_list_real(request, client_api):
     equip_name = get_param_in_request(request, 'equip_name')
 
     try:
+        column_index_name_map = {
+            0: '',
+            1: 'id',
+            9: ''}
+        dtp = DataTablePaginator(request, column_index_name_map)
+
+        # Make params
+        dtp.build_server_side_list()
+
+        # Set params in simple Pagination class
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search)
+
+        extends_search = facade.format_name_ip_search(equip_name)
+
+        data = dict()
+        data["start_record"] = pagination.start_record
+        data["end_record"] = pagination.end_record
+        data["asorting_cols"] = pagination.asorting_cols
+        data["searchable_columns"] = pagination.searchable_columns
+        data["custom_search"] = pagination.custom_search or ""
+        data["extends_search"] = [extends_search] if extends_search else []
         # Valid Equipament
-        equip = client_api.create_equipamento().listar_por_nome(equip_name).get("equipamento")
-        ips_list = client_api.create_pool().get_available_ips_to_add_server_pool(equip_name, ambiente)
+        equip = client_api.create_api_equipment().get_equipment(
+            search=data,
+            include=[
+                'ipv4__details',
+                'ipv6__details',
+                'model__details__brand__details',
+                'equipment_type__details'
+            ],
+            environment=ambiente
+        ).get("equipments")[0]
     except NetworkAPIClientError, e:
         logger.error(e)
         status_code = 500
         return HttpResponse(json.dumps({'message': e.error, 'status': 'error'}), status=status_code,
                             content_type='application/json')
 
-    if not ips_list['list_ipv4'] and not ips_list['list_ipv6']:
-        return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
-                                                   u'possa ser utilizado nos pools desse ambiente.',
+    # if not ips_list['list_ipv4'] and not ips_list['list_ipv6']:
+    #     return HttpResponse(json.dumps({'message': u'Esse equipamento não tem nenhum IP que '
+    #                                                u'possa ser utilizado nos pools desse ambiente.',
 
-                                        'status': 'error'}), status=status_code, content_type='application/json')
+    #                                     'status': 'error'}), status=status_code, content_type='application/json')
 
-    ips['list_ipv4'] = ips_list['list_ipv4']
-    ips['list_ipv6'] = ips_list['list_ipv6']
+    ips['list_ipv4'] = equip['ipv4']
+    ips['list_ipv6'] = equip['ipv6']
     lists['ips'] = ips
     lists['equip'] = equip
 

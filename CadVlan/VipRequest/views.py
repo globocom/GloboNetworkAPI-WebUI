@@ -1018,4 +1018,4 @@ def prepare_hostname(hostname):
         return octs
 
     except:
-        raise Exception('Não suportado')
+        raise Exception('IP not found!')
