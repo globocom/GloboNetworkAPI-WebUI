@@ -51,15 +51,15 @@ function loadPoolMembers(){
                     }
                     if($('.ports_vip_ports[value='+portVip+']').length > 0){
                         tr = new_table.find('#vip_port_pool_'+poolId)
-                        
+
                         table = $('.ports_vip_ports[value='+portVip+']')
                             .parents("table:first")
                             .find('tbody:first');
-                        
+
                         table.append(tr)
 
                         td = table.find('tr:first').find('td');
-                        
+
                         td.attr('rowspan',parseInt(td.attr('rowspan'))+1);
 
                     }
@@ -140,7 +140,7 @@ function openDialog(callback) {
                     var el = $('input:radio:checked[name=environment][attr],input:hidden[name=environment_vip]');
                     var envVipId = el.attr('attr') == undefined ? el.val() : el.attr('attr');
                     var idToken = $("#id_token").val();
-
+                    var idPool = $("#id_pools").val();
                     var $this = $(this);
                     var form =  $("#add_form_vip_pool");
                     var formData = form.serialize() + '&' + $.param({'environment_vip': envVipId, 'token': idToken});
@@ -159,12 +159,18 @@ function openDialog(callback) {
                             }else if(xhr.status == 203){
                                 alert(data);
                             }
+
                         },
                         error: function (error) {
                             message = jQuery.parseJSON(error.responseText);
                             addMessageModal(message);
                         }
                     });
+
+                    $(document).one("ajaxStop", function() {
+                        $("#id_pools").val(idPool.toString()).change();
+                    });
+
                 },
                 "Cancelar": function() {
                     var $this = $(this);
@@ -182,7 +188,7 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
         var tokenId = $("#id_token").val();
         $.ajax({
                 url: "{% url vip-request.load.pool %}",
-                data: { 
+                data: {
                     pool_id: poolId,
                     is_copy: 1,
                     token: tokenId
@@ -196,13 +202,17 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
                     else if(xhr.status == 203){
                         alert(data);
                     }
+
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
                     addMessage(message);
+
                 }
         });
 
+    }else{
+        alert('Selecione um Pool!');
     }
 });
 
@@ -219,17 +229,19 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
                     token: tokenId
                 },
                 success: function(data, textStatus, xhr) {
-
                     if (xhr.status == 200) {
                         buildContentNewPool(data);
                     }
                     else if(xhr.status == 203){
                        alert(data);
                     }
+
+
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
                     addMessage(message);
+
                 }
         });
     }
