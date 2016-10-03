@@ -259,6 +259,14 @@ def shared_load_pool(request, client, form_acess=None, external=False):
         pool = client.create_api_pool().get_pool_details(pool_id)['server_pools'][0]
         environment_id = pool['environment']['id']
 
+        group_users_list_selected = []
+        for group in pool["groups_permissions"]:
+            group_users_list_selected.append(group["group"]["id"])
+
+        group_users_list = client.create_grupo_usuario().listar()
+        forms_aux = {}
+        forms_aux['group_users'] = group_users_list
+
         server_pool_members = list()
         server_pool_members_raw = pool.get('server_pool_members')
         if server_pool_members_raw:
@@ -325,6 +333,14 @@ def shared_load_pool(request, client, form_acess=None, external=False):
             initial=form_initial
         )
 
+        form_group_users = forms.PoolModalGroupUsersForm(
+            forms_aux,
+            edit=False,
+            initial={
+                "group_users_modal": group_users_list_selected
+            }
+        )
+
         if external:
             action = reverse('external.save.pool')
         else:
@@ -338,7 +354,8 @@ def shared_load_pool(request, client, form_acess=None, external=False):
             'pool_members': server_pool_members,
             'selection_form': DeleteForm(),
             'show_environment': False,
-            'is_copy': bool(int(is_copy))
+            'is_copy': bool(int(is_copy)),
+            'form_group_users': form_group_users
         }
 
         return render(

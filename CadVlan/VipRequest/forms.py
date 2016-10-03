@@ -56,10 +56,10 @@ class PoolForm(forms.Form):
         )
     )
 
-    default_port = forms.CharField(
+    default_port = forms.IntegerField(
         label=u'Default Port',
-        min_length=2,
-        max_length=5,
+        min_value=1,
+        max_value=65535,
         required=True,
         error_messages=error_messages,
         widget=forms.TextInput(
