@@ -248,7 +248,29 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
 });
 
 $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
-    loadPoolMembers();
+    var idPortVip = $("#id_port_vip").val();
+    var l4ProtocolId = $("#id_l4_protocol").val();
+    var l7ProtocolId = $("#id_l7_protocol").val();
+    var poolId = $("#id_pools").val();
+    if (idPortVip !=  0 && idPortVip != null && poolId !=  0 && poolId != null && l4ProtocolId !=  0 && l4ProtocolId!= null && l7ProtocolId !=  0 && l7ProtocolId != null ) {
+        loadPoolMembers();
+    }else{
+        var errormsg = "";
+
+        if(idPortVip ==  0 || idPortVip == null){
+            errormsg += "Porta Vip\n";
+        }
+        if(l4ProtocolId ==  0 || l4ProtocolId == null){
+            errormsg += "Protocolo L4\n";
+        }
+        if(l7ProtocolId ==  0 || l7ProtocolId == null){
+            errormsg += "Protocolo L7\n";
+        }
+        if(poolId ==  0 || poolId == null){
+            errormsg += "Pools\n";
+        }
+        alert("Os seguintes campos devem ser preenchidos:\n".concat(errormsg));
+    }
 });
 
 
