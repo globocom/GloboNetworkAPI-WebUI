@@ -44,6 +44,7 @@ from CadVlan.permissions import POOL_REMOVE_SCRIPT
 from CadVlan.permissions import VIPS_REQUEST
 from CadVlan.Pool import facade
 from CadVlan.Pool.forms import PoolFormV3
+from CadVlan.Pool.forms import PoolGroupUsersForm
 from CadVlan.Pool.forms import PoolHealthcheckForm
 from CadVlan.Pool.forms import SearchPoolForm
 from CadVlan.templates import AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML
@@ -259,10 +260,10 @@ def add_form(request):
             lists["form_pool"] = PoolFormV3(
                 environment_choices,
                 lb_method_choices,
-                servicedownaction_choices,
-                group_users_list
+                servicedownaction_choices
             )
 
+            lists["form_group_users"] = PoolGroupUsersForm(group_users_list, False)
             lists["form_healthcheck"] = PoolHealthcheckForm()
 
         if request.method == 'POST':
@@ -288,7 +289,6 @@ def add_form(request):
                 environment_choices,
                 lb_method_choices,
                 servicedownaction_choices,
-                group_users_list,
                 request.POST
             )
 
@@ -297,14 +297,16 @@ def add_form(request):
                 request.POST
             )
 
-            if form_pool.is_valid() and form_healthcheck.is_valid():
+            form_group_users = PoolGroupUsersForm(group_users_list, False, request.POST)
+
+            if form_pool.is_valid() and form_healthcheck.is_valid() and form_group_users.is_valid():
                 pool = dict()
                 pool["id"] = pool_id
 
                 servicedownaction = facade.format_servicedownaction(client, form_pool)
                 healthcheck = facade.format_healthcheck(request)
 
-                group_users = form_pool.cleaned_data['group_users']
+                group_users = form_group_users.cleaned_data['group_users']
 
                 groups_permissions = []
                 if len(group_users) > 0:
@@ -317,6 +319,8 @@ def add_form(request):
                             "delete": True
                         })
                 pool["groups_permissions"] = groups_permissions
+                pool["permissions"] = {"replace": False}
+
                 pool["identifier"] = str(form_pool.cleaned_data['identifier'])
                 pool["default_port"] = int(form_pool.cleaned_data['default_port'])
                 pool["environment"] = int(form_pool.cleaned_data['environment'])
@@ -335,6 +339,7 @@ def add_form(request):
 
             lists["form_pool"] = form_pool
             lists["form_healthcheck"] = form_healthcheck
+            lists["form_group_users"] = form_group_users
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -427,8 +432,8 @@ def edit_form(request, id_server_pool):
                 'balancing': pool.get('lb_method'),
                 'servicedownaction': pool.get('servicedownaction').get('id'),
                 'maxcon': pool.get('default_limit'),
-                'identifier': pool.get('identifier'),
-                'group_users': group_users_list_selected
+                'identifier': pool.get('identifier')
+
             }
             healthcheck_choices = facade.populate_healthcheck_choices(client)
 
@@ -436,9 +441,15 @@ def edit_form(request, id_server_pool):
                 environment_choices,
                 lb_method_choices,
                 servicedownaction_choices,
-                group_users_list,
+
                 initial=form_initial
             )
+
+            form_initial = {
+                'group_users': group_users_list_selected
+            }
+
+            lists["form_group_users"] = PoolGroupUsersForm(group_users_list, True, initial=form_initial)
 
             form_initial = {
                 'healthcheck': healthcheck,
@@ -474,7 +485,7 @@ def edit_form(request, id_server_pool):
                 environment_choices,
                 lb_method_choices,
                 servicedownaction_choices,
-                group_users_list,
+
                 request.POST
             )
 
@@ -483,7 +494,9 @@ def edit_form(request, id_server_pool):
                 request.POST
             )
 
-            if form_pool.is_valid() and form_healthcheck.is_valid():
+            form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
+
+            if form_pool.is_valid() and form_healthcheck.is_valid() and form_group_users.is_valid():
                 pool = dict()
                 pool["id"] = int(id_server_pool)
 
@@ -499,7 +512,7 @@ def edit_form(request, id_server_pool):
                 pool["default_limit"] = int(form_pool.cleaned_data['maxcon'])
                 server_pool_members = facade.format_server_pool_members(request, pool["default_limit"])
                 pool["server_pool_members"] = server_pool_members
-                group_users = form_pool.cleaned_data['group_users']
+                group_users = form_group_users.cleaned_data['group_users']
 
                 groups_permissions = []
                 if len(group_users) > 0:
@@ -512,6 +525,7 @@ def edit_form(request, id_server_pool):
                             "delete": True
                         })
                 pool["groups_permissions"] = groups_permissions
+                pool["permissions"] = {"replace": form_group_users.cleaned_data['overwrite']}
 
                 client.create_pool().update_pool(pool, id_server_pool)
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
@@ -520,6 +534,7 @@ def edit_form(request, id_server_pool):
 
             lists["form_pool"] = form_pool
             lists["form_healthcheck"] = form_healthcheck
+            lists["form_group_users"] = form_group_users
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -528,9 +543,10 @@ def edit_form(request, id_server_pool):
             environment_choices,
             lb_method_choices,
             servicedownaction_choices,
-            group_users_list,
             request.POST
         )
+
+        form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
 
         form_healthcheck = PoolHealthcheckForm(
             request.POST
@@ -538,6 +554,7 @@ def edit_form(request, id_server_pool):
 
         lists["form_pool"] = form_pool
         lists["form_healthcheck"] = form_healthcheck
+        lists["form_group_users"] = form_group_users
 
     return render_to_response(POOL_FORM, lists, context_instance=RequestContext(request))
 
@@ -659,6 +676,7 @@ def _get_opcoes_pool_by_ambiente(request, client_api):
     try:
         ambiente = get_param_in_request(request, 'id_environment')
         opcoes_pool = client_api.create_pool().get_opcoes_pool_by_environment(ambiente)
+
     except NetworkAPIClientError, e:
         logger.error(e)
 
@@ -926,6 +944,7 @@ def pool_member_items(request):
 def manage_tab1(request, id_server_pool):
 
     try:
+
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
@@ -1053,18 +1072,19 @@ def manage_tab3(request, id_server_pool):
                 environment_choices,
                 lb_method_choices,
                 servicedownaction_choices,
-                group_users_list,
                 request.POST)
+
+            form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
 
             form_healthcheck = PoolHealthcheckForm(
                 healthcheck_choices,
                 request.POST)
 
-            if form.is_valid() and form_healthcheck.is_valid():
+            if form.is_valid() and form_healthcheck.is_valid() and form_group_users.is_valid():
                 healthcheck = facade.format_healthcheck(request)
                 servicedownaction = facade.format_servicedownaction(client, form)
                 groups_permissions = []
-                group_users = form.cleaned_data['group_users']
+                group_users = form_group_users.cleaned_data['group_users']
 
                 if len(group_users) > 0:
                     for id in group_users:
@@ -1075,8 +1095,10 @@ def manage_tab3(request, id_server_pool):
                             "change_config": True,
                             "delete": True
                         })
+                overwrite = form_group_users.cleaned_data['overwrite']
+
                 pool = format_pool(client, form, members, healthcheck,
-                                   servicedownaction, groups_permissions, int(id_server_pool))
+                                   servicedownaction, groups_permissions, overwrite, int(id_server_pool))
                 client.create_pool().deploy_update_pool(pool, id_server_pool)
 
                 messages.add_message(request, messages.SUCCESS, pool_messages.get('success_update'))
@@ -1092,17 +1114,23 @@ def manage_tab3(request, id_server_pool):
                 'balancing': pool.get('lb_method'),
                 'servicedownaction': pool.get('servicedownaction').get('id'),
                 'maxcon': pool.get('default_limit'),
-                'identifier': pool.get('identifier'),
-                'group_users': group_users_list_selected
+                'identifier': pool.get('identifier')
 
             }
+
             form = PoolFormV3(
                 environment_choices,
                 lb_method_choices,
                 servicedownaction_choices,
-                group_users_list,
                 initial=form_initial
             )
+
+            form_initial_gu = {
+                'group_users': group_users_list_selected
+
+            }
+
+            form_group_users = PoolGroupUsersForm(group_users_list, True, initial=form_initial_gu)
 
             form_initial_hc = {
                 'healthcheck': healthcheck,
@@ -1125,8 +1153,11 @@ def manage_tab3(request, id_server_pool):
             servicedownaction_choices,
             request.POST)
 
+        form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
+
     lists["form_pool"] = form
     lists["form_healthcheck"] = form_healthcheck
+    lists["form_group_users"] = form_group_users
     return render_to_response(POOL_MANAGE_TAB3, lists, context_instance=RequestContext(request))
 
 
@@ -1186,7 +1217,7 @@ def manage_tab4(request, id_server_pool):
     return render_to_response(POOL_MANAGE_TAB4, lists, context_instance=RequestContext(request))
 
 
-def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, groups_permissions, pool_id=None):
+def format_pool(client, form, server_pool_members, healthcheck, servicedownaction, groups_permissions, overwrite, pool_id=None):
 
     pool = dict()
     pool["id"] = pool_id
@@ -1199,6 +1230,7 @@ def format_pool(client, form, server_pool_members, healthcheck, servicedownactio
     pool["default_limit"] = int(form.cleaned_data['maxcon'])
     pool["server_pool_members"] = server_pool_members
     pool["groups_permissions"] = groups_permissions
+    pool["permissions"] = {"replace": overwrite}
     for member in server_pool_members:
         member['limit'] = pool['default_limit']
 

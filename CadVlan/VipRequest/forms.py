@@ -56,10 +56,10 @@ class PoolForm(forms.Form):
         )
     )
 
-    default_port = forms.CharField(
+    default_port = forms.IntegerField(
         label=u'Default Port',
-        min_length=2,
-        max_length=5,
+        min_value=1,
+        max_value=65535,
         required=True,
         error_messages=error_messages,
         widget=forms.TextInput(
@@ -152,9 +152,10 @@ class PoolHealthcheckForm(forms.Form):
         )
     )
 
-    healthcheck_destination = forms.CharField(
+    healthcheck_destination = forms.IntegerField(
         label=u'Porta',
-        max_length=5,
+        min_value=1,
+        max_value=65535,
         required=False,
         error_messages=error_messages,
         widget=forms.TextInput(
@@ -204,16 +205,54 @@ class RequestVipBasicForm(forms.Form):
 @autostrip
 class RequestVipGroupUsersForm(forms.Form):
 
-    def __init__(self, forms_aux, *args, **kwargs):
+    def __init__(self, forms_aux, edit, *args, **kwargs):
         super(RequestVipGroupUsersForm, self).__init__(*args, **kwargs)
 
         self.fields['group_users'].choices = [(gu["id"], gu["nome"]) for gu in forms_aux["group_users"]["user_group"]]
+        if not edit:
+            del self.fields['overwrite']
+        else:
+            self.fields['overwrite'].check_test = False
 
     group_users = forms.MultipleChoiceField(
         label=u'Grupo de usuários',
         required=False,
         error_messages=error_messages,
         widget=forms.SelectMultiple(attrs={'style': "width: 310px"})
+    )
+
+    overwrite = forms.BooleanField(
+        label='Sobrescrever permissões?',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.CheckboxInput()
+    )
+
+
+@autostrip
+class PoolModalGroupUsersForm(forms.Form):
+
+    def __init__(self, forms_aux, edit, *args, **kwargs):
+        super(PoolModalGroupUsersForm, self).__init__(*args, **kwargs)
+
+        self.fields['group_users_modal'].choices = [(gu["id"], gu["nome"]) for gu in forms_aux["group_users"]["user_group"]]
+        if not edit:
+            del self.fields['overwrite']
+        else:
+            self.fields['overwrite'].check_test = False
+
+    group_users_modal = forms.MultipleChoiceField(
+        label=u'Grupo de usuários',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.SelectMultiple(attrs={'style': "width: 310px"})
+    )
+
+    overwrite = forms.BooleanField(
+        label='Sobrescrever permissões?',
+        required=False,
+        error_messages=error_messages,
+        widget=forms.CheckboxInput()
     )
 
 
