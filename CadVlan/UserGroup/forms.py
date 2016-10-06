@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,9 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 from django import forms
+
 from CadVlan.messages import error_messages
 
 
@@ -47,3 +45,28 @@ class PermissionGroupForm(forms.Form):
         label=u'Leitura', required=False, error_messages=error_messages)
     write = forms.BooleanField(
         label=u'Escrita', required=False, error_messages=error_messages)
+
+
+class IndividualPermsGroupUserForm(forms.Form):
+
+    id_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+    id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+    id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+
+    read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+
+    write = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+    change_config = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+    delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+
+
+class GeneralPermsGroupUserForm(forms.Form):
+
+    id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+    id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+
+    read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+
+    write = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+    change_config = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+    delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)

@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,26 +13,42 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.UserGroup.forms import UserGroupForm, PermissionGroupForm
-from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.utility import convert_string_to_boolean, convert_boolean_to_int, validates_dict
-from CadVlan.forms import DeleteForm, DeleteFormAux
-from CadVlan.messages import error_messages, user_group_messages, perm_group_messages
-from CadVlan.permissions import ADMINISTRATION
-from CadVlan.templates import USERGROUP_LIST
-from CadVlan.settings import PATH_PERMLISTS
-from django.contrib import messages
-from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response, redirect
-from django.template.context import RequestContext
-from networkapiclient.exception import NetworkAPIClientError, PermissaoAdministrativaDuplicadaError
+import codecs
 import logging
 import re
-import codecs
+
+from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
+from networkapiclient.exception import NetworkAPIClientError
+from networkapiclient.exception import PermissaoAdministrativaDuplicadaError
+
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.forms import DeleteForm
+from CadVlan.forms import DeleteFormAux
+from CadVlan.messages import error_messages
+from CadVlan.messages import perm_group_messages
+from CadVlan.messages import user_group_messages
+from CadVlan.permissions import ADMINISTRATION
+from CadVlan.settings import PATH_PERMLISTS
+from CadVlan.templates import USERGROUP_CREATE_INDIVIDUAL_PERMS
+from CadVlan.templates import USERGROUP_EDIT_GENERAL_PERMS
+from CadVlan.templates import USERGROUP_EDIT_INDIVIDUAL_PERMS
+from CadVlan.templates import USERGROUP_INDIVIDUAL_PERMS
+from CadVlan.templates import USERGROUP_LIST
+from CadVlan.UserGroup.forms import GeneralPermsGroupUserForm
+from CadVlan.UserGroup.forms import IndividualPermsGroupUserForm
+from CadVlan.UserGroup.forms import PermissionGroupForm
+from CadVlan.UserGroup.forms import UserGroupForm
+from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import has_perm
+from CadVlan.Util.Decorators import log
+from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.utility import convert_boolean_to_int
+from CadVlan.Util.utility import convert_string_to_boolean
+from CadVlan.Util.utility import validates_dict
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +79,7 @@ def parse_cad_perms(filename):
 
             api_data = re.search(
                 '\tapi:\n((?:\t[a-zA-Z]+\n\t[a-zA-Z0-9_\(\)]+\n(?:\t\t[a-zA-Z_]+\n\t\t(?:Leitura|Escrita)\n\t\t(?:True|False)\n\t\t(?:None|Leitura|Escrita|Update_Config)\n)*)+)', resto, re.MULTILINE)
-            if api_data != None:
+            if api_data is not None:
 
                 permcadvlan['api_calls'] = list()
                 api_data = api_data.group(1)
@@ -135,6 +150,99 @@ def parse_api_perms(filename):
     return apitree
 
 
+def cria_array_individual_perms_of_vips_fake():  # it could be another objects (pools, vlans...)
+    individual_perms = {"individual_perms": []}
+
+    individual_perms["individual_perms"].append({"id": 12305,
+                                                 "name": "VIP-GLOBO1",
+                                                 "read": True,
+                                                 "write": False,
+                                                 "change_config": False,
+                                                 "delete": True})
+    individual_perms["individual_perms"].append({"id": 12306,
+                                                 "name": "VIP-GLOBO2",
+                                                 "read": True,
+                                                 "write": True,
+                                                 "change_config": False,
+                                                 "delete": True})
+
+    individual_perms["individual_perms"].append({"id": 12307,
+                                                 "name": "VIP-GLOBO3",
+                                                 "read": True,
+                                                 "write": False,
+                                                 "change_config": False,
+                                                 "delete": True})
+    return individual_perms["individual_perms"]
+
+
+def cria_array_perms_jb_fake():
+    obj_perms = {"object_perms": []}
+
+    obj_perms["object_perms"].append({
+        "id": 1,
+        "url": "/user-group/individ-perm/9/1",
+        "nome_obj": "VIP",
+        "read": True,
+        "write": False,
+        "change_config": False,
+        "delete": True
+    })
+
+    obj_perms["object_perms"].append({
+        "id": 2,
+        "url": "/user-group/individ-perm/9/2",
+        "nome_obj": "Pool",
+        "read": True,
+        "write": True,
+        "change_config": False,
+        "delete": True
+    })
+
+    obj_perms["object_perms"].append({
+        "id": 3,
+        "url": "/user-group/individ-perm/9/3",
+        "nome_obj": "VLAN",
+        "read": True,
+        "write": True,
+        "change_config": True,
+        "delete": True
+    })
+
+    return obj_perms["object_perms"]
+
+
+def list_individ_perms_of_group_user(request, id_ugroup, id_type_obj):
+    lists = {}
+    lists["individual_perms"] = cria_array_individual_perms_of_vips_fake()
+    return render_to_response(USERGROUP_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
+
+
+def edit_individ_perms_of_object(request, id_ugroup, id_type_obj, id_obj):
+    lists = {}
+    lists["group_name"] = "Administradores"
+    lists["object_type"] = "VIP"
+    lists["object_name"] = "VIP_192.168.0.1_GLOBO"
+    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserForm()
+
+    return render_to_response(USERGROUP_EDIT_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
+
+
+def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
+    lists = {}
+    lists["group_name"] = "Administradores"
+    lists["object_type"] = "VIP"
+    lists["form_gen_perms_group_user"] = GeneralPermsGroupUserForm()
+
+    return render_to_response(USERGROUP_EDIT_GENERAL_PERMS, lists, context_instance=RequestContext(request))
+
+
+def create_individ_perms_of_object(request):
+    lists = {}
+    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserForm()
+
+    return render_to_response(USERGROUP_CREATE_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
+
+
 def load_list(request, lists, id_ugroup, tab):
 
     try:
@@ -143,26 +251,28 @@ def load_list(request, lists, id_ugroup, tab):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        lists['object_perms'] = cria_array_perms_jb_fake()
+
         lists['users'] = validates_dict(
             client.create_usuario().list_by_group(id_ugroup), 'users')
 
-        if not 'ugroup' in lists:
+        if 'ugroup' not in lists:
             lists['ugroup'] = client.create_grupo_usuario().search(
                 id_ugroup).get('user_group')
 
-        if not 'form_users' in lists:
+        if 'form_users' not in lists:
             lists['form_users'] = UserGroupForm(
                 client.create_usuario().list_by_group_out(id_ugroup))
 
         lists['perms'] = validates_dict(
             client.create_permissao_administrativa().list_by_group(id_ugroup), 'perms')
 
-        if not 'form_perms' in lists:
+        if 'form_perms' not in lists:
             function_list = validates_dict(
                 client.create_permission().list_all(), 'perms')
             lists['form_perms'] = PermissionGroupForm(function_list)
 
-        if not 'action_edit_perms' in lists:
+        if 'action_edit_perms' not in lists:
             lists['action_edit_perms'] = reverse(
                 "user-group-perm.form", args=[id_ugroup])
 
@@ -245,7 +355,7 @@ def delete_user(request, id_ugroup):
                 messages.add_message(request, messages.WARNING, msg)
 
             # If all has ben removed
-            elif have_errors == False:
+            elif have_errors is False:
                 messages.add_message(
                     request, messages.SUCCESS, user_group_messages.get("success_remove"))
 
@@ -308,7 +418,7 @@ def add_form_user(request, id_ugroup):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    lists = load_list(request, lists,  id_ugroup, '0')
+    lists = load_list(request, lists, id_ugroup, '0')
 
     return render_to_response(USERGROUP_LIST, lists, context_instance=RequestContext(request))
 
@@ -367,7 +477,7 @@ def delete_perm(request, id_ugroup):
                 messages.add_message(request, messages.WARNING, msg)
 
             # If all has ben removed
-            elif have_errors == False:
+            elif have_errors is False:
                 messages.add_message(
                     request, messages.SUCCESS, perm_group_messages.get("success_remove"))
 
@@ -427,7 +537,7 @@ def add_form_perm(request, id_ugroup):
         messages.add_message(request, messages.ERROR, e)
 
     lists['open_form'] = str(True)
-    lists = load_list(request, lists,  id_ugroup, '1')
+    lists = load_list(request, lists, id_ugroup, '1')
 
     return render_to_response(USERGROUP_LIST, lists, context_instance=RequestContext(request))
 
@@ -489,6 +599,6 @@ def edit_form_perm(request, id_ugroup, id_perm):
         messages.add_message(request, messages.ERROR, e)
 
     lists['open_form'] = str(True)
-    lists = load_list(request, lists,  id_ugroup, '1')
+    lists = load_list(request, lists, id_ugroup, '1')
 
     return render_to_response(USERGROUP_LIST, lists, context_instance=RequestContext(request))
