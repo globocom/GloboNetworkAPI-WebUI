@@ -20,11 +20,13 @@ import re
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
+from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError
 from networkapiclient.exception import PermissaoAdministrativaDuplicadaError
 
+from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import DeleteForm
 from CadVlan.forms import DeleteFormAux
@@ -38,14 +40,16 @@ from CadVlan.templates import USERGROUP_EDIT_GENERAL_PERMS
 from CadVlan.templates import USERGROUP_EDIT_INDIVIDUAL_PERMS
 from CadVlan.templates import USERGROUP_INDIVIDUAL_PERMS
 from CadVlan.templates import USERGROUP_LIST
-from CadVlan.UserGroup.forms import GeneralPermsGroupUserForm
-from CadVlan.UserGroup.forms import IndividualPermsGroupUserForm
+from CadVlan.UserGroup.forms import GeneralPermsGroupUserEditForm
+from CadVlan.UserGroup.forms import IndividualPermsGroupUserCreateForm
+from CadVlan.UserGroup.forms import IndividualPermsGroupUserEditForm
 from CadVlan.UserGroup.forms import PermissionGroupForm
 from CadVlan.UserGroup.forms import UserGroupForm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.Decorators import has_perm
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.shortcuts import render_message_json
 from CadVlan.Util.utility import convert_boolean_to_int
 from CadVlan.Util.utility import convert_string_to_boolean
 from CadVlan.Util.utility import validates_dict
@@ -214,6 +218,9 @@ def cria_array_perms_jb_fake():
 def list_individ_perms_of_group_user(request, id_ugroup, id_type_obj):
     lists = {}
     lists["individual_perms"] = cria_array_individual_perms_of_vips_fake()
+    lists["group_name"] = "Administradores"
+    lists["object_type"] = "VIP"
+
     return render_to_response(USERGROUP_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
 
 
@@ -222,7 +229,7 @@ def edit_individ_perms_of_object(request, id_ugroup, id_type_obj, id_obj):
     lists["group_name"] = "Administradores"
     lists["object_type"] = "VIP"
     lists["object_name"] = "VIP_192.168.0.1_GLOBO"
-    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserForm()
+    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserEditForm()
 
     return render_to_response(USERGROUP_EDIT_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
 
@@ -231,14 +238,17 @@ def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
     lists = {}
     lists["group_name"] = "Administradores"
     lists["object_type"] = "VIP"
-    lists["form_gen_perms_group_user"] = GeneralPermsGroupUserForm()
+    lists["form_gen_perms_group_user"] = GeneralPermsGroupUserEditForm()
 
     return render_to_response(USERGROUP_EDIT_GENERAL_PERMS, lists, context_instance=RequestContext(request))
 
 
-def create_individ_perms_of_object(request):
+def create_individ_perms_of_object(request, id_ugroup, id_type_obj):
     lists = {}
-    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserForm()
+    lists["group_name"] = "Administradores"
+    lists["object_type"] = "VIP"
+
+    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserEditForm()  # TODO Alterar depois de edit pra ""
 
     return render_to_response(USERGROUP_CREATE_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
 

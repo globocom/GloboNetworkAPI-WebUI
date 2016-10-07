@@ -1,0 +1,5 @@
+{% load util %}
+	<option value="">-</option>
+{% for obj in objects %}
+	<option value="{{ obj.id }}">{{ obj.identifier }}</option>
+{% endfor %}

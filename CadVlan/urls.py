@@ -416,7 +416,7 @@ urlpatterns += patterns(
         '^user-group/individ-perm/edit/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)/(?P<id_obj>\d+)[/]?$', 'edit_individ_perms_of_object', name='user-group-individual-perms.edit', ),
 
     url(
-        '^user-group/individ-perm/create[/]?$', 'create_individ_perms_of_object', name='user-group-individual-perms.create', ),
+        '^user-group/individ-perm/create/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)[/]?$', 'create_individ_perms_of_object', name='user-group-individual-perms.create', ),
 
     url(
         '^user-group/gen-perm/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)[/]?$', 'edit_gen_perms_of_type_obj', name='user-group-general-perms.edit', ),

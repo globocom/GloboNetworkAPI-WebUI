@@ -47,9 +47,25 @@ class PermissionGroupForm(forms.Form):
         label=u'Escrita', required=False, error_messages=error_messages)
 
 
-class IndividualPermsGroupUserForm(forms.Form):
+class IndividualPermsGroupUserEditForm(forms.Form):
 
     id_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+    id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+    id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+
+    obj_name = forms.CharField(label=u'Nome do Objeto', min_length=3, required=True, widget=forms.TextInput(
+        attrs={'style': "width: 300px; height: 19px;", 'class': "ui-state-default", 'autocomplete': "off"}),
+        error_messages=error_messages)
+
+    read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+
+    write = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+    change_config = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+    delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+
+
+class GeneralPermsGroupUserEditForm(forms.Form):
+
     id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
     id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
 
@@ -60,13 +76,45 @@ class IndividualPermsGroupUserForm(forms.Form):
     delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
 
 
-class GeneralPermsGroupUserForm(forms.Form):
+class IndividualPermsGroupUserCreateForm(forms.Form):
 
-    id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
-    id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+    def __init__(self, groups=[], objects=[], *args, **kwargs):
+        super(IndividualPermsGroupUserCreateForm, self).__init__(*args, **kwargs)
+        self.fields['type_obj'].choices = [('', ''), (1, "VIP"), (2, "Pool"), (3, "VLAN"), (4, "IPv4")]
+
+        self.fields['obj'].choices = [(obj["id"], obj["nome"]) for obj in objects]
+        self.fields['obj'].choices.insert(0, ('', ''))
+
+        self.fields['group'].choices = [(group["id"], group["nome"]) for group in groups]
+        self.fields['group'].choices.insert(0, ('', ''))
+
+    type_obj = forms.ChoiceField(
+        label=u'Tipo de Objeto',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'}))
+
+    obj = forms.ChoiceField(
+        label=u'Objeto',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2',
+            'disabled': 'disabled'}))
+
+    group = forms.ChoiceField(
+        label=u'Grupo de Usuários',
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            "style": "width: 300px",
+            'class': 'select2'
+        }))
 
     read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
-
     write = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
     change_config = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
     delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)

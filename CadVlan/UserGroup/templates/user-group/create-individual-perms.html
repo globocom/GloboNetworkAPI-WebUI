@@ -22,8 +22,15 @@
 
 {% block header %}
 <script type="text/javascript">
+var select2_basic = {
+    placeholder: 'Selecione',
+    allowClear: true, // Adds X image to clear select
+    closeOnSelect: true, // Only applies to multiple selects. Closes the select upon selection.
+    minimumResultsForSearch: 3 // Removes search when there are 3 or fewer options
+};
 $(document).ready(function() {
 
+    $(".select2").select2(select2_basic);
 	$("#page_tab").tabs();
 
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
@@ -32,19 +39,47 @@ $(document).ready(function() {
 		location.href = "{% url environment-vip.list %}";
 	});
 
-})
+    $("select[name=type_obj]").change(function(){
+
+        if($("select[name=type_obj]").val()!=0 && $("select[name=type_obj]").val()!=null){
+            $("select[name=obj]").prop('disabled',false);
+
+        }else{
+            $("select[name=obj]").prop('disabled',true);
+
+        }
+
+	});
+
+    autocomplete("{% url vip-request.list.ajax %}", false, "id_obj_name", false);
+});
 </script>
 {% endblock %}
 
 {% block content %}
 <div id="page_tab">
 	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Criação de Permissões de Objeto</a></li>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Criação de Permissão Individual de Objeto</a></li>
 	</ul>
 	<div id="tabs-1">
 
+        <div id="fields" class="ui-widget-content">
+            <table>
+                <tr>
+                    <td style="width: 100px"><label for="nome_grupo">Grupo de Usuário</label></td>
+                    <td><label style="width: 350px;color: blue;text-align: center;" >{{group_name}}</label></td>
+                </tr>
 
-		<form id="edit_form" method="post" action="{% url user-group-individual-perms.create %}">
+                <tr>
+                    <td style="width: 100px"><label for="tipo_objeto">Tipo dos Objetos</label></td>
+                    <td><label style="width: 350px;color: blue;text-align: center;" >{{object_type}}</label></td>
+                </tr>
+
+            </table>
+        </div>
+        <div class="separator spacer"></div>
+
+		<form id="edit_form" method="post" action="{% url user-group-individual-perms.create 9 1 %}">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			{% for field in form_individ_perms_group_user %}
