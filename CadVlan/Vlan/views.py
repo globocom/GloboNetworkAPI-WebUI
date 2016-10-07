@@ -729,24 +729,25 @@ def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_netty
                     # Execute in NetworkAPI
                     client_vlan.deallocate(id_vlan)
 
-                    key_acl_v4 = acl_key(NETWORK_TYPES.v4)
-                    key_acl_v6 = acl_key(NETWORK_TYPES.v6)
-                    user = AuthSession(request.session).get_user()
+                    # commenting code to remove acl files - issue #40 
+                    # key_acl_v4 = acl_key(NETWORK_TYPES.v4)
+                    # key_acl_v6 = acl_key(NETWORK_TYPES.v6)
+                    # user = AuthSession(request.session).get_user()
 
-                    try:
-                        if vlan.get(key_acl_v4) is not None:
-                            if checkAclGit(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user):
-                                deleteAclGit(
-                                    vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
+                    # try:
+                    #     if vlan.get(key_acl_v4) is not None:
+                    #         if checkAclGit(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user):
+                    #             deleteAclGit(
+                    #                 vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
 
-                        if vlan.get(key_acl_v6) is not None:
-                            if checkAclGit(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user):
-                                deleteAclGit(
-                                    vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
+                    #     if vlan.get(key_acl_v6) is not None:
+                    #         if checkAclGit(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user):
+                    #             deleteAclGit(
+                    #                 vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
 
-                    except GITError, e:
-                        messages.add_message(
-                            request, messages.WARNING, vlan_messages.get("vlan_git_error"))
+                    # except GITError, e:
+                    #     messages.add_message(
+                    #         request, messages.WARNING, vlan_messages.get("vlan_git_error"))
 
                 except VipIpError, e:
                     logger.error(e)
