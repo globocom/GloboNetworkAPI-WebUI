@@ -141,7 +141,7 @@ function openDialog(callback) {
                     var el = $('input:radio:checked[name=environment][attr],input:hidden[name=environment_vip]');
                     var envVipId = el.attr('attr') == undefined ? el.val() : el.attr('attr');
                     var idToken = $("#id_token").val();
-
+                    var idPool = $("#id_pools").val();
                     var $this = $(this);
                     var form =  $("#add_form_vip_pool");
                     var formData = form.serialize() + '&' + $.param({'environment_vip': envVipId, 'token': idToken});
@@ -160,12 +160,18 @@ function openDialog(callback) {
                             }else if(xhr.status == 203){
                                 alert(data);
                             }
+
                         },
                         error: function (error) {
                             message = jQuery.parseJSON(error.responseText);
                             addMessageModal(message);
                         }
                     });
+
+                    $(document).one("ajaxStop", function() {
+                        $("#id_pools").val(idPool.toString()).change();
+                    });
+
                 },
                 "Cancelar": function() {
                     var $this = $(this);
@@ -197,13 +203,17 @@ $("#btn_copy").button({ icons: {primary: "ui-icon-copy"} }).live("click", functi
                     else if(xhr.status == 203){
                         alert(data);
                     }
+
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
                     addMessage(message);
+
                 }
         });
 
+    }else{
+        alert('Selecione um Pool!');
     }
 });
 
@@ -220,24 +230,48 @@ $("#btn_new_pool").button({ icons: {primary: "ui-icon-document"} }).click(functi
                     token: tokenId
                 },
                 success: function(data, textStatus, xhr) {
-
                     if (xhr.status == 200) {
                         buildContentNewPool(data);
                     }
                     else if(xhr.status == 203){
                        alert(data);
                     }
+
+
                 },
                 error: function (error) {
                     message = jQuery.parseJSON(error.responseText);
                     addMessage(message);
+
                 }
         });
     }
 });
 
 $("#btn_add_pool").button({ icons: {primary: "ui-icon-plus"} }).live("click", function(){
-    loadPoolMembers();
+    var idPortVip = $("#id_port_vip").val();
+    var l4ProtocolId = $("#id_l4_protocol").val();
+    var l7ProtocolId = $("#id_l7_protocol").val();
+    var poolId = $("#id_pools").val();
+    if (idPortVip !=  0 && idPortVip != null && poolId !=  0 && poolId != null && l4ProtocolId !=  0 && l4ProtocolId!= null && l7ProtocolId !=  0 && l7ProtocolId != null ) {
+        loadPoolMembers();
+    }else{
+        var errormsg = "";
+
+        if(idPortVip ==  0 || idPortVip == null){
+            errormsg += "Porta Vip\n";
+        }
+        if(l4ProtocolId ==  0 || l4ProtocolId == null){
+            errormsg += "Protocolo L4\n";
+        }
+        if(l7ProtocolId ==  0 || l7ProtocolId == null){
+            errormsg += "Protocolo L7\n";
+        }
+        if(poolId ==  0 || poolId == null){
+            errormsg += "Pools\n";
+        }
+        alert("Os seguintes campos devem ser preenchidos:\n".concat(errormsg));
+    }
 });
 
 

@@ -259,6 +259,14 @@ def shared_load_pool(request, client, form_acess=None, external=False):
         pool = client.create_api_pool().get_pool_details(pool_id)['server_pools'][0]
         environment_id = pool['environment']['id']
 
+        group_users_list_selected = []
+        for group in pool["groups_permissions"]:
+            group_users_list_selected.append(group["group"]["id"])
+
+        group_users_list = client.create_grupo_usuario().listar()
+        forms_aux = {}
+        forms_aux['group_users'] = group_users_list
+
         server_pool_members = list()
         server_pool_members_raw = pool.get('server_pool_members')
         if server_pool_members_raw:
@@ -325,6 +333,14 @@ def shared_load_pool(request, client, form_acess=None, external=False):
             initial=form_initial
         )
 
+        form_group_users = forms.PoolModalGroupUsersForm(
+            forms_aux,
+            edit=False,
+            initial={
+                "group_users_modal": group_users_list_selected
+            }
+        )
+
         if external:
             action = reverse('external.save.pool')
         else:
@@ -338,7 +354,8 @@ def shared_load_pool(request, client, form_acess=None, external=False):
             'pool_members': server_pool_members,
             'selection_form': DeleteForm(),
             'show_environment': False,
-            'is_copy': bool(int(is_copy))
+            'is_copy': bool(int(is_copy)),
+            'form_group_users': form_group_users
         }
 
         return render(
@@ -432,7 +449,7 @@ def _options(form):
     return options
 
 
-def _vip_dict(form, envvip, options, v4, v6, pools, vip_id):
+def _vip_dict(form, envvip, options, v4, v6, pools, groups_permissions, overwrite, vip_id=None):
     vip = {
         "id": int(vip_id) if vip_id else None,
         "name": str(form.cleaned_data["name"]),
@@ -442,7 +459,9 @@ def _vip_dict(form, envvip, options, v4, v6, pools, vip_id):
         "ipv4": v4,
         "ipv6": v6,
         "ports": pools,
-        "options": options
+        "options": options,
+        "groups_permissions": groups_permissions,
+        "permissions": {"replace": overwrite}
     }
     return vip
 
@@ -583,9 +602,10 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
     form_option = forms.RequestVipOptionVipForm(forms_aux, request.POST)
     form_port_option = forms.RequestVipPortOptionVipForm(forms_aux, request.POST)
     form_ip = forms.RequestVipIPForm(forms_aux, request.POST)
+    form_user_group = forms.RequestVipGroupUsersForm(forms_aux, edit, request.POST)
 
     if form_basic.is_valid() and form_environment.is_valid() and form_option.is_valid() and \
-            form_ip.is_valid() and is_valid_ports and is_valid_pools:
+            form_ip.is_valid() and form_user_group.is_valid() and is_valid_ports and is_valid_pools:
 
         options = _options(form_option)
 
@@ -593,6 +613,11 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
         environment_vip = form_environment.cleaned_data["environment_vip"]
         ipv4_check = form_ip.cleaned_data["ipv4_check"]
         ipv6_check = form_ip.cleaned_data["ipv6_check"]
+        group_users = form_user_group.cleaned_data['group_users']
+        if edit:
+            overwrite = form_user_group.cleaned_data['overwrite']
+        else:
+            overwrite = False
 
         ipv4 = None
         ipv6 = None
@@ -672,12 +697,23 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
 
                     pools.append(port_dict)
 
+                groups_permissions = []
+                if len(group_users) > 0:
+                    for id in group_users:
+                        groups_permissions.append({
+                            "group": int(id),
+                            "read": True,
+                            "write": True,
+                            "change_config": True,
+                            "delete": True
+                        })
+
                 if edit:
-                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
+                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, overwrite, vip_id)
                     vip = client_api.create_api_vip_request().update_vip_request(vip, vip_id)
                     id_vip_created = vip_id
                 else:
-                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
+                    vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, overwrite, vip_id)
                     vip = client_api.create_api_vip_request().save_vip_request(vip)
                     id_vip_created = vip[0].get("id")
 
@@ -739,7 +775,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
     lists['form_option'] = form_option
     lists['form_port_option'] = form_port_option
     lists['form_ip'] = form_ip
-
+    lists['form_group_users'] = form_user_group
     return lists, is_valid, id_vip_created
 
 
@@ -831,14 +867,16 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
     form_basic = forms.RequestVipBasicForm(forms_aux, request.POST)
     form_option = forms.RequestVipOptionVipEditForm(forms_aux, request.POST)
     form_port_option = forms.RequestVipPortOptionVipForm(forms_aux, request.POST)
+    form_user_group = forms.RequestVipGroupUsersForm(forms_aux, True, request.POST)
 
-    if form_basic.is_valid() and form_option.is_valid() and is_valid_ports and is_valid_pools:
+    if form_basic.is_valid() and form_option.is_valid() and form_user_group.is_valid() and is_valid_ports and is_valid_pools:
 
         options = _options(form_option)
-
         environment_vip = vip.get('environmentvip').get('id')
         ipv4 = vip.get('ipv4').get('id') if vip.get('ipv4') else None
         ipv6 = vip.get('ipv6').get('id') if vip.get('ipv6') else None
+        group_users = form_user_group.cleaned_data["group_users"]
+        overwrite = form_user_group.cleaned_data["overwrite"]
 
         try:
 
@@ -870,7 +908,18 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
 
                     pools.append(port_dict)
 
-                vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, vip_id)
+                groups_permissions = []
+                if len(group_users) > 0:
+                    for id in group_users:
+                        groups_permissions.append({
+                            "group": int(id),
+                            "read": True,
+                            "write": True,
+                            "change_config": True,
+                            "delete": True
+                        })
+
+                vip = _vip_dict(form_basic, environment_vip, options, ipv4, ipv6, pools, groups_permissions, overwrite, vip_id)
                 vip = client_api.create_api_vip_request().update_vip(vip, vip_id)
                 id_vip_created = vip_id
 
@@ -920,6 +969,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
     lists['form_basic'] = form_basic
     lists['form_option'] = form_option
     lists['form_port_option'] = form_port_option
+    lists['form_group_users'] = form_user_group
 
     return lists, is_valid, id_vip_created
 
@@ -944,7 +994,6 @@ def _create_options_environment(client, env_vip_id):
 def shared_save_pool(request, client, form_acess=None, external=False):
 
     try:
-
         env_vip_id = request.POST.get('environment_vip')
 
         # Get Data From Request Post To Save
@@ -961,6 +1010,10 @@ def shared_save_pool(request, client, form_acess=None, external=False):
         members["id_ips"] = request.POST.getlist('id_ip')
         members["ips"] = request.POST.getlist('ip')
         members["environment"] = environment_id
+
+        group_users_list = client.create_grupo_usuario().listar()
+        forms_aux = {}
+        forms_aux['group_users'] = group_users_list
 
         environment_choices = _create_options_environment(client, env_vip_id)
         lb_method_choices = facade_pool.populate_optionsvips_choices(client)
@@ -979,7 +1032,24 @@ def shared_save_pool(request, client, form_acess=None, external=False):
             request.POST
         )
 
-        if form_pool.is_valid() and form_healthcheck.is_valid():
+        form_user_group = forms.PoolModalGroupUsersForm(
+            forms_aux,
+            False,
+            request.POST)
+
+        if form_pool.is_valid() and form_healthcheck.is_valid() and form_user_group.is_valid():
+            group_users = form_user_group.cleaned_data['group_users_modal']
+
+            groups_permissions = []
+            if len(group_users) > 0:
+                for id in group_users:
+                    groups_permissions.append({
+                        "group": int(id),
+                        "read": True,
+                        "write": True,
+                        "change_config": True,
+                        "delete": True
+                    })
 
             param_dic = {}
 
@@ -998,6 +1068,9 @@ def shared_save_pool(request, client, form_acess=None, external=False):
             pool["default_limit"] = int(form_pool.cleaned_data['maxcon'])
             server_pool_members = facade_pool.format_server_pool_members(request, pool["default_limit"])
             pool["server_pool_members"] = server_pool_members
+            pool["groups_permissions"] = groups_permissions
+
+            # logger.error(json.dumps(pool, indent=4, sort_keys=True))
 
             client.create_pool().save_pool(pool)
             if pool_id:
@@ -1007,7 +1080,10 @@ def shared_save_pool(request, client, form_acess=None, external=False):
 
             return HttpResponse(json.dumps(param_dic), content_type="application/json")
 
-        errors = form_pool.errors + form_healthcheck.errors
+        errors = ['{} - {}'.format(k, v) for k, v in form_pool.errors.iteritems()]
+        errors += ['{} - {}'.format(k, v) for k, v in form_healthcheck.errors.iteritems()]
+
+        # errors = unicode(str(form_pool.errors.as_ul() + form_healthcheck.errors.as_ul()), errors='replace')
 
         return render_message_json('<br>'.join(errors), messages.ERROR)
 
@@ -1033,11 +1109,12 @@ def add_form_shared(request, client_api, form_acess="", external=False):
 
         if external:
             lists['token'] = form_acess.initial.get("token")
-
+        group_users_list = client_api.create_grupo_usuario().listar()
         finality_list = client_api.create_api_environment_vip().environmentvip_step()
 
         forms_aux = dict()
         forms_aux['finalities'] = finality_list
+        forms_aux['group_users'] = group_users_list
         forms_aux['pools'] = list()
 
         if request.method == "POST":
@@ -1071,6 +1148,8 @@ def add_form_shared(request, client_api, form_acess="", external=False):
         else:
 
             lists['form_basic'] = forms.RequestVipBasicForm(forms_aux)
+            lists['form_group_users'] = forms.RequestVipGroupUsersForm(forms_aux, edit=False)
+
             lists['form_environment'] = forms.RequestVipEnvironmentVipForm(forms_aux)
             lists['form_option'] = forms.RequestVipOptionVipForm(forms_aux)
             lists['form_port_option'] = forms.RequestVipPortOptionVipForm(forms_aux)
@@ -1109,6 +1188,12 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
 
         vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
 
+        group_users_list_selected = []
+        for group in vip["groups_permissions"]:
+            group_users_list_selected.append(group["group"]["id"])
+
+        group_users_list = client_api.create_grupo_usuario().listar()
+
         if vip.get('created') is True:
             return redirect(reverse('vip-request.tab.edit', args=[id_vip]))
 
@@ -1117,6 +1202,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         forms_aux = dict()
         forms_aux['finalities'] = finality_list
         forms_aux['pools'] = list()
+        forms_aux['group_users'] = group_users_list
 
         if request.method == "POST":
 
@@ -1204,6 +1290,15 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
 
             forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
+            lists['form_group_users'] = forms.RequestVipGroupUsersForm(
+                forms_aux,
+                edit=True,
+                initial={
+                    "group_users": group_users_list_selected
+                }
+
+            )
+
             lists['form_basic'] = forms.RequestVipBasicForm(
                 forms_aux,
                 initial={
@@ -1274,6 +1369,8 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         messages.add_message(request, messages.ERROR, e)
 
     template = templates.VIPREQUEST_EDIT_EXTERNAL if external else templates.VIPREQUEST_FORM
+
+    logger.error(" XXXXX TEM " + template)
 
     return render_to_response(template, lists, context_instance=RequestContext(request))
 
@@ -1377,6 +1474,9 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         lb_method_choices = facade_pool.populate_optionsvips_choices(client)
         servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
         healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
+        group_users_list = client.create_grupo_usuario().listar()
+        forms_aux = {}
+        forms_aux['group_users'] = group_users_list
 
         lists = dict()
         lists["form_pool"] = forms.PoolForm(environment_choices, lb_method_choices,
@@ -1386,6 +1486,8 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         lists["load_pool_url"] = load_pool_url
         lists["pool_members"] = pool_members
         lists["show_environment"] = True
+        lists['form_group_users'] = forms.PoolModalGroupUsersForm(forms_aux, edit=False)
+
         return render(
             request,
             templates.VIPREQUEST_POOL_FORM,

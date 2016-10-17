@@ -16,6 +16,7 @@
 import base64
 import hashlib
 import logging
+import socket
 import re
 from time import strftime
 
@@ -222,8 +223,13 @@ def tab_vip_edit(request, id_vip):
 
         vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
 
+        group_users_list = client_api.create_grupo_usuario().listar()
+        forms_aux['group_users'] = group_users_list
+
         if vip.get('created') is not True:
             return redirect(reverse('vip-request.edit', args=[id_vip]))
+
+        lists['vip'] = vip
 
         if request.method == 'POST':
             lists, is_valid, id_vip = facade._valid_form_and_submit_update(
@@ -256,6 +262,11 @@ def tab_vip_edit(request, id_vip):
             forms_aux['l7_protocol'] = options_list['l7_protocol']
             forms_aux['l7_rule'] = options_list['l7_rule']
             forms_aux['pools'] = pools
+            forms_aux['overwrite'] = False
+
+            group_users_list_selected = []
+            for group in vip["groups_permissions"]:
+                group_users_list_selected.append(group["group"]["id"])
 
             lists['form_basic'] = forms.RequestVipBasicForm(
                 forms_aux,
@@ -265,6 +276,15 @@ def tab_vip_edit(request, id_vip):
                     "name": vip.get("name"),
                     "created": vip.get("created")
                 }
+            )
+
+            lists['form_group_users'] = forms.RequestVipGroupUsersForm(
+                forms_aux,
+                edit=True,
+                initial={
+                    "group_users": group_users_list_selected
+                }
+
             )
 
             lists['form_option'] = forms.RequestVipOptionVipEditForm(
@@ -286,8 +306,6 @@ def tab_vip_edit(request, id_vip):
 
             pools_add = vip.get("ports")
             lists['pools_add'] = pools_add
-
-            lists['vip'] = vip
 
     except VipNaoExisteError, e:
         logger.error(e)
@@ -876,9 +894,13 @@ def ajax_list_vips(request):
                 ipv4 = search_form.cleaned_data["ipv4"]
                 ipv6 = search_form.cleaned_data["ipv6"]
                 vip_created = search_form.cleaned_data["vip_created"]
+                vip_with_onwer = search_form.cleaned_data["vip_with_onwer"]
+                hostname = search_form.cleaned_data["hostname"]
 
                 extends_search = dict()
-                if len(ipv4) > 0:
+                if hostname:
+                    extends_search.update(prepare_hostname(hostname))
+                elif len(ipv4) > 0:
                     if request.GET["oct1"]:
                         extends_search.update({'ipv4__oct1': request.GET["oct1"]})
                     if request.GET["oct2"]:
@@ -888,7 +910,6 @@ def ajax_list_vips(request):
                     if request.GET["oct4"]:
                         extends_search.update({'ipv4__oct4': request.GET["oct4"]})
                 elif len(ipv6) > 0:
-                    extends_search = dict()
                     if request.GET["oct1"]:
                         extends_search.update({'ipv6__block1__iexact': request.GET["oct1"]})
                     if request.GET["oct2"]:
@@ -910,6 +931,9 @@ def ajax_list_vips(request):
                     extends_search.update({'created': vip_created})
                 if id_vip:
                     extends_search.update({"id": id_vip})
+                if vip_with_onwer:
+                    user = auth.get_user().get_id()
+                    extends_search.update({'viprequestgrouppermission__user_group__usuario': user})
 
                 # Pagination
                 column_index_name_map = {
@@ -981,3 +1005,19 @@ def ajax_list_vips(request):
     except BaseException, error:
         logger.error(error)
         return HttpResponseServerError(error, mimetype='application/javascript')
+
+
+def prepare_hostname(hostname):
+    try:
+        ip = socket.gethostbyname(hostname).split('.')
+        octs = {
+            'ipv4__oct1': ip[0],
+            'ipv4__oct2': ip[1],
+            'ipv4__oct3': ip[2],
+            'ipv4__oct4': ip[3]
+        }
+
+        return octs
+
+    except:
+        raise Exception('IP not found!')

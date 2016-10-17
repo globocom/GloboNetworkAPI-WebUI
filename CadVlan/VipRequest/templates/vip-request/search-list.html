@@ -263,6 +263,8 @@ input {
 							<tr>
 								<th>Id Requisição</th>
 								<th>IP <label for="ip_v4"><input type="radio" id="ip_v4" name="ip_version" checked="checked" value="0" />IPv4</label> <label for="ip_v6"><input type="radio" id="ip_v6" name="ip_version" value="1" />IPv6</label></th>
+								<th>Hostname</th>
+								<th></th>
 								<th></th>
 								<th></th>
 							</tr>
@@ -270,8 +272,34 @@ input {
 						<tbody>
 							<tr>
 								<td>{{ search_form.id_request }}</td>
-								<td><input type="text" class="ip_input ipv6 ipv4" name="oct1" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct2" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct3" onkeyup="changeInput(this, false)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct4" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input style="display: none;" type="text" class="ip_input ipv6" name="oct5" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct6" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct7" onkeyup="changeInput(this, false)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, false)" /></td>
-								<td>{{ search_form.vip_created }}<label for="id_iexact"> Buscar apenas Vips criados</label></td>
+								<td>
+									<input type="text" class="ip_input ipv6 ipv4" name="oct1" onkeyup="changeInput(this, false)" />
+									<label class="ipv4">.</label>
+									<label style="display: none;" class="ipv6">:</label>
+									<input type="text" class="ip_input ipv6 ipv4" name="oct2" onkeyup="changeInput(this, false)" />
+									<label class="ipv4">.</label>
+									<label style="display: none;" class="ipv6">:</label>
+									<input type="text" class="ip_input ipv6 ipv4" name="oct3" onkeyup="changeInput(this, false)" />
+									<label class="ipv4">.</label>
+									<label style="display: none;" class="ipv6">:</label>
+									<input type="text" class="ip_input ipv6 ipv4" name="oct4" onkeyup="changeInput(this, false)" />
+									<label></label>
+									<label style="display: none;" class="ipv6">:</label>
+									<input style="display: none;" type="text" class="ip_input ipv6" name="oct5" onkeyup="changeInput(this, false)" />
+									<label></label>
+									<label style="display: none;" class="ipv6">:</label>
+									<input type="text" class="ip_input ipv6" style="display: none;" name="oct6" onkeyup="changeInput(this, false)" />
+									<label></label>
+									<label style="display: none;" class="ipv6">:</label>
+									<input type="text" class="ip_input ipv6" style="display: none;" name="oct7" onkeyup="changeInput(this, false)" />
+									<label></label>
+									<label style="display: none;" class="ipv6">:</label>
+									<input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, false)" />
+								</td>
+								<td>{{ search_form.hostname }}</td>
+								<td>{{ search_form.vip_created }}<label for="id_vip_created"> Buscar apenas Vips criados</label>
+								<td>{{ search_form.vip_with_onwer }}<label for="id_vip_with_onwer">{{ search_form.vip_with_onwer.label_tag }}</label>
+								</td>
 								<td style="padding-top: 4px; float: right; width: 10.5%"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
 							</tr>
 						</tbody>
