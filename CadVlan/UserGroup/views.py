@@ -33,8 +33,11 @@ from CadVlan.forms import DeleteFormAux
 from CadVlan.messages import error_messages
 from CadVlan.messages import perm_group_messages
 from CadVlan.messages import user_group_messages
+from CadVlan.Net.business import is_valid_ipv4
+from CadVlan.Net.business import is_valid_ipv6
 from CadVlan.permissions import ADMINISTRATION
 from CadVlan.settings import PATH_PERMLISTS
+from CadVlan.templates import USERGROUP_AJAX_OBJECTS
 from CadVlan.templates import USERGROUP_CREATE_INDIVIDUAL_PERMS
 from CadVlan.templates import USERGROUP_EDIT_GENERAL_PERMS
 from CadVlan.templates import USERGROUP_EDIT_INDIVIDUAL_PERMS
@@ -215,11 +218,29 @@ def cria_array_perms_jb_fake():
     return obj_perms["object_perms"]
 
 
+def cria_objs_fake():
+    obj_perms = {"objs": []}
+
+    obj_perms["objs"].append({
+        "id": 1,
+        "name": "Teste"
+    })
+
+    obj_perms["objs"].append({
+        "id": 2,
+        "name": "Teste 2"
+    })
+
+    return obj_perms["objs"]
+
+
 def list_individ_perms_of_group_user(request, id_ugroup, id_type_obj):
     lists = {}
     lists["individual_perms"] = cria_array_individual_perms_of_vips_fake()
     lists["group_name"] = "Administradores"
     lists["object_type"] = "VIP"
+    lists["id_ugroup"] = id_ugroup
+    lists["id_type_obj"] = id_type_obj
 
     return render_to_response(USERGROUP_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
 
@@ -230,6 +251,9 @@ def edit_individ_perms_of_object(request, id_ugroup, id_type_obj, id_obj):
     lists["object_type"] = "VIP"
     lists["object_name"] = "VIP_192.168.0.1_GLOBO"
     lists["form_individ_perms_group_user"] = IndividualPermsGroupUserEditForm()
+    lists["id_ugroup"] = id_ugroup
+    lists["id_type_obj"] = id_type_obj
+    lists["id_obj"] = id_obj
 
     return render_to_response(USERGROUP_EDIT_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
 
@@ -239,18 +263,80 @@ def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
     lists["group_name"] = "Administradores"
     lists["object_type"] = "VIP"
     lists["form_gen_perms_group_user"] = GeneralPermsGroupUserEditForm()
+    lists["id_ugroup"] = id_ugroup
+    lists["id_type_obj"] = id_type_obj
 
     return render_to_response(USERGROUP_EDIT_GENERAL_PERMS, lists, context_instance=RequestContext(request))
 
 
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
 def create_individ_perms_of_object(request, id_ugroup, id_type_obj):
     lists = {}
     lists["group_name"] = "Administradores"
     lists["object_type"] = "VIP"
+    lists["id_ugroup"] = id_ugroup
+    lists["id_type_obj"] = id_type_obj
 
     lists["form_individ_perms_group_user"] = IndividualPermsGroupUserEditForm()  # TODO Alterar depois de edit pra ""
 
     return render_to_response(USERGROUP_CREATE_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
+def ajax_get_vip_requests(request):
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    search = request.POST.get('search')
+
+    query = {
+        "start_record": 0,
+        "custom_search": "",
+        "end_record": 25,
+        "asorting_cols": [],
+        "searchable_columns": []
+    }
+    try:
+        # query["id"] = int(search)
+        vips = client.create_api_vip_request().get_by_pk(int(search))
+        # query["extends_search"] = [{"id__iexact": int(search)}]
+    except ValueError as e:  # Usuario nao passou id
+
+        if(is_valid_ipv4(search)):    # testa se bate com ipv4
+            m = search.split(".")
+            query["extends_search"] = [{
+                "ipv4__oct1": m[0],
+                "ipv4__oct2": m[1],
+                "ipv4__oct3": m[2],
+                "ipv4__oct4": m[3]
+            }]
+
+        elif (is_valid_ipv6(search)):     # testa se bate com ipv6
+            m = search.split(":")
+            query["extends_search"] = [{
+                "ipv6__oct1": m[0],
+                "ipv6__oct2": m[1],
+                "ipv6__oct3": m[2],
+                "ipv6__oct4": m[3],
+                "ipv6__oct5": m[4],
+                "ipv6__oct6": m[5],
+                "ipv6__oct7": m[6],
+                "ipv6__oct8": m[7]
+            }]
+        else:
+            query["extends_search"] = [{
+                "name__iexact": search
+            }]
+
+        vips = client.create_api_vip_request().search_vip_request(query)
+
+    lists = {}
+    lists["objs"] = cria_objs_fake()
+    return render_to_response(USERGROUP_AJAX_OBJECTS, lists, context_instance=RequestContext(request))
 
 
 def load_list(request, lists, id_ugroup, tab):

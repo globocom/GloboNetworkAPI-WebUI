@@ -22,42 +22,110 @@
 
 {% block header %}
 <script type="text/javascript">
-var select2_basic = {
-    placeholder: 'Selecione',
-    allowClear: true, // Adds X image to clear select
-    closeOnSelect: true, // Only applies to multiple selects. Closes the select upon selection.
-    minimumResultsForSearch: 3 // Removes search when there are 3 or fewer options
-};
-$(document).ready(function() {
 
-    $(".select2").select2(select2_basic);
+var sel_obj;
+
+$(document).ready(function() {
+    var csrftoken = getCookie('csrftoken');
+
+
+    function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
 	$("#page_tab").tabs();
 
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url environment-vip.list %}";
+		location.href = "{% url user-group.list-perms-obj id_ugroup id_type_obj %}";
 	});
 
-    $("select[name=type_obj]").change(function(){
+    $("#dialog_obj").dialog({
+        height: 440,
+        width: 580,
+        modal: true,
+        draggable: false,
+        resizable: true,
 
-        if($("select[name=type_obj]").val()!=0 && $("select[name=type_obj]").val()!=null){
-            $("select[name=obj]").prop('disabled',false);
+        buttons: {
+            "Selecionar": function(ev) {
+                if($("input[name=sel_obj]:checked").val()){
+                    sel_obj = $("input[name=sel_obj]:checked").val();
+                    $("#id_show_obj_name").css("display","inline");
 
-        }else{
-            $("select[name=obj]").prop('disabled',true);
+                    $("#id_show_obj_name").html("Nome do objeto selecionado: "+ $("#sel_obj_"+sel_obj).val());
 
+                    $(this).dialog("close");
+                }else{
+                    alert("Selecione algum objeto!");
+                }
+
+
+            },
+            "Cancelar": function() {
+                var $this = $(this);
+                $this.dialog("close");
+            }
         }
+    });
 
-	});
+    $("#btn_select_obj").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+        ajax_to_retrieve_objects();
+    });
 
-    autocomplete("{% url vip-request.list.ajax %}", false, "id_obj_name", false);
+    $('#id_obj_name').keydown(function (e){
+        if(e.keyCode == 13){
+            //alert('you pressed enter ^_^');
+            ajax_to_retrieve_objects();
+        }
+    });
+
+    function ajax_to_retrieve_objects(){
+        $.ajax({
+            type: "POST",
+            url: "{% url user-group-individual-perms.ajax.get-vip-requests %}",
+            data: {
+                'search' : $("#id_obj_name").val()
+            },
+            success: function(data, textStatus, xhr) {
+                $('#content_obj').html(data);
+                $("#dialog_obj").dialog("open");
+            },
+            error: function (error) {
+                message = jQuery.parseJSON(error.responseText);
+                addMessageModal(message);
+            }
+        });
+
+    }
+
+    $("#dialog_obj").dialog("close");
+
+    $("#btn_select_obj").button({icons: {primary: "ui-icon-disk"}});
+
 });
 </script>
 {% endblock %}
 
 {% block content %}
 <div id="page_tab">
+
+    <div id="dialog_obj">
+        <div id="content_obj">
+
+
+        </div>
+
+    </div>
 	<ul>
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Criação de Permissão Individual de Objeto</a></li>
 	</ul>
@@ -79,9 +147,25 @@ $(document).ready(function() {
         </div>
         <div class="separator spacer"></div>
 
-		<form id="edit_form" method="post" action="{% url user-group-individual-perms.create 9 1 %}">
+		<form onkeypress="return event.keyCode != 13" id="edit_form" method="post" action="{% url user-group-individual-perms.create 9 1 %}">
 			{% csrf_token %}
+
+
 			<div id="fields" class="ui-widget-content">
+
+            <tr>
+                <td>Buscar Objeto:</td>
+                <td style="margin-left: 5px;">
+                    <input id="id_obj_name" type="text" name="obj_name" maxlength="100" style="width:250px" />
+                </td>
+                <td>
+                    <input type="button" id="btn_select_obj" value="Selecionar Objeto" />
+                </td>
+            </tr>
+
+            <div>
+                <label id="id_show_obj_name" style="display:none">Nome do objeto selecionado:</label>
+            </div>
 			{% for field in form_individ_perms_group_user %}
 				<div>
 					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
@@ -96,6 +180,8 @@ $(document).ready(function() {
 				</div>
 			{% endfor %}
 			</div>
+
+
 
 			<div class="separator spacer"></div>
 

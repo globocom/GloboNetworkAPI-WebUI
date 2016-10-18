@@ -418,6 +418,10 @@ urlpatterns += patterns(
     url(
         '^user-group/individ-perm/create/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)[/]?$', 'create_individ_perms_of_object', name='user-group-individual-perms.create', ),
 
+
+
+    url(
+        '^user-group/individ-perm/ajax/vip-request[/]?$', 'ajax_get_vip_requests', name='user-group-individual-perms.ajax.get-vip-requests', ),
     url(
         '^user-group/gen-perm/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)[/]?$', 'edit_gen_perms_of_type_obj', name='user-group-general-perms.edit', ),
 

@@ -56,7 +56,7 @@
 	        $(".btn_edit", individual_perms.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 
             $("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url user-group-individual-perms.create 1 9 %}";
+		location.href = "{% url user-group-individual-perms.create id_ugroup id_type_obj %}";
             });
 
             $("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
@@ -146,7 +146,7 @@
                             <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
                         </td>
                         <td class="text_center">
-                            <a href="{% url user-group-individual-perms.edit 5 2 3 %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a>
+                            <a href="{% url user-group-individual-perms.edit id_ugroup id_type_obj item.id %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a>
                         </td>
 
                     </tr>

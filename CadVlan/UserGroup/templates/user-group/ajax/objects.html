@@ -1,5 +1,51 @@
-{% load util %}
-	<option value="">-</option>
-{% for obj in objects %}
-	<option value="{{ obj.id }}">{{ obj.identifier }}</option>
-{% endfor %}
+<div id="page_tab_model">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Seleção de Objeto</a></li>
+	</ul>
+	<div id="tabs-1">
+
+		<div>
+
+			<br>
+
+			<table id="table_objs">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Identificador do Objeto</th>
+                    <th>Nome do Objeto</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in objs %}
+                    <tr>
+                        <td class="text_center"><input type="radio" name="sel_obj" value="{{ item.id }}"/><input type="hidden" id="sel_obj_{{ item.id }}"  value="{{ item.name }}" /></td>
+                        <td class="text_center">{{ item.id }}</td>
+                        <td class="text_center">{{ item.name}}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+		</div>
+	</div>
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	table_vips = $("#table_objs").dataTable({
+		"aaSorting": [],
+        "bFilter": false,
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": 25,
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 1 ] }]
+	});
+
+	$("#page_tab_model").tabs();
+	//$("#page_tab_lists").tabs();
+
+});
+
+</script>

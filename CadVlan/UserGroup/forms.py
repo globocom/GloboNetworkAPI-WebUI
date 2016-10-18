@@ -53,9 +53,7 @@ class IndividualPermsGroupUserEditForm(forms.Form):
     id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
     id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
 
-    obj_name = forms.CharField(label=u'Nome do Objeto', min_length=3, required=True, widget=forms.TextInput(
-        attrs={'style': "width: 300px; height: 19px;", 'class': "ui-state-default", 'autocomplete': "off"}),
-        error_messages=error_messages)
+    # obj_name = forms.CharField(label=u'Nome do Objeto', min_length=3, required=True, widget=forms.TextInput(attrs={'style': "width: 310px"}),error_messages=error_messages)
 
     read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
 

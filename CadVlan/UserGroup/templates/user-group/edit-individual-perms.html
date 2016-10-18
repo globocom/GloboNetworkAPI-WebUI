@@ -29,7 +29,7 @@ $(document).ready(function() {
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url environment-vip.list %}";
+		location.href = "{% url user-group.list-perms-obj id_ugroup id_type_obj %}";
 	});
 
 })
@@ -70,7 +70,7 @@ $(document).ready(function() {
         </div>
         <div class="separator spacer"></div>
 
-		<form id="edit_form" method="post" action="{% url user-group-individual-perms.edit 5 2 3 %}">
+		<form id="edit_form" method="post" action="{% url user-group-individual-perms.edit id_ugroup id_type_obj id_obj %}">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			{% for field in form_individ_perms_group_user %}
