@@ -1481,8 +1481,15 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         servicedownaction_choices = facade_pool.populate_servicedownaction_choices(client)
         healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
         group_users_list = client.create_grupo_usuario().listar()
+
+        groups_of_logged_user = client.create_usuario().get_by_id(request.session["user"]._User__id)
         forms_aux = {}
         forms_aux['group_users'] = group_users_list
+
+        form_group_users_initial = {
+            'group_users_modal': groups_of_logged_user["usuario"]["grupos"]
+
+        }
 
         lists = dict()
         lists["form_pool"] = forms.PoolForm(environment_choices, lb_method_choices,
@@ -1492,12 +1499,12 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         lists["load_pool_url"] = load_pool_url
         lists["pool_members"] = pool_members
         lists["show_environment"] = True
-        lists['form_group_users'] = forms.PoolModalGroupUsersForm(forms_aux, edit=False)
+        lists['form_group_users'] = forms.PoolModalGroupUsersForm(forms_aux, edit=False, initial=form_group_users_initial)
 
-        return render(
-            request,
+        return render_to_response(
             templates.VIPREQUEST_POOL_FORM,
-            lists
+            lists,
+            context_instance=RequestContext(request)
         )
 
     except NetworkAPIClientError, e:
