@@ -253,9 +253,10 @@ class PoolHealthcheckForm(forms.Form):
         )
     )
 
-    healthcheck_destination = forms.CharField(
+    healthcheck_destination = forms.IntegerField(
         label=u'Porta',
-        max_length=5,
+        min_value=1,
+        max_value=65535,
         required=False,
         error_messages=error_messages,
         widget=forms.TextInput(

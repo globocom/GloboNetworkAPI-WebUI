@@ -259,7 +259,7 @@ def add_form(request):
             lists["healthcheck_expect"] = ''
             lists["healthcheck_request"] = ''
 
-            lists["form_pool"] = PoolFormV3(
+            form_pool = PoolFormV3(
                 environment_choices,
                 lb_method_choices,
                 servicedownaction_choices
@@ -270,8 +270,8 @@ def add_form(request):
 
             }
 
-            lists["form_group_users"] = PoolGroupUsersForm(group_users_list, False, initial=form_group_users_initial)
-            lists["form_healthcheck"] = PoolHealthcheckForm()
+            form_group_users = PoolGroupUsersForm(group_users_list, False, initial=form_group_users_initial)
+            form_healthcheck = PoolHealthcheckForm()
 
         if request.method == 'POST':
 
@@ -344,22 +344,14 @@ def add_form(request):
 
                 return redirect('pool.list')
 
-            lists["form_pool"] = form_pool
-            lists["form_healthcheck"] = form_healthcheck
-            lists["form_group_users"] = form_group_users
-
     except NetworkAPIClientError, e:
         logger.error(e)
+
         messages.add_message(request, messages.ERROR, e)
-        form_pool = PoolFormV3(
-            environment_choices,
-            lb_method_choices,
-            servicedownaction_choices,
-            request.POST
-        )
 
-        lists["form_pool"] = form_pool
-
+    lists["form_pool"] = form_pool
+    lists["form_healthcheck"] = form_healthcheck
+    lists["form_group_users"] = form_group_users
     return render_to_response(POOL_FORM, lists, context_instance=RequestContext(request))
 
 
@@ -444,7 +436,7 @@ def edit_form(request, id_server_pool):
             }
             healthcheck_choices = facade.populate_healthcheck_choices(client)
 
-            lists["form_pool"] = PoolFormV3(
+            form_pool = PoolFormV3(
                 environment_choices,
                 lb_method_choices,
                 servicedownaction_choices,
@@ -456,7 +448,7 @@ def edit_form(request, id_server_pool):
                 'group_users': group_users_list_selected
             }
 
-            lists["form_group_users"] = PoolGroupUsersForm(group_users_list, True, initial=form_initial)
+            form_group_users = PoolGroupUsersForm(group_users_list, True, initial=form_initial)
 
             form_initial = {
                 'healthcheck': healthcheck,
@@ -465,7 +457,7 @@ def edit_form(request, id_server_pool):
                 'healthcheck_destination': healthcheck_destination
             }
 
-            lists["form_healthcheck"] = PoolHealthcheckForm(
+            form_healthcheck = PoolHealthcheckForm(
                 healthcheck_choices,
                 initial=form_initial
             )
@@ -539,29 +531,13 @@ def edit_form(request, id_server_pool):
 
                 return redirect(lists["action"])
 
-            lists["form_pool"] = form_pool
-            lists["form_healthcheck"] = form_healthcheck
-            lists["form_group_users"] = form_group_users
-
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        form_pool = PoolFormV3(
-            environment_choices,
-            lb_method_choices,
-            servicedownaction_choices,
-            request.POST
-        )
 
-        form_group_users = PoolGroupUsersForm(group_users_list, True, request.POST)
-
-        form_healthcheck = PoolHealthcheckForm(
-            request.POST
-        )
-
-        lists["form_pool"] = form_pool
-        lists["form_healthcheck"] = form_healthcheck
-        lists["form_group_users"] = form_group_users
+    lists["form_pool"] = form_pool
+    lists["form_healthcheck"] = form_healthcheck
+    lists["form_group_users"] = form_group_users
 
     return render_to_response(POOL_FORM, lists, context_instance=RequestContext(request))
 
