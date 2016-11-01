@@ -249,7 +249,7 @@ class PoolHealthcheckForm(forms.Form):
         error_messages=error_messages,
         widget=forms.TextInput(
             attrs={
-                "style": "width: 310px"}
+                "style": "width : 310px"}
         )
     )
 
