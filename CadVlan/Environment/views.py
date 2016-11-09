@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,31 +13,48 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.templates import ENVIRONMENT_LIST, ENVIRONMENT_FORM, \
-    AJAX_AUTOCOMPLETE_LIST
-from django.shortcuts import render_to_response, redirect
-from django.template.context import RequestContext
-from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, AmbienteNaoExisteError, AmbienteError, InvalidParameterError, DataBaseError, XMLError, DetailedEnvironmentError
+
 from django.contrib import messages
-from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm
-from CadVlan.Environment.forms import AmbienteLogicoForm, DivisaoDCForm, Grupol3Form, AmbienteForm, \
-    IpConfigForm
-from CadVlan.messages import environment_messages, vlan_messages
 from django.core.urlresolvers import reverse
-from CadVlan.Acl.acl import mkdir_divison_dc, deleteAclGit, checkAclGit, \
-    get_templates
-from CadVlan.Util.git import GITCommandError, GITError
-from CadVlan.Util.Enum import NETWORK_TYPES
-from CadVlan.Util.utility import acl_key
-from CadVlan.Util.shortcuts import render_to_response_ajax
+from django.shortcuts import redirect
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
+from networkapiclient.exception import AmbienteError
+from networkapiclient.exception import AmbienteNaoExisteError
+from networkapiclient.exception import DataBaseError
+from networkapiclient.exception import DetailedEnvironmentError
+from networkapiclient.exception import InvalidParameterError
+from networkapiclient.exception import NetworkAPIClientError
+from networkapiclient.exception import XMLError
+
 from CadVlan import templates
+from CadVlan.Acl.acl import checkAclGit
+from CadVlan.Acl.acl import deleteAclGit
+from CadVlan.Acl.acl import get_templates
+from CadVlan.Acl.acl import mkdir_divison_dc
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.Environment.forms import AmbienteForm
+from CadVlan.Environment.forms import AmbienteLogicoForm
+from CadVlan.Environment.forms import DivisaoDCForm
+from CadVlan.Environment.forms import Grupol3Form
+from CadVlan.Environment.forms import IpConfigForm
+from CadVlan.forms import DeleteForm
+from CadVlan.messages import environment_messages
+from CadVlan.messages import vlan_messages
+from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST
+from CadVlan.templates import ENVIRONMENT_FORM
+from CadVlan.templates import ENVIRONMENT_LIST
+from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import has_perm
+from CadVlan.Util.Decorators import log
+from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.Enum import NETWORK_TYPES
+from CadVlan.Util.git import GITCommandError
+from CadVlan.Util.git import GITError
+from CadVlan.Util.shortcuts import render_to_response_ajax
+from CadVlan.Util.utility import acl_key
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +126,7 @@ def remove_environment(request):
                     # Remove environment and its dependencies
                     client_api_env.delete_environment(id_env)
 
-                    # commenting code to remove acl files - issue #40 
+                    # commenting code to remove acl files - issue #40
                     # # Remove acl's
                     # user = auth.get_user()
                     # for vlan in vlans:
@@ -477,7 +493,7 @@ def edit(request, id_environment):
         # Set Environment data
         initial = {
             "id_env": env.get("id"),
-            "divisao": env.get("grupo_l3"),
+            "divisao": env.get("divisao_dc"),
             "ambiente_logico": env.get("ambiente_logico"),
             "grupol3": env.get("grupo_l3"),
             "filter": env.get("filter"),
