@@ -848,7 +848,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
 
     # Options - data
     lists_options = _get_optionsvip_by_environmentvip(environment_vip, client_api)
-    forms_aux['timeout'] = lists_options['timeout']
+    forms_aux['timeout'] = [vip.get('options').get('timeout')]
     forms_aux['caches'] = [vip.get('options').get('cache_group')]
     forms_aux['trafficreturn'] = [vip.get('options').get('traffic_return')]
     forms_aux['persistence'] = lists_options['persistence']

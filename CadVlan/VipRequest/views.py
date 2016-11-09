@@ -16,8 +16,8 @@
 import base64
 import hashlib
 import logging
-import socket
 import re
+import socket
 from time import strftime
 
 from django.contrib import messages
@@ -213,7 +213,7 @@ def tab_vip_edit(request, id_vip):
     lists['idt'] = id_vip
     lists["action"] = reverse('vip-request.tab.edit', args=[id_vip])
     lists['status_form'] = DeleteForm()
-
+    form_option = None
     try:
         forms_aux = dict()
         forms_aux['pools'] = list()
@@ -231,6 +231,32 @@ def tab_vip_edit(request, id_vip):
 
         lists['vip'] = vip
 
+        options_list = facade._get_optionsvip_by_environmentvip(vip.get('environmentvip').get('id'), client_api)
+
+        pools = client_api.create_api_pool().pool_by_environmentvip(vip.get('environmentvip').get('id'))
+
+        forms_aux['timeout'] = [vip.get('options').get('timeout')]
+        forms_aux['persistence'] = options_list['persistence']
+        forms_aux['trafficreturn'] = [vip.get('options').get('traffic_return')]
+        forms_aux['caches'] = [vip.get('options').get('cache_group')]
+        forms_aux['l4_protocol'] = options_list['l4_protocol']
+        forms_aux['l7_protocol'] = options_list['l7_protocol']
+        forms_aux['l7_rule'] = options_list['l7_rule']
+        forms_aux['pools'] = pools
+        forms_aux['overwrite'] = False
+
+        initial_form_request_vip_option = {
+            "environment_vip": vip.get('environmentvip').get('id'),
+            "timeout": vip.get('options').get('timeout').get('id')
+            if vip.get('options').get('timeout') else None,
+            "persistence": vip.get('options').get('persistence').get('id')
+            if vip.get('options').get('persistence') else None,
+            "trafficreturn": vip.get('options').get('traffic_return').get('id')
+            if vip.get('options').get('traffic_return') else None,
+            "caches": vip.get('options').get('cache_group').get('id')
+            if vip.get('options').get('cache_group') else None
+        }
+
         if request.method == 'POST':
             lists, is_valid, id_vip = facade._valid_form_and_submit_update(
                 forms_aux,
@@ -239,6 +265,12 @@ def tab_vip_edit(request, id_vip):
                 lists,
                 client_api,
                 id_vip
+            )
+
+            lists['form_option'] = forms.RequestVipOptionVipEditForm(
+                forms_aux,
+                request.POST,
+                initial=initial_form_request_vip_option
             )
 
             if is_valid:
@@ -250,19 +282,6 @@ def tab_vip_edit(request, id_vip):
 
                 return redirect('vip-request.list')
         else:
-
-            options_list = facade._get_optionsvip_by_environmentvip(vip.get('environmentvip').get('id'), client_api)
-
-            pools = client_api.create_api_pool().pool_by_environmentvip(vip.get('environmentvip').get('id'))
-            forms_aux['timeout'] = options_list['timeout']
-            forms_aux['persistence'] = options_list['persistence']
-            forms_aux['trafficreturn'] = options_list['trafficreturn']
-            forms_aux['caches'] = options_list['caches']
-            forms_aux['l4_protocol'] = options_list['l4_protocol']
-            forms_aux['l7_protocol'] = options_list['l7_protocol']
-            forms_aux['l7_rule'] = options_list['l7_rule']
-            forms_aux['pools'] = pools
-            forms_aux['overwrite'] = False
 
             group_users_list_selected = []
             for group in vip["groups_permissions"]:
@@ -289,17 +308,7 @@ def tab_vip_edit(request, id_vip):
 
             lists['form_option'] = forms.RequestVipOptionVipEditForm(
                 forms_aux,
-                initial={
-                    "environment_vip": vip.get('environmentvip').get('id'),
-                    "timeout": vip.get('options').get('timeout').get('id')
-                    if vip.get('options').get('timeout') else None,
-                    "persistence": vip.get('options').get('persistence').get('id')
-                    if vip.get('options').get('persistence') else None,
-                    "trafficreturn": vip.get('options').get('traffic_return').get('id')
-                    if vip.get('options').get('traffic_return') else None,
-                    "caches": vip.get('options').get('cache_group').get('id')
-                    if vip.get('options').get('cache_group') else None
-                }
+                initial=initial_form_request_vip_option
             )
 
             lists['form_port_option'] = forms.RequestVipPortOptionVipForm(forms_aux)
