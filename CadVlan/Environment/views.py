@@ -493,9 +493,9 @@ def edit(request, id_environment):
         # Set Environment data
         initial = {
             "id_env": env.get("id"),
-            "divisao": env.get("divisao_dc"),
-            "ambiente_logico": env.get("ambiente_logico"),
-            "grupol3": env.get("grupo_l3"),
+            "divisao": env.get("divisao_dc").get("id"),
+            "ambiente_logico": env.get("ambiente_logico").get("id"),
+            "grupol3": env.get("grupo_l3").get("id"),
             "filter": env.get("filter"),
             "acl_path": env.get("acl_path"),
             "vrf": env.get("vrf"),
