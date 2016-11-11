@@ -690,7 +690,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                             "id": int(ports_vip_pool_id[i][j]) if ports_vip_pool_id[i][j] else None,
                             "server_pool": int(pool_ids[i][j]),
                             "l7_rule": int(ports_vip_l7_rules[i][j]) if ports_vip_l7_rules[i][j] else default_l7_rule,
-                            "order": ports_vip_l7_rules_orders[i][j] if ports_vip_l7_rules_orders[i][j] else None,
+                            "order": int(ports_vip_l7_rules_orders[i][j]) if ports_vip_l7_rules_orders[i][j] else None,
                             "l7_value": ports_vip_l7_rules_values[i][j] if ports_vip_l7_rules_values[i][j] else None
                         }
                         port_dict['pools'].append(pool_dict)
@@ -763,7 +763,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                     "l7_rule": {
                         "id": int(ports_vip_l7_rules[index][index_pool]) if ports_vip_l7_rules[index][index_pool] else default_l7_rule,
                     },
-                    "order": ports_vip_l7_rules_orders[index][index_pool] if ports_vip_l7_rules_orders[index][index_pool] else None,
+                    "order": int(ports_vip_l7_rules_orders[index][index_pool]) if ports_vip_l7_rules_orders[index][index_pool] else None,
                     "l7_value": ports_vip_l7_rules_values[index][index_pool] if ports_vip_l7_rules_values[index][index_pool] else None
                 })
 
@@ -901,7 +901,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
                             "id": int(ports_vip_pool_id[i][j]) if ports_vip_pool_id[i][j] else None,
                             "server_pool": int(pool_ids[i][j]),
                             "l7_rule": int(ports_vip_l7_rules[i][j]) if ports_vip_l7_rules[i][j] else default_l7_rule,
-                            "order": ports_vip_l7_rules_orders[i][j] if ports_vip_l7_rules_orders[i][j] else None,
+                            "order": int(ports_vip_l7_rules_orders[i][j]) if ports_vip_l7_rules_orders[i][j] else None,
                             "l7_value": ports_vip_l7_rules_values[i][j] if ports_vip_l7_rules_values[i][j] else None
                         }
                         port_dict['pools'].append(pool_dict)
@@ -959,7 +959,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
                     "l7_rule": {
                         "id": int(ports_vip_l7_rules[index][index_pool]) if ports_vip_l7_rules[index][index_pool] else default_l7_rule,
                     },
-                    "order": ports_vip_l7_rules_orders[index][index_pool] if ports_vip_l7_rules_orders[index][index_pool] else None,
+                    "order": int(ports_vip_l7_rules_orders[index][index_pool]) if ports_vip_l7_rules_orders[index][index_pool] else None,
                     "l7_value": ports_vip_l7_rules_values[index][index_pool] if ports_vip_l7_rules_values[index][index_pool] else None
                 })
 
