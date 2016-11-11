@@ -4,7 +4,7 @@
     <tbody>
       <tr>
         <td rowspan='{{ port.pools|length|sum }}' style="text-align: left; width:200px">
-          
+
 
           <span id="removePort" class="ui-icon ui-icon-closethick" style="cursor:pointer;float:right;"></span>
 
@@ -33,15 +33,21 @@
                 {% if pool.l7_rule.nome_opcao_txt != 'default_vip' %}
                   <label>Tipo Regra L7: <b><span class="pool_l7_rule">{{ pool.l7_rule.nome_opcao_txt }}<span></b></label>
                   <br>
-                  <label>Regra L7 <b><span class="pool_l7_value">{{ pool.l7_value }}<span></b></label>
+                  <label>Regra L7: <input class="ports_vip_l7_rules_values" name="ports_vip_l7_rules_values_{{ port.port }}" type="text" value="{% if pool.l7_value %}{{pool.l7_value }}{%endif%}"/> </label>
                   <br>
-                  <label>Ordem: <b><span class="pool_l7_order">{{ pool.order }}<span></b></label>
-                {% endif %} 
+                  <label>Ordem: <input class="ports_vip_l7_rules_orders" name="ports_vip_l7_rules_orders_{{ port.port }}" type="text" value="{% if pool.order %}{{pool.order }}{%endif%}"/> </label>
+
+
+
+                {% else %}
+                  <input class="ports_vip_l7_rules_orders" name="ports_vip_l7_rules_orders_{{ port.port }}" type="hidden" value="{% if pool.order %}{{pool.order }}{%endif%}"/>
+                  <input class="ports_vip_l7_rules_values" name="ports_vip_l7_rules_values_{{ port.port }}" type="hidden" value="{% if pool.l7_value %}{{pool.l7_value }}{%endif%}"/>
+
+                {% endif %}
+
                 <input class="idsPool" name="idsPool_{{ port.port }}" id="idsPool" type="hidden" value="{{ pool.server_pool.id }}"/>
                 <input class="ports_vip_pool_id" name="ports_vip_pool_id_{{ port.port }}" id="ports_vip_pool_id" type="hidden" value="{% if pool.id %}{{pool.id }}{%endif%}"/>
                 <input class="ports_vip_l7_rules" name="ports_vip_l7_rules_{{ port.port }}" type="hidden" value='{{pool.l7_rule.id}}'/>
-                <input class="ports_vip_l7_rules_orders" name="ports_vip_l7_rules_orders_{{ port.port }}" type="hidden" value="{% if pool.order %}{{pool.order }}{%endif%}"/>
-                <input class="ports_vip_l7_rules_values" name="ports_vip_l7_rules_values_{{ port.port }}" type="hidden" value="{% if pool.l7_value %}{{pool.l7_value }}{%endif%}"/>
               </th>
             </tr>
             <tr>
@@ -93,15 +99,16 @@
               <div class="l7_rule" style="display:none">
                 <label>Tipo Regra L7: <b><span class="vip_port_pool_l7_rule"></span></b></label>
                 <br>
-                <label>Regra L7 <b><span class="vip_port_pool_l7_value"></span></b></label>
+                <label>Regra L7: <input class="ports_vip_l7_rules_values" name="ports_vip_l7_rules_values" type="text" /></label>
                 <br>
-                <label>Ordem: <b><span class="vip_port_pool_l7_ordem"></span></b></label>
+                <label>Ordem: <input class="ports_vip_l7_rules_orders" name="ports_vip_l7_rules_orders" type="text" />
+</label>
+
               </div>
               <input class="idsPool" type="hidden" value="{{ server_pool.id }}"/>
               <input class="ports_vip_pool_id" type="hidden" />
               <input class="ports_vip_l7_rules" name="ports_vip_l7_rules" type="hidden"/>
-              <input class="ports_vip_l7_rules_orders" name="ports_vip_l7_rules_orders" type="hidden" />
-              <input class="ports_vip_l7_rules_values" name="ports_vip_l7_rules_values" type="hidden" />
+
             </th>
           </tr>
           <tr>

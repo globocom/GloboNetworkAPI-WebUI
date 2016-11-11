@@ -30,9 +30,10 @@ function loadPoolMembers(){
             success: function(data, textStatus, xhr) {
                 if(xhr.status == 200) {
                     new_table = $(data)
+
                     new_table.find(".vip_port_pool_l7_rule").html(l7_rule.html());
-                    new_table.find(".vip_port_pool_l7_value").html(l7_rule_value.val());
-                    new_table.find(".vip_port_pool_l7_ordem").html(l7_order.val());
+                    //new_table.find(".vip_port_pool_l7_value").html(l7_rule_value.val());
+                    //new_table.find(".vip_port_pool_l7_ordem").html(l7_order.val());
                     new_table.find(".idsPool")
                         .attr('name', 'idsPool_'+portVip);
                     new_table.find(".ports_vip_pool_id")
