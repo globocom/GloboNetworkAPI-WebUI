@@ -1117,7 +1117,7 @@ def add_form_shared(request, client_api, form_acess="", external=False):
         forms_aux['group_users'] = group_users_list
         forms_aux['pools'] = list()
 
-        groups_of_logged_user = client_api.create_usuario().get_by_id(request.session["user"]._User__id)
+        groups_of_logged_user = client_api.create_usuario().get_by_id(request.session["user"]._User__id)["usuario"]["grupos"]
 
         if request.method == "POST":
 
@@ -1149,7 +1149,8 @@ def add_form_shared(request, client_api, form_acess="", external=False):
 
         else:
             form_group_users_initial = {
-                'group_users': groups_of_logged_user["usuario"]["grupos"]
+                'group_users': groups_of_logged_user if not isinstance(groups_of_logged_user, basestring) else [groups_of_logged_user]
+
 
             }
 
@@ -1482,13 +1483,12 @@ def shared_load_new_pool(request, client, form_acess=None, external=False):
         healthcheck_choices = facade_pool.populate_healthcheck_choices(client)
         group_users_list = client.create_grupo_usuario().listar()
 
-        groups_of_logged_user = client.create_usuario().get_by_id(request.session["user"]._User__id)
+        groups_of_logged_user = client.create_usuario().get_by_id(request.session["user"]._User__id)["usuario"]["grupos"]
         forms_aux = {}
         forms_aux['group_users'] = group_users_list
 
         form_group_users_initial = {
-            'group_users_modal': groups_of_logged_user["usuario"]["grupos"]
-
+            'group_users_modal': groups_of_logged_user if not isinstance(groups_of_logged_user, basestring) else [groups_of_logged_user]
         }
 
         lists = dict()

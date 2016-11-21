@@ -248,7 +248,7 @@ def add_form(request):
         servicedownaction_choices = facade.populate_servicedownaction_choices(client)
         group_users_list = client.create_grupo_usuario().listar()
 
-        groups_of_logged_user = client.create_usuario().get_by_id(request.session["user"]._User__id)
+        groups_of_logged_user = client.create_usuario().get_by_id(request.session["user"]._User__id)["usuario"]["grupos"]
 
         lists["action"] = reverse('pool.add.form')
         lists["label_tab"] = u'Cadastro de Pool'
@@ -266,8 +266,7 @@ def add_form(request):
             )
 
             form_group_users_initial = {
-                'group_users': groups_of_logged_user["usuario"]["grupos"]
-
+                'group_users': groups_of_logged_user if not isinstance(groups_of_logged_user, basestring) else [groups_of_logged_user]
             }
 
             form_group_users = PoolGroupUsersForm(group_users_list, False, initial=form_group_users_initial)
