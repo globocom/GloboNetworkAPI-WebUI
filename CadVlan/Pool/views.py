@@ -216,11 +216,34 @@ def reqvip_datatable(request, id_server_pool):
         }
 
         dtp = DataTablePaginator(request, column_index_name_map)
+
+        # Make params
         dtp.build_server_side_list()
 
-        requisicoes_vip = client.create_pool().get_vip_by_pool(id_server_pool)
+        # Set params in simple Pagination class
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search)
 
-        return dtp.build_response(requisicoes_vip["vips"], requisicoes_vip["total"], POOL_REQVIP_DATATABLE, request)
+        data = dict()
+        data["start_record"] = pagination.start_record
+        data["end_record"] = pagination.end_record
+        data["asorting_cols"] = pagination.asorting_cols
+        data["searchable_columns"] = pagination.searchable_columns
+        data["custom_search"] = pagination.custom_search or ""
+        data["extends_search"] = [{"viprequestport__viprequestportpool__server_pool": id_server_pool}]
+
+        requisicoes_vip = client.create_api_vip_request().search(
+            search=data,
+            kind='details',
+            fields=['id', 'name', 'environmentvip', 'ipv4',
+                    'ipv6', 'equipments', 'created'])
+
+        return dtp.build_response(requisicoes_vip["vips"], requisicoes_vip["total"],
+                                  POOL_REQVIP_DATATABLE, request)
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -266,7 +289,8 @@ def add_form(request):
             )
 
             form_group_users_initial = {
-                'group_users': groups_of_logged_user if not isinstance(groups_of_logged_user, basestring) else [groups_of_logged_user]
+                'group_users': groups_of_logged_user
+                if not isinstance(groups_of_logged_user, basestring) else [groups_of_logged_user]
             }
 
             form_group_users = PoolGroupUsersForm(group_users_list, False, initial=form_group_users_initial)
@@ -599,11 +623,11 @@ def _modal_ip_list_real(request, client_api):
         data["custom_search"] = pagination.custom_search or ""
         data["extends_search"] = [extends_search] if extends_search else []
         # Valid Equipament
-        equip = client_api.create_api_equipment().get_equipment(
+        equip = client_api.create_api_equipment().search(
             search=data,
             include=[
-                'ipv4__details',
-                'ipv6__details',
+                'ipv4__basic__networkipv4__basic',
+                'ipv6__basic__networkipv6__basic',
                 'model__details__brand__details',
                 'equipment_type__details'
             ],

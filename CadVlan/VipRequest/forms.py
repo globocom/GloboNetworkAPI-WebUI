@@ -378,19 +378,23 @@ class RequestVipOptionVipEditForm(forms.Form):
 
         if forms_aux.get('timeout'):
             self.fields['timeout'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["timeout"]]
+                [(env['id'], env["nome_opcao_txt"])
+                    for env in forms_aux["timeout"] if env]
 
         if forms_aux.get('caches'):
             self.fields['caches'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["caches"]]
+                [(env['id'], env["nome_opcao_txt"])
+                    for env in forms_aux["caches"] if env]
 
         if forms_aux.get('persistence'):
             self.fields['persistence'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["persistence"]]
+                [(env['id'], env["nome_opcao_txt"])
+                    for env in forms_aux["persistence"] if env]
 
         if forms_aux.get('trafficreturn'):
             self.fields['trafficreturn'].choices = \
-                [(env['id'], env["nome_opcao_txt"]) for env in forms_aux["trafficreturn"]]
+                [(env['id'], env["nome_opcao_txt"])
+                    for env in forms_aux["trafficreturn"] if env]
 
     environment_vip = forms.IntegerField(
         label="",

@@ -206,7 +206,7 @@ def ajax_shared_view_vip(request, id_vip, lists):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        lists['vip'] = vip = client.create_api_vip_request().get_vip_request_details(id_vip).get('vips')[0]
+        lists['vip'] = vip = client.create_api_vip_request().get(ids=[id_vip], kind='details').get('vips')[0]
 
         # apenas reals
         reals = []
@@ -578,6 +578,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
         if client:
             forms_aux['environments'] = client_apienv.environmentvip_step(finality, client)
 
+    default_l7_rule = None
     # Options - data
     if environment_vip:
         lists_options = _get_optionsvip_by_environmentvip(environment_vip, client_api)
@@ -591,10 +592,9 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
 
         forms_aux['pools'] = client_apipool.pool_by_environmentvip(environment_vip)
 
-    default_l7_rule = None
-    for opt in lists_options['l7_rule']:
-        if opt['nome_opcao_txt'] == 'default_vip':
-            default_l7_rule = opt['id']
+        for opt in lists_options['l7_rule']:
+            if opt['nome_opcao_txt'] == 'default_vip':
+                default_l7_rule = opt['id']
 
     # forms with data and request by POST
     form_basic = forms.RequestVipBasicForm(forms_aux, request.POST)
@@ -1149,9 +1149,8 @@ def add_form_shared(request, client_api, form_acess="", external=False):
 
         else:
             form_group_users_initial = {
-                'group_users': groups_of_logged_user if not isinstance(groups_of_logged_user, basestring) else [groups_of_logged_user]
-
-
+                'group_users': groups_of_logged_user
+                if not isinstance(groups_of_logged_user, basestring) else [groups_of_logged_user]
             }
 
             lists['form_basic'] = forms.RequestVipBasicForm(forms_aux)
@@ -1193,7 +1192,7 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         if external:
             lists['token'] = form_acess.initial.get("token")
 
-        vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
+        vip = client_api.create_api_vip_request().get(ids=[id_vip], kind='details')['vips'][0]
 
         group_users_list_selected = []
         for group in vip["groups_permissions"]:

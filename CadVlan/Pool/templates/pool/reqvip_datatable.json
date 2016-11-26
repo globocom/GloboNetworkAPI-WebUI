@@ -3,18 +3,18 @@
     "iTotalRecords": {{ iTotalRecords|escapejs }},
     "iTotalDisplayRecords": {{ iTotalDisplayRecords|escapejs }},
     "aaData":[
-    {% for requisicoes_vip in aaData %}
-    [
-        "<div class='text_center'><input type='checkbox' name='selection' value='{{ requisicoes_vip.id|escapejs }}' /></div>",
-		"<div class='text_center'> {{ requisicoes_vip.id|escapejs }} </div>",
-        "<div class='text_center'> {% for name in requisicoes_vip.default_names %} {{ name|escapejs }}{% endfor %} </div>",
-		"<div class='text_center'> {% if requisicoes_vip.ipv4 %} {{ requisicoes_vip.ipv4.ip_formated|escapejs }}{% else %} - {% endif %} </div>",
-		"<div class='text_center'> {% if requisicoes_vip.ipv6 %} {{ requisicoes_vip.ipv6.ip_formated|escapejs }}{% else %} - {% endif %} </div>",
-		"<div class='text_center'> {% if requisicoes_vip.equipments|length > 2 %}<div class='expandable expandable_{{ requisicoes_vip.id|escapejs }}'>{% endif %}<table style='width: 100%;'>{% for equip in requisicoes_vip.equipments %}<tr><td>{{ equip.name|escapejs }}</td></tr>{% endfor %}</table></div>{% if requisicoes_vip.equipments|length > 2 %}<div class='expand' lang='{{ requisicoes_vip.id|escapejs }}'></div></div>{% endif %} </div>",
-		"<div class='text_center'> {% if requisicoes_vip.environmentvip %}{{ requisicoes_vip.environmentvip.finalidade_txt|escapejs }} {{ requisicoes_vip.environmentvip.cliente_txt|escapejs }} {{ requisicoes_vip.environmentvip.ambiente_p44_txt|escapejs }}{% else %} - {% endif %}</div>",
-		"<div class='text_center'>{% if requisicoes_vip.created %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endif %}</div>",
-		"<div class='text_center'> {% if requisicoes_vip.created %}<a href='{% url vip-request.tab.pools requisicoes_vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit_create'>Editar Vip Criado (Healthcheck,Portas, Maxconn, Real(s) Server(s))</a>{% else %} <a href='{% url vip-request.edit requisicoes_vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a> {% endif %}</div>"
-	]
+    {% for vip in aaData %}
+    [   
+        "<div class='text_center'><input type='checkbox' name='selection' value='{{ vip.id|escapejs }}' /></div>",
+        "<div class='text_center table_id' lang='{% url vip.view.ajax vip.id %}'>{{ vip.id|escapejs }}</div>",
+        "<div class='text_center'> {{ vip.name }}</div>",
+        "<div class='text_center'> {{ vip.ipv4.ip_formated }}</div>",
+        "<div class='text_center'> {{ vip.ipv6.ip_formated }}</div>",
+        "<div class='text_center'> {% if vip.equipments|length > 2 %}<div class='expandable expandable_{{ vip.id|escapejs }}'>{% endif %}<table style='width: 100%;'>{% for equip in vip.equipments %}<tr><td>{{ equip.name|escapejs }}</td></tr>{% endfor %}</table></div>{% if vip.equipments|length > 2 %}<div class='expand' lang='{{ vip.id|escapejs }}'></div></div>{% endif %} </div>",
+        "<div class='text_center'> {{ vip.environmentvip.finalidade_txt}} - {{ vip.environmentvip.cliente_txt}} - {{vip.environmentvip.ambiente_p44_txt}}</div>",
+        "<div class='text_center'>{% if vip.created %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NÃO'></span> {% endif %}</div>",
+        "<div class='text_center'>{% if vip.created %}<a href='{% url vip-request.tab.pools vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit_create'>Editar Vip Criado (Healthcheck,Portas, Maxconn, Real(s) Server(s))</a>{% else %} <a href='{% url vip-request.edit vip.id  %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a> {% endif %} </div>"
+    ]
     {% if not forloop.last %}
     ,
     {% endif %}

@@ -88,7 +88,6 @@ pool_read_permission = {"permission": POOL_MANAGEMENT, "read": True}
 ])
 def search_list(request):
     try:
-
         lists = dict()
         lists["delete_form"] = DeleteForm()
         lists["create_form"] = CreateForm()
@@ -187,7 +186,7 @@ def tab_pools(request, id_vip):
         auth = AuthSession(request.session)
         client_api = auth.get_clientFactory()
 
-        vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
+        vip = client_api.create_api_vip_request().get(ids=[id_vip], kind='details')['vips'][0]
         lists['vip'] = vip
 
     except NetworkAPIClientError, e:
@@ -213,7 +212,7 @@ def tab_vip_edit(request, id_vip):
     lists['idt'] = id_vip
     lists["action"] = reverse('vip-request.tab.edit', args=[id_vip])
     lists['status_form'] = DeleteForm()
-    form_option = None
+    # form_option = None
     try:
         forms_aux = dict()
         forms_aux['pools'] = list()
@@ -221,7 +220,7 @@ def tab_vip_edit(request, id_vip):
         auth = AuthSession(request.session)
         client_api = auth.get_clientFactory()
 
-        vip = client_api.create_api_vip_request().get_vip_request_details(id_vip)['vips'][0]
+        vip = client_api.create_api_vip_request().get(ids=[id_vip], kind='details')['vips'][0]
 
         group_users_list = client_api.create_grupo_usuario().listar()
         forms_aux['group_users'] = group_users_list
@@ -981,7 +980,11 @@ def ajax_list_vips(request):
                 data["custom_search"] = pagination.custom_search or ""
                 data["extends_search"] = [extends_search] if extends_search else []
 
-                vips = client.create_api_vip_request().search_vip_request_details(data)
+                vips = client.create_api_vip_request().search(
+                    search=data,
+                    kind='details',
+                    fields=['id', 'name', 'environmentvip', 'ipv4',
+                            'ipv6', 'equipments', 'created'])
 
                 # Returns JSON
                 return dtp.build_response(

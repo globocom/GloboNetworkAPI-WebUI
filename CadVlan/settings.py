@@ -16,13 +16,14 @@
 # Django settings for CadVlan project.
 import os
 import sys
+import logging
 
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 PDB = os.getenv('NETWORKAPI_PDB', '0') == '1'
 DEBUG = os.getenv('NETWORKAPI_DEBUG', '0') == '1'
 TEMPLATE_DEBUG = DEBUG
-
+LOG_LEVEL = logging.DEBUG if DEBUG else logging.INFO
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -271,97 +272,150 @@ LOGGING = {
         'handlers-request': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'formatter': 'simple',
             'filename': LOG_FILE,
-            'mode': 'a',  # append+create
+            'formatter': 'simple',
+            'mode': 'a',
         },
         'handlers-view': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'formatter': 'verbose',
             'filename': LOG_FILE,
-            'mode': 'a',  # append+create
+            'formatter': 'verbose',
+            'mode': 'a',
         },
     },
     'loggers': {
+        'default': {
+            'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'networkapiclient': {
+            'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         'django': {
             'handlers': ['handlers-view'],
-            'propagate': True,
             'level': 'DEBUG',
+            'propagate': True,
         },
         'django.request': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
             'propagate': True,
-            'level': 'INFO',
         },
         'CadVlan.Util': {
             'handlers': ['handlers-request'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.Auth': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.Script': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.ScriptType': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.EquipAccess': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.OptionVip': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.EnvironmentVip': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.GroupEquip': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.EquipGroup': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.GroupUser': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.UserGroup': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.Acl': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.AccessType': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.EquipmentType': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.NetworkType': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.HealthcheckExpect': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.VipRequest': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.Ldap': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.EventLog': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.Vlan': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.BlockRules': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         'CadVlan.Pool': {
             'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     }
 }
-
 reload(sys)
 sys.setdefaultencoding('utf-8')
