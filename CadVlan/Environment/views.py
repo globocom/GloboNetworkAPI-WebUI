@@ -29,8 +29,6 @@ from networkapiclient.exception import NetworkAPIClientError
 from networkapiclient.exception import XMLError
 
 from CadVlan import templates
-from CadVlan.Acl.acl import checkAclGit
-from CadVlan.Acl.acl import deleteAclGit
 from CadVlan.Acl.acl import get_templates
 from CadVlan.Acl.acl import mkdir_divison_dc
 from CadVlan.Auth.AuthSession import AuthSession
@@ -41,7 +39,6 @@ from CadVlan.Environment.forms import Grupol3Form
 from CadVlan.Environment.forms import IpConfigForm
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import environment_messages
-from CadVlan.messages import vlan_messages
 from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
 from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST
 from CadVlan.templates import ENVIRONMENT_FORM
@@ -50,11 +47,8 @@ from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.Decorators import has_perm
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
-from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.Util.git import GITCommandError
-from CadVlan.Util.git import GITError
 from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.Util.utility import acl_key
 
 logger = logging.getLogger(__name__)
 
@@ -98,9 +92,9 @@ def remove_environment(request):
         if form.is_valid():
             # Get user
             auth = AuthSession(request.session)
-            client_env = auth.get_clientFactory().create_ambiente()
+            # client_env = auth.get_clientFactory().create_ambiente()
             client_api_env = auth.get_clientFactory().create_api_environment()
-            client_vlan = auth.get_clientFactory().create_vlan()
+            # client_vlan = auth.get_clientFactory().create_vlan()
 
             # All ids to be removed
             ids = split_to_array(form.cleaned_data['ids'])
@@ -119,9 +113,9 @@ def remove_environment(request):
                 try:
 
                     # Get VLANs to remove ACLs
-                    vlans = client_vlan.listar_por_ambiente(id_env).get("vlan")
-                    environment = client_env.buscar_por_id(
-                        id_env).get("ambiente")
+                    # vlans = client_vlan.listar_por_ambiente(id_env).get("vlan")
+                    # environment = client_env.buscar_por_id(
+                    #     id_env).get("ambiente")
 
                     # Remove environment and its dependencies
                     client_api_env.delete_environment(id_env)
@@ -493,9 +487,9 @@ def edit(request, id_environment):
         # Set Environment data
         initial = {
             "id_env": env.get("id"),
-            "divisao": env.get("divisao_dc").get("id"),
-            "ambiente_logico": env.get("ambiente_logico").get("id"),
-            "grupol3": env.get("grupo_l3").get("id"),
+            "divisao": env.get("divisao_dc"),
+            "ambiente_logico": env.get("ambiente_logico"),
+            "grupol3": env.get("grupo_l3"),
             "filter": env.get("filter"),
             "acl_path": env.get("acl_path"),
             "vrf": env.get("vrf"),
