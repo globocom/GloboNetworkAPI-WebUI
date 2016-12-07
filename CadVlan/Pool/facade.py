@@ -124,10 +124,13 @@ def populate_pool_members_by_obj(server_pool_members):
 
     for obj in server_pool_members:
 
+        mbs = bin(int(obj.get('member_status')))[2:5].zfill(3)
         ip = obj['ip'] if obj['ip'] else obj['ipv6']
         pool_members.append(
             {'id': obj['id'],
              'id_equip': obj['equipment']['id'],
+             'member_status_hab': mbs[1],
+             'member_status_updown': mbs[2],
              'member_status': obj["member_status"],
              'nome_equipamento': obj['equipment']['name'],
              'priority': obj['priority'],
@@ -176,8 +179,11 @@ def format_server_pool_members(request, limit=0):
         server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
         server_pool_members["limit"] = limit
         server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
-        server_pool_members["member_status"] = int(request.POST.getlist('member_status')[i]) \
-            if request.POST.getlist('member_status')[i] else 7
+        member_status = '1%s%s' % (
+            request.POST.getlist('member_status_hab')[i],
+            request.POST.getlist('member_status_updown')[i]
+        )
+        server_pool_members["member_status"] = int(member_status, 2)
         v4, v6 = _format_ips(request, i)
         server_pool_members["ip"] = v4
         server_pool_members["ipv6"] = v6

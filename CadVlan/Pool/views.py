@@ -429,6 +429,8 @@ def edit_form(request, id_server_pool):
                     # get_equip_by_ip method can return many equipments related with those Ips,
                     # this is an error, because the equipment returned cannot be the same
 
+                    mbs = bin(int(obj_member.get('member_status')))[2:5].zfill(3)
+
                     server_pool_members.append({
                         'id': obj_member['id'],
                         'id_equip': obj_member['equipment']['id'],
@@ -438,6 +440,8 @@ def edit_form(request, id_server_pool):
                         'weight': obj_member['weight'],
                         'id_ip': ip_obj.get('id'),
                         'member_status': obj_member.get('member_status'),
+                        'member_status_hab': mbs[1],
+                        'member_status_updown': mbs[2],
                         'ip': ip_obj.get('ip_formated')
                     })
 
@@ -498,7 +502,11 @@ def edit_form(request, id_server_pool):
             members["weight"] = request.POST.getlist('weight')
             members["id_ips"] = request.POST.getlist('id_ip')
             members["ips"] = request.POST.getlist('ip')
-            members["member_status"] = request.POST.getlist('member_status')
+            # member_status = '1%s%s' % (
+            #     request.POST.getlist('member_status_hab'),
+            #     request.POST.getlist('member_status_updown')
+            # )
+            # members["member_status"] = int(member_status)
             members["environment"] = environment_id
 
             healthcheck_choices = facade.populate_healthcheck_choices(client)

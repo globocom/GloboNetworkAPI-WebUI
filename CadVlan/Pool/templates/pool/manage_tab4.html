@@ -269,6 +269,8 @@ $(document).ready(function() {
                                             <td>Prioridade</td>
                                             <td class="weighted">Peso do Real</td>
                                             <td>Porta Real</td>
+                                            <td>Habilitado</td>
+                                            <td>User Up/Down</td>
                                             <td style="width: 20px;"></td>
                                         </tr>
                                     </thead>
@@ -300,6 +302,18 @@ $(document).ready(function() {
                                                 <input type='hidden' name='id_pool_member' value='{{field.id}}' />
                                                 <input type='hidden' name='member_status' value='{{field.member_status}}' />
 
+                                            </td>
+                                            <td class='habilitado'>
+                                                <select name='member_status_hab'>
+                                                    <option value='1' {% if field.member_status_hab == "1" %}selected{%endif%}>Habilitado</option>
+                                                    <option value='0' {% if field.member_status_hab == "0" %}selected{%endif%}>Desabilitado</option>
+                                                </select>
+                                            </td>
+                                            <td class='user_updown'>
+                                                <select name='member_status_updown'>
+                                                    <option value="1" {% if field.member_status_updown == "1" %}selected{%endif%}>User UP</option>
+                                                    <option value="0" {% if field.member_status_updown == "0" %}selected{%endif%}>User Down</option>
+                                                </select>
                                             </td>
                                             <td>
                                                 <span class='ui-icon ui-icon-closethick' style="cursor:pointer;"></span>
