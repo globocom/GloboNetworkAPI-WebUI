@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,10 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 from django import forms
-from CadVlan.messages import error_messages, environment_messages
+
+from CadVlan.messages import environment_messages
+from CadVlan.messages import error_messages
 from CadVlan.Util.utility import check_regex
 
 
@@ -66,9 +65,25 @@ class AmbienteLogicoForm(forms.Form):
     """
 
 
+class SearchEnvironmentForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super(SearchEnvironmentForm, self).__init__(*args, **kwargs)
+
+    search_field = forms.CharField(
+        label=u'Buscar ambientes',
+        max_length=250,
+        required=False,
+        error_messages=error_messages,
+        widget=forms.TextInput(
+            attrs={'style': "width: 280px", 'autocomplete': "off"}
+        )
+    )
+
+
 class AmbienteForm(forms.Form):
 
-    def __init__(self, env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, *args, **kwargs):
+    def __init__(self, env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, *args, **kwargs):
         super(AmbienteForm, self).__init__(*args, **kwargs)
         self.fields['divisao'].choices = [
             (div['id'], div['nome']) for div in division_dc["division_dc"]]
@@ -91,6 +106,8 @@ class AmbienteForm(forms.Form):
                 env['nome_ambiente_logico'],
                 env['nome_grupo_l3'])) for env in envs]
         self.fields['father_environment'].choices.insert(0, ('', '--------'))
+        self.fields['vrf'].choices = [(vrf["id"], '%s' % (vrf["vrf"])) for vrf in vrfs]
+        self.fields['vrf'].choices.insert(0, ('', '--------'))
 
     id_env = forms.IntegerField(
         label="",
@@ -98,6 +115,14 @@ class AmbienteForm(forms.Form):
         widget=forms.HiddenInput(),
         error_messages=error_messages
     )
+
+    id_father_env = forms.IntegerField(
+        label="",
+        required=False,
+        widget=forms.HiddenInput(),
+        error_messages=error_messages
+    )
+
     divisao = forms.ChoiceField(
 
         label="Divisão DC",
@@ -191,14 +216,17 @@ class AmbienteForm(forms.Form):
             attrs={'style': "width: 280px"}
         )
     )
-    vrf = forms.CharField(
-        label=u'Vrf',
-        max_length=100,
-        required=False,
-        error_messages=error_messages,
-        widget=forms.TextInput(
-            attrs={'style': "width: 280px"}
-        )
+    vrf = forms.ChoiceField(
+        label="VRF",
+        choices=[(0, 'Selecione')],
+        required=True,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 310px",
+                'class': 'select2'
+            }
+        ),
+        error_messages=error_messages
     )
 
     max_num_vlan_1 = forms.IntegerField(
@@ -245,6 +273,15 @@ class AmbienteForm(forms.Form):
         ),
         error_messages=error_messages
     )
+    # father_environment = forms.CharField(
+    #     label=u'Father Environment',
+    #     max_length=250,
+    #     required=False,
+    #     error_messages=error_messages,
+    #     widget=forms.TextInput(
+    #         attrs={'style': "width: 310px", 'autocomplete': "off"}
+    #     )
+    # )
 
     def clean_min_num_vlan_1(self):
         max_num_vlan_1 = self.cleaned_data.get('max_num_vlan_1')

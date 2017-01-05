@@ -714,3 +714,13 @@ urlpatterns += patterns(
     url('^system/variables/list[/]?$', 'list_variables', name='variables.list'),
     url('^system/variables/delete[/]?$', 'delete_all', name='variables.delete'),
 )
+
+# URL's Vrf
+urlpatterns += patterns(
+    'CadVlan.Vrf.views',
+    url('^vrf/form[/]?$', 'insert_vrf', name='vrf.insert'),
+    url('^vrf/form/(?P<id_vrf>\d+)[/]?$', 'edit_vrf', name='vrf.edit'),
+    url('^vrf/list[/]?$', 'list_vrf', name='vrf.list'),
+    url('^vrf/delete[/]?$', 'delete_vrf', name='vrf.delete'),
+
+)

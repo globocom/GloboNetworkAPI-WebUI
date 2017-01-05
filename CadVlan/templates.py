@@ -21,9 +21,11 @@ HOME = 'home.html'
 VERSION_HTML = 'version.html'
 
 # Ajax
+AJAX_AUTOCOMPLETE_ENVIRONMENTS = 'ajax/environment-autocomplete-list.txt'
 AJAX_AUTOCOMPLETE_LIST = 'ajax/autocomplete-list.json'
 AJAX_VLAN_AUTOCOMPLETE = 'ajax/vlan-autocomplete-list.json'
 AJAX_VLAN_LIST = 'ajax/vlan-list.json'
+AJAX_ENVIRONMENT_LIST = 'ajax/env-list.json'
 AJAX_EQUIP_LIST = 'ajax/equip-list.json'
 AJAX_VIPREQUEST_LIST = 'ajax/vip-list.json'
 AJAX_LOG_LIST = 'ajax/log-list.json'
@@ -150,6 +152,11 @@ USER_LIST = 'users/list.html'
 
 # User Group
 USERGROUP_LIST = 'user-group/list.html'
+
+# VRF
+VRF_CREATE = 'vrf/form.html'
+VRF_EDIT = 'vrf/edit.html'
+VRF_LIST = 'vrf/list.html'
 
 # ACL
 ACL_FORM = 'acl/form.html'

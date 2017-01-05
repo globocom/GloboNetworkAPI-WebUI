@@ -33,7 +33,7 @@
         <link type="text/css" rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/select2.min.css" />
 
         <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.min.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-ui.custom.min.js"></script>   
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-ui.custom.min.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dataTables.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}/js/hoverIntent.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dropdown.js"></script>
@@ -62,21 +62,21 @@
 
                     });
                 });
-                
+
                 $(".loading").ajaxStart(function() {
                     $(this).show();
                 });
-                
+
                 $(".loading").ajaxStop(function() {
                     $(this).hide();
                 });
-                
+
                 $("#id_new_pass").val("");
-                
+
                 $("#modal").click(function(){
                     $("#dialog-form-home").dialog("open");
                 });
-                
+
                 $("#change_pass").click(function() {
                     $.ajax({
                         url: "{% url home.change.pass %}",
@@ -86,7 +86,7 @@
                         }
                     });
                 });
-                
+
                 $("#dialog-form-home").dialog({
                     height: 260,
                     width: 500,
@@ -116,9 +116,9 @@
                         }
                     }
                 });
-                
-        
-                
+
+
+
             })
         </script>
     <style type="text/css">
@@ -139,12 +139,12 @@
                     <div id="name"><img id="img" src="{{ MEDIA_URL }}/img/user_left.png" width="45" height="46" /><div id="text">{% user_name request %}</div><img src="{{ MEDIA_URL }}/img/user_right.png" width="19" height="46" /></div>
                     <div class="btn"><div id="change_pass" class="text" style="width: 80px">Alterar Senha</div></div>
                     <div class="btn"><div class="text" onclick="window.location='/logout'">Logout</div></div>
-                    
+
                     {% has_perm ADMINISTRATION True None %}
                     {% if has_perm %}
                         <div class="btn"><div class="adm">Admin</div></div>
                     {% endif %}
-                    
+
                     {% block btns %}{% endblock %}
                 </div>
             {% endif %}
@@ -152,7 +152,7 @@
             <div id="menu">
                 {% if request|is_authenticated %}
                 <ul class="dropdown">
-                    
+
                     {% has_perm_menu  None True %}
                     {% if has_perm %}
                     <li>
@@ -190,7 +190,7 @@
                             {% if has_perm %}
                             <li><a href="{% url equip.interface.search.list %}">Interfaces</a></li>
                             {% endif %}
-                            
+
                             {% has_perm OPTION_VIP None True %}
                             {% if has_perm %}
                             <li><a href="{% url option-vip.list %}">Opções VIP</a></li>
@@ -215,7 +215,7 @@
                             {% if has_perm %}
                             <li><a href="{% url script.list %}">Roteiro</a></li>
                             {% endif %}
-                            
+
                             {% has_perm VLAN_MANAGEMENT None True %}
                             {% if has_perm %}
                             <li><a href="{% url acl.template.list %} ">Template</a></li>
@@ -235,13 +235,13 @@
                         </ul>
                     </li>
                     {% endif %}
-                    
+
                     {% has_perm_menu  True None %}
                     {% if has_perm %}
                     <li>
                         <a href="#" class="cad">Cadastrar</a>
                         <ul class="sub_menu">
-                        
+
                             {% has_perm EQUIPMENT_MANAGEMENT True None %}
                             {% if has_perm %}
                             <li><a href="{% url equip.access.form %}">Acessos</a></li>
@@ -251,7 +251,7 @@
                             {% if has_perm %}
                             <li><a href="{% url environment.form %}">Ambiente</a></li>
                             {% endif %}
-                            
+
                             {% has_perm ENVIRONMENT_VIP True None %}
                             {% if has_perm %}
                             <li><a href="{% url environment-vip.form %}">Ambiente VIP</a></li>
@@ -266,12 +266,12 @@
                             {% endif %}
 
                             <li class="separator"></li>
-                            
+
                             {% has_perm EQUIPMENT_MANAGEMENT True None %}
                             {% if has_perm %}
                             <li><a href="{% url equipment.form %}">Equipamento</a></li>
                             {% endif %}
-                                                        
+
                             {% has_perm ENVIRONMENT_MANAGEMENT True None %}
                             {% if has_perm %}
                                 {% has_perm VLAN_MANAGEMENT True None %}
@@ -279,7 +279,7 @@
                                     <li><a href="{% url filter.form %}">Filtros</a></li>
                                 {% endif %}
                             {% endif %}
-                            
+
                             {% has_perm HEALTH_CHECK_EXPECT True None %}
                             {% if has_perm %}
                             <li><a href="{% url healthcheck-expect.form %}">Healthcheck Expect</a></li>
@@ -289,7 +289,7 @@
                             {% if has_perm %}
                             <li><a href="{% url equipment.marca.form %}">Marca e/ou Modelo</a></li>
                             {% endif %}
-                            
+
                             {% has_perm OPTION_VIP True None %}
                             {% if has_perm %}
                             <li><a href="{% url option-vip.form %}">Opções VIP</a></li>
@@ -322,12 +322,12 @@
                             {% if has_perm %}
                             <li><a href="{% url vip-request.form %}">Requisições de VIP</a></li>
                             {% endif %}
-                            
+
                             {% has_perm SCRIPT_MANAGEMENT True None %}
                             {% if has_perm %}
                             <li><a href="{% url script.form %}">Roteiro</a></li>
                             {% endif %}
-                            
+
                             {% has_perm ENVIRONMENT_MANAGEMENT None True %}
                             {% if has_perm %}
                                 {% has_perm VLAN_MANAGEMENT None True %}
@@ -335,7 +335,7 @@
                             <li><a href="{% url acl.template.add %}">Template</a></li>
                                 {% endif %}
                             {% endif %}
-                            
+
                             {% has_perm ACCESS_TYPE_MANAGEMENT True None %}
                             {% if has_perm %}
                             <li><a href="{% url access-type.form %}">Tipo de Acesso</a></li>
@@ -345,12 +345,12 @@
                             {% if has_perm %}
                             <li><a href="{% url equipment-type.form %}">Tipo de Equipamento</a></li>
                             {% endif %}
-                            
+
                             {% has_perm NETWORK_TYPE_MANAGEMENT True None %}
                             {% if has_perm %}
                             <li><a href="{% url network-type.form %}">Tipo de Rede</a></li>
                             {% endif %}
-                            
+
                             {% has_perm SCRIPT_MANAGEMENT True None %}
                             {% if has_perm %}
                             <li><a href="{% url script.type.form %}">Tipo de Roteiro</a></li>
@@ -361,10 +361,15 @@
                             <li><a href="{% url vlan.form %}">Vlan</a></li>
                             {% endif %}
 
+                            {% has_perm ENVIRONMENT_MANAGEMENT True None %}
+                            {% if has_perm %}
+                            <li><a href="{% url vrf.insert %}">Vrf</a></li>
+                            {% endif %}
+
                         </ul>
                     </li>
                     {% endif %}
-                    
+
                     {% has_perm EQUIPMENT_MANAGEMENT True None %}
                     {% if has_perm %}
                     <li>
@@ -375,7 +380,7 @@
 
                     </li>
                     {% endif %}
-                    
+
                     {% has_perm USER_ADMINISTRATION True None %}
                     {% if has_perm %}<!--
                     <li>
@@ -385,11 +390,11 @@
                             <li><a href="{% url ldap.user.list 'externo' %}">Usuários Externos</a></li>
                             <li><a href="{% url ldap.group.list %}">Grupos</a></li>
                             <li><a href="{% url ldap.sudoer.list %}">Sudoers</a></li>
-                            
+
                         </ul>
                     </li>-->
                     {% endif %}
-                    
+
                     {% has_perm ADMINISTRATION True None %}
                     {% if has_perm %}
                     <li>
@@ -432,12 +437,12 @@
         <div id="content">
         {% block content %}{% endblock %}
         </div>
-        
+
         <div id="dialog-form-home" title="Alterar Senha">
             <div id="change_pass_form">
             </div>
         </div>
-        
+
         <div class="loading">
             <br />
             <p style="text-align: center;"><img src="{{ MEDIA_URL }}/img/ajax-loading.gif" width="32" height="32" /></p>

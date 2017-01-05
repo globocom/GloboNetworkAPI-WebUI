@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,37 +13,66 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-import logging
-from networkapiclient.Pagination import Pagination
-from CadVlan.Util.Decorators import log, login_required, has_perm
-from django.shortcuts import render_to_response, redirect
-from django.template.context import RequestContext
-from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, VlanNaoExisteError, VlanError, VipIpError
-from django.contrib import messages
-from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT, NETWORK_TYPE_MANAGEMENT, \
-    VLAN_CREATE_SCRIPT
-from CadVlan.forms import DeleteForm, CreateForm, RemoveForm
-from CadVlan.templates import VLAN_SEARCH_LIST, VLANS_DEETAIL, AJAX_VLAN_LIST, SEARCH_FORM_ERRORS, AJAX_VLAN_AUTOCOMPLETE, VLAN_FORM, VLAN_EDIT, AJAX_SUGGEST_NAME, \
-    AJAX_CONFIRM_VLAN
-from CadVlan.Vlan.forms import SearchVlanForm, VlanForm
-from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
-from CadVlan.Util.utility import DataTablePaginator, acl_key, \
-    convert_string_to_boolean, upcase_first_letter
-from django.http import HttpResponseServerError, HttpResponse, HttpResponseRedirect
-from django.template import loader
-from CadVlan.Vlan.business import montaIPRede, cache_list_vlans
-from CadVlan.Util.shortcuts import render_to_response_ajax, render_json
-from CadVlan.messages import vlan_messages, error_messages, network_ip_messages, \
-    acl_messages
-from django.core.urlresolvers import reverse
-from CadVlan.Acl.acl import checkAclGit, deleteAclGit
-from CadVlan.Util.git import GITCommandError, GITError
-from CadVlan.Util.Enum import NETWORK_TYPES
-from __builtin__ import Exception
 import json
+import logging
+from __builtin__ import Exception
+
+from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.http import HttpResponseServerError
+from django.shortcuts import redirect
+from django.shortcuts import render_to_response
+from django.template import loader
+from django.template.context import RequestContext
+from networkapiclient.exception import NetworkAPIClientError
+from networkapiclient.exception import VipIpError
+from networkapiclient.exception import VlanError
+from networkapiclient.exception import VlanNaoExisteError
+from networkapiclient.Pagination import Pagination
+
+from CadVlan.Acl.acl import checkAclGit
+from CadVlan.Acl.acl import deleteAclGit
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.forms import CreateForm
+from CadVlan.forms import DeleteForm
+from CadVlan.forms import RemoveForm
+from CadVlan.messages import acl_messages
+from CadVlan.messages import error_messages
+from CadVlan.messages import network_ip_messages
+from CadVlan.messages import vlan_messages
+from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
+from CadVlan.permissions import NETWORK_TYPE_MANAGEMENT
+from CadVlan.permissions import VLAN_CREATE_SCRIPT
+from CadVlan.permissions import VLAN_MANAGEMENT
+from CadVlan.templates import AJAX_CONFIRM_VLAN
+from CadVlan.templates import AJAX_SUGGEST_NAME
+from CadVlan.templates import AJAX_VLAN_AUTOCOMPLETE
+from CadVlan.templates import AJAX_VLAN_LIST
+from CadVlan.templates import SEARCH_FORM_ERRORS
+from CadVlan.templates import VLAN_EDIT
+from CadVlan.templates import VLAN_FORM
+from CadVlan.templates import VLAN_SEARCH_LIST
+from CadVlan.templates import VLANS_DEETAIL
+from CadVlan.Util.converters.util import replace_id_to_name
+from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import has_perm
+from CadVlan.Util.Decorators import log
+from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.Enum import NETWORK_TYPES
+from CadVlan.Util.git import GITCommandError
+from CadVlan.Util.git import GITError
+from CadVlan.Util.shortcuts import render_json
+from CadVlan.Util.shortcuts import render_to_response_ajax
+from CadVlan.Util.utility import acl_key
+from CadVlan.Util.utility import convert_string_to_boolean
+from CadVlan.Util.utility import DataTablePaginator
+from CadVlan.Util.utility import upcase_first_letter
+from CadVlan.Vlan.business import cache_list_vlans
+from CadVlan.Vlan.business import montaIPRede
+from CadVlan.Vlan.forms import SearchVlanForm
+from CadVlan.Vlan.forms import VlanForm
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +82,6 @@ logger = logging.getLogger(__name__)
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
-    
     try:
 
         # If form was submited
@@ -82,7 +109,7 @@ def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environ
                 networkv6 = search_form.cleaned_data["networkv6"]
                 subnet = search_form.cleaned_data["subnet"]
                 acl = search_form.cleaned_data["acl"]
- 
+
                 if len(networkv4) > 0:
                     network = networkv4
                 elif len(networkv6) > 0:
@@ -90,36 +117,36 @@ def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environ
                 else:
                     network = None
 
-                if id_vlan=='1':
-                    if not sf_number=='0':
-                        number =  sf_number 
-                    if not sf_name=='0':
-                        name =  sf_name
-                    if sf_iexact=='0':
+                if id_vlan == '1':
+                    if not sf_number == '0':
+                        number = sf_number
+                    if not sf_name == '0':
+                        name = sf_name
+                    if sf_iexact == '0':
                         sf_iexact = False
-                    elif sf_iexact=='1':
+                    elif sf_iexact == '1':
                         sf_iexact = True
                     iexact = sf_iexact
-                    if not sf_environment=='0':
-                        environment = sf_environment 
-                    if not sf_nettype=='0':
+                    if not sf_environment == '0':
+                        environment = sf_environment
+                    if not sf_nettype == '0':
                         net_type = sf_nettype
-                    if not sf_ipversion=='0':
+                    if not sf_ipversion == '0':
                         ip_version = sf_ipversion
-                    if not sf_network=='0':
-                        if (sf_network.count('_') == 4): #ipv4
+                    if not sf_network == '0':
+                        if (sf_network.count('_') == 4):  # ipv4
                             sf_network = sf_network.replace("_", ".", 3)
-                        else: #ipv6
+                        else:  # ipv6
                             sf_network = sf_network.replace("_", ":", 7)
                         sf_network = sf_network.replace("_", "/")
-                        network =  sf_network
-                    if not sf_subnet=='0':
+                        network = sf_network
+                    if not sf_subnet == '0':
                         subnet = sf_subnet
-                    if sf_acl=='0':
+                    if sf_acl == '0':
                         sf_acl = False
-                    elif sf_acl=='1':
+                    elif sf_acl == '1':
                         sf_acl = True
-                    acl = search_form.cleaned_data["acl"]      
+                    acl = search_form.cleaned_data["acl"]
 
                 if environment == "0":
                     environment = None
@@ -142,44 +169,44 @@ def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environ
                 vlans = client.create_vlan().find_vlans(
                     number, name, iexact, environment, net_type, network, ip_version, subnet, acl, pag)
 
-                if not vlans.has_key("vlan"):
+                if "vlan" not in vlans:
                     vlans["vlan"] = []
 
                 request_var = dict()
 
-                if number==None:
+                if number is None:
                     number = '0'
                 request_var["number"] = number
-                if name=='':
+                if name == '':
                     name = '0'
                 request_var["name"] = name
-                if environment==None:
+                if environment is None:
                     environment = '0'
                 request_var["environment"] = environment
-                if net_type==None:
+                if net_type is None:
                     net_type = '0'
                 request_var["nettype"] = net_type
-                if subnet==None:
+                if subnet is None:
                     subnet = '0'
                 request_var["subnet"] = subnet
-                if ip_version==None:
+                if ip_version is None:
                     ip_version = '0'
                 request_var["ipversion"] = ip_version
-                if network==None:
+                if network is None:
                     network = '0'
                 else:
                     network = network.replace(".", "_")
                     network = network.replace(":", "_")
                     network = network.replace("/", "_")
                 request_var["network"] = network
-                if iexact==False:
+                if iexact is False:
                     iexact = '0'
-                elif iexact==True:
+                elif iexact is True:
                     iexact = '1'
                 request_var["iexact"] = iexact
-                if acl==False:
+                if acl is False:
                     acl = '0'
-                elif acl==True:
+                elif acl is True:
                     acl = '1'
                 request_var["acl"] = acl
 
@@ -251,7 +278,7 @@ def search_list(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment
         net_list = client.create_tipo_rede().listar()
 
         lists["search_form"] = SearchVlanForm(env_list, net_list)
-        
+
         lists['search_var'] = id_vlan
         lists['sf_number'] = sf_number
         lists['sf_name'] = sf_name
@@ -280,7 +307,7 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
     lista = []
     lists["delete_form"] = DeleteForm()
     lists["create_form"] = CreateForm()
-    lists["remove_form"] = RemoveForm() 
+    lists["remove_form"] = RemoveForm()
     lists['sf_number'] = sf_number
     lists['sf_name'] = sf_name
     lists['sf_environment'] = sf_environment
@@ -297,7 +324,7 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
         client = auth.get_clientFactory()
 
         # recuperando lista de vlans
-        
+
         vlans = client.create_vlan().get(id_vlan)
 
         # recuperando ambientes
@@ -339,7 +366,7 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
                     lists['exists_not_active_network'] = 1
                 else:
                     lists['exists_active_network'] = 1
-                    
+
                 lista.append(i)
 
         net_type = client.create_tipo_rede().listar()
@@ -485,7 +512,7 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
                     request, messages.SUCCESS, vlan_messages.get("vlan_edit_sucess"))
 
                 # If click apply
-                if apply_vlan == True:
+                if apply_vlan is True:
                     return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
@@ -511,7 +538,7 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
                 'acl_file_name'), environment, NETWORK_TYPES.v4, AuthSession(request.session).get_user())
 
             lists[
-                'acl_created_v4'] = "False" if is_acl_created == False else "True"
+                'acl_created_v4'] = "False" if is_acl_created is False else "True"
 
         if vlan.get('acl_file_name_v6') is not None:
 
@@ -519,7 +546,7 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
                 'acl_file_name_v6'), environment, NETWORK_TYPES.v6, AuthSession(request.session).get_user())
 
             lists[
-                'acl_created_v6'] = "False" if is_acl_created == False else "True"
+                'acl_created_v6'] = "False" if is_acl_created is False else "True"
 
     except GITCommandError, e:
         logger.error(e)
@@ -729,7 +756,7 @@ def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_netty
                     # Execute in NetworkAPI
                     client_vlan.deallocate(id_vlan)
 
-                    # commenting code to remove acl files - issue #40 
+                    # commenting code to remove acl files - issue #40
                     # key_acl_v4 = acl_key(NETWORK_TYPES.v4)
                     # key_acl_v6 = acl_key(NETWORK_TYPES.v6)
                     # user = AuthSession(request.session).get_user()
@@ -766,7 +793,7 @@ def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_netty
                     have_errors = True
 
             # If all has ben removed
-            if have_errors == False:
+            if have_errors is False:
                 messages.add_message(
                     request, messages.SUCCESS, vlan_messages.get("success_remove"))
 
@@ -787,7 +814,8 @@ def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_netty
 
     # Redirect to list_all action
     return redirect('vlan.search.list')
-    #return HttpResponseRedirect(reverse('vlan.search.list', args=["1", sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
+    # return HttpResponseRedirect(reverse('vlan.search.list', args=["1", sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
+
 
 @log
 @login_required
@@ -840,7 +868,7 @@ def delete_all_network(request, id_vlan='0', sf_number='0', sf_name='0', sf_envi
                     error_list.append(id_network)
 
             # If all has ben removed
-            if have_errors == False:
+            if have_errors is False:
                 messages.add_message(
                     request, messages.SUCCESS, vlan_messages.get("success_remove_network"))
 
@@ -861,6 +889,7 @@ def delete_all_network(request, id_vlan='0', sf_number='0', sf_name='0', sf_envi
 
     # Redirect to list_all action
     return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
+
 
 @log
 @login_required
@@ -893,7 +922,6 @@ def create(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0',
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
-
     """ Set column 'active = 1' in tables  """
     try:
         if request.method == 'POST':
@@ -927,7 +955,7 @@ def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
                     id_net = value[0]
                     network_type = value[1]
 
-                    if network_type == 'v4': 
+                    if network_type == 'v4':
                         net = client.create_network().get_network_ipv4(id_net)
                     else:
                         net = client.create_network().get_network_ipv6(id_net)
@@ -937,12 +965,12 @@ def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
                     else:
                         networks_was_activated = False
 
-                    if network_type == 'v4':                        
+                    if network_type == 'v4':
                         equipments_ipv4.extend(
                             list_equipment_by_network_ip4(client, id_net))
-                        
+
                         client.create_api_network_ipv4().deploy(id_net)
-                    else:      
+                    else:
                         equipments_ipv6.extend(
                             list_equipment_by_network_ip6(client, id_net))
 
@@ -954,11 +982,11 @@ def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
                 apply_acl_for_network_v6(
                     request, client, equipments_ipv6, vlan, environment)
 
-                if networks_activated == True:
+                if networks_activated is True:
                     messages.add_message(
                         request, messages.ERROR, network_ip_messages.get("networks_activated"))
 
-                if networks_was_activated == False:
+                if networks_was_activated is False:
                     messages.add_message(
                         request, messages.SUCCESS, network_ip_messages.get("net_create_success"))
 
@@ -980,11 +1008,11 @@ def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
 
     return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan, sf_number, sf_name, sf_environment, sf_nettype, sf_subnet, sf_ipversion, sf_network, sf_iexact, sf_acl]))
 
+
 @log
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def remove_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
-
     """ Set column 'active = 0' in tables  """
     try:
         if request.method == 'POST':
@@ -1018,7 +1046,7 @@ def remove_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
                     id_net = value[0]
                     network_type = value[1]
 
-                    if network_type == 'v4': 
+                    if network_type == 'v4':
                         net = client.create_network().get_network_ipv4(id_net)
                     else:
                         net = client.create_network().get_network_ipv6(id_net)
@@ -1028,22 +1056,22 @@ def remove_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
                     else:
                         networks_was_activated = False
 
-                    if network_type == 'v4':                        
+                    if network_type == 'v4':
                         equipments_ipv4.extend(
                             list_equipment_by_network_ip4(client, id_net))
-                        
+
                         client.create_api_network_ipv4().undeploy(id_net)
-                    else:      
+                    else:
                         equipments_ipv6.extend(
                             list_equipment_by_network_ip6(client, id_net))
 
                         client.create_api_network_ipv6().undeploy(id_net)
 
-                if networks_activated == False:
+                if networks_activated is False:
                     messages.add_message(
                         request, messages.ERROR, network_ip_messages.get("networks_deactivated"))
 
-                if networks_was_activated == True:
+                if networks_was_activated is True:
                     messages.add_message(
                         request, messages.SUCCESS, network_ip_messages.get("net_remove_success"))
 

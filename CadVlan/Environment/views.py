@@ -349,13 +349,23 @@ def insert_ambiente(request):
         division_dc = client.create_divisao_dc().listar()
         group_l3 = client.create_grupo_l3().listar()
         filters = client.create_filter().list_all()
-        templates = get_templates(auth.get_user(), True)
-        ipv4 = templates["ipv4"]
-        ipv6 = templates["ipv6"]
+        try:
+            templates = get_templates(auth.get_user(), True)
+        except GITCommandError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            templates = {
+                'ipv4': list(),
+                'ipv6': list()
+            }
+
+        ipv4 = templates.get("ipv4")
+        ipv6 = templates.get("ipv6")
         envs = client.create_ambiente().listar().get('ambiente')
+        vrfs = client.create_api_vrf().search()['vrfs']
         # Forms
         lists['ambiente'] = AmbienteForm(
-            env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs)
+            env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs)
         lists['divisaodc_form'] = DivisaoDCForm()
         lists['grupol3_form'] = Grupol3Form()
         lists['ambientelogico_form'] = AmbienteLogicoForm()
@@ -367,7 +377,7 @@ def insert_ambiente(request):
 
             # Set data in form
             ambiente_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, request.POST)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, request.POST)
 
             # Return data to form in case of error
             lists['ambiente'] = ambiente_form
@@ -415,7 +425,7 @@ def insert_ambiente(request):
                     "max_num_vlan_1": max_num_vlan_1,
                     "min_num_vlan_2": min_num_vlan_2,
                     "max_num_vlan_2": max_num_vlan_2,
-                    "vrf": vrf,
+                    "default_vrf": int(vrf),
                     "father_environment": int(father_environment)
                     if father_environment else None
                 }
@@ -468,11 +478,21 @@ def edit(request, id_environment):
         lists['configurations_prefix'] = configurations_prefix.get(
             'lists_configuration')
 
-        templates = get_templates(auth.get_user(), True)
-        ipv4 = templates["ipv4"]
-        ipv6 = templates["ipv6"]
+        try:
+            templates = get_templates(auth.get_user(), True)
+        except GITCommandError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            templates = {
+                'ipv4': list(),
+                'ipv6': list()
+            }
+
+        ipv4 = templates.get("ipv4")
+        ipv6 = templates.get("ipv6")
 
         envs = client.create_ambiente().listar().get('ambiente')
+        vrfs = client.create_api_vrf().search()['vrfs']
 
         try:
             env = client.create_api_environment().get_environment(id_environment)
@@ -492,7 +512,7 @@ def edit(request, id_environment):
             "grupol3": env.get("grupo_l3"),
             "filter": env.get("filter"),
             "acl_path": env.get("acl_path"),
-            "vrf": env.get("vrf"),
+            "default_vrf": env.get("vrf"),
             "ipv4_template": env.get("ipv4_template"),
             "ipv6_template": env.get("ipv6_template"),
             "min_num_vlan_1": env.get("min_num_vlan_1"),
@@ -501,9 +521,10 @@ def edit(request, id_environment):
             "max_num_vlan_2": env.get("max_num_vlan_2"),
             'link': env.get('link'),
             'father_environment': env.get('father_environment'),
+            'default_vrf': env.get('default_vrf'),
         }
         env_form = AmbienteForm(
-            env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, initial=initial)
+            env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
 
         # Forms
         lists['ambiente'] = env_form
@@ -520,7 +541,7 @@ def edit(request, id_environment):
 
             # Set data in form
             ambiente_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, request.POST)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, request.POST)
 
             # Return data to form in case of error
             lists['ambiente'] = ambiente_form
@@ -567,7 +588,7 @@ def edit(request, id_environment):
                     "max_num_vlan_1": max_num_vlan_1,
                     "min_num_vlan_2": min_num_vlan_2,
                     "max_num_vlan_2": max_num_vlan_2,
-                    "vrf": vrf,
+                    "default_vrf": int(vrf),
                     "father_environment": int(father_environment) if father_environment else None
                 }
                 client.create_api_environment().update_environment(dict_env, id_env)
@@ -635,13 +656,24 @@ def insert_grupo_l3(request):
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
-            templates = get_templates(auth.get_user(), True)
-            ipv4 = templates["ipv4"]
-            ipv6 = templates["ipv6"]
+
+            try:
+                templates = get_templates(auth.get_user(), True)
+            except GITCommandError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+                templates = {
+                    'ipv4': list(),
+                    'ipv6': list()
+                }
+
+            ipv4 = templates.get("ipv4")
+            ipv6 = templates.get("ipv6")
             envs = client.create_ambiente().listar().get('ambiente')
+            vrfs = client.create_api_vrf().search()['vrfs']
             # Forms
             env_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs)
             div_form = DivisaoDCForm()
             amb_form = AmbienteLogicoForm()
             action = reverse("environment.form")
@@ -658,7 +690,7 @@ def insert_grupo_l3(request):
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -729,14 +761,24 @@ def insert_divisao_dc(request):
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
-            templates = get_templates(auth.get_user(), True)
-            ipv4 = templates["ipv4"]
-            ipv6 = templates["ipv6"]
+            try:
+                templates = get_templates(auth.get_user(), True)
+            except GITCommandError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+                templates = {
+                    'ipv4': list(),
+                    'ipv6': list()
+                }
+
+            ipv4 = templates.get("ipv4")
+            ipv6 = templates.get("ipv6")
             envs = client.create_ambiente().listar().get('ambiente')
+            vrfs = client.create_api_vrf().search()['vrfs']
 
             # Forms
             env_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs)
             gro_form = Grupol3Form()
             amb_form = AmbienteLogicoForm()
             action = reverse("environment.form")
@@ -753,7 +795,7 @@ def insert_divisao_dc(request):
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -823,14 +865,24 @@ def insert_ambiente_logico(request):
             division_dc = client.create_divisao_dc().listar()
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
-            templates = get_templates(auth.get_user(), True)
-            ipv4 = templates["ipv4"]
-            ipv6 = templates["ipv6"]
+            try:
+                templates = get_templates(auth.get_user(), True)
+            except GITCommandError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+                templates = {
+                    'ipv4': list(),
+                    'ipv6': list()
+                }
+
+            ipv4 = templates.get("ipv4")
+            ipv6 = templates.get("ipv6")
             envs = client.create_ambiente().listar().get('ambiente')
+            vrfs = client.create_api_vrf().search()['vrfs']
 
             # Forms
             env_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs)
             div_form = DivisaoDCForm()
             gro_form = Grupol3Form()
             action = reverse("environment.form")
@@ -847,7 +899,7 @@ def insert_ambiente_logico(request):
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])

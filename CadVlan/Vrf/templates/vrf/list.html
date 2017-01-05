@@ -1,0 +1,176 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Vrfs - Listagem]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+var oTable;
+$(document).ready(function() {
+
+    // using jQuery
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    oTable = $("#script_list").dataTable({
+		"aaSorting": [],
+		"bJQueryUI": true,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 3 ] }]
+	});
+
+	$("#checkAll").click( function() {
+		if ($(this).attr('checked')) {
+			$(":checkbox").attr("checked", true);
+		} else {
+			$(":checkbox").attr("checked", false);
+		}
+	});
+
+	$(".fg-button").live("click", function(){
+		$(":checkbox").attr("checked", false);
+		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+		$("#checkAll").attr("checked", false);
+	});
+
+	$("#page_tab").tabs();
+
+	$("#tool").buttonset();
+
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url vrf.insert %}";
+	});
+
+
+	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+
+        var ids_to_send = [];
+        $('input:checkbox[name=selection]:checked').each(function() {
+            ids_to_send.push($(this).val());
+
+        });
+
+        var formData = {"ids": ids_to_send};
+		if (confirm('Deseja realmente excluir o(s) Vrf(s) selecionado(s)?')){
+            $.ajax({
+                url : "{% url vrf.delete %}",
+                type: "POST",
+                data : formData,
+                success: function(data, textStatus, jqXHR)
+                {
+
+                    location.href="{% url vrf.list %}";
+                },
+                error: function (jqXHR, textStatus, errorThrown)
+                {
+                    alert(errorThrown);
+                }
+            });
+
+		}
+	});
+
+
+	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+
+	$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	$(".btn_edit", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+
+	$(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false });
+	$(".btn_manager", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-wrench"}, text: false });
+
+
+
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Vrfs</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div class="buttons">
+			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			<span id="tool">
+			<button id="btn_new">Novo Registro</button>
+
+			<button id="btn_del">Excluir</button>
+			</span>
+		</div>
+
+		<table id="script_list">
+			<thead>
+				<tr>
+					<th><input id="checkAll" type="checkbox" /></th>
+					<th>Vrf</th>
+					<th>Nome Interno</th>
+
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in vrfs %}
+				<tr>
+					<td class="text_center"><input type="checkbox" name="selection" value="{{ item.id }}" /></td>
+					<td class="text_center">{{ item.vrf }}</td>
+					<td class="text_center">{{ item.internal_name }}</td>
+
+					<td class="text_center">
+						<a href="{% url vrf.edit item.id %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}

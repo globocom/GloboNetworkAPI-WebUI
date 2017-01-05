@@ -1,0 +1,14 @@
+[
+  {% for iten in list %}
+  {
+
+
+   "id": "{{ iten.id|escapejs }}",
+    "label": "{{ iten.name|escapejs }}",
+    "value": "{{ iten.name|escapejs }}"
+  }
+
+  {% if not forloop.last %}, {% endif %}
+
+  {% endfor %}
+]
