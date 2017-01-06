@@ -512,7 +512,6 @@ def edit(request, id_environment):
             "grupol3": env.get("grupo_l3"),
             "filter": env.get("filter"),
             "acl_path": env.get("acl_path"),
-            "default_vrf": env.get("vrf"),
             "ipv4_template": env.get("ipv4_template"),
             "ipv6_template": env.get("ipv6_template"),
             "min_num_vlan_1": env.get("min_num_vlan_1"),
@@ -521,7 +520,7 @@ def edit(request, id_environment):
             "max_num_vlan_2": env.get("max_num_vlan_2"),
             'link': env.get('link'),
             'father_environment': env.get('father_environment'),
-            'default_vrf': env.get('default_vrf'),
+            'vrf': env.get('default_vrf'),
         }
         env_form = AmbienteForm(
             env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
