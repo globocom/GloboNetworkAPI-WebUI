@@ -1,0 +1,162 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Permissões individuais do Objeto - Listagem]{% endblock %}
+
+{% block header %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $("#page_tab").tabs();
+            //$("#page_tab_lists").tabs({ selected: {{tab}} });
+
+
+            individual_perms = $("#individual_perms").dataTable({
+                "aaSorting": [],
+                "bJQueryUI": true,
+                "bPaginate": false,
+                "bFilter": false,
+                "bInfo": false,
+                "aoColumns": [
+                    {"bSortable": false},
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    {"bSortable": false}
+                ]
+            });
+           	$("#tool").buttonset();
+
+
+            $("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
+		location.reload();
+	});
+
+            $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	        $(".btn_edit", individual_perms.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+
+            $("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+		location.href = "{% url user-group-individual-perms.create id_ugroup id_type_obj %}";
+            });
+
+            $("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
+		        if (confirm('Deseja realmente excluir o(s) Grupo(s) de Usuário selecionado(s)?')){
+			        var data = getSelectionData(individual_perms);
+			        // $("#id_ids").val(data).parent().submit();
+		        }
+            });
+
+            $("#checkAll").click( function() {
+                if ($(this).attr('checked')) {
+                    $(":checkbox").attr("checked", true);
+                } else {
+                    $(":checkbox").attr("checked", false);
+                }
+	        });
+
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div id="page_tab">
+        <ul>
+            <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes das
+                Permissões Individuais do Objeto</a></li>
+        </ul>
+        <div id="tabs-1">
+
+            <div id="fields" class="ui-widget-content">
+                <table>
+                    <tr>
+                        <td style="width: 100px"><label for="nome_grupo">Grupo de Usuário</label></td>
+                        <td><label style="width: 350px;color: blue;text-align: center;" >{{group_name}}</label></td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 100px"><label for="tipo_objeto">Tipo dos Objetos</label></td>
+                        <td><label style="width: 350px;color: blue;text-align: center;" >{{object_type}}</label></td>
+                    </tr>
+
+                </table>
+            </div>
+            <div class="separator spacer"></div>
+            <div class="buttons">
+                <button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+                <span id="tool">
+                    <button id="btn_new">Novo Registro</button>
+                    <button id="btn_del">Excluir</button>
+                </span>
+		    </div>
+
+            <table id="individual_perms">
+                <thead>
+                <tr>
+                    <th><input id="checkAll" type="checkbox" /></th>
+                    <th>Identificador do Objeto</th>
+                    <th>Nome do Objeto</th>
+                    <th>Leitura</th>
+                    <th>Escrita</th>
+                    <th>Mudar configuração</th>
+                    <th>Remoção</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in individual_perms %}
+                    <tr>
+                        <td class="text_center"><input type="checkbox" name="selection" value="{{ item.id }}" /></td>
+                        <td class="text_center">{{ item.id }}</td>
+
+                        <td class="text_center">{{ item.name }}</td>
+                        <td class="text_center">{% if item.read %}
+                            <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
+                            <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
+                        </td>
+                        <td class="text_center">{% if item.write %}
+                            <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
+                            <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
+                        </td>
+                        <td class="text_center">{% if item.change_config %}
+                            <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
+                            <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
+                        </td>
+                        <td class="text_center">{% if item.delete %}
+                            <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
+                            <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
+                        </td>
+                        <td class="text_center">
+                            <a href="{% url user-group-individual-perms.edit id_ugroup id_type_obj item.id %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a>
+                        </td>
+
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+
+    </div>
+
+{% endblock %}

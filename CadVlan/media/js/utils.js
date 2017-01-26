@@ -4,6 +4,23 @@
  * Copyright: ( c )  2012 globo.com todos os direitos reservados.
  */
 
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function isEmpty(str) {
     return (!str || 0 === str.length);
 }
@@ -229,19 +246,19 @@ jQuery.fn.dataTableExt.oSort['ipv4-desc']  = function(a,b) {
 
 jQuery.fn.dataTableExt.oSort['check-asc']  = function(a,b) {
     var x = "",  y = "";
-    
+
     if ( a.split('title="')[1].split('"></span>')[0] == 'SIM'){ x = 10 }else{ x = 0 };
     if ( b.split('title="')[1].split('"></span>')[0] == 'SIM'){ y = 10 }else{ y = 0 };
-    
+
     return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 };
 
 jQuery.fn.dataTableExt.oSort['check-desc']  = function(a,b) {
     var x = "",  y = "";
-    
+
     if ( a.split('title="')[1].split('"></span>')[0] == 'SIM'){ x = 10 }else{ x = 0 };
     if ( b.split('title="')[1].split('"></span>')[0] == 'SIM'){ y = 10 }else{ y = 0 };
-    
+
     return ((x < y) ? 1 : ((x > y) ? -1 : 0));
 };
 
@@ -276,16 +293,16 @@ $.fn.disabledRemoveForm = function() {
 
 
 $.fn.editableTable = function() {
-	
-	 $(this).editable(function(value, settings) { 
+
+	 $(this).editable(function(value, settings) {
 		var _value_ = "-";
-			 
+
 		if ( value != "" )
 			_value_ = value;
-			 
+
 		$(this).next().val(_value_);
 	    return(value);
-	  }, { 
+	  }, {
 	     type    : "text",
 	     tooltip : "Click para editar.",
 	     submit  : 'Ok',
@@ -304,10 +321,10 @@ function getInputsData(seletor, key) {
 
 
 function addMessage(data) {
-	
+
 	var divMessage = '';
 	var classMessage = data.status === 'error' ? 'ui-state-error':'ui-state-highlight'
-		
+
 	divMessage += '<div class="ui-widget error-messages" style="display:none">';
 	divMessage += '<p></p>';
 	divMessage += '<div id="messagesError" class="'+classMessage+" ui-corner-all "+data.status+'">';
@@ -316,7 +333,7 @@ function addMessage(data) {
 	divMessage += '</div>';
 	divMessage += '<p></p>';
 	divMessage += '</div>';
-	
+
 	var message = $('div#messages');
 	message.html(divMessage).show();
 
@@ -330,10 +347,10 @@ function addMessage(data) {
 
 
 function addMessageModal(data) {
-	
+
 	var divMessage = '';
 	var classMessage = data.status === 'error' ? 'ui-state-error':'ui-state-highlight'
-		
+
 	divMessage += '<div class="ui-widget error-messages" style="display:none">';
 	divMessage += '<p></p>';
 	divMessage += '<div id="messagesError" class="'+classMessage+" ui-corner-all>";
