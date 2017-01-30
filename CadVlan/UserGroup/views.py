@@ -347,7 +347,22 @@ def load_list(request, lists, id_ugroup, tab):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        lists['object_perms'] = cria_array_perms_jb_fake()
+        data_search = {
+            'start_record': 0,
+            'end_record': 25,
+            'asorting_cols': [],
+            'searchable_columns': [],
+            'extends_search': [{
+                'user_group': id_ugroup
+
+            }]
+        }
+        kind = ['details']
+        fields = ['id', 'read', 'write', 'change_config', 'delete',
+                  'user_group', 'object_type__details']
+        lists['object_perms'] = client.\
+            create_api_object_group_permission_general().\
+            search(search=data_search, kind=kind, fields=fields)['ogpgs']
 
         lists['users'] = validates_dict(
             client.create_usuario().list_by_group(id_ugroup), 'users')
