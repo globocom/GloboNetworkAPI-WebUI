@@ -126,9 +126,9 @@
                 {% for item in individual_perms %}
                     <tr>
                         <td class="text_center"><input type="checkbox" name="selection" value="{{ item.id }}" /></td>
-                        <td class="text_center">{{ item.id }}</td>
+                        <td class="text_center">{{ item.object_value }}</td>
 
-                        <td class="text_center">{{ item.name }}</td>
+                        <td class="text_center"> TESTE </td>
                         <td class="text_center">{% if item.read %}
                             <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
                             <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
@@ -146,7 +146,7 @@
                             <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
                         </td>
                         <td class="text_center">
-                            <a href="{% url user-group-individual-perms.edit id_ugroup id_type_obj item.id %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a>
+                            <a href="{% url user-group-individual-perms.edit id_ugroup id_type_obj item.object_value %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a>
                         </td>
 
                     </tr>

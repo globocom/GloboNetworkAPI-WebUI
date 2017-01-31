@@ -49,6 +49,8 @@ class PermissionGroupForm(forms.Form):
 
 class IndividualPermsGroupUserEditForm(forms.Form):
 
+    id = forms.IntegerField(label='', widget=forms.HiddenInput(), required=False)
+
     id_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
     id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
     id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
@@ -63,6 +65,7 @@ class IndividualPermsGroupUserEditForm(forms.Form):
 
 
 class GeneralPermsGroupUserEditForm(forms.Form):
+    id = forms.IntegerField(label='', widget=forms.HiddenInput(), required=False)
 
     id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
     id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
