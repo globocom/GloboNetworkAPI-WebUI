@@ -92,9 +92,10 @@ $(document).ready(function() {
     function ajax_to_retrieve_objects(){
         $.ajax({
             type: "POST",
-            url: "{% url user-group-individual-perms.ajax.get-vip-requests %}",
+            url: "{% url user-group-individual-perms.ajax.get-objects %}",
             data: {
-                'search' : $("#id_obj_name").val()
+                'search' : $("#id_obj_name").val(),
+                'id_type_obj': $("input[name='id_type_obj']").val()
             },
             success: function(data, textStatus, xhr) {
                 $('#content_obj').html(data);
@@ -147,9 +148,8 @@ $(document).ready(function() {
         </div>
         <div class="separator spacer"></div>
 
-		<form onkeypress="return event.keyCode != 13" id="edit_form" method="post" action="{% url user-group-individual-perms.create 9 1 %}">
+		<form onkeypress="return event.keyCode != 13" id="edit_form" method="post" action="{% url user-group-individual-perms.create id_ugroup id_type_obj %}">
 			{% csrf_token %}
-
 
 			<div id="fields" class="ui-widget-content">
 

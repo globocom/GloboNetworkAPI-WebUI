@@ -269,7 +269,8 @@ def list_individ_perms_of_group_user(request, id_ugroup, id_type_obj):
     lists["id_ugroup"] = id_ugroup
     lists["id_type_obj"] = id_type_obj
 
-    return render_to_response(USERGROUP_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
+    return render_to_response(USERGROUP_INDIVIDUAL_PERMS, lists,
+                              context_instance=RequestContext(request))
 
 
 def edit_individ_perms_of_object(request, id_ugroup, id_type_obj, id_obj):
@@ -345,7 +346,8 @@ def edit_individ_perms_of_object(request, id_ugroup, id_type_obj, id_obj):
         lists['form_individ_perms_group_user'] = \
             IndividualPermsGroupUserEditForm(initial=perms)
 
-    return render_to_response(USERGROUP_EDIT_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
+    return render_to_response(USERGROUP_EDIT_INDIVIDUAL_PERMS, lists,
+                              context_instance=RequestContext(request))
 
 
 def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
@@ -417,76 +419,189 @@ def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
         lists['form_gen_perms_group_user'] = \
             GeneralPermsGroupUserEditForm(initial=perms)
 
-    return render_to_response(USERGROUP_EDIT_GENERAL_PERMS, lists, context_instance=RequestContext(request))
+    return render_to_response(USERGROUP_EDIT_GENERAL_PERMS, lists,
+                              context_instance=RequestContext(request))
 
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
 def create_individ_perms_of_object(request, id_ugroup, id_type_obj):
-    lists = {}
-    lists["group_name"] = "Administradores"
-    lists["object_type"] = "VIP"
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    lists = dict()
+
+    lists['group_name'] = client.create_grupo_usuario(). \
+        search(id_ugroup)['user_group']['nome']
+    lists['object_type'] = client.create_api_object_type(). \
+        get([id_type_obj])['ots'][0]['name']
+
+    initial_form = {
+        'id_type_obj': id_type_obj,
+        'id_ugroup': id_ugroup
+    }
+    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserEditForm(
+        initial=initial_form)  # TODO Alterar depois de edit pra ""
+
+    # lists["group_name"] = "Administradores"
+    # lists["object_type"] = "VIP"
     lists["id_ugroup"] = id_ugroup
     lists["id_type_obj"] = id_type_obj
 
-    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserEditForm()  # TODO Alterar depois de edit pra ""
-
     return render_to_response(USERGROUP_CREATE_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
+
+
+def represents_int(s):
+
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
+def get_vips_request(client, search):
+
+    data_search = {
+        'start_record': 0,
+        'end_record': 25,
+        'asorting_cols': [],
+        'searchable_columns': [],
+        'extends_search': [
+            {
+                'id': search
+            } if represents_int(search) else {},
+            {
+                'name__icontains': search
+            }
+        ]
+    }
+
+    fields = ['id', 'name']
+
+    return client.create_api_vip_request() \
+        .search(search=data_search, fields=fields)['vips']
+
+
+def get_server_pools(client, search):
+
+    data_search = {
+        'start_record': 0,
+        'end_record': 25,
+        'asorting_cols': [],
+        'searchable_columns': [],
+        'extends_search': [
+            {
+                'id': search
+            } if represents_int(search) else {},
+            {
+                'identifier__icontains': search
+            }
+        ]
+    }
+
+    fields = ['id', 'identifier']
+
+    return client.create_api_pool() \
+        .search(search=data_search, fields=fields)['server_pools']
+
+
+def get_vlans(client, search):
+
+    data_search = {
+        'start_record': 0,
+        'end_record': 25,
+        'asorting_cols': [],
+        'searchable_columns': [],
+        'extends_search': [
+            {
+                'id': search
+            } if represents_int(search) else {},
+            {
+                'num_vlan': search
+            } if represents_int(search) else {},
+            {
+                'nome__icontains': search
+            }
+        ]
+    }
+
+    fields = ['id', 'nome']
+
+    return client.create_api_vlan() \
+        .search(search=data_search, fields=fields)['vlans']
 
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
-def ajax_get_vip_requests(request):
+def ajax_get_objects(request):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
     search = request.POST.get('search')
+    id_type_obj = [request.POST.get('id_type_obj')]
 
-    query = {
-        "start_record": 0,
-        "custom_search": "",
-        "end_record": 25,
-        "asorting_cols": [],
-        "searchable_columns": []
-    }
-    try:
-        # query["id"] = int(search)
-        vips = client.create_api_vip_request().get_by_pk(int(search))
-        # query["extends_search"] = [{"id__iexact": int(search)}]
-    except ValueError as e:  # Usuario nao passou id
+    type_obj = client.create_api_object_type().\
+        get(id_type_obj)['ots'][0]['name']
 
-        if(is_valid_ipv4(search)):    # testa se bate com ipv4
-            m = search.split(".")
-            query["extends_search"] = [{
-                "ipv4__oct1": m[0],
-                "ipv4__oct2": m[1],
-                "ipv4__oct3": m[2],
-                "ipv4__oct4": m[3]
-            }]
+    lists = dict()
+    if type_obj == 'Vip':
+        lists["objs"] = get_vips_request(client, search)
 
-        elif (is_valid_ipv6(search)):     # testa se bate com ipv6
-            m = search.split(":")
-            query["extends_search"] = [{
-                "ipv6__oct1": m[0],
-                "ipv6__oct2": m[1],
-                "ipv6__oct3": m[2],
-                "ipv6__oct4": m[3],
-                "ipv6__oct5": m[4],
-                "ipv6__oct6": m[5],
-                "ipv6__oct7": m[6],
-                "ipv6__oct8": m[7]
-            }]
-        else:
-            query["extends_search"] = [{
-                "name__iexact": search
-            }]
+    elif type_obj == 'ServerPool':
+        lists["objs"] = get_server_pools(client, search)
 
-        vips = client.create_api_vip_request().search_vip_request(query)
+    elif type_obj == 'Vlan':
+        lists["objs"] = get_vlans(client, search)
 
-    lists = {}
-    lists["objs"] = cria_objs_fake()
+    lists['type_obj'] = type_obj
+
+    #
+    # search = request.POST.get('search')
+    #
+    # query = {
+    #     "start_record": 0,
+    #     "custom_search": "",
+    #     "end_record": 25,
+    #     "asorting_cols": [],
+    #     "searchable_columns": []
+    # }
+    # try:
+    #     # query["id"] = int(search)
+    #     vips = client.create_api_vip_request().get_by_pk(int(search))
+    #     # query["extends_search"] = [{"id__iexact": int(search)}]
+    # except ValueError as e:  # Usuario nao passou id
+    #
+    #     if(is_valid_ipv4(search)):    # testa se bate com ipv4
+    #         m = search.split(".")
+    #         query["extends_search"] = [{
+    #             "ipv4__oct1": m[0],
+    #             "ipv4__oct2": m[1],
+    #             "ipv4__oct3": m[2],
+    #             "ipv4__oct4": m[3]
+    #         }]
+    #
+    #     elif (is_valid_ipv6(search)):     # testa se bate com ipv6
+    #         m = search.split(":")
+    #         query["extends_search"] = [{
+    #             "ipv6__oct1": m[0],
+    #             "ipv6__oct2": m[1],
+    #             "ipv6__oct3": m[2],
+    #             "ipv6__oct4": m[3],
+    #             "ipv6__oct5": m[4],
+    #             "ipv6__oct6": m[5],
+    #             "ipv6__oct7": m[6],
+    #             "ipv6__oct8": m[7]
+    #         }]
+    #     else:
+    #         query["extends_search"] = [{
+    #             "name__iexact": search
+    #         }]
+    #
+    #     vips = client.create_api_vip_request().search_vip_request(query)
+
     return render_to_response(USERGROUP_AJAX_OBJECTS, lists, context_instance=RequestContext(request))
 
 
