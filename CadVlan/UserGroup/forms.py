@@ -55,8 +55,6 @@ class IndividualPermsGroupUserEditForm(forms.Form):
     id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
     id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
 
-    # obj_name = forms.CharField(label=u'Nome do Objeto', min_length=3, required=True, widget=forms.TextInput(attrs={'style': "width: 310px"}),error_messages=error_messages)
-
     read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
 
     write = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
@@ -119,3 +117,13 @@ class IndividualPermsGroupUserCreateForm(forms.Form):
     write = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
     change_config = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
     delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+
+
+class DeletePermsForm(forms.Form):
+    ids_perms = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
+
+    id_ugroup = forms.IntegerField(widget=forms.HiddenInput, label='', required=False)
+
+    id_type_obj = forms.IntegerField(widget=forms.HiddenInput, label='', required=False)
+
+    id_obj = forms.IntegerField(widget=forms.HiddenInput, label='', required=False)

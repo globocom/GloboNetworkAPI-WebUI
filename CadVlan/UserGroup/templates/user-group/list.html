@@ -598,12 +598,12 @@ $(document).ready(function() {
                     <tbody>
                         {% for item in object_perms %}
                         <tr>
-                            <td class="text_center table_id" lang="{% url user-group.list-perms-obj ugroup.id item.id %}">{{ item.object_type.name }}</td>
+                            <td class="text_center table_id" lang="{% url user-group.list-perms-obj ugroup.id item.object_type.id %}">{{ item.object_type.name }}</td>
                             <td class="text_center">{% if item.read %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}</td>
                             <td class="text_center">{% if item.write %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}</td>
                             <td class="text_center">{% if item.change_config %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}</td>
                             <td class="text_center">{% if item.delete %} <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %} <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}</td>
-                            <td class="text_center"><a href="{% url user-group-general-perms.edit ugroup.id item.id %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a></td>
+                            <td class="text_center"><a href="{% url user-group-general-perms.edit ugroup.id item.object_type.id %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a></td>
 
                         </tr>
                         {% endfor %}

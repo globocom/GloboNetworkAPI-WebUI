@@ -1,0 +1,24 @@
+{
+    "sEcho": {{ sEcho|escapejs }},
+    "iTotalRecords": {{ iTotalRecords|escapejs }},
+    "iTotalDisplayRecords": {{ iTotalDisplayRecords|escapejs }},
+    "aaData":[
+
+      {% for item in aaData %}
+      [
+          "<div class='text_center'><input type='checkbox' name='selection' value='{{ item.id }}' /></div>",
+          "<div class='text_center table_id'>{{ item.object_value }}</div>",
+          "<div class='text_center'> {% if item.read %}<span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %}<span class='ui-icon ui-icon-close text_center' title='NÃO'></span>  {% endif %}</div>",
+          "<div class='text_center'> {% if item.write %}<span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %}<span class='ui-icon ui-icon-close text_center' title='NÃO'></span>  {% endif %}</div>",
+          "<div class='text_center'> {% if item.change_config %}<span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %}<span class='ui-icon ui-icon-close text_center' title='NÃO'></span>  {% endif %}</div>",
+          "<div class='text_center'> {% if item.delete %}<span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %}<span class='ui-icon ui-icon-close text_center' title='NÃO'></span>  {% endif %}</div>",
+              "<div class='text_center'><a href='{% url user-group-individual-perms.edit requestVar.id_ugroup requestVar.id_type_obj item.object_value %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'>Editar</a></div>"
+
+      ]
+      {% if not forloop.last %}
+      ,
+      {% endif %}
+      {% endfor %}
+
+    ]
+}

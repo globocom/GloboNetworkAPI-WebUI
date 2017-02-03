@@ -156,7 +156,9 @@ USERGROUP_INDIVIDUAL_PERMS = 'user-group/list-individual-perms.html'
 USERGROUP_EDIT_INDIVIDUAL_PERMS = 'user-group/edit-individual-perms.html'
 USERGROUP_EDIT_GENERAL_PERMS = 'user-group/edit-general-perms.html'
 USERGROUP_CREATE_INDIVIDUAL_PERMS = 'user-group/create-individual-perms.html'
-USERGROUP_AJAX_OBJECTS = 'user-group/ajax/objects.html'
+USERGROUP_AJAX_OBJECTS = 'user-group/ajax/objects.json'
+USERGROUP_AJAX_INDIVIDUAL_PERMISSIONS = 'user-group/ajax/individual-permissions.json'
+
 
 # VRF
 VRF_CREATE = 'vrf/form.html'

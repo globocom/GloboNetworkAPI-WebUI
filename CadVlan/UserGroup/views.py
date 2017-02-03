@@ -19,15 +19,20 @@ import re
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseServerError
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError
 from networkapiclient.exception import PermissaoAdministrativaDuplicadaError
+from networkapiclient.Pagination import Pagination
 
 from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.constants import SERVERPOOL_OBJ_TYPE
+from CadVlan.constants import VIPREQUEST_OBJ_TYPE
+from CadVlan.constants import VLAN_OBJ_TYPE
 from CadVlan.forms import DeleteForm
 from CadVlan.forms import DeleteFormAux
 from CadVlan.messages import error_messages
@@ -39,12 +44,14 @@ from CadVlan.Net.business import is_valid_ipv4
 from CadVlan.Net.business import is_valid_ipv6
 from CadVlan.permissions import ADMINISTRATION
 from CadVlan.settings import PATH_PERMLISTS
+from CadVlan.templates import USERGROUP_AJAX_INDIVIDUAL_PERMISSIONS
 from CadVlan.templates import USERGROUP_AJAX_OBJECTS
 from CadVlan.templates import USERGROUP_CREATE_INDIVIDUAL_PERMS
 from CadVlan.templates import USERGROUP_EDIT_GENERAL_PERMS
 from CadVlan.templates import USERGROUP_EDIT_INDIVIDUAL_PERMS
 from CadVlan.templates import USERGROUP_INDIVIDUAL_PERMS
 from CadVlan.templates import USERGROUP_LIST
+from CadVlan.UserGroup.forms import DeletePermsForm
 from CadVlan.UserGroup.forms import GeneralPermsGroupUserEditForm
 from CadVlan.UserGroup.forms import IndividualPermsGroupUserCreateForm
 from CadVlan.UserGroup.forms import IndividualPermsGroupUserEditForm
@@ -57,6 +64,7 @@ from CadVlan.Util.Decorators import login_required
 from CadVlan.Util.shortcuts import render_message_json
 from CadVlan.Util.utility import convert_boolean_to_int
 from CadVlan.Util.utility import convert_string_to_boolean
+from CadVlan.Util.utility import DataTablePaginator
 from CadVlan.Util.utility import validates_dict
 
 logger = logging.getLogger(__name__)
@@ -159,115 +167,22 @@ def parse_api_perms(filename):
     return apitree
 
 
-def cria_array_individual_perms_of_vips_fake():  # it could be another objects (pools, vlans...)
-    individual_perms = {"individual_perms": []}
-
-    individual_perms["individual_perms"].append({"id": 12305,
-                                                 "name": "VIP-GLOBO1",
-                                                 "read": True,
-                                                 "write": False,
-                                                 "change_config": False,
-                                                 "delete": True})
-    individual_perms["individual_perms"].append({"id": 12306,
-                                                 "name": "VIP-GLOBO2",
-                                                 "read": True,
-                                                 "write": True,
-                                                 "change_config": False,
-                                                 "delete": True})
-
-    individual_perms["individual_perms"].append({"id": 12307,
-                                                 "name": "VIP-GLOBO3",
-                                                 "read": True,
-                                                 "write": False,
-                                                 "change_config": False,
-                                                 "delete": True})
-    return individual_perms["individual_perms"]
-
-
-def cria_array_perms_jb_fake():
-    obj_perms = {"object_perms": []}
-
-    obj_perms["object_perms"].append({
-        "id": 1,
-        "url": "/user-group/individ-perm/9/1",
-        "nome_obj": "VIP",
-        "read": True,
-        "write": False,
-        "change_config": False,
-        "delete": True
-    })
-
-    obj_perms["object_perms"].append({
-        "id": 2,
-        "url": "/user-group/individ-perm/9/2",
-        "nome_obj": "Pool",
-        "read": True,
-        "write": True,
-        "change_config": False,
-        "delete": True
-    })
-
-    obj_perms["object_perms"].append({
-        "id": 3,
-        "url": "/user-group/individ-perm/9/3",
-        "nome_obj": "VLAN",
-        "read": True,
-        "write": True,
-        "change_config": True,
-        "delete": True
-    })
-
-    return obj_perms["object_perms"]
-
-
-def cria_objs_fake():
-    obj_perms = {"objs": []}
-
-    obj_perms["objs"].append({
-        "id": 1,
-        "name": "Teste"
-    })
-
-    obj_perms["objs"].append({
-        "id": 2,
-        "name": "Teste 2"
-    })
-
-    return obj_perms["objs"]
-
-
 def list_individ_perms_of_group_user(request, id_ugroup, id_type_obj):
+
     lists = {}
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
-
-    data_search = {
-        'start_record': 0,
-        'end_record': 25,
-        'asorting_cols': [],
-        'searchable_columns': [],
-        'extends_search': [{
-            'user_group': id_ugroup,
-            'object_type': id_type_obj
-
-        }]
-    }
-    kind = ['basic']
-    fields = ['id', 'read', 'write', 'change_config', 'delete',
-              'object_value']
-
-    lists['individual_perms'] = client. \
-        create_api_object_group_permission(). \
-        search(search=data_search, kind=kind, fields=fields)['ogps']
 
     lists['group_name'] = client.create_grupo_usuario().\
         search(id_ugroup)['user_group']['nome']
     lists['object_type'] = client.create_api_object_type().\
         get([id_type_obj])['ots'][0]['name']
 
-    lists["id_ugroup"] = id_ugroup
-    lists["id_type_obj"] = id_type_obj
+    lists['id_ugroup'] = id_ugroup
+    lists['id_type_obj'] = id_type_obj
+    initial = {'id_ugroup': id_ugroup, 'id_type_obj': id_type_obj}
+    lists['delete_form'] = DeletePermsForm(initial=initial)
 
     return render_to_response(USERGROUP_INDIVIDUAL_PERMS, lists,
                               context_instance=RequestContext(request))
@@ -283,7 +198,22 @@ def edit_individ_perms_of_object(request, id_ugroup, id_type_obj, id_obj):
     lists['id_type_obj'] = id_type_obj
     lists['id_obj'] = id_obj
 
-    lists['object_name'] = 'NOT IMPLEMENTED'
+    type_obj = client.create_api_object_type().get(
+        [int(id_type_obj)])['ots'][0]['name']
+
+    if type_obj == VIPREQUEST_OBJ_TYPE:
+        obj_name = get_vips_request(client, None,
+                                    None, id_obj)['objs'][0]['name']
+
+    elif type_obj == SERVERPOOL_OBJ_TYPE:
+        obj_name = get_server_pools(client, None,
+                                    None, id_obj)['objs'][0]['identifier']
+
+    elif type_obj == VLAN_OBJ_TYPE:
+        obj_name = get_vlans(client, None,
+                             None, id_obj)['objs'][0]['name']
+
+    lists['object_name'] = obj_name
 
     if request.method == 'POST':
 
@@ -317,7 +247,7 @@ def edit_individ_perms_of_object(request, id_ugroup, id_type_obj, id_obj):
             messages.add_message(request, messages.SUCCESS,
                                  object_group_perm_messages.get("success_edit"))
 
-            return redirect('user-group.list', id_ugroup, 1)
+            return redirect('user-group.list-perms-obj', id_ugroup, id_type_obj)
 
     else:
 
@@ -379,14 +309,23 @@ def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
             delete = form_gen_group_perms.cleaned_data['delete']
 
             data = {
-                'id': id,
                 'read': read,
                 'write': write,
                 'change_config': change_config,
                 'delete': delete
             }
 
-            client.create_api_object_group_permission_general().update([data])
+            if id is not None:
+                data['id'] = id
+                client.create_api_object_group_permission_general().\
+                    update([data])
+
+            else:
+                data['user_group'] = int(id_ugroup)
+                data['object_type'] = int(id_type_obj)
+
+                client.create_api_object_group_permission_general().\
+                    create([data])
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -410,14 +349,24 @@ def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
         fields = ['id', 'read', 'write', 'change_config', 'delete',
                   'user_group__details', 'object_type__details']
 
-        perms = client.create_api_object_group_permission_general() \
-            .search(search=data_search, kind=kind, fields=fields)['ogpgs'][0]
+        try:
+            perms = client.create_api_object_group_permission_general() \
+                .search(search=data_search, kind=kind, fields=fields)['ogpgs'][0]
 
-        lists['group_name'] = perms['user_group']['name']
-        lists['object_type'] = perms['object_type']['name']
+            lists['group_name'] = perms['user_group']['name']
+            lists['object_type'] = perms['object_type']['name']
 
-        lists['form_gen_perms_group_user'] = \
-            GeneralPermsGroupUserEditForm(initial=perms)
+            lists['form_gen_perms_group_user'] = \
+                GeneralPermsGroupUserEditForm(initial=perms)
+
+        except IndexError:
+            lists['group_name'] = client.create_grupo_usuario(). \
+                search(id_ugroup)['user_group']['nome']
+            lists['object_type'] = client.create_api_object_type(). \
+                get([id_type_obj])['ots'][0]['name']
+
+            lists['form_gen_perms_group_user'] = \
+                GeneralPermsGroupUserEditForm()
 
     return render_to_response(USERGROUP_EDIT_GENERAL_PERMS, lists,
                               context_instance=RequestContext(request))
@@ -427,29 +376,97 @@ def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
 def create_individ_perms_of_object(request, id_ugroup, id_type_obj):
-    auth = AuthSession(request.session)
-    client = auth.get_clientFactory()
 
     lists = dict()
 
-    lists['group_name'] = client.create_grupo_usuario(). \
-        search(id_ugroup)['user_group']['nome']
-    lists['object_type'] = client.create_api_object_type(). \
-        get([id_type_obj])['ots'][0]['name']
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
 
-    initial_form = {
-        'id_type_obj': id_type_obj,
-        'id_ugroup': id_ugroup
-    }
-    lists["form_individ_perms_group_user"] = IndividualPermsGroupUserEditForm(
-        initial=initial_form)  # TODO Alterar depois de edit pra ""
+    lists['id_ugroup'] = id_ugroup
+    lists['id_type_obj'] = id_type_obj
 
-    # lists["group_name"] = "Administradores"
-    # lists["object_type"] = "VIP"
-    lists["id_ugroup"] = id_ugroup
-    lists["id_type_obj"] = id_type_obj
+    if request.method == 'POST':
 
-    return render_to_response(USERGROUP_CREATE_INDIVIDUAL_PERMS, lists, context_instance=RequestContext(request))
+        lists['group_name'] = client.create_grupo_usuario(). \
+            search(id_ugroup)['user_group']['nome']
+        lists['object_type'] = client.create_api_object_type(). \
+            get([id_type_obj])['ots'][0]['name']
+
+        form_individ_group_perms = \
+            IndividualPermsGroupUserEditForm(request.POST)
+        lists['form_individ_perms_group_user'] = form_individ_group_perms
+
+        if form_individ_group_perms.is_valid():
+            read = form_individ_group_perms.cleaned_data['read']
+            write = form_individ_group_perms.cleaned_data['write']
+            change_config = form_individ_group_perms.\
+                cleaned_data['change_config']
+            delete = form_individ_group_perms.cleaned_data['delete']
+
+            object_value = form_individ_group_perms.cleaned_data['id_obj']
+
+            data = {
+                'user_group': int(id_ugroup),
+                'object_type': int(id_type_obj),
+                'object_value': int(object_value),
+                'read': read,
+                'write': write,
+                'change_config': change_config,
+                'delete': delete
+            }
+
+            client.create_api_object_group_permission().create([data])
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 object_group_perm_messages.get("success_create"))
+
+            return redirect('user-group.list-perms-obj', id_ugroup, id_type_obj)
+
+    else:
+
+        lists['group_name'] = client.create_grupo_usuario(). \
+            search(id_ugroup)['user_group']['nome']
+        lists['object_type'] = client.create_api_object_type(). \
+            get([id_type_obj])['ots'][0]['name']
+
+        initial_form = {
+            'id_type_obj': id_type_obj,
+            'id_ugroup': id_ugroup
+        }
+        lists["form_individ_perms_group_user"] = IndividualPermsGroupUserEditForm(
+            initial=initial_form)
+
+    return render_to_response(USERGROUP_CREATE_INDIVIDUAL_PERMS, lists,
+                              context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
+def delete_individ_perms_of_object(request):
+
+    if request.method == 'POST':
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeletePermsForm(request.POST)
+
+        if form.is_valid():
+
+            ids_perms = split_to_array(form.cleaned_data['ids_perms'])
+
+            id_ugroup = form.cleaned_data['id_ugroup']
+            id_type_obj = form.cleaned_data['id_type_obj']
+
+            client.create_api_object_group_permission().delete(ids_perms)
+
+            messages.add_message(
+                request, messages.SUCCESS, object_group_perm_messages.
+                get('success_delete'))
+
+    return redirect('user-group.list-perms-obj', id_ugroup, id_type_obj)
 
 
 def represents_int(s):
@@ -461,148 +478,257 @@ def represents_int(s):
         return False
 
 
-def get_vips_request(client, search):
-
-    data_search = {
-        'start_record': 0,
-        'end_record': 25,
-        'asorting_cols': [],
-        'searchable_columns': [],
-        'extends_search': [
-            {
-                'id': search
-            } if represents_int(search) else {},
-            {
-                'name__icontains': search
-            }
-        ]
-    }
+def get_vips_request(client, search, pagination, id_obj):
 
     fields = ['id', 'name']
 
-    return client.create_api_vip_request() \
-        .search(search=data_search, fields=fields)['vips']
+    if pagination is not None and search is not None:
+        data_search = {
+            'start_record': pagination.start_record,
+            'end_record': pagination.end_record,
+            'asorting_cols': pagination.asorting_cols,
+            'searchable_columns': pagination.searchable_columns,
+            'custom_search': pagination.custom_search or '',
+            'extends_search': [
+                {
+                    'id': search
+                } if represents_int(search) else {},
+                {
+                    'name__icontains': search
+                }
+            ]
+        }
+
+        vips = client.create_api_vip_request() \
+            .search(search=data_search, fields=fields)
+
+        return {'total': vips['total'], 'objs': vips['vips']}
+
+    else:
+        vips = client.create_api_vip_request() \
+            .get([id_obj], fields=fields)
+
+        return {'total': len(vips['vips']), 'objs': vips['vips']}
 
 
-def get_server_pools(client, search):
-
-    data_search = {
-        'start_record': 0,
-        'end_record': 25,
-        'asorting_cols': [],
-        'searchable_columns': [],
-        'extends_search': [
-            {
-                'id': search
-            } if represents_int(search) else {},
-            {
-                'identifier__icontains': search
-            }
-        ]
-    }
+def get_server_pools(client, search, pagination, id_obj):
 
     fields = ['id', 'identifier']
 
-    return client.create_api_pool() \
-        .search(search=data_search, fields=fields)['server_pools']
+    if pagination is not None and search is not None:
+        data_search = {
+            'start_record': pagination.start_record,
+            'end_record': pagination.end_record,
+            'asorting_cols': pagination.asorting_cols,
+            'searchable_columns': pagination.searchable_columns,
+            'custom_search': pagination.custom_search or '',
+            'extends_search': [
+                {
+                    'id': search
+                } if represents_int(search) else {},
+                {
+                    'identifier__icontains': search
+                }
+            ]
+        }
+
+        pools = client.create_api_pool() \
+            .search(search=data_search, fields=fields)
+
+        return {'total': pools['total'], 'objs': pools['server_pools']}
+
+    else:
+        pools = client.create_api_pool() \
+            .get([id_obj], fields=fields)
+
+        return {'objs': pools['server_pools']}
 
 
-def get_vlans(client, search):
+def get_vlans(client, search, pagination, id_obj):
 
-    data_search = {
-        'start_record': 0,
-        'end_record': 25,
-        'asorting_cols': [],
-        'searchable_columns': [],
-        'extends_search': [
-            {
-                'id': search
-            } if represents_int(search) else {},
-            {
-                'num_vlan': search
-            } if represents_int(search) else {},
-            {
-                'nome__icontains': search
+    fields = ['id', 'name']
+
+    if pagination is not None and search is not None:
+        data_search = {
+            'start_record': pagination.start_record,
+            'end_record': pagination.end_record,
+            'asorting_cols': pagination.asorting_cols,
+            'searchable_columns': pagination.searchable_columns,
+            'custom_search': pagination.custom_search or '',
+            'extends_search': [
+                {
+                    'id': search
+                } if represents_int(search) else {},
+                {
+                    'num_vlan': search
+                } if represents_int(search) else {},
+                {
+                    'nome__icontains': search
+                }
+            ]
+        }
+
+        vlans = client.create_api_vlan() \
+            .search(search=data_search, fields=fields)
+
+        return {'total': vlans['total'], 'objs': vlans['vlans']}
+
+    else:
+        vlans = client.create_api_vlan() \
+            .get([id_obj], fields=fields)
+
+        return {'objs': vlans['vlans']}
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
+def ajax_get_individual_permissions(request, id_ugroup, id_type_obj):
+
+    try:
+        # If form was submited
+        if request.method == "GET":
+
+            # Get user auth
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            column_index_name_map = {
+                0: '',
+                1: 'id',
+                2: 'read',
+                3: 'write',
+                4: 'change_config',
+                5: 'delete',
+                6: ''
             }
-        ]
-    }
 
-    fields = ['id', 'nome']
+            dtp = DataTablePaginator(request, column_index_name_map)
 
-    return client.create_api_vlan() \
-        .search(search=data_search, fields=fields)['vlans']
+            # Make params
+            dtp.build_server_side_list()
+
+            # Set params in simple Pagination class
+            pagination = Pagination(
+                dtp.start_record,
+                dtp.end_record,
+                dtp.asorting_cols,
+                dtp.searchable_columns,
+                dtp.custom_search)
+
+            data_search = {
+                'start_record': pagination.start_record,
+                'end_record': pagination.end_record,
+                'asorting_cols': pagination.asorting_cols,
+                'searchable_columns': pagination.searchable_columns,
+                'custom_search': pagination.custom_search,
+                'extends_search': [{
+                    'user_group': int(id_ugroup),
+                    'object_type': int(id_type_obj)
+                }]
+            }
+
+            kind = ['basic']
+            fields = ['id', 'read', 'write', 'change_config', 'delete',
+                      'object_value']
+
+            perms = client. \
+                create_api_object_group_permission(). \
+                search(search=data_search, kind=kind, fields=fields)
+            lists = dict()
+            lists['id_ugroup'] = id_ugroup
+            lists['id_type_obj'] = id_type_obj
+
+            # Returns JSON
+            return dtp.build_response(
+                perms['ogps'],
+                perms['total'],
+                USERGROUP_AJAX_INDIVIDUAL_PERMISSIONS,
+                request,
+                lists
+            )
+
+    except NetworkAPIClientError, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
+    except BaseException, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
 
 
 @log
 @login_required
 @has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
 def ajax_get_objects(request):
-    auth = AuthSession(request.session)
-    client = auth.get_clientFactory()
 
-    search = request.POST.get('search')
-    id_type_obj = [request.POST.get('id_type_obj')]
+    try:
 
-    type_obj = client.create_api_object_type().\
-        get(id_type_obj)['ots'][0]['name']
+        # If form was submited
+        if request.method == "GET":
 
-    lists = dict()
-    if type_obj == 'Vip':
-        lists["objs"] = get_vips_request(client, search)
+            # Get user auth
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
 
-    elif type_obj == 'ServerPool':
-        lists["objs"] = get_server_pools(client, search)
+            column_index_name_map = {
+                0: '',
+                1: 'id',
+                2: 'name'
+            }
 
-    elif type_obj == 'Vlan':
-        lists["objs"] = get_vlans(client, search)
+            dtp = DataTablePaginator(request, column_index_name_map)
 
-    lists['type_obj'] = type_obj
+            # Make params
+            dtp.build_server_side_list()
 
-    #
-    # search = request.POST.get('search')
-    #
-    # query = {
-    #     "start_record": 0,
-    #     "custom_search": "",
-    #     "end_record": 25,
-    #     "asorting_cols": [],
-    #     "searchable_columns": []
-    # }
-    # try:
-    #     # query["id"] = int(search)
-    #     vips = client.create_api_vip_request().get_by_pk(int(search))
-    #     # query["extends_search"] = [{"id__iexact": int(search)}]
-    # except ValueError as e:  # Usuario nao passou id
-    #
-    #     if(is_valid_ipv4(search)):    # testa se bate com ipv4
-    #         m = search.split(".")
-    #         query["extends_search"] = [{
-    #             "ipv4__oct1": m[0],
-    #             "ipv4__oct2": m[1],
-    #             "ipv4__oct3": m[2],
-    #             "ipv4__oct4": m[3]
-    #         }]
-    #
-    #     elif (is_valid_ipv6(search)):     # testa se bate com ipv6
-    #         m = search.split(":")
-    #         query["extends_search"] = [{
-    #             "ipv6__oct1": m[0],
-    #             "ipv6__oct2": m[1],
-    #             "ipv6__oct3": m[2],
-    #             "ipv6__oct4": m[3],
-    #             "ipv6__oct5": m[4],
-    #             "ipv6__oct6": m[5],
-    #             "ipv6__oct7": m[6],
-    #             "ipv6__oct8": m[7]
-    #         }]
-    #     else:
-    #         query["extends_search"] = [{
-    #             "name__iexact": search
-    #         }]
-    #
-    #     vips = client.create_api_vip_request().search_vip_request(query)
+            # Set params in simple Pagination class
+            pagination = Pagination(
+                dtp.start_record,
+                dtp.end_record,
+                dtp.asorting_cols,
+                dtp.searchable_columns,
+                dtp.custom_search)
 
-    return render_to_response(USERGROUP_AJAX_OBJECTS, lists, context_instance=RequestContext(request))
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            search = request.GET.get('search')
+
+            if not search:
+                raise Exception(u'Empty search')
+
+            id_type_obj = [request.GET.get('id_type_obj')]
+
+            type_obj = client.create_api_object_type(). \
+                get(id_type_obj)['ots'][0]['name']
+
+            lists = dict()
+            if type_obj == VIPREQUEST_OBJ_TYPE:
+                objs = get_vips_request(client, search, pagination, None)
+
+            elif type_obj == SERVERPOOL_OBJ_TYPE:
+                objs = get_server_pools(client, search, pagination, None)
+
+            elif type_obj == VLAN_OBJ_TYPE:
+                objs = get_vlans(client, search, pagination, None)
+
+            lists['type_obj'] = type_obj
+
+            # Returns JSON
+            return dtp.build_response(
+                objs['objs'],
+                objs['total'],
+                templates.USERGROUP_AJAX_OBJECTS,
+                request,
+                lists
+            )
+
+    except NetworkAPIClientError, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
+    except BaseException, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
 
 
 def load_list(request, lists, id_ugroup, tab):
@@ -630,6 +756,20 @@ def load_list(request, lists, id_ugroup, tab):
             create_api_object_group_permission_general().\
             search(search=data_search, kind=kind, fields=fields)['ogpgs']
 
+        fields = ['id', 'name']
+
+        ots = map(lambda x: x['object_type'], lists['object_perms'])
+
+        ots_all = client.create_api_object_type().search(fields=fields)['ots']
+
+        for ot in ots_all:
+            if ot not in ots:
+                perm_fake = {'change_config': False, 'read': False, 'write': False,
+                             'user_group': False, 'delete': False}
+                perm_fake['object_type'] = ot
+                perm_fake['id'] = ot['id']
+                lists['object_perms'].append(perm_fake)
+
         lists['users'] = validates_dict(
             client.create_usuario().list_by_group(id_ugroup), 'users')
 
@@ -642,7 +782,8 @@ def load_list(request, lists, id_ugroup, tab):
                 client.create_usuario().list_by_group_out(id_ugroup))
 
         lists['perms'] = validates_dict(
-            client.create_permissao_administrativa().list_by_group(id_ugroup), 'perms')
+            client.create_permissao_administrativa().list_by_group(id_ugroup),
+            'perms')
 
         if 'form_perms' not in lists:
             function_list = validates_dict(
@@ -670,6 +811,10 @@ def load_list(request, lists, id_ugroup, tab):
         messages.add_message(request, messages.ERROR, e)
 
     return lists
+
+
+def convert_array(a):
+    return a['object_type']
 
 
 @log

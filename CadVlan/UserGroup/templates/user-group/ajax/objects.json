@@ -1,0 +1,35 @@
+{
+    "sEcho": {{ sEcho|escapejs }},
+    "iTotalRecords": {{ iTotalRecords|escapejs }},
+    "iTotalDisplayRecords": {{ iTotalDisplayRecords|escapejs }},
+    "aaData":[
+    {% if requestVar.type_obj == "VipRequest" or requestVar.type_obj == "Vlan" %}
+
+      {% for item in aaData %}
+      [
+          "<div class='text_center'><input type='radio' name='sel_obj' value='{{ item.id|escapejs }}'/><input type='hidden' id='sel_obj_{{ item.id|escapejs }}'  value='{{ item.name|escapejs }}' /></div>",
+          "<div class='text_center table_id'>{{ item.id|escapejs }}</div>",
+          "<div class='text_center'> {{ item.name|escapejs }}</div>"
+
+      ]
+      {% if not forloop.last %}
+      ,
+      {% endif %}
+      {% endfor %}
+
+    {% elif requestVar.type_obj == "ServerPool" %}
+      {% for item in aaData %}
+      [
+          "<div class='text_center'><input type='radio' name='sel_obj' value='{{ item.id|escapejs }}'/><input type='hidden' id='sel_obj_{{ item.id|escapejs}}'  value='{{ item.identifier|escapejs }}' /></div>",
+          "<div class='text_center table_id'>{{ item.id|escapejs }}</div>",
+          "<div class='text_center'> {{ item.identifier|escapejs }}</div>"
+
+      ]
+      {% if not forloop.last %}
+      ,
+      {% endif %}
+      {% endfor %}
+
+    {% endif %}
+    ]
+}

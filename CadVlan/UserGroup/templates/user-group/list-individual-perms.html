@@ -29,21 +29,16 @@
 
 
             individual_perms = $("#individual_perms").dataTable({
+                "bProcessing": true,
+                "bServerSide": true,
+                "sAjaxSource": "{% url user-group-individual-perms.ajax.get-perms id_ugroup id_type_obj %}",
                 "aaSorting": [],
+                "bAutoWidth": false,
                 "bJQueryUI": true,
-                "bPaginate": false,
                 "bFilter": false,
-                "bInfo": false,
-                "aoColumns": [
-                    {"bSortable": false},
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                    {"bSortable": false}
-                ]
+                "sPaginationType": "full_numbers",
+                "iDisplayLength": {% max_results %},
+                "aoColumnDefs": [{"bSortable": false, "aTargets": [0,1,2,3,4,5,6]}]
             });
            	$("#tool").buttonset();
 
@@ -60,9 +55,9 @@
             });
 
             $("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		        if (confirm('Deseja realmente excluir o(s) Grupo(s) de Usuário selecionado(s)?')){
+		        if (confirm('Deseja realmente excluir a(s) Permissões(s) dos Objetos selecionado(s)?')){
 			        var data = getSelectionData(individual_perms);
-			        // $("#id_ids").val(data).parent().submit();
+                    $("#id_ids_perms").val(data).parent().submit();
 		        }
             });
 
@@ -109,12 +104,25 @@
                 </span>
 		    </div>
 
+            <form id="delete_form" method="post" action="{% url user-group-individual-perms.delete %}" style="visibility: hidden;">
+                {% csrf_token %}
+                {% for field in delete_form %}
+                    {{ field }}
+                {% endfor %}
+		    </form>
+
             <table id="individual_perms">
+                <col width="3%" />
+                <col width="6%" />
+                <col width="20%" />
+                <col width="15%" />
+                <col width="15%" />
+                <col width="10%" />
+                <col width="31%" />
                 <thead>
                 <tr>
                     <th><input id="checkAll" type="checkbox" /></th>
                     <th>Identificador do Objeto</th>
-                    <th>Nome do Objeto</th>
                     <th>Leitura</th>
                     <th>Escrita</th>
                     <th>Mudar configuração</th>
@@ -123,34 +131,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for item in individual_perms %}
-                    <tr>
-                        <td class="text_center"><input type="checkbox" name="selection" value="{{ item.id }}" /></td>
-                        <td class="text_center">{{ item.object_value }}</td>
 
-                        <td class="text_center"> TESTE </td>
-                        <td class="text_center">{% if item.read %}
-                            <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
-                            <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
-                        </td>
-                        <td class="text_center">{% if item.write %}
-                            <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
-                            <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
-                        </td>
-                        <td class="text_center">{% if item.change_config %}
-                            <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
-                            <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
-                        </td>
-                        <td class="text_center">{% if item.delete %}
-                            <span class="ui-icon ui-icon-check text_center" title="SIM"></span> {% else %}
-                            <span class="ui-icon ui-icon-close text_center" title="NÃO"></span>  {% endif %}
-                        </td>
-                        <td class="text_center">
-                            <a href="{% url user-group-individual-perms.edit id_ugroup id_type_obj item.object_value %}" style="width: 20px; height: 20px;" class="btn_edit" title="Editar">Editar</a>
-                        </td>
-
-                    </tr>
-                {% endfor %}
                 </tbody>
             </table>
 
