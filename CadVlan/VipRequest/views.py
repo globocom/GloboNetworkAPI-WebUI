@@ -284,7 +284,7 @@ def tab_vip_edit(request, id_vip):
 
             group_users_list_selected = []
             for group in vip["groups_permissions"]:
-                group_users_list_selected.append(group["group"]["id"])
+                group_users_list_selected.append(group["user_group"]["id"])
 
             lists['form_basic'] = forms.RequestVipBasicForm(
                 forms_aux,

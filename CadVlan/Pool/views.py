@@ -342,7 +342,7 @@ def add_form(request):
                 if len(group_users) > 0:
                     for id in group_users:
                         groups_permissions.append({
-                            "group": int(id),
+                            "user_group": int(id),
                             "read": True,
                             "write": True,
                             "change_config": True,
@@ -405,7 +405,7 @@ def edit_form(request, id_server_pool):
 
         group_users_list_selected = []
         for group in pool["groups_permissions"]:
-            group_users_list_selected.append(group["group"]["id"])
+            group_users_list_selected.append(group["user_group"]["id"])
 
         pool_created = lists["pool_created"] = pool['pool_created']
 
@@ -548,7 +548,7 @@ def edit_form(request, id_server_pool):
                 if len(group_users) > 0:
                     for id in group_users:
                         groups_permissions.append({
-                            "group": int(id),
+                            "user_group": int(id),
                             "read": True,
                             "write": True,
                             "change_config": True,
@@ -1051,7 +1051,7 @@ def manage_tab3(request, id_server_pool):
 
         group_users_list_selected = []
         for group in pool["groups_permissions"]:
-            group_users_list_selected.append(group["group"]["id"])
+            group_users_list_selected.append(group["user_group"]["id"])
 
         environment_id = pool['environment']['id']
 
@@ -1103,7 +1103,7 @@ def manage_tab3(request, id_server_pool):
                 if len(group_users) > 0:
                     for id in group_users:
                         groups_permissions.append({
-                            "group": int(id),
+                            "user_group": int(id),
                             "read": True,
                             "write": True,
                             "change_config": True,
