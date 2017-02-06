@@ -47,7 +47,7 @@ $(document).ready(function() {
 	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url user-group.list-perms-obj id_ugroup id_type_obj %}";
+		location.href = "{% url user-group.list-perms-obj form_hidden_ids.id_ugroup.value form_hidden_ids.id_type_obj.value %}";
 	});
 
     $("#dialog_obj").dialog({
@@ -88,8 +88,6 @@ $(document).ready(function() {
         }else{
             alert('Preencha o campo de busca de objeto!');
         }
-
-        //ajax_to_retrieve_objects();
     });
 
     $('#id_obj_name').keydown(function (e){
@@ -103,25 +101,19 @@ $(document).ready(function() {
         }
     });
 
-    function ajax_to_retrieve_objects(){
-        $.ajax({
-            type: "POST",
-            url: "{% url user-group-individual-perms.ajax.get-objects %}",
-            data: {
-                'search' : $("#id_obj_name").val(),
-                'id_type_obj': $("input[name='id_type_obj']").val()
-            },
-            success: function(data, textStatus, xhr) {
-                $('#content_obj').html(data);
-                $("#dialog_obj").dialog("open");
-            },
-            error: function (error) {
-                message = jQuery.parseJSON(error.responseText);
-                addMessageModal(message);
-            }
-        });
+    $("select[name=object_type]").change(function() {
+        var id_type_obj = $("select[name=object_type] option:selected").val();
 
-    }
+        $("#id_show_obj_name").css("display","none");
+
+        $("#id_show_obj_name").html("");
+
+        $("input[name=id_obj]").val("");
+
+        $("input[name='id_type_obj']").val(id_type_obj);
+
+    });
+
 
     $("#dialog_obj").dialog("close");
 
@@ -180,23 +172,7 @@ $(document).ready(function() {
 	</ul>
 	<div id="tabs-1">
 
-        <div id="fields" class="ui-widget-content">
-            <table>
-                <tr>
-                    <td style="width: 100px"><label for="nome_grupo">Grupo de Usuário</label></td>
-                    <td><label style="width: 350px;color: blue;text-align: center;" >{{group_name}}</label></td>
-                </tr>
-
-                <tr>
-                    <td style="width: 100px"><label for="tipo_objeto">Tipo dos Objetos</label></td>
-                    <td><label style="width: 350px;color: blue;text-align: center;" >{{object_type}}</label></td>
-                </tr>
-
-            </table>
-        </div>
-        <div class="separator spacer"></div>
-
-		<form onkeypress="return event.keyCode != 13" id="edit_form" method="post" action="{% url user-group-individual-perms.create id_ugroup id_type_obj %}">
+		<form onkeypress="return event.keyCode != 13" id="edit_form" method="post" action="{% url user-group-individual-perms.create %}">
 			{% csrf_token %}
 
 			<div id="fields" class="ui-widget-content">
@@ -215,6 +191,20 @@ $(document).ready(function() {
                 <label id="id_show_obj_name" style="display:none">Nome do objeto selecionado:</label>
             </div>
 			{% for field in form_individ_perms_group_user %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					{{ field }}
+					<p id="error">
+					{% if field.errors %}
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				</div>
+			{% endfor %}
+
+            {% for field in form_hidden_ids %}
 				<div>
 					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
 					{{ field }}

@@ -419,7 +419,7 @@ urlpatterns += patterns(
         'edit_individ_perms_of_object', name='user-group-individual-perms.edit', ),
 
     url(
-        '^user-group/ogp/create/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)[/]?$',
+        '^user-group/ogp/create[/]?$',
         'create_individ_perms_of_object', name='user-group-individual-perms.create', ),
 
     url(

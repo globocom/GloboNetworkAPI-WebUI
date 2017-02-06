@@ -51,7 +51,7 @@
 	        $(".btn_edit", individual_perms.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 
             $("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
-		location.href = "{% url user-group-individual-perms.create id_ugroup id_type_obj %}";
+		location.href = "{% url user-group-individual-perms.create %}";
             });
 
             $("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){

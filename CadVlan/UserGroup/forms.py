@@ -48,12 +48,54 @@ class PermissionGroupForm(forms.Form):
 
 
 class IndividualPermsGroupUserEditForm(forms.Form):
-
     id = forms.IntegerField(label='', widget=forms.HiddenInput(), required=False)
 
     id_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
     id_type_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
     id_group = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+
+    read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+
+    write = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+    change_config = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+    delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+
+
+class IndividualPermsGroupUserCreateForm(forms.Form):
+
+    def __init__(self, fields, *args, **kwargs):
+        super(IndividualPermsGroupUserCreateForm, self).__init__(*args, **kwargs)
+        if fields is not None:
+            self.fields['user_group'].choices = [
+                (ch['id'], ch['nome']) for ch in fields['user_group']]
+            self.fields['object_type'].choices = [
+                (ch['id'], ch['name']) for ch in fields['object_type']]
+
+    id = forms.IntegerField(label='', widget=forms.HiddenInput(), required=False)
+
+    id_obj = forms.IntegerField(label="", widget=forms.HiddenInput(), required=False)
+
+    user_group = forms.ChoiceField(
+        label=u'Grupo do Usuário',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            'style': 'width: 310px',
+            'class': 'select2'}
+        )
+    )
+
+    object_type = forms.ChoiceField(
+        label=u'Tipo do Objeto',
+        choices=[],
+        required=True,
+        error_messages=error_messages,
+        widget=forms.Select(attrs={
+            'style': 'width: 310px',
+            'class': 'select2'}
+        )
+    )
 
     read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
 
@@ -75,50 +117,6 @@ class GeneralPermsGroupUserEditForm(forms.Form):
     delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
 
 
-class IndividualPermsGroupUserCreateForm(forms.Form):
-
-    def __init__(self, groups=[], objects=[], *args, **kwargs):
-        super(IndividualPermsGroupUserCreateForm, self).__init__(*args, **kwargs)
-        self.fields['type_obj'].choices = [('', ''), (1, "VIP"), (2, "Pool"), (3, "VLAN"), (4, "IPv4")]
-
-        self.fields['obj'].choices = [(obj["id"], obj["nome"]) for obj in objects]
-        self.fields['obj'].choices.insert(0, ('', ''))
-
-        self.fields['group'].choices = [(group["id"], group["nome"]) for group in groups]
-        self.fields['group'].choices.insert(0, ('', ''))
-
-    type_obj = forms.ChoiceField(
-        label=u'Tipo de Objeto',
-        required=True,
-        error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "width: 300px",
-            'class': 'select2'}))
-
-    obj = forms.ChoiceField(
-        label=u'Objeto',
-        required=True,
-        error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "width: 300px",
-            'class': 'select2',
-            'disabled': 'disabled'}))
-
-    group = forms.ChoiceField(
-        label=u'Grupo de Usuários',
-        required=True,
-        error_messages=error_messages,
-        widget=forms.Select(attrs={
-            "style": "width: 300px",
-            'class': 'select2'
-        }))
-
-    read = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
-    write = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
-    change_config = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
-    delete = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
-
-
 class DeletePermsForm(forms.Form):
     ids_perms = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
 
@@ -127,3 +125,10 @@ class DeletePermsForm(forms.Form):
     id_type_obj = forms.IntegerField(widget=forms.HiddenInput, label='', required=False)
 
     id_obj = forms.IntegerField(widget=forms.HiddenInput, label='', required=False)
+
+
+class HiddenIdsPermsForm(forms.Form):
+
+    id_ugroup = forms.IntegerField(widget=forms.HiddenInput, label='', required=False)
+
+    id_type_obj = forms.IntegerField(widget=forms.HiddenInput, label='', required=False)
