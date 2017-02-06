@@ -573,6 +573,8 @@ def ajax_get_individual_permissions(request, id_ugroup, id_type_obj):
             lists = dict()
             lists['id_ugroup'] = id_ugroup
             lists['id_type_obj'] = id_type_obj
+            lists['type_obj'] = client.create_api_object_type().get(
+                [id_type_obj])['ots'][0]['name']
 
             # Returns JSON
             return dtp.build_response(

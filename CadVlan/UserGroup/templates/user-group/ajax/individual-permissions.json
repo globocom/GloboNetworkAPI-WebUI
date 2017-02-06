@@ -12,7 +12,15 @@
           "<div class='text_center'> {% if item.write %}<span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %}<span class='ui-icon ui-icon-close text_center' title='NÃO'></span>  {% endif %}</div>",
           "<div class='text_center'> {% if item.change_config %}<span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %}<span class='ui-icon ui-icon-close text_center' title='NÃO'></span>  {% endif %}</div>",
           "<div class='text_center'> {% if item.delete %}<span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %}<span class='ui-icon ui-icon-close text_center' title='NÃO'></span>  {% endif %}</div>",
-              "<div class='text_center'><a href='{% url user-group-individual-perms.edit requestVar.id_ugroup requestVar.id_type_obj item.object_value %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar'>Editar</a></div>"
+
+          {% if requestVar.type_obj == "VipRequest" %}
+          "<div class='text_center'><a href='{% url user-group-individual-perms.edit requestVar.id_ugroup requestVar.id_type_obj item.object_value %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar Permissão'></a><a href='{% url vip-request.edit item.object_value %}' style='width: 20px; height: 20px;' class='btn_manager' title='Editar Objeto'>Editar Objeto</a></div>"
+          {% elif requestVar.type_obj == "ServerPool" %}
+          "<div class='text_center'><a href='{% url user-group-individual-perms.edit requestVar.id_ugroup requestVar.id_type_obj item.object_value %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar Permissão'></a><a href='{% url pool.manage.tab1 item.object_value %}' style='width: 20px; height: 20px;' class='btn_manager' title='Editar Objeto'>Editar Objeto</a></div>"
+          {% elif requestVar.type_obj == "Vlan" %}
+          "<div class='text_center'><a href='{% url user-group-individual-perms.edit requestVar.id_ugroup requestVar.id_type_obj item.object_value %}' style='width: 20px; height: 20px;' class='btn_edit' title='Editar Permissão'>EP</a><a href='{% url vlan.edit.by.id item.object_value 0 0 0 0 0 0 0 0 0 %}' style='width: 20px; height: 20px;' class='btn_manager' title='Editar Objeto'>EO</a></div>"
+          {% endif %}
+
 
       ]
       {% if not forloop.last %}

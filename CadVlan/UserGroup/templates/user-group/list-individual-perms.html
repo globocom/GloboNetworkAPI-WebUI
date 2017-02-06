@@ -36,6 +36,22 @@
                 "bAutoWidth": false,
                 "bJQueryUI": true,
                 "bFilter": false,
+                "fnServerData": function ( sSource, aoData, fnCallback, oSettings ) {
+                    oSettings.jqXHR = $.ajax({
+                       "dataType": 'json',
+                       "type": "GET",
+                       "url": sSource,
+                       "data": aoData,
+                       "success": fnCallback,
+                       "error": function(error){
+                            message = jQuery.parseJSON(error.responseText);
+			   		        addMessage(message);
+			            }
+                    }).done(function() {
+                         $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+                         $(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false                      });
+                    });
+                },
                 "sPaginationType": "full_numbers",
                 "iDisplayLength": {% max_results %},
                 "aoColumnDefs": [{"bSortable": false, "aTargets": [0,1,2,3,4,5,6]}]
@@ -47,8 +63,10 @@
 		location.reload();
 	});
 
-            $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
-	        $(".btn_edit", individual_perms.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
+            //$(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false });
+
+            //$(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+	        //$(".btn_edit", individual_perms.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-pencil"}, text: false });
 
             $("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 		location.href = "{% url user-group-individual-perms.create %}";
