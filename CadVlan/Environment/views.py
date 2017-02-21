@@ -410,6 +410,10 @@ def insert_ambiente(request):
                 max_num_vlan_2 = ambiente_form.cleaned_data.get(
                     'max_num_vlan_2', None)
 
+                vrf_field = 'internal_name'
+                vrf_internal = client.create_api_vrf().get(
+                    [vrf], fields=[vrf_field])['vrfs'][0][vrf_field]
+
                 # Business
                 dict_env = {
                     "id": None,
@@ -426,8 +430,8 @@ def insert_ambiente(request):
                     "min_num_vlan_2": min_num_vlan_2,
                     "max_num_vlan_2": max_num_vlan_2,
                     "default_vrf": int(vrf),
-                    "father_environment": int(father_environment)
-                    if father_environment else None
+                    "father_environment": int(father_environment) if father_environment else None,
+                    'vrf': vrf_internal
                 }
                 client.create_api_environment().create_environment(dict_env)
                 messages.add_message(
@@ -572,6 +576,10 @@ def edit(request, id_environment):
                 max_num_vlan_2 = ambiente_form.cleaned_data.get(
                     'max_num_vlan_2', None)
 
+                vrf_field = 'internal_name'
+                vrf_internal = client.create_api_vrf().get(
+                    [vrf], fields=[vrf_field])['vrfs'][0][vrf_field]
+
                 # Business
                 dict_env = {
                     "id": int(id_env),
@@ -588,7 +596,9 @@ def edit(request, id_environment):
                     "min_num_vlan_2": min_num_vlan_2,
                     "max_num_vlan_2": max_num_vlan_2,
                     "default_vrf": int(vrf),
-                    "father_environment": int(father_environment) if father_environment else None
+                    "father_environment": int(father_environment) if father_environment else None,
+                    'vrf': vrf_internal
+
                 }
                 client.create_api_environment().update_environment(dict_env, id_env)
 
