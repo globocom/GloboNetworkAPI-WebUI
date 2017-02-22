@@ -57,7 +57,6 @@ logger = logging.getLogger(__name__)
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def list_all(request):
-
     try:
 
         lists = dict()
@@ -84,7 +83,6 @@ def list_all(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def remove_environment(request):
-
     if request.method == 'POST':
 
         form = DeleteForm(request.POST)
@@ -220,7 +218,6 @@ def remove_environment(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def ajax_autocomplete_acl_path(request):
-
     try:
 
         # Get user auth
@@ -246,7 +243,6 @@ def ajax_autocomplete_acl_path(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def add_configuration(request, id_environment):
-
     try:
 
         auth = AuthSession(request.session)
@@ -270,7 +266,6 @@ def add_configuration(request, id_environment):
         context["environment"] = environment
 
         if form.is_valid():
-
             network = form.cleaned_data['network_validate']
             prefix = form.cleaned_data['prefix']
             ip_version = form.cleaned_data['ip_version']
@@ -297,14 +292,14 @@ def add_configuration(request, id_environment):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(templates.ENVIRONMENT_CONFIGURATION_FORM, context, context_instance=RequestContext(request))
+    return render_to_response(templates.ENVIRONMENT_CONFIGURATION_FORM, context,
+                              context_instance=RequestContext(request))
 
 
 @log
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def remove_configuration(request, environment_id, configuration_id):
-
     try:
 
         auth = AuthSession(request.session)
@@ -335,7 +330,6 @@ def remove_configuration(request, environment_id, configuration_id):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_ambiente(request):
-
     try:
         lists = dict()
         config_forms = list()
@@ -410,9 +404,7 @@ def insert_ambiente(request):
                 max_num_vlan_2 = ambiente_form.cleaned_data.get(
                     'max_num_vlan_2', None)
 
-                vrf_field = 'internal_name'
-                vrf_internal = client.create_api_vrf().get(
-                    [vrf], fields=[vrf_field])['vrfs'][0][vrf_field]
+                vrf_internal = dict(ambiente_form.fields['vrf'].choices)[int(vrf)]
 
                 # Business
                 dict_env = {
@@ -462,7 +454,6 @@ def insert_ambiente(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def edit(request, id_environment):
-
     try:
         lists = dict()
 
@@ -576,9 +567,7 @@ def edit(request, id_environment):
                 max_num_vlan_2 = ambiente_form.cleaned_data.get(
                     'max_num_vlan_2', None)
 
-                vrf_field = 'internal_name'
-                vrf_internal = client.create_api_vrf().get(
-                    [vrf], fields=[vrf_field])['vrfs'][0][vrf_field]
+                vrf_internal = dict(ambiente_form.fields['vrf'].choices)[int(vrf)]
 
                 # Business
                 dict_env = {
@@ -622,7 +611,6 @@ def edit(request, id_environment):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_grupo_l3(request):
-
     # If form was submited
     if request.method == 'POST':
 
@@ -724,7 +712,6 @@ def insert_grupo_l3(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_divisao_dc(request):
-
     # If form was submited
     if request.method == 'POST':
 
@@ -829,7 +816,6 @@ def insert_divisao_dc(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_ambiente_logico(request):
-
     # If form was submited
     if request.method == 'POST':
 
