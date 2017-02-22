@@ -412,6 +412,9 @@ def insert_ambiente(request):
 
                 vrf_internal = dict(ambiente_form.fields['vrf'].choices)[int(vrf)]
 
+                if vrf_internal == u'Default' or vrf_internal == 'Default':
+                    vrf_internal = ''
+
                 # Business
                 dict_env = {
                     "id": None,
@@ -576,6 +579,9 @@ def edit(request, id_environment):
                     'max_num_vlan_2', None)
 
                 vrf_internal = dict(ambiente_form.fields['vrf'].choices)[int(vrf)]
+
+                if vrf_internal == u'Default' or vrf_internal == 'Default':
+                    vrf_internal = ''
 
                 # Business
                 dict_env = {
