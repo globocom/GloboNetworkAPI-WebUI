@@ -401,7 +401,9 @@ def edit_form(request, id_server_pool):
 
     try:
 
-        pool = client.create_api_pool().get_pool_details(id_server_pool)['server_pools'][0]
+        pool = client.create_api_pool()\
+            .get([id_server_pool], kind='details',
+                 include=['groups_permissions'])['server_pools'][0]
 
         group_users_list_selected = []
         for group in pool["groups_permissions"]:
@@ -964,7 +966,9 @@ def manage_tab1(request, id_server_pool):
 
         lists = dict()
         lists["id_server_pool"] = id_server_pool
-        pool = client.create_api_pool().get_pool_details(id_server_pool)['server_pools'][0]
+        pool = client.create_api_pool()\
+            .get([id_server_pool], kind='details',
+                 include=['groups_permissions'])['server_pools'][0]
 
         lists["environment"] = pool['environment']['name']
         lists["identifier"] = pool['identifier']
@@ -1047,7 +1051,9 @@ def manage_tab3(request, id_server_pool):
         servicedownaction_choices = facade.populate_servicedownaction_choices(client)
         group_users_list = client.create_grupo_usuario().listar()
 
-        pool = client.create_api_pool().get_pool_details(id_server_pool)['server_pools'][0]
+        pool = client.create_api_pool()\
+            .get([id_server_pool], kind='details',
+                 include=['groups_permissions'])['server_pools'][0]
 
         group_users_list_selected = []
         for group in pool["groups_permissions"]:

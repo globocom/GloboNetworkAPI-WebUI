@@ -206,7 +206,9 @@ def ajax_shared_view_vip(request, id_vip, lists):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        lists['vip'] = vip = client.create_api_vip_request().get(ids=[id_vip], kind='details').get('vips')[0]
+        lists['vip'] = vip = client.create_api_vip_request()\
+            .get(ids=[id_vip], kind='details',
+                 include=['groups_permissions']).get('vips')[0]
 
         # apenas reals
         reals = []
@@ -1192,7 +1194,9 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         if external:
             lists['token'] = form_acess.initial.get("token")
 
-        vip = client_api.create_api_vip_request().get(ids=[id_vip], kind='details')['vips'][0]
+        vip = client_api.create_api_vip_request()\
+            .get(ids=[id_vip], kind='details',
+                 include=['groups_permissions'])['vips'][0]
 
         group_users_list_selected = []
         for group in vip["groups_permissions"]:
