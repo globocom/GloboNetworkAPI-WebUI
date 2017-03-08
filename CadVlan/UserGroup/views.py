@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,27 +13,62 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.UserGroup.forms import UserGroupForm, PermissionGroupForm
-from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.utility import convert_string_to_boolean, convert_boolean_to_int, validates_dict
-from CadVlan.forms import DeleteForm, DeleteFormAux
-from CadVlan.messages import error_messages, user_group_messages, perm_group_messages
-from CadVlan.permissions import ADMINISTRATION
-from CadVlan.templates import USERGROUP_LIST
-from CadVlan.settings import PATH_PERMLISTS
-from django.contrib import messages
-from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response, redirect
-from django.template.context import RequestContext
-from networkapiclient.exception import NetworkAPIClientError, PermissaoAdministrativaDuplicadaError
+import codecs
 import logging
 import re
-import codecs
 
+from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseServerError
+from django.shortcuts import redirect
+from django.shortcuts import render
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
+from networkapiclient.exception import InvalidParameterError
+from networkapiclient.exception import NetworkAPIClientError
+from networkapiclient.exception import PermissaoAdministrativaDuplicadaError
+from networkapiclient.Pagination import Pagination
+
+from CadVlan import templates
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.constants import SERVERPOOL_OBJ_TYPE
+from CadVlan.constants import VIPREQUEST_OBJ_TYPE
+from CadVlan.constants import VLAN_OBJ_TYPE
+from CadVlan.forms import DeleteForm
+from CadVlan.forms import DeleteFormAux
+from CadVlan.messages import error_messages
+from CadVlan.messages import object_group_perm_gen_messages
+from CadVlan.messages import object_group_perm_messages
+from CadVlan.messages import perm_group_messages
+from CadVlan.messages import user_group_messages
+from CadVlan.Net.business import is_valid_ipv4
+from CadVlan.Net.business import is_valid_ipv6
+from CadVlan.permissions import ADMINISTRATION
+from CadVlan.settings import PATH_PERMLISTS
+from CadVlan.templates import USERGROUP_AJAX_INDIVIDUAL_PERMISSIONS
+from CadVlan.templates import USERGROUP_AJAX_OBJECTS
+from CadVlan.templates import USERGROUP_CREATE_INDIVIDUAL_PERMS
+from CadVlan.templates import USERGROUP_EDIT_GENERAL_PERMS
+from CadVlan.templates import USERGROUP_EDIT_INDIVIDUAL_PERMS
+from CadVlan.templates import USERGROUP_INDIVIDUAL_PERMS
+from CadVlan.templates import USERGROUP_LIST
+from CadVlan.UserGroup import facade
+from CadVlan.UserGroup.forms import DeletePermsForm
+from CadVlan.UserGroup.forms import GeneralPermsGroupUserEditForm
+from CadVlan.UserGroup.forms import HiddenIdsPermsForm
+from CadVlan.UserGroup.forms import IndividualPermsGroupUserCreateForm
+from CadVlan.UserGroup.forms import IndividualPermsGroupUserEditForm
+from CadVlan.UserGroup.forms import PermissionGroupForm
+from CadVlan.UserGroup.forms import UserGroupForm
+from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import has_perm
+from CadVlan.Util.Decorators import log
+from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.shortcuts import render_message_json
+from CadVlan.Util.utility import convert_boolean_to_int
+from CadVlan.Util.utility import convert_string_to_boolean
+from CadVlan.Util.utility import DataTablePaginator
+from CadVlan.Util.utility import validates_dict
 logger = logging.getLogger(__name__)
 
 
@@ -64,7 +98,7 @@ def parse_cad_perms(filename):
 
             api_data = re.search(
                 '\tapi:\n((?:\t[a-zA-Z]+\n\t[a-zA-Z0-9_\(\)]+\n(?:\t\t[a-zA-Z_]+\n\t\t(?:Leitura|Escrita)\n\t\t(?:True|False)\n\t\t(?:None|Leitura|Escrita|Update_Config)\n)*)+)', resto, re.MULTILINE)
-            if api_data != None:
+            if api_data is not None:
 
                 permcadvlan['api_calls'] = list()
                 api_data = api_data.group(1)
@@ -135,6 +169,505 @@ def parse_api_perms(filename):
     return apitree
 
 
+def list_individ_perms_of_group_user(request, id_ugroup, id_type_obj):
+
+    lists = dict()
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists['group_name'] = client.create_grupo_usuario().\
+            search(id_ugroup)['user_group']['nome']
+        lists['object_type'] = client.create_api_object_type().\
+            get([id_type_obj])['ots'][0]['name']
+
+        lists['id_ugroup'] = id_ugroup
+        lists['id_type_obj'] = id_type_obj
+        initial = {'id_ugroup': id_ugroup, 'id_type_obj': id_type_obj}
+        lists['delete_form'] = DeletePermsForm(initial=initial)
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('home')
+
+    return render_to_response(USERGROUP_INDIVIDUAL_PERMS, lists,
+                              context_instance=RequestContext(request))
+
+
+def edit_individ_perms_of_object(request, id_ugroup, id_type_obj, id_obj):
+
+    try:
+        lists = {}
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists['id_ugroup'] = id_ugroup
+        lists['id_type_obj'] = id_type_obj
+        lists['id_obj'] = id_obj
+
+        type_obj = client.create_api_object_type().get(
+            [int(id_type_obj)])['ots'][0]['name']
+
+        if type_obj == VIPREQUEST_OBJ_TYPE:
+            obj_name = facade.get_vips_request(client, None,
+                                               None, id_obj)['objs'][0]['name']
+
+        elif type_obj == SERVERPOOL_OBJ_TYPE:
+            obj_name = facade.get_server_pools(client, None,
+                                               None, id_obj)['objs'][0]['identifier']
+
+        elif type_obj == VLAN_OBJ_TYPE:
+            obj_name = facade.get_vlans(client, None,
+                                        None, id_obj)['objs'][0]['name']
+
+        lists['object_name'] = obj_name
+
+        if request.method == 'POST':
+
+            lists['group_name'] = client.create_grupo_usuario(). \
+                search(id_ugroup)['user_group']['nome']
+            lists['object_type'] = client.create_api_object_type(). \
+                get([id_type_obj])['ots'][0]['name']
+
+            form_individ_group_perms = \
+                IndividualPermsGroupUserEditForm(request.POST)
+            lists['form_individ_perms_group_user'] = form_individ_group_perms
+
+            if form_individ_group_perms.is_valid():
+                id = form_individ_group_perms.cleaned_data['id']
+                read = form_individ_group_perms.cleaned_data['read']
+                write = form_individ_group_perms.cleaned_data['write']
+                change_config = form_individ_group_perms.\
+                    cleaned_data['change_config']
+                delete = form_individ_group_perms.cleaned_data['delete']
+
+                data = {
+                    'id': id,
+                    'read': read,
+                    'write': write,
+                    'change_config': change_config,
+                    'delete': delete
+                }
+
+                client.create_api_object_group_permission().update([data])
+
+                messages.add_message(request, messages.SUCCESS,
+                                     object_group_perm_messages.get("success_edit"))
+
+                return redirect('user-group.list-perms-obj', id_ugroup, id_type_obj)
+
+        else:
+
+            data_search = {
+                'start_record': 0,
+                'end_record': 25,
+                'asorting_cols': [],
+                'searchable_columns': [],
+                'extends_search': [{
+                    'user_group': id_ugroup,
+                    'object_type': id_type_obj,
+                    'object_value': id_obj
+
+                }]
+            }
+            kind = ['basic']
+            fields = ['id', 'read', 'write', 'change_config', 'delete',
+                      'user_group__details', 'object_type__details']
+
+            try:
+                perms = client.create_api_object_group_permission()\
+                    .search(search=data_search, kind=kind, fields=fields)['ogps'][0]
+            except IndexError:
+                raise NetworkAPIClientError(u'Permission not found')
+
+            lists['group_name'] = perms['user_group']['name']
+            lists['object_type'] = perms['object_type']['name']
+
+            lists['form_individ_perms_group_user'] = \
+                IndividualPermsGroupUserEditForm(initial=perms)
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('home')
+
+    return render_to_response(USERGROUP_EDIT_INDIVIDUAL_PERMS, lists,
+                              context_instance=RequestContext(request))
+
+
+def edit_gen_perms_of_type_obj(request, id_ugroup, id_type_obj):
+
+    try:
+        lists = {}
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists['id_ugroup'] = id_ugroup
+        lists['id_type_obj'] = id_type_obj
+
+        if request.method == 'POST':
+
+            lists['group_name'] = client.create_grupo_usuario(). \
+                search(id_ugroup)['user_group']['nome']
+            lists['object_type'] = client.create_api_object_type(). \
+                get([id_type_obj])['ots'][0]['name']
+
+            form_gen_group_perms = GeneralPermsGroupUserEditForm(request.POST)
+            lists['form_gen_perms_group_user'] = form_gen_group_perms
+
+            if form_gen_group_perms.is_valid():
+                id = form_gen_group_perms.cleaned_data['id']
+                read = form_gen_group_perms.cleaned_data['read']
+                write = form_gen_group_perms.cleaned_data['write']
+                change_config = form_gen_group_perms.\
+                    cleaned_data['change_config']
+                delete = form_gen_group_perms.cleaned_data['delete']
+
+                data = {
+                    'read': read,
+                    'write': write,
+                    'change_config': change_config,
+                    'delete': delete
+                }
+
+                if id is not None:
+                    data['id'] = id
+                    client.create_api_object_group_permission_general().\
+                        update([data])
+
+                else:
+                    data['user_group'] = int(id_ugroup)
+                    data['object_type'] = int(id_type_obj)
+
+                    client.create_api_object_group_permission_general().\
+                        create([data])
+
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     object_group_perm_gen_messages.get("success_edit"))
+
+                return redirect('user-group.list', id_ugroup, 1)
+
+        else:
+
+            data_search = {
+                'start_record': 0,
+                'end_record': 25,
+                'asorting_cols': [],
+                'searchable_columns': [],
+                'extends_search': [{
+                    'user_group': id_ugroup,
+                    'object_type': id_type_obj,
+                }]
+            }
+            kind = ['basic']
+            fields = ['id', 'read', 'write', 'change_config', 'delete',
+                      'user_group__details', 'object_type__details']
+
+            try:
+                perms = client.create_api_object_group_permission_general() \
+                    .search(search=data_search, kind=kind, fields=fields)['ogpgs'][0]
+
+                lists['group_name'] = perms['user_group']['name']
+                lists['object_type'] = perms['object_type']['name']
+
+                lists['form_gen_perms_group_user'] = \
+                    GeneralPermsGroupUserEditForm(initial=perms)
+
+            except IndexError:
+                lists['group_name'] = client.create_grupo_usuario(). \
+                    search(id_ugroup)['user_group']['nome']
+                lists['object_type'] = client.create_api_object_type(). \
+                    get([id_type_obj])['ots'][0]['name']
+
+                lists['form_gen_perms_group_user'] = \
+                    GeneralPermsGroupUserEditForm()
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('home')
+
+    return render_to_response(USERGROUP_EDIT_GENERAL_PERMS, lists,
+                              context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
+def create_individ_perms_of_object(request):
+
+    try:
+
+        lists = dict()
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        group_users = client.create_grupo_usuario().listar()['user_group']
+
+        object_types = client.create_api_object_type().search()['ots']
+
+        fields = {
+            'user_group': group_users,
+            'object_type': object_types
+        }
+
+        if request.method == 'POST':
+
+            form_individ_group_perms = \
+                IndividualPermsGroupUserCreateForm(fields, request.POST)
+            lists['form_individ_perms_group_user'] = form_individ_group_perms
+
+            lists['form_hidden_ids'] = HiddenIdsPermsForm(request.POST)
+
+            if form_individ_group_perms.is_valid():
+                read = form_individ_group_perms.cleaned_data['read']
+                write = form_individ_group_perms.cleaned_data['write']
+                change_config = form_individ_group_perms.\
+                    cleaned_data['change_config']
+                delete = form_individ_group_perms.cleaned_data['delete']
+
+                user_group = form_individ_group_perms.cleaned_data['user_group']
+                object_type = form_individ_group_perms.cleaned_data['object_type']
+                object_value = form_individ_group_perms.cleaned_data['id_obj']
+
+                data = {
+                    'user_group': int(user_group),
+                    'object_type': int(object_type),
+                    'object_value': int(object_value),
+                    'read': read,
+                    'write': write,
+                    'change_config': change_config,
+                    'delete': delete
+                }
+
+                client.create_api_object_group_permission().create([data])
+
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     object_group_perm_messages.get("success_create"))
+
+                return redirect('user-group.list-perms-obj', user_group, object_type)
+
+        else:
+            id_ugroup = group_users[0]['id']
+            id_type_obj = object_types[0]['id']
+
+            initial_form = {
+                'user_group': int(id_ugroup),
+                'object_type': int(id_type_obj)
+            }
+
+            lists['form_individ_perms_group_user'] = IndividualPermsGroupUserCreateForm(
+                fields, initial=initial_form)
+
+            initial_ids = {
+                'id_ugroup': int(id_ugroup),
+                'id_type_obj': int(id_type_obj)
+            }
+
+            lists['form_hidden_ids'] = HiddenIdsPermsForm(initial=initial_ids)
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(USERGROUP_CREATE_INDIVIDUAL_PERMS, lists,
+                              context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
+def delete_individ_perms_of_object(request):
+
+    try:
+        if request.method == 'POST':
+
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            form = DeletePermsForm(request.POST)
+
+            if form.is_valid():
+
+                ids_perms = split_to_array(form.cleaned_data['ids_perms'])
+
+                id_ugroup = form.cleaned_data['id_ugroup']
+                id_type_obj = form.cleaned_data['id_type_obj']
+
+                client.create_api_object_group_permission().delete(ids_perms)
+
+                messages.add_message(
+                    request, messages.SUCCESS, object_group_perm_messages.
+                    get('success_delete'))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('user-group.list-perms-obj', id_ugroup, id_type_obj)
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
+def ajax_get_individual_permissions(request, id_ugroup, id_type_obj):
+
+    try:
+        # If form was submited
+        if request.method == "GET":
+
+            # Get user auth
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            column_index_name_map = {
+                0: '',
+                1: 'id',
+                2: 'read',
+                3: 'write',
+                4: 'change_config',
+                5: 'delete',
+                6: ''
+            }
+
+            dtp = DataTablePaginator(request, column_index_name_map)
+
+            # Make params
+            dtp.build_server_side_list()
+
+            # Set params in simple Pagination class
+            pagination = Pagination(
+                dtp.start_record,
+                dtp.end_record,
+                dtp.asorting_cols,
+                dtp.searchable_columns,
+                dtp.custom_search)
+
+            data_search = {
+                'start_record': pagination.start_record,
+                'end_record': pagination.end_record,
+                'asorting_cols': pagination.asorting_cols,
+                'searchable_columns': pagination.searchable_columns,
+                'custom_search': pagination.custom_search,
+                'extends_search': [{
+                    'user_group': int(id_ugroup),
+                    'object_type': int(id_type_obj)
+                }]
+            }
+
+            kind = ['basic']
+            fields = ['id', 'read', 'write', 'change_config', 'delete',
+                      'object_value']
+
+            perms = client. \
+                create_api_object_group_permission(). \
+                search(search=data_search, kind=kind, fields=fields)
+            lists = dict()
+            lists['id_ugroup'] = id_ugroup
+            lists['id_type_obj'] = id_type_obj
+            lists['type_obj'] = client.create_api_object_type().get(
+                [id_type_obj])['ots'][0]['name']
+
+            # Returns JSON
+            return dtp.build_response(
+                perms['ogps'],
+                perms['total'],
+                USERGROUP_AJAX_INDIVIDUAL_PERMISSIONS,
+                request,
+                lists
+            )
+
+    except NetworkAPIClientError, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
+    except BaseException, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
+def ajax_get_objects(request):
+
+    try:
+
+        # If form was submited
+        if request.method == "GET":
+
+            # Get user auth
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            column_index_name_map = {
+                0: '',
+                1: 'id',
+                2: 'name'
+            }
+
+            dtp = DataTablePaginator(request, column_index_name_map)
+
+            # Make params
+            dtp.build_server_side_list()
+
+            # Set params in simple Pagination class
+            pagination = Pagination(
+                dtp.start_record,
+                dtp.end_record,
+                dtp.asorting_cols,
+                dtp.searchable_columns,
+                dtp.custom_search)
+
+            auth = AuthSession(request.session)
+            client = auth.get_clientFactory()
+
+            search = request.GET.get('search')
+
+            if not search:
+                raise Exception(u'Empty search')
+
+            id_type_obj = [request.GET.get('id_type_obj')]
+
+            type_obj = client.create_api_object_type(). \
+                get(id_type_obj)['ots'][0]['name']
+
+            lists = dict()
+            if type_obj == VIPREQUEST_OBJ_TYPE:
+                objs = facade.get_vips_request(client, search, pagination, None)
+
+            elif type_obj == SERVERPOOL_OBJ_TYPE:
+                objs = facade.get_server_pools(client, search, pagination, None)
+
+            elif type_obj == VLAN_OBJ_TYPE:
+                objs = facade.get_vlans(client, search, pagination, None)
+
+            lists['type_obj'] = type_obj
+
+            # Returns JSON
+            return dtp.build_response(
+                objs['objs'],
+                objs['total'],
+                templates.USERGROUP_AJAX_OBJECTS,
+                request,
+                lists
+            )
+
+    except NetworkAPIClientError, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
+    except BaseException, error:
+        logger.error(error)
+        return HttpResponseServerError(error, mimetype='application/javascript')
+
+
 def load_list(request, lists, id_ugroup, tab):
 
     try:
@@ -143,26 +676,58 @@ def load_list(request, lists, id_ugroup, tab):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        data_search = {
+            'start_record': 0,
+            'end_record': 25,
+            'asorting_cols': [],
+            'searchable_columns': [],
+            'extends_search': [{
+                'user_group': id_ugroup
+
+            }]
+        }
+        kind = ['details']
+        fields = ['id', 'read', 'write', 'change_config', 'delete',
+                  'user_group', 'object_type__details']
+        lists['object_perms'] = client.\
+            create_api_object_group_permission_general().\
+            search(search=data_search, kind=kind, fields=fields)['ogpgs']
+
+        fields = ['id', 'name']
+
+        ots = map(lambda x: x['object_type'], lists['object_perms'])
+
+        ots_all = client.create_api_object_type().search(fields=fields)['ots']
+
+        for ot in ots_all:
+            if ot not in ots:
+                perm_fake = {'change_config': False, 'read': False, 'write': False,
+                             'user_group': False, 'delete': False}
+                perm_fake['object_type'] = ot
+                perm_fake['id'] = ot['id']
+                lists['object_perms'].append(perm_fake)
+
         lists['users'] = validates_dict(
             client.create_usuario().list_by_group(id_ugroup), 'users')
 
-        if not 'ugroup' in lists:
+        if 'ugroup' not in lists:
             lists['ugroup'] = client.create_grupo_usuario().search(
                 id_ugroup).get('user_group')
 
-        if not 'form_users' in lists:
+        if 'form_users' not in lists:
             lists['form_users'] = UserGroupForm(
                 client.create_usuario().list_by_group_out(id_ugroup))
 
         lists['perms'] = validates_dict(
-            client.create_permissao_administrativa().list_by_group(id_ugroup), 'perms')
+            client.create_permissao_administrativa().list_by_group(id_ugroup),
+            'perms')
 
-        if not 'form_perms' in lists:
+        if 'form_perms' not in lists:
             function_list = validates_dict(
                 client.create_permission().list_all(), 'perms')
             lists['form_perms'] = PermissionGroupForm(function_list)
 
-        if not 'action_edit_perms' in lists:
+        if 'action_edit_perms' not in lists:
             lists['action_edit_perms'] = reverse(
                 "user-group-perm.form", args=[id_ugroup])
 
@@ -183,6 +748,10 @@ def load_list(request, lists, id_ugroup, tab):
         messages.add_message(request, messages.ERROR, e)
 
     return lists
+
+
+def convert_array(a):
+    return a['object_type']
 
 
 @log
@@ -245,7 +814,7 @@ def delete_user(request, id_ugroup):
                 messages.add_message(request, messages.WARNING, msg)
 
             # If all has ben removed
-            elif have_errors == False:
+            elif have_errors is False:
                 messages.add_message(
                     request, messages.SUCCESS, user_group_messages.get("success_remove"))
 
@@ -308,7 +877,7 @@ def add_form_user(request, id_ugroup):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    lists = load_list(request, lists,  id_ugroup, '0')
+    lists = load_list(request, lists, id_ugroup, '0')
 
     return render_to_response(USERGROUP_LIST, lists, context_instance=RequestContext(request))
 
@@ -367,7 +936,7 @@ def delete_perm(request, id_ugroup):
                 messages.add_message(request, messages.WARNING, msg)
 
             # If all has ben removed
-            elif have_errors == False:
+            elif have_errors is False:
                 messages.add_message(
                     request, messages.SUCCESS, perm_group_messages.get("success_remove"))
 
@@ -427,7 +996,7 @@ def add_form_perm(request, id_ugroup):
         messages.add_message(request, messages.ERROR, e)
 
     lists['open_form'] = str(True)
-    lists = load_list(request, lists,  id_ugroup, '1')
+    lists = load_list(request, lists, id_ugroup, '1')
 
     return render_to_response(USERGROUP_LIST, lists, context_instance=RequestContext(request))
 
@@ -489,6 +1058,6 @@ def edit_form_perm(request, id_ugroup, id_perm):
         messages.add_message(request, messages.ERROR, e)
 
     lists['open_form'] = str(True)
-    lists = load_list(request, lists,  id_ugroup, '1')
+    lists = load_list(request, lists, id_ugroup, '1')
 
     return render_to_response(USERGROUP_LIST, lists, context_instance=RequestContext(request))

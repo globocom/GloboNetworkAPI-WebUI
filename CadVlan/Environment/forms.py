@@ -106,7 +106,7 @@ class AmbienteForm(forms.Form):
                 env['nome_ambiente_logico'],
                 env['nome_grupo_l3'])) for env in envs]
         self.fields['father_environment'].choices.insert(0, ('', '--------'))
-        self.fields['vrf'].choices = [(vrf["id"], '%s' % (vrf["vrf"])) for vrf in vrfs]
+        self.fields['vrf'].choices = [(vrf['id'], '%s' % (vrf['internal_name'])) for vrf in vrfs]
         self.fields['vrf'].choices.insert(0, ('', '--------'))
 
     id_env = forms.IntegerField(
