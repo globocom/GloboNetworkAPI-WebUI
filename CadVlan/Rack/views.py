@@ -23,7 +23,7 @@ from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, InvalidParameterError, NetworkAPIClientError, NumeroRackDuplicadoError
 from django.contrib import messages
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.templates import RACK_EDIT, RACK_FORM, RACK_VIEW_AJAX
+from CadVlan.templates import RACK_EDIT, RACK_FORM, RACK_VIEW_AJAX, DC_FORM, DCROOM_FORM, DCROOM_ENV_FORM, DCROOM_VLANS_FORM, DCROOM_BGP_FORM, MENU
 from django.template.context import RequestContext
 from CadVlan.Rack.forms import RackForm
 from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
@@ -31,6 +31,7 @@ from django.shortcuts import render_to_response, redirect
 from CadVlan.messages import error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm, AlocarForm
+from django.views.decorators.csrf import csrf_protect
 
 
 logger = logging.getLogger(__name__)
@@ -486,3 +487,157 @@ def rack_deploy(request):
         rack_config_delete(request, client, form, 'APLICAR')
 
     return redirect("ajax.view.rack")
+
+
+
+#################################################################################   DC
+
+
+def menu(request):
+    return render_to_response(MENU, {'form': {}}, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
+@csrf_protect
+def dc_cadastro(request):
+
+    try:
+
+        lists = dict()
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        #raise Exception ("ok")
+        #if request.method == 'GET':
+
+            #cadastro no nome e local do dc (chama outras funções)
+
+        if request.method == 'POST':
+            #raise Exception (request)
+            #inserir o datacenter na tabela
+            #direcionar pra pagina do room
+            return redirect("dcroom.cadastro")
+
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    return render_to_response(DC_FORM, {'form': {}}, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
+@csrf_protect
+def dcroom_cadastro(request):
+
+    try:
+
+        lists = dict()
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        #raise Exception ("ok")
+        #if request.method == 'GET':
+
+            #cadastro no nome e local do dc (chama outras funções)
+
+        if request.method == 'POST':
+            #raise Exception (request)
+            #inserir o datacenter na tabela
+            #direcionar pra pagina do room
+            return redirect("dcroom.ambiente")
+
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    return render_to_response(DCROOM_FORM, {'form': {}}, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
+@csrf_protect
+def dcroom_ambiente(request):
+
+    try:
+
+        lists = dict()
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        #raise Exception ("ok")
+        #if request.method == 'GET':
+
+            #cadastro no nome e local do dc (chama outras funções)
+
+        if request.method == 'POST':
+            #raise Exception (request)
+            #inserir o datacenter na tabela
+            #direcionar pra pagina do room
+            return redirect("dcroom.vlans")
+
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    return render_to_response(DCROOM_ENV_FORM, {'form': {}}, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
+@csrf_protect
+def dcroom_vlans(request):
+
+    try:
+
+        lists = dict()
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        #raise Exception ("ok")
+        #if request.method == 'GET':
+
+            #cadastro no nome e local do dc (chama outras funções)
+
+        if request.method == 'POST':
+            #raise Exception (request)
+            #inserir o datacenter na tabela
+            #direcionar pra pagina do room
+            return redirect("dcroom.bgp")
+
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    return render_to_response(DCROOM_VLANS_FORM, {'form': {}}, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
+@csrf_protect
+def dcroom_bgp(request):
+
+    try:
+
+        lists = dict()
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        #raise Exception ("ok")
+        #if request.method == 'GET':
+
+            #cadastro no nome e local do dc (chama outras funções)
+
+        #if request.method == 'POST':
+            #raise Exception (request)
+            #inserir o datacenter na tabela
+            #direcionar pra pagina do room
+            #return redirect("dcroom.vlans")
+
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    return render_to_response(DCROOM_BGP_FORM, {'form': {}}, context_instance=RequestContext(request))
