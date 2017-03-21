@@ -705,12 +705,13 @@ urlpatterns += patterns(
     url('^rack/alocar[/]?$', 'rack_alocar', name='rack.alocar',),
     url('^rack/save/deploy[/]?$', 'rack_deploy', name='rack.deploy',),
     url('^datacenter/cadastro[/]?$', 'dc_cadastro', name='dc.cadastro',),
+    url('^datacenterroom/cadastro/(?P<dc_id>\d+)[/]?$', 'dcroom_cadastro', name='dcroom.cadastro',),
     url('^datacenterroom/cadastro[/]?$', 'dcroom_cadastro', name='dcroom.cadastro',),
+    url('^datacenterroom/ambientes/(?P<dcroom_id>\d+)[/][/]?$', 'dcroom_ambiente', name='dcroom.ambiente',),
     url('^datacenterroom/ambientes[/]?$', 'dcroom_ambiente', name='dcroom.ambiente',),
     url('^datacenterroom/vlans[/]?$', 'dcroom_vlans', name='dcroom.vlans',),
     url('^datacenterroom/bgp[/]?$', 'dcroom_bgp', name='dcroom.bgp',),
     url('^menu[/]?$', 'menu', name='menu',),
-
 )
 
 # URL's System

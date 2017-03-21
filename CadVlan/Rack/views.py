@@ -19,6 +19,7 @@
 import logging
 
 from CadVlan.Util.Decorators import log, login_required, has_perm
+from django.core.urlresolvers import reverse
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, InvalidParameterError, NetworkAPIClientError, NumeroRackDuplicadoError
 from django.contrib import messages
@@ -32,6 +33,7 @@ from CadVlan.messages import error_messages, rack_messages
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm, AlocarForm
 from django.views.decorators.csrf import csrf_protect
+from django.http import HttpResponseRedirect
 
 
 logger = logging.getLogger(__name__)
@@ -505,21 +507,19 @@ def dc_cadastro(request):
 
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        #raise Exception ("ok")
-        #if request.method == 'GET':
-
-            #cadastro no nome e local do dc (chama outras funções)
-
         if request.method == 'POST':
-            #raise Exception (request)
-            #inserir o datacenter na tabela
-            #direcionar pra pagina do room
-            return redirect("dcroom.cadastro")
 
+            dc = dict()
+            dc['dcname'] = request.POST.get('name')
+            dc['address'] = request.POST.get('address')
+
+            newdc = client.create_apirack().save_dc(dc)
+            id = newdc.get('dc').get('id')
+
+            return HttpResponseRedirect(reverse('dcroom.cadastro', args=[id]))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -530,36 +530,43 @@ def dc_cadastro(request):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
 @csrf_protect
-def dcroom_cadastro(request):
+def dcroom_cadastro(request, dc_id=None):
 
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        #raise Exception ("ok")
-        #if request.method == 'GET':
+        lists = dict()
 
-            #cadastro no nome e local do dc (chama outras funções)
+        if request.method == 'GET':
+            lists['dc_id'] = dc_id
 
         if request.method == 'POST':
-            #raise Exception (request)
-            #inserir o datacenter na tabela
-            #direcionar pra pagina do room
-            return redirect("dcroom.ambiente")
+
+            dcroom = dict()
+            dcroom['dc'] = request.META.get('HTTP_REFERER').split("/")[-1]
+            dcroom['name'] = request.POST.get('dcroomname')
+            dcroom['racks'] = request.POST.get('dcroomspn')
+            dcroom['spines'] = request.POST.get('dcroomrck')
+            dcroom['leafs'] = request.POST.get('dcroomlfs')
+
+            newdcroom = client.create_apirack().save_dcroom(dcroom)
+            id = newdcroom.get('dcroom').get('id')
+
+            return HttpResponseRedirect(reverse('dcroom.ambiente', args=[id]))
 
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(DCROOM_FORM, {'form': {}}, context_instance=RequestContext(request))
+    return render_to_response(DCROOM_FORM, lists, context_instance=RequestContext(request))
 
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
 @csrf_protect
-def dcroom_ambiente(request):
+def dcroom_ambiente(request, dcroom_id=None):
 
     try:
 
@@ -567,15 +574,22 @@ def dcroom_ambiente(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        #raise Exception ("ok")
-        #if request.method == 'GET':
-
-            #cadastro no nome e local do dc (chama outras funções)
+        if request.method == 'GET':
+            lists['dcroom_id'] = dcroom_id
 
         if request.method == 'POST':
-            #raise Exception (request)
-            #inserir o datacenter na tabela
-            #direcionar pra pagina do room
+
+            dcroomenv = dict()
+            dcroomenv['dcroom'] = request.META.get('HTTP_REFERER').split("/")[-1]
+            dcroomenv['name'] = request.POST.get('envname')
+            dcroomenv['racks'] = request.POST.get('vlanname')
+            dcroomenv['spines'] = request.POST.get('ipv4range')
+            dcroomenv['leafs'] = request.POST.get('ipv6range')
+
+            newdcroom = client.create_apirack().save_dcroom(dcroomenv)
+            id = newdcroom.get('dcroom').get('id')
+
+            return HttpResponseRedirect(reverse('dcroom.ambiente', args=[id]))
             return redirect("dcroom.vlans")
 
 

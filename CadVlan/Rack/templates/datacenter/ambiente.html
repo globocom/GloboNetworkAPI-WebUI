@@ -21,31 +21,31 @@
                             <div class="col-xs-12 col-md-12">
                                 <div class="form-group">
                                     <label class="form-control-label" for="form1-5-phone">Nome do Ambiente<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="dcroomspn" data-form-field="dcroom_spn" id="dcroom_form_spn">
+                                    <input type="text" class="form-control" name="envname" data-form-field="dcroom_envname" id="dcroom_form_env">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-md-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="form1-5-phone">Vlans<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="dcroomspn" data-form-field="dcroom_spn" id="dcroom_form_spn">
+                                    <input type="text" class="form-control" name="vlanname" data-form-field="dcroom_vlanname" id="dcroom_form_vlans">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-md-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="form1-5-name">CIDR IPv4<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="dcroomrck" data-form-field="dcroom_rck" id="dcroom_form_rck">
+                                    <input type="text" class="form-control" name="ipv4range" data-form-field="dcroom_ipv4range" id="dcroom_form_v4">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-md-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="form1-5-phone">CIDR IPv6<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="dcroomlfs" data-form-field="dcroom_lfs" id="dcroom_form_lfs">
+                                    <input type="text" class="form-control" name="ipv6range" data-form-field="dcroom_ipv6range" id="dcroom_form_v6">
                                 </div>
                             </div>
                         </div>
                         <br><br><br><br>
                         <div class="text-xs-center">
-                            <a class="btn btn-danger-outline btn-danger" href="{% url dcroom.cadastro %}">Voltar</a>
+                            <a class="btn btn-danger-outline btn-danger" href="{% url dcroom.cadastro 0 %}">Voltar</a>
                             <button type="submit" class="btn btn-success-outline btn-success"> <span class="mbri-plus mbr-iconfont mbr-iconfont-btn"></span></button>
                             <a class="btn btn-success-outline btn-success" href="{% url dcroom.vlans %}">Próximo</a>
                         </div>
