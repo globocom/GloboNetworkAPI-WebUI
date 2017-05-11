@@ -532,7 +532,7 @@ p.lead,
   background-color: #f5f5f5;
   border-radius: 3px;
   box-shadow: none;
-  color: #565656;
+  color: #747474;
   font-size: 0.875rem;
   line-height: 1.43;
   min-height: 3.5em;
@@ -683,7 +683,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   font-size: 17px;
   font-family: "Lora";
   line-height: 26px;
-  color: #8c8c8c;
+  color: #0D84A5;
   margin-bottom: 30px; }
 
 .mbr-section-title + .mbr-section-subtitle {
@@ -1520,7 +1520,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .mbr-subscribe {
   background: #f5f5f5;
   border-radius: 3px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid #ffffff;
   height: 4rem;
   padding: 0;
   position: relative; }

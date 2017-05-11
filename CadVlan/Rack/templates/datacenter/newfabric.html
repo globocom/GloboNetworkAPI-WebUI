@@ -5,7 +5,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12 text-xs-center">
-                    <h3 class="mbr-section-title display-2">Salas</h3>
+                    <h3 class="mbr-section-title display-2">Fabric</h3>
 
                 </div>
             </div>
@@ -15,39 +15,38 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12 col-lg-10 col-lg-offset-1">
-                    <form action="{% url dcroom.cadastro %}" method="post" id="dcroom_form">
+                    <form action="{{action}}" method="post" id="fabric_form">
                         {% csrf_token %}
                         <div class="row row-sm-offset">
                             <div class="col-xs-12 col-md-12">
                                 <div class="form-group">
-                                    <label class="form-control-label" for="form1-5-name">Nome da Sala<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="dcroomname" data-form-field="dcroom_name" id="dcroom_form_name">
+                                    <label class="form-control-label" for="form1-5-name">Nome<span class="form-asterisk">*</span></label>
+                                    <input type="text" class="form-control" name="fabricname" data-form-field="fabric_name" id="fabric_form_name">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-md-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="form1-5-phone">Número de Spines<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="dcroomspn" data-form-field="dcroom_spn" id="dcroom_form_spn">
+                                    <input type="text" class="form-control" name="spn" data-form-field="fabric_spn" id="fabric_form_spn">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-md-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="form1-5-name">Número de Racks<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="dcroomrck" data-form-field="dcroom_rck" id="dcroom_form_rck">
+                                    <input type="text" class="form-control" name="rack" data-form-field="fabric_rck" id="fabric_form_rck">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-md-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="form1-5-phone">Número de Leafs<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="dcroomlfs" data-form-field="dcroom_lfs" id="dcroom_form_lfs">
+                                    <input type="text" class="form-control" name="lfs" data-form-field="fabric_lfs" id="fabric_form_lfs">
                                 </div>
                             </div>
                         </div>
                         <br><br><br><br>
                         <div class="text-xs-center">
                             <a class="btn btn-danger-outline btn-danger" href="{% url dc.cadastro %}">Voltar</a>
-                            <button type="submit" class="btn btn-success-outline btn-success"> <span class="mbri-plus mbr-iconfont mbr-iconfont-btn"></span></button>
-                            <a class="btn btn-success-outline btn-success" href="{% url dcroom.ambiente %}">Próximo</a>
+                            <button type="submit" class="btn btn-success-outline btn-success">Proximo</button>
                         </div>
                     </form>
                 </div>

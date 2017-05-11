@@ -6,52 +6,76 @@
             <div class="row">
                 <div class="col-xs-12 text-xs-center">
                     <h3 class="mbr-section-title display-2">Ambientes</h3>
-
                 </div>
             </div>
         </div>
     </div>
     <div class="mbr-section mbr-section-nopadding">
         <div class="container">
-            <div class="row">
-                <div class="col-xs-12 col-lg-10 col-lg-offset-1">
-                    <form action="{% url dcroom.ambiente %}" method="post" id="dcroom_env_form">
+                    <form action="{{action}}" method="post" id="fabric_env_form">
                         {% csrf_token %}
-                        <div class="row row-sm-offset">
+                        <div class="row form-group">
                             <div class="col-xs-12 col-md-12">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="form1-5-phone">Nome do Ambiente<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="envname" data-form-field="dcroom_envname" id="dcroom_form_env">
+                                <label class="form-control-label" for="form1-5-phone">Nome do Ambiente<span class="form-asterisk">*</span></label>
                                 </div>
+                            <div class="col-xs-12 col-md-4">
+                                <input type="text" class="form-control" name="envnamedc" data-form-field="fabric_envname" id="fabric_form_env" placeholder="BE">
                             </div>
                             <div class="col-xs-12 col-md-4">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="form1-5-phone">Vlans<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="vlanname" data-form-field="dcroom_vlanname" id="dcroom_form_vlans">
-                                </div>
+                                <input type="text" class="form-control" name="envnamelogic" data-form-field="fabric_envname" id="fabric_form_env" placeholder="PRODUCAO">
                             </div>
                             <div class="col-xs-12 col-md-4">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="form1-5-name">CIDR IPv4<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="ipv4range" data-form-field="dcroom_ipv4range" id="dcroom_form_v4">
-                                </div>
+                                <input type="text" class="form-control" name="envnamel3" data-form-field="fabric_envname" id="fabric_form_env" placeholder="FABRIC">
                             </div>
-                            <div class="col-xs-12 col-md-4">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="form1-5-phone">CIDR IPv6<span class="form-asterisk">*</span></label>
-                                    <input type="text" class="form-control" name="ipv6range" data-form-field="dcroom_ipv6range" id="dcroom_form_v6">
-                                </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="form1-5-phone">Filtro</label>
+                                <input type="text" class="form-control" name="envfiltro" data-form-field="fabric_envfiltro" id="fabric_form_filtro" placeholder="Servidores">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="form1-5-phone">Path ACL</label>
+                                <input type="text" class="form-control" name="envpathacl" data-form-field="fabric_envpathacl" id="fabric_form_acl" placeholder="BEACL">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="form1-5-phone">Template ACL</label>
+                                <input type="text" class="form-control" name="envtemplateacl" data-form-field="fabric_envtemplateacl" id="fabric_form_template" placeholder="Template.txt">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="form1-5-phone">VRF<span class="form-asterisk">*</span></label>
+                                <input type="text" class="form-control" name="envvrf" data-form-field="fabric_envvrf" id="fabric_form_vrf" placeholder="BEVrf">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="form1-5-name">Vlans<span class="form-asterisk">*</span></label>
+                                <input type="text" class="form-control" name="vlan" data-form-field="fabric_vlanname" id="fabric_form_vlans" placeholder="1-4096">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="form1-5-name">CIDR IPv4</label>
+                                <input type="text" class="form-control" name="ipv4range" data-form-field="fabric_ipv4range" id="fabric_form_v4" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="form1-5-name">Prefix</label>
+                                <input type="text" class="form-control" name="prefixv4" data-form-field="fabric_prefixv4" id="fabric_form_pfxv4" placeholder="/24">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="form1-5-name">CIDR IPv6 </label>
+                                <input type="text" class="form-control" name="ipv6range" data-form-field="fabric_ipv6range" id="fabric_form_v6" placeholder="2001:0db8:cafe::/118">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="form1-5-name">Prefix</label>
+                                <input type="text" class="form-control" name="prefixv6" data-form-field="fabric_prefixv6" id="fabric_form_pfxv6" placeholder="/120">
                             </div>
                         </div>
                         <br><br><br><br>
                         <div class="text-xs-center">
-                            <a class="btn btn-danger-outline btn-danger" href="{% url dcroom.cadastro 0 %}">Voltar</a>
-                            <button type="submit" class="btn btn-success-outline btn-success"> <span class="mbri-plus mbr-iconfont mbr-iconfont-btn"></span></button>
-                            <a class="btn btn-success-outline btn-success" href="{% url dcroom.vlans %}">Próximo</a>
+                            <a class="btn btn-danger-outline btn-danger" href="{% url fabric.cadastro fabric_id %}">Voltar</a>
+                            <button type="submit" class="btn btn-success-outline btn-success"> + </button>
+                            <a class="btn btn-success-outline btn-success" href="{% url fabric.bgp fabric_id %}">Continuar</a>
                         </div>
                     </form>
-                </div>
-            </div>
+
         </div>
     </div>
 </section>

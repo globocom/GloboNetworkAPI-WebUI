@@ -503,7 +503,7 @@ def menu(request):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
 @csrf_protect
-def dc_cadastro(request):
+def new_datacenter(request):
 
     try:
 
@@ -519,7 +519,7 @@ def dc_cadastro(request):
             newdc = client.create_apirack().save_dc(dc)
             id = newdc.get('dc').get('id')
 
-            return HttpResponseRedirect(reverse('dcroom.cadastro', args=[id]))
+            return HttpResponseRedirect(reverse('fabric.cadastro', args=[id]))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -530,7 +530,7 @@ def dc_cadastro(request):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
 @csrf_protect
-def dcroom_cadastro(request, dc_id=None):
+def new_fabric(request, dc_id):
 
     try:
 
@@ -538,24 +538,23 @@ def dcroom_cadastro(request, dc_id=None):
         client = auth.get_clientFactory()
 
         lists = dict()
-
-        if request.method == 'GET':
-            lists['dc_id'] = dc_id
+        lists['dc_id'] = dc_id
+        lists["action"] = reverse('fabric.cadastro', args=[dc_id])
 
         if request.method == 'POST':
 
-            dcroom = dict()
-            dcroom['dc'] = request.META.get('HTTP_REFERER').split("/")[-1]
-            dcroom['name'] = request.POST.get('dcroomname')
-            dcroom['racks'] = request.POST.get('dcroomspn')
-            dcroom['spines'] = request.POST.get('dcroomrck')
-            dcroom['leafs'] = request.POST.get('dcroomlfs')
+            fabric = dict()
+            fabric['dc'] = request.META.get('HTTP_REFERER').split("/")[-1]
+            fabric['name'] = request.POST.get('fabricname')
+            fabric['racks'] = request.POST.get('spn')
+            fabric['spines'] = request.POST.get('rack')
+            fabric['leafs'] = request.POST.get('lfs')
 
-            newdcroom = client.create_apirack().save_dcroom(dcroom)
-            id = newdcroom.get('dcroom').get('id')
+            newfabric = client.create_apirack().save_fabric(fabric)
+            dc_id = newfabric.get('dcroom').get('id')
+            lists["dc_id"] = dc_id
 
-            return HttpResponseRedirect(reverse('dcroom.ambiente', args=[id]))
-
+            return HttpResponseRedirect(reverse('fabric.ambiente', args=[dc_id]))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -566,92 +565,107 @@ def dcroom_cadastro(request, dc_id=None):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
 @csrf_protect
-def dcroom_ambiente(request, dcroom_id=None):
+def fabric_ambiente(request, fabric_id):
 
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        if request.method == 'GET':
-            lists['dcroom_id'] = dcroom_id
+        lists = dict()
+        lists['fabric_id'] = fabric_id
+        lists["action"] = reverse('fabric.ambiente', args=[fabric_id])
 
         if request.method == 'POST':
+            url = request.META.get('HTTP_REFERER').split("/")
+            fabric_id = url[-1] if url[-1] else url[-2]
+            lists["fabric_id"] = fabric_id
+            ambiente = {
+                'divisao_dc': request.POST.get('envnamedc'),
+                'amb_logico': request.POST.get('envnamelogic'),
+                'amb_l3': request.POST.get('envnamel3'),
+                'filtro': request.POST.get('envfiltro'),
+                'path_acl': request.POST.get('envpathacl'),
+                'template_acl': request.POST.get('envtemplateacl'),
+                'vrf': request.POST.get('envvrf'),
+                'vlan': request.POST.get('vlan'),
+                'ipv4range': request.POST.get('ipv4range'),
+                'prefixv4': request.POST.get('prefixv4'),
+                'ipv4range': request.POST.get('ipv6range'),
+                'prefixv4': request.POST.get('prefixv6')
+            }
+            config = dict()
+            config["Ambiente"] = ambiente
+            config["flag"] = True
+            environment = client.create_apirack().edit_fabric(fabric_id, config)
 
-            dcroomenv = dict()
-            dcroomenv['dcroom'] = request.META.get('HTTP_REFERER').split("/")[-1]
-            dcroomenv['name'] = request.POST.get('envname')
-            dcroomenv['racks'] = request.POST.get('vlanname')
-            dcroomenv['spines'] = request.POST.get('ipv4range')
-            dcroomenv['leafs'] = request.POST.get('ipv6range')
-
-            newdcroom = client.create_apirack().save_dcroom(dcroomenv)
-            id = newdcroom.get('dcroom').get('id')
-
-            return HttpResponseRedirect(reverse('dcroom.ambiente', args=[id]))
-            return redirect("dcroom.vlans")
-
+            return HttpResponseRedirect(reverse('fabric.ambiente', args=[fabric_id]))
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(DCROOM_ENV_FORM, {'form': {}}, context_instance=RequestContext(request))
+    return render_to_response(DCROOM_ENV_FORM, lists, context_instance=RequestContext(request))
+
 
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
 @csrf_protect
-def dcroom_vlans(request):
+def fabric_bgp(request, fabric_id):
 
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        #raise Exception ("ok")
-        #if request.method == 'GET':
+        lists = dict()
+        lists['fabric_id'] = fabric_id
+        lists["action"] = reverse('fabric.bgp', args=[fabric_id])
 
-            #cadastro no nome e local do dc (chama outras funções)
 
         if request.method == 'POST':
-            #raise Exception (request)
-            #inserir o datacenter na tabela
-            #direcionar pra pagina do room
-            return redirect("dcroom.bgp")
+            lists["fabric_id"] = fabric_id
 
+            bgp = {
+                'mpls': request.POST.get('fabricasnmpls'),
+                'spines': request.POST.get('fabricasnspn'),
+                'leafs': request.POST.get('fabricasnlfs')
+            }
+            vlt = {
+                'id_vlt_lf1': request.POST.get('fabricvlt01'),
+                'priority_vlt_lf1': request.POST.get('fabricpriority01'),
+                'id_vlt_lf2': request.POST.get('fabricvlt02'),
+                'priority_vlt_lf2': request.POST.get('fabricpriority02')
+            }
+            telecom = {
+                'rede': request.POST.get('gerenciatelecom'),
+                'vlan': request.POST.get('gerenciavlan')
+            }
+            monitoracao = {
+                'rede': request.POST.get('gerenciamonitoracao'),
+                'vlan': request.POST.get('gerenciamonitvlan')
+            }
+            noc = {
+                'rede': request.POST.get('gerencianoc'),
+                'vlan': request.POST.get('gerencianocvlan')
+            }
+
+            gerencia = dict()
+            gerencia["telecom"] = telecom
+            gerencia["monitoracao"] = monitoracao
+            gerencia["noc"] = noc
+
+            config = dict()
+            config["BGP"] = bgp
+            config["Gerencia"] = gerencia
+            config["VLT"] = vlt
+            config["flag"] = True
+
+            environment = client.create_apirack().edit_fabric(fabric_id, config)
+
+            return render_to_response(DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(DCROOM_VLANS_FORM, {'form': {}}, context_instance=RequestContext(request))
-
-@log
-@login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
-@csrf_protect
-def dcroom_bgp(request):
-
-    try:
-
-        lists = dict()
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        #raise Exception ("ok")
-        #if request.method == 'GET':
-
-            #cadastro no nome e local do dc (chama outras funções)
-
-        #if request.method == 'POST':
-            #raise Exception (request)
-            #inserir o datacenter na tabela
-            #direcionar pra pagina do room
-            #return redirect("dcroom.vlans")
-
-
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-    return render_to_response(DCROOM_BGP_FORM, {'form': {}}, context_instance=RequestContext(request))
+    return render_to_response(DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
