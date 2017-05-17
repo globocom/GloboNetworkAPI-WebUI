@@ -15,28 +15,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import ast
+import operator
 import logging
 
-from CadVlan.Util.Decorators import log, login_required, has_perm
-from django.core.urlresolvers import reverse
-from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, InvalidParameterError, NetworkAPIClientError, NumeroRackDuplicadoError
 from django.contrib import messages
-from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.templates import RACK_EDIT, RACK_FORM, RACK_VIEW_AJAX, DC_FORM, DCROOM_FORM, DCROOM_ENV_FORM, DCROOM_VLANS_FORM, DCROOM_BGP_FORM, MENU
-from django.template.context import RequestContext
-from CadVlan.Rack.forms import RackForm
-from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
-from django.shortcuts import render_to_response, redirect
-from CadVlan.messages import error_messages, rack_messages
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm, AlocarForm
-from django.views.decorators.csrf import csrf_protect
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response, redirect
+from django.template.context import RequestContext
+from django.views.decorators.csrf import csrf_protect
 
+from CadVlan.Acl import acl
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm, AlocarForm
+from CadVlan.messages import error_messages, rack_messages, environment_messages
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT
+from CadVlan.Rack.forms import RackForm
+from CadVlan.templates import RACK_EDIT, RACK_FORM, RACK_VIEW_AJAX, DC_FORM, DCROOM_FORM, DCROOM_ENV_FORM, \
+    DCROOM_VLANS_FORM, DCROOM_BGP_FORM, MENU
+from CadVlan.Util.Decorators import log, login_required, has_perm
+from CadVlan.Util.git import GITCommandError
+from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
+
+from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, \
+    InvalidParameterError, NetworkAPIClientError, NumeroRackDuplicadoError
 
 logger = logging.getLogger(__name__)
+
 
 def proximo_rack(racks):
 
@@ -59,6 +65,7 @@ def proximo_rack(racks):
         return ''
     return str(rack_anterior)
 
+
 def validar_mac(mac):
 
     if not mac=='':
@@ -68,6 +75,7 @@ def validar_mac(mac):
         if ((len(mac_val[0])>2) or (len(mac_val[1])>2) or (len(mac_val[2])>2) or (len(mac_val[3])>2) or (len(mac_val[4])>2) or (len(mac_val[5])>2)):
             raise InvalidParameterError(u'Endereco MAC invalido. Formato: FF:FF:FF:FF:FF:FF')
 
+
 def buscar_id_equip(client, nome):
                 
     id_equip = None
@@ -76,7 +84,8 @@ def buscar_id_equip(client, nome):
             equip = equip.get('equipamento')
             id_equip = equip['id']
             return (id_equip)
-    
+
+
 def buscar_nome_equip(client, rack, tipo):
     id_equip = rack.get(tipo)
     if not id_equip==None:
@@ -87,13 +96,16 @@ def buscar_nome_equip(client, rack, tipo):
     else:
         rack[tipo] = ''
 
+
 def valid_rack_number(rack_number):
    if not rack_number < 120:
       raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - 119') 
 
+
 def valid_rack_name(rack_name):
    if not check_regex(rack_name, r'^[A-Z][A-Z][0-9][0-9]'):
       raise InvalidParameterError('Nome inváildo. Ex: AA00')
+
 
 def get_msg(request, var, nome, operation):
 
@@ -116,6 +128,7 @@ def get_msg(request, var, nome, operation):
         elif operation=='APLICAR':
             msg = rack_messages.get('can_not_aplicar_config') % nome
         messages.add_message(request, messages.ERROR, msg)
+
 
 def rack_config_delete (request, client, form, operation):
 
@@ -213,6 +226,7 @@ def rack_config_delete (request, client, form, operation):
          # Redirect to list_all action
         return redirect("ajax.view.rack")
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
@@ -271,6 +285,7 @@ def rack_form(request):
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(RACK_FORM, {'form': form}, context_instance=RequestContext(request))
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_MANAGEMENT, "write": True}])
@@ -281,6 +296,7 @@ def ajax_view(request):
     client_api = auth.get_clientFactory()
 
     return ajax_rack_view(request, client_api)
+
 
 def ajax_rack_view(request, client_api):
 
@@ -474,6 +490,7 @@ def rack_alocar(request):
 
     return redirect("ajax.view.rack")
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
@@ -491,10 +508,7 @@ def rack_deploy(request):
     return redirect("ajax.view.rack")
 
 
-
-#################################################################################   DC
-
-
+# ################################################################################   DC
 def menu(request):
     return render_to_response(MENU, {'form': {}}, context_instance=RequestContext(request))
 
@@ -525,6 +539,7 @@ def new_datacenter(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(DC_FORM, {'form': {}}, context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -561,6 +576,7 @@ def new_fabric(request, dc_id):
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(DCROOM_FORM, lists, context_instance=RequestContext(request))
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
@@ -576,28 +592,79 @@ def fabric_ambiente(request, fabric_id):
         lists['fabric_id'] = fabric_id
         lists["action"] = reverse('fabric.ambiente', args=[fabric_id])
 
+        lists["net_type_list"] = client.create_tipo_rede().listar().get("net_type")
+        lists["env_logic"] = client.create_ambiente_logico().listar().get("logical_environment")
+        lists["env_dc"] = client.create_divisao_dc().listar().get("division_dc")
+        lists["env_l3"] = client.create_grupo_l3().listar().get("group_l3")
+        lists["filters"] = client.create_filter().list_all().get("filter")
+        lists["envs"] = client.create_ambiente().listar().get('ambiente')
+        vrfs = client.create_api_vrf().search()['vrfs']
+        lists["vrfs"] = sorted(vrfs, key=operator.itemgetter('vrf'))
+
+        """
+        try:
+            templates = acl.get_templates(auth.get_user(), True)
+        except GITCommandError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            templates = {
+                'ipv4': list(),
+                'ipv6': list()
+            }
+        lists["ipv4"] = templates.get("ipv4")
+        lists["ipv6"] = templates.get("ipv6")
+        """
         if request.method == 'POST':
             url = request.META.get('HTTP_REFERER').split("/")
             fabric_id = url[-1] if url[-1] else url[-2]
             lists["fabric_id"] = fabric_id
-            ambiente = {
-                'divisao_dc': request.POST.get('envnamedc'),
-                'amb_logico': request.POST.get('envnamelogic'),
-                'amb_l3': request.POST.get('envnamel3'),
-                'filtro': request.POST.get('envfiltro'),
-                'path_acl': request.POST.get('envpathacl'),
-                'template_acl': request.POST.get('envtemplateacl'),
-                'vrf': request.POST.get('envvrf'),
-                'vlan': request.POST.get('vlan'),
-                'ipv4range': request.POST.get('ipv4range'),
-                'prefixv4': request.POST.get('prefixv4'),
-                'ipv4range': request.POST.get('ipv6range'),
-                'prefixv4': request.POST.get('prefixv6')
+
+            vrf = ast.literal_eval(request.POST.get('select_vrf'))
+
+            configs = list()
+
+            if request.POST.get('ipv4range'):
+                config = {
+                    'subnet': request.POST.get('ipv4range'),
+                    'new_prefix': request.POST.get('prefixv4'),
+                    'type': "v4",
+                    'network_type': int(request.POST.get('env_type')),
+                }
+                configs.append(config)
+            if request.POST.get('ipv6range'):
+                config = {
+                    'subnet': request.POST.get('ipv6range'),
+                    'new_prefix': request.POST.get('prefixv6'),
+                    'type': "v6",
+                    'network_type': int(request.POST.get('env_type')),
+                }
+                configs.append(config)
+
+            env_dict = {
+                "id": None,
+                "fabric_id": int(fabric_id),
+                "grupo_l3": int(request.POST.get('select_env_l3')),
+                "ambiente_logico": int(request.POST.get('select_env_log')),
+                "divisao_dc": int(request.POST.get('select_divisaodc')),
+                "filter": int(request.POST.get('select_filter')) if request.POST.get('select_filter') else None,
+                "acl_path": request.POST.get('envpathacl', None),
+                "ipv4_template": request.POST.get('envtemplateaclv4', None),
+                "ipv6_template": request.POST.get('envtemplateaclv6', None),
+                "link": None,
+                "min_num_vlan_1": int(request.POST.get('vlanmin')) if request.POST.get('vlanmin') else None,
+                "max_num_vlan_1": int(request.POST.get('vlanmax')) if request.POST.get('vlanmax') else None,
+                "min_num_vlan_2": None,
+                "max_num_vlan_2": None,
+                "default_vrf": int(vrf.get("id")) if vrf.get("id") else None,
+                'vrf': vrf.get('vrf', ''),
+                "father_environment": None,
+                "configs": configs
             }
-            config = dict()
-            config["Ambiente"] = ambiente
-            config["flag"] = True
-            environment = client.create_apirack().edit_fabric(fabric_id, config)
+            environment = client.create_api_environment().create_environment(env_dict)
+            messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+
+            # if mais prefixo
+            # redireciona para outra pagina para inserir os ambientes filhos
 
             return HttpResponseRedirect(reverse('fabric.ambiente', args=[fabric_id]))
 

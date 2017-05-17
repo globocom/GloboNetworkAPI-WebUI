@@ -535,7 +535,7 @@ p.lead,
   color: #747474;
   font-size: 0.875rem;
   line-height: 1.43;
-  min-height: 3.5em;
+  min-height: 1.0em;
   padding: 0.5em 1.07em 0.5em; }
   .form-control, .form-control:focus {
     border: 1px solid #e8e8e8; }
@@ -547,6 +547,9 @@ p.lead,
   font-size: 0.875rem;
   margin-bottom: 0.357em;
   padding: 0; }
+
+.input-lg {
+  height: 2.5em; }
 
 .alert {
   border-radius: 0;
