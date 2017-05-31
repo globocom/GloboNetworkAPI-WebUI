@@ -409,7 +409,34 @@ urlpatterns += patterns(
 urlpatterns += patterns(
     'CadVlan.UserGroup.views',
     url(
-        '^user-group/list/(?P<id_ugroup>\d+)/(?P<tab>\d+)[/]?$', 'list_all', name='user-group.list',),
+        '^user-group/list/(?P<id_ugroup>\d+)/(?P<tab>\d+)[/]?$',
+        'list_all', name='user-group.list',),
+    url(
+        '^user-group/ogp/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)[/]?$',
+        'list_individ_perms_of_group_user', name='user-group.list-perms-obj', ),
+    url(
+        '^user-group/ogp/edit/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)/(?P<id_obj>\d+)[/]?$',
+        'edit_individ_perms_of_object', name='user-group-individual-perms.edit', ),
+
+    url(
+        '^user-group/ogp/create[/]?$',
+        'create_individ_perms_of_object', name='user-group-individual-perms.create', ),
+
+    url(
+        '^user-group/ogp/delete[/]?$', 'delete_individ_perms_of_object',
+        name='user-group-individual-perms.delete', ),
+
+    url(
+        '^user-group/ogp/ajax/objects[/]?$', 'ajax_get_objects',
+        name='user-group-individual-perms.ajax.get-objects', ),
+    url(
+        '^user-group/ogp/ajax/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)[/]?$',
+        'ajax_get_individual_permissions',
+        name='user-group-individual-perms.ajax.get-perms', ),
+    url(
+        '^user-group/gen-perm/edit/(?P<id_ugroup>\d+)/(?P<id_type_obj>\d+)[/]?$',
+        'edit_gen_perms_of_type_obj', name='user-group-general-perms.edit', ),
+
     url('^user-group/delete/(?P<id_ugroup>\d+)[/]?$',
         'delete_user', name='user-group.delete',),
     url('^user-group/form/(?P<id_ugroup>\d+)[/]?$',

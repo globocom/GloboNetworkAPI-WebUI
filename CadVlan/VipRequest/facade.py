@@ -206,7 +206,9 @@ def ajax_shared_view_vip(request, id_vip, lists):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        lists['vip'] = vip = client.create_api_vip_request().get(ids=[id_vip], kind='details').get('vips')[0]
+        lists['vip'] = vip = client.create_api_vip_request()\
+            .get(ids=[id_vip], kind='details',
+                 include=['groups_permissions']).get('vips')[0]
 
         # apenas reals
         reals = []
@@ -261,7 +263,7 @@ def shared_load_pool(request, client, form_acess=None, external=False):
 
         group_users_list_selected = []
         for group in pool["groups_permissions"]:
-            group_users_list_selected.append(group["group"]["id"])
+            group_users_list_selected.append(group["user_group"]["id"])
 
         group_users_list = client.create_grupo_usuario().listar()
         forms_aux = {}
@@ -701,7 +703,7 @@ def _valid_form_and_submit(forms_aux, request, lists, client_api, edit=False, vi
                 if len(group_users) > 0:
                     for id in group_users:
                         groups_permissions.append({
-                            "group": int(id),
+                            "user_group": int(id),
                             "read": True,
                             "write": True,
                             "change_config": True,
@@ -912,7 +914,7 @@ def _valid_form_and_submit_update(forms_aux, vip, request, lists, client_api, vi
                 if len(group_users) > 0:
                     for id in group_users:
                         groups_permissions.append({
-                            "group": int(id),
+                            "user_group": int(id),
                             "read": True,
                             "write": True,
                             "change_config": True,
@@ -1044,7 +1046,7 @@ def shared_save_pool(request, client, form_acess=None, external=False):
             if len(group_users) > 0:
                 for id in group_users:
                     groups_permissions.append({
-                        "group": int(id),
+                        "user_group": int(id),
                         "read": True,
                         "write": True,
                         "change_config": True,
@@ -1192,11 +1194,13 @@ def edit_form_shared(request, id_vip, client_api, form_acess="", external=False)
         if external:
             lists['token'] = form_acess.initial.get("token")
 
-        vip = client_api.create_api_vip_request().get(ids=[id_vip], kind='details')['vips'][0]
+        vip = client_api.create_api_vip_request()\
+            .get(ids=[id_vip], kind='details',
+                 include=['groups_permissions'])['vips'][0]
 
         group_users_list_selected = []
         for group in vip["groups_permissions"]:
-            group_users_list_selected.append(group["group"]["id"])
+            group_users_list_selected.append(group["user_group"]["id"])
 
         group_users_list = client_api.create_grupo_usuario().listar()
 
