@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import ast
+import json
 import operator
 import logging
 
@@ -32,8 +33,7 @@ from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm,
 from CadVlan.messages import error_messages, rack_messages, environment_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.Rack.forms import RackForm
-from CadVlan.templates import RACK_EDIT, RACK_FORM, RACK_VIEW_AJAX, DC_FORM, DCROOM_FORM, DCROOM_ENV_FORM, \
-    DCROOM_VLANS_FORM, DCROOM_BGP_FORM, MENU
+from CadVlan import templates
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.git import GITCommandError
 from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
@@ -283,7 +283,7 @@ def rack_form(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(RACK_FORM, {'form': form}, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_FORM, {'form': form}, context_instance=RequestContext(request))
 
 
 @log
@@ -346,7 +346,7 @@ def ajax_rack_view(request, client_api):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(RACK_VIEW_AJAX, racks, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_VIEW_AJAX, racks, context_instance=RequestContext(request))
 
 
 @log
@@ -437,7 +437,7 @@ def rack_edit(request, id_rack):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(RACK_EDIT, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_EDIT, lists, context_instance=RequestContext(request))
 
 
 @log
@@ -515,6 +515,41 @@ def menu(request):
 
 @log
 @login_required
+@csrf_protect
+def datacenter(request):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists = dict()
+
+        if request.method =='GET':
+
+            dc = client.create_apirack().list()
+            dc_list = dc.get("dc")
+            lists["dc"] = dc_list
+
+        if request.method == 'POST':
+
+            dc = dict()
+            #dc['dcname'] = request.POST.get('name')
+            #dc['address'] = request.POST.get('address')
+
+            #newdc = client.create_apirack().save_dc(dc)
+            #id = newdc.get('dc').get('id')
+
+            #return HttpResponseRedirect(reverse('fabric.cadastro', args=[id]))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    return render_to_response(templates.LISTDC, lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
 @csrf_protect
 def new_datacenter(request):
@@ -538,7 +573,48 @@ def new_datacenter(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(DC_FORM, {'form': {}}, context_instance=RequestContext(request))
+    return render_to_response(templates.DC_FORM, {'form': {}}, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@csrf_protect
+def fabric(request, fabric_id):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists = dict()
+        lists["fabric_id"] = fabric_id
+        lists["action"] = reverse('fabric', args=[fabric_id])
+
+        if request.method =='GET':
+
+            fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
+            if fabric.get("config"):
+                fabric["config"] = json.dumps(fabric.get("config"))
+            lists["fabric"] = fabric
+
+            racks = client.create_apirack().get_rack(fabric_id=fabric_id)
+            lists["racks"] = racks.get("racks")
+
+        if request.method == 'POST':
+
+            dc = dict()
+            #dc['dcname'] = request.POST.get('name')
+            #dc['address'] = request.POST.get('address')
+
+            #newdc = client.create_apirack().save_dc(dc)
+            #id = newdc.get('dc').get('id')
+
+            #return HttpResponseRedirect(reverse('fabric.cadastro', args=[id]))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    return render_to_response(templates.FABRIC, lists, context_instance=RequestContext(request))
 
 
 @log
@@ -574,7 +650,7 @@ def new_fabric(request, dc_id):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(DCROOM_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.DCROOM_FORM, lists, context_instance=RequestContext(request))
 
 
 @log
@@ -671,7 +747,7 @@ def fabric_ambiente(request, fabric_id):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(DCROOM_ENV_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.DCROOM_ENV_FORM, lists, context_instance=RequestContext(request))
 
 
 @log
@@ -735,4 +811,4 @@ def fabric_bgp(request, fabric_id):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))

@@ -1,0 +1,44 @@
+{% extends "menu.html" %}
+{% block content %}
+<section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
+    <div class="mbr-section mbr-section__container mbr-section__container--middle">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 text-xs-center">
+                    <h3 class="mbr-section-title display-2">Data Center</h3>
+                </div>
+            </div>
+            <div id="hamburger">
+                <div id="wrapper">
+                  <a class="material-icons" href="/datacenter/cadastro/">add</a>
+                </div>
+            </div>
+            {% for dc in dc %}
+            <div class="form-group form-control-label">
+                <div class="table-responsive">
+                    <table class="table table-hover accordion-toggle" data-toggle="collapse" data-target="#{{ dc.id }}">
+                        <thead>
+                            <tr class="col-xs-12">
+                                <td class="col-xs-12 col-md-8 text-xs-left">{{ dc.dcname }}</td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                                <td class="col-xs-12 col-md-3 text-xs-left">{{ dc.address }}</td>
+                            </tr>
+                        </thead>
+                        <tbody class="collapse" id="{{ dc.id }}">
+                            {% for fabric in dc.fabric %}
+                            <tr class="col-xs-12" onClick="event.stopPropagation();">
+                                <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                                <td class="col-xs-12 col-md-8">{{ fabric.name }}</td>
+                                <td class="col-xs-12 col-md-3"><a class="material-icons" style="color:#0D84A5" href="{% url fabric fabric.id %}">edit</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+

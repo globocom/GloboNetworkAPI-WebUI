@@ -1,5 +1,10 @@
 (function($){
 
+	$('a[href*=#]').on('click', function(e) {
+		e.preventDefault();
+		$('html, body').animate({ scrollTop: $($(this).attr('href')).offset().top}, 500, 'linear');
+	});
+
     $.extend($.easing, {
         easeInOutCubic : function(x, t, b, c, d){
             if ((t/=d/2) < 1) return c/2*t*t*t + b;

@@ -705,12 +705,14 @@ urlpatterns += patterns(
     url('^rack/alocar[/]?$', 'rack_alocar', name='rack.alocar',),
     url('^rack/save/deploy[/]?$', 'rack_deploy', name='rack.deploy',),
     url('^datacenter/cadastro[/]?$', 'new_datacenter', name='dc.cadastro',),
+    url('^datacenter[/]?$', 'datacenter', name='listdc',),
     url('^fabric/cadastro/(?P<dc_id>\d+)[/]?$', 'new_fabric', name='fabric.cadastro',),
     #url('^fabric/cadastro[/]?$', 'new_fabric', name='fabric.cadastro',),
     url('^fabric/ambientes/(?P<fabric_id>\d+)[/]?$', 'fabric_ambiente', name='fabric.ambiente',),
     #url('^fabric/ambientes[/]?$', 'fabric_ambiente', name='fabric.ambiente',),
     #url('^fabric/vlans[/]?$', 'fabric_vlans', name='fabric.vlans',),
     url('^fabric/bgp/(?P<fabric_id>\d+)[/]?$', 'fabric_bgp', name='fabric.bgp',),
+    url('^fabric/(?P<fabric_id>\d+)[/]?$', 'fabric', name='fabric',),
     url('^menu[/]?$', 'menu', name='menu',),
 )
 

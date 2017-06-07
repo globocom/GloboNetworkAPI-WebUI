@@ -44,22 +44,22 @@
                         <div class="row form-group">
                             <h1 class="mbr-section-subtitle display-4 text-xs-center">ACL</h1>
                             <div class="col-xs-12 col-md-4">
-                                <label class="form-control-label">Template V4</label>
+                                <label class="fabric_form_template">Template V4</label>
                                 <input type="text" class="form-control" name="envtemplateaclv4" data-form-field="fabric_envtemplateacl" id="fabric_form_template" placeholder="Template.txt">
                             </div>
                             <div class="col-xs-12 col-md-4">
-                                <label class="form-control-label">Template V6</label>
+                                <label class="fabric_form_template">Template V6</label>
                                 <input type="text" class="form-control" name="envtemplateaclv6" data-form-field="fabric_envtemplateacl" id="fabric_form_template" placeholder="Template.txt">
                             </div>
                             <div class="col-xs-12 col-md-4">
-                                <label class="form-control-label">Path</label>
+                                <label class="fabric_form_acl">Path</label>
                                 <input type="text" class="form-control" name="envpathacl" data-form-field="fabric_envpathacl" id="fabric_form_acl" placeholder="BEACL">
                             </div>
                         </div>
                         <div class="row form-group">
                             <h1 class="mbr-section-subtitle display-4 text-xs-center">Filtros</h1>
                             <div class="col-xs-12 col-md-4">
-                                <label class="form-control-label">Filtro</label>
+                                <label class="form-control-label" for="id_select_filter">Filtro</label>
                                 <select id="id_select_filter" name="select_filter" class="form-control input-lg">
                                     <option selected="selected" disabled>Select Filter</option>
                                     {% for item in filters %}
@@ -68,7 +68,7 @@
                                 </select>
                             </div>
                             <div class="col-xs-12 col-md-4">
-                                <label class="form-control-label">VRF<span class="form-asterisk">*</span></label>
+                                <label class="form-control-label" for="id_select_vrf">VRF<span class="form-asterisk">*</span></label>
                                 <select id="id_select_vrf" name="select_vrf" class="form-control input-lg">
                                     <option selected="selected" disabled>Select VRF</option>
                                     {% for item in vrfs %}
@@ -77,26 +77,26 @@
                                 </select>
                             </div>
                             <div class="col-xs-12 col-md-2">
-                                <label class="form-control-label" for="form1-5-name">Vlans Min</label>
+                                <label class="form-control-label" for="fabric_form_vlans">Vlans Min</label>
                                 <input type="text" class="form-control" name="vlanmin" data-form-field="fabric_vlanname" id="fabric_form_vlans" placeholder="1">
                             </div>
                             <div class="col-xs-12 col-md-2">
-                                <label class="form-control-label" for="form1-5-name">Máx</label>
+                                <label class="form-control-label" for="fabric_form_vlans">Máx</label>
                                 <input type="text" class="form-control" name="vlanmax" data-form-field="fabric_vlanname" id="fabric_form_vlans" placeholder="4096">
                             </div>
                         </div>
                         <div class="row form-group">
                             <h1 class="mbr-section-subtitle display-4 text-xs-center">CIDR</h1>
                             <div class="col-xs-12 col-md-5">
-                                <label class="form-control-label" for="form1-5-name">Bloco IPv4</label>
+                                <label class="form-control-label" for="fabric_form_v4">Bloco IPv4</label>
                                 <input type="text" class="form-control" name="ipv4range" data-form-field="fabric_ipv4range" id="fabric_form_v4" placeholder="0.0.0.0/22">
                             </div>
                             <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="form1-5-name">Prefixo</label>
+                                <label class="form-control-label" for="fabric_form_pfxv4">Prefixo</label>
                                 <input type="text" class="form-control" name="prefixv4" data-form-field="fabric_prefixv4" id="fabric_form_pfxv4" placeholder="24">
                             </div>
                             <div class="col-xs-12 col-md-4">
-                                <label class="form-control-label" for="form1-5-name">Tipo de rede</label>
+                                <label class="form-control-label" for="id_env_type">Tipo de rede</label>
                                 <select id="id_env_type" name="env_type" class="form-control input-lg">
                                     <option selected="selected" disabled>Select o Tipo da Rede</option>
                                     {% for item in net_type_list %}
@@ -105,11 +105,11 @@
                                 </select>
                             </div>
                             <div class="col-xs-12 col-md-5">
-                                <label class="form-control-label" for="form1-5-name">Bloco IPv6 </label>
+                                <label class="form-control-label" for="fabric_form_v6">Bloco IPv6 </label>
                                 <input type="text" class="form-control" name="ipv6range" data-form-field="fabric_ipv6range" id="fabric_form_v6" placeholder="2001:0db8:cafe::/118">
                             </div>
                             <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="form1-5-name">Prefixo</label>
+                                <label class="form-control-label" for="fabric_form_pfxv6">Prefixo</label>
                                 <input type="text" class="form-control" name="prefixv6" data-form-field="fabric_prefixv6" id="fabric_form_pfxv6" placeholder="120">
                             </div>
                         </div>
