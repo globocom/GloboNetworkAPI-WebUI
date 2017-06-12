@@ -258,7 +258,9 @@ def shared_load_pool(request, client, form_acess=None, external=False):
         action = reverse('external.save.pool') if external else reverse('save.pool')
         load_pool_url = reverse('pool.modal.ips.ajax.external') if external else reverse('pool.modal.ips.ajax')
 
-        pool = client.create_api_pool().get_pool_details(pool_id)['server_pools'][0]
+        pool = client.create_api_pool().get(
+            ids=[pool_id], kind='details',
+            include=['groups_permissions'])['server_pools'][0]
         environment_id = pool['environment']['id']
 
         group_users_list_selected = []
@@ -399,7 +401,9 @@ def shared_pool_member_items(request, client, form_acess=None, external=False):
     try:
 
         pool_id = request.GET.get('pool_id')
-        pool = client.create_api_pool().get_pool_details(pool_id)
+        pool = client.create_api_pool().get(
+            ids=[pool_id], kind='details',
+            include=['groups_permissions'])['server_pools'][0]
         pool_data = {
             'server_pool': pool['server_pools'][0],
             'external': external
