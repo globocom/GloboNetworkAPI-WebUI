@@ -403,7 +403,7 @@ def shared_pool_member_items(request, client, form_acess=None, external=False):
         pool_id = request.GET.get('pool_id')
         pool = client.create_api_pool().get(
             ids=[pool_id], kind='details',
-            include=['groups_permissions'])['server_pools'][0]
+            include=['groups_permissions'])
         pool_data = {
             'server_pool': pool['server_pools'][0],
             'external': external
