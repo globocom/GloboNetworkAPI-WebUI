@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!-- Site made with Mobirise Website Builder v3.12.1, https://mobirise.com -->
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="generator" content="Mobirise v3.12.1, mobirise.com">
@@ -25,72 +24,91 @@
 <body>
 <section class="mbr-section mbr-after-navbar demo" id="section01"
          style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-12 text-xs-center">
-                    <h3 class="mbr-section-title display-2">Fabric</h3>
-                </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 text-xs-center">
+                <h3 class="mbr-section-title display-2">Fabric</h3>
             </div>
         </div>
-        <div class="container mbr-section">
-            <div class="row">
-                <div class="col-xs-12 col-lg-10 col-lg-offset-1">
-                    <form action="{{action}}" method="post" id="fabric_form">
-                        {% csrf_token %}
-                        <div class="row row-sm-offset">
-                            <div class="col-xs-12 col-md-5">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="fabric_form_name">
-                                        Nome<span class="form-asterisk">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" data-form-field="fabric_name"
-                                           name="fabricname" id="fabric_form_name" value={{fabric.name}}>
-                                </div>
-                            </div>
-                            <div class="col-xs-12 col-md-2">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="fabric_form_spn">
-                                        Spines<span class="form-asterisk">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" name="spn" data-form-field="fabric_spn"
-                                           id="fabric_form_spn" value={{fabric.spines}}>
-                                </div>
-                            </div>
-                            <div class="col-xs-12 col-md-2">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="fabric_form_lfs">
-                                        Leafs<span class="form-asterisk">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" name="lfs" data-form-field="fabric_lfs"
-                                           id="fabric_form_lfs" value={{fabric.leafs}}>
-                                </div>
-                            </div>
-                            <div class="col-xs-12 col-md-3">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="fabric_form_rck">
-                                        Racks<span class="form-asterisk">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" name="rack" data-form-field="fabric_rck"
-                                           id="fabric_form_rck" value={{fabric.racks}}>
-                                </div>
-                            </div>
-                            <div class="col-xs-12 col-md-12">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="fabric_form_config">
-                                        Configuração<span class="form-asterisk">*</span>
-                                    </label>
-                                    <textarea class="form-control form-control-lg" name="config" row="7" data-form-field="fabric_config"
-                                              id="fabric_form_config" height="100">{{fabric.config}}</textarea>
-                                </div>
+    </div>
+    <div class="container mbr-section">
+        <div class="row">
+            <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+                <form action="{{action}}" method="post" id="fabric_form">
+                    {% csrf_token %}
+                    <div class="row row-sm-offset">
+                        <div class="col-xs-12 col-md-5">
+                            <div class="form-group">
+                                <label class="form-control-label" for="fabric_form_name">
+                                    Nome<span class="form-asterisk">*</span>
+                                </label>
+                                <input type="text" class="form-control" data-form-field="fabric_name"
+                                       name="fabricname" id="fabric_form_name" value={{fabric.name}}>
                             </div>
                         </div>
-                    </form>
-                </div>
+                        <div class="col-xs-12 col-md-2">
+                            <div class="form-group">
+                                <label class="form-control-label" for="fabric_form_spn">
+                                    Spines<span class="form-asterisk">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="spn" data-form-field="fabric_spn"
+                                       id="fabric_form_spn" value={{fabric.spines}}>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-2">
+                            <div class="form-group">
+                                <label class="form-control-label" for="fabric_form_lfs">
+                                    Leafs<span class="form-asterisk">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="lfs" data-form-field="fabric_lfs"
+                                       id="fabric_form_lfs" value={{fabric.leafs}}>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-3">
+                            <div class="form-group">
+                                <label class="form-control-label" for="fabric_form_rck">
+                                    Racks<span class="form-asterisk">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="rack" data-form-field="fabric_rck"
+                                       id="fabric_form_rck" value={{fabric.racks}}>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-12">
+                            <div class="form-group">
+                                <label class="form-control-label" for="fabric_form_config">
+                                    Configuração<span class="form-asterisk">*</span>
+                                </label>
+                                <textarea class="form-control form-control-lg" name="config" row="7" data-form-field="fabric_config"
+                                          id="fabric_form_config" height="100">{{fabric.config}}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-sm-offset">
+                        <div class="col-xs-12 col-md-4"></div>
+                        <div class="col-xs-12 col-md-2" style="text-align: center;">
+                            <div class="form-group">
+                                <a class="btn btn-danger-outline btn-danger" href="{% url listdc %}">Voltar</a>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-2">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success-outline btn-success">Salvar</button>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-2"></div>
+                        <div class="col-xs-12 col-md-1">
+                            <div class="form-group">
+                                <a href="#section02"><i class="material-icons" style="color:#0D84A5;font-size:36px">expand_more</i>Racks</a>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-1"></div>
+                    </div>
+                </form>
             </div>
         </div>
-    <a href="#section02"><span></span>Racks</a>
+    </div>
 </section>
-<section id="section02" class="demo">
+<section id="section02" >
     <div class="container">
         {% for i in racks %}
         <div class="square">
@@ -98,7 +116,7 @@
                 <div class="table">
                     <div class="table-cell">
                         <p>
-                        <h2 style="text-align: center;">RACK{{i.nome}}<br></h2>
+                        <h2 style="text-align: center;">RACK {{i.nome}}<br></h2>
                             Numero: {{i.numero}}<br>
                             Equipamentos: <br>
                                 {{i.id_sw1}}<br>
@@ -107,11 +125,53 @@
                         </p>
                     </div>
                 </div>
+                <div id="buttons" style="padding: 1px 1px" >
+                    <a id="edit_rack" class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                            href="{% url rack.edit i.id %}">
+                       <i class="material-icons" style="color:#FFD17C;font-size:15px">edit</i>
+                    </a>
+                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                            href="{% url rack.files i.dcroom i.id %}">
+                        <i class="material-icons" style="color:#FFD17C;font-size:15px">insert_drive_file</i>
+                    </a>
+                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                            href="{% url rack.vlans i.dcroom i.id %}">
+                        <p style="font-size:8px;color:#FFD17C">NET</p>
+                    </a>
+                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                            href="{% url rack.deploy.new i.dcroom i.id %}">
+                        <i class="material-icons" style="color:#FFD17C;font-size:15px">launch</i>
+                    </a>
+                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                            href="{% url rack.delete.new i.dcroom i.id %}">
+                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">delete</i>
+                    </a>
+                </div>
             </div>
         </div>
         {% endfor %}
     </div>
-    <a href="#section01"><i class="material-icons" style="color:#0D84A5;font-size:36px">expand_less</i></a>
+    <div class="container mbr-section">
+        <div class="row">
+            <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+                <div class="row row-sm-offset">
+                    <div class="col-xs-12 col-md-5"></div>
+                    <div class="col-xs-12 col-md-2">
+                        <div class="form-group">
+                            <a class="btn" href="{% url rack.add fabric_id %}"><i class="material-icons" style="color:#FFD17C;font-size:44px;left:50%">add</i></a>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-md-3"></div>
+                    <div class="col-xs-12 col-md-1"></div>
+                    <div class="col-xs-12 col-md-1">
+                        <div class="form-group">
+                            <a class="btn" href="#section01"><i class="material-icons" style="color:#0D84A5;font-size:36px">expand_less</i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 </body>
 </html>

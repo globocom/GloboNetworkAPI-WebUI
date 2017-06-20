@@ -175,6 +175,11 @@
 
                             {% has_perm EQUIPMENT_MANAGEMENT None True %}
                             {% if has_perm %}
+                            <li><a href="{% url listdc %}">Data Center</a></li>
+                            {% endif %}
+
+                            {% has_perm EQUIPMENT_MANAGEMENT None True %}
+                            {% if has_perm %}
                             <li><a href="{% url equipment.search.list %}">Equipamentos</a></li>
                             {% endif %}
 

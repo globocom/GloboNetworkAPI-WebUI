@@ -443,6 +443,34 @@ a.mbr-iconfont:hover {
   .btn-social + .btn {
     margin-left: 0.1rem; }
 
+.btn-social-bottom {
+  border-radius: 50%;
+  max-width: 100%;
+  text-align: center;
+  position: relative;
+  border: 2px solid #0D84A5;
+  background: #0D84A5;
+  color: #0D84A5; }
+  .btn-social i {
+    top: 0;
+    top: 0;
+    line-height: 40px;
+    width: 40px; }
+  .btn-social:hover {
+    color: #fff;
+    background: #0D84A5; }
+  .btn-social + .btn {
+    margin-left: 0.1rem; }
+
+.btn-responsive {
+  padding:4px 4px;
+  font-size:10%;
+  line-height: 1.2;
+  height:30px;
+  width:30px;
+  bottom:0
+}
+
 p.lead,
 .lead p {
   font-size: 1.07rem;
@@ -2196,15 +2224,26 @@ html.is-builder .article .lead:not([data-app-remove-it]) + div .btn {
   box-shadow: 2px 2px 10px rgba(10,10,10,0.3);
 }
 
+#hamburger-2 {
+  justify-content: center;
+  align-items: center;
+  bottom: 20%;
+  right: 5%;
+  background-color: #0D84A5;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 2px 2px 10px rgba(10,10,10,0.3);
+}
+
+
+
 .material-icons {
   font-size: 35px;
   color: #0D84A5;
 }
 
-* {
-	margin: 0;
-	padding: 0;
-}
 html, body {
 	height: 100%;
 }
@@ -2252,43 +2291,6 @@ section h3 {
     font-weight: 600;
     letter-spacing: -1px;
 }
-
-.demo a {
-	position: absolute;
-	bottom: 20px;
-	left: 50%;
-	z-index: 2;
-	display: inline-block;
-	-webkit-transform: translate(0, -50%);
-	transform: translate(0, -50%);
-    font-family: 'Montserrat', sans-serif;
-	letter-spacing: .1em;
-	text-decoration: none;
-	transition: opacity .3s;
-}
-.demo a:hover {
-	opacity: .5;
-}
-#section01 a {
-	padding-top: 60px;
-}
-#section01 a span {
-    color: #0D84A5;
-	position: absolute;
-	top: 0;
-	left: 50%;
-	width: 24px;
-	height: 24px;
-	margin-left: -12px;
-	border-left: 1px solid #0D84A5;
-	border-bottom: 1px solid #0D84A5;
-	-webkit-transform: rotate(-45deg);
-	transform: rotate(-45deg);
-	box-sizing: border-box;
-}
-#section02 a {
-	padding-top: 60px;
-}
 #section02 a span {
     color: #0D84A5;
 	position: absolute;
@@ -2334,12 +2336,13 @@ section h3 {
     height:90%; /* = 100% - 2*5% padding */
     width:90%; /* = 100% - 2*5% padding */
     padding: 5%;
-
+    margin:0;
 }
 .table{
     display:table;
     width:100%;
-    height:100%;
+    height:90%;
+    left:50%;
 }
 .table-cell{
     display:table-cell;
