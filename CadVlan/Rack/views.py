@@ -728,10 +728,9 @@ def fabric(request, fabric_id):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        lists = dict()
-
         racks = client.create_apirack().get_rack(fabric_id=fabric_id)
 
+        lists = dict()
         lists["racks"] = racks.get("racks")
         lists["fabric_id"] = fabric_id
         lists["action"] = reverse('fabric', args=[fabric_id])
@@ -741,11 +740,9 @@ def fabric(request, fabric_id):
             fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
             if fabric.get("config"):
                 fabric["config"] = json.dumps(fabric.get("config"))
-
             lists["fabric"] = fabric
 
         if request.method == 'POST':
-
             fabric = dict()
             fabric['id'] = fabric_id
             fabric['name'] = request.POST.get('fabricname')
@@ -846,23 +843,23 @@ def fabric_ambiente(request, fabric_id):
             configs = list()
 
             if request.POST.get('ipv4range'):
-                config = {
+                v4 = {
                     'subnet': request.POST.get('ipv4range'),
                     'new_prefix': request.POST.get('prefixv4'),
                     'type': "v4",
                     'network_type': int(request.POST.get('env_type')),
                 }
-                configs.append(config)
+                configs.append(v4)
             if request.POST.get('ipv6range'):
-                config = {
+                v6 = {
                     'subnet': request.POST.get('ipv6range'),
                     'new_prefix': request.POST.get('prefixv6'),
                     'type': "v6",
                     'network_type': int(request.POST.get('env_type')),
                 }
-                configs.append(config)
+                configs.append(v6)
 
-            env_dict = {
+            ambiente = {
                 "id": None,
                 "fabric_id": int(fabric_id),
                 "grupo_l3": int(request.POST.get('select_env_l3')),
@@ -882,9 +879,13 @@ def fabric_ambiente(request, fabric_id):
                 "father_environment": None,
                 "configs": configs
             }
-            environment = client.create_api_environment().create_environment(env_dict)
-            messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+            fabric = dict()
+            config = dict()
+            config["Ambiente"] = ambiente
+            fabric["flag"] = True
+            fabric["config"] = config
 
+            environment = client.create_apirack().edit_fabric(fabric_id, fabric)
             # if mais prefixo
             # redireciona para outra pagina para inserir os ambientes filhos
 
@@ -893,6 +894,8 @@ def fabric_ambiente(request, fabric_id):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        return HttpResponseRedirect(reverse('fabric.ambiente', args=[fabric_id]))
+
     return render_to_response(templates.DCROOM_ENV_FORM, lists, context_instance=RequestContext(request))
 
 
@@ -938,23 +941,28 @@ def fabric_bgp(request, fabric_id):
                 'rede': request.POST.get('gerencianoc'),
                 'vlan': request.POST.get('gerencianocvlan')
             }
+            gerencia = {
+                'telecom': telecom,
+                'monitoracao': monitoracao,
+                'noc': noc
+            }
+            config = {
+                'BGP': [bgp],
+                'Gerencia': [gerencia],
+                'VLT': [vlt]
+            }
+            fabric = {
+                'flag': True,
+                'config': config
+            }
 
-            gerencia = dict()
-            gerencia["telecom"] = telecom
-            gerencia["monitoracao"] = monitoracao
-            gerencia["noc"] = noc
+            environment = client.create_apirack().edit_fabric(fabric_id, fabric)
 
-            config = dict()
-            config["BGP"] = bgp
-            config["Gerencia"] = gerencia
-            config["VLT"] = vlt
-            config["flag"] = True
-
-            environment = client.create_apirack().edit_fabric(fabric_id, config)
-
-            return render_to_response(DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
+            return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
+
     return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
