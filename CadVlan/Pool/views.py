@@ -342,7 +342,7 @@ def add_form(request):
                 if len(group_users) > 0:
                     for id in group_users:
                         groups_permissions.append({
-                            "group": int(id),
+                            "user_group": int(id),
                             "read": True,
                             "write": True,
                             "change_config": True,
@@ -401,11 +401,13 @@ def edit_form(request, id_server_pool):
 
     try:
 
-        pool = client.create_api_pool().get_pool_details(id_server_pool)['server_pools'][0]
+        pool = client.create_api_pool()\
+            .get([id_server_pool], kind='details',
+                 include=['groups_permissions'])['server_pools'][0]
 
         group_users_list_selected = []
         for group in pool["groups_permissions"]:
-            group_users_list_selected.append(group["group"]["id"])
+            group_users_list_selected.append(group["user_group"]["id"])
 
         pool_created = lists["pool_created"] = pool['pool_created']
 
@@ -548,7 +550,7 @@ def edit_form(request, id_server_pool):
                 if len(group_users) > 0:
                     for id in group_users:
                         groups_permissions.append({
-                            "group": int(id),
+                            "user_group": int(id),
                             "read": True,
                             "write": True,
                             "change_config": True,
@@ -964,7 +966,9 @@ def manage_tab1(request, id_server_pool):
 
         lists = dict()
         lists["id_server_pool"] = id_server_pool
-        pool = client.create_api_pool().get_pool_details(id_server_pool)['server_pools'][0]
+        pool = client.create_api_pool()\
+            .get([id_server_pool], kind='details',
+                 include=['groups_permissions'])['server_pools'][0]
 
         lists["environment"] = pool['environment']['name']
         lists["identifier"] = pool['identifier']
@@ -1047,11 +1051,13 @@ def manage_tab3(request, id_server_pool):
         servicedownaction_choices = facade.populate_servicedownaction_choices(client)
         group_users_list = client.create_grupo_usuario().listar()
 
-        pool = client.create_api_pool().get_pool_details(id_server_pool)['server_pools'][0]
+        pool = client.create_api_pool()\
+            .get([id_server_pool], kind='details',
+                 include=['groups_permissions'])['server_pools'][0]
 
         group_users_list_selected = []
         for group in pool["groups_permissions"]:
-            group_users_list_selected.append(group["group"]["id"])
+            group_users_list_selected.append(group["user_group"]["id"])
 
         environment_id = pool['environment']['id']
 
@@ -1103,7 +1109,7 @@ def manage_tab3(request, id_server_pool):
                 if len(group_users) > 0:
                     for id in group_users:
                         groups_permissions.append({
-                            "group": int(id),
+                            "user_group": int(id),
                             "read": True,
                             "write": True,
                             "change_config": True,

@@ -232,6 +232,18 @@ perm_group_messages = {
     'invalid_group_user': u'Permissão Administrativa inválida',
 }
 
+object_group_perm_messages = {
+    'success_edit': u'Permissão Individual alterada com sucesso.',
+    'success_create': u'Permissão Individual criada com sucesso.',
+    'success_delete': u'Permissão Individual removida com sucesso.'
+}
+
+object_group_perm_gen_messages = {
+    'success_edit': u'Permissão Geral alterada com sucesso.',
+    'success_create': u'Permissão Geral criada com sucesso.'
+
+}
+
 acl_messages = {
     'success_create': u'Acl criada com sucesso.',
     'success_remove': u'Acl foi excluida com sucesso.',
