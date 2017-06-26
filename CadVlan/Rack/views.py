@@ -249,32 +249,33 @@ def rack_form(request):
         if request.method == 'POST':
 
             form = RackForm(request.POST)
+            rack = dict()
             if form.is_valid():
-                rack_number = form.cleaned_data['rack_number']
-                rack_name = form.cleaned_data['rack_name']
-                mac_sw1 = form.cleaned_data['mac_address_sw1']
-                mac_sw2 = form.cleaned_data['mac_address_sw2']
-                mac_ilo = form.cleaned_data['mac_address_ilo']
+                rack['numero'] = form.cleaned_data['rack_number']
+                rack['nome'] = form.cleaned_data['rack_name']
+                rack['mac_sw1'] = form.cleaned_data['mac_address_sw1']
+                rack['mac_sw2'] = form.cleaned_data['mac_address_sw2']
+                rack['mac_ilo'] = form.cleaned_data['mac_address_ilo']
                 nome_sw1 = form.cleaned_data['nome_sw1']
                 nome_sw2 = form.cleaned_data['nome_sw2']
                 nome_ilo = form.cleaned_data['nome_ilo']
 
                 # validacao: Numero do Rack
-                valid_rack_number(rack_number)
+                valid_rack_number(rack['numero'])
  
                 # validacao: Nome do Rack
-                valid_rack_name(rack_name)
+                valid_rack_name(rack['nome'])
 
                 # Validacao: MAC 
-                validar_mac(mac_sw1)
-                validar_mac(mac_sw2)
-                validar_mac(mac_ilo)
+                validar_mac(rack['mac_sw1'])
+                validar_mac(rack['mac_sw2'])
+                validar_mac(rack['mac_ilo'])
                 
-                id_sw1 = buscar_id_equip(client,nome_sw1)
-                id_sw2 = buscar_id_equip(client,nome_sw2)
-                id_ilo = buscar_id_equip(client,nome_ilo)
+                rack['id_sw1'] = buscar_id_equip(client,nome_sw1)
+                rack['id_sw2'] = buscar_id_equip(client,nome_sw2)
+                rack['id_ilo'] = buscar_id_equip(client,nome_ilo)
  
-                rack = client.create_apirack().insert_rack(rack_number, rack_name, mac_sw1, mac_sw2, mac_ilo, id_sw1, id_sw2, id_ilo)
+                rack = client.create_apirack().insert_rack(rack)
                 messages.add_message(request, messages.SUCCESS, rack_messages.get("success_insert"))
 
                 form = RackForm()
