@@ -1,0 +1,233 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Permissões Individuais de Objeto - Criação]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+var sel_obj;
+var oTable;
+
+$(document).ready(function() {
+    var csrftoken = getCookie('csrftoken');
+
+
+    function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+	$("#page_tab").tabs();
+
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
+
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
+		location.href = "{% url user-group.list-perms-obj form_hidden_ids.id_ugroup.value form_hidden_ids.id_type_obj.value %}";
+	});
+
+    $("#dialog_obj").dialog({
+        height: 440,
+        width: 580,
+        modal: true,
+        draggable: false,
+        resizable: true,
+
+        buttons: {
+            "Selecionar": function(ev) {
+                if($("input[name=sel_obj]:checked").val()){
+                    sel_obj = $("input[name=sel_obj]:checked").val();
+                    $("#id_show_obj_name").css("display","inline");
+
+                    $("#id_show_obj_name").html("Nome do objeto selecionado: "+ $("#sel_obj_"+sel_obj).val());
+
+                    $("input[name=id_obj]").val(sel_obj);
+
+                    $(this).dialog("close");
+                }else{
+                    alert("Selecione algum objeto!");
+                }
+
+
+            },
+            "Cancelar": function() {
+                var $this = $(this);
+                $this.dialog("close");
+            }
+        }
+    });
+
+    $("#btn_select_obj").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+        if( $("#id_obj_name").val().length>0){
+            oTable.fnAjaxUpdate();
+            $("#dialog_obj").dialog("open");
+        }else{
+            alert('Preencha o campo de busca de objeto!');
+        }
+    });
+
+    $('#id_obj_name').keydown(function (e){
+        if(e.keyCode == 13){
+            if($("#id_obj_name").val().length>0){
+                oTable.fnAjaxUpdate();
+                $("#dialog_obj").dialog("open");
+            }else{
+                alert('Preencha o campo de busca de objeto!');
+            }
+        }
+    });
+
+    $("select[name=object_type]").change(function() {
+        var id_type_obj = $("select[name=object_type] option:selected").val();
+
+        $("#id_show_obj_name").css("display","none");
+
+        $("#id_show_obj_name").html("");
+
+        $("input[name=id_obj]").val("");
+
+        $("input[name='id_type_obj']").val(id_type_obj);
+
+    });
+
+
+    $("#dialog_obj").dialog("close");
+
+    $("#btn_select_obj").button({icons: {primary: "ui-icon-disk"}});
+
+    oTable = $("#obj_list").dataTable({
+        "bProcessing": true,
+        "bServerSide": true,
+		"sAjaxSource": "{% url user-group-individual-perms.ajax.get-objects %}",
+        "fnServerParams": function(aoData) {
+            aoData["search"] =  $("#id_obj_name").val();
+            aoData["id_type_obj"] = $("input[name='id_type_obj']").val();
+        },
+		"iDeferLoading": 0,
+		"aaSorting": [],
+		"bAutoWidth": false,
+		"bJQueryUI": true,
+		"bFilter": false,
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": {% max_results %},
+		"aoColumnDefs": [{"bSortable": false, "aTargets": [0,1,2]}]
+	});
+
+    $("#page_tab_model").tabs();
+
+
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+
+    <div id="dialog_obj">
+        <div id="page_tab_model">
+            <table id="obj_list">
+                <col width="10%" />
+                <col width="25%" />
+                <col width="65%" />
+                <thead>
+                    <tr>
+                        <th><input type="radio" name="sel_obj" /></th>
+                        <th>Id</th>
+                        <th>Nome</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Criação de Permissão Individual de Objeto</a></li>
+	</ul>
+	<div id="tabs-1">
+
+		<form onkeypress="return event.keyCode != 13" id="edit_form" method="post" action="{% url user-group-individual-perms.create %}">
+			{% csrf_token %}
+
+			<div id="fields" class="ui-widget-content">
+
+            <tr>
+                <td>Buscar Objeto:</td>
+                <td style="margin-left: 5px;">
+                    <input id="id_obj_name" type="text" name="obj_name" maxlength="100" style="width:250px" />
+                </td>
+                <td>
+                    <input type="button" id="btn_select_obj" value="Selecionar Objeto" />
+                </td>
+            </tr>
+
+            <div>
+                <label id="id_show_obj_name" style="display:none">Nome do objeto selecionado:</label>
+            </div>
+			{% for field in form_individ_perms_group_user %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					{{ field }}
+					<p id="error">
+					{% if field.errors %}
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				</div>
+			{% endfor %}
+
+            {% for field in form_hidden_ids %}
+				<div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					{{ field }}
+					<p id="error">
+					{% if field.errors %}
+						{% for error in field.errors %}
+							{{ error|escape }}
+						{% endfor %}
+					{% endif %}
+					</p>
+				</div>
+			{% endfor %}
+			</div>
+
+
+
+			<div class="separator spacer"></div>
+
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}
