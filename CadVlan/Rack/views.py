@@ -38,6 +38,8 @@ from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.git import GITCommandError
 from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
 
+from CadVlan.Util.converters.util import split_to_array
+
 from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, \
     InvalidParameterError, NetworkAPIClientError, NumeroRackDuplicadoError
 
