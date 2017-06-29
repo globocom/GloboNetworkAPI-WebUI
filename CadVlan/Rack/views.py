@@ -613,10 +613,10 @@ def remove_rack (request, fabric_id, rack_id):
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def vlans_rack (request, fabric_id, rack_id):
 
-    auth = AuthSession(request.session)
-    client = auth.get_clientFactory()
     try:
-        client.create_apirack().rack_vlans(rack_id)
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+        client.create_apirack().rackenvironments(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_alocar_config"))
     except:
         messages.add_message(request, messages.WARNING, rack_messages.get("can_not_alocar_config"))
@@ -882,15 +882,20 @@ def fabric_ambiente(request, fabric_id):
                 "father_environment": None,
                 "configs": configs
             }
+
+            amb = client.create_api_environment().create_environment(ambiente)
+
+            environment = dict()
+            environment["id"] = amb[0].get("id")
+            environment["details"] = dict()
+
             fabric = dict()
             config = dict()
-            config["Ambiente"] = ambiente
+            config["Ambiente"] = environment
             fabric["flag"] = True
             fabric["config"] = config
 
             environment = client.create_apirack().edit_fabric(fabric_id, fabric)
-            # if mais prefixo
-            # redireciona para outra pagina para inserir os ambientes filhos
 
             return HttpResponseRedirect(reverse('fabric.ambiente', args=[fabric_id]))
 

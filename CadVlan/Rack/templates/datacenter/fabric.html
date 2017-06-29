@@ -131,12 +131,12 @@
                        <i class="material-icons" style="color:#FFD17C;font-size:15px">edit</i>
                     </a>
                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                            href="{% url rack.files i.dcroom i.id %}">
-                        <i class="material-icons" style="color:#FFD17C;font-size:15px">insert_drive_file</i>
-                    </a>
-                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                             href="{% url rack.vlans i.dcroom i.id %}">
                         <p style="font-size:8px;color:#FFD17C">NET</p>
+                    </a>
+                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                            href="{% url rack.files i.dcroom i.id %}">
+                        <i class="material-icons" style="color:#FFD17C;font-size:15px">insert_drive_file</i>
                     </a>
                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                             href="{% url rack.deploy.new i.dcroom i.id %}">
