@@ -632,7 +632,7 @@ def files_rack (request, fabric_id, rack_id):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
     try:
-        client.create_apirack().rack_files(rack_id)
+        client.create_apirack().rackfiles(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_create_config"))
     except:
         messages.add_message(request, messages.WARNING, rack_messages.get("can_not_create_config"))
@@ -753,8 +753,9 @@ def fabric(request, fabric_id):
             fabric['spines'] = request.POST.get('rack')
             fabric['leafs'] = request.POST.get('lfs')
             fabric['config'] = request.POST.get('config')
+            fabric['flag'] = 0
 
-            fabric_dict = client.create_apirack().edit_fabric(fabric_id, fabric)
+            fabric_dict = client.create_apirack().put_fabric(fabric_id, fabric)
             lists["fabric"] = fabric_dict.get("dcroom")
 
     except NetworkAPIClientError, e:
@@ -895,7 +896,7 @@ def fabric_ambiente(request, fabric_id):
             fabric["flag"] = True
             fabric["config"] = config
 
-            environment = client.create_apirack().edit_fabric(fabric_id, fabric)
+            environment = client.create_apirack().put_fabric(fabric_id, fabric)
 
             return HttpResponseRedirect(reverse('fabric.ambiente', args=[fabric_id]))
 
@@ -955,16 +956,16 @@ def fabric_bgp(request, fabric_id):
                 'noc': noc
             }
             config = {
-                'BGP': [bgp],
-                'Gerencia': [gerencia],
-                'VLT': [vlt]
+                'BGP': bgp,
+                'Gerencia': gerencia,
+                'VLT': vlt
             }
             fabric = {
                 'flag': True,
                 'config': config
             }
 
-            environment = client.create_apirack().edit_fabric(fabric_id, fabric)
+            environment = client.create_apirack().put_fabric(fabric_id, fabric)
 
             return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
