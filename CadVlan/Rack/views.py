@@ -753,7 +753,6 @@ def fabric(request, fabric_id):
             fabric['spines'] = request.POST.get('rack')
             fabric['leafs'] = request.POST.get('lfs')
             fabric['config'] = request.POST.get('config')
-            fabric['flag'] = 0
 
             fabric_dict = client.create_apirack().put_fabric(fabric_id, fabric)
             lists["fabric"] = fabric_dict.get("dcroom")
@@ -813,45 +812,36 @@ def fabric_ambiente(request, fabric_id):
 
         lists = dict()
         lists['fabric_id'] = fabric_id
+        fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
+        fabric_name = fabric.get("name")
+        lists['fabric_name'] = fabric_name
         lists["action"] = reverse('fabric.ambiente', args=[fabric_id])
 
-        lists["net_type_list"] = client.create_tipo_rede().listar().get("net_type")
-        lists["env_logic"] = client.create_ambiente_logico().listar().get("logical_environment")
-        lists["env_dc"] = client.create_divisao_dc().listar().get("division_dc")
-        lists["env_l3"] = client.create_grupo_l3().listar().get("group_l3")
-        lists["filters"] = client.create_filter().list_all().get("filter")
-        lists["envs"] = client.create_ambiente().listar().get('ambiente')
-        vrfs = client.create_api_vrf().search()['vrfs']
-        lists["vrfs"] = sorted(vrfs, key=operator.itemgetter('vrf'))
-
-        """
-        try:
-            templates = acl.get_templates(auth.get_user(), True)
-        except GITCommandError, e:
-            logger.error(e)
-            messages.add_message(request, messages.ERROR, e)
-            templates = {
-                'ipv4': list(),
-                'ipv6': list()
-            }
-        lists["ipv4"] = templates.get("ipv4")
-        lists["ipv6"] = templates.get("ipv6")
-        """
         if request.method == 'POST':
-            url = request.META.get('HTTP_REFERER').split("/")
-            fabric_id = url[-1] if url[-1] else url[-2]
-            lists["fabric_id"] = fabric_id
 
-            vrf = ast.literal_eval(request.POST.get('select_vrf'))
+            envs = list()
+            env_oob = dict()
+            env_hosts = dict()
+            env_spn_be = dict()
+            env_spn_fe = dict()
+            env_spn_bo = dict()
+            env_spn_boca = dict()
+            env_spn_bocab = dict()
+            env_interno_fe = dict()
+            env_interno_be = dict()
+
+            net_type_list  = client.create_tipo_rede().listar().get("net_type")
+            for type in net_type_list:
+                if type.get("name")=="Rede invalida equipamentos":
+                    net_type_id = type.get("id")
 
             configs = list()
-
             if request.POST.get('ipv4range'):
                 v4 = {
                     'subnet': request.POST.get('ipv4range'),
                     'new_prefix': request.POST.get('prefixv4'),
                     'type': "v4",
-                    'network_type': int(request.POST.get('env_type')),
+                    'network_type': int(net_type_id),
                 }
                 configs.append(v4)
             if request.POST.get('ipv6range'):
@@ -859,46 +849,200 @@ def fabric_ambiente(request, fabric_id):
                     'subnet': request.POST.get('ipv6range'),
                     'new_prefix': request.POST.get('prefixv6'),
                     'type': "v6",
-                    'network_type': int(request.POST.get('env_type')),
+                    'network_type': int(net_type_id),
                 }
                 configs.append(v6)
 
-            ambiente = {
-                "id": None,
-                "fabric_id": int(fabric_id),
-                "grupo_l3": int(request.POST.get('select_env_l3')),
-                "ambiente_logico": int(request.POST.get('select_env_log')),
-                "divisao_dc": int(request.POST.get('select_divisaodc')),
-                "filter": int(request.POST.get('select_filter')) if request.POST.get('select_filter') else None,
-                "acl_path": request.POST.get('envpathacl', None),
-                "ipv4_template": request.POST.get('envtemplateaclv4', None),
-                "ipv6_template": request.POST.get('envtemplateaclv6', None),
-                "link": None,
-                "min_num_vlan_1": int(request.POST.get('vlanmin')) if request.POST.get('vlanmin') else None,
-                "max_num_vlan_1": int(request.POST.get('vlanmax')) if request.POST.get('vlanmax') else None,
-                "min_num_vlan_2": None,
-                "max_num_vlan_2": None,
-                "default_vrf": int(vrf.get("id")) if vrf.get("id") else None,
-                'vrf': vrf.get('vrf', ''),
-                "father_environment": None,
-                "configs": configs
-            }
+            configs_int = list()
+            if request.POST.get('ipv4range'):
+                v4_int = {
+                    'subnet': request.POST.get('ipv4rangeint'),
+                    'new_prefix': request.POST.get('prefixv4int'),
+                    'type': "v4",
+                    'network_type': int(net_type_id),
+                }
+                configs.append(v4_int)
+            if request.POST.get('ipv6range'):
+                v6_int = {
+                    'subnet': request.POST.get('ipv6rangeint'),
+                    'new_prefix': request.POST.get('prefixv6int'),
+                    'type': "v6",
+                    'network_type': int(net_type_id),
+                }
+                configs_int.append(v6_int)
 
-            amb = client.create_api_environment().create_environment(ambiente)
+            configs_oob = list()
+            if request.POST.get('ipv4range'):
+                v4_oob = {
+                    'subnet': request.POST.get('ipv4rangeoob'),
+                    'new_prefix': request.POST.get('prefixv4oob'),
+                    'type': "v4",
+                    'network_type': int(net_type_id),
+                }
+                configs.append(v4_oob)
 
-            environment = dict()
-            environment["id"] = amb[0].get("id")
-            environment["details"] = dict()
+            try:
+                env_l3_id = client.create_grupo_l3().inserir(fabric_name).get("logical_environment").get("id")
+            except:
+                env_l3 = client.create_grupo_l3().listar().get("group_l3")
+                for l3 in env_l3:
+                    if l3.get("nome")==fabric_name:
+                        env_l3_id = l3.get("id")
 
-            fabric = dict()
-            config = dict()
-            config["Ambiente"] = environment
-            fabric["flag"] = True
-            fabric["config"] = config
+            env_logic = client.create_ambiente_logico().listar().get("logical_environment")
+            for el in env_logic:
+                if el.get("nome")=="SPINES":
+                    logic_id_spn = el.get("id")
+                elif el.get("nome")=="HOSTS-CLOUD":
+                    logic_id_host = el.get("id")
+                elif el.get("nome")=="GERENCIA":
+                    logic_id_ger = el.get("id")
+                elif el.get("nome")=="INTERNO-RACK":
+                    logic_id_int = el.get("id")
 
-            environment = client.create_apirack().put_fabric(fabric_id, fabric)
+            vrfs = client.create_api_vrf().search()['vrfs']
+            for vrf in vrfs:
+                if vrf.get("vrf")=="BEVrf":
+                    vrf_id_be = vrf.get("id")
+                    vrf_be = vrf.get("vrf")
+                elif vrf.get("vrf")=="FEVrf":
+                    vrf_id_fe = vrf.get("id")
+                    vrf_fe = vrf.get("vrf")
+                elif vrf.get("vrf")=="BordaVrf":
+                    vrf_id_bo = vrf.get("id")
+                    vrf_bo = vrf.get("vrf")
+                elif vrf.get("vrf")=="BordaCachosVrf":
+                    vrf_id_boca = vrf.get("id")
+                    vrf_boca = vrf.get("vrf")
+                elif vrf.get("vrf")=="BordaCachosBVrf":
+                    vrf_id_bocab = vrf.get("id")
+                    vrf_bocab = vrf.get("vrf")
+                elif vrf.get("vrf")=="Default":
+                    vrf_id = vrf.get("id")
+                    vrf_ = vrf.get("vrf")
 
-            return HttpResponseRedirect(reverse('fabric.ambiente', args=[fabric_id]))
+            env_dc = client.create_divisao_dc().listar().get("division_dc")
+            for dc in env_dc:
+                if dc.get("nome")=="BE":
+                    env_spn_be["dc_id"] = dc.get("id")
+                    env_spn_be["logic_id"] = logic_id_spn
+                    env_spn_be["vrf"] = vrf_be
+                    env_spn_be["vrf_id"] = vrf_id_be
+                    env_spn_be["vlan_min"] = int(request.POST.get('vlanminspnbe')) if request.POST.get('vlanminspnbe') else None
+                    env_spn_be["vlan_max"] = int(request.POST.get('vlanmaxspnbe')) if request.POST.get('vlanmaxspnbe') else None
+                    env_spn_be["config"] = configs
+                    env_hosts["dc_id"] = dc.get("id")
+                    env_hosts["logic_id"] = logic_id_host
+                    env_hosts["vrf"] = vrf_be
+                    env_hosts["vrf_id"] = vrf_id_be
+                    env_hosts["vlan_min"] = int(request.POST.get('vlanminintbe')) if request.POST.get('vlanminintbe') else None
+                    env_hosts["vlan_max"] = int(request.POST.get('vlanmaxintbe')) if request.POST.get('vlanmaxintbe') else None
+                    env_hosts["config"] = configs_int
+                    env_interno_be["dc_id"] = dc.get("id")
+                    env_interno_be["logic_id"] = logic_id_int
+                    env_interno_be["vrf"] = vrf_be
+                    env_interno_be["vrf_id"] = vrf_id_be
+                    env_interno_be["vlan_min"] = None
+                    env_interno_be["vlan_max"] = None
+                    env_interno_be["config"] = []
+                    envs.append(env_spn_be)
+                    envs.append(env_hosts)
+                    envs.append(env_interno_be)
+                elif dc.get("nome")=="FE":
+                    env_spn_fe["dc_id"] = dc.get("id")
+                    env_spn_fe["logic_id"] = logic_id_spn
+                    env_spn_fe["vrf"] = vrf_fe
+                    env_spn_fe["vrf_id"] = vrf_id_fe
+                    env_spn_fe["vlan_min"] = int(request.POST.get('vlanminspnfe')) if request.POST.get('vlanminspnfe') else None
+                    env_spn_fe["vlan_max"] = int(request.POST.get('vlanmaxspnfe')) if request.POST.get('vlanmaxspnfe') else None
+                    env_spn_fe["config"] = configs
+                    env_interno_fe["dc_id"] = dc.get("id")
+                    env_interno_fe["logic_id"] = logic_id_int
+                    env_interno_fe["vrf"] = vrf_fe
+                    env_interno_fe["vrf_id"] = vrf_id_fe
+                    env_interno_fe["vlan_min"] = None
+                    env_interno_fe["vlan_max"] = None
+                    env_interno_fe["config"] = []
+                    envs.append(env_spn_fe)
+                    envs.append(env_interno_fe)
+                elif dc.get("nome")=="BO":
+                    env_spn_bo["dc_id"] = dc.get("id")
+                    env_spn_bo["logic_id"] = logic_id_spn
+                    env_spn_bo["vrf"] = vrf_bo
+                    env_spn_bo["vrf_id"] = vrf_id_bo
+                    env_spn_bo["vlan_min"] = int(request.POST.get('vlanminspnbo')) if request.POST.get('vlanminspnbo') else None
+                    env_spn_bo["vlan_max"] = int(request.POST.get('vlanmaxspnbo')) if request.POST.get('vlanmaxspnbo') else None
+                    env_spn_bo["config"] = configs
+                    envs.append(env_spn_bo)
+                elif dc.get("nome")=="BOCACHOS":
+                    env_spn_boca["dc_id"] = dc.get("id")
+                    env_spn_boca["logic_id"] = logic_id_spn
+                    env_spn_boca["vrf"] = vrf_boca
+                    env_spn_boca["vrf_id"] = vrf_id_boca
+                    env_spn_boca["vlan_min"] = int(request.POST.get('vlanminspnboca')) if request.POST.get('vlanminspnboca') else None
+                    env_spn_boca["vlan_max"] = int(request.POST.get('vlanmaxspnboca')) if request.POST.get('vlanmaxspnboca') else None
+                    env_spn_boca["config"] = configs
+                    envs.append(env_spn_boca)
+                elif dc.get("nome")=="BOCACHOS-B":
+                    env_spn_bocab["dc_id"] = dc.get("id")
+                    env_spn_bocab["logic_id"] = logic_id_spn
+                    env_spn_bocab["vrf"] = vrf_bocab
+                    env_spn_bocab["vrf_id"] = vrf_id_bocab
+                    env_spn_bocab["vlan_min"] = int(request.POST.get('vlanminspnbocab')) if request.POST.get('vlanminspnbocab') else None
+                    env_spn_bocab["vlan_max"] = int(request.POST.get('vlanmaxspnbocab')) if request.POST.get('vlanmaxspnbocab') else None
+                    env_spn_bocab["config"] = configs
+                    envs.append(env_spn_bocab)
+                elif dc.get("nome")=="OOB":
+                    env_oob["dc_id"] = dc.get("id")
+                    env_oob["logic_id"] = logic_id_ger
+                    env_oob["vrf"] = vrf_
+                    env_oob["vrf_id"] = vrf_id
+                    env_oob["vlan_min"] = int(request.POST.get('vlanminoob')) if request.POST.get('vlanminoob') else None
+                    env_oob["vlan_max"] = int(request.POST.get('vlanmaxoob')) if request.POST.get('vlanmaxoob') else None
+                    env_oob["config"] = configs_oob
+                    envs.append(env_oob)
+
+            url = request.META.get('HTTP_REFERER').split("/")
+            fabric_id = url[-1] if url[-1] else url[-2]
+            lists["fabric_id"] = fabric_id
+
+            for amb in envs:
+                ambiente = {
+                    "id": None,
+                    "fabric_id": int(fabric_id),
+                    "grupo_l3": int(env_l3_id),
+                    "ambiente_logico": int(amb.get("logic_id")),
+                    "divisao_dc": int(amb.get("dc_id")),
+                    "filter": None,
+                    "acl_path": None,
+                    "ipv4_template": None,
+                    "ipv6_template": None,
+                    "link": None,
+                    "min_num_vlan_1": amb.get("vlan_min"),
+                    "max_num_vlan_1": amb.get("vlan_max"),
+                    "min_num_vlan_2": None,
+                    "max_num_vlan_2": None,
+                    "default_vrf": amb.get("vrf_id"),
+                    'vrf': amb.get("vrf"),
+                    "father_environment": None,
+                    "configs": amb.get("config")
+                }
+
+                amb_id = client.create_api_environment().create_environment(ambiente)
+
+                environment = dict()
+                environment["id"] = amb_id[0].get("id")
+                environment["details"] = dict()
+
+                fabric = dict()
+                config = dict()
+                config["Ambiente"] = environment
+                fabric["flag"] = True
+                fabric["config"] = config
+
+                environment = client.create_apirack().put_fabric(fabric_id, fabric)
+
+            return HttpResponseRedirect(reverse('fabric.bgp', args=[fabric_id]))
 
     except NetworkAPIClientError, e:
         logger.error(e)
