@@ -1,161 +1,271 @@
 {% extends "menu.html" %}
 {% block content %}
 <section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
-    <div class="mbr-section mbr-section__container mbr-section__container--middle">
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-12 text-xs-center">
-                    <h3 class="mbr-section-title display-2">Ambientes e Redes</h3>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="mbr-section mbr-section-nopadding">
         <div class="container">
                     <form action="{{action}}" method="post" id="fabric_env_form">
                         {% csrf_token %}
                         <div class="row form-group">
-                            <h1 class="mbr-section-subtitle display-4 text-xs-center">
+                            <h3 class="mbr-section-title display-4 text-xs-center">
                                 <p>Redes Externas ao Rack: Spines - Leafs</p>
-                            </h1>
+                            </h3>
                         </div>
                         <div class="row form-group">
-                            <p class="form-control-label">Bloco IPv4 (Rede - Prefixo)</p>
                             <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="fabric_form_v4">CIDR Ipv4</label>
                                 <input type="text" class="form-control" name="ipv4range" id="fabric_form_v4"
                                        data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
                             </div>
                             <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="fabric_form_pfxv4">Sumário do Rack</label>
                                 <input type="text" class="form-control" name="prefixv4" id="fabric_form_pfxv4"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
                         </div>
                         <div class="row form-group">
-                            <p class="form-control-label">Bloco IPv6 (Rede - Prefixo)</p>
                             <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="fabric_form_v6">CIDR Ipv6</label>
                                 <input type="text" class="form-control" name="ipv6range" id="fabric_form_v6"
                                        data-form-field="fabric_ipv6range" placeholder="2001:0db8:cafe::/118">
                             </div>
                             <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="fabric_form_pfxv6">Sumário do Rack</label>
                                 <input type="text" class="form-control" name="prefixv6" id="fabric_form_pfxv6"
                                        data-form-field="fabric_prefixv6" placeholder="120">
                             </div>
                         </div>
                         <div class="row form-group">
                             <p class="form-control-label">Range de Vlans (Valor mínimo - Valor máximo)</p>
-                            <div class="col-xs-12 col-md-2">
+                            <div class="col-xs-12 col-md-1">
                                 <label class="form-control-label" for="vlanminspnbe_id">BE</label>
                                 <input type="text" class="form-control" name="vlanminspnbe" data-form-field="fabric_vlanname"
                                        id="vlanminspnbe_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-2">
+                            <div class="col-xs-12 col-md-1">
                                 <label class="form-control-label" for="vlanmaxspnbe_id">BE</label>
                                 <input type="text" class="form-control" name="vlanmaxspnbe" data-form-field="fabric_vlanname"
                                        id="vlanmaxspnbe_id" placeholder="4096">
                             </div>
-                            <div class="col-xs-12 col-md-2">
+                            <div class="col-xs-12 col-md-1">
                                 <label class="form-control-label" for="vlanminspnfe_id">FE</label>
                                 <input type="text" class="form-control" name="vlanminspnfe" data-form-field="fabric_vlanname"
                                        id="vlanminspnfe_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-2">
+                            <div class="col-xs-12 col-md-1">
                                 <label class="form-control-label" for="vlanmaxspnfe_id">FE</label>
                                 <input type="text" class="form-control" name="vlanmaxspnfe" data-form-field="fabric_vlanname"
                                        id="vlanmaxspnfe_id" placeholder="4096">
                             </div>
-                            <div class="col-xs-12 col-md-2">
-                                <label class="form-control-label" for="vlanminspnbo_id">BORDA</label>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminspnbo_id">BO</label>
                                 <input type="text" class="form-control" name="vlanminspnbo" data-form-field="fabric_vlanname"
                                        id="vlanminspnbo_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-2">
-                                <label class="form-control-label" for="vlanmaxspnbo_id">BORDA</label>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanmaxspnbo_id">BO</label>
                                 <input type="text" class="form-control" name="vlanmaxspnbo" data-form-field="fabric_vlanname"
                                        id="vlanmaxspnbo_id" placeholder="4096">
                             </div>
-                            <div class="col-xs-12 col-md-2">
-                                <label class="form-control-label" for="vlanminspnboca_id">BORDA-CACHOS</label>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminspnboca_id">BOCA</label>
                                 <input type="text" class="form-control" name="vlanminspnboca" data-form-field="fabric_vlanname"
                                        id="vlanminspnboca_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-2">
-                                <label class="form-control-label" for="vlanmaxspnboca_id">BORDA-CACHOS</label>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanmaxspnboca_id">BOCA</label>
                                 <input type="text" class="form-control" name="vlanmaxspnboca" data-form-field="fabric_vlanname"
                                        id="vlanmaxspnboca_id" placeholder="4096">
                             </div>
-                            <div class="col-xs-12 col-md-2">
-                                <label class="form-control-label" for="vlanminspnboca2_id">BORDA-CACHOS-B</label>
-                                <input type="text" class="form-control" name="vlanminspnboca2" data-form-field="fabric_vlanname"
-                                       id="vlanminspnboca2_id" placeholder="1">
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminspnbocab_id">BOCA-B</label>
+                                <input type="text" class="form-control" name="vlanminspnbocab" data-form-field="fabric_vlanname"
+                                       id="vlanminspnbocab_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-2">
-                                <label class="form-control-label" for="vlanmaxspnboca2_id">BORDA-CACHOS-B</label>
-                                <input type="text" class="form-control" name="vlanmaxspnboca2" data-form-field="fabric_vlanname"
-                                       id="vlanmaxspnboca2_id" placeholder="4096">
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanmaxspnbocab_id">BOCA-B</label>
+                                <input type="text" class="form-control" name="vlanmaxspnbocab" data-form-field="fabric_vlanname"
+                                       id="vlanmaxspnbocab_id" placeholder="4096">
                             </div>
                         </div>
+                        <br><br><br>
                         <div class="row form-group">
-                            <h1 class="mbr-section-subtitle display-4 text-xs-center">
+                            <h1 class="mbr-section-title display-4 text-xs-center">
                                 <p>Rede de BE para uso interno do Rack: Servidores/VMs</p>
                             </h1>
                         </div>
                         <div class="row form-group">
-                            <p class="form-control-label">Bloco IPv4 (Rede - Prefixo)</p>
                             <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="ipv4rangeint_id">CIDR Ipv4</label>
                                 <input type="text" class="form-control" name="ipv4rangeint" id="ipv4rangeint_id"
                                        data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
                             </div>
                             <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="prefixv4int_id">Sumário do Rack</label>
                                 <input type="text" class="form-control" name="prefixv4int" id="prefixv4int_id"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
                         </div>
                         <div class="row form-group">
-                            <p class="form-control-label">Bloco IPv6 (Rede - Prefixo)</p>
                             <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="ipv6rangeint_id">CIDR Ipv6</label>
                                 <input type="text" class="form-control" name="ipv6rangeint" id="ipv6rangeint_id"
                                        data-form-field="fabric_ipv6range" placeholder="2001:0db8:cafe::/118">
                             </div>
                             <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="prefixv6int_int">Sumário do Rack</label>
                                 <input type="text" class="form-control" name="prefixv6int" id="prefixv6int_int"
                                        data-form-field="fabric_prefixv6" placeholder="120">
                             </div>
                         </div>
                         <div class="row form-group">
-                            <p class="form-control-label">Range de Vlans (Valor mínimo - Valor máximo)</p>
-                            <div class="col-xs-12 col-md-2">
+                            <p class="form-control-label">Ambientes Filhos:</p>
+                            <div class="col-xs-12 col-md-4">
+                                <label class="form-control-label" for="ipv4rangeintbe_id">Bloco BE Ipv4</label>
+                                <input type="text" class="form-control" name="ipv4rangeintbe" id="ipv4rangeintbe_id"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="prefixv4intbe_id">Prefixo v4</label>
+                                <input type="text" class="form-control" name="prefixv4intbe" id="prefixv4intbe_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-4">
+                                <label class="form-control-label" for="ipv6rangeintbe_id">Bloco BE Ipv6</label>
+                                <input type="text" class="form-control" name="ipv6rangeintbe" id="ipv6rangeintbe_id"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="prefixv6intbe_id">Prefixo v6</label>
+                                <input type="text" class="form-control" name="prefixv6intbe" id="prefixv6intbe_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminintbe_id">Vlan mín</label>
                                 <input type="text" class="form-control" name="vlanminintbe" data-form-field="fabric_vlanname"
                                        id="vlanminintbe_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-2">
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanmaxintbe_id">Vlan máx</label>
                                 <input type="text" class="form-control" name="vlanmaxintbe" data-form-field="fabric_vlanname"
                                        id="vlanmaxintbe_id" placeholder="4096">
                             </div>
+                            <div class="col-xs-12 col-md-4">
+                                <label class="form-control-label" for="ipv4rangeintbefe_id">Bloco BEFE Ipv4</label>
+                                <input type="text" class="form-control" name="ipv4rangeintbefe" id="ipv4rangeintbefe_id"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="prefixv4intbefe_id">Prefixo v4</label>
+                                <input type="text" class="form-control" name="prefixv4intbefe" id="prefixv4intbefe_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-4">
+                                <label class="form-control-label" for="ipv6rangeintbefe_id">Bloco BEFE Ipv6</label>
+                                <input type="text" class="form-control" name="ipv6rangeintbefe" id="ipv6rangeintbefe_id"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="prefixv6intbefe_id">Prefixo v6</label>
+                                <input type="text" class="form-control" name="prefixv6intbefe" id="prefixv6intbefe_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminintbefe_id">Vlan mín</label>
+                                <input type="text" class="form-control" name="vlanminintbefe" data-form-field="fabric_vlanname"
+                                       id="vlanminintbefe_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanmaxintbefe_id">Vlan máx</label>
+                                <input type="text" class="form-control" name="vlanmaxintbefe" data-form-field="fabric_vlanname"
+                                       id="vlanmaxintbefe_id" placeholder="4096">
+                            </div>
+                            <div class="col-xs-12 col-md-4">
+                                <label class="form-control-label" for="ipv4rangeintbebo_id">Bloco BEBORDA Ipv4</label>
+                                <input type="text" class="form-control" name="ipv4rangeintbebo" id="ipv4rangeintbebo_id"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="prefixv4intbebo_id">Prefixo v4</label>
+                                <input type="text" class="form-control" name="prefixv4intbebo" id="prefixv4intbebo_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-4">
+                                <label class="form-control-label" for="ipv6rangeintbebo_id">Bloco BEBORDA Ipv6</label>
+                                <input type="text" class="form-control" name="ipv6rangeintbebo" id="ipv6rangeintbebo_id"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="prefixv6intbebo_id">Prefixo v6</label>
+                                <input type="text" class="form-control" name="prefixv6intbebo" id="prefixv6intbebo_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminintbebo_id">Vlan mín</label>
+                                <input type="text" class="form-control" name="vlanminintbebo" data-form-field="fabric_vlanname"
+                                       id="vlanminintbebo_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanmaxintbebo_id">Vlan máx</label>
+                                <input type="text" class="form-control" name="vlanmaxintbebo" data-form-field="fabric_vlanname"
+                                       id="vlanmaxintbebo_id" placeholder="4096">
+                            </div>
+                            <div class="col-xs-12 col-md-4">
+                                <label class="form-control-label" for="ipv4rangeintbeca_id">Bloco BECACHOS Ipv4</label>
+                                <input type="text" class="form-control" name="ipv4rangeintbeca" id="ipv4rangeintbeca_id"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="prefixv4intbeca_id">Prefixo v4</label>
+                                <input type="text" class="form-control" name="prefixv4intbeca" id="prefixv4intbeca_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-4">
+                                <label class="form-control-label" for="ipv6rangeintbeca_id">Bloco BECACHOS Ipv6</label>
+                                <input type="text" class="form-control" name="ipv6rangeintbeca" id="ipv6rangeintbeca_id"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="prefixv6intbeca_id">Prefixo v6</label>
+                                <input type="text" class="form-control" name="prefixv6intbeca" id="prefixv6intbeca_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminintbeca_id">Vlan mín</label>
+                                <input type="text" class="form-control" name="vlanminintbeca" data-form-field="fabric_vlanname"
+                                       id="vlanminintbeca_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanmaxintbeca_id">Vlan máx</label>
+                                <input type="text" class="form-control" name="vlanmaxintbeca" data-form-field="fabric_vlanname"
+                                       id="vlanmaxintbeca_id" placeholder="4096">
+                            </div>
                         </div>
-
+                        <br><br><br>
                         <div class="row form-group">
-                            <h1 class="mbr-section-subtitle display-4 text-xs-center">
-                                <p>Rede de Gerencia:</p>
+                            <h1 class="mbr-section-title display-4 text-xs-center">
+                                <p>Rede de Gerencia</p>
                             </h1>
                         </div>
                         <div class="row form-group">
-                            <p class="form-control-label">Bloco IPv4 (Rede - Prefixo)</p>
                             <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="prefixv4oob_id">CIDR IPv4</label>
                                 <input type="text" class="form-control" name="ipv4rangeoob" id="ipv4rangeoob_id"
                                        data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
                             </div>
                             <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="prefixv4oob_id">Sumário dos Racks</label>
                                 <input type="text" class="form-control" name="prefixv4oob" id="prefixv4oob_id"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
                         </div>
                         <div class="row form-group">
-                            <p class="form-control-label">Range de Vlans (Valor mínimo - Valor máximo)</p>
                             <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="vlanminoob_id">Vlan mín</label>
                                 <input type="text" class="form-control" name="vlanminoob" data-form-field="fabric_vlanname"
                                        id="vlanminoob_id" placeholder="1">
                             </div>
                             <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="vlanmaxoob_id">Vlan máx</label>
                                 <input type="text" class="form-control" name="vlanmaxoob" data-form-field="fabric_vlanname"
                                        id="vlanmaxoob_id" placeholder="4096">
                             </div>

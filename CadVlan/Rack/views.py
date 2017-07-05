@@ -854,15 +854,15 @@ def fabric_ambiente(request, fabric_id):
                 configs.append(v6)
 
             configs_int = list()
-            if request.POST.get('ipv4range'):
+            if request.POST.get('ipv4rangeint'):
                 v4_int = {
                     'subnet': request.POST.get('ipv4rangeint'),
                     'new_prefix': request.POST.get('prefixv4int'),
                     'type': "v4",
                     'network_type': int(net_type_id),
                 }
-                configs.append(v4_int)
-            if request.POST.get('ipv6range'):
+                configs_int.append(v4_int)
+            if request.POST.get('ipv6rangeint'):
                 v6_int = {
                     'subnet': request.POST.get('ipv6rangeint'),
                     'new_prefix': request.POST.get('prefixv6int'),
@@ -872,14 +872,14 @@ def fabric_ambiente(request, fabric_id):
                 configs_int.append(v6_int)
 
             configs_oob = list()
-            if request.POST.get('ipv4range'):
+            if request.POST.get('ipv4rangeoob'):
                 v4_oob = {
                     'subnet': request.POST.get('ipv4rangeoob'),
                     'new_prefix': request.POST.get('prefixv4oob'),
                     'type': "v4",
                     'network_type': int(net_type_id),
                 }
-                configs.append(v4_oob)
+                configs_oob.append(v4_oob)
 
             try:
                 env_l3_id = client.create_grupo_l3().inserir(fabric_name).get("logical_environment").get("id")
@@ -921,6 +921,88 @@ def fabric_ambiente(request, fabric_id):
                     vrf_id = vrf.get("id")
                     vrf_ = vrf.get("vrf")
 
+            details_hosts = list()
+            details_hosts_be = {
+                'min_num_vlan_1': int(request.POST.get('vlanminintbe')) if request.POST.get('vlanminintbe') else None,
+                'max_num_vlan_1': int(request.POST.get('vlanmaxintbe')) if request.POST.get('vlanmaxintbe') else None,
+                'config': [
+                    {
+                        'subnet': request.POST.get('ipv4rangeintbe'),
+                        'type': "v4",
+                        'new_prefix': request.POST.get('prefixv4intbe'),
+                        'network_type': int(net_type_id),
+                    },
+                    {
+                        'subnet': request.POST.get('ipv6rangeintbe'),
+                        'type': "v6",
+                        'new_prefix': request.POST.get('prefixv6intbe'),
+                        'network_type': int(net_type_id),
+                    }
+                ],
+                'name': "BE"
+            }
+            details_hosts.append(details_hosts_be)
+            details_hosts_fe = {
+                'min_num_vlan_1': int(request.POST.get('vlanminintbefe')) if request.POST.get('vlanminintbefe') else None,
+                'max_num_vlan_1': int(request.POST.get('vlanmaxintbefe')) if request.POST.get('vlanmaxintbefe') else None,
+                'config': [
+                    {
+                        'subnet': request.POST.get('ipv4rangeintbefe'),
+                        'type': "v4",
+                        'new_prefix': request.POST.get('prefixv4intbefe'),
+                        'network_type': int(net_type_id),
+                    },
+                    {
+                        'subnet': request.POST.get('ipv6rangeintbefe'),
+                        'type': "v6",
+                        'new_prefix': request.POST.get('prefixv6intbefe'),
+                        'network_type': int(net_type_id),
+                    }
+                ],
+                'name': "BEFE"
+            }
+            details_hosts.append(details_hosts_fe)
+            details_hosts_bo = {
+                'min_num_vlan_1': int(request.POST.get('vlanminintbebo')) if request.POST.get('vlanminintbebo') else None,
+                'max_num_vlan_1': int(request.POST.get('vlanmaxintbebo')) if request.POST.get('vlanmaxintbebo') else None,
+                'config': [
+                    {
+                        'subnet': request.POST.get('ipv4rangeintbebo'),
+                        'type': "v4",
+                        'new_prefix': request.POST.get('prefixv4intbebo'),
+                        'network_type': int(net_type_id),
+                    },
+                    {
+                        'subnet': request.POST.get('ipv6rangeintbebo'),
+                        'type': "v6",
+                        'new_prefix': request.POST.get('prefixv6intbebo'),
+                        'network_type': int(net_type_id),
+                    }
+                ],
+                'name': "BEBO"
+            }
+            details_hosts.append(details_hosts_bo)
+            details_hosts_ca = {
+                'min_num_vlan_1': int(request.POST.get('vlanminintbeca')) if request.POST.get('vlanminintbeca') else None,
+                'max_num_vlan_1': int(request.POST.get('vlanmaxintbeca')) if request.POST.get('vlanmaxintbeca') else None,
+                'config': [
+                    {
+                        'subnet': request.POST.get('ipv4rangeintbeca'),
+                        'type': "v4",
+                        'new_prefix': request.POST.get('prefixv4intbeca'),
+                        'network_type': int(net_type_id),
+                    },
+                    {
+                        'subnet': request.POST.get('ipv6rangeintbeca'),
+                        'type': "v6",
+                        'new_prefix': request.POST.get('prefixv6intbeca'),
+                        'network_type': int(net_type_id),
+                    }
+                ],
+                'name': "BECA"
+            }
+            details_hosts.append(details_hosts_ca)
+
             env_dc = client.create_divisao_dc().listar().get("division_dc")
             for dc in env_dc:
                 if dc.get("nome")=="BE":
@@ -938,6 +1020,7 @@ def fabric_ambiente(request, fabric_id):
                     env_hosts["vlan_min"] = int(request.POST.get('vlanminintbe')) if request.POST.get('vlanminintbe') else None
                     env_hosts["vlan_max"] = int(request.POST.get('vlanmaxintbe')) if request.POST.get('vlanmaxintbe') else None
                     env_hosts["config"] = configs_int
+                    env_hosts["details"] = details_hosts
                     env_interno_be["dc_id"] = dc.get("id")
                     env_interno_be["logic_id"] = logic_id_int
                     env_interno_be["vrf"] = vrf_be
@@ -1032,7 +1115,7 @@ def fabric_ambiente(request, fabric_id):
 
                 environment = dict()
                 environment["id"] = amb_id[0].get("id")
-                environment["details"] = dict()
+                environment["details"] = amb.get("details") if amb.get("details") else []
 
                 fabric = dict()
                 config = dict()
