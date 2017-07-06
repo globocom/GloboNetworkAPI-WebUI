@@ -7,7 +7,8 @@
                         {% csrf_token %}
                         <div class="row form-group">
                             <h3 class="mbr-section-title display-4 text-xs-center">
-                                <p>Redes Externas ao Rack: Spines - Leafs</p>
+                                <p>Redes Externas ao Rack</p>
+                                <p>SPINE - LEAF</p>
                             </h3>
                         </div>
                         <div class="row form-group">
@@ -89,8 +90,68 @@
                         </div>
                         <br><br><br>
                         <div class="row form-group">
+                            <h3 class="mbr-section-title display-4 text-xs-center">
+                                <p>Redes Internas ao Rack</p>
+                                <p>LEAF - LEAF</p>
+                            </h3>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="fabric_form_v4lflf">CIDR Ipv4</label>
+                                <input type="text" class="form-control" name="ipv4rangelflf" id="fabric_form_v4lflf"
+                                       data-form-field="fabric_ipv4range" placeholder="0.0.0.0/22">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="fabric_form_pfxv4lflf">Sumário do Rack</label>
+                                <input type="text" class="form-control" name="prefixv4lflf" id="fabric_form_pfxv4lflf"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="fabric_form_v6lflf">CIDR Ipv6</label>
+                                <input type="text" class="form-control" name="ipv6rangelflf" id="fabric_form_v6lflf"
+                                       data-form-field="fabric_ipv6range" placeholder="2001:0db8:cafe::/118">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="fabric_form_pfxv6lflf">Sumário do Rack</label>
+                                <input type="text" class="form-control" name="prefixv6lflf" id="fabric_form_pfxv6lflf"
+                                       data-form-field="fabric_prefixv6" placeholder="120">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <p class="form-control-label">Número da Vlan</p>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminlflfbe_id">BE</label>
+                                <input type="text" class="form-control" name="vlanminlflfbe" data-form-field="fabric_vlanname"
+                                       id="vlanminlflfbe_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminlflffe_id">FE</label>
+                                <input type="text" class="form-control" name="vlanminlflffe" data-form-field="fabric_vlanname"
+                                       id="vlanminlflffe_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminlflfbo_id">BO</label>
+                                <input type="text" class="form-control" name="vlanminlflfbo" data-form-field="fabric_vlanname"
+                                       id="vlanminlflfbo_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminlflfboca_id">BOCA</label>
+                                <input type="text" class="form-control" name="vlanminlflfboca" data-form-field="fabric_vlanname"
+                                       id="vlanminlflfboca_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-1">
+                                <label class="form-control-label" for="vlanminlflfbocab_id">BOCA-B</label>
+                                <input type="text" class="form-control" name="vlanminlflfbocab" data-form-field="fabric_vlanname"
+                                       id="vlanminlflfbocab_id" placeholder="1">
+                            </div>
+                        </div>
+                        <br><br><br>
+                        <div class="row form-group">
                             <h1 class="mbr-section-title display-4 text-xs-center">
-                                <p>Rede de BE para uso interno do Rack: Servidores/VMs</p>
+                                <p>Rede Internas do Rack (BE)</p>
+                                <p>Servidores/VMs</p>
                             </h1>
                         </div>
                         <div class="row form-group">

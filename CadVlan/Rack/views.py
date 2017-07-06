@@ -749,8 +749,8 @@ def fabric(request, fabric_id):
             fabric = dict()
             fabric['id'] = fabric_id
             fabric['name'] = request.POST.get('fabricname')
-            fabric['racks'] = request.POST.get('spn')
-            fabric['spines'] = request.POST.get('rack')
+            fabric['racks'] = request.POST.get('rack')
+            fabric['spines'] = request.POST.get('spn')
             fabric['leafs'] = request.POST.get('lfs')
             fabric['config'] = request.POST.get('config')
 
@@ -827,6 +827,11 @@ def fabric_ambiente(request, fabric_id):
             env_spn_bo = dict()
             env_spn_boca = dict()
             env_spn_bocab = dict()
+            env_lflf_be = dict()
+            env_lflf_fe = dict()
+            env_lflf_bo = dict()
+            env_lflf_boca = dict()
+            env_lflf_bocab = dict()
             env_interno_fe = dict()
             env_interno_be = dict()
 
@@ -852,6 +857,24 @@ def fabric_ambiente(request, fabric_id):
                     'network_type': int(net_type_id),
                 }
                 configs.append(v6)
+
+            configs_lf = list()
+            if request.POST.get('ipv4rangelflf'):
+                v4 = {
+                    'subnet': request.POST.get('ipv4rangelflf'),
+                    'new_prefix': request.POST.get('prefixv4lflf'),
+                    'type': "v4",
+                    'network_type': int(net_type_id),
+                }
+                configs_lf.append(v4)
+            if request.POST.get('ipv6rangelflf'):
+                v6 = {
+                    'subnet': request.POST.get('ipv6rangelflf'),
+                    'new_prefix': request.POST.get('prefixv6lflf'),
+                    'type': "v6",
+                    'network_type': int(net_type_id),
+                }
+                configs_lf.append(v6)
 
             configs_int = list()
             if request.POST.get('ipv4rangeint'):
@@ -899,6 +922,8 @@ def fabric_ambiente(request, fabric_id):
                     logic_id_ger = el.get("id")
                 elif el.get("nome")=="INTERNO-RACK":
                     logic_id_int = el.get("id")
+                elif el.get("nome")=="LEAF-LEAF":
+                    logic_id_lflf = el.get("id")
 
             vrfs = client.create_api_vrf().search()['vrfs']
             for vrf in vrfs:
@@ -939,7 +964,7 @@ def fabric_ambiente(request, fabric_id):
                         'network_type': int(net_type_id),
                     }
                 ],
-                'name': "BE"
+                'name': "BEBE"
             }
             details_hosts.append(details_hosts_be)
             details_hosts_fe = {
@@ -1013,6 +1038,13 @@ def fabric_ambiente(request, fabric_id):
                     env_spn_be["vlan_min"] = int(request.POST.get('vlanminspnbe')) if request.POST.get('vlanminspnbe') else None
                     env_spn_be["vlan_max"] = int(request.POST.get('vlanmaxspnbe')) if request.POST.get('vlanmaxspnbe') else None
                     env_spn_be["config"] = configs
+                    env_lflf_be["dc_id"] = dc.get("id")
+                    env_lflf_be["logic_id"] = logic_id_lflf
+                    env_lflf_be["vrf"] = vrf_be
+                    env_lflf_be["vrf_id"] = vrf_id_be
+                    env_lflf_be["vlan_min"] = int(request.POST.get('vlanminlflfbe')) if request.POST.get('vlanminlflfbe') else None
+                    env_lflf_be["vlan_max"] = int(request.POST.get('vlanminlflfbe'))+1 if request.POST.get('vlanminlflfbe') else None
+                    env_lflf_be["config"] = configs_lf
                     env_hosts["dc_id"] = dc.get("id")
                     env_hosts["logic_id"] = logic_id_host
                     env_hosts["vrf"] = vrf_be
@@ -1029,6 +1061,7 @@ def fabric_ambiente(request, fabric_id):
                     env_interno_be["vlan_max"] = None
                     env_interno_be["config"] = []
                     envs.append(env_spn_be)
+                    envs.append(env_lflf_be)
                     envs.append(env_hosts)
                     envs.append(env_interno_be)
                 elif dc.get("nome")=="FE":
@@ -1039,6 +1072,13 @@ def fabric_ambiente(request, fabric_id):
                     env_spn_fe["vlan_min"] = int(request.POST.get('vlanminspnfe')) if request.POST.get('vlanminspnfe') else None
                     env_spn_fe["vlan_max"] = int(request.POST.get('vlanmaxspnfe')) if request.POST.get('vlanmaxspnfe') else None
                     env_spn_fe["config"] = configs
+                    env_lflf_fe["dc_id"] = dc.get("id")
+                    env_lflf_fe["logic_id"] = logic_id_lflf
+                    env_lflf_fe["vrf"] = vrf_fe
+                    env_lflf_fe["vrf_id"] = vrf_id_fe
+                    env_lflf_fe["vlan_min"] = int(request.POST.get('vlanminlflffe')) if request.POST.get('vlanminlflffe') else None
+                    env_lflf_fe["vlan_max"] = int(request.POST.get('vlanminlflffe'))+1 if request.POST.get('vlanminlflffe') else None
+                    env_lflf_fe["config"] = configs_lf
                     env_interno_fe["dc_id"] = dc.get("id")
                     env_interno_fe["logic_id"] = logic_id_int
                     env_interno_fe["vrf"] = vrf_fe
@@ -1047,6 +1087,7 @@ def fabric_ambiente(request, fabric_id):
                     env_interno_fe["vlan_max"] = None
                     env_interno_fe["config"] = []
                     envs.append(env_spn_fe)
+                    envs.append(env_lflf_fe)
                     envs.append(env_interno_fe)
                 elif dc.get("nome")=="BO":
                     env_spn_bo["dc_id"] = dc.get("id")
@@ -1057,6 +1098,14 @@ def fabric_ambiente(request, fabric_id):
                     env_spn_bo["vlan_max"] = int(request.POST.get('vlanmaxspnbo')) if request.POST.get('vlanmaxspnbo') else None
                     env_spn_bo["config"] = configs
                     envs.append(env_spn_bo)
+                    env_lflf_bo["dc_id"] = dc.get("id")
+                    env_lflf_bo["logic_id"] = logic_id_lflf
+                    env_lflf_bo["vrf"] = vrf_bo
+                    env_lflf_bo["vrf_id"] = vrf_id_bo
+                    env_lflf_bo["vlan_min"] = int(request.POST.get('vlanminlflfbo')) if request.POST.get('vlanminlflfbo') else None
+                    env_lflf_bo["vlan_max"] = int(request.POST.get('vlanminlflfbo'))+1 if request.POST.get('vlanminlflfbo') else None
+                    env_lflf_bo["config"] = configs_lf
+                    envs.append(env_lflf_bo)
                 elif dc.get("nome")=="BOCACHOS":
                     env_spn_boca["dc_id"] = dc.get("id")
                     env_spn_boca["logic_id"] = logic_id_spn
@@ -1066,6 +1115,14 @@ def fabric_ambiente(request, fabric_id):
                     env_spn_boca["vlan_max"] = int(request.POST.get('vlanmaxspnboca')) if request.POST.get('vlanmaxspnboca') else None
                     env_spn_boca["config"] = configs
                     envs.append(env_spn_boca)
+                    env_lflf_boca["dc_id"] = dc.get("id")
+                    env_lflf_boca["logic_id"] = logic_id_lflf
+                    env_lflf_boca["vrf"] = vrf_boca
+                    env_lflf_boca["vrf_id"] = vrf_id_boca
+                    env_lflf_boca["vlan_min"] = int(request.POST.get('vlanminlflfboca')) if request.POST.get('vlanminlflfboca') else None
+                    env_lflf_boca["vlan_max"] = int(request.POST.get('vlanminlflfboca'))+1 if request.POST.get('vlanminlflfboca') else None
+                    env_lflf_boca["config"] = configs_lf
+                    envs.append(env_lflf_boca)
                 elif dc.get("nome")=="BOCACHOS-B":
                     env_spn_bocab["dc_id"] = dc.get("id")
                     env_spn_bocab["logic_id"] = logic_id_spn
@@ -1075,6 +1132,14 @@ def fabric_ambiente(request, fabric_id):
                     env_spn_bocab["vlan_max"] = int(request.POST.get('vlanmaxspnbocab')) if request.POST.get('vlanmaxspnbocab') else None
                     env_spn_bocab["config"] = configs
                     envs.append(env_spn_bocab)
+                    env_lflf_bocab["dc_id"] = dc.get("id")
+                    env_lflf_bocab["logic_id"] = logic_id_lflf
+                    env_lflf_bocab["vrf"] = vrf_bocab
+                    env_lflf_bocab["vrf_id"] = vrf_id_bocab
+                    env_lflf_bocab["vlan_min"] = int(request.POST.get('vlanminlflfbocab')) if request.POST.get('vlanminlflfbocab') else None
+                    env_lflf_bocab["vlan_max"] = int(request.POST.get('vlanminlflfbocab'))+1 if request.POST.get('vlanminlflfbocab') else None
+                    env_lflf_bocab["config"] = configs_lf
+                    envs.append(env_lflf_bocab)
                 elif dc.get("nome")=="OOB":
                     env_oob["dc_id"] = dc.get("id")
                     env_oob["logic_id"] = logic_id_ger
@@ -1155,7 +1220,7 @@ def fabric_bgp(request, fabric_id):
             lists["fabric_id"] = fabric_id
 
             bgp = {
-                'mpls': request.POST.get('fabricasnmpls'),
+                'mpls': "65000",
                 'spines': request.POST.get('fabricasnspn'),
                 'leafs': request.POST.get('fabricasnlfs')
             }
