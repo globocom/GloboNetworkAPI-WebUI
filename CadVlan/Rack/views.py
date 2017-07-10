@@ -46,7 +46,7 @@ from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfi
 logger = logging.getLogger(__name__)
 
 
-def proximo_rack(racks):
+def proximo_rack(racks, qtd_rack=None):
 
     rack_anterior = -1
     lists = list()
@@ -62,8 +62,10 @@ def proximo_rack(racks):
                 return str(rack_anterior)
 
     rack_anterior = rack_anterior + 1
-    if rack_anterior > 119:
-        return ''
+    if not qtd_rack:
+        qtd_rack = 119
+    if rack_anterior > qtd_rack:
+        return -1
     return str(rack_anterior)
 
 
@@ -101,6 +103,11 @@ def buscar_nome_equip(client, rack, tipo):
 def valid_rack_number(rack_number):
    if not rack_number < 120:
       raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - 119') 
+
+
+def valid_rack_number_dc(rack_number, racks):
+   if not rack_number < int(racks)-1:
+      raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - %' %str(racks))
 
 
 def valid_rack_name(rack_name):
@@ -530,14 +537,19 @@ def newrack(request, fabric_id):
         lists = dict()
         lists["fabric_id"] = fabric_id
 
+        fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
+        fabric_racks = fabric.get("racks")
+
         if request.method == 'GET':
             racks = client.create_apirack().get_rack(fabric_id=fabric_id)
-            numero = proximo_rack(racks.get("racks"))
-            form = RackForm(initial={'rack_number': numero})
+            numero = proximo_rack(racks.get("racks"), fabric_racks)
+            if numero < 0:
+                messages.add_message(request, messages.ERROR, "Fabric já possui %s racks." % str(fabric_racks))
+                return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
         if request.method == 'POST':
 
-            form = RackForm(request.POST)
+
             if form.is_valid():
 
                 rack_number = form.cleaned_data['rack_number']
@@ -550,7 +562,7 @@ def newrack(request, fabric_id):
                 nome_ilo = form.cleaned_data['nome_ilo']
 
                 # validacao: Numero do Rack
-                valid_rack_number(rack_number)
+                valid_rack_number_dc(rack_number, fabric_racks)
 
                 # validacao: Nome do Rack
                 valid_rack_name(rack_name)
@@ -579,14 +591,12 @@ def newrack(request, fabric_id):
                 rack = client.create_apirack().newrack(rack)
                 messages.add_message(request, messages.SUCCESS, rack_messages.get("success_insert"))
 
-                form = RackForm()
-                return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
-
         lists["form"] = form
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+        return HttpResponseRedirect(reverse('rack.add', args=[fabric_id]))
     return render_to_response(templates.RACK_DC_ADD, lists, context_instance=RequestContext(request))
 
 
@@ -739,8 +749,8 @@ def fabric(request, fabric_id):
         if request.method =='GET':
 
             fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
-            if fabric.get("config"):
-                fabric["config"] = json.dumps(fabric.get("config"))
+            #if fabric.get("config"):
+                #fabric["config"] = json.dumps(fabric.get("config"))
             lists["fabric"] = fabric
 
         if request.method == 'POST':

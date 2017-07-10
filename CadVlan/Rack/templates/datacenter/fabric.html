@@ -127,23 +127,31 @@
                 </div>
                 <div id="buttons" style="padding: 1px 1px" >
                     <a id="edit_rack" class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                            href="{% url rack.edit i.id %}">
+                            href="{% url rack.edit i.id %}" title="Editar as informações do Rack">
                        <i class="material-icons" style="color:#FFD17C;font-size:15px">edit</i>
                     </a>
+                    {% ifequal var.create_vlan_amb 'True' %}
                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                            href="{% url rack.vlans i.dcroom i.id %}">
+                            href="{% url rack.vlans i.dcroom i.id %}" title="Alocar os ambientes e vlans do Rack">
                         <p style="font-size:8px;color:#FFD17C">NET</p>
                     </a>
+                    {% else %}
                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                            href="{% url rack.files i.dcroom i.id %}">
+                       title="Ambientes e Vlans do Rack já alocados.">
+                        <p style="font-size:8px;color:#FFD17C">NET</p>
+                    </a>
+                    {% endifequal %}
+                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                            href="{% url rack.files i.dcroom i.id %}" title="Criar os arquivos de configuração dos
+                            Leafs e OOBs">
                         <i class="material-icons" style="color:#FFD17C;font-size:15px">insert_drive_file</i>
                     </a>
                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                            href="{% url rack.deploy.new i.dcroom i.id %}">
+                            href="{% url rack.deploy.new i.dcroom i.id %}" title="Integração com o Foreman">
                         <i class="material-icons" style="color:#FFD17C;font-size:15px">launch</i>
                     </a>
                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                            href="{% url rack.delete.new i.dcroom i.id %}">
+                            href="{% url rack.delete.new i.dcroom i.id %}" title="Remover o Rack">
                         <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">delete</i>
                     </a>
                 </div>
