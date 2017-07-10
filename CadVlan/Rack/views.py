@@ -49,9 +49,8 @@ logger = logging.getLogger(__name__)
 def proximo_rack(racks):
 
     rack_anterior = -1
-    racks = racks.get('rack')
-
     lists = list()
+
     for rack in racks:
         lists.append(int(rack.get('numero')))
     lists.sort()
@@ -245,7 +244,7 @@ def rack_form(request):
         if request.method == 'GET':
 
             racks = client.create_rack().list()
-            numero = proximo_rack(racks)
+            numero = proximo_rack(racks.get("rack"))
             form = RackForm(initial={'rack_number': numero})
 
         if request.method == 'POST':
@@ -532,9 +531,8 @@ def newrack(request, fabric_id):
         lists["fabric_id"] = fabric_id
 
         if request.method == 'GET':
-
-            racks = client.create_rack().list()
-            numero = proximo_rack(racks)
+            racks = client.create_apirack().get_rack(fabric_id=fabric_id)
+            numero = proximo_rack(racks.get("racks"))
             form = RackForm(initial={'rack_number': numero})
 
         if request.method == 'POST':
@@ -589,7 +587,7 @@ def newrack(request, fabric_id):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(templates.RACK_ADD, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_DC_ADD, lists, context_instance=RequestContext(request))
 
 
 @log

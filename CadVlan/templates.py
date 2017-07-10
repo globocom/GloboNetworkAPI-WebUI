@@ -246,6 +246,8 @@ RACK_FORM = 'rack/form.html'
 RACK_ADD = 'rack/newrack.html'
 RACK_VIEW_AJAX = 'rack/view-rack.html'
 RACK_EDIT = 'rack/edit.html'
+#
+RACK_DC_ADD = 'datacenter/newrack.html'
 LISTDC = 'datacenter/datacenter.html'
 DC_FORM = 'datacenter/newdc.html'
 FABRIC = 'datacenter/fabric.html'
