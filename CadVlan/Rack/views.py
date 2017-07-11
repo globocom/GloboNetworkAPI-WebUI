@@ -960,13 +960,13 @@ def fabric_ambiente(request, fabric_id):
                 'max_num_vlan_1': int(request.POST.get('vlanmaxintbe')) if request.POST.get('vlanmaxintbe') else None,
                 'config': [
                     {
-                        'subnet': request.POST.get('ipv4rangeintbe'),
+                        'subnet': request.POST.get('ipv4rangeint'),
                         'type': "v4",
                         'new_prefix': request.POST.get('prefixv4intbe'),
                         'network_type': int(net_type_id),
                     },
                     {
-                        'subnet': request.POST.get('ipv6rangeintbe'),
+                        'subnet': request.POST.get('ipv6rangeint'),
                         'type': "v6",
                         'new_prefix': request.POST.get('prefixv6intbe'),
                         'network_type': int(net_type_id),
@@ -980,13 +980,13 @@ def fabric_ambiente(request, fabric_id):
                 'max_num_vlan_1': int(request.POST.get('vlanmaxintbefe')) if request.POST.get('vlanmaxintbefe') else None,
                 'config': [
                     {
-                        'subnet': request.POST.get('ipv4rangeintbefe'),
+                        'subnet': request.POST.get('ipv4rangeint'),
                         'type': "v4",
                         'new_prefix': request.POST.get('prefixv4intbefe'),
                         'network_type': int(net_type_id),
                     },
                     {
-                        'subnet': request.POST.get('ipv6rangeintbefe'),
+                        'subnet': request.POST.get('ipv6rangeint'),
                         'type': "v6",
                         'new_prefix': request.POST.get('prefixv6intbefe'),
                         'network_type': int(net_type_id),
@@ -1000,13 +1000,13 @@ def fabric_ambiente(request, fabric_id):
                 'max_num_vlan_1': int(request.POST.get('vlanmaxintbebo')) if request.POST.get('vlanmaxintbebo') else None,
                 'config': [
                     {
-                        'subnet': request.POST.get('ipv4rangeintbebo'),
+                        'subnet': request.POST.get('ipv4rangeint'),
                         'type': "v4",
                         'new_prefix': request.POST.get('prefixv4intbebo'),
                         'network_type': int(net_type_id),
                     },
                     {
-                        'subnet': request.POST.get('ipv6rangeintbebo'),
+                        'subnet': request.POST.get('ipv6rangeint'),
                         'type': "v6",
                         'new_prefix': request.POST.get('prefixv6intbebo'),
                         'network_type': int(net_type_id),
@@ -1020,13 +1020,13 @@ def fabric_ambiente(request, fabric_id):
                 'max_num_vlan_1': int(request.POST.get('vlanmaxintbeca')) if request.POST.get('vlanmaxintbeca') else None,
                 'config': [
                     {
-                        'subnet': request.POST.get('ipv4rangeintbeca'),
+                        'subnet': request.POST.get('ipv4rangeint'),
                         'type': "v4",
                         'new_prefix': request.POST.get('prefixv4intbeca'),
                         'network_type': int(net_type_id),
                     },
                     {
-                        'subnet': request.POST.get('ipv6rangeintbeca'),
+                        'subnet': request.POST.get('ipv6rangeint'),
                         'type': "v6",
                         'new_prefix': request.POST.get('prefixv6intbeca'),
                         'network_type': int(net_type_id),
