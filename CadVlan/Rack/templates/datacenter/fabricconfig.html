@@ -16,20 +16,29 @@
                     <h1 class="mbr-section-subtitle display-4 text-xs-center">BGP</h1>
                     <div class="col-xs-12 col-md-4">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_asn_mpls">ASN MPLS<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="fabricasnmpls" data-form-field="fabric_asn_mpls" id="id_fabric_asn_mpls">
+                            <label class="form-control-label" for="id_fabric_asn_mpls">
+                                ASN MPLS<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="fabricasnmpls" placeholder="65000"
+                                   data-form-field="fabric_asn_mpls" id="id_fabric_asn_mpls">
                         </div>
                     </div>
                     <div class="col-xs-12 col-md-4">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_asn_spn">ASN base Spines<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="fabricasnspn" data-form-field="fabric_asn_spn" id="id_fabric_asn_spn">
+                            <label class="form-control-label" for="id_fabric_asn_spn">
+                                ASN base Spines<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="fabricasnspn" placeholder="64611"
+                                   data-form-field="fabric_asn_spn" id="id_fabric_asn_spn">
                         </div>
                     </div>
                     <div class="col-xs-12 col-md-4">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_asn_lfs">ASN base Leafs<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="fabricasnlfs" data-form-field="fabric_asn_lfs" id="id_fabric_asn_lfs">
+                            <label class="form-control-label" for="id_fabric_asn_lfs">
+                                ASN base Leafs<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="fabricasnlfs" placeholder="65500"
+                                   data-form-field="fabric_asn_lfs" id="id_fabric_asn_lfs">
                         </div>
                     </div>
                 </div>
@@ -37,65 +46,59 @@
                     <h1 class="mbr-section-subtitle display-4 text-xs-center">VLT</h1>
                     <div class="col-xs-12 col-md-3">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_vlt_01">Id VLT Leaf 01<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="fabricvlt01" data-form-field="fabric_vlt_01" id="id_fabric_vlt_01">
+                            <label class="form-control-label" for="id_fabric_vlt_01">
+                                Id VLT Leaf 01<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="fabricvlt01" placeholder="0"
+                                   data-form-field="fabric_vlt_01" id="id_fabric_vlt_01">
                         </div>
                     </div>
                     <div class="col-xs-12 col-md-3">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_priority_01">Priority Leaf 01<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="fabricpriority01" data-form-field="fabric_priority_01" id="id_fabric_priority_01">
+                            <label class="form-control-label" for="id_fabric_priority_01">
+                                Priority Leaf 01<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="fabricpriority01" placeholder="4096"
+                                   data-form-field="fabric_priority_01" id="id_fabric_priority_01">
                         </div>
                     </div>
                     <div class="col-xs-12 col-md-3">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_vlt_02">Id VLT Leaf 02<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="fabricvlt02" data-form-field="fabric_vlt_02" id="id_fabric_vlt_02">
+                            <label class="form-control-label" for="id_fabric_vlt_02">
+                                Id VLT Leaf 02<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="fabricvlt02" placeholder="1"
+                                   data-form-field="fabric_vlt_02" id="id_fabric_vlt_02">
                         </div>
                     </div>
                     <div class="col-xs-12 col-md-3">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_priority_02">Priority Leaf 02<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="fabricpriority02" data-form-field="fabric_priority_02" id="id_fabric_priority_02">
+                            <label class="form-control-label" for="id_fabric_priority_02">
+                                Priority Leaf 02<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="fabricpriority02" placeholder="8192"
+                                   data-form-field="fabric_priority_02" id="id_fabric_priority_02">
                         </div>
                     </div>
                 </div>
                 <div class="row row-sm-offset">
                     <h1 class="mbr-section-subtitle display-4 text-xs-center">GERÊNCIA</h1>
-                    <div class="col-xs-12 col-md-8">
+                    <div class="col-xs-12 col-md-4">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_ger_telecom">Rede Gerencia Telecom<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="gerenciatelecom" data-form-field="fabric_ger_telecom" id="id_fabric_ger_telecom">
+                            <label class="form-control-label" for="id_fabric_ger_telecom">
+                                Rede Gerencia Telecom<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="gerenciatelecom" placeholder="10.191.208.0/24"
+                                   data-form-field="fabric_ger_telecom" id="id_fabric_ger_telecom">
                         </div>
                     </div>
                     <div class="col-xs-12 col-md-4">
                         <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_ger_vlan">Numero da Vlan<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="gerenciavlan" data-form-field="fabric_ger_vlan" id="id_fabric_ger_vlan">
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-md-8">
-                        <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_ger_monit">Rede Gerencia Monitoração<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="gerenciamonitoracao" data-form-field="fabric_ger_monit" id="id_fabric_ger_monit">
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-md-4">
-                        <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_ger_monit_vlan">Numero da Vlan<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="gerenciamonitvlan" data-form-field="fabric_ger_monit_vlan" id="id_fabric_ger_monit_vlan">
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-md-8">
-                        <div class="form-group">
-                            <label class="form-control-label" for="id_fabric_ger_noc">Equipamentos do NOC<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="gerencianoc" data-form-field="fabric_ger_noc" id="id_fabric_ger_noc">
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-md-4">
-                        <div class="form-group">
-                            <label class="form-control-label" for="dcroom_form_redelf">Numero da Vlan<span class="form-asterisk">*</span></label>
-                            <input type="text" class="form-control" name="gerencianocvlan" data-form-field="dcroom_redelf" id="dcroom_form_redelf">
+                            <label class="form-control-label" for="id_fabric_ger_vlan">
+                                Numero da Vlan<span class="form-asterisk">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="gerenciavlan" placeholder="1000"
+                                   data-form-field="fabric_ger_vlan" id="id_fabric_ger_vlan">
                         </div>
                     </div>
                 </div>

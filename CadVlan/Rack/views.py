@@ -1251,9 +1251,7 @@ def fabric_bgp(request, fabric_id):
                 'vlan': request.POST.get('gerencianocvlan')
             }
             gerencia = {
-                'telecom': telecom,
-                'monitoracao': monitoracao,
-                'noc': noc
+                'telecom': telecom
             }
             config = {
                 'BGP': bgp,
