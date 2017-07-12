@@ -279,6 +279,49 @@
                         <br><br><br>
                         <div class="row form-group">
                             <h1 class="mbr-section-title display-4 text-xs-center">
+                                <p>Rede Internas do Rack (FE)</p>
+                                <p>Servidores/VMs</p>
+                            </h1>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="ipv4rangeintfe_id">CIDR Ipv4 por Fabric</label>
+                                <input type="text" class="form-control" name="ipv4rangeintfe" id="ipv4rangeintfe_id"
+                                       data-form-field="fabric_ipv4range" placeholder="172.17.128.0/17">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="prefixv4intfe_id">Mascara da rede por Rack</label>
+                                <input type="number" class="form-control" name="prefixv4intfe" id="prefixv4intfe_id"
+                                       data-form-field="fabric_prefixv4" placeholder="22">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-md-5">
+                                <label class="form-control-label" for="ipv6rangeintfe_id">CIDR Ipv6 por Fabric</label>
+                                <input type="text" class="form-control" name="ipv6rangeintfe" id="ipv6rangeintfe_id"
+                                       data-form-field="fabric_ipv6range" placeholder="fdfe:fefe:fedd::/49">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="prefixv6intfe_id">Mascara da rede por Rack</label>
+                                <input type="number" class="form-control" name="prefixv6intfe" id="prefixv6intfe_id"
+                                       data-form-field="fabric_prefixv6" placeholder="54">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="vlanminint_fe_id">Vlans mín</label>
+                                <input type="number" class="form-control" name="vlanminint_fe" data-form-field="vlanminint_fe_id"
+                                       id="vlanminintbeca_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="vlanmaxint_Fe_id">Vlan máx</label>
+                                <input type="number" class="form-control" name="vlanmaxint_Fe" data-form-field="vlanmaxint_Fe_id"
+                                       id="vlanmaxintbeca_id" placeholder="4096">
+                            </div>
+                        </div>
+                        <br><br><br>
+                        <div class="row form-group">
+                            <h1 class="mbr-section-title display-4 text-xs-center">
                                 <p>Rede de Gerencia/ILOs Servidores</p>
                             </h1>
                         </div>

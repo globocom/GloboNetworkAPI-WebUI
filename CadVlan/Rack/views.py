@@ -536,6 +536,7 @@ def newrack(request, fabric_id):
         form = RackForm()
         lists = dict()
         lists["fabric_id"] = fabric_id
+        lists["action"] = reverse('rack.add', args=[fabric_id])
 
         fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
         fabric_racks = fabric.get("racks")
@@ -546,12 +547,15 @@ def newrack(request, fabric_id):
             if numero < 0:
                 messages.add_message(request, messages.ERROR, "Fabric já possui %s racks." % str(fabric_racks))
                 return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+            form = RackForm(initial={'rack_number': numero})
+
+        lists["form"] = form
 
         if request.method == 'POST':
 
+            form = RackForm(request.POST)
 
             if form.is_valid():
-
                 rack_number = form.cleaned_data['rack_number']
                 rack_name = form.cleaned_data['rack_name']
                 mac_sw1 = form.cleaned_data['mac_address_sw1']
@@ -560,6 +564,7 @@ def newrack(request, fabric_id):
                 nome_sw1 = form.cleaned_data['nome_sw1']
                 nome_sw2 = form.cleaned_data['nome_sw2']
                 nome_ilo = form.cleaned_data['nome_ilo']
+
 
                 # validacao: Numero do Rack
                 valid_rack_number_dc(rack_number, fabric_racks)
@@ -591,9 +596,10 @@ def newrack(request, fabric_id):
                 rack = client.create_apirack().newrack(rack)
                 messages.add_message(request, messages.SUCCESS, rack_messages.get("success_insert"))
 
-        lists["form"] = form
+                return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
     except NetworkAPIClientError, e:
+
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return HttpResponseRedirect(reverse('rack.add', args=[fabric_id]))
@@ -791,8 +797,8 @@ def new_fabric(request, dc_id):
             fabric = dict()
             fabric['dc'] = request.META.get('HTTP_REFERER').split("/")[-1]
             fabric['name'] = request.POST.get('fabricname')
-            fabric['racks'] = request.POST.get('spn')
-            fabric['spines'] = request.POST.get('rack')
+            fabric['racks'] = request.POST.get('rack')
+            fabric['spines'] = request.POST.get('spn')
             fabric['leafs'] = request.POST.get('lfs')
 
             newfabric = client.create_apirack().save_fabric(fabric)
@@ -830,6 +836,7 @@ def fabric_ambiente(request, fabric_id):
             envs = list()
             env_oob = dict()
             env_hosts = dict()
+            env_hosts_fe = dict()
             env_spn_be = dict()
             env_spn_fe = dict()
             env_spn_bo = dict()
@@ -901,6 +908,24 @@ def fabric_ambiente(request, fabric_id):
                     'network_type': int(net_type_id),
                 }
                 configs_int.append(v6_int)
+
+            configs_int_fe = list()
+            if request.POST.get('ipv4rangeintfe'):
+                v4_int_fe = {
+                    'subnet': request.POST.get('ipv4rangeintfe'),
+                    'new_prefix': request.POST.get('prefixv4intfe'),
+                    'type': "v4",
+                    'network_type': int(net_type_id),
+                }
+                configs_int_fe.append(v4_int_fe)
+            if request.POST.get('ipv6rangeintfe'):
+                v6_int_Fe = {
+                    'subnet': request.POST.get('ipv6rangeintfe'),
+                    'new_prefix': request.POST.get('prefixv6intfe'),
+                    'type': "v6",
+                    'network_type': int(net_type_id),
+                }
+                configs_int_fe.append(v6_int_Fe)
 
             configs_oob = list()
             if request.POST.get('ipv4rangeoob'):
@@ -1087,6 +1112,14 @@ def fabric_ambiente(request, fabric_id):
                     env_lflf_fe["vlan_min"] = int(request.POST.get('vlanminlflffe')) if request.POST.get('vlanminlflffe') else None
                     env_lflf_fe["vlan_max"] = int(request.POST.get('vlanminlflffe'))+1 if request.POST.get('vlanminlflffe') else None
                     env_lflf_fe["config"] = configs_lf
+                    env_hosts_fe["dc_id"] = dc.get("id")
+                    env_hosts_fe["logic_id"] = logic_id_host
+                    env_hosts_fe["vrf"] = vrf_fe
+                    env_hosts_fe["vrf_id"] = vrf_id_fe
+                    env_hosts_fe["vlan_min"] = int(request.POST.get('vlanminint_fe')) if request.POST.get('vlanminint_fe') else None
+                    env_hosts_fe["vlan_max"] = int(request.POST.get('vlanmaxint_Fe')) if request.POST.get('vlanmaxint_Fe') else None
+                    env_hosts_fe["config"] = configs_int_fe
+                    env_hosts_fe["details"] = []
                     env_interno_fe["dc_id"] = dc.get("id")
                     env_interno_fe["logic_id"] = logic_id_int
                     env_interno_fe["vrf"] = vrf_fe

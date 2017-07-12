@@ -93,7 +93,7 @@ $(document).ready(function() {
 <li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Rack</a></li>
 </ul>
         <div id="tabs-1">
-                <form id="add_form" method="post" action="{% url rack.form %}">
+                <form id="rack_form" method="post" action="{{action}}">
                         {% csrf_token %}
                         <div id="fields" class="ui-widget-content">
                         {% for field in form %}

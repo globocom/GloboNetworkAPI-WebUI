@@ -129,17 +129,10 @@
                             href="{% url rack.edit i.id %}" title="Editar as informações do Rack">
                        <i class="material-icons" style="color:#FFD17C;font-size:15px">edit</i>
                     </a>
-                    {% ifequal var.create_vlan_amb 'True' %}
                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                             href="{% url rack.vlans i.dcroom i.id %}" title="Alocar os ambientes e vlans do Rack">
                         <p style="font-size:8px;color:#FFD17C">NET</p>
                     </a>
-                    {% else %}
-                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                       title="Ambientes e Vlans do Rack já alocados.">
-                        <p style="font-size:8px;color:#FFD17C">NET</p>
-                    </a>
-                    {% endifequal %}
                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                             href="{% url rack.files i.dcroom i.id %}" title="Criar os arquivos de configuração dos
                             Leafs e OOBs">
