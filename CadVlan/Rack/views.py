@@ -949,7 +949,7 @@ def fabric_ambiente(request, fabric_id):
             for el in env_logic:
                 if el.get("nome")=="SPINES":
                     logic_id_spn = el.get("id")
-                elif el.get("nome")=="HOSTS-CLOUD":
+                elif el.get("nome")=="PRODUCAO":
                     logic_id_host = el.get("id")
                 elif el.get("nome")=="GERENCIA":
                     logic_id_ger = el.get("id")
