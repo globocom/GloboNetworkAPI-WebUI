@@ -186,22 +186,32 @@
                         <div class="row form-group">
                             <p class="mbr-section-subtitle display-4">Mascara das redes e Range de Vlans por Rack:</p>
                             <p class="form-control-label">BE</p>
-                            <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="prefixv4intbe_id">Mascara v4</label>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv4intbe_id">Mascara (/rack) v4 </label>
                                 <input type="number" class="form-control" name="prefixv4intbe" id="prefixv4intbe_id"
-                                       data-form-field="fabric_prefixv4" placeholder="24">
+                                       data-form-field="fabric_prefixv4" placeholder="21">
                             </div>
-                            <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="prefixv6intbe_id">Mascara v6</label>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv6intbe_id">v6</label>
                                 <input type="number" class="form-control" name="prefixv6intbe" id="prefixv6intbe_id"
-                                       data-form-field="fabric_prefixv4" placeholder="24">
+                                       data-form-field="fabric_prefixv4" placeholder="57">
                             </div>
-                            <div class="col-xs-12 col-md-3">
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_bebe_v4_id">Mascara redes v4</label>
+                                <input type="number" class="form-control" name="newprefix_bebe_v4" data-form-field="newprefix_bebe_v4_id"
+                                       id="newprefix_bebe_v4_id" placeholder="25">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_bebe_v6_id">v6</label>
+                                <input type="number" class="form-control" name="newprefix_bebe_v6" data-form-field="newprefix_bebe_v6_id"
+                                       id="newprefix_bebe_v6_id" placeholder="64">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
                                 <label class="form-control-label" for="vlanminintbe_id">Vlan mín</label>
                                 <input type="number" class="form-control" name="vlanminintbe" data-form-field="fabric_vlanname"
                                        id="vlanminintbe_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-3">
+                            <div class="col-xs-12 col-md-2">
                                 <label class="form-control-label" for="vlanmaxintbe_id">Vlan máx</label>
                                 <input type="number" class="form-control" name="vlanmaxintbe" data-form-field="fabric_vlanname"
                                        id="vlanmaxintbe_id" placeholder="4096">
@@ -209,22 +219,32 @@
                         </div>
                         <div class="row form-group">
                             <p class="form-control-label">BEFE</p>
-                            <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="prefixv4intbefe_id">Mascara v4</label>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv4intbefe_id">Mascara (/rack) v4</label>
                                 <input type="number" class="form-control" name="prefixv4intbefe" id="prefixv4intbefe_id"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
-                            <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="prefixv6intbefe_id">Mascara v6</label>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv6intbefe_id">v6</label>
                                 <input type="number" class="form-control" name="prefixv6intbefe" id="prefixv6intbefe_id"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
-                            <div class="col-xs-12 col-md-3">
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_befe_v4_id">Mascara redes v4</label>
+                                <input type="number" class="form-control" name="newprefix_befe_v4" data-form-field="newprefix_befe_v4_id"
+                                       id="newprefix_befe_v4_id" placeholder="25">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_befe_v6_id">v6</label>
+                                <input type="number" class="form-control" name="newprefix_befe_v6" data-form-field="newprefix_befe_v6_id"
+                                       id="newprefix_befe_v6_id" placeholder="64">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
                                 <label class="form-control-label" for="vlanminintbefe_id">Vlan mín</label>
                                 <input type="number" class="form-control" name="vlanminintbefe" data-form-field="fabric_vlanname"
                                        id="vlanminintbefe_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-3">
+                            <div class="col-xs-12 col-md-2">
                                 <label class="form-control-label" for="vlanmaxintbefe_id">Vlan máx</label>
                                 <input type="number" class="form-control" name="vlanmaxintbefe" data-form-field="fabric_vlanname"
                                        id="vlanmaxintbefe_id" placeholder="4096">
@@ -232,22 +252,32 @@
                         </div>
                         <div class="row form-group">
                             <p class="form-control-label">BEBORDA</p>
-                            <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="prefixv4intbebo_id">Mascara v4</label>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv4intbebo_id">Mascara (/rack) v4</label>
                                 <input type="number" class="form-control" name="prefixv4intbebo" id="prefixv4intbebo_id"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
-                            <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="prefixv6intbebo_id">Mascara v6</label>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv6intbebo_id">v6</label>
                                 <input type="number" class="form-control" name="prefixv6intbebo" id="prefixv6intbebo_id"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
-                            <div class="col-xs-12 col-md-3">
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_bebo_v4_id">Mascara redes v4</label>
+                                <input type="number" class="form-control" name="newprefix_bebo_v4" data-form-field="newprefix_bebo_v4_id"
+                                       id="newprefix_bebo_v4_id" placeholder="25">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_bebo_v6_id">v6</label>
+                                <input type="number" class="form-control" name="newprefix_bebo_v6" data-form-field="newprefix_bebo_v6_id"
+                                       id="newprefix_bebo_v6_id" placeholder="64">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
                                 <label class="form-control-label" for="vlanminintbebo_id">Vlan mín</label>
                                 <input type="number" class="form-control" name="vlanminintbebo" data-form-field="fabric_vlanname"
                                        id="vlanminintbebo_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-3">
+                            <div class="col-xs-12 col-md-2">
                                 <label class="form-control-label" for="vlanmaxintbebo_id">Vlan máx</label>
                                 <input type="number" class="form-control" name="vlanmaxintbebo" data-form-field="fabric_vlanname"
                                        id="vlanmaxintbebo_id" placeholder="4096">
@@ -255,25 +285,68 @@
                         </div>
                         <div class="row form-group">
                             <p class="form-control-label">BECACHOS</p>
-                            <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="prefixv4intbeca_id">Mascara v4</label>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv4intbeca_id">Mascara (/rack) v4</label>
                                 <input type="number" class="form-control" name="prefixv4intbeca" id="prefixv4intbeca_id"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
-                            <div class="col-xs-12 col-md-3">
-                                <label class="form-control-label" for="prefixv6intbeca_id">Mascara v6</label>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv6intbeca_id">v6</label>
                                 <input type="number" class="form-control" name="prefixv6intbeca" id="prefixv6intbeca_id"
                                        data-form-field="fabric_prefixv4" placeholder="24">
                             </div>
-                            <div class="col-xs-12 col-md-3">
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_beca_v4_id">Mascara redes v4</label>
+                                <input type="number" class="form-control" name="newprefix_beca_v4" data-form-field="newprefix_beca_v4_id"
+                                       id="newprefix_beca_v4_id" placeholder="25">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_beca_v6_id">v6</label>
+                                <input type="number" class="form-control" name="newprefix_beca_v6" data-form-field="newprefix_beca_v6_id"
+                                       id="newprefix_beca_v6_id" placeholder="64">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
                                 <label class="form-control-label" for="vlanminintbeca_id">Vlan mín</label>
                                 <input type="number" class="form-control" name="vlanminintbeca" data-form-field="fabric_vlanname"
                                        id="vlanminintbeca_id" placeholder="1">
                             </div>
-                            <div class="col-xs-12 col-md-3">
+                            <div class="col-xs-12 col-md-2">
                                 <label class="form-control-label" for="vlanmaxintbeca_id">Vlan máx</label>
                                 <input type="number" class="form-control" name="vlanmaxintbeca" data-form-field="fabric_vlanname"
                                        id="vlanmaxintbeca_id" placeholder="4096">
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <p class="form-control-label">Hosts ACS</p>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv4intasc_id">Mascara (/rack) v4</label>
+                                <input type="number" class="form-control" name="prefixv4intasc" id="prefixv4intasc_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="prefixv6intacs_id">v6</label>
+                                <input type="number" class="form-control" name="prefixv6intacs" id="prefixv6intacs_id"
+                                       data-form-field="fabric_prefixv4" placeholder="24">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_acs_v4_id">Mascara redes v4</label>
+                                <input type="number" class="form-control" name="newprefix_acs_v4" data-form-field="newprefix_acs_v4_id"
+                                       id="newprefix_acs_v4_id" placeholder="25">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="newprefix_acs_v6_id">v6</label>
+                                <input type="number" class="form-control" name="newprefix_acs_v6" data-form-field="newprefix_acs_v6_id"
+                                       id="newprefix_acs_v6_id" placeholder="64">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="vlanminintacs_id">Vlan mín</label>
+                                <input type="number" class="form-control" name="vlanminintacs" data-form-field="fabric_vlanname"
+                                       id="vlanminintacs_id" placeholder="1">
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <label class="form-control-label" for="vlanmaxintacs_id">Vlan máx</label>
+                                <input type="number" class="form-control" name="vlanmaxintacs" data-form-field="fabric_vlanname"
+                                       id="vlanmaxintacs_id" placeholder="4096">
                             </div>
                         </div>
                         <br><br><br>
@@ -284,7 +357,7 @@
                             </h1>
                         </div>
                         <div class="row form-group">
-                            <div class="col-xs-12 col-md-5">
+                            <div class="col-xs-12 col-md-6">
                                 <label class="form-control-label" for="ipv4rangeintfe_id">CIDR Ipv4 por Fabric</label>
                                 <input type="text" class="form-control" name="ipv4rangeintfe" id="ipv4rangeintfe_id"
                                        data-form-field="fabric_ipv4range" placeholder="172.17.128.0/17">
@@ -294,9 +367,14 @@
                                 <input type="number" class="form-control" name="prefixv4intfe" id="prefixv4intfe_id"
                                        data-form-field="fabric_prefixv4" placeholder="22">
                             </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="newprefix_fe_id">Mascara da rede dentro do Rack</label>
+                                <input type="number" class="form-control" name="newprefix_fe" data-form-field="newprefix_fe_id"
+                                       id="newprefix_fe_id" placeholder="27">
+                            </div>
                         </div>
                         <div class="row form-group">
-                            <div class="col-xs-12 col-md-5">
+                            <div class="col-xs-12 col-md-6">
                                 <label class="form-control-label" for="ipv6rangeintfe_id">CIDR Ipv6 por Fabric</label>
                                 <input type="text" class="form-control" name="ipv6rangeintfe" id="ipv6rangeintfe_id"
                                        data-form-field="fabric_ipv6range" placeholder="fdfe:fefe:fedd::/49">
@@ -305,6 +383,11 @@
                                 <label class="form-control-label" for="prefixv6intfe_id">Mascara da rede por Rack</label>
                                 <input type="number" class="form-control" name="prefixv6intfe" id="prefixv6intfe_id"
                                        data-form-field="fabric_prefixv6" placeholder="54">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="newprefix_fe_v6_id">Mascara da rede dentro do Rack</label>
+                                <input type="number" class="form-control" name="newprefix_fe_v6" data-form-field="newprefix_fe_v6_id"
+                                       id="newprefix_fe_v6_id" placeholder="64">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -327,7 +410,7 @@
                             </h1>
                         </div>
                         <div class="row form-group">
-                            <div class="col-xs-12 col-md-5">
+                            <div class="col-xs-12 col-md-6">
                                 <label class="form-control-label" for="ipv4rangeintbodsr_id">CIDR Ipv4 por Fabric</label>
                                 <input type="text" class="form-control" name="ipv4rangeintbodsr" id="ipv4rangeintbodsr_id"
                                        data-form-field="fabric_ipv4range" placeholder="172.17.128.0/17">
@@ -337,9 +420,14 @@
                                 <input type="number" class="form-control" name="prefixv4intbodsr" id="prefixv4intbodsr_id"
                                        data-form-field="fabric_prefixv4" placeholder="22">
                             </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="newprefix_dsr_id">Mascara da rede dentro do Rack</label>
+                                <input type="number" class="form-control" name="newprefix_dsr" data-form-field="newprefix_dsr_id"
+                                       id="newprefix_dsr_id" placeholder="27">
+                            </div>
                         </div>
                         <div class="row form-group">
-                            <div class="col-xs-12 col-md-5">
+                            <div class="col-xs-12 col-md-6">
                                 <label class="form-control-label" for="ipv6rangeintbodsr_id">CIDR Ipv6 por Fabric</label>
                                 <input type="text" class="form-control" name="ipv6rangeintbodsr" id="ipv6rangeintbodsr_id"
                                        data-form-field="fabric_ipv6range" placeholder="fdfe:fefe:fedd::/49">
@@ -348,6 +436,11 @@
                                 <label class="form-control-label" for="prefixv6intbodsr_id">Mascara da rede por Rack</label>
                                 <input type="number" class="form-control" name="prefixv6intbodsr" id="prefixv6intbodsr_id"
                                        data-form-field="fabric_prefixv6" placeholder="54">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="newprefix_dsr_v6_id">Mascara da rede dentro do Rack</label>
+                                <input type="number" class="form-control" name="newprefix_dsr_v6" data-form-field="newprefix_dsr_v6_id"
+                                       id="newprefix_dsr_v6_id" placeholder="60">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -413,7 +506,7 @@
                             </h1>
                         </div>
                         <div class="row form-group">
-                            <div class="col-xs-12 col-md-5">
+                            <div class="col-xs-12 col-md-6">
                                 <label class="form-control-label" for="ipv4rangeintbo_a_id">CIDR Ipv4 por Fabric</label>
                                 <input type="text" class="form-control" name="ipv4rangeintbo_a_" id="ipv4rangeintbo_a_id"
                                        data-form-field="fabric_ipv4range" placeholder="172.17.128.0/17">
@@ -423,9 +516,14 @@
                                 <input type="number" class="form-control" name="prefixv4inboa" id="prefixv4intboa_id"
                                        data-form-field="fabric_prefixv4" placeholder="22">
                             </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="newprefix_caa_id">Mascara da rede dentro do Rack</label>
+                                <input type="number" class="form-control" name="newprefix_caa" data-form-field="newprefix_caa_id"
+                                       id="newprefix_caa_id" placeholder="27">
+                            </div>
                         </div>
                         <div class="row form-group">
-                            <div class="col-xs-12 col-md-5">
+                            <div class="col-xs-12 col-md-6">
                                 <label class="form-control-label" for="ipv6rangeintbo_a_id">CIDR Ipv6 por Fabric</label>
                                 <input type="text" class="form-control" name="ipv6rangeintbo_a_" id="ipv6rangeintbo_a_id"
                                        data-form-field="fabric_ipv6range" placeholder="fdfe:fefe:fedd::/49">
@@ -434,6 +532,11 @@
                                 <label class="form-control-label" for="prefixv6intbo_a_id">Mascara da rede por Rack</label>
                                 <input type="number" class="form-control" name="prefixv6intbo_a_" id="prefixv6intbo_a_id"
                                        data-form-field="fabric_prefixv6" placeholder="54">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="newprefix_caa_v6_id">Mascara da rede dentro do Rack</label>
+                                <input type="number" class="form-control" name="newprefix_caa_v6" data-form-field="newprefix_caa_v6_id"
+                                       id="newprefix_caa_v6_id" placeholder="64">
                             </div>
                         </div>
                         <div class="row form-group">
@@ -466,6 +569,11 @@
                                 <input type="number" class="form-control" name="prefixv4intbob" id="prefixv4intbob_id"
                                        data-form-field="fabric_prefixv4" placeholder="22">
                             </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="newprefix_cab_id">Mascara da rede dentro do Rack</label>
+                                <input type="number" class="form-control" name="newprefix_cab" data-form-field="newprefix_cab_id"
+                                       id="newprefix_cab_id" placeholder="27">
+                            </div>
                         </div>
                         <div class="row form-group">
                             <div class="col-xs-12 col-md-5">
@@ -477,6 +585,11 @@
                                 <label class="form-control-label" for="prefixv6intbo_b_id">Mascara da rede por Rack</label>
                                 <input type="number" class="form-control" name="prefixv6intbo_b_" id="prefixv6intbo_b_id"
                                        data-form-field="fabric_prefixv6" placeholder="54">
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <label class="form-control-label" for="newprefix_cab_v6_id">Mascara da rede dentro do Rack</label>
+                                <input type="number" class="form-control" name="newprefix_cab_v6" data-form-field="newprefix_cab_v6_id"
+                                       id="newprefix_cab_v6_id" placeholder="64">
                             </div>
                         </div>
                         <div class="row form-group">

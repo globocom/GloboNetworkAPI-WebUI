@@ -755,8 +755,8 @@ def fabric(request, fabric_id):
         if request.method =='GET':
 
             fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
-            #if fabric.get("config"):
-                #fabric["config"] = json.dumps(fabric.get("config"))
+            if fabric.get("config"):
+                fabric["config"] = json.dumps(fabric.get("config"))
             lists["fabric"] = fabric
 
         if request.method == 'POST':
@@ -769,7 +769,11 @@ def fabric(request, fabric_id):
             fabric['config'] = request.POST.get('config')
 
             fabric_dict = client.create_apirack().put_fabric(fabric_id, fabric)
-            lists["fabric"] = fabric_dict.get("dcroom")
+            fabric_dict = fabric_dict.get("fabric")
+            if fabric_dict.get("config"):
+                fabric_dict["config"] = json.dumps(fabric_dict.get("config"))
+
+            lists["fabric"] = fabric_dict
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -1013,6 +1017,8 @@ def fabric_ambiente(request, fabric_id):
                 }
                 configs_oob.append(v4_oob)
 
+
+
             try:
                 env_l3_id = client.create_grupo_l3().inserir(fabric_name).get("logical_environment").get("id")
             except:
@@ -1063,19 +1069,22 @@ def fabric_ambiente(request, fabric_id):
                     {
                         'subnet': request.POST.get('ipv4rangeint'),
                         'type': "v4",
-                        'new_prefix': str(request.POST.get('prefixv4intbe')),
+                        'new_prefix': str(request.POST.get('newprefix_bebe_v4')),
                         'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv4intbe'))
                     },
                     {
                         'subnet': request.POST.get('ipv6rangeint'),
                         'type': "v6",
-                        'new_prefix': str(request.POST.get('prefixv6intbe')),
+                        'new_prefix': str(request.POST.get('newprefix_bebe_v6')),
                         'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv6intbe'))
                     }
                 ],
                 'name': "BEBE"
             }
             details_hosts.append(details_hosts_be)
+
             details_hosts_fe = {
                 'min_num_vlan_1': int(request.POST.get('vlanminintbefe')) if request.POST.get('vlanminintbefe') else None,
                 'max_num_vlan_1': int(request.POST.get('vlanmaxintbefe')) if request.POST.get('vlanmaxintbefe') else None,
@@ -1083,19 +1092,22 @@ def fabric_ambiente(request, fabric_id):
                     {
                         'subnet': request.POST.get('ipv4rangeint'),
                         'type': "v4",
-                        'new_prefix': str(request.POST.get('prefixv4intbefe')),
+                        'new_prefix': str(request.POST.get('newprefix_befe_v4')),
                         'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv4intbefe'))
                     },
                     {
                         'subnet': request.POST.get('ipv6rangeint'),
                         'type': "v6",
-                        'new_prefix': str(request.POST.get('prefixv6intbefe')),
+                        'new_prefix': str(request.POST.get('newprefix_befe_v6')),
                         'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv6intbefe'))
                     }
                 ],
                 'name': "BEFE"
             }
             details_hosts.append(details_hosts_fe)
+
             details_hosts_bo = {
                 'min_num_vlan_1': int(request.POST.get('vlanminintbebo')) if request.POST.get('vlanminintbebo') else None,
                 'max_num_vlan_1': int(request.POST.get('vlanmaxintbebo')) if request.POST.get('vlanmaxintbebo') else None,
@@ -1103,19 +1115,22 @@ def fabric_ambiente(request, fabric_id):
                     {
                         'subnet': request.POST.get('ipv4rangeint'),
                         'type': "v4",
-                        'new_prefix': str(request.POST.get('prefixv4intbebo')),
+                        'new_prefix': str(request.POST.get('newprefix_bebo_v4')),
                         'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv4intbebo'))
                     },
                     {
                         'subnet': request.POST.get('ipv6rangeint'),
                         'type': "v6",
-                        'new_prefix': str(request.POST.get('prefixv6intbebo')),
+                        'new_prefix': str(request.POST.get('newprefix_bebo_v6')),
                         'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv6intbebo'))
                     }
                 ],
                 'name': "BEBO"
             }
             details_hosts.append(details_hosts_bo)
+
             details_hosts_ca = {
                 'min_num_vlan_1': int(request.POST.get('vlanminintbeca')) if request.POST.get('vlanminintbeca') else None,
                 'max_num_vlan_1': int(request.POST.get('vlanmaxintbeca')) if request.POST.get('vlanmaxintbeca') else None,
@@ -1123,19 +1138,80 @@ def fabric_ambiente(request, fabric_id):
                     {
                         'subnet': request.POST.get('ipv4rangeint'),
                         'type': "v4",
-                        'new_prefix': str(request.POST.get('prefixv4intbeca')),
+                        'new_prefix': str(request.POST.get('newprefix_beca_v4')),
                         'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv4intbeca'))
                     },
                     {
                         'subnet': request.POST.get('ipv6rangeint'),
                         'type': "v6",
                         'new_prefix': str(request.POST.get('prefixv6intbeca')),
                         'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('newprefix_beca_v6'))
                     }
                 ],
                 'name': "BECA"
             }
             details_hosts.append(details_hosts_ca)
+
+            details_hosts_acs = {
+                'min_num_vlan_1': int(request.POST.get('vlanminintacs')) if request.POST.get('vlanminintacs') else None,
+                'max_num_vlan_1': int(request.POST.get('vlanmaxintacs')) if request.POST.get('vlanmaxintacs') else None,
+                'config': [
+                    {
+                        'subnet': request.POST.get('ipv4rangeint'),
+                        'type': "v4",
+                        'new_prefix': str(request.POST.get('newprefix_acs_v4')),
+                        'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv4intasc'))
+                    },
+                    {
+                        'subnet': request.POST.get('ipv6rangeint'),
+                        'type': "v6",
+                        'new_prefix': str(request.POST.get('newprefix_acs_v6')),
+                        'network_type': int(net_type_id),
+                        'mask': str(request.POST.get('prefixv6intacs'))
+                    }
+                ],
+                'name': "Hosts-ACS"
+            }
+            details_hosts.append(details_hosts_acs)
+
+            details_fe = {
+                'v4': {
+                    'new_prefix': str(request.POST.get('newprefix_fe'))
+                },
+                'v6': {
+                    'new_prefix': str(request.POST.get('newprefix_fe_v6'))
+                }
+            }
+
+            details_dsr = {
+                'v4': {
+                    'new_prefix': str(request.POST.get('newprefix_dsr'))
+                },
+                'v6': {
+                    'new_prefix': str(request.POST.get('newprefix_dsr_v6'))
+                }
+            }
+
+            details_ca = {
+                'v4': {
+                    'new_prefix': str(request.POST.get('newprefix_caa'))
+                },
+                'v6': {
+                    'new_prefix': str(request.POST.get('newprefix_caa_v6'))
+                }
+            }
+
+            details_cab = {
+                'v4': {
+                    'new_prefix': str(request.POST.get('newprefix_cab'))
+                },
+                'v6': {
+                    'new_prefix': str(request.POST.get('newprefix_cab_v6'))
+                }
+            }
 
             env_dc = client.create_divisao_dc().listar().get("division_dc")
             for dc in env_dc:
@@ -1195,7 +1271,7 @@ def fabric_ambiente(request, fabric_id):
                     env_hosts_fe["vlan_min"] = int(request.POST.get('vlanminint_fe')) if request.POST.get('vlanminint_fe') else None
                     env_hosts_fe["vlan_max"] = int(request.POST.get('vlanmaxint_Fe')) if request.POST.get('vlanmaxint_Fe') else None
                     env_hosts_fe["config"] = configs_int_fe
-                    env_hosts_fe["details"] = []
+                    env_hosts_fe["details"] = [details_fe]
                     env_interno_fe["dc_id"] = dc.get("id")
                     env_interno_fe["logic_id"] = logic_id_int
                     env_interno_fe["vrf"] = vrf_fe
@@ -1231,6 +1307,7 @@ def fabric_ambiente(request, fabric_id):
                     env_prod_dsr["vlan_min"] = int(request.POST.get('vlanminint_dsr')) if request.POST.get('vlanminint_dsr') else None
                     env_prod_dsr["vlan_max"] = int(request.POST.get('vlanmaxint_dsr')) if request.POST.get('vlanmaxint_dsr') else None
                     env_prod_dsr["config"] = configs_dsr
+                    env_prod_dsr["details"] = [details_dsr]
                     envs.append(env_prod_dsr)
                 elif dc.get("nome")=="BO_DMZ":
                     env_prod_dmz["dc_id"] = dc.get("id")
@@ -1265,6 +1342,7 @@ def fabric_ambiente(request, fabric_id):
                     env_hosts_boca["vlan_min"] = int(request.POST.get('vlanminint_a_')) if request.POST.get('vlanminint_a_') else None
                     env_hosts_boca["vlan_max"] = int(request.POST.get('vlanmaxint_a_')) if request.POST.get('vlanmaxint_a_') else None
                     env_hosts_boca["config"] = configs_ca_a
+                    env_hosts_boca["details"] = [details_ca]
                     envs.append(env_hosts_boca)
                 elif dc.get("nome")=="BOCACHOS-B":
                     env_spn_bocab["dc_id"] = dc.get("id")
@@ -1290,6 +1368,7 @@ def fabric_ambiente(request, fabric_id):
                     env_hosts_bocab["vlan_min"] = int(request.POST.get('vlanminint_b_')) if request.POST.get('vlanminint_b_') else None
                     env_hosts_bocab["vlan_max"] = int(request.POST.get('vlanmaxint_b_')) if request.POST.get('vlanmaxint_b_') else None
                     env_hosts_bocab["config"] = configs_ca_b
+                    env_hosts_bocab["details"] = [details_cab]
                     envs.append(env_hosts_bocab)
                 elif dc.get("nome")=="OOB":
                     env_oob["dc_id"] = dc.get("id")
