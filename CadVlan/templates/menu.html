@@ -1,25 +1,27 @@
+{% load util %}
 <!DOCTYPE html>
 <html>
 <head>
-  <!-- Site made with Mobirise Website Builder v3.12.1, https://mobirise.com -->
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="generator" content="Mobirise v3.12.1, mobirise.com">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
-  <meta name="description" content="NAPI-WEB">
+    <!-- Site made with Mobirise Website Builder v3.12.1, https://mobirise.com -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="generator" content="Mobirise v3.12.1, mobirise.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+    <meta name="description" content="NAPI-WEB">
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic&amp;subset=latin">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
-  <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
-  <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/tether/tether.min.css">
-  <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/animate.css/animate.min.css">
-  <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-  <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic&amp;subset=latin">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/tether/tether.min.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/animate.css/animate.min.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/globo/jquery-ui-1.8.17.custom.css" />
 
 </head>
 
@@ -89,20 +91,34 @@
 <section class="engine">
     <a rel="external" href="https:/globo.com">https://globo.com/</a>
 </section>
-
 <div id="content">
-{% block content %}{% endblock %}
+    <div id="messages">
+        <br><br><br>
+        {% if messages %}
+            {% for message in messages %}
+                <div>
+                    <div id="messagesError" class="{% if message.tags == 'error'%}ui-state-error{% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
+                        <span class="ui-icon"></span>
+                        {{ message }}
+                    </div>
+                    <p></p>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% block content %}{% endblock %}
 </div>
 
-  <script src="{{ MEDIA_URL }}/assets/web/assets/jquery/jquery.min.js"></script>
-  <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
-  <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
-  <script src="{{ MEDIA_URL }}/assets/smooth-scroll/smooth-scroll.js"></script>
-  <script src="{{ MEDIA_URL }}/assets/viewport-checker/jquery.viewportchecker.js"></script>
-  <script src="{{ MEDIA_URL }}/assets/theme/js/script.js"></script>
-  <script src="{{ MEDIA_URL }}/assets/formoid/formoid.min.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/web/assets/jquery/jquery.min.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/smooth-scroll/smooth-scroll.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/viewport-checker/jquery.viewportchecker.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/theme/js/script.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/formoid/formoid.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-ui.custom.min.js"></script>
 
-  <input name="animation" type="hidden">
+    <input name="animation" type="hidden">
 
 </body>
 </html>

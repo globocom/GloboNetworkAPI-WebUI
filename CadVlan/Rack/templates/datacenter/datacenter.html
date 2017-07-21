@@ -29,9 +29,12 @@
                             <tr class="col-xs-12" onClick="event.stopPropagation();">
                                 <td class="col-xs-12 col-md-1 text-xs-left"></td>
                                 <td class="col-xs-12 col-md-8">{{ fabric.name }}</td>
-                                <td class="col-xs-12 col-md-3"><a class="material-icons" style="color:#0D84A5"
-                                                                  href="{% url fabric fabric.id %}"
-                                                                  title="Editar este fabric">edit</a></td>
+                                <td class="col-xs-12 col-md-3">
+                                    <a class="material-icons" style="color:#0D84A5" href="{% url fabric fabric.id %}"
+                                       title="Editar este fabric">
+                                        edit
+                                    </a>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

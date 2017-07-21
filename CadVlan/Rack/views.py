@@ -48,6 +48,12 @@ logger = logging.getLogger(__name__)
 
 def proximo_rack(racks, qtd_rack=None):
 
+    if not qtd_rack:
+        qtd_rack = 119
+
+    if len(racks)==qtd_rack:
+        return -1
+
     rack_anterior = -1
     lists = list()
 
@@ -61,13 +67,7 @@ def proximo_rack(racks, qtd_rack=None):
             if not num == rack_anterior:
                 return str(rack_anterior)
 
-    rack_anterior = rack_anterior + 1
-    if not qtd_rack:
-        qtd_rack = 119
-    if rack_anterior > qtd_rack:
-        return -1
     return str(rack_anterior)
-
 
 def validar_mac(mac):
 
@@ -106,8 +106,8 @@ def valid_rack_number(rack_number):
 
 
 def valid_rack_number_dc(rack_number, racks):
-   if not rack_number < int(racks)-1:
-      raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - %' %str(racks))
+   if not int(rack_number) < int(racks):
+      raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - %s' % str(racks))
 
 
 def valid_rack_name(rack_name):
@@ -565,14 +565,8 @@ def newrack(request, fabric_id):
                 nome_sw2 = form.cleaned_data['nome_sw2']
                 nome_ilo = form.cleaned_data['nome_ilo']
 
-
-                # validacao: Numero do Rack
-                valid_rack_number_dc(rack_number, fabric_racks)
-
-                # validacao: Nome do Rack
                 valid_rack_name(rack_name)
 
-                # Validacao: MAC
                 validar_mac(mac_sw1)
                 validar_mac(mac_sw2)
                 validar_mac(mac_ilo)
@@ -599,10 +593,10 @@ def newrack(request, fabric_id):
                 return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
     except NetworkAPIClientError, e:
-
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return HttpResponseRedirect(reverse('rack.add', args=[fabric_id]))
+        return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+
     return render_to_response(templates.RACK_DC_ADD, lists, context_instance=RequestContext(request))
 
 
@@ -635,7 +629,7 @@ def vlans_rack (request, fabric_id, rack_id):
     except:
         messages.add_message(request, messages.WARNING, rack_messages.get("can_not_alocar_config"))
 
-    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]) + '#section02')
 
 
 @log
@@ -651,7 +645,7 @@ def files_rack (request, fabric_id, rack_id):
     except:
         messages.add_message(request, messages.WARNING, rack_messages.get("can_not_create_config"))
 
-    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]) + '#section02')
 
 
 @log
