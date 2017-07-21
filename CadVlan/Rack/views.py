@@ -46,28 +46,25 @@ from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfi
 logger = logging.getLogger(__name__)
 
 
-def proximo_rack(racks, qtd_rack=None):
-
-    if not qtd_rack:
-        qtd_rack = 119
+def proximo_rack(racks, qtd_rack=119):
 
     if len(racks)==qtd_rack:
         return -1
 
     rack_anterior = -1
-    lists = list()
+    racks_ids = list()
 
     for rack in racks:
-        lists.append(int(rack.get('numero')))
-    lists.sort()
+        racks_ids.append(int(rack.get('numero')))
+    racks_ids.sort()
 
-    for num in lists:
+    for num in racks_ids:
         if num > rack_anterior:
             rack_anterior = rack_anterior + 1
             if not num == rack_anterior:
                 return str(rack_anterior)
 
-    return str(rack_anterior)
+    return str(rack_anterior+1)
 
 def validar_mac(mac):
 
