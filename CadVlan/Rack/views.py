@@ -109,7 +109,7 @@ def valid_rack_number_dc(rack_number, racks):
 
 def valid_rack_name(rack_name):
    if not check_regex(rack_name, r'^[A-Z][A-Z][0-9][0-9]'):
-      raise InvalidParameterError('Nome inváildo. Ex: AA00')
+      raise InvalidParameterError('Nome inválido. Ex: AA00')
 
 
 def get_msg(request, var, nome, operation):
@@ -562,7 +562,7 @@ def newrack(request, fabric_id):
                 nome_sw2 = form.cleaned_data['nome_sw2']
                 nome_ilo = form.cleaned_data['nome_ilo']
 
-                valid_rack_name(rack_name)
+                #valid_rack_name(rack_name)
 
                 validar_mac(mac_sw1)
                 validar_mac(mac_sw2)

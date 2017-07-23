@@ -24,7 +24,7 @@ class RackForm(forms.Form):
 
     rack_number = forms.IntegerField(label=u'Numero do Rack', required=True,  
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 150px"}))
-    rack_name = forms.CharField(label=u'Nome do Rack', min_length=4, max_length=5, required=True,
+    rack_name = forms.CharField(label=u'Nome do Rack', min_length=2, max_length=4, required=True,
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 200px"}))
     mac_address_sw1 = forms.CharField(label=u'Mac Address', min_length=1, max_length=17, required=False, 
                            error_messages=error_messages, widget=forms.TextInput(attrs={'style': "width: 150px"}))
