@@ -360,7 +360,7 @@ def add_several_forms(request, equip_name):
 
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     divisor = "/" if (brand == '3' or brand ==
-                      '5' or brand == '21') else ":" if brand == "0" else "." if brand == '4' else ""
+                      '5' or brand == '6' or brand == '21') else ":" if brand == "0" else "." if brand == '4' else ""
 
     list_brands = [2, 3, 4, 5, 6, 21, 25]
     # 2 Patch-Panel-Generico
