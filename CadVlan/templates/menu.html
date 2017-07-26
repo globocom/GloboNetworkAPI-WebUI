@@ -61,7 +61,7 @@
                                 <a class="dropdown-item" href="/script-type/list">Tipo de Roteiros</a>
                                 <a class="dropdown-item" href="/vip-request/list">VIP</a>
                                 <a class="dropdown-item" href="/vlan/list">Vlans</a>
-
+                                </div>
                             </ol>
                         </li>
                         <li class="nav-item dropdown">
@@ -72,6 +72,7 @@
                                 <a class="dropdown-item" href="/group-user/list">Grupos de Usuários</a>
                                 <a class="dropdown-item" href="/user/list/0/0">Usuários</a>
                                 <a class="dropdown-item" href="/system/variables/list">Variáveis do sistema</a>
+                                </div>
                             </ol>
                         </li>
                         <!--li class="nav-item dropdown">
@@ -89,25 +90,30 @@
 </section>
 
 <section class="engine">
-    <a rel="external" href="https:/globo.com">https://globo.com/</a>
+    <a rel="external" href="https:/globo.com">CadVlan</a>
 </section>
-<div id="content">
-    <div id="messages">
-        <br><br><br>
-        {% if messages %}
-            {% for message in messages %}
-                <div>
-                    <div id="messagesError" class="{% if message.tags == 'error'%}ui-state-error{% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
-                        <span class="ui-icon"></span>
-                        {{ message }}
+{% if messages %}
+    <div class="mbr-section mbr-section__container mbr-section__container--middle">
+        <div class="container">
+            <div id="messages">
+                <br><br><br>
+                {% for message in messages %}
+                    <div data-toggle="collapse" data-target="#messagesError">
+                        <div id="messagesError" class="{% if message.tags == 'error'%}ui-state-error
+                        {% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
+                            <!--span class="ui-icon"></span-->
+                            <p class="{% if message.tags == 'error'%}text-danger
+                             {% elif message.tags == 'success' %}text-success
+                             {% else %}text-info{% endif %}
+                             form-control-label text-xs-center">{{ message }}</p>
+                        </div>
                     </div>
-                    <p></p>
-                </div>
-            {% endfor %}
-        {% endif %}
+                {% endfor %}
+            </div>
+        </div>
     </div>
+{% endif %}
     {% block content %}{% endblock %}
-</div>
 
     <script src="{{ MEDIA_URL }}/assets/web/assets/jquery/jquery.min.js"></script>
     <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
