@@ -1449,6 +1449,9 @@ def fabric_bgp(request, fabric_id):
                 'id_vlt_lf2': request.POST.get('fabricvlt02'),
                 'priority_vlt_lf2': request.POST.get('fabricpriority02')
             }
+            channel = {
+                'channel': request.POST.get('channel')
+            }
             telecom = {
                 'rede': request.POST.get('gerenciatelecom'),
                 'vlan': request.POST.get('gerenciavlan')
@@ -1467,7 +1470,8 @@ def fabric_bgp(request, fabric_id):
             config = {
                 'BGP': bgp,
                 'Gerencia': gerencia,
-                'VLT': vlt
+                'VLT': vlt,
+                'Channel': channel
             }
             fabric = {
                 'flag': True,
