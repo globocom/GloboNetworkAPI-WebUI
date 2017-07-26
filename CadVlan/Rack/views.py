@@ -15,9 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ast
 import json
-import operator
 import logging
 
 from django.contrib import messages
@@ -27,7 +25,6 @@ from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_protect
 
-from CadVlan.Acl import acl
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm, AlocarForm
 from CadVlan.messages import error_messages, rack_messages, environment_messages
@@ -116,6 +113,7 @@ def get_msg(request, var, nome, operation):
 
     var = var.get('rack_conf')
     var = str(var)
+    msg = ""
 
     if var=="True":
         if operation=='CONFIG':
@@ -608,7 +606,7 @@ def remove_rack (request, fabric_id, rack_id):
         client.create_apirack().rack_delete(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("success_remove"))
     except:
-        messages.add_message(request, messages.WARNING, rack_messages.get("can_not_remove"))
+        messages.add_message(request, messages.ERROR, rack_messages.get("can_not_remove"))
 
     return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
@@ -623,10 +621,10 @@ def vlans_rack (request, fabric_id, rack_id):
         client = auth.get_clientFactory()
         client.create_apirack().rackenvironments(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_alocar_config"))
-    except:
-        messages.add_message(request, messages.WARNING, rack_messages.get("can_not_alocar_config"))
+    except NetworkAPIClientError, e:
+        messages.add_message(request, messages.ERROR, "Os ambientes do rack não foram alocados. Erro: %s" % e)
 
-    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]) + '#section02')
+    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
 
 @log
@@ -639,10 +637,10 @@ def files_rack (request, fabric_id, rack_id):
     try:
         client.create_apirack().rackfiles(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_create_config"))
-    except:
-        messages.add_message(request, messages.WARNING, rack_messages.get("can_not_create_config"))
+    except NetworkAPIClientError, e:
+        messages.add_message(request, messages.ERROR, "Os arquivos de configuração não foram gerados. Erro: %s" % e)
 
-    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]) + '#section02')
+    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
 
 @log
@@ -656,11 +654,10 @@ def deploy_rack_new (request, fabric_id, rack_id):
     try:
         client.create_apirack().rack_deploy(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_aplicar_config"))
-    except:
-        messages.add_message(request, messages.WARNING, rack_messages.get("can_not_aplicar_config"))
+    except NetworkAPIClientError, e:
+        messages.add_message(request, messages.ERROR, "Erro ao deployar. Erro: %s" % e)
 
     return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
-
 
 
 @log
@@ -722,7 +719,7 @@ def new_datacenter(request):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+        messages.add_message(request, messages.ERROR, "Datacenter não foi cadastrado. Erro: %s" % e)
     return render_to_response(templates.DC_FORM, {'form': {}}, context_instance=RequestContext(request))
 
 
@@ -768,7 +765,7 @@ def fabric(request, fabric_id):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+        messages.add_message(request, messages.ERROR, "Erro cadastrando o Fabric. Erro: %s " % e)
     return render_to_response(templates.FABRIC, lists, context_instance=RequestContext(request))
 
 
@@ -804,7 +801,7 @@ def new_fabric(request, dc_id):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+        messages.add_message(request, messages.ERROR, "Erro cadastrando o Fabric. Erro: %s " % e)
     return render_to_response(templates.DCROOM_FORM, lists, context_instance=RequestContext(request))
 
 
@@ -1415,7 +1412,8 @@ def fabric_ambiente(request, fabric_id):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+        messages.add_message(request, messages.ERROR, "Houve algum problema ao alocar os ambientes do Fabric. "
+                                                      "Erro: %s" % e)
         return HttpResponseRedirect(reverse('fabric.ambiente', args=[fabric_id]))
 
     return render_to_response(templates.DCROOM_ENV_FORM, lists, context_instance=RequestContext(request))
@@ -1482,7 +1480,7 @@ def fabric_bgp(request, fabric_id):
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+        messages.add_message(request, messages.ERROR, "Erro salvando a configuração do Fabric. Erro: %s" % e)
         return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
 
     return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
