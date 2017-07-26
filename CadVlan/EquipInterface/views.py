@@ -362,7 +362,14 @@ def add_several_forms(request, equip_name):
     divisor = "/" if (brand == '3' or brand ==
                       '5' or brand == '21') else ":" if brand == "0" else "." if brand == '4' else ""
 
-    list_brands = [2, 3, 4, 5, 21, 25]
+    list_brands = [2, 3, 4, 5, 6, 21, 25]
+    # 2 Patch-Panel-Generico
+    # 3 Cisco
+    # 4 F5
+    # 5 Foundry
+    # 6 Dell
+    # 21 HUAWEI
+    # 25 Sistmax
 
     if int(brand) not in list_brands:
         # Redirect to list_all action
