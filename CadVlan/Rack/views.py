@@ -590,7 +590,7 @@ def newrack(request, fabric_id):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+        return HttpResponseRedirect(reverse('rack.add', args=[fabric_id]))
 
     return render_to_response(templates.RACK_DC_ADD, lists, context_instance=RequestContext(request))
 
@@ -603,12 +603,12 @@ def remove_rack (request, fabric_id, rack_id):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
     try:
-        client.create_apirack().rack_delete(rack_id)
+        client.create_apirack().delete_rack(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("success_remove"))
-    except:
-        messages.add_message(request, messages.ERROR, rack_messages.get("can_not_remove"))
-
-    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+    except NetworkAPIClientError, e:
+        messages.add_message(request, messages.ERROR, "Não foi possivel remover o rack. Erro: %s" % e)
+    finally:
+        return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
 
 @log
