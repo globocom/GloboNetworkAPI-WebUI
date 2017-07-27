@@ -116,6 +116,8 @@ class AddInterfaceForm(forms.Form):
             self.regex = "^(interface)\s[0-9a-zA-Z]+(/[0-9a-zA-Z])+([0-9a-zA-Z-.]+)?$"
         elif marca == "5":#Trocar pelo Brocade
             self.regex = "^(eth)[0-9]+(/[0-9]+)?$"
+        elif marca == "6":#Trocar pelo Brocade
+            self.regex = "^(Hu|Fi|Fo|Tf|Te|Gi)\s+[0-9]+(/[0-9]+(/[0-9]+(/[0-9]+)?)?)?$"
         elif marca == "8":
             self.regex = "^[0-9]+$"
         elif marca == "21":
@@ -230,6 +232,14 @@ class AddSeveralInterfaceForm(forms.Form):
             attrs['disabled'] = "disabled"
             self.fields['combo_aux'].widget = forms.Select(attrs=attrs)
             self.fields['combo_aux'].choices = [("eth", "eth")]
+        elif marca == "6":
+            self.regex = "^(Hu|Fi|Fo|Tf|Te|Gi)\s+[0-9]+(/[0-9]+(/[0-9]+(/[0-9]+)?)?)?$"
+            self.fields['campos'].choices = [("1", "1"), ("2", "2"), ("3", "3"), ("4", "4")]
+            self.fields['combo'].widget = forms.Select(attrs=attrs)
+            self.fields['combo'].choices = [("Hu", "Hu"),("Fi", "Fi"),("Fo", "Fo"),("Tf", "Tf"),("Te", "Te"),("Gi", "Gi")]
+            attrs['disabled'] = "disabled"
+            self.fields['combo_aux'].widget = forms.Select(attrs=attrs)
+            self.fields['combo_aux'].choices = [("Hu", "Hu"),("Fi", "Fi"),("Fo", "Fo"),("Tf", "Tf"),("Te", "Te"),("Gi", "Gi")]
 
         elif marca == "21":
             attrs["style"] = "width: 98px;"
