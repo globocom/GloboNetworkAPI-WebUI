@@ -248,6 +248,7 @@ RACK_VIEW_AJAX = 'rack/view-rack.html'
 RACK_EDIT = 'rack/edit.html'
 #
 RACK_DC_ADD = 'datacenter/newrack.html'
+RACK_NEWEDIT = 'datacenter/editrack.html'
 LISTDC = 'datacenter/datacenter.html'
 DC_FORM = 'datacenter/newdc.html'
 FABRIC = 'datacenter/fabric.html'

@@ -728,6 +728,7 @@ urlpatterns += patterns(
     url('^rack/form/(?P<fabric_id>\d+)[/]?$', 'newrack', name='rack.add',),
     url('^rack/ajax-view[/]?$', 'ajax_view', name='ajax.view.rack',),
     url('^rack/edit/(?P<id_rack>\d+)[/]?$', 'rack_edit', name='rack.edit',),
+    url('^rack/edit/(?P<rack_id>\d+)/fabric/(?P<fabric_id>\d+)[/]?$', 'put_rack', name='rack.new.edit', ),
     url('^rack/delete/(?P<fabric_id>\d+)/(?P<rack_id>\d+)[/]?$', 'remove_rack', name='rack.delete.new',),
     url('^rack/delete[/]?$', 'rack_delete', name='rack.delete',),
     url('^rack/gerar-configuracao[/]?$', 'rack_config', name='rack.config',),

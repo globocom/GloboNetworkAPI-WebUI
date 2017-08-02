@@ -597,6 +597,83 @@ def newrack(request, fabric_id):
 
 @log
 @login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
+def put_rack(request, rack_id, fabric_id):
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists = dict()
+        lists['id'] = rack_id
+        lists["fabric_id"] = fabric_id
+        lists["action"] = reverse('rack.new.edit', args=[rack_id, fabric_id])
+
+
+        racks = client.create_apirack().get_rack(rack_id=rack_id)
+
+        rack = racks.get("racks")[0] if racks.get("racks") else dict()
+
+        lists['numero'] = rack.get("numero")
+
+        lists['form'] = RackForm(initial={'rack_number': rack.get("numero"),
+                                          'rack_name': rack.get("nome"),
+                                          "nome_sw1": rack.get("id_sw1"),
+                                          'nome_sw2': rack.get("id_sw2"),
+                                          'nome_ilo': rack.get("id_ilo"),
+                                          'mac_address_sw1': rack.get("mac_sw1"),
+                                          'mac_address_sw2': rack.get("mac_sw2"),
+                                          'mac_address_ilo': rack.get("mac_ilo")})
+
+        if request.method == 'POST':
+            form = RackForm(request.POST)
+            lists['form'] = form
+
+            if form.is_valid():
+                numero = form.cleaned_data['rack_number']
+                nome = form.cleaned_data['rack_name']
+                mac_sw1 = form.cleaned_data['mac_address_sw1']
+                mac_sw2 = form.cleaned_data['mac_address_sw2']
+                mac_ilo = form.cleaned_data['mac_address_ilo']
+                nome_sw1 = form.cleaned_data['nome_sw1']
+                nome_sw2 = form.cleaned_data['nome_sw2']
+                nome_ilo = form.cleaned_data['nome_ilo']
+
+                # Validacao: MAC
+                validar_mac(mac_sw1)
+                validar_mac(mac_sw2)
+                validar_mac(mac_ilo)
+
+                id_sw1 = buscar_id_equip(client, nome_sw1)
+                id_sw2 = buscar_id_equip(client, nome_sw2)
+                id_ilo = buscar_id_equip(client, nome_ilo)
+
+                rack = {
+                    'number': numero,
+                    'name': nome,
+                    'id_sw1': id_sw1,
+                    'mac_sw1': mac_sw1,
+                    'id_sw2': id_sw2,
+                    'mac_sw2': mac_sw2,
+                    'id_ilo': id_ilo,
+                    'mac_ilo': mac_ilo,
+                    'fabric_id': fabric_id
+                }
+                rack = client.create_apirack().put_rack(rack_id, rack)
+                messages.add_message(request, messages.SUCCESS, "Rack foi editado.")
+
+                return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return render_to_response(templates.RACK_NEWEDIT, lists, context_instance=RequestContext(request))
+
+    return render_to_response(templates.RACK_NEWEDIT, lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def remove_rack (request, fabric_id, rack_id):
 
