@@ -1,0 +1,32 @@
+version: '3'
+services:
+
+    cache:
+        container_name: netapi_webui_cache
+        image: memcached:1.4.33
+        ports:
+            - "11211"
+        networks:
+            - globonetworkapi_netapi_net 
+
+    netapi_webui:
+        container_name: netapi_webui_app
+        build: .
+        ports:
+            - "127.0.0.1:8080:8080"
+        command: sh docker-start.sh
+        env_file:
+            - netapi_webui.env
+        volumes:
+            - .:/netapi_webui
+        networks:
+            - globonetworkapi_netapi_net
+        depends_on:
+            - cache
+        external_links:
+            - netapi_app
+            - cache:netapi_webui_cache
+
+networks:
+    globonetworkapi_netapi_net:
+        external: true
