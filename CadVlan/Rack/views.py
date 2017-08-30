@@ -649,6 +649,7 @@ def put_rack(request, rack_id, fabric_id):
                 id_ilo = buscar_id_equip(client, nome_ilo)
 
                 rack = {
+                    'id': rack_id,
                     'number': numero,
                     'name': nome,
                     'id_sw1': id_sw1,
