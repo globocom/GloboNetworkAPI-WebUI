@@ -1,0 +1,143 @@
+{% extends "menu.html" %}
+{% block content %}
+<section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
+    <div class="mbr-section mbr-section__container mbr-section__container--middle">
+        <div class="container">
+            <div class="row form-group">
+                <h1 class="mbr-section-title display-2 text-xs-center">
+                    <p>Fabric</p>
+                </h1>
+            </div>
+            <div class="row form-group">
+                <div class="col-xs-12 col-lg-12 col-lg-offset-1">
+                    <form action="{{action}}" method="post" id="fabric_form">
+                        {% csrf_token %}
+                        <div class="row row-sm-offset">
+                            <div class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                <a id="voltardc" class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                        href="{% url listdc %}">
+                                   <i class="material-icons" style="color:#FFD17C;font-size:15px">arrow_back</i>
+                                </a>
+                            </div>
+                            <div class="col-xs-12 col-md-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="fabric_form_name">
+                                        Nome<span class="form-asterisk">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" data-form-field="fabric_name"
+                                           name="fabricname" id="fabric_form_name" value={{fabric.name}}>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="fabric_form_spn">
+                                        Spines<span class="form-asterisk">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="spn" data-form-field="fabric_spn"
+                                           id="fabric_form_spn" value={{fabric.spines}}>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="fabric_form_lfs">
+                                        Leafs<span class="form-asterisk">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="lfs" data-form-field="fabric_lfs"
+                                           id="fabric_form_lfs" value={{fabric.leafs}}>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-2">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="fabric_form_rck">
+                                        Racks<span class="form-asterisk">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="rack" data-form-field="fabric_rck"
+                                           id="fabric_form_rck" value={{fabric.racks}}>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                <a id="voltardc" class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                        href="#">
+                                   <i class="material-icons" style="color:#FFD17C;font-size:15px">edit</i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <br><br><br>
+        <div class="container">
+            <div class="row form-group">
+                <h1 class="mbr-section-title display-3 text-xs-center">
+                    <p>Racks</p>
+                </h1>
+            </div>
+            <div class="row form-group form-control-label">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="col-xs-12  col-lg-12 col-lg-offset-1">
+                                <td class="col-xs-12 col-md-4 text-xs-left"><b>RACK</b></td>
+                                <td class="col-xs-12 col-md-2 text-xs-left"><b>Número</b></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left">
+                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                       href="{% url rack.add fabric_id %}" title="Adicionar Rack">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">add</i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rack in racks %}
+                            <tr class="col-xs-12 col-lg-12 col-lg-offset-1" id="{{ rack.id }}">
+                                <td class="col-xs-12 col-md-4 text-xs-left">RACK {{ rack.nome }}</td>
+                                <td class="col-xs-12 col-md-2">{{ rack.numero }}</td>
+                                <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                    <a id="edit_rack" class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                            href="{% url rack.new.edit rack.id fabric_id %}" title="Editar as informações do Rack">
+                                       <i class="material-icons" style="color:#FFD17C;font-size:15px">edit</i>
+                                    </a>
+                                </td>
+                                <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                            href="{% url rack.vlans rack.dcroom rack.id %}" title="Alocar os ambientes e vlans do Rack">
+                                        <p style="font-size:8px;color:#FFD17C">NET</p>
+                                    </a>
+                                </td>
+                                <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                            href="{% url rack.files rack.dcroom rack.id %}" title="Criar os arquivos de configuração dos Leafs e OOBs">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px">insert_drive_file</i>
+                                    </a>
+                                </td>
+                                <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                            href="{% url rack.deploy.new rack.dcroom rack.id %}" title="Integração com o Foreman">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px">launch</i>
+                                    </a>
+                                </td>
+                                <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                            href="{% url rack.delete.new rack.dcroom rack.id %}" title="Remover o Rack">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">delete</i>
+                                    </a>
+                                </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br><br><br>
+            <div class="text-xs-center">
+                <a class="btn btn-danger-outline btn-danger" href="{% url listdc %}">Voltar</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

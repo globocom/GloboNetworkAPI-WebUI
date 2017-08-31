@@ -18,6 +18,8 @@
 LOGIN = 'login.html'
 HOME = 'home.html'
 
+MENU = 'menu.html'
+
 VERSION_HTML = 'version.html'
 
 # Ajax
@@ -241,8 +243,19 @@ POOL_MEMBER_ITEMS = 'pool/items.html'
 
 # Rack
 RACK_FORM = 'rack/form.html'
+RACK_ADD = 'rack/newrack.html'
 RACK_VIEW_AJAX = 'rack/view-rack.html'
 RACK_EDIT = 'rack/edit.html'
+#
+RACK_DC_ADD = 'datacenter/newrack.html'
+RACK_NEWEDIT = 'datacenter/editrack.html'
+LISTDC = 'datacenter/datacenter.html'
+DC_FORM = 'datacenter/newdc.html'
+FABRIC = 'datacenter/fabric.html'
+DCROOM_FORM = 'datacenter/newfabric.html'
+DCROOM_ENV_FORM = 'datacenter/ambiente.html'
+DCROOM_VLANS_FORM = 'datacenter/vlans.html'
+DCROOM_BGP_FORM = 'datacenter/fabricconfig.html'
 
 # System
 VARIABLES_FORM = 'system/form.html'

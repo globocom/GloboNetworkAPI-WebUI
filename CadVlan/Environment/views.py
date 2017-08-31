@@ -587,7 +587,6 @@ def edit(request, id_environment):
                     "default_vrf": int(vrf),
                     "father_environment": int(father_environment) if father_environment else None,
                     'vrf': vrf_internal
-
                 }
                 client.create_api_environment().update_environment(dict_env, id_env)
 

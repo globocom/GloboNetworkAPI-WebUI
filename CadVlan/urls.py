@@ -725,12 +725,25 @@ urlpatterns += patterns(
 urlpatterns += patterns(
     'CadVlan.Rack.views',
     url('^rack/form[/]?$', 'rack_form', name='rack.form',),
+    url('^rack/form/(?P<fabric_id>\d+)[/]?$', 'newrack', name='rack.add',),
     url('^rack/ajax-view[/]?$', 'ajax_view', name='ajax.view.rack',),
     url('^rack/edit/(?P<id_rack>\d+)[/]?$', 'rack_edit', name='rack.edit',),
+    url('^rack/edit/(?P<rack_id>\d+)/fabric/(?P<fabric_id>\d+)[/]?$', 'put_rack', name='rack.new.edit', ),
+    url('^rack/delete/(?P<fabric_id>\d+)/(?P<rack_id>\d+)[/]?$', 'remove_rack', name='rack.delete.new',),
     url('^rack/delete[/]?$', 'rack_delete', name='rack.delete',),
     url('^rack/gerar-configuracao[/]?$', 'rack_config', name='rack.config',),
+    url('^rack/files/(?P<fabric_id>\d+)/(?P<rack_id>\d+)[/]?$', 'files_rack', name='rack.files',),
     url('^rack/alocar[/]?$', 'rack_alocar', name='rack.alocar',),
+    url('^rack/vlans/(?P<fabric_id>\d+)/(?P<rack_id>\d+)[/]?$', 'vlans_rack', name='rack.vlans',),
     url('^rack/save/deploy[/]?$', 'rack_deploy', name='rack.deploy',),
+    url('^rack/deploy/(?P<fabric_id>\d+)/(?P<rack_id>\d+)[/]?$', 'deploy_rack_new', name='rack.deploy.new',),
+    url('^datacenter/cadastro[/]?$', 'new_datacenter', name='dc.cadastro',),
+    url('^datacenter[/]?$', 'datacenter', name='listdc',),
+    url('^fabric/cadastro/(?P<dc_id>\d+)[/]?$', 'new_fabric', name='fabric.cadastro',),
+    url('^fabric/ambientes/(?P<fabric_id>\d+)[/]?$', 'fabric_ambiente', name='fabric.ambiente',),
+    url('^fabric/bgp/(?P<fabric_id>\d+)[/]?$', 'fabric_bgp', name='fabric.bgp',),
+    url('^fabric/(?P<fabric_id>\d+)[/]?$', 'fabric', name='fabric',),
+    url('^menu[/]?$', 'menu', name='menu',),
 )
 
 # URL's System
