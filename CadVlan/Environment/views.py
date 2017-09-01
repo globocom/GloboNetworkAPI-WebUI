@@ -62,7 +62,7 @@ def list_all(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        environment = client.create_api_environment().search()
+        environment = client.create_api_environment().search(include=['vrf'])
 
         lists = dict()
         lists['environment'] = environment.get("environments")

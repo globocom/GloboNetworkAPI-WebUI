@@ -118,10 +118,14 @@ $(document).ready(function() {
 				{% for ambiente in environment %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ ambiente.id }}" /></td>
-					<td>{{ ambiente.name }}</td>
-					<td class="text_center">{% if ambiente.default_vrf %}{{ ambiente.default_vrf }}{% else %}-{% endif %}</td>
-					<td>{{ ambiente.sdn_controllers }}</td>
-					<td> DCCM/POP </td>
+					<td class="text_center">{{ ambiente.name }}</td>
+					<td class="text_center">
+                        {% if ambiente.vrf %}{{ ambiente.vrf }}{% endif %}
+                    </td>
+					<td class="text_center">
+                        {% if ambiente.sdn_controllers %}{{ ambiente.sdn_controllers }}{% endif %}
+                    </td>
+					<td class="text_center"> DCCM/POP </td>
 					<td class="text_center">
 						<a href="{% url environment.edit ambiente.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a>
 						{% has_perm VIP_VALIDATION True None %}
