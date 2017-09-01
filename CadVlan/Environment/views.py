@@ -59,17 +59,13 @@ logger = logging.getLogger(__name__)
 def list_all(request):
     try:
 
-        lists = dict()
-
-        # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        # Get all environments from NetworkAPI
-        environment = client.create_ambiente().listar()
+        environment = client.create_api_environment().search()
 
-        # Business
-        lists['environment'] = environment.get("ambiente")
+        lists = dict()
+        lists['environment'] = environment.get("environments")
         lists['form'] = DeleteForm()
 
     except NetworkAPIClientError, e:

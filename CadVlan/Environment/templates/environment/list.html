@@ -29,7 +29,7 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 0, 6 ] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [0, 4]}]
 	});
 	
 	$("#checkAll").click( function() {
@@ -107,12 +107,10 @@ $(document).ready(function() {
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
-					<th>Divisão DC</th>					
-					<th>Ambiente Lógico</th>
-					<th>Grupo Layer3</th>
-					<th>Filtro</th>
+					<th>Ambiente</th>
 					<th>VRF</th>
-					<th>Wiki</th>
+					<th>SDN Controler</th>
+					<th>Região</th>
 					<th style="width: 45px"></th>
 				</tr>
 			</thead>
@@ -120,17 +118,18 @@ $(document).ready(function() {
 				{% for ambiente in environment %}
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ ambiente.id }}" /></td>
-					<td>{{ ambiente.nome_divisao }}</td>
-					<td>{{ ambiente.nome_ambiente_logico }}</td>
-					<td>{{ ambiente.nome_grupo_l3 }}</td>
-					<td class="text_center">{% if ambiente.filter_name %}{{ ambiente.filter_name }}{% else %}-{% endif %}</td>
-					<td class="text_center">{% if ambiente.vrf %}{{ ambiente.vrf }}{% else %}-{% endif %}</td>
-					<td class="text_center">{% ifequal ambiente.link None %}-{% else %}<a href="{{ ambiente.link }}" target="_blank">wiki</a>{% endifequal %}</td>
+					<td>{{ ambiente.name }}</td>
+					<td class="text_center">{% if ambiente.default_vrf %}{{ ambiente.default_vrf }}{% else %}-{% endif %}</td>
+					<td>{{ ambiente.sdn_controllers }}</td>
+					<td> DCCM/POP </td>
 					<td class="text_center">
 						<a href="{% url environment.edit ambiente.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a>
 						{% has_perm VIP_VALIDATION True None %}
 						{% if has_perm %}
-						<a href='{% url block.edit.form ambiente.id %}' style='width: 20px; height: 20px;' class='btn_block_rule'>Regras/Blocos</a>
+						<a href='{% url block.edit.form ambiente.id %}' style='width: 20px; height: 20px;'
+						   class='btn_block_rule'>
+							Regras/Blocos
+						</a>
 						{% endif %}
 					</td>
 				</tr>
