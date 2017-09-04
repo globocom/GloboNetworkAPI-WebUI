@@ -168,6 +168,8 @@ urlpatterns += patterns(
     'CadVlan.Environment.views',
     url('^environment/list[/]?$',
         'list_all', name='environment.list',),
+    url('^environment/find[/]?$',
+        'ajax_list_all', name='ajax.environment.list', ),
     url('^environment/remove[/]?$',
         'remove_environment', name='environment.remove',),
     url('^environment/ambiente-logico[/]?$', 'insert_ambiente_logico',

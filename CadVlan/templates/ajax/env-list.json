@@ -3,20 +3,17 @@
     "iTotalRecords": {{ iTotalRecords|escapejs }},
     "iTotalDisplayRecords": {{ iTotalDisplayRecords|escapejs }},
     "aaData":[
-    {% for env in aaData %}
-    [
-		"<div class='text_center'><input type='checkbox' name='selection' value='{{ env.id|escapejs }}' /></div>",
-        "<div class='text_center'>{{ env.divisao_dc.name }}</div>",
-        "<div class='text_center'>{{ env.ambiente_logico.name }}</div>",
-        "<div class='text_center'>{{ env.grupo_l3.name }}</div>",
-		"<div class='text_center'>{% if env.filter %}{{ env.filter.name }}{% else %}-{% endif %}</div>",
-        "<div class='text_center'>{% if env.default_vrf %}{{ env.default_vrf.vrf}}{% else %}-{% endif %} </div> ",
-        "<div class='text_center'>{% ifequal env.link None %}-{% else %}<a href='{{ env.link }}'  target='_blank'>wiki</a>{% endifequal %}</div>",
-        "<div class='text_center'><a href='{% url environment.edit env.id %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a></div>"
-    ]
-    {% if not forloop.last %}
-    ,
-    {% endif %}
-    {% endfor %}
+        {% for env in aaData %}
+            [
+                "<div class='text_center'><input type='checkbox' name='selection' value='{{ env.id|escapejs }}' /></div>",
+                "<div class='text_center'>{{ env.name }}</div>",
+                "<div class='text_center'>{% if env.default_vrf %}{{ env.vrf}}{% else %}{% endif %} </div> ",
+                "<div class='text_center'>{{ env.sdn_controllers }}</div>",
+                "<div class='text_center'><a href='{% url environment.edit env.id %}' style='width: 20px; height: 20px;' class='btn_edit'>Editar</a></div>"
+            ]
+            {% if not forloop.last %}
+            ,
+            {% endif %}
+        {% endfor %}
     ]
 }

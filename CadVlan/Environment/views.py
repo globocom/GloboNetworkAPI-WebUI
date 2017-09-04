@@ -27,6 +27,7 @@ from networkapiclient.exception import DetailedEnvironmentError
 from networkapiclient.exception import InvalidParameterError
 from networkapiclient.exception import NetworkAPIClientError
 from networkapiclient.exception import XMLError
+from networkapiclient.Pagination import Pagination
 
 from CadVlan import templates
 from CadVlan.Acl.acl import get_templates
@@ -49,8 +50,62 @@ from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 from CadVlan.Util.git import GITCommandError
 from CadVlan.Util.shortcuts import render_to_response_ajax
+from CadVlan.Util.utility import DataTablePaginator
 
 logger = logging.getLogger(__name__)
+
+
+@log
+@login_required
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def ajax_list_all(request):
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        extends_search = dict()
+
+        column_index_name_map = {
+            0: '',
+            1: 'id',
+            2: 'name',
+            4: 'vrf',
+            3: 'dcroom',
+            9: ''}
+
+        dtp = DataTablePaginator(request, column_index_name_map)
+
+        dtp.build_server_side_list()
+
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search)
+
+        data = dict()
+        data["start_record"] = pagination.start_record
+        data["end_record"] = pagination.end_record
+        data["asorting_cols"] = pagination.asorting_cols
+        data["searchable_columns"] = pagination.searchable_columns
+        data["custom_search"] = pagination.custom_search or ""
+        data["extends_search"] = [extends_search] if extends_search else []
+
+        environment = client.create_api_environment().search(include=['vrf'],
+                                                             search=data)
+
+        return dtp.build_response(
+            environment.get("environments"),
+            environment.get("total"),
+            templates.AJAX_ENVIRONMENT_LIST,
+            request
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
 
 
 @log
@@ -59,13 +114,7 @@ logger = logging.getLogger(__name__)
 def list_all(request):
     try:
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        environment = client.create_api_environment().search(include=['vrf'])
-
         lists = dict()
-        lists['environment'] = environment.get("environments")
         lists['form'] = DeleteForm()
 
     except NetworkAPIClientError, e:

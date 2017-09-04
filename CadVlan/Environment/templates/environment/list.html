@@ -25,11 +25,14 @@
 $(document).ready(function() {
 	
 	oTable = $("#environment_list").dataTable({
+		"sAjaxSource": "{% url ajax.environment.list %}",
+		"bServerSide": true,
 		"aaSorting": [],
+		"bAutoWidth": false,
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [0, 4]}]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [0, 3]}]
 	});
 	
 	$("#checkAll").click( function() {
@@ -40,11 +43,11 @@ $(document).ready(function() {
 		}
 	});
 	
-	$(".fg-button").live("click", function(){
-		$(":checkbox").attr("checked", false);
-		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
-		$("#checkAll").attr("checked", false);
-	});
+    $(".fg-button").live("click", function(){
+            $("name['selection']").attr("checked", false);
+            $(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+            $("#checkAll").attr("checked", false);
+    });
 	
 	$("#page_tab").tabs();
 	
@@ -73,7 +76,7 @@ $(document).ready(function() {
 	
 	$(".btn_block_rule").button({ icons: {primary: "ui-icon-wrench"}, text: false });
 	$(".btn_block_rule", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-wrench"}, text: false });
-	
+
 })
 </script>
 {% endblock %}
@@ -109,35 +112,11 @@ $(document).ready(function() {
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th>Ambiente</th>
 					<th>VRF</th>
-					<th>SDN Controler</th>
 					<th>Região</th>
 					<th style="width: 45px"></th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for ambiente in environment %}
-				<tr>
-					<td class="text_center"><input type="checkbox" name="selection" value="{{ ambiente.id }}" /></td>
-					<td class="text_center">{{ ambiente.name }}</td>
-					<td class="text_center">
-                        {% if ambiente.vrf %}{{ ambiente.vrf }}{% endif %}
-                    </td>
-					<td class="text_center">
-                        {% if ambiente.sdn_controllers %}{{ ambiente.sdn_controllers }}{% endif %}
-                    </td>
-					<td class="text_center"> DCCM/POP </td>
-					<td class="text_center">
-						<a href="{% url environment.edit ambiente.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a>
-						{% has_perm VIP_VALIDATION True None %}
-						{% if has_perm %}
-						<a href='{% url block.edit.form ambiente.id %}' style='width: 20px; height: 20px;'
-						   class='btn_block_rule'>
-							Regras/Blocos
-						</a>
-						{% endif %}
-					</td>
-				</tr>
-				{% endfor %}
 			</tbody>
 		</table>
 	</div>
