@@ -32,9 +32,43 @@ $(document).ready(function() {
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
 		"iDisplayLength": {% max_results %},
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [0, 3]}]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [0, 3]}],
+		"fnServerData": function ( sSource, aoData, fnCallback, oSettings ) {
+
+			var env_by_name = $("input[name^=env_by_name]").val().trim();
+
+			 aoData["pEnvironment"] = $("select#id_environment").val();
+			 if (env_by_name!==""){
+                aoData["sSearch"] = env_by_name;
+               }
+			 oSettings.jqXHR = $.ajax({
+			   "dataType": 'json',
+			   "type": "GET",
+			   "url": sSource,
+			   "data": aoData,
+			   "success": fnCallback,
+			   "error": function(error){
+			   		message = jQuery.parseJSON(error.responseText);
+			   		addMessage(message);
+			   }
+			 }).done(function() {
+				 $(".btn_edit").button({ icons: {primary: "ui-icon-pencil"}, text: false });
+				 $(".btn_manager").button({ icons: {primary: "ui-icon-wrench"}, text: false });
+			 });
+	    }
 	});
-	
+
+	$('#env_by_name').bind('keyup', function(e){
+        if(e.which == 13 || e.keyCode == 13){
+            $('#btn_search').click();
+        }
+	});
+
+	$("#btn_search").button({ icons: {primary: "ui-icon-search"} }).live("click", function(event){
+		event.preventDefault();
+		$("#environment_list").dataTable().fnDraw();
+	});
+
 	$("#checkAll").click( function() {
 		if ($(this).attr('checked')) {
 			$(":checkbox").attr("checked", true);
@@ -79,6 +113,26 @@ $(document).ready(function() {
 
 })
 </script>
+
+<style>
+input {
+	padding: 4px 0px !important;
+}
+#searchForm th {
+	padding: 2px;
+    text-align: center !important;
+    background: url("/media/css/globo/images/ui-bg_highlight-soft_80_dddddd_1x100.png") repeat-x scroll 50% 50% #DDDDDD;
+}
+#searchForm tbody td {
+    text-align: center !important;
+	background-color: #F6F6F6;
+}
+.ui-accordion .ui-accordion-content {
+	padding: 5px !important;
+}
+</style>
+
+
 {% endblock %}
 
 {% block content %}
@@ -87,6 +141,29 @@ $(document).ready(function() {
 		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Ambientes</a></li>
 	</ul>
 	<div id="tabs-1">
+		<div id="accordion">
+			<h3><a href="#">Pesquisar:</a></h3>
+            <div>
+                <table id="searchForm" style="width: 100%">
+                    <thead>
+                    <tr>
+                        <th>Nome do Ambiente</th>
+                        <th><!--Região--></th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input name="env_by_name" id="env_by_name" type="text" style="width: 300px"></td>
+                            <td><!--input name="env_by_datacenter" id="env_by_datacenter" type="text" style="width: 300px"--></td>
+                            <td style="padding-top: 4px; float: right; width: 10.5%"><span class="tool">
+                                <button id="btn_search" type="submit">Pesquisar</button>
+                            </span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 		<div class="buttons">
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			<span id="tool">

@@ -71,19 +71,28 @@ def ajax_list_all(request):
             1: 'id',
             2: 'name',
             4: 'vrf',
-            3: 'dcroom',
-            9: ''}
+            3: 'father_environment',
+            9: ''
+        }
 
         dtp = DataTablePaginator(request, column_index_name_map)
 
         dtp.build_server_side_list()
+
+        dtp.searchable_columns = [
+            'grupo_l3__nome',
+            'ambiente_logico__nome',
+            'divisao_dc__nome',
+            'vrf',
+        ]
 
         pagination = Pagination(
             dtp.start_record,
             dtp.end_record,
             dtp.asorting_cols,
             dtp.searchable_columns,
-            dtp.custom_search)
+            dtp.custom_search
+        )
 
         data = dict()
         data["start_record"] = pagination.start_record
@@ -93,7 +102,12 @@ def ajax_list_all(request):
         data["custom_search"] = pagination.custom_search or ""
         data["extends_search"] = [extends_search] if extends_search else []
 
-        environment = client.create_api_environment().search(include=['vrf'],
+        environment = client.create_api_environment().search(fields=['id',
+                                                                     'vrf',
+                                                                     'name',
+                                                                     'grupo_l3__details',
+                                                                     'ambiente_logico__details',
+                                                                     'divisao_dc__details'],
                                                              search=data)
 
         return dtp.build_response(
