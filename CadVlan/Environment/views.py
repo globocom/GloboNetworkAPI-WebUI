@@ -70,8 +70,8 @@ def ajax_list_all(request):
             0: '',
             1: 'id',
             2: 'name',
-            4: 'vrf',
-            3: 'father_environment',
+            3: 'vrf',
+            4: 'dcroom',
             9: ''
         }
 
@@ -84,6 +84,7 @@ def ajax_list_all(request):
             'ambiente_logico__nome',
             'divisao_dc__nome',
             'vrf',
+            'dcroom__dc__dcname'
         ]
 
         pagination = Pagination(
@@ -107,7 +108,8 @@ def ajax_list_all(request):
                                                                      'name',
                                                                      'grupo_l3__details',
                                                                      'ambiente_logico__details',
-                                                                     'divisao_dc__details'],
+                                                                     'divisao_dc__details',
+                                                                     'dcroom__details'],
                                                              search=data)
 
         return dtp.build_response(

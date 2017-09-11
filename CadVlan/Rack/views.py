@@ -748,24 +748,12 @@ def datacenter(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+
+        dc = client.create_apirack().list()
+        dc_list = dc.get("dc")
+
         lists = dict()
-
-        if request.method =='GET':
-
-            dc = client.create_apirack().list()
-            dc_list = dc.get("dc")
-            lists["dc"] = dc_list
-
-        if request.method == 'POST':
-
-            dc = dict()
-            #dc['dcname'] = request.POST.get('name')
-            #dc['address'] = request.POST.get('address')
-
-            #newdc = client.create_apirack().save_dc(dc)
-            #id = newdc.get('dc').get('id')
-
-            #return HttpResponseRedirect(reverse('fabric.cadastro', args=[id]))
+        lists["dc"] = dc_list
 
     except NetworkAPIClientError, e:
         logger.error(e)
