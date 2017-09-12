@@ -106,24 +106,6 @@ class AddInterfaceForm(forms.Form):
             attrs={"style": "width: 100px;", "onKeyUp": "javascript:fixName(this, " + str(index) + ");"})
         self.fields['name'].widget = widget
 
-        if marca == "0":
-            self.regex = "^([a-zA-Z0-9-_/ ]+(:)?){1,6}$"
-        elif marca == "2":
-            self.regex = "^(Int)\s[0-9]+$"
-        elif marca == "3":
-            self.regex = "^(Fa|Gi|Te|Serial|Eth|mgmt)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
-        elif marca == "4":
-            self.regex = "^(interface)\s[0-9a-zA-Z]+(/[0-9a-zA-Z])+([0-9a-zA-Z-.]+)?$"
-        elif marca == "5":#Trocar pelo Brocade
-            self.regex = "^(eth)[0-9]+(/[0-9]+)?$"
-        elif marca == "6":#Trocar pelo Brocade
-            self.regex = "^(Hu|Fi|Fo|Tf|Te|Gi)\s+[0-9]+(/[0-9]+(/[0-9]+(/[0-9]+)?)?)?$"
-        elif marca == "8":
-            self.regex = "^[0-9]+$"
-        elif marca == "21":
-            self.regex = "^(GE|10GE|40GE|100GE|meth)\s+[0-9]+(/[0-9]+(/[0-9]+)?)?$"
-        else:
-            self.regex = ""
 
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
     name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
@@ -137,15 +119,6 @@ class AddInterfaceForm(forms.Form):
                                   widget=forms.RadioSelect, initial=0)
     vlan = forms.CharField(label="Numero da Vlan Nativa", required=False, error_messages=error_messages, min_length=1, max_length=5)
     channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
-
-
-    def clean_name(self):
-        name = self.cleaned_data['name']
-        if not check_regex(name, self.regex):
-            raise forms.ValidationError(
-                'Nome da interface inválida para esta marca')
-
-        return self.cleaned_data['name']
 
     def clean_type(self):
         int_type = self.cleaned_data['int_type']
@@ -277,14 +250,6 @@ class AddSeveralInterfaceForm(forms.Form):
     inter_id = forms.IntegerField(
         widget=forms.HiddenInput(), label='', required=False)
 
-    def clean_name(self):
-        name = self.cleaned_data['name']
-        if not check_regex(name, self.regex):
-            raise forms.ValidationError(
-                'Nome da interface inválida para esta marca')
-
-        return self.cleaned_data['name']
-
 class EditForm(forms.Form):
 
 
@@ -313,23 +278,6 @@ class EditForm(forms.Form):
             attrs={"style": "width: 100px;", "onKeyUp": "javascript:fixName(this, " + str(index) + ");", "readonly": True})
         self.fields['name'].widget = widget
 
-        if marca == "0":
-            self.regex = "^([a-zA-Z0-9-_/ ]+(:)?){1,6}$"
-        elif marca == "2":
-            self.regex = "^(Int)\s[0-9]+$"
-        elif marca == "3":
-            self.regex = "^(Fa|Gi|Te|Serial|Eth|mgmt)[0-9]+(/[0-9]+(/[0-9]+)?)?$"
-        elif marca == "4":
-            self.regex = "^(interface)\s[0-9a-zA-Z]+(/[0-9a-zA-Z])+([0-9a-zA-Z-.]+)?$"
-        elif marca == "5":#Trocar pelo Brocade
-            self.regex = "^(eth)[0-9]+(/[0-9]+)?$"
-        elif marca == "8":
-            self.regex = "^[0-9]+$"
-        elif marca == "21":
-            self.regex = "^(GE|10GE|40GE|100GE|meth)\s+[0-9]+(/[0-9]+(/[0-9]+)?)?$"
-        else:
-            self.regex = ""
-
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
     name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
     protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
@@ -341,14 +289,6 @@ class EditForm(forms.Form):
     back = forms.IntegerField(widget=forms.HiddenInput(), label='', required=False)
     channel = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
     type = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
-
-    def clean_name(self):
-        name = self.cleaned_data['name']
-        if not check_regex(name, self.regex):
-            raise forms.ValidationError(
-                'Nome da interface inválida para esta marca')
-
-        return self.cleaned_data['name']
 
 class ChannelAddForm(forms.Form):
 
