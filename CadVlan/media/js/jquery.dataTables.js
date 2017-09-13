@@ -1960,6 +1960,7 @@
 			
 			var jqFilter = $("input", nFilter);
 			jqFilter.val( oPreviousSearch.sSearch.replace('"','&quot;') );
+			jqFilter.attr("placeholder", "Pesquisar...");
 			jqFilter.bind( 'keyup.DT', function(e) {
 				/* Update all other filter input elements for the new display */
 				var n = oSettings.aanFeatures.f;
@@ -9116,7 +9117,7 @@
 			 *      } );
 			 *    } );
 			 */
-			"sSearch": "Pesquisar:",
+			"sSearch": "",
 		
 		
 			/**

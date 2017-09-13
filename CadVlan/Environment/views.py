@@ -144,134 +144,89 @@ def list_all(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def remove_environment(request):
+
     if request.method == 'POST':
 
-        form = DeleteForm(request.POST)
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
 
-        if form.is_valid():
-            # Get user
-            auth = AuthSession(request.session)
-            # client_env = auth.get_clientFactory().create_ambiente()
-            client_api_env = auth.get_clientFactory().create_api_environment()
-            # client_vlan = auth.get_clientFactory().create_vlan()
+        ids = request.POST.getlist('ids[]')
 
-            # All ids to be removed
-            ids = split_to_array(form.cleaned_data['ids'])
+        error_not_found = list()
+        error_associated = list()
+        have_errors = False
 
-            # List of ids not found
-            error_not_found = list()
-            # List of environment id's who have associated VLANs or equipments
-            # that can't be removed
-            error_associated = list()
+        try:
+            client.create_api_environment().delete_environment(';'.join(str(id) for id in ids))
+        except DetailedEnvironmentError, e:
+            # Detailed message for VLAN errors
+            logger.error(e)
+            have_errors = True
+            messages.add_message(request, messages.ERROR, e)
+        except AmbienteNaoExisteError, e:
+            # Environment doesn't exist.
+            logger.error(e)
+            have_errors = True
+            error_not_found.append(id_env)
+        except AmbienteError, e:
+            # Environment associated to equipment and/or VLAN that
+            # couldn't be removed.
+            logger.error(e)
+            have_errors = True
+            error_associated.append(id_env)
+        except InvalidParameterError, e:
+            # Environment id is null or invalid.
+            logger.error(e)
+            have_errors = True
+            messages.add_message(
+                request, messages.ERROR, environment_messages.get("invalid_id"))
+        except DataBaseError, e:
+            # NetworkAPI fail to access database.
+            logger.error(e)
+            have_errors = True
+            messages.add_message(request, messages.ERROR, e)
+        except XMLError, e:
+            # NetworkAPI fail generating XML response.
+            logger.error(e)
+            have_errors = True
+            messages.add_message(request, messages.ERROR, e)
+        except Exception, e:
+            # Other errors
+            logger.error(e)
+            have_errors = True
+            messages.add_message(request, messages.ERROR, e)
 
-            have_errors = False
+    # Build not found message
+    if len(error_not_found) > 0:
+        msg = ''
+        for id_error in error_not_found[0:-1]:
+            msg = msg + id_error + ','
+        if len(error_not_found) > 1:
+            msg = msg[:-1] + ' e ' + error_not_found[-1]
+        else:
+            msg = error_not_found[0]
 
-            # For each environment
-            for id_env in ids:
+        msg = environment_messages.get("env_not_found") % msg
+        messages.add_message(request, messages.ERROR, msg)
 
-                try:
+    # Build associated error message
+    if len(error_associated) > 0:
+        msg = ''
+        for id_error in error_associated[0:-1]:
+            msg = msg + id_error + ','
+        if len(error_associated) > 1:
+            msg = msg[:-1] + ' e ' + error_associated[-1]
+        else:
+            msg = error_associated[0]
 
-                    # Get VLANs to remove ACLs
-                    # vlans = client_vlan.listar_por_ambiente(id_env).get("vlan")
-                    # environment = client_env.buscar_por_id(
-                    #     id_env).get("ambiente")
+        msg = environment_messages.get("env_associated") % msg
+        messages.add_message(request, messages.ERROR, msg)
 
-                    # Remove environment and its dependencies
-                    client_api_env.delete_environment(id_env)
+    # Success message
+    if not have_errors:
+        messages.add_message(
+            request, messages.SUCCESS, environment_messages.get("success_delete_all"))
 
-                    # commenting code to remove acl files - issue #40
-                    # # Remove acl's
-                    # user = auth.get_user()
-                    # for vlan in vlans:
-
-                    #     key_acl_v4 = acl_key(NETWORK_TYPES.v4)
-                    #     key_acl_v6 = acl_key(NETWORK_TYPES.v6)
-
-                    #     try:
-                    #         if vlan.get(key_acl_v4) is not None:
-                    #             if checkAclGit(vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user):
-                    #                 deleteAclGit(
-                    #                     vlan.get(key_acl_v4), environment, NETWORK_TYPES.v4, user)
-
-                    #         if vlan.get(key_acl_v6) is not None:
-                    #             if checkAclGit(vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user):
-                    #                 deleteAclGit(
-                    #                     vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
-
-                    #     except GITError, e:
-                    #         messages.add_message(
-                    #             request, messages.WARNING, vlan_messages.get("vlan_git_error"))
-
-                except DetailedEnvironmentError, e:
-                    # Detailed message for VLAN errors
-                    logger.error(e)
-                    have_errors = True
-                    messages.add_message(request, messages.ERROR, e)
-                except AmbienteNaoExisteError, e:
-                    # Environment doesn't exist.
-                    logger.error(e)
-                    have_errors = True
-                    error_not_found.append(id_env)
-                except AmbienteError, e:
-                    # Environment associated to equipment and/or VLAN that
-                    # couldn't be removed.
-                    logger.error(e)
-                    have_errors = True
-                    error_associated.append(id_env)
-                except InvalidParameterError, e:
-                    # Environment id is null or invalid.
-                    logger.error(e)
-                    have_errors = True
-                    messages.add_message(
-                        request, messages.ERROR, environment_messages.get("invalid_id"))
-                except DataBaseError, e:
-                    # NetworkAPI fail to access database.
-                    logger.error(e)
-                    have_errors = True
-                    messages.add_message(request, messages.ERROR, e)
-                except XMLError, e:
-                    # NetworkAPI fail generating XML response.
-                    logger.error(e)
-                    have_errors = True
-                    messages.add_message(request, messages.ERROR, e)
-                except Exception, e:
-                    # Other errors
-                    logger.error(e)
-                    have_errors = True
-                    messages.add_message(request, messages.ERROR, e)
-
-            # Build not found message
-            if len(error_not_found) > 0:
-                msg = ''
-                for id_error in error_not_found[0:-1]:
-                    msg = msg + id_error + ','
-                if len(error_not_found) > 1:
-                    msg = msg[:-1] + ' e ' + error_not_found[-1]
-                else:
-                    msg = error_not_found[0]
-
-                msg = environment_messages.get("env_not_found") % msg
-                messages.add_message(request, messages.ERROR, msg)
-
-            # Build associated error message
-            if len(error_associated) > 0:
-                msg = ''
-                for id_error in error_associated[0:-1]:
-                    msg = msg + id_error + ','
-                if len(error_associated) > 1:
-                    msg = msg[:-1] + ' e ' + error_associated[-1]
-                else:
-                    msg = error_associated[0]
-
-                msg = environment_messages.get("env_associated") % msg
-                messages.add_message(request, messages.ERROR, msg)
-
-            # Success message
-            if not have_errors:
-                messages.add_message(
-                    request, messages.SUCCESS, environment_messages.get("success_delete_all"))
-
-    # Redirect to list_all action
     return redirect('environment.list')
 
 
