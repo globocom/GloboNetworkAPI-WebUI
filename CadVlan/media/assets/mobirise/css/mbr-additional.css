@@ -450,7 +450,7 @@ h6,
 #menu-8 .dropdown-item:hover,
 #menu-8 .link:focus,
 #menu-8 .dropdown-item:focus {
-  color: #FF9B36;
+  color: #FFEAD5;
 }
 #menu-8 .link[aria-expanded="true"],
 #menu-8 .dropdown-menu {
@@ -467,6 +467,10 @@ h6,
 #menu-8 .nav-dropdown-sm .link[aria-expanded="true"],
 #menu-8 .nav-dropdown-sm .dropdown-menu {
   background: #3CD1FB;
+  background: -webkit-linear-gradient(#3CD1FB, white); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#3CD1FB, white); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#3CD1FB, white); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#3CD1FB, white); /* Standard syntax (must be last) */
 }
 #menu-8 .bg-color.transparent .link {
   color: #2b3882;
@@ -481,5 +485,5 @@ h6,
 }
 #menu-8 .link[aria-expanded="true"],
 #menu-8 .dropdown-item[aria-expanded="true"] {
-  color: #FF860B!important;
+  color: #FFEAD5!important;
 }
