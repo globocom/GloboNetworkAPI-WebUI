@@ -168,6 +168,8 @@ urlpatterns += patterns(
     'CadVlan.Environment.views',
     url('^environment/list[/]?$',
         'list_all', name='environment.list',),
+    url('^environment/ajax_view/(?P<env_id>\d+)[/]?$',
+        'ajax_view_env', name='env.view.ajax', ),
     url('^environment/find[/]?$',
         'ajax_list_all', name='ajax.environment.list', ),
     url('^environment/remove[/]?$',
@@ -491,18 +493,13 @@ urlpatterns += patterns(
         name='vip-request.list.ajax',),
     url('^vip-request/ajax_view/(?P<id_vip>\d+)[/]?$',
         'ajax_view_vip', name='vip.view.ajax',),
-
-
     url('^vip-request/operation/delete[/]?$',
         'delete_vip', name='vip.delete',),
     url('^vip-request/operation/create[/]?$',
         'create_vip', name='vip.create',),
     url('^vip-request/operation/remove[/]?$',
         'remove_vip', name='vip.remove',),
-
-
-    url(
-        '^vip-request/form[/]?$',
+    url('^vip-request/form[/]?$',
         'add_form', name='vip-request.form',),
     url('^vip-request/form/external[/]?$',
         'add_form_external', name='vip-request.form.external',),

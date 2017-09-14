@@ -432,7 +432,7 @@ h6,
 }
 #menu-8 .close-icon::before,
 #menu-8 .close-icon::after {
-  background-color: #80E3FF;
+  background-color: #0D84A5;
 }
 #menu-8 .link,
 #menu-8 .dropdown-item {
@@ -450,28 +450,28 @@ h6,
 #menu-8 .dropdown-item:hover,
 #menu-8 .link:focus,
 #menu-8 .dropdown-item:focus {
-  color: #FFEAD5;
+  color: #FF9B36;
 }
 #menu-8 .link[aria-expanded="true"],
 #menu-8 .dropdown-menu {
-  background: #80E3FF;
+  background: #0D84A5;
 }
 #menu-8 .nav-dropdown-sm .link:focus,
 #menu-8 .nav-dropdown-sm .link:hover,
 #menu-8 .nav-dropdown-sm .dropdown-item:focus,
 #menu-8 .nav-dropdown-sm .dropdown-item:hover {
-  background: #80E3FF!important;
+  background: #0D84A5!important;
 }
 #menu-8 .navbar,
 #menu-8 .nav-dropdown-sm,
 #menu-8 .nav-dropdown-sm .link[aria-expanded="true"],
 #menu-8 .nav-dropdown-sm .dropdown-menu {
-  background: #3CD1FB;
-  background: -webkit-linear-gradient(#3CD1FB, white); /* For Safari 5.1 to 6.0 */
-  background: -o-linear-gradient(#3CD1FB, white); /* For Opera 11.1 to 12.0 */
-  background: -moz-linear-gradient(#3CD1FB, white); /* For Firefox 3.6 to 15 */
-  background: linear-gradient(#3CD1FB, white); /* Standard syntax (must be last) */
-  height: 100px
+  background: #0D84A5;
+  background: -webkit-linear-gradient(#0D84A5, white); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#0D84A5, white); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#0D84A5, white); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#0D84A5, white); /* Standard syntax (must be last) */
+  height: 65px
 }
 #menu-8 .bg-color.transparent .link {
   color: #2b3882;
@@ -486,5 +486,5 @@ h6,
 }
 #menu-8 .link[aria-expanded="true"],
 #menu-8 .dropdown-item[aria-expanded="true"] {
-  color: #FFEAD5!important;
+  color: #FF9B36!important;
 }

@@ -27,9 +27,6 @@
  * --- Custom ---
  */
 
-#vlan_list_length {
-	margin-top: 2px;
-}
 
 .DataTables_sort_wrapper span {
 	float: right;
@@ -245,27 +242,27 @@ table.display tr.even.gradeU {
 }
 
 tr.odd {
-	background-color: #eee;
+	background-color: #F4FCFF; /* linha impar */
 }
 
 tr.even {
-	background-color: white;
+	background-color: #FFFFFF; /* linha par */
 }
 
 tr.odd:hover {
-	background-color: #E2E4FF;
+	background-color: #FFEAD5;
 }
 
 tr.even:hover {
-	background-color: #E2E4FF;
+	background-color: #FFEAD5;
 }
 
 tr.odd:hover td.sorting_1 {
-	background-color: #E2E4FF;
+	background-color: #FFEAD5;
 }
 
 tr.even:hover td.sorting_1 {
-	background-color: #E2E4FF;
+	background-color: #FFEAD5;
 }
 
 /*
@@ -277,8 +274,8 @@ tr.even:hover td.sorting_1 {
 
 .top, .bottom {
 	padding: 15px;
-	background-color: #F5F5F5;
-	border: 1px solid #CCCCCC;
+	background-color: #D6F6FF;
+	border: 1px solid #D6F6FF;
 }
 
 .top .dataTables_info {
@@ -296,11 +293,11 @@ tr.even:hover td.sorting_1 {
 tfoot input {
 	margin: 0.5em 0;
 	width: 100%;
-	color: #444;
+	color: #3CD1FB;
 }
 
 tfoot input.search_init {
-	color: #999;
+	color: #3CD1FB;
 }
 
 td.group {
@@ -310,8 +307,8 @@ td.group {
 }
 
 td.details {
-	background-color: #d1cfd0;
-	border: 2px solid #A19B9E;
+	background-color: #FFFFFF;
+	border: 2px solid #FFFFFF;
 }
 
 .example_alt_pagination div.dataTables_info {
@@ -344,11 +341,11 @@ td.details {
 }
 
 table.display tr.even.row_selected td {
-	background-color: #B0BED9;
+	background-color: #FFEAD5;
 }
 
 table.display tr.odd.row_selected td {
-	background-color: #9FAFD1;
+	background-color: #FFEAD5;
 }
 
 /*
@@ -356,7 +353,7 @@ table.display tr.odd.row_selected td {
  */
 /* For the standard odd/even */
 tr.odd td.sorting_1 {
-	background-color: #e5e5e5;
+	background-color: #dbf5ff;
 }
 
 tr.odd td.sorting_2 {
@@ -368,7 +365,7 @@ tr.odd td.sorting_3 {
 }
 
 tr.even td.sorting_1 {
-	background-color: #f0f0f0;
+	background-color: #FCFCFC;
 }
 
 tr.even td.sorting_2 {

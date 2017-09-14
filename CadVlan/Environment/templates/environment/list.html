@@ -32,6 +32,8 @@ $(document).ready(function() {
 	    }
 	});
 
+    $('div.dataTables_filter input').addClass('form-control');
+
 	$("#checkAll").click( function() {
 		if ($(this).attr('checked')) {
 			$(":checkbox").attr("checked", true);

@@ -17,43 +17,40 @@ import logging
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.shortcuts import redirect
-from django.shortcuts import render_to_response
+from django.shortcuts import redirect, render_to_response
 from django.template.context import RequestContext
-from networkapiclient.exception import AmbienteError
-from networkapiclient.exception import AmbienteNaoExisteError
-from networkapiclient.exception import DataBaseError
-from networkapiclient.exception import DetailedEnvironmentError
-from networkapiclient.exception import InvalidParameterError
-from networkapiclient.exception import NetworkAPIClientError
-from networkapiclient.exception import XMLError
+from networkapiclient.exception import AmbienteError, AmbienteNaoExisteError, DataBaseError, DetailedEnvironmentError
+from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError, XMLError
 from networkapiclient.Pagination import Pagination
 
 from CadVlan import templates
-from CadVlan.Acl.acl import get_templates
-from CadVlan.Acl.acl import mkdir_divison_dc
+from CadVlan.Acl.acl import get_templates, mkdir_divison_dc
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Environment.forms import AmbienteForm
-from CadVlan.Environment.forms import AmbienteLogicoForm
-from CadVlan.Environment.forms import DivisaoDCForm
-from CadVlan.Environment.forms import Grupol3Form
-from CadVlan.Environment.forms import IpConfigForm
+from CadVlan.Environment.forms import AmbienteForm, AmbienteLogicoForm, DivisaoDCForm, Grupol3Form, IpConfigForm
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import environment_messages
 from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
-from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST
-from CadVlan.templates import ENVIRONMENT_FORM
-from CadVlan.templates import ENVIRONMENT_LIST
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.Util.Decorators import has_perm
-from CadVlan.Util.Decorators import log
-from CadVlan.Util.Decorators import login_required
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, ENVIRONMENT_FORM, ENVIRONMENT_LIST
+from CadVlan.Util.Decorators import has_perm, log, login_required
 from CadVlan.Util.git import GITCommandError
 from CadVlan.Util.shortcuts import render_to_response_ajax
 from CadVlan.Util.utility import DataTablePaginator
 
 logger = logging.getLogger(__name__)
 
+
+def ajax_view_env(request, env_id):
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists = dict()
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(ENVIRONMENT_LIST, lists, context_instance=RequestContext(request))
 
 @log
 @login_required
@@ -68,11 +65,10 @@ def ajax_list_all(request):
 
         column_index_name_map = {
             0: '',
-            1: 'id',
-            2: 'name',
-            3: 'vrf',
-            4: 'dcroom',
-            9: ''
+            1: 'divisao_dc__nome',
+            2: 'vrf',
+            3: 'dcroom__dc__dcname',
+            4: ''
         }
 
         dtp = DataTablePaginator(request, column_index_name_map)
