@@ -51,6 +51,7 @@ from CadVlan.templates import AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML
 from CadVlan.templates import POOL_DATATABLE
 from CadVlan.templates import POOL_FORM
 from CadVlan.templates import POOL_LIST
+from CadVlan.templates import POOL_LIST_NEW
 from CadVlan.templates import POOL_MANAGE_TAB1
 from CadVlan.templates import POOL_MANAGE_TAB2
 from CadVlan.templates import POOL_MANAGE_TAB3
@@ -83,8 +84,8 @@ def list_all(request):
         environments = client.create_pool().list_environments_with_pools()
 
         lists = dict()
-        lists["delete_form"] = DeleteForm()
-        lists["search_form"] = SearchPoolForm(environments)
+        lists['delete_form'] = DeleteForm()
+        lists['search_form'] = SearchPoolForm(environments)
 
         return render_to_response(POOL_LIST, lists, context_instance=RequestContext(request))
 
@@ -93,6 +94,37 @@ def list_all(request):
         messages.add_message(request, messages.ERROR, e)
         return redirect('home')
 
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
+def list_all_new(request):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        search = {
+            'extends_search': [{'serverpool__environment__isnull': False}],
+            'start_record': 0,
+            'custom_search': '',
+            'end_record': 10000,
+            'asorting_cols': [],
+            'searchable_columns': []}
+        fields = ['id', 'name']
+        environments = client.create_api_environment().search(search=search,
+                                                              fields=fields)
+
+        lists = {"delete_form": DeleteForm(),
+                 "search_form": SearchPoolForm(environments['environments'])}
+
+        return render_to_response(POOL_LIST_NEW, lists,
+                                  context_instance=RequestContext(request))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('home')
 
 @log
 @login_required
@@ -156,6 +188,68 @@ def datatable(request):
         logger.error(e.error)
         return render_message_json(e.error, messages.ERROR)
 
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
+def datatable_new(request):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        environment_id = int(request.GET.get('pEnvironment'))
+
+        column_index_name_map = {
+            0: '',
+            1: 'identifier',
+            2: 'default_port',
+            3: 'healthcheck__healthcheck_type',
+            4: 'environment',
+            5: 'pool_created',
+            6: '',
+            7: ''
+        }
+        import ipdb; ipdb.set_trace()
+        dtp = DataTablePaginator(request, column_index_name_map)
+
+        dtp.build_server_side_list()
+
+        dtp.searchable_columns = [
+            'identifier',
+            'default_port',
+            'pool_created',
+            'healthcheck__healthcheck_type',
+        ]
+
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search
+        )
+
+        data = dict()
+        data["start_record"] = pagination.start_record
+        data["end_record"] = pagination.end_record
+        data["asorting_cols"] = pagination.asorting_cols
+        data["searchable_columns"] = pagination.searchable_columns
+        data["custom_search"] = pagination.custom_search or ""
+        data["extends_search"] = [{"environment": environment_id}] if environment_id else []
+
+        pools = client.create_pool().list_pool(data)
+
+        return dtp.build_response(
+            pools["server_pools"],
+            pools["total"],
+            POOL_DATATABLE,
+            request
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e.error)
+        return render_message_json(e.error, messages.ERROR)
 
 @log
 @login_required

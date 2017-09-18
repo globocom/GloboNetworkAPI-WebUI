@@ -227,6 +227,7 @@ TAB_RULES = 'block-rules/tab-rules.html'
 
 # Pool
 POOL_LIST = 'pool/list.html'
+POOL_LIST_NEW = 'pool/list_new.html'
 POOL_FORM = 'pool/form.html'
 POOL_MANAGE_TAB1 = 'pool/manage_tab1.html'
 POOL_MANAGE_TAB2 = 'pool/manage_tab2.html'

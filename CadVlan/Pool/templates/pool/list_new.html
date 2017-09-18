@@ -1,0 +1,175 @@
+{% extends "menu.html" %}
+
+{% load util %}
+
+{% block title %}[Pool - Listagem]{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+
+$(document).ready(function() {
+    oTable = $("#environment_list").dataTable({
+        "sAjaxSource": "{% url pool.datatable.new %}",
+        "bServerSide": true,
+        "aaSorting": [[1, "asc"]],
+        "bAutoWidth": false,
+        "bJQueryUI": true,
+        "bFilter": false,
+        "sPaginationType": "full_numbers",
+        "iDisplayLength": {% max_results %},
+        "aoColumnDefs": [{"bSortable": false, "aTargets": [0, 4, 6]}],
+        "fnServerData": function(sSource, aoData, fnCallback, oSettings) {
+            // var filterPool = $("input[name^=filterPool]").val().trim();
+            var filterPool = "";
+            // aoData["pEnvironment"] = $("select#id_environment").val();
+            aoData["pEnvironment"] = "0";
+            if (filterPool!==""){
+                aoData["sSearch"] = filterPool;
+            }
+            oSettings.jqXHR = $.ajax({
+                "dataType": 'json',
+                "type": "GET",
+                "url": sSource,
+                "data": aoData,
+                "success": fnCallback,
+                "error": function(error){
+                    message = jQuery.parseJSON(error.responseText);
+                    addMessage(message);
+                }
+            }).done(function() {
+                $(".btn_edit").button(
+                    { icons: {primary: "ui-icon-pencil"}, text: false }
+                );
+                $(".btn_manager").button(
+                    { icons: {primary: "ui-icon-wrench"}, text: false }
+                );
+            });
+        }
+    });
+
+    $('div.dataTables_filter input').addClass('form-control');
+
+    $("#checkAll").click(function () {
+        if ($(this).attr('checked')) {
+            $(":checkbox").attr("checked", true);
+        } else {
+            $(":checkbox").attr("checked", false);
+        }
+    });
+
+    $(".fg-button").on('click', function () {
+        $("name['selection']").attr("checked", false);
+        $(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
+        $("#checkAll").attr("checked", false);
+    });
+
+    $(".btn_edit", oTable.fnGetHiddenNodes()).button({
+        icons: {primary: "ui-icon-pencil"},
+        text: false
+    });
+
+    {% has_perm ENVIRONMENT_MANAGEMENT True None %}
+    {% if has_perm %}
+    $(".btn_del").click(function () {
+        if (confirm('Deseja realmente excluir o(s) Ambiente(s) selecionado(s)?')) {
+            var data = getSelectionData(oTable);
+            $("#id_ids").val(data).parent().submit();
+        }
+    });
+    {% endif %}
+
+    $("#btn_del").click(function () {
+        var ids_to_send = [];
+        $('input:checkbox[name=selection]:checked').each(function () {
+            ids_to_send.push($(this).val());
+        });
+        var formData = {
+            "ids": ids_to_send,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+        };
+        if (confirm('Deseja realmente excluir o(s) Ambientes(s) selecionado(s)?')) {
+            $.ajax({
+                url: "{% url environment.remove %}",
+                type: "POST",
+                data: formData,
+                success: function (data, textStatus, jqXHR) {
+                    location.href = "{% url environment.list %}";
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(errorThrown);
+                }
+            });
+        }
+    });
+});
+
+
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
+    <div class="mbr-section mbr-section__container mbr-section__container--middle">
+        <div class="container">
+            <div class="row form-group">
+                <h1 class="mbr-section-title display-2 text-xs-center">
+                    <p>Server Pools</p>
+                </h1>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row form-group form-control-label">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="environment_list">
+                        <thead>
+                            <tr>
+                                <th><input id="checkAll" type="checkbox" /></th>
+                                <th>Identificador</th>
+                                <th>Porta padrão</th>
+                                <th>Healthcheck</th>
+                                <th>Ambiente</th>
+                                <th>Criado</th>
+                                <th></th>
+                                <th style="width: 90px">
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom; margin:0px"
+                                       href="{% url pool.add.form %}"
+                                       title="Criar Pool">
+                                        <i class="material-icons"
+                                           style="color:#FFD17C;font-size:15px;left:50%">
+                                            add
+                                        </i>
+                                    </a>
+                                    <button id="btn_del"
+                                       class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom; margin: 0px"
+                                        type="submit">
+                                       <i class="material-icons"
+                                          style="color:#FFD17C;font-size:15px">
+                                           delete
+                                       </i>
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br><br><br>
+            <button id="up_env"
+                    class="btn btn-info btn-responsive mbr-arrow-up"
+                    style="vertical-align: bottom;"
+                    href="#"
+                    data-placement="left"
+                    title="Click to return on the top page">
+                <i class="material-icons"
+                  style="color:#FFD17C;font-size:15px">
+                   arrow_upward
+                </i>
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}

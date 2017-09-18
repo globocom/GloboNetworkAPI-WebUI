@@ -695,6 +695,7 @@ urlpatterns += patterns(
 urlpatterns += patterns(
     'CadVlan.Pool.views',
     url('^pool/list[/]?$', 'list_all', name='pool.list',),
+    url('^pool/list/new[/]?$', 'list_all_new', name='pool.list.new', ),
     url('^pool/form[/]?$', 'add_form', name='pool.add.form',),
     url('^pool/edit/(?P<id_server_pool>\d+)[/]?$', 'edit_form', name='pool.edit.form',),
 
@@ -710,6 +711,7 @@ urlpatterns += patterns(
     url('^pool/manage/tab3/(?P<id_server_pool>\d+)[/]?$', 'manage_tab3', name='pool.manage.tab3',),
     url('^pool/manage/tab4/(?P<id_server_pool>\d+)[/]?$', 'manage_tab4', name='pool.manage.tab4',),
     url('^pool/datatable[/]?$', 'datatable', name='pool.datatable',),
+    url('^pool/datatable/new[/]?$', 'datatable_new', name='pool.datatable.new', ),
     url('^pool/spm_datatable/(?P<id_server_pool>\d+)/(?P<checkstatus>\d+)[/]?$', 'spm_datatable', name='pool.spm_datatable',),
     url('^pool/reqvip_datatable/(?P<id_server_pool>\d+)[/]?$', 'reqvip_datatable', name='pool.reqvip_datatable',),
     url('^pool/ajax_modal_ips[/]?$', 'ajax_modal_ip_real_server', name='pool.modal.ips.ajax',),
