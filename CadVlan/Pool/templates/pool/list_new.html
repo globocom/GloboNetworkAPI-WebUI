@@ -20,10 +20,10 @@ $(document).ready(function() {
         "iDisplayLength": {% max_results %},
         "aoColumnDefs": [{"bSortable": false, "aTargets": [0, 4, 6]}],
         "fnServerData": function(sSource, aoData, fnCallback, oSettings) {
-            // var filterPool = $("input[name^=filterPool]").val().trim();
-            var filterPool = "";
-            // aoData["pEnvironment"] = $("select#id_environment").val();
-            aoData["pEnvironment"] = "0";
+            var filterPool = $("input[name^=filterPool]").val().trim();
+            //var filterPool = "";
+            aoData["pEnvironment"] = $("select#id_environment").val();
+            // aoData["pEnvironment"] = "0";
             if (filterPool!==""){
                 aoData["sSearch"] = filterPool;
             }
@@ -38,15 +38,20 @@ $(document).ready(function() {
                     addMessage(message);
                 }
             }).done(function() {
-                /*$(".btn_edit").button(
+                $(".btn_edit").button(
                     { icons: {primary: "ui-icon-pencil"}, text: false }
                 );
                 $(".btn_manager").button(
                     { icons: {primary: "ui-icon-wrench"}, text: false }
-                );*/
+                );
             });
         }
     });
+
+    $("#btn_search").click( function(event){
+		event.preventDefault();
+		$("#pool_list").dataTable().fnDraw();
+	});
 
     $("#checkAll").click( function() {
         $(":checkbox").prop("checked", $("#checkAll").is(':checked'));
@@ -116,6 +121,31 @@ $(document).ready(function() {
                 <h1 class="mbr-section-title display-2 text-xs-center">
                     <p>Server Pools</p>
                 </h1>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row form-group">
+                <div id="accordion">
+                    <h3><a href="#">Filtro por Ambiente</a></h3>
+                    <div>
+                        <table id="searchForm" style="width: 100%">
+                            <thead>
+                            <tr>
+                                <th>Identificador - Porta Padrão - Healthcheck</th>
+                                <th>Ambiente</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input name="filterPool" id="filterPool" type="text" style="width: 300px"></td>
+                                    <td>{{ search_form.environment }}</td>
+                                    <td><button id="btn_search" type="submit">Pesquisar</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="container">
