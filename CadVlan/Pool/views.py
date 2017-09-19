@@ -875,6 +875,87 @@ def create(request):
 
 @log
 @login_required
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True}]
+)
+def delete_new(request):
+    """Delete Pool Into Database"""
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+            ids = form.cleaned_data['ids']
+            client.create_pool().delete_pool(ids)
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_delete'))
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.list.new')
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_REMOVE_SCRIPT, "write": True}])
+def remove_new(request):
+    """Remove Pool Running Script and Update to Not Created"""
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+            ids = form.cleaned_data['ids']
+            client.create_pool().deploy_remove_pool(ids)
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_remove'))
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.list.new')
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_CREATE_SCRIPT, "write": True}])
+def create_new(request):
+    """Remove Pool Running Script and Update to Not Created"""
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+            ids = form.cleaned_data['ids']
+            client.create_pool().deploy_create_pool(ids)
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_create'))
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.list.new')
+
+
+@log
+@login_required
 @has_perm([{"permission": POOL_ALTER_SCRIPT, "write": True}])
 def status_change(request):
     """Enable Pool Member Running Script"""

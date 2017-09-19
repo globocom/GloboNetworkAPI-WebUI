@@ -81,7 +81,7 @@ $(document).ready(function() {
     $("#btn_remove").click(function(){
         if (confirm('Deseja realmente remover o(s) Pool(s) selecionado(s)?')){
             var data = getSelectionData(oTable);
-            $('#delete_form').attr('action','{% url pool.remove %}');
+            $('#delete_form').attr('action','{% url pool.remove.new %}');
             $("#id_ids").val(data).parent().submit();
         }
     });
@@ -92,7 +92,7 @@ $(document).ready(function() {
 	$("#btn_create").click(function(){
 		if (confirm('Deseja realmente criar o(s) Pool(s) selecionado(s) ?')){
 			var data = getSelectionData(oTable);
-			$('#delete_form').attr('action','{% url pool.create %}');
+			$('#delete_form').attr('action','{% url pool.create.new %}');
 			$("#id_ids").val(data).parent().submit();
 		}
 	});
@@ -121,7 +121,7 @@ $(document).ready(function() {
         <div class="container">
             <div class="row form-group form-control-label">
                 <div class="table-responsive">
-                    <form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden;">
+                    <form id="delete_form" method="post" action="{% url pool.delete.new %}" style="visibility: hidden;">
                         {% csrf_token %}
                         {% for field in delete_form %}
                             {{ field }}
