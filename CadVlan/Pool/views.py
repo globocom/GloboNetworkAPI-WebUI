@@ -49,6 +49,7 @@ from CadVlan.Pool.forms import PoolHealthcheckForm
 from CadVlan.Pool.forms import SearchPoolForm
 from CadVlan.templates import AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML
 from CadVlan.templates import POOL_DATATABLE
+from CadVlan.templates import POOL_DATATABLE_NEW
 from CadVlan.templates import POOL_FORM
 from CadVlan.templates import POOL_LIST
 from CadVlan.templates import POOL_LIST_NEW
@@ -208,9 +209,8 @@ def datatable_new(request):
             4: 'environment',
             5: 'pool_created',
             6: '',
-            7: ''
+            7: '',
         }
-        import ipdb; ipdb.set_trace()
         dtp = DataTablePaginator(request, column_index_name_map)
 
         dtp.build_server_side_list()
@@ -243,7 +243,7 @@ def datatable_new(request):
         return dtp.build_response(
             pools["server_pools"],
             pools["total"],
-            POOL_DATATABLE,
+            POOL_DATATABLE_NEW,
             request
         )
 
