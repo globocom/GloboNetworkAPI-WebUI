@@ -9,7 +9,7 @@
 var checkbox = false;
 
 $(document).ready(function() {
-    oTable = $("#environment_list").dataTable({
+    oTable = $("#pool_list").dataTable({
         "sAjaxSource": "{% url pool.datatable.new %}",
         "bServerSide": true,
         "aaSorting": [[1, "asc"]],
@@ -49,66 +49,59 @@ $(document).ready(function() {
     });
 
     $("#checkAll").click( function() {
-        $(":checkbox").prop("checked", !$("#checkAll").is(':checked'));
+        $(":checkbox").prop("checked", $("#checkAll").is(':checked'));
+        console.log("clicked: ", $("#checkAll").is(':checked'));
     });
 
-    $("#btn_ref").click(function(){
-		location.reload();
-	});
-    /*$('div.dataTables_filter input').addClass('form-control');
+    {% has_perm POOL_MANAGEMENT True None %}
+	{% with has_perm as has_perm_pool_management_write %}
 
-    $("#checkAll").click(function () {
-        if ($(this).attr('checked')) {
-            $(":checkbox").attr("checked", true);
-        } else {
-            $(":checkbox").attr("checked", false);
-        }
+	{% has_perm POOL_ALTER_SCRIPT True None %}
+	{% with has_perm as has_perm_pool_script_alter_write %}
+
+	{% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
+    $("#btn_new").click(function(){
+        location.href = "{% url pool.add.form %}";
     });
 
-    $(".fg-button").on('click', function () {
-        $("name['selection']").attr("checked", false);
-        $(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
-        $("#checkAll").attr("checked", false);
-    });
-
-    $(".btn_edit", oTable.fnGetHiddenNodes()).button({
-        icons: {primary: "ui-icon-pencil"},
-        text: false
-    });
-
-    {% has_perm ENVIRONMENT_MANAGEMENT True None %}
-    {% if has_perm %}
-    $(".btn_del").click(function () {
-        if (confirm('Deseja realmente excluir o(s) Ambiente(s) selecionado(s)?')) {
+    $("#btn_del").click(function(){
+        if (confirm('Deseja realmente excluir o(s) Pool(s) selecionado(s)?')){
             var data = getSelectionData(oTable);
             $("#id_ids").val(data).parent().submit();
         }
     });
-    {% endif %}
+	{% endif %}
 
-    $("#btn_del").click(function () {
-        var ids_to_send = [];
-        $('input:checkbox[name=selection]:checked').each(function () {
-            ids_to_send.push($(this).val());
-        });
-        var formData = {
-            "ids": ids_to_send,
-            csrfmiddlewaretoken: "{{ csrf_token }}"
-        };
-        if (confirm('Deseja realmente excluir o(s) Ambientes(s) selecionado(s)?')) {
-            $.ajax({
-                url: "{% url environment.remove %}",
-                type: "POST",
-                data: formData,
-                success: function (data, textStatus, jqXHR) {
-                    location.href = "{% url environment.list %}";
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    alert(errorThrown);
-                }
-            });
+	{% endwith %}
+	{% endwith %}
+
+	{% has_perm POOL_REMOVE_SCRIPT True None %}
+	{% if has_perm %}
+	/** Bind Events With Pool Script Remove Permissions */
+    $("#btn_remove").click(function(){
+        if (confirm('Deseja realmente remover o(s) Pool(s) selecionado(s)?')){
+            var data = getSelectionData(oTable);
+            $('#delete_form').attr('action','{% url pool.remove %}');
+            $("#id_ids").val(data).parent().submit();
         }
-    }); */
+    });
+	{% endif %}
+
+	{% has_perm POOL_CREATE_SCRIPT True None %}
+	{% if has_perm %}
+	$("#btn_create").click(function(){
+		if (confirm('Deseja realmente criar o(s) Pool(s) selecionado(s) ?')){
+			var data = getSelectionData(oTable);
+			$('#delete_form').attr('action','{% url pool.create %}');
+			$("#id_ids").val(data).parent().submit();
+		}
+	});
+	{% endif %}
+
+	$("#btn_ref").click(function(){
+		location.reload();
+	});
+
 });
 
 
@@ -128,7 +121,14 @@ $(document).ready(function() {
         <div class="container">
             <div class="row form-group form-control-label">
                 <div class="table-responsive">
-                    <table class="table table-hover" id="environment_list">
+                    <form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden;">
+                        {% csrf_token %}
+                        {% for field in delete_form %}
+                            {{ field }}
+                        {% endfor %}
+                    </form>
+
+                    <table class="table table-hover" id="pool_list">
                         <thead>
                             <tr>
                                 <th><input id="checkAll" type="checkbox" /></th>
@@ -241,12 +241,5 @@ $(document).ready(function() {
             </button>
         </div>
     </div>
-
-    <form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden;">
-        {% csrf_token %}
-        {% for field in delete_form %}
-            {{ field }}
-        {% endfor %}
-    </form>
 </section>
 {% endblock %}
