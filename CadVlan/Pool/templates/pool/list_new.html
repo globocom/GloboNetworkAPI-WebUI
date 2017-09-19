@@ -6,6 +6,7 @@
 
 {% block header %}
 <script type="text/javascript">
+var checkbox = false;
 
 $(document).ready(function() {
     oTable = $("#environment_list").dataTable({
@@ -37,17 +38,24 @@ $(document).ready(function() {
                     addMessage(message);
                 }
             }).done(function() {
-                $(".btn_edit").button(
+                /*$(".btn_edit").button(
                     { icons: {primary: "ui-icon-pencil"}, text: false }
                 );
                 $(".btn_manager").button(
                     { icons: {primary: "ui-icon-wrench"}, text: false }
-                );
+                );*/
             });
         }
     });
 
-    $('div.dataTables_filter input').addClass('form-control');
+    $("#checkAll").click( function() {
+        $(":checkbox").prop("checked", !$("#checkAll").is(':checked'));
+    });
+
+    $("#btn_ref").click(function(){
+		location.reload();
+	});
+    /*$('div.dataTables_filter input').addClass('form-control');
 
     $("#checkAll").click(function () {
         if ($(this).attr('checked')) {
@@ -100,7 +108,7 @@ $(document).ready(function() {
                 }
             });
         }
-    });
+    }); */
 });
 
 
@@ -130,24 +138,87 @@ $(document).ready(function() {
                                 <th>Ambiente</th>
                                 <th>Criado</th>
                                 <th style="width: 90px">
-                                    <a class="btn btn-social-bottom btn-responsive"
-                                       style="vertical-align: bottom; margin:0px"
-                                       href="{% url pool.add.form %}"
-                                       title="Criar Pool">
-                                        <i class="material-icons"
-                                           style="color:#FFD17C;font-size:15px;left:50%">
-                                            add
-                                        </i>
-                                    </a>
+
+                                    <button id="btn_ref"
+                                       class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom; margin: 0px"
+                                        type="submit">
+                                       <i class="material-icons"
+                                          style="color:#FFD17C;font-size:15px"
+                                       title="Atualizar dados da listagem">
+                                           update
+                                       </i>
+                                    </button>
+
+                                    {% has_perm POOL_MANAGEMENT True None %}
+                                    {% with has_perm as has_perm_pool_management_write %}
+                                    {% has_perm POOL_ALTER_SCRIPT True None %}
+                                    {% with has_perm as has_perm_pool_script_alter_write %}
+
+                                    {% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
+                                    <button id="btn_new"
+                                       class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom; margin: 0px"
+                                        type="submit">
+                                       <i class="material-icons"
+                                          style="color:#FFD17C;font-size:15px"
+                                       title="Novo Registro">
+                                           add
+                                       </i>
+                                    </button>
+                                    {% endif %}
+
+				                    {% endwith %}
+				                    {% endwith %}
+
+                                    {% has_perm POOL_CREATE_SCRIPT True None %}
+				                    {% if has_perm %}
+                                    <button id="btn_create"
+                                       class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom; margin: 0px"
+                                        type="submit">
+                                       <i class="material-icons"
+                                          style="color:#FFD17C;font-size:15px"
+                                       title="Deploy Pool">
+                                           power_settings_new
+                                       </i>
+                                    </button>
+                                    {% endif %}
+
+                                    {% has_perm POOL_REMOVE_SCRIPT True None %}
+				                    {% if has_perm %}
+                                    <button id="btn_remove"
+                                       class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom; margin: 0px"
+                                        type="submit">
+                                       <i class="material-icons"
+                                          style="color:#FFD17C;font-size:15px"
+                                       title="Undeploy Pool">
+                                            cancel
+                                       </i>
+                                    </button>
+                                    {% endif %}
+
+                                    {% has_perm POOL_MANAGEMENT True None %}
+                                    {% with has_perm as has_perm_pool_management_write %}
+                                    {% has_perm POOL_ALTER_SCRIPT True None %}
+                                    {% with has_perm as has_perm_pool_script_alter_write %}
+
+                                    {% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
                                     <button id="btn_del"
                                        class="btn btn-social-bottom btn-responsive"
                                        style="vertical-align: bottom; margin: 0px"
                                         type="submit">
                                        <i class="material-icons"
-                                          style="color:#FFD17C;font-size:15px">
+                                          style="color:#FFD17C;font-size:15px"
+                                       title="Excluir Registro">
                                            delete
                                        </i>
                                     </button>
+                                    {% endif %}
+
+				                    {% endwith %}
+				                    {% endwith %}
                                 </th>
                             </tr>
                         </thead>
@@ -170,5 +241,12 @@ $(document).ready(function() {
             </button>
         </div>
     </div>
+
+    <form id="delete_form" method="post" action="{% url pool.delete %}" style="visibility: hidden;">
+        {% csrf_token %}
+        {% for field in delete_form %}
+            {{ field }}
+        {% endfor %}
+    </form>
 </section>
 {% endblock %}
