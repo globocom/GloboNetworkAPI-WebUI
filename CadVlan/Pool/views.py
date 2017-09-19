@@ -209,7 +209,6 @@ def datatable_new(request):
             4: 'environment',
             5: 'pool_created',
             6: '',
-            7: '',
         }
         dtp = DataTablePaginator(request, column_index_name_map)
 
