@@ -140,7 +140,16 @@ $(document).ready(function() {
                                 <tr>
                                     <td><input name="filterPool" id="filterPool" type="text" style="width: 300px"></td>
                                     <td>{{ search_form.environment }}</td>
-                                    <td><button id="btn_search" type="submit">Pesquisar</button></td>
+
+                                    <td>
+                                        <button id="btn_search"
+                                                class="btn btn-social-bottom btn-responsive"
+                                                style="vertical-align: bottom; margin: 0px"
+                                                type="submit">
+                                                <i class="material-icons" style="color:#FFD17C;font-size:15px" title="Pesquisar">
+                                           search</i>
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
