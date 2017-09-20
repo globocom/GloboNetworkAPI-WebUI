@@ -229,15 +229,20 @@ def datatable_new(request):
             dtp.custom_search
         )
 
-        data = dict()
-        data["start_record"] = pagination.start_record
-        data["end_record"] = pagination.end_record
-        data["asorting_cols"] = pagination.asorting_cols
-        data["searchable_columns"] = pagination.searchable_columns
-        data["custom_search"] = pagination.custom_search or ""
-        data["extends_search"] = [{"environment": environment_id}] if environment_id else []
+        search = {'start_record': pagination.start_record,
+                  'end_record': pagination.end_record,
+                  'asorting_cols': pagination.asorting_cols,
+                  'searchable_columns': pagination.searchable_columns,
+                  'custom_search': pagination.custom_search or "",
+                  'extends_search': [{"environment": environment_id}]
+                  if environment_id else []}
 
-        pools = client.create_pool().list_pool(data)
+        fields = ['id', 'identifier', 'default_port',
+                  'healthcheck__healthcheck_type', 'environment__details',
+                  'pool_created']
+
+        pools = client.create_api_pool().search(search=search,
+                                                fields=fields)
 
         return dtp.build_response(
             pools["server_pools"],
