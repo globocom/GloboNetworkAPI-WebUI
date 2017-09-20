@@ -12,12 +12,12 @@ $(document).ready(function() {
     oTable = $("#pool_list").dataTable({
         "sAjaxSource": "{% url pool.datatable.new %}",
         "bServerSide": true,
+        "aaSorting": [],
         "bAutoWidth": false,
         "bJQueryUI": true,
-        "bFilter": false,
         "sPaginationType": "full_numbers",
         "iDisplayLength": {% max_results %},
-        "aoColumnDefs": [{"bSortable": false, "aTargets": [0, 4, 6]}],
+        "aoColumnDefs": [{"bSortable": false, "aTargets": [0,2,3,5,6]}],
         "fnServerData": function(sSource, aoData, fnCallback, oSettings) {
             var filterPool = $("input[name^=filterPool]").val().trim();
             //var filterPool = "";
@@ -113,6 +113,11 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block content %}
+<style type="text/css">
+    table.dataTable tbody td {
+        vertical-align: middle;
+    }
+</style>
 <section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
     <div class="mbr-section mbr-section__container mbr-section__container--middle">
         <div class="container">
@@ -170,11 +175,11 @@ $(document).ready(function() {
                         <thead>
                             <tr>
                                 <th><input id="checkAll" type="checkbox" /></th>
-                                <th>Identificador</th>
+                                <th style="width: 25%">Identificador</th>
                                 <th>Porta padrão</th>
                                 <th>Healthcheck</th>
-                                <th>Ambiente</th>
-                                <th>Criado</th>
+                                <th style="width: 25%">Ambiente</th>
+                                <th style="width: 5%">Criado</th>
                                 <th style="width: 17%">
 
                                     <button id="btn_ref"
