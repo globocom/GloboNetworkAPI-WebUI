@@ -221,6 +221,8 @@ def datatable_new(request):
             'healthcheck__healthcheck_type',
         ]
 
+        dtp.asorting_cols = ['identifier']
+
         pagination = Pagination(
             dtp.start_record,
             dtp.end_record,
@@ -237,9 +239,14 @@ def datatable_new(request):
                   'extends_search': [{"environment": environment_id}]
                   if environment_id else []}
 
-        fields = ['id', 'identifier', 'default_port',
-                  'healthcheck__healthcheck_type', 'environment__details',
-                  'pool_created']
+        fields = [
+            'id',
+            'identifier',
+            'default_port',
+            'healthcheck__healthcheck_type',
+            'environment__details',
+            'pool_created'
+        ]
 
         pools = client.create_api_pool().search(search=search,
                                                 fields=fields)

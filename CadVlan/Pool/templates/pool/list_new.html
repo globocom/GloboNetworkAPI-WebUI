@@ -12,7 +12,6 @@ $(document).ready(function() {
     oTable = $("#pool_list").dataTable({
         "sAjaxSource": "{% url pool.datatable.new %}",
         "bServerSide": true,
-        "aaSorting": [[1, "asc"]],
         "bAutoWidth": false,
         "bJQueryUI": true,
         "bFilter": false,
