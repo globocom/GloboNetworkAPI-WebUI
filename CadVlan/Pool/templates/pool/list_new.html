@@ -6,8 +6,6 @@
 
 {% block header %}
 <script type="text/javascript">
-var checkbox = false;
-
 $(document).ready(function() {
     oTable = $("#pool_list").dataTable({
         "sAjaxSource": "{% url pool.datatable.new %}",
@@ -48,10 +46,26 @@ $(document).ready(function() {
         }
     });
 
-    $("#btn_search").click( function(event){
-		event.preventDefault();
+    function refresh_pool_list(event){
+        event.preventDefault();
 		$("#pool_list").dataTable().fnDraw();
+    }
+
+    $("#btn_search").click( function(event){
+		refresh_pool_list(event);
 	});
+
+    $('#filterPool').keydown(function (event){
+        if(event.keyCode == 13){
+		    refresh_pool_list(event);
+        }
+    });
+
+    $('#id_environment').change(function(event){
+        refresh_pool_list(event);
+    });
+
+
 
     $("#checkAll").click( function() {
         $(":checkbox").prop("checked", $("#checkAll").is(':checked'));
@@ -176,12 +190,12 @@ $(document).ready(function() {
                         <thead>
                             <tr>
                                 <th><input id="checkAll" type="checkbox" /></th>
-                                <th style="width: 25%">Identificador</th>
+                                <th>Identificador</th>
                                 <th>Porta padrão</th>
                                 <th>Healthcheck</th>
-                                <th style="width: 25%">Ambiente</th>
-                                <th style="width: 5%">Criado</th>
-                                <th style="width: 25%">
+                                <th>Ambiente</th>
+                                <th>Criado</th>
+                                <th style="width: 190px">
 
                                     <button id="btn_ref"
                                        class="btn btn-social-bottom btn-responsive"
