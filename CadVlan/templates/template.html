@@ -206,6 +206,11 @@
                             <li><a href="{% url pool.list %} ">Pool</a></li>
                             {% endif %}
 
+                            {% has_perm VLAN_MANAGEMENT None True %}
+                            {% if has_perm %}
+                            <li><a href="{% url pool.list.new %} ">Pool (NOVO!)</a></li>
+                            {% endif %}
+
                             {% has_perm VIPS_REQUEST None True %}
                             {% if has_perm %}
                             <li><a href="{% url vip-request.list %}">Requisições de VIP</a></li>
