@@ -142,19 +142,18 @@ $(document).ready(function() {
         <div class="container">
             <div class="row form-group">
                 <div id="accordion">
-                    <h3><a href="#">Filtro por Ambiente</a></h3>
                     <div>
-                        <table id="searchForm" style="width: 100%">
+                        <h4 class="mbr-section-title">Filtrar Pools</h4>
+                        <table id="searchForm" style="width: 75%">
                             <thead>
-                            <tr>
-                                <th>Identificador - Porta Padrão - Healthcheck</th>
-                                <th>Ambiente</th>
-                                <th></th>
-                            </tr>
+                                <tr>
+                                    <th>Identificador - Porta Padrão - Healthcheck</th>
+                                    <th>Ambiente</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><input name="filterPool" id="filterPool" type="text" style="width: 300px" class="form-control"></td>
+                                    <td><input name="filterPool" id="filterPool" type="text" style="width: 81%" class="form-control"></td>
                                     <td>{{ search_form.environment }}</td>
                                 </tr>
                             </tbody>
