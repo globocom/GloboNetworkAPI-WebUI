@@ -51,21 +51,13 @@ $(document).ready(function() {
 		$("#pool_list").dataTable().fnDraw();
     }
 
-    $("#btn_search").click( function(event){
-		refresh_pool_list(event);
-	});
-
-    $('#filterPool').keydown(function (event){
-        if(event.keyCode == 13){
-		    refresh_pool_list(event);
-        }
+    $('#filterPool').on("change keyup", function (event){
+        refresh_pool_list(event);
     });
 
     $('#id_environment').change(function(event){
         refresh_pool_list(event);
     });
-
-
 
     $("#checkAll").click( function() {
         $(":checkbox").prop("checked", $("#checkAll").is(':checked'));
@@ -131,6 +123,11 @@ $(document).ready(function() {
 <style type="text/css">
     table.dataTable tbody td {
         vertical-align: middle;
+        text-align: center;
+    }
+    table.dataTable thead th {
+        vertical-align: middle;
+        text-align: center;
     }
 </style>
 <section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
@@ -159,16 +156,6 @@ $(document).ready(function() {
                                 <tr>
                                     <td><input name="filterPool" id="filterPool" type="text" style="width: 300px" class="form-control"></td>
                                     <td>{{ search_form.environment }}</td>
-
-                                    <td>
-                                        <button id="btn_search"
-                                                class="btn btn-social-bottom btn-responsive"
-                                                style="vertical-align: bottom; margin: 0px"
-                                                type="submit">
-                                                <i class="material-icons" style="color:#FFD17C;font-size:15px" title="Pesquisar">
-                                           search</i>
-                                        </button>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>
