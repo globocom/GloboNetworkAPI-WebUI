@@ -169,7 +169,7 @@ urlpatterns += patterns(
     url('^environment/list[/]?$',
         'list_all', name='environment.list',),
     url('^environment/ajax_view/(?P<env_id>\d+)[/]?$',
-        'ajax_view_env', name='env.view.ajax', ),
+        'ajax_view_env', name='children.view.ajax', ),
     url('^environment/find[/]?$',
         'ajax_list_all', name='ajax.environment.list', ),
     url('^environment/remove[/]?$',

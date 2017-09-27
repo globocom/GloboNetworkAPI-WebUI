@@ -30,7 +30,7 @@ from CadVlan.Environment.forms import AmbienteForm, AmbienteLogicoForm, DivisaoD
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import environment_messages
 from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
-from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, ENVIRONMENT_FORM, ENVIRONMENT_LIST
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, ENVIRONMENT_FORM, ENVIRONMENT_LIST, AJAX_CHILDREN_ENV
 from CadVlan.Util.Decorators import has_perm, log, login_required
 from CadVlan.Util.git import GITCommandError
 from CadVlan.Util.shortcuts import render_to_response_ajax
@@ -50,7 +50,7 @@ def ajax_view_env(request, env_id):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ENVIRONMENT_LIST, lists, context_instance=RequestContext(request))
+    return render_to_response(AJAX_CHILDREN_ENV, lists, context_instance=RequestContext(request))
 
 @log
 @login_required
@@ -61,14 +61,13 @@ def ajax_list_all(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        extends_search = dict()
-
         column_index_name_map = {
             0: '',
-            1: 'divisao_dc__nome',
-            2: 'vrf',
-            3: 'dcroom__dc__dcname',
-            4: ''
+            1: 'id',
+            2: 'divisao_dc__nome',
+            3: 'vrf',
+            4: 'dcroom__dc__dcname',
+            5: ''
         }
 
         dtp = DataTablePaginator(request, column_index_name_map)
@@ -90,6 +89,9 @@ def ajax_list_all(request):
             dtp.searchable_columns,
             dtp.custom_search
         )
+
+        extends_search = dict()
+        extends_search["father_environment__isnull"] = True
 
         data = dict()
         data["start_record"] = pagination.start_record

@@ -5,7 +5,8 @@
     "aaData":[
         {% for env in aaData %}
             [
-                "<div class='text_center'><input type='checkbox' name='selection' value='{{ env.id|escapejs }}' /></div>",
+        		"<div class='text_center'><input type='checkbox' name='selection' value='{{ env.id|escapejs }}'/></div>",
+                "<div class='text_center table_id' lang='{% url children.view.ajax env.id %}'>{{ env.id|escapejs }}</div>",
                 "<div class='text_center'>{{ env.name }}</div>",
                 "<div class='text_center'>{{ env.vrf}}</div> ",
                 "<div class='text_center'>{{ env.dcroom.dc.dcname }}</div>",
