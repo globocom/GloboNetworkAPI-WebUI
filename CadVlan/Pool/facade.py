@@ -179,11 +179,17 @@ def format_server_pool_members(request, limit=0):
         server_pool_members["weight"] = int(request.POST.getlist('weight')[i])
         server_pool_members["limit"] = limit
         server_pool_members["port_real"] = int(request.POST.getlist('ports_real_reals')[i])
-        member_status = '1%s%s' % (
-            request.POST.getlist('member_status_hab')[i],
-            request.POST.getlist('member_status_updown')[i]
-        )
-        server_pool_members["member_status"] = int(member_status, 2)
+        try:
+            member_status = '1%s%s' % (
+                request.POST.getlist('member_status_hab')[i],
+                request.POST.getlist('member_status_updown')[i]
+            )
+            server_pool_members["member_status"] = int(member_status, 2)
+        except:
+            #When copying a pool, information required was already sent in request
+            # and there is no separation of hab and updown
+            server_pool_members["member_status"] = int(request.POST.getlist('member_status')[i])
+
         v4, v6 = _format_ips(request, i)
         server_pool_members["ip"] = v4
         server_pool_members["ipv6"] = v6
