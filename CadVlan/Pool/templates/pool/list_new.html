@@ -51,9 +51,13 @@ $(document).ready(function() {
 		$("#pool_list").dataTable().fnDraw();
     }
 
-    $('#filterPool').on("change keyup", function (event){
-        refresh_pool_list(event);
-    });
+    var prohibitedKeys = [9, 13, 16, 17, 18, 20, 27, 37, 38, 39, 40, 91, 93];
+
+    $('#filterPool').keyup(debounce(function (event) {
+        if(checkProhibitedKeys(event.keyCode, prohibitedKeys)){
+            refresh_pool_list(event);
+        }
+    }, 250));
 
     $('#id_environment').change(function(event){
         refresh_pool_list(event);
