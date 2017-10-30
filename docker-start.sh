@@ -19,7 +19,7 @@ cat > /etc/init.d/gunicorn_networkapi_webui <<- EOM
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
-/usr/local/bin/gunicorn -c /netapi_webui/gunicorn.conf.py cadvlan_wsgi:application
+/usr/local/bin/gunicorn -c /netapi_webui/gunicorn.conf.py cadvlan_wsgi:application --reload
 EOM
 
 chmod 777 /etc/init.d/gunicorn_networkapi_webui

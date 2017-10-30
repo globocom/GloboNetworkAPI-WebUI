@@ -1,0 +1,18 @@
+.loading {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    filter: alpha(opacity=75);
+    opacity: 0.75;
+    width: 100px;
+    height: 100px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-left:-75px;
+    margin-top:-45px;
+    z-index: 999999;
+    display: none;
+}

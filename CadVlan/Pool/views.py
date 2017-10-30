@@ -49,8 +49,10 @@ from CadVlan.Pool.forms import PoolHealthcheckForm
 from CadVlan.Pool.forms import SearchPoolForm
 from CadVlan.templates import AJAX_IPLIST_EQUIPMENT_REAL_SERVER_HTML
 from CadVlan.templates import POOL_DATATABLE
+from CadVlan.templates import POOL_DATATABLE_NEW
 from CadVlan.templates import POOL_FORM
 from CadVlan.templates import POOL_LIST
+from CadVlan.templates import POOL_LIST_NEW
 from CadVlan.templates import POOL_MANAGE_TAB1
 from CadVlan.templates import POOL_MANAGE_TAB2
 from CadVlan.templates import POOL_MANAGE_TAB3
@@ -83,8 +85,8 @@ def list_all(request):
         environments = client.create_pool().list_environments_with_pools()
 
         lists = dict()
-        lists["delete_form"] = DeleteForm()
-        lists["search_form"] = SearchPoolForm(environments)
+        lists['delete_form'] = DeleteForm()
+        lists['search_form'] = SearchPoolForm(environments)
 
         return render_to_response(POOL_LIST, lists, context_instance=RequestContext(request))
 
@@ -93,6 +95,37 @@ def list_all(request):
         messages.add_message(request, messages.ERROR, e)
         return redirect('home')
 
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
+def list_all_new(request):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        search = {
+            'extends_search': [{'serverpool__environment__isnull': False}],
+            'start_record': 0,
+            'custom_search': '',
+            'end_record': 10000,
+            'asorting_cols': [],
+            'searchable_columns': []}
+        fields = ['id', 'name']
+        environments = client.create_api_environment().search(search=search,
+                                                              fields=fields)
+
+        lists = {"delete_form": DeleteForm(),
+                 "search_form": SearchPoolForm(environments['environments'])}
+
+        return render_to_response(POOL_LIST_NEW, lists,
+                                  context_instance=RequestContext(request))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('home')
 
 @log
 @login_required
@@ -156,6 +189,78 @@ def datatable(request):
         logger.error(e.error)
         return render_message_json(e.error, messages.ERROR)
 
+@log
+@login_required
+@has_perm([{"permission": POOL_MANAGEMENT, "read": True}])
+def datatable_new(request):
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        environment_id = int(request.GET.get('pEnvironment'))
+
+        column_index_name_map = {
+            0: '',
+            1: 'identifier',
+            2: 'default_port',
+            3: 'healthcheck__healthcheck_type',
+            4: 'environment',
+            5: 'pool_created',
+            6: '',
+        }
+        dtp = DataTablePaginator(request, column_index_name_map)
+
+        dtp.build_server_side_list()
+
+        dtp.searchable_columns = [
+            'identifier',
+            'default_port',
+            'pool_created',
+            'healthcheck__healthcheck_type',
+        ]
+
+        dtp.asorting_cols = ['identifier']
+
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search
+        )
+
+        search = {'start_record': pagination.start_record,
+                  'end_record': pagination.end_record,
+                  'asorting_cols': pagination.asorting_cols,
+                  'searchable_columns': pagination.searchable_columns,
+                  'custom_search': pagination.custom_search or "",
+                  'extends_search': [{"environment": environment_id}]
+                  if environment_id else []}
+
+        fields = [
+            'id',
+            'identifier',
+            'default_port',
+            'healthcheck__healthcheck_type',
+            'environment__details',
+            'pool_created'
+        ]
+
+        pools = client.create_api_pool().search(search=search,
+                                                fields=fields)
+
+        return dtp.build_response(
+            pools["server_pools"],
+            pools["total"],
+            POOL_DATATABLE_NEW,
+            request
+        )
+
+    except NetworkAPIClientError, e:
+        logger.error(e.error)
+        return render_message_json(e.error, messages.ERROR)
 
 @log
 @login_required
@@ -778,6 +883,87 @@ def create(request):
         messages.add_message(request, messages.ERROR, e)
 
     return redirect('pool.list')
+
+
+@log
+@login_required
+@has_perm([
+    {"permission": POOL_MANAGEMENT, "write": True},
+    {"permission": POOL_ALTER_SCRIPT, "write": True}]
+)
+def delete_new(request):
+    """Delete Pool Into Database"""
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+            ids = form.cleaned_data['ids']
+            client.create_pool().delete_pool(ids)
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_delete'))
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.list.new')
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_REMOVE_SCRIPT, "write": True}])
+def remove_new(request):
+    """Remove Pool Running Script and Update to Not Created"""
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+            ids = form.cleaned_data['ids']
+            client.create_pool().deploy_remove_pool(ids)
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_remove'))
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.list.new')
+
+
+@log
+@login_required
+@has_perm([{"permission": POOL_CREATE_SCRIPT, "write": True}])
+def create_new(request):
+    """Remove Pool Running Script and Update to Not Created"""
+
+    try:
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        form = DeleteForm(request.POST)
+
+        if form.is_valid():
+            ids = form.cleaned_data['ids']
+            client.create_pool().deploy_create_pool(ids)
+            messages.add_message(request, messages.SUCCESS, pool_messages.get('success_create'))
+        else:
+            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return redirect('pool.list.new')
 
 
 @log

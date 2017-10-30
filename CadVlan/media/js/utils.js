@@ -21,6 +21,10 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function jumpToTop() {
+	$('html, body').animate({ scrollTop: 0 }, 'fast');
+}
+
 function isEmpty(str) {
     return (!str || 0 === str.length);
 }

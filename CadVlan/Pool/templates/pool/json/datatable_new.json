@@ -1,0 +1,23 @@
+{% load util %}
+{
+    "sEcho": {{ sEcho|escapejs }},
+    "iTotalRecords": {{ iTotalRecords|escapejs }},
+    "iTotalDisplayRecords": {{ iTotalDisplayRecords|escapejs }},
+    "aaData":[
+    {% for pool in aaData %}
+    [	
+		"{% has_perm POOL_MANAGEMENT True None %}{% if has_perm%}{% has_perm POOL_ALTER_SCRIPT True None %}{% if has_perm%} <input type='checkbox' name='selection' value='{{ pool.id|escapejs }}' />{% endif %}{% endif %}",
+		"{% if pool.identifier%} {{ pool.identifier|escapejs }} {% endif %}",
+		"{% if pool.default_port%} {{ pool.default_port|escapejs }} {% endif %}",
+		"{% if pool.healthcheck%} {{ pool.healthcheck.healthcheck_type|escapejs }} {% endif %}",
+		"{% if pool.environment %} {{ pool.environment.name|default:""|escapejs }} {% endif %}",
+		"{% if pool.pool_created %}<i class='material-icons' style='color:#000000;font-size:150%' title='Sim'>done</i>{% else %}<i class='material-icons' style='color:#000000;font-size:150%' title='Não'>clear</i>{% endif %}",
+		"{% has_perm POOL_MANAGEMENT True None %}{% if has_perm%}{% has_perm POOL_ALTER_SCRIPT True None %}{% if has_perm %}{% if pool.pool_created %} <a href='{% url pool.manage.tab1 pool.id %}' class='btn btn-social-bottom btn-responsive' style='vertical-align: bottom; margin: 0px'><i class='material-icons' style='color:#D3D5D7;font-size:15px' title='Gerenciar'>build</i> </a>{% else %}<a href='{% url pool.edit.form pool.id %}' class='btn btn-social-bottom btn-responsive' style='vertical-align: bottom; margin: 0px'><i class='material-icons' style='color:#D3D5D7;font-size:15px' title='Editar'>edit</i> </a>{% endif %}{%endif%}{%endif%}"
+		
+	]
+    {% if not forloop.last %}
+    ,
+    {% endif %}
+    {% endfor %}
+    ]
+}
