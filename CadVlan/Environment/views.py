@@ -91,7 +91,7 @@ def ajax_list_all(request):
         )
 
         extends_search = dict()
-        extends_search["father_environment__isnull"] = True
+        #extends_search["father_environment__isnull"] = True
 
         data = dict()
         data["start_record"] = pagination.start_record
