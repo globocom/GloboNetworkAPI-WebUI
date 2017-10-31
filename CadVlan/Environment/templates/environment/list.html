@@ -28,11 +28,44 @@ $(document).ready(function() {
                 // Append a link to the jqtree-element div.
                 // The link has an url '#node-[id]' and a data property 'node-id'.
                 $li.find('.jqtree-element').append(
-                    '<a href="/environment/form/' + node.id + '" class="edit" data-node-id="'+
-                    node.id +'"> edit </a>'
+                    ' <a href="/environment/form/' + node.id +
+                    '" class="btn_edit ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" style="background-color:white;" data-node-id="1'+
+                    node.id +'"><i class="material-icons" style="background-color:white;color:#FFD17C;font-size:13px;left:50%">edit</i></a><a href="#node-'+ node.id +'" class="edit" data-node-id="'+
+                node.id +'">del</a>'
                 );
             }
         });
+        $tree.on(
+            'click', '.edit',
+            function(e) {
+                // Get the id from the 'node-id' data property
+                var node_id = $(e.target).data('node-id');
+
+                // Get the node from the tree
+                var node = $tree.tree('getNodeById', node_id);
+
+                if (node) {
+                    var ids_to_send = [];
+                    ids_to_send.push(node_id);
+                    var formData = {"ids": ids_to_send, csrfmiddlewaretoken: "{{ csrf_token }}"};
+                    if (confirm('Deseja realmente excluir o Ambiente selecionado?')){
+                        $.ajax({
+                            url : "{% url environment.remove %}",
+                            type: "POST",
+                            data : formData,
+                            success: function(data, textStatus, jqXHR)
+                            {
+                                location.href="{% url environment.list %}";
+                            },
+                            error: function (jqXHR, textStatus, errorThrown)
+                            {
+                                alert(errorThrown);
+                            }
+                        });
+                    }
+                }
+            }
+        );
     });
 })
 
