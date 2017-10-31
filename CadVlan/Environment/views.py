@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-
+import json
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render_to_response
@@ -110,12 +110,10 @@ def ajax_list_all(request):
                                                                      'dcroom__details'],
                                                              search=data)
 
-        return dtp.build_response(
-            environment.get("environments"),
-            environment.get("total"),
-            templates.AJAX_ENVIRONMENT_LIST,
-            request
-        )
+        environment_dumps = json.dumps(environment.get("environments"))
+        envs = json.loads(environment_dumps)
+
+        return render_to_response(ENVIRONMENT_LIST, envs, context_instance=RequestContext(request))
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -130,6 +128,63 @@ def list_all(request):
 
         lists = dict()
         lists['form'] = DeleteForm()
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        column_index_name_map = {
+            0: '',
+            1: 'id',
+            2: 'divisao_dc__nome',
+            3: 'vrf',
+            4: 'dcroom__dc__dcname',
+            5: ''
+        }
+
+        dtp = DataTablePaginator(request, column_index_name_map)
+
+        dtp.build_server_side_list()
+
+        dtp.searchable_columns = [
+            'grupo_l3__nome',
+            'ambiente_logico__nome',
+            'divisao_dc__nome',
+            'vrf',
+            'dcroom__dc__dcname'
+        ]
+
+        dtp.end_record = 1000
+
+        pagination = Pagination(
+            dtp.start_record,
+            dtp.end_record,
+            dtp.asorting_cols,
+            dtp.searchable_columns,
+            dtp.custom_search
+        )
+
+        extends_search = dict()
+        extends_search["father_environment__isnull"] = True
+
+        data = dict()
+        data["start_record"] = pagination.start_record
+        data["end_record"] = pagination.end_record
+        data["asorting_cols"] = pagination.asorting_cols
+        data["searchable_columns"] = pagination.searchable_columns
+        data["custom_search"] = pagination.custom_search or ""
+        data["extends_search"] = [extends_search] if extends_search else []
+
+        environment = client.create_api_environment().search(fields=['id',
+                                                                     'children',
+                                                                     'vrf',
+                                                                     'name',
+                                                                     'grupo_l3__details',
+                                                                     'ambiente_logico__details',
+                                                                     'divisao_dc__details',
+                                                                     'dcroom__details'],
+                                                             search=data)
+
+        lists['envs'] = json.dumps(environment.get("environments"))
 
     except NetworkAPIClientError, e:
         logger.error(e)
