@@ -14,11 +14,32 @@ ul {
 <script src="{{ MEDIA_URL }}/assets/mbraak-jqTree-9102352/tree.jquery.js"></script>
 
 <script type="text/javascript">
+function search_tree() {
+    var $tree = $('#tree1');
+    var search_term = document.getElementById("search").value;;
+
+    var tree = $tree.tree('getTree');
+
+    tree.iterate(
+        function(node) {
+            if (node.name.indexOf(search_term) == -1) {
+                // Not found, continue searching
+                return true;
+            }
+            else {
+                // Found. Select node. Stop searching.
+                $tree.tree('selectNode', node, true);
+                return false
+            }
+        }
+    );
+}
 $(document).ready(function() {
 
     var data = {{ envs|safe }};
 
     $(function() {
+
         var $tree = $('#tree1');
 
         $tree.tree({
@@ -35,6 +56,7 @@ $(document).ready(function() {
                 );
             }
         });
+
         $tree.on(
             'click', '.edit',
             function(e) {
@@ -80,6 +102,10 @@ $(document).ready(function() {
                 <h1 class="mbr-section-title display-2 text-xs-center">
                     <p>Ambientes</p>
                 </h1>
+            </div>
+            <div class="row form-group" style="padding: 0px 0px 0px 40px;">
+                <input class="form-control" data-form-field="fabric_name" name="search" id="search"
+                       placeholder="Busque pelo nome do ambiente, ip ou rede" onchange="search_tree();">
             </div>
             <div id="tree1"></div>
         </div>

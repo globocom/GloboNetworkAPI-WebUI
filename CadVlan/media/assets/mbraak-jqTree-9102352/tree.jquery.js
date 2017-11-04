@@ -2351,7 +2351,15 @@ var ElementsRenderer = /** @class */ (function () {
             div.appendChild(button_link);
         }
         // title span
-        div.appendChild(this.createTitleSpan(node.name, level, is_selected, node.is_open, true));
+        var net, netv4, netv6 = "";
+        for (net in node.configs) {
+            if (net.type=="v4") {
+                netv4 = node.configs[0].subnet;
+            } else {
+                netv6 = node.configs[0].subnet;
+            }
+        }
+        div.appendChild(this.createTitleSpan(node.name, node.vrf, netv4, netv6, level, is_selected, node.is_open, true));
         if (!this.tree_widget.options.buttonLeft) {
             div.appendChild(button_link);
         }
@@ -2373,10 +2381,18 @@ var ElementsRenderer = /** @class */ (function () {
         div.setAttribute("role", "presentation");
         li.appendChild(div);
         // title span
-        div.appendChild(this.createTitleSpan(node.name, level, is_selected, node.is_open, false));
+        var net, netv4, netv6 = "";
+        for (net in node.configs) {
+            if (net.type=="v4") {
+                netv4 = node.configs[0].subnet;
+            } else {
+                netv6 = node.configs[0].subnet;
+            }
+        }
+        div.appendChild(this.createTitleSpan(node.name, node.vrf, netv4, netv6, level, is_selected, node.is_open, false));
         return li;
     };
-    ElementsRenderer.prototype.createTitleSpan = function (node_name, level, is_selected, is_open, is_folder) {
+    ElementsRenderer.prototype.createTitleSpan = function (node_name, node_vrf, netv4, netv6, level, is_selected, is_open, is_folder) {
         var title_span = document.createElement("span");
         var classes = "jqtree-title jqtree_common";
         if (is_folder) {
@@ -2390,7 +2406,10 @@ var ElementsRenderer = /** @class */ (function () {
         if (is_selected) {
             title_span.setAttribute("tabindex", this.tree_widget.options.tabIndex);
         }
-        title_span.innerHTML = this.escapeIfNecessary(node_name);
+        if (node_vrf==null) node_vrf = "";
+        if (netv4==undefined) netv4 = "";
+        if (netv6==undefined) netv6 = "";
+        title_span.innerHTML = this.escapeIfNecessary(node_name+" "+node_vrf+" "+netv4+" "+netv6);
         return title_span;
     };
     ElementsRenderer.prototype.getButtonClasses = function (node) {

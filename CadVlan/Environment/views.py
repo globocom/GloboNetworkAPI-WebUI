@@ -178,6 +178,7 @@ def list_all(request):
                                                                      'children',
                                                                      'vrf',
                                                                      'name',
+                                                                     'configs__details'
                                                                      'grupo_l3__details',
                                                                      'ambiente_logico__details',
                                                                      'divisao_dc__details',
