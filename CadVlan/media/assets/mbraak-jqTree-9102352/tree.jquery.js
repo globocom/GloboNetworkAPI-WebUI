@@ -2353,10 +2353,10 @@ var ElementsRenderer = /** @class */ (function () {
         // title span
         var net, netv4, netv6 = "";
         for (net in node.configs) {
-            if (net.type=="v4") {
-                netv4 = node.configs[0].subnet;
+            if (node.configs[net].type=="v4") {
+                netv4 = node.configs[net].subnet;
             } else {
-                netv6 = node.configs[0].subnet;
+                netv6 = node.configs[net].subnet;
             }
         }
         div.appendChild(this.createTitleSpan(node.name, node.vrf, netv4, netv6, level, is_selected, node.is_open, true));
@@ -2383,10 +2383,10 @@ var ElementsRenderer = /** @class */ (function () {
         // title span
         var net, netv4, netv6 = "";
         for (net in node.configs) {
-            if (net.type=="v4") {
-                netv4 = node.configs[0].subnet;
+            if (node.configs[net].type=="v4") {
+                netv4 = node.configs[net].subnet;
             } else {
-                netv6 = node.configs[0].subnet;
+                netv6 = node.configs[net].subnet;
             }
         }
         div.appendChild(this.createTitleSpan(node.name, node.vrf, netv4, netv6, level, is_selected, node.is_open, false));
@@ -2409,7 +2409,7 @@ var ElementsRenderer = /** @class */ (function () {
         if (node_vrf==null) node_vrf = "";
         if (netv4==undefined) netv4 = "";
         if (netv6==undefined) netv6 = "";
-        title_span.innerHTML = this.escapeIfNecessary(node_name+" "+node_vrf+" "+netv4+" "+netv6);
+        title_span.innerHTML = this.escapeIfNecessary(node_name+"   "+node_vrf+"    "+netv4+"   "+netv6);
         return title_span;
     };
     ElementsRenderer.prototype.getButtonClasses = function (node) {

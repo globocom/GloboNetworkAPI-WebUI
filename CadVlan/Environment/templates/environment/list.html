@@ -15,25 +15,15 @@ ul {
 
 <script type="text/javascript">
 function search_tree() {
-    var $tree = $('#tree1');
-    var search_term = document.getElementById("search").value;;
+    var search_term = document.getElementById("search").value;
+    console.log(search_term.replace(/ /g, ";"));
 
-    var tree = $tree.tree('getTree');
+    var url = "{% url ajax.environment.list %}" + "/" + search_term.replace(/ /g, "+");
+    console.log(url);
 
-    tree.iterate(
-        function(node) {
-            if (node.name.indexOf(search_term) == -1) {
-                // Not found, continue searching
-                return true;
-            }
-            else {
-                // Found. Select node. Stop searching.
-                $tree.tree('selectNode', node, true);
-                return false
-            }
-        }
-    );
+	location.href = url;
 }
+
 $(document).ready(function() {
 
     var data = {{ envs|safe }};
@@ -44,21 +34,22 @@ $(document).ready(function() {
 
         $tree.tree({
             data: data,
-            autoOpen: true,
+            autoOpen: false,
             onCreateLi: function(node, $li) {
                 // Append a link to the jqtree-element div.
                 // The link has an url '#node-[id]' and a data property 'node-id'.
                 $li.find('.jqtree-element').append(
                     ' <a href="/environment/form/' + node.id +
                     '" class="btn_edit ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" style="background-color:white;" data-node-id="1'+
-                    node.id +'"><i class="material-icons" style="background-color:white;color:#FFD17C;font-size:13px;left:50%">edit</i></a><a href="#node-'+ node.id +'" class="edit" data-node-id="'+
-                node.id +'">del</a>'
+                    node.id +'"><i class="material-icons" style="background-color:white;color:#FFD17C;font-size:13px;left:50%">edit</i></a><a href="#node-'+
+                    node.id +'" id="delete" class="btn_edit ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-search " data-node-id="'+
+                    node.id +'"></a>'
                 );
             }
         });
 
         $tree.on(
-            'click', '.edit',
+            'click', '#delete',
             function(e) {
                 // Get the id from the 'node-id' data property
                 var node_id = $(e.target).data('node-id');

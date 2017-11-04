@@ -2,7 +2,10 @@
 
 	$('a[href*=#]').on('click', function(e) {
 		e.preventDefault();
-		$('html, body').animate({ scrollTop: $($(this).attr('href')).offset().top}, 500, 'linear');
+		var href_var = $($(this).attr('href'));
+		if (href_var.length) {
+		    $('html, body').animate({ scrollTop: href_var.offset().top}, 500, 'linear');
+		}
 	});
 
     $.extend($.easing, {

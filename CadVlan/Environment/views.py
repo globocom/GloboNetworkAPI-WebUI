@@ -55,8 +55,11 @@ def ajax_view_env(request, env_id):
 @log
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def ajax_list_all(request):
+def ajax_list_all(request, search_term):
     try:
+
+        lists = dict()
+        lists['form'] = DeleteForm()
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -82,6 +85,25 @@ def ajax_list_all(request):
             'dcroom__dc__dcname'
         ]
 
+        dtp.end_record = 1000
+
+        fields = [
+            "divisao_dc__nome__icontains",
+            "ambiente_logico__nome__icontains",
+            "grupo_l3__nome__icontains"
+        ]
+
+        extends_search_dict = dict()
+
+        if search_term:
+            term = search_term.split("+")
+            term_len = len(term)
+            if term_len > 1:
+                for i in xrange(len(term)):
+                    extends_search_dict.update({fields[i]: term[i]})
+            else:
+                dtp.custom_search = term[0]
+
         pagination = Pagination(
             dtp.start_record,
             dtp.end_record,
@@ -90,30 +112,28 @@ def ajax_list_all(request):
             dtp.custom_search
         )
 
-        extends_search = dict()
-        #extends_search["father_environment__isnull"] = True
-
         data = dict()
         data["start_record"] = pagination.start_record
         data["end_record"] = pagination.end_record
         data["asorting_cols"] = pagination.asorting_cols
         data["searchable_columns"] = pagination.searchable_columns
         data["custom_search"] = pagination.custom_search or ""
-        data["extends_search"] = [extends_search] if extends_search else []
+        data["extends_search"] = [extends_search_dict] if extends_search_dict else []
 
         environment = client.create_api_environment().search(fields=['id',
+                                                                     'children',
                                                                      'vrf',
                                                                      'name',
+                                                                     'configs__details'
                                                                      'grupo_l3__details',
                                                                      'ambiente_logico__details',
                                                                      'divisao_dc__details',
                                                                      'dcroom__details'],
                                                              search=data)
 
-        environment_dumps = json.dumps(environment.get("environments"))
-        envs = json.loads(environment_dumps)
+        lists['envs'] = json.dumps(environment.get("environments"))
 
-        return render_to_response(ENVIRONMENT_LIST, envs, context_instance=RequestContext(request))
+        return render_to_response(ENVIRONMENT_LIST, lists, context_instance=RequestContext(request))
 
     except NetworkAPIClientError, e:
         logger.error(e)
