@@ -82,7 +82,8 @@ def ajax_list_all(request, search_term=None):
             'ambiente_logico__nome',
             'divisao_dc__nome',
             'vrf',
-            'dcroom__dc__dcname'
+            'dcroom__dc__dcname',
+            'dcroom__name'
         ]
 
         dtp.end_record = 1000
@@ -121,13 +122,10 @@ def ajax_list_all(request, search_term=None):
         data["extends_search"] = [extends_search_dict] if extends_search_dict else []
 
         environment = client.create_api_environment().search(fields=['id',
-                                                                     'children',
+                                                                     'children__configs',
                                                                      'vrf',
                                                                      'name',
-                                                                     'configs__details'
-                                                                     'grupo_l3__details',
-                                                                     'ambiente_logico__details',
-                                                                     'divisao_dc__details',
+                                                                     'configs__details',
                                                                      'dcroom__details'],
                                                              search=data)
 
@@ -170,7 +168,8 @@ def list_all(request):
             'ambiente_logico__nome',
             'divisao_dc__nome',
             'vrf',
-            'dcroom__dc__dcname'
+            'dcroom__dc__dcname',
+            'dcroom__name'
         ]
 
         dtp.end_record = 1000
@@ -195,13 +194,10 @@ def list_all(request):
         data["extends_search"] = [extends_search] if extends_search else []
 
         environment = client.create_api_environment().search(fields=['id',
-                                                                     'children',
+                                                                     'children__configs',
                                                                      'vrf',
                                                                      'name',
-                                                                     'configs__details'
-                                                                     'grupo_l3__details',
-                                                                     'ambiente_logico__details',
-                                                                     'divisao_dc__details',
+                                                                     'configs__details',
                                                                      'dcroom__details'],
                                                              search=data)
 
