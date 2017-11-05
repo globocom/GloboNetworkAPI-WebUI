@@ -55,7 +55,7 @@ def ajax_view_env(request, env_id):
 @log
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def ajax_list_all(request, search_term):
+def ajax_list_all(request, search_term=None):
     try:
 
         lists = dict()

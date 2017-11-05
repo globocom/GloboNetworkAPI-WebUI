@@ -7,7 +7,6 @@
 ul {
     list-style-type: none;
 }
-
 </style>
 
 <link rel="stylesheet" src="{{ MEDIA_URL }}/assets/mbraak-jqTree-9102352/jqtree.css">
@@ -16,10 +15,7 @@ ul {
 <script type="text/javascript">
 function search_tree() {
     var search_term = document.getElementById("search").value;
-    console.log(search_term.replace(/ /g, ";"));
-
     var url = "{% url ajax.environment.list %}" + "/" + search_term.replace(/ /g, "+");
-    console.log(url);
 
 	location.href = url;
 }
@@ -42,44 +38,45 @@ $(document).ready(function() {
                     ' <a href="/environment/form/' + node.id +
                     '" class="btn_edit ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" style="background-color:white;" data-node-id="1'+
                     node.id +'"><i class="material-icons" style="background-color:white;color:#FFD17C;font-size:13px;left:50%">edit</i></a><a href="#node-'+
-                    node.id +'" id="delete" class="btn_edit ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-search " data-node-id="'+
-                    node.id +'"></a>'
+                    node.id +'" id="btn_del" data-node-id="'+
+                    node.id +'"><i id="btn_del_" data-node-id="'+
+                    node.id +'" class="material-icons" style="background-color:white;color:#FFD17C;font-size:13px;left:50%">delete</i></a>'
                 );
             }
         });
 
-        $tree.on(
-            'click', '#delete',
-            function(e) {
-                // Get the id from the 'node-id' data property
-                var node_id = $(e.target).data('node-id');
+        $tree.on('click', '#btn_del_.material-icons',function(e) {
+            // Get the id from the 'node-id' data property
+            var node_id = $(e.target).data('node-id');
+            // Get the node from the tree
+            var node = $tree.tree('getNodeById', node_id);
 
-                // Get the node from the tree
-                var node = $tree.tree('getNodeById', node_id);
-
-                if (node) {
-                    var ids_to_send = [];
-                    ids_to_send.push(node_id);
-                    var formData = {"ids": ids_to_send, csrfmiddlewaretoken: "{{ csrf_token }}"};
-                    if (confirm('Deseja realmente excluir o Ambiente selecionado?')){
-                        $.ajax({
-                            url : "{% url environment.remove %}",
-                            type: "POST",
-                            data : formData,
-                            success: function(data, textStatus, jqXHR)
-                            {
-                                location.href="{% url environment.list %}";
-                            },
-                            error: function (jqXHR, textStatus, errorThrown)
-                            {
-                                alert(errorThrown);
-                            }
-                        });
-                    }
+            if (node) {
+                var ids_to_send = [];
+                ids_to_send.push(node_id);
+                var formData = {"ids": ids_to_send, csrfmiddlewaretoken: "{{ csrf_token }}"};
+                if (confirm('Deseja realmente excluir o Ambiente selecionado?')){
+                    $.ajax({
+                        url : "{% url environment.remove %}",
+                        type: "POST",
+                        data : formData,
+                        success: function(data, textStatus, jqXHR)
+                        {
+                            location.href="{% url environment.list %}";
+                        },
+                        error: function (jqXHR, textStatus, errorThrown)
+                        {
+                            alert(errorThrown);
+                        }
+                    });
                 }
             }
-        );
+        });
     });
+
+	$("#btn_clear").click(function(){
+        location.href = "{% url environment.list %}";
+	});
 })
 
 </script>
@@ -94,9 +91,24 @@ $(document).ready(function() {
                     <p>Ambientes</p>
                 </h1>
             </div>
-            <div class="row form-group" style="padding: 0px 0px 0px 40px;">
-                <input class="form-control" data-form-field="fabric_name" name="search" id="search"
-                       placeholder="Busque pelo nome do ambiente, ip ou rede" onchange="search_tree();">
+            <div id="hamburger">
+                <div id="wrapper">
+                  <a class="material-icons" href="{% url environment.form %}">add</a>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="row form-group" style="padding: 0px 0px 0px 40px;">
+                    <div class="col-xs-12 col-md-11" style="padding: 0px;">
+                        <input class="form-control" data-form-field="fabric_name" name="search" id="search"
+                               placeholder="Busque pelo nome do ambiente, vrf, ip ou rede"
+                               onchange="search_tree();">
+                    </div>
+                    <div class="col-xs-12 col-md-1" style="padding:0px;">
+                        <button id="btn_clear" class="form-control" style="background-color:#f5f5f5;">
+                            <i class="material-icons" style="background-color:#f5f5f5;color:#2C2C2C;font-size:13px;left:50%">close</i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div id="tree1"></div>
         </div>
