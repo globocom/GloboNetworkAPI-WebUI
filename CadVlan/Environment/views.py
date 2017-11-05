@@ -115,7 +115,7 @@ def ajax_list_all(request, search_term=None):
         data = dict()
         data["start_record"] = pagination.start_record
         data["end_record"] = pagination.end_record
-        data["asorting_cols"] = pagination.asorting_cols
+        data["asorting_cols"] = ['divisao_dc__nome','ambiente_logico__nome','grupo_l3__nome']
         data["searchable_columns"] = pagination.searchable_columns
         data["custom_search"] = pagination.custom_search or ""
         data["extends_search"] = [extends_search_dict] if extends_search_dict else []
@@ -189,7 +189,7 @@ def list_all(request):
         data = dict()
         data["start_record"] = pagination.start_record
         data["end_record"] = pagination.end_record
-        data["asorting_cols"] = pagination.asorting_cols
+        data["asorting_cols"] = ['divisao_dc__nome','ambiente_logico__nome','grupo_l3__nome']
         data["searchable_columns"] = pagination.searchable_columns
         data["custom_search"] = pagination.custom_search or ""
         data["extends_search"] = [extends_search] if extends_search else []
