@@ -112,11 +112,6 @@ $(document).ready(function() {
 		}
 	});
 	{% endif %}
-
-	$("#btn_ref").click(function(){
-		location.reload();
-	});
-
 });
 
 
@@ -173,7 +168,6 @@ $(document).ready(function() {
                             {{ field }}
                         {% endfor %}
                     </form>
-
                     <table class="table table-hover" id="pool_list">
                         <thead>
                             <tr>
@@ -183,39 +177,7 @@ $(document).ready(function() {
                                 <th>Healthcheck</th>
                                 <th>Ambiente</th>
                                 <th>Criado</th>
-                                <th style="width: 190px">
-
-                                    <button id="btn_ref"
-                                       class="btn btn-social-bottom btn-responsive"
-                                       style="vertical-align: bottom; margin: 0px"
-                                        type="submit">
-                                       <i class="material-icons"
-                                          style="color:#FFD17C;font-size:15px"
-                                       title="Atualizar dados da listagem">
-                                           update
-                                       </i>
-                                    </button>
-
-                                    {% has_perm POOL_MANAGEMENT True None %}
-                                    {% with has_perm as has_perm_pool_management_write %}
-                                    {% has_perm POOL_ALTER_SCRIPT True None %}
-                                    {% with has_perm as has_perm_pool_script_alter_write %}
-
-                                    {% if has_perm_pool_management_write and has_perm_pool_script_alter_write %}
-                                    <button id="btn_new"
-                                       class="btn btn-social-bottom btn-responsive"
-                                       style="vertical-align: bottom; margin: 0px"
-                                        type="submit">
-                                       <i class="material-icons"
-                                          style="color:#FFD17C;font-size:15px"
-                                       title="Novo Registro">
-                                           add
-                                       </i>
-                                    </button>
-                                    {% endif %}
-
-				                    {% endwith %}
-				                    {% endwith %}
+                                <th style="width: 150px">
 
                                     {% has_perm POOL_CREATE_SCRIPT True None %}
 				                    {% if has_perm %}
@@ -262,7 +224,6 @@ $(document).ready(function() {
                                        </i>
                                     </button>
                                     {% endif %}
-
 				                    {% endwith %}
 				                    {% endwith %}
                                 </th>
@@ -271,20 +232,13 @@ $(document).ready(function() {
                         <tbody>
                         </tbody>
                     </table>
+                    <div id="hamburger">
+                        <div id="wrapper">
+                          <a class="material-icons" href="{% url pool.add.form %}">add</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <br><br><br>
-            <button id="up_env"
-                    class="btn btn-info btn-responsive mbr-arrow-up"
-                    style="vertical-align: bottom;"
-                    onclick="jumpToTop();"
-                    data-placement="left"
-                    title="Click to return on the top page">
-                <i class="material-icons"
-                  style="color:#FFD17C;font-size:15px">
-                   arrow_upward
-                </i>
-            </button>
         </div>
     </div>
 </section>

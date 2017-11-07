@@ -21,7 +21,7 @@ $(document).ready(function() {
     $(".tab4").attr("href", "{%  url pool.manage.tab4 id_server_pool%}");
 
     obj_btn_can.click(function(){
-        location.href = "{% url pool.list %}";
+        location.href = "{% url pool.list.new %}";
     });
 
     oTableReq = $("#requisicoes_list").dataTable({

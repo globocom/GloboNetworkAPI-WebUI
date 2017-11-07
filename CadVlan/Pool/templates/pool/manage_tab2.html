@@ -17,7 +17,7 @@ $(document).ready(function() {
     $("#page_tab").tabs({selected:1});
 
     obj_btn_can.click(function(){
-        location.href = "{% url pool.list %}";
+        location.href = "{% url pool.list.new %}";
     });
 
     $(".tab1").attr("href", "{%  url pool.manage.tab1 id_server_pool%}");

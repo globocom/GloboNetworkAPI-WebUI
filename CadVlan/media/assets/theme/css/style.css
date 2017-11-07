@@ -560,7 +560,7 @@ p.lead,
   background-color: #f5f5f5;
   border-radius: 3px;
   box-shadow: none;
-  color: #747474;
+  color: #9d9d9d;
   font-size: 0.875rem;
   line-height: 1.43;
   min-height: 1.0em;
@@ -621,7 +621,7 @@ p.lead,
  */
 body {
   font-family: 'Raleway', sans-serif;
-  color: #232323; }
+  color: #0D84A5; }
 
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6,
