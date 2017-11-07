@@ -272,18 +272,18 @@ class SearchPoolForm(forms.Form):
 
         super(SearchPoolForm, self).__init__(*args, **kwargs)
         env_choices = ([(env['id'], env["name"]) for env in environment_list])
-        env_choices.insert(0, (0, "Selecione"))
+        env_choices.insert(0, (0, "Busque pelo Ambiente do Pool..."))
 
         self.fields['environment'].choices = env_choices
 
     environment = forms.ChoiceField(
         label="Ambiente",
         required=False,
-        choices=[(0, "Selecione")],
+        choices=[(0, "Busque pelo Ambiente do Pool...")],
         error_messages=error_messages,
         widget=forms.Select(
             attrs={"class": "form-control",
-                   "style": "width: 50%; height: 2.7em"}
+                   "style": "height: 2.7em;"}
         )
     )
 

@@ -122,7 +122,7 @@ def ajax_list_all(request, search_term=None):
         data["extends_search"] = [extends_search_dict] if extends_search_dict else []
 
         environment = client.create_api_environment().search(fields=['id',
-                                                                     'children__configs',
+                                                                     'children__basic',
                                                                      'vrf',
                                                                      'name',
                                                                      'configs__details',
@@ -194,7 +194,7 @@ def list_all(request):
         data["extends_search"] = [extends_search] if extends_search else []
 
         environment = client.create_api_environment().search(fields=['id',
-                                                                     'children__configs',
+                                                                     'children__basic',
                                                                      'vrf',
                                                                      'name',
                                                                      'configs__details',
