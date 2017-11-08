@@ -86,7 +86,7 @@ def ajax_list_all(request, search_term=None):
             'dcroom__name'
         ]
 
-        dtp.end_record = 1000
+        dtp.end_record = 10000
 
         fields = [
             "divisao_dc__nome__icontains",
@@ -172,7 +172,7 @@ def list_all(request):
             'dcroom__name'
         ]
 
-        dtp.end_record = 1000
+        dtp.end_record = 10000
 
         pagination = Pagination(
             dtp.start_record,

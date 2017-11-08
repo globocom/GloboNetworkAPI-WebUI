@@ -203,12 +203,12 @@
 
                             {% has_perm VLAN_MANAGEMENT None True %}
                             {% if has_perm %}
-                            <li><a href="{% url pool.list %} ">Pool</a></li>
+                            <!--li><a href="{% url pool.list %} ">Pool</a></li-->
                             {% endif %}
 
                             {% has_perm VLAN_MANAGEMENT None True %}
                             {% if has_perm %}
-                            <li><a href="{% url pool.list.new %} ">Pool (NOVO!)</a></li>
+                            <li><a href="{% url pool.list.new %} ">Pool </a></li>
                             {% endif %}
 
                             {% has_perm VIPS_REQUEST None True %}
