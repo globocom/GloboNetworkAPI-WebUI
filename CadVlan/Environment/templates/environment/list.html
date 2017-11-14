@@ -3,13 +3,8 @@
 {% load util %}
 
 {% block header %}
-<style>
-ul {
-    list-style-type: none;
-}
-</style>
 
-<link rel="stylesheet" src="{{ MEDIA_URL }}/assets/mbraak-jqTree-9102352/jqtree.css">
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mbraak-jqTree-9102352/jqtree.css">
 <script src="{{ MEDIA_URL }}/assets/mbraak-jqTree-9102352/tree.jquery.js"></script>
 
 <script type="text/javascript">
@@ -30,7 +25,6 @@ $(document).ready(function() {
 
         $tree.tree({
             data: data,
-            autoOpen: false,
             onCreateLi: function(node, $li) {
                 // Append a link to the jqtree-element div.
                 // The link has an url '#node-[id]' and a data property 'node-id'.
