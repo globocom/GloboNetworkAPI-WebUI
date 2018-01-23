@@ -97,18 +97,23 @@ class AddInterfaceForm(forms.Form):
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [
                 ("", "Selecione"), ("GE","GE"), ("10GE", "10GE"), ("40GE", "40GE"), ("100GE", "100GE"), ("meth", "meth")]
+        elif marca == "8":
+            attrs["onChange"] = "javascript:setMask(" + str(index) + ")"
+            attrs["style"] = "width: 98px;"
+            self.fields['combo'].widget = forms.Select(attrs=attrs)
+            self.fields['combo'].choices = [
+                ("", "Selecione"), ("For", "For"), ("Ten","Ten"), ("Twe", "Twe")]
         else:
             attrs["style"] = "display: none;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [("", "")]
 
-        widget = forms.TextInput(
-            attrs={"style": "width: 100px;", "onKeyUp": "javascript:fixName(this, " + str(index) + ");"})
+        widget = forms.TextInput(attrs={"style": "width: 100px;"})
         self.fields['name'].widget = widget
 
 
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
-    name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=30)
     description = forms.CharField(label=u'Descrição', required=False, min_length=3, max_length=200, error_messages=error_messages)
     protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
                                   widget=forms.RadioSelect, initial=0)
@@ -269,17 +274,22 @@ class EditForm(forms.Form):
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [
                 ("", "Selecione"), ("GE","GE"), ("10GE", "10GE"), ("40GE", "40GE"), ("100GE", "100GE"), ("meth", "meth")]
+        elif marca == "8":
+            attrs["onChange"] = "javascript:setMask(" + str(index) + ")"
+            attrs["style"] = "width: 98px;"
+            self.fields['combo'].widget = forms.Select(attrs=attrs)
+            self.fields['combo'].choices = [
+                ("", "Selecione"), ("For", "For"), ("Ten","Ten"), ("Twe", "Twe")]
         else:
             attrs["style"] = "display: none;"
             self.fields['combo'].widget = forms.Select(attrs=attrs)
             self.fields['combo'].choices = [("", "")]
 
-        widget = forms.TextInput(
-            attrs={"style": "width: 100px;", "onKeyUp": "javascript:fixName(this, " + str(index) + ");", "readonly": True})
+        widget = forms.TextInput(attrs={"style": "width: 100px;", "readonly": True})
         self.fields['name'].widget = widget
 
     combo = forms.ChoiceField(label="", required=False, error_messages=error_messages)
-    name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=20)
+    name = forms.CharField(label="Nome da Interface", required=True, error_messages=error_messages, min_length=1, max_length=30)
     protected = forms.ChoiceField(label="Protegido", required=True, choices=[(0, "Não"), (1, "Sim")], error_messages=error_messages,
                                   widget=forms.RadioSelect(attrs={'disabled': 'disabled'}), initial=0)
     equip_name = forms.CharField(widget=forms.HiddenInput(), label='', required=False)
