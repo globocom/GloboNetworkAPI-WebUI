@@ -1441,7 +1441,7 @@ def manage_tab4(request, id_server_pool):
         lists['id_server_pool'] = id_server_pool
 
         pool = client.create_api_pool().get(
-            id_server_pool, include=['groups_permissions'])
+            [id_server_pool], include=['groups_permissions'])
         server_pools = pool['server_pools'][0]
 
         lists['pool_created'] = pool_created = server_pools['pool_created']
