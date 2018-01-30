@@ -127,6 +127,15 @@ urlpatterns += patterns(
         name='insert.interface.channel',),
 )
 
+
+# URL's Equipment Interface - NEW
+urlpatterns += patterns(
+    'CadVlan.EquipInterface.views_v3',
+    url('^interface[/]?$', 'list_equipment_interfaces',
+        name='interface.list',),
+)
+
+
 # URL's Equipment
 urlpatterns += patterns(
     'CadVlan.Equipment.views',

@@ -68,10 +68,10 @@
   border-radius: 3px; }
 
 .btn-primary {
-  background-color: #c0a375;
-  border-color: #c0a375;
+  background-color: #8f8f8f;
+  border-color: #8f8f8f;
   box-shadow: none;
-  color: #fff; }
+  color: #9d9d9d; }
   .btn-primary:hover {
     color: #fff;
     background-color: #a07e49;
