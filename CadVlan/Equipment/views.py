@@ -1,5 +1,4 @@
-# -*- coding:utf-8 -*-
-
+# -*- coding: utf-8 -*-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,32 +13,55 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
+import json
 import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm, has_perm_external
-from CadVlan.permissions import EQUIPMENT_MANAGEMENT, ENVIRONMENT_MANAGEMENT, EQUIPMENT_GROUP_MANAGEMENT, BRAND_MANAGEMENT,\
-    VIP_ALTER_SCRIPT
-from networkapiclient.exception import NetworkAPIClientError, EquipamentoError, UserNotAuthorizedError
+
 from django.contrib import messages
+from django.http import HttpResponse
+from django.http import HttpResponseServerError
+from django.shortcuts import redirect
+from django.shortcuts import render_to_response
+from django.template import loader
+from django.template.context import RequestContext
+from django.views.decorators.csrf import csrf_exempt
+from networkapiclient.exception import EquipamentoError
+from networkapiclient.exception import NetworkAPIClientError
+from networkapiclient.exception import UserNotAuthorizedError
+from networkapiclient.Pagination import Pagination
+
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Equipment.business import cache_list_equipment
-from CadVlan.Util.shortcuts import render_to_response_ajax
-from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, EQUIPMENT_SEARCH_LIST, SEARCH_FORM_ERRORS, AJAX_EQUIP_LIST, EQUIPMENT_FORM, EQUIPMENT_MODELO, EQUIPMENT_EDIT, EQUIPMENT_MARCAMODELO_FORM, EQUIPMENT_MARCA,\
-    EQUIPMENT_VIEW_AJAX
-from django.template.context import RequestContext
+from CadVlan.Equipment.forms import EquipForm
+from CadVlan.Equipment.forms import MarcaForm
+from CadVlan.Equipment.forms import ModeloForm
+from CadVlan.Equipment.forms import SearchEquipmentForm
 from CadVlan.forms import DeleteForm
-from CadVlan.Equipment.forms import SearchEquipmentForm, EquipForm, MarcaForm, ModeloForm
-from CadVlan.Util.utility import DataTablePaginator, validates_dict
-from networkapiclient.Pagination import Pagination
-from django.http import HttpResponseServerError, HttpResponse
-from django.shortcuts import render_to_response, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.template import loader
-from CadVlan.messages import equip_messages, error_messages,\
-    request_vip_messages
+from CadVlan.messages import equip_messages
+from CadVlan.messages import error_messages
+from CadVlan.messages import request_vip_messages
+from CadVlan.permissions import BRAND_MANAGEMENT
+from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
+from CadVlan.permissions import EQUIPMENT_GROUP_MANAGEMENT
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT
+from CadVlan.permissions import VIP_ALTER_SCRIPT
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST
+from CadVlan.templates import AJAX_EQUIP_LIST
+from CadVlan.templates import EQUIPMENT_EDIT
+from CadVlan.templates import EQUIPMENT_FORM
+from CadVlan.templates import EQUIPMENT_MARCA
+from CadVlan.templates import EQUIPMENT_MARCAMODELO_FORM
+from CadVlan.templates import EQUIPMENT_MODELO
+from CadVlan.templates import EQUIPMENT_SEARCH_LIST
+from CadVlan.templates import EQUIPMENT_VIEW_AJAX
+from CadVlan.templates import SEARCH_FORM_ERRORS
 from CadVlan.Util.converters.util import split_to_array
-import json
+from CadVlan.Util.Decorators import has_perm
+from CadVlan.Util.Decorators import has_perm_external
+from CadVlan.Util.Decorators import log
+from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.shortcuts import render_to_response_ajax
+from CadVlan.Util.utility import DataTablePaginator
+from CadVlan.Util.utility import validates_dict
 
 logger = logging.getLogger(__name__)
 
@@ -55,23 +77,23 @@ def ajax_check_real(request, id_vip):
         client = auth.get_clientFactory()
 
         # Get reals related
-        vip = client.create_vip().get_by_id(id_vip).get("vip")
+        vip = client.create_vip().get_by_id(id_vip).get('vip')
         reals = [vip.get('reals')['real'], ] if type(
             vip.get('reals')['real']) is dict else vip.get('reals')['real']
 
         response_data = {}
         response_data['count'] = len(reals)
 
-        return HttpResponse(json.dumps(response_data), content_type="application/json")
+        return HttpResponse(json.dumps(response_data), content_type='application/json')
 
     except NetworkAPIClientError, e:
         logger.error(e)
-        return HttpResponse(json.dumps(e), content_type="application/json")
+        return HttpResponse(json.dumps(e), content_type='application/json')
 
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ALTER_SCRIPT, "write": True}, ])
+@has_perm([{'permission': VIP_ALTER_SCRIPT, 'write': True}, ])
 def ajax_view_real(request, id_equip):
 
     lists = dict()
@@ -114,7 +136,7 @@ def ajax_view_real_shared(request, id_equip, lists):
 
 @log
 @login_required
-@has_perm([{"permission": VIP_ALTER_SCRIPT, "write": True}, ])
+@has_perm([{'permission': VIP_ALTER_SCRIPT, 'write': True}, ])
 def ajax_remove_real(request, id_vip):
 
     try:
@@ -159,7 +181,7 @@ def ajax_remove_real(request, id_vip):
 
 def remove_reals_from_equip(client, id_vip, lists, ip='', port_vip='', port_real='', real_name='', remove_all=False):
     try:
-        vip = client.create_vip().get_by_id(id_vip).get("vip")
+        vip = client.create_vip().get_by_id(id_vip).get('vip')
 
         reals = [vip.get('reals')['real'], ] if type(
             vip.get('reals')['real']) is dict else vip.get('reals')['real']
@@ -199,7 +221,7 @@ def remove_reals_from_equip(client, id_vip, lists, ip='', port_vip='', port_real
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'read': True}])
 def ajax_autocomplete_equips(request):
     try:
 
@@ -224,7 +246,7 @@ def ajax_autocomplete_equips(request):
 
 @log
 @csrf_exempt
-@has_perm_external([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
+@has_perm_external([{'permission': EQUIPMENT_MANAGEMENT, 'read': True}])
 def ajax_autocomplete_equips_external(request, form_acess, client):
     try:
 
@@ -246,13 +268,13 @@ def ajax_autocomplete_equips_external(request, form_acess, client):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'read': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def ajax_list_equips(request):
 
     try:
 
         # If form was submited
-        if request.method == "GET":
+        if request.method == 'GET':
 
             # Get user auth
             auth = AuthSession(request.session)
@@ -270,19 +292,19 @@ def ajax_list_equips(request):
 
             if search_form.is_valid():
 
-                name = search_form.cleaned_data["name"]
-                iexact = search_form.cleaned_data["iexact"]
-                environment = search_form.cleaned_data["environment"]
-                equip_type = search_form.cleaned_data["type_equip"]
-                group = search_form.cleaned_data["group"]
-                ipv4 = search_form.cleaned_data["ipv4"]
-                ipv6 = search_form.cleaned_data["ipv6"]
+                name = search_form.cleaned_data['name']
+                iexact = search_form.cleaned_data['iexact']
+                environment = search_form.cleaned_data['environment']
+                equip_type = search_form.cleaned_data['type_equip']
+                group = search_form.cleaned_data['group']
+                ipv4 = search_form.cleaned_data['ipv4']
+                ipv6 = search_form.cleaned_data['ipv6']
 
-                if environment == "0":
+                if environment == '0':
                     environment = None
-                if equip_type == "0":
+                if equip_type == '0':
                     equip_type = None
-                if group == "0":
+                if group == '0':
                     group = None
 
                 if len(ipv4) > 0:
@@ -308,16 +330,16 @@ def ajax_list_equips(request):
                 equips = client.create_equipamento().find_equips(
                     name, iexact, environment, equip_type, group, ip, pag)
 
-                if not equips.has_key("equipamento"):
-                    equips["equipamento"] = []
+                if 'equipamento' in equips:
+                    equips['equipamento'] = []
 
                 # Returns JSON
-                return dtp.build_response(equips["equipamento"], equips["total"], AJAX_EQUIP_LIST, request)
+                return dtp.build_response(equips['equipamento'], equips['total'], AJAX_EQUIP_LIST, request)
 
             else:
                 # Remake search form
                 lists = dict()
-                lists["search_form"] = search_form
+                lists['search_form'] = search_form
 
                 # Returns HTML
                 response = HttpResponse(loader.render_to_string(
@@ -336,13 +358,13 @@ def ajax_list_equips(request):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'read': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def search_list(request):
 
     try:
 
         lists = dict()
-        lists["delete_form"] = DeleteForm()
+        lists['delete_form'] = DeleteForm()
 
         # Get user
         auth = AuthSession(request.session)
@@ -358,7 +380,7 @@ def search_list(request):
         search_form = SearchEquipmentForm(
             env_list, type_equip_list, group_list)
 
-        lists["search_form"] = search_form
+        lists['search_form'] = search_form
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -369,7 +391,7 @@ def search_list(request):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'write': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def equip_form(request):
     try:
         equip = None
@@ -393,8 +415,10 @@ def equip_form(request):
         forms_aux['grupos'] = client.create_grupo_equipamento().listar().get(
             'grupo')
         # List All - Ambientes
-        forms_aux['ambientes'] = client.create_ambiente().listar().get(
-            'ambiente')
+        environments = client.create_ambiente().listar().get('ambiente')
+        forms_aux['ambientes'] = environments
+        # List All - Sdn Controller Environments
+        forms_aux['sdn_controlled_environment'] = environments
 
         if request.method == 'POST':
             roteadores = request.POST.getlist('roteadores')
@@ -411,7 +435,6 @@ def equip_form(request):
                 forms_aux['modelos'] = None
 
             form = EquipForm(forms_aux, request.POST)
-
             if form.is_valid():
 
                 lists['form'] = form
@@ -423,27 +446,34 @@ def equip_form(request):
                 modelo = form.cleaned_data['modelo']
                 tipo_equipamento = form.cleaned_data['tipo_equipamento']
                 maintenance = form.cleaned_data['maintenance']
+                sdn_controlled_environment = form.cleaned_data[
+                    'sdn_controlled_environment']
 
-                grupo_aux = grupos[0]
+                environments = [{
+                    'is_router': True if amb in roteadores else False,
+                    'environment': int(amb)
+                } for amb in ambientes]
 
-                equip = client.create_equipamento().inserir(
-                    nome, tipo_equipamento, modelo, grupo_aux, maintenance)
-                equip = equip.get('equipamento').get('id')
-                for g in grupos:
-                    if g != grupo_aux:
-                        client.create_grupo_equipamento().associa_equipamento(
-                            equip, g)
+                groups = [{'id': int(g)} for g in grupos]
+                sdn_envs = [{'environment': int(env)}
+                            for env in sdn_controlled_environment]
 
-                for amb in ambientes:
-                    is_router = 1 if amb in roteadores else 0
-                    client.create_equipamento_ambiente().inserir(
-                        equip, amb, is_router)
+                eqpt = {
+                    'name': nome,
+                    'maintenance': bool(maintenance),
+                    'equipment_type': int(tipo_equipamento),
+                    'model': int(modelo),
+                    'environments': environments,
+                    'groups': groups,
+                    'sdn_controlled_environment': sdn_envs
+                }
+                client.create_api_v4_equipment().create([eqpt])
 
                 messages.add_message(
-                    request, messages.SUCCESS, equip_messages.get("equip_sucess"))
+                    request, messages.SUCCESS, equip_messages.get('equip_sucess'))
 
                 # redirecionar
-                return redirect("equipment.search.list")
+                return redirect('equipment.search.list')
 
             else:
                 lists['form'] = form
@@ -467,7 +497,7 @@ def equip_form(request):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'read': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def ajax_modelo_equip(request, id_marca):
     try:
 
@@ -515,7 +545,7 @@ def ajax_modelo_equip(request, id_marca):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'read': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def ajax_marca_equip(request):
     try:
 
@@ -550,7 +580,7 @@ def ajax_marca_equip(request):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'write': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def equip_edit(request, id_equip):
 
     lists = dict()
@@ -568,32 +598,30 @@ def equip_edit(request, id_equip):
     forms_aux['tipo_equipamento'] = client.create_tipo_equipamento().listar().get(
         'equipment_type')
     forms_aux['marcas'] = client.create_marca().listar().get('brand')
-    forms_aux['grupos'] = client.create_grupo_equipamento().listar().get(
-        'grupo')
-    forms_aux['ambientes'] = client.create_ambiente().listar().get('ambiente')
+    forms_aux['grupos'] = client.create_grupo_equipamento(
+    ).listar().get('grupo')
+    # List All - Ambientes
+    environments = client.create_ambiente().listar().get('ambiente')
+    forms_aux['ambientes'] = environments
+    # List All - Sdn Controller Environments
+    forms_aux['sdn_controlled_environment'] = environments
 
     try:
-        equip = client.create_equipamento().listar_por_id(
-            id_equip).get('equipamento')
+        equip = client.create_api_v4_equipment().get(
+            [id_equip],
+            include=[
+                'environments', 'sdn_controlled_environment',
+                'groups', 'model__details__brand']
+        ).get('equipments')[0]
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return redirect("equipment.search.list")
-
-    environments = client.create_ambiente().listar_por_equip(id_equip)
-    environments = validates_dict(environments, 'ambiente')
-    if (environments is None):
-        environments = []
-
-    groups = client.create_grupo_equipamento().listar_por_equip(id_equip)
-    groups = validates_dict(groups, 'grupo')
-    if (groups is None):
-        groups = []
+        return redirect('equipment.search.list')
 
     list_groups = []
     list_environments = []
-    logger.info("groups = %s" % groups)
-    logger.error("groups = %s" % groups)
+    list_sdn_controlled_environments = []
     try:
 
         if request.method == 'POST':
@@ -616,142 +644,40 @@ def equip_edit(request, id_equip):
             lists['form'] = form
 
             if form.is_valid():
-
                 groups_chosen = form.cleaned_data['grupo']
                 environments_chosen = form.cleaned_data['ambiente']
                 name = form.cleaned_data['nome']
                 model = form.cleaned_data['modelo']
                 type_equipment = form.cleaned_data['tipo_equipamento']
                 maintenance = form.cleaned_data['maintenance']
+                sdn_controlled_environment = form.cleaned_data[
+                    'sdn_controlled_environment']
 
-                # Equipment orquestração
-                orquestracao = 1
-                server_virtual = 10
+                environments = [{
+                    'is_router': True if amb in roteadores_chosen else False,
+                    'environment': int(amb)
+                } for amb in environments_chosen]
 
-                if str(orquestracao) in groups_chosen and int(type_equipment) != server_virtual:
-                    messages.add_message(
-                        request, messages.ERROR, equip_messages.get("orquestracao_error"))
-                    raise Exception
+                groups = [{'id': int(g)} for g in groups_chosen]
+                sdn_envs = [{'environment': int(env)}
+                            for env in sdn_controlled_environment]
 
-                # Diff environments
-                environments_list = []
-                roteadores_list = []
-                for environment in environments:
-                    environments_list.append(environment['id'])
-                    if environment['is_router'] == 'True':
-                        roteadores_list.append(environment['id'])
-
-                environments_rm = list(
-                    set(environments_list) - set(environments_chosen))
-                environments_add = list(
-                    set(environments_chosen) - set(environments_list))
-
-                # Remove environment equimpament
-                for env in environments_rm:
-                    try:
-
-                        client.create_equipamento_ambiente().remover(
-                            id_equip, env)
-                    except NetworkAPIClientError, e:
-                        logger.error(e)
-                        is_error = True
-                        messages.add_message(request, messages.ERROR, e)
-
-                # ADD environment equimpament
-                for env in environments_add:
-                    try:
-                        client.create_equipamento_ambiente().inserir(
-                            id_equip, env)
-                    except NetworkAPIClientError, e:
-                        logger.error(e)
-                        is_error = True
-                        messages.add_message(request, messages.ERROR, e)
-
-                # Diff roteadores
-                roteadores_rmv = list(
-                    (set(roteadores_list) - set(roteadores_chosen)) - set(environments_rm))
-                roteadores_add = list(
-                    set(roteadores_chosen) - set(roteadores_list))
-
-                # Remove roteadores environment equimpament
-                for env in roteadores_rmv:
-                    try:
-                        client.create_equipamento_ambiente().update(
-                            id_equip, env, 0)
-                    except NetworkAPIClientError, e:
-                        logger.error(e)
-                        is_error = True
-                        messages.add_message(request, messages.ERROR, e)
-
-                # add roteadores environment equimpament
-                for env in roteadores_add:
-                    try:
-                        client.create_equipamento_ambiente().update(
-                            id_equip, env, 1)
-                    except NetworkAPIClientError, e:
-                        logger.error(e)
-                        is_error = True
-                        messages.add_message(request, messages.ERROR, e)
-
-                # diff groups
-                groups_list = []
-                for group in groups:
-                    groups_list.append(group['id'])
-
-                groups_rm = list(set(groups_list) - set(groups_chosen))
-                groups_add = list(set(groups_chosen) - set(groups_list))
-
-                # Add groups before because the equipment cannot be groupless
-                for group in groups_add:
-                    try:
-                        client.create_grupo_equipamento().associa_equipamento(
-                            id_equip, group)
-                    except UserNotAuthorizedError, e:
-                        logger.error(e)
-                        is_error = True
-
-                        for grp in forms_aux['grupos']:
-                            if grp["id"] == group:
-                                messages.add_message(request, messages.ERROR, equip_messages.get(
-                                    "error_associate_group") % grp["nome"])
-                                raise Exception
-                                break
-
-                    except NetworkAPIClientError, e:
-                        logger.error(e)
-                        messages.add_message(request, messages.ERROR, e)
-                        is_error = True
-
-                # Remove groups
-                for group in groups_rm:
-                    try:
-                        client.create_grupo_equipamento().remove(
-                            id_equip, group)
-                    except UserNotAuthorizedError, e:
-                        logger.error(e)
-                        is_error = True
-
-                        for grp in forms_aux['grupos']:
-                            if grp["id"] == group:
-                                messages.add_message(request, messages.ERROR, equip_messages.get(
-                                    "error_disassociate_group") % grp["nome"])
-
-                    except NetworkAPIClientError, e:
-                        logger.error(e)
-                        messages.add_message(request, messages.ERROR, e)
-                        is_error = True
-
-                # edit name
-                client.create_equipamento().edit(
-                    id_equip, name, type_equipment, model, maintenance)
-
-                if is_error:
-                    raise Exception
+                eqpt = {
+                    'id': int(id_equip),
+                    'name': name,
+                    'maintenance': bool(maintenance),
+                    'equipment_type': int(type_equipment),
+                    'model': int(model),
+                    'environments': environments,
+                    'groups': groups,
+                    'sdn_controlled_environment': sdn_envs
+                }
+                client.create_api_v4_equipment().update([eqpt])
 
                 messages.add_message(
-                    request, messages.SUCCESS, equip_messages.get("equip_edit_sucess"))
+                    request, messages.SUCCESS, equip_messages.get('equip_edit_sucess'))
 
-                return redirect("equipment.search.list")
+                return redirect('equipment.search.list')
 
             # form invalid
             else:
@@ -765,27 +691,36 @@ def equip_edit(request, id_equip):
 
                 lists = list_ips_edit_equip(lists, id_equip, client)
 
-                for group in groups:
+                for group in equip.get('groups'):
                     list_groups.append(group['id'])
 
-                if (environments != None):
-                    for environment in environments:
-                        list_environments.append(environment['id'])
+                for environment in equip.get('environments'):
+                    list_environments.append(environment['environment'])
 
-                        if environment['is_router'] == 'True':
-                            roteadores.append(environment['id'])
+                    if environment['is_router'] is True:
+                        roteadores.append(str(environment['environment']))
+
+                for sdn_env in equip.get('sdn_controlled_environment'):
+                    list_sdn_controlled_environments.append(
+                        sdn_env['environment'])
 
                 # Set Form
                 modelos = client.create_modelo().listar_por_marca(
-                    equip.get('id_marca'))
+                    equip.get('model').get('brand').get('id'))
                 forms_aux['modelos'] = modelos.get('model')
 
-                maintenance = False
-                if equip.get('maintenance') == u'True':
-                    maintenance = True
-
-                lists['form'] = EquipForm(forms_aux, initial={"nome": equip.get('nome'), "maintenance": maintenance, "tipo_equipamento": equip.get(
-                    'id_tipo_equipamento'), "marca": equip.get('id_marca'), "modelo": equip.get('id_modelo'), "grupo": list_groups, "ambiente": list_environments})
+                lists['form'] = EquipForm(
+                    forms_aux,
+                    initial={
+                        'nome': equip.get('name'),
+                        'maintenance': equip.get('maintenance'),
+                        'tipo_equipamento': equip.get('equipment_type'),
+                        'marca': equip.get('model').get('brand').get('id'),
+                        'modelo': equip.get('model').get('id'),
+                        'grupo': list_groups,
+                        'ambiente': list_environments,
+                        'sdn_controlled_environment': list_sdn_controlled_environments
+                    })
                 lists['roteadores'] = roteadores
 
             except NetworkAPIClientError, e:
@@ -826,7 +761,7 @@ def list_ips_edit_equip(lists, id_equip, client):
 
 @log
 @login_required
-@has_perm([{"permission": BRAND_MANAGEMENT, "write": True}])
+@has_perm([{'permission': BRAND_MANAGEMENT, 'write': True}])
 def marca_form(request):
 
     lists = dict()
@@ -856,7 +791,7 @@ def marca_form(request):
                 client.create_marca().inserir(nome)
 
                 messages.add_message(
-                    request, messages.SUCCESS, equip_messages.get("marca_sucess"))
+                    request, messages.SUCCESS, equip_messages.get('marca_sucess'))
 
                 return render_to_response(EQUIPMENT_MARCAMODELO_FORM, lists, context_instance=RequestContext(request))
 
@@ -873,7 +808,7 @@ def marca_form(request):
 
 @log
 @login_required
-@has_perm([{"permission": BRAND_MANAGEMENT, "write": True}])
+@has_perm([{'permission': BRAND_MANAGEMENT, 'write': True}])
 def modelo_form(request):
 
     lists = dict()
@@ -902,7 +837,7 @@ def modelo_form(request):
                 client.create_modelo().inserir(marca, nome)
 
                 messages.add_message(
-                    request, messages.SUCCESS, equip_messages.get("modelo_sucess"))
+                    request, messages.SUCCESS, equip_messages.get('modelo_sucess'))
 
                 return render_to_response(EQUIPMENT_MARCAMODELO_FORM, lists, context_instance=RequestContext(request))
 
@@ -919,7 +854,7 @@ def modelo_form(request):
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'write': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def delete_all(request):
 
     if request.method == 'POST':
@@ -938,7 +873,7 @@ def delete_all(request):
             delete_equipments_shared(request, client_equip, ids)
         else:
             messages.add_message(
-                request, messages.ERROR, error_messages.get("select_one"))
+                request, messages.ERROR, error_messages.get('select_one'))
 
     # Redirect to list_all action
     return redirect('equipment.search.list')
@@ -970,31 +905,31 @@ def delete_equipments_shared(request, client_equip, ids):
     # If cant remove nothing
     if len(error_list) == len(ids):
         messages.add_message(
-            request, messages.ERROR, error_messages.get("can_not_remove_all"))
+            request, messages.ERROR, error_messages.get('can_not_remove_all'))
 
     # If cant remove someones
     elif len(error_list) > 0:
-        msg = ""
+        msg = ''
         for id_error in error_list:
-            msg = msg + id_error + ", "
+            msg = msg + id_error + ', '
 
-        msg = error_messages.get("can_not_remove") % msg[:-2]
+        msg = error_messages.get('can_not_remove') % msg[:-2]
 
         messages.add_message(request, messages.WARNING, msg)
 
     # If all has ben removed
-    elif have_errors == False:
+    elif have_errors is False:
         messages.add_message(
-            request, messages.SUCCESS, equip_messages.get("success_remove"))
+            request, messages.SUCCESS, equip_messages.get('success_remove'))
 
     else:
         messages.add_message(
-            request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+            request, messages.SUCCESS, error_messages.get('can_not_remove_error'))
 
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_GROUP_MANAGEMENT, "read": True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'write': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def delete_equipment(request, id_equip):
     """
     Method called from modal of equipment's reals

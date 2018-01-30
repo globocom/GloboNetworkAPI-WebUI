@@ -1,5 +1,4 @@
-virtualenv==15.1.0
 django-pdb==0.5.1
-pdb==0.1
-ipython==5.3.0
 ipdb==0.10.2
+ipython==5.3.0
+virtualenv==15.1.0
