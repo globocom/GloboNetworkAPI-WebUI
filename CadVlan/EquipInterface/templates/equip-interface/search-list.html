@@ -216,7 +216,9 @@ $(document).ready(function() {
 					<th>Interface</th>					
 					<th>Channel</th>
 					<th>Ligação de Front</th>
-					{% ifequal pp "1" %}<th>Ligação de Back</th>{% endifequal %}
+					{% ifequal pp "1" %}
+					<th>Ligação de Back</th>
+					{% endifequal %}
 					<th>Descrição</th>
 					<th>Protegida</th>
 					<th>Tipo</th>
@@ -229,14 +231,62 @@ $(document).ready(function() {
 				<tr>
 					<td class="text_center"><input type="checkbox" name="selection" value="{{ interface.id }}" /></td>
 					<td>{{ interface.interface }}</td>
-					<td>{% ifequal interface.channel None %}{% else %}{% ifequal interface.sw_router None %}{% else %}<a href="{% url equip.interface.edit.channel interface.channel equip_name %}" style="width: 20px; height: 20px;" class="btn_edit_channel">Editar</a>{% endifequal %} {{ interface.channel }}{% endifequal %}</td>
-					<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_front }}</a> {{ interface.nome_ligacao_front }}</td>
-					{% ifequal pp "1" %}<td><a class="btn_equip" href="#" style="color: royalblue;">{{ interface.nome_equip_l_back }}</a> {{ interface.nome_ligacao_back }}</td>{% endifequal %}
-					<td>{% ifequal interface.channel None %}{% else %}{{ interface.descricao }}{% endifequal %}</td>
-					<td>{% ifequal interface.protegida "True" %}Sim{% else %}Não{% endifequal %}</td>
-					<td>{% ifequal interface.tipo None %}{% else %}{{ interface.tipo }}{% endifequal %}</td>
-					<td>{% ifequal interface.vlan None %}{% else %}{{ interface.vlan }}{% endifequal %}</td>
-					<td class="text_center"><a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+					<td>
+						{% ifequal interface.channel None %}
+						{% else %}
+						{% ifequal interface.sw_router None %}
+						{% else %}
+						<a href="{% url equip.interface.edit.channel interface.channel equip_name %}" style="width: 20px; height: 20px;"
+						   class="btn_edit_channel">Editar
+						</a>
+						{% endifequal %}
+							{{ interface.channel }}
+						{% endifequal %}
+					</td>
+					<td>
+						<a class="btn_equip" href="#" style="color: royalblue;">
+							{{ interface.nome_equip_l_front }}
+						</a>
+						{{ interface.nome_ligacao_front }}
+					</td>
+					{% ifequal pp "1" %}
+					<td>
+						<a class="btn_equip" href="#" style="color: royalblue;">
+							{{ interface.nome_equip_l_back }}
+						</a>
+						{{ interface.nome_ligacao_back }}
+					</td>
+					{% endifequal %}
+					<td>
+						{% ifequal interface.channel None %}
+						{% else %}
+							{{ interface.descricao }}
+						{% endifequal %}
+					</td>
+					<td>
+						{% ifequal interface.protegida "True" %}
+							Sim
+						{% else %}
+							Não
+						{% endifequal %}
+					</td>
+					<td>
+						{% ifequal interface.tipo None %}
+						{% else %}
+							{{ interface.tipo }}
+						{% endifequal %}
+					</td>
+					<td>
+						{% ifequal interface.vlan None %}
+						{% else %}
+							{{ interface.vlan }}
+						{% endifequal %}
+					</td>
+					<td class="text_center">
+						<a href="{{ interface.id }}" style="width: 20px; height: 20px;" class="btn_edit">
+							Editar
+						</a>
+					</td>
 				</tr>
 				{% endfor %}
 			</tbody>

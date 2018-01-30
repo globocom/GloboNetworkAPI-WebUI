@@ -584,6 +584,16 @@ input.form-control.bs-autocomplete {
     font-size: 60px;
 }
 
+input.form-control.bs-autocomplete.menor {
+    height: 50px;
+    font-size: 20px;
+}
+
+input.form-control.bs-autocomplete.menor.ui-autocomplete-input  {
+  height: 50px;
+  font-size: 20px;
+}
+
 .input-lg {
   height: 2.5em; }
 
@@ -2228,7 +2238,7 @@ html.is-builder .article .lead:not([data-app-remove-it]) + div .btn {
   box-shadow: 2px 2px 10px rgba(10,10,10,0.3);
 }
 
-.material-icons {
+material-icons {
   font-size: 35px;
   color: #FFFFFF;
 }

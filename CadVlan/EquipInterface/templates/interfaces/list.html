@@ -4,8 +4,7 @@
 .ui-widget-content {
     border: 1px solid #f5f5f5;
     background: #f5f5f5  50% 50% repeat-x;
-    color: #9d9d9d;
-}
+    color: #9d9d9d;}
 .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
     border: 1px solid #FFF2D5;
     background: #FFF2D5 50% 50% repeat-x;
@@ -17,6 +16,10 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
+	$(".btn_equip").live("click", function() {
+		$("#id_equip_name").val($(this).html());
+		$("#search_form").submit();
+	});
 })
 </script>
 {% endblock %}
@@ -27,11 +30,11 @@ $(document).ready(function() {
             <div class="row">
                 <div class="col-xs-12 text-xs-center">
                     <h3 class="mbr-section-title display-2">Interfaces do Equipamento</h3>
-
                 </div>
             </div>
         </div>
     </div>
+    {% if not equip_interface %}
     <div class="mbr-section mbr-section-nopadding">
         <div class="container">
             <div class="row">
@@ -39,20 +42,130 @@ $(document).ready(function() {
                     <form id="search_form" action="{% url interface.list %}">
                         {% csrf_token %}
                         <div class="input-group input-group-lg">
-                            <input autocomplete="off" class="form-control bs-autocomplete" name="search_equipment" data-form-field="dcname"
-                                   id="id_equip_name" placeholder="Nome do equipamento..." autofocus>
+                            <input autocomplete="off" class="form-control bs-autocomplete" name="search_equipment"
+                                   data-form-field="dcname" id="id_equip_name" placeholder="Nome do equipamento..."
+                                   autofocus value="{{ search_form }}">
                             <div class="input-group-btn">
                                 <button class="btn primary" style="background-color:#f5f5f5;border:#9d9d9d;">
                                     <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
                                 </button>
                             </div>
-                            <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
+                            <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif"
+                                 style="display: none;" />
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="mbr-section mbr-section-nopadding">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12">
+                    <form id="search_form" method="post" action="{% url interface.list %}">
+                        {% csrf_token %}
+                        <div class="input-group input-group-sm">
+                            <input autocomplete="off" class="form-control bs-autocomplete menor" name="search_equipment"
+                                   data-form-field="dcname" id="id_equip_name" placeholder="Nome do equipamento..."
+                                   autofocus value="{{ search_form }}">
+                            <div class="input-group-btn">
+                                <button class="btn primary" style="background-color:#f5f5f5;border:#9d9d9d;">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
+                                </button>
+                            </div>
+                            <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif"
+                                 style="display: none;" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row form-group form-control-label">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class="col-xs-12  col-md-12 col-lg-12">
+                            <td class="col-xs-12 col-md-2 text-xs-left"><b>Interface</b></td>
+                            <td class="col-xs-12 col-md-2 text-xs-left"><b>Channel</b></td>
+                            <td class="col-xs-12 col-md-3 text-xs-left"><b>Equipamento-interface ligada</b></td>
+                            <td class="col-xs-12 col-md-1 text-xs-left"><b>Tipo</b></td>
+                            <td class="col-xs-12 col-md-1 text-xs-left"><b>Vlan</b></td>
+                            <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                            <td class="col-xs-12 col-md-1 text-xs-left">
+                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                   href="{% url equip.interface.form search_form %}" title="Adicionar Interface">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">add</i>
+                                </a>
+                            </td>
+                            <td class="col-xs-12 col-md-1 text-xs-left">
+                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                   href="{% url equip.interface.several.form search_form %}" title="Adicionar Vários">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">add</i>
+                                </a>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for interface in equip_interface %}
+                        <tr class="col-xs-12  col-md-12 col-lg-12" id="{{ interface.id }}">
+                            <td class="col-xs-12 col-md-2 text-xs-left">{{ interface.interface }}</td>
+                            <td class="col-xs-12 col-md-2 text-xs-left">
+                                {% ifequal interface.channel None %}
+                                {% else %}
+                                {% ifequal interface.sw_router None %}
+                                {% else %}
+                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                   href="{% url equip.interface.edit.channel interface.channel interface.equipamento_nome %}"
+                                   title="Editar Channel">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
+                                </a>
+                                {% endifequal %}
+                                {{ interface.channel }}
+                                {% endifequal %}
+                            </td>
+                            <td class="col-xs-12 col-md-3 text-xs-left" style="padding: 1px 1px">
+                                <a class="btn_equip" href="#" style="color: royalblue;">
+                                    {{ interface.nome_equip_l_front }}
+                                </a>
+                                {{ interface.nome_ligacao_front }}
+                            </td>
+                            <td class="col-xs-12 col-md-1 text-xs-left" style="padding: 1px 1px">
+                                {% ifequal interface.tipo None %}
+                                {% else %}
+                                    {{ interface.tipo }}
+                                {% endifequal %}
+                            </td>
+                            <td class="col-xs-12 col-md-1 text-xs-left" style="padding: 1px 1px">
+                                {% ifequal interface.vlan None %}
+                                {% else %}
+                                    {{ interface.vlan }}
+                                {% endifequal %}
+                            </td>
+                            <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                            <td class="col-xs-12 col-md-1 text-xs-left" style="padding: 1px 1px">
+                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                   href="{% url equip.interface.edit.form interface.equipamento_nome interface.id %}"
+                                   title="Editar Interface">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
+                                </a>
+                            </td>
+                            <td class="col-xs-12 col-md-1 text-xs-left" style="padding: 1px 1px">
+                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                   href="{% url equip.interface.edit.form interface.equipamento_nome interface.id %}"
+                                   title="Remover Interface">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}
 

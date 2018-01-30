@@ -24,6 +24,7 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 
 from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.settings import PATCH_PANEL_ID
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
@@ -37,8 +38,6 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 def list_equipment_interfaces(request):
-    # get: buscar equipamento
-
     try:
 
         auth = AuthSession(request.session)
@@ -54,7 +53,15 @@ def list_equipment_interfaces(request):
                 equipment = client.create_equipamento().listar_por_nome(search_form)['equipamento']
                 init_map = {'equip_name': equipment['nome'], 'equip_id': equipment['id']}
 
+                equip_interface_list = client.create_interface().list_all_by_equip(equipment['id'])
+
                 lists['search_form'] = search_form
+
+                if equip_interface_list.has_key('interfaces'):
+                    lists['equip_interface'] = equip_interface_list['interfaces']
+                if equipment['id_tipo_equipamento'] == str(PATCH_PANEL_ID):
+                    lists['pp'] = "1"
+
         return render_to_response(LIST_EQUIPMENT_INTERFACES, lists, RequestContext(request))
 
     except NetworkAPIClientError, e:
