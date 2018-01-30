@@ -275,7 +275,6 @@ def ajax_list_equips(request):
 
         # If form was submited
         if request.method == 'GET':
-
             # Get user auth
             auth = AuthSession(request.session)
             client = auth.get_clientFactory()
@@ -330,7 +329,7 @@ def ajax_list_equips(request):
                 equips = client.create_equipamento().find_equips(
                     name, iexact, environment, equip_type, group, ip, pag)
 
-                if 'equipamento' in equips:
+                if 'equipamento' not in equips:
                     equips['equipamento'] = []
 
                 # Returns JSON
