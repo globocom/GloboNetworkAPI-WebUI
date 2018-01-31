@@ -72,8 +72,12 @@ $(document).ready(function() {
                             <input autocomplete="off" class="form-control bs-autocomplete menor" name="search_equipment"
                                    data-form-field="dcname" id="id_equip_name" placeholder="Nome do equipamento..."
                                    autofocus value="{{ search_form }}">
+                            <span class="input-group-addon">
+                                <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif"
+                                 style="display: none;"/>
+                            </span>
                             <div class="input-group-btn">
-                                <button class="btn primary" style="background-color:#f5f5f5;margin:0px;height:60px;">
+                                <button class="btn primary" style="background-color:#f5f5f5;margin:0px;height:50px;">
                                     <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
                                 </button>
                             </div>
@@ -85,18 +89,18 @@ $(document).ready(function() {
             </div>
         </div>
     </div>
+    <br>
     <div class="container">
-        <div class="row form-group form-control-label">
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr class="col-xs-12  col-md-12 col-lg-12">
                             <td class="col-xs-12 col-md-2 text-xs-left"><b>Interface</b></td>
                             <td class="col-xs-12 col-md-2 text-xs-left"><b>Channel</b></td>
-                            <td class="col-xs-12 col-md-3 text-xs-left"><b>Equipamento-interface ligada</b></td>
+                            <td class="col-xs-12 col-md-2 text-xs-left"><b>Ligacao Front</b></td>
+                            <td class="col-xs-12 col-md-2 text-xs-left"><b>Ligacao Back</b></td>
                             <td class="col-xs-12 col-md-1 text-xs-left"><b>Tipo</b></td>
                             <td class="col-xs-12 col-md-1 text-xs-left"><b>Vlan</b></td>
-                            <td class="col-xs-12 col-md-1 text-xs-left"></td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                                    href="{% url equip.interface.form search_form %}" title="Adicionar Interface">
@@ -131,33 +135,40 @@ $(document).ready(function() {
                                     {{ interface.channel }}
                                 {% endifequal %}
                             </td>
-                            <td class="col-xs-12 col-md-3 text-xs-left" style="padding: 1px 1px">
+                            <td class="col-xs-12 col-md-2 text-xs-left">
                                 <a class="btn_equip" href="#" style="color: royalblue;">
                                     {{ interface.nome_equip_l_front }}
                                 </a>
                                 {{ interface.nome_ligacao_front }}
                             </td>
-                            <td class="col-xs-12 col-md-1 text-xs-left" style="padding: 1px 1px">
+                            <td class="col-xs-12 col-md-2 text-xs-left">
+                                {% ifequal pp "1" %}
+                                    <a class="btn_equip" href="#" style="color: royalblue;">
+                                        {{ interface.nome_equip_l_back }}
+                                    </a>
+                                    {{ interface.nome_ligacao_back }}
+                                {% endifequal %}
+                            </td>
+                            <td class="col-xs-12 col-md-1 text-xs-left">
                                 {% ifequal interface.tipo None %}
                                 {% else %}
                                     {{ interface.tipo }}
                                 {% endifequal %}
                             </td>
-                            <td class="col-xs-12 col-md-1 text-xs-left" style="padding: 1px 1px">
+                            <td class="col-xs-12 col-md-1 text-xs-left">
                                 {% ifequal interface.vlan None %}
                                 {% else %}
                                     {{ interface.vlan }}
                                 {% endifequal %}
                             </td>
-                            <td class="col-xs-12 col-md-1 text-xs-left"></td>
-                            <td class="col-xs-12 col-md-1 text-xs-left" style="padding: 1px 1px">
+                            <td class="col-xs-12 col-md-1 text-xs-left">
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                                    href="{% url equip.interface.edit.form interface.equipamento_nome interface.id %}"
                                    title="Editar Interface">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
                                 </a>
                             </td>
-                            <td class="col-xs-12 col-md-1 text-xs-left" style="padding: 1px 1px">
+                            <td class="col-xs-12 col-md-1 text-xs-left">
                                 {% ifequal interface.channel None %}
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                                    href="{% url equip.interface.edit.form interface.equipamento_nome interface.id %}"
@@ -178,7 +189,6 @@ $(document).ready(function() {
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
         </div>
     {% endif %}
 </section>
