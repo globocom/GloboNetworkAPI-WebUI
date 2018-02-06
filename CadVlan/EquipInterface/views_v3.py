@@ -38,33 +38,61 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 def list_equipment_interfaces(request):
+
+    lists = dict()
+    interface_list = list()
+
     try:
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-
-        lists = dict()
 
         if request.method == "GET":
 
             if request.GET.__contains__('search_equipment'):
 
                 search_form = request.GET.get('search_equipment')
-                equipment = client.create_equipamento().listar_por_nome(search_form)['equipamento']
-                init_map = {'equip_name': equipment['nome'], 'equip_id': equipment['id']}
 
-                equip_interface_list = client.create_interface().list_all_by_equip(equipment['id'])
+                data = dict()
+                data["start_record"] = 0
+                data["end_record"] = 25
+                data["asorting_cols"] = []
+                data["searchable_columns"] = ["nome"]
+                data["custom_search"] = search_form
+                data["extends_search"] = []
 
+                search_equipment = client.create_api_equipment().search(fields=['id','name'],
+                                                                        search=data)
+
+                equipments = search_equipment.get('equipments')
+
+                if not equipments:
+                    raise Exception ("Equipment Does Not Exist.")
+
+                if len(equipments)==1:
+                    data["searchable_columns"] = ["equipamento__id"]
+                    data["custom_search"] = equipments[0].get('id')
+                    search_interface = client.create_api_interface_request().search(fields=['id',
+                                                                                          'interface',
+                                                                                          'equipamento__basic',
+                                                                                          'native_vlan',
+                                                                                          'tipo__details',
+                                                                                          'channel__basic',
+                                                                                          'ligacao_front__basic',
+                                                                                          'ligacao_back__basic'],
+                                                                                  search=data)
+                    interface_list = search_interface.get('interfaces')
+
+                lists['equip_interface'] = interface_list
                 lists['search_form'] = search_form
-
-                if equip_interface_list.has_key('interfaces'):
-                    lists['equip_interface'] = equip_interface_list['interfaces']
-                if equipment['id_tipo_equipamento'] == str(PATCH_PANEL_ID):
-                    lists['pp'] = "1"
 
         return render_to_response(LIST_EQUIPMENT_INTERFACES, lists, RequestContext(request))
 
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return redirect('home')
+        return render_to_response(LIST_EQUIPMENT_INTERFACES, lists, RequestContext(request))
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return render_to_response(LIST_EQUIPMENT_INTERFACES, lists, RequestContext(request))

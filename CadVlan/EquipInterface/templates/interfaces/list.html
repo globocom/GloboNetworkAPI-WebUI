@@ -1,28 +1,33 @@
 {% extends "menu.html" %}
+
 {% block header %}
+
 <style>
-.ui-widget-content {
-    border: 1px solid #f5f5f5;
-    background: #f5f5f5  50% 50% repeat-x;
-    color: #9d9d9d;}
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
-    border: 1px solid #FFF2D5;
-    background: #FFF2D5 50% 50% repeat-x;
-    font-weight: bold; color: #9d9d9d;}
-.ui-state-hover a, .ui-state-hover a:hover {
-    color: #9d9d9d;
-    text-decoration: none; }
+    .ui-widget-content {
+        border: 1px solid #f5f5f5;
+        background: #f5f5f5  50% 50% repeat-x;
+        color: #9d9d9d;}
+    .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+        border: 1px solid #FFF2D5;
+        background: #FFF2D5 50% 50% repeat-x;
+        font-weight: bold; color: #9d9d9d;}
+    .ui-state-hover a, .ui-state-hover a:hover {
+        color: #9d9d9d;
+        text-decoration: none; }
 </style>
+
 <script type="text/javascript">
-$(document).ready(function() {
-	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
-	$(".btn_equip").on("click", function() {
-		$("#id_equip_name").val($(this).html());
-		$("#search_form").submit();
-	});
-})
+    $(document).ready(function() {
+        autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
+        $(".btn_equip").on("click", function() {
+            $("#id_equip_name").val($(this).html());
+            $("#search_form").submit();
+        });
+    })
 </script>
+
 {% endblock %}
+
 {% block content %}
 <section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
     <div class="mbr-section mbr-section__container mbr-section__container--middle">
@@ -54,8 +59,12 @@ $(document).ready(function() {
                                     <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
                                 </button>
                             </div>
-
                         </div>
+                        <p id="error">
+                            {% for error in field.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        </p>
                     </form>
                 </div>
             </div>
@@ -95,10 +104,10 @@ $(document).ready(function() {
                 <table class="table table-hover">
                     <thead>
                         <tr class="col-xs-12  col-md-12 col-lg-12">
-                            <td class="col-xs-12 col-md-2 text-xs-left"><b>Interface</b></td>
-                            <td class="col-xs-12 col-md-2 text-xs-left"><b>Channel</b></td>
-                            <td class="col-xs-12 col-md-2 text-xs-left"><b>Ligacao Front</b></td>
-                            <td class="col-xs-12 col-md-2 text-xs-left"><b>Ligacao Back</b></td>
+                            <td class="col-xs-12 col-md-1 text-xs-left"><b>Interface</b></td>
+                            <td class="col-xs-12 col-md-1 text-xs-left"><b>Channel</b></td>
+                            <td class="col-xs-12 col-md-3 text-xs-left"><b>Ligacao Front</b></td>
+                            <td class="col-xs-12 col-md-3 text-xs-left"><b>Ligacao Back</b></td>
                             <td class="col-xs-12 col-md-1 text-xs-left"><b>Tipo</b></td>
                             <td class="col-xs-12 col-md-1 text-xs-left"><b>Vlan</b></td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
@@ -120,58 +129,52 @@ $(document).ready(function() {
                     <tbody>
                         {% for interface in equip_interface %}
                         <tr class="col-xs-12  col-md-12 col-lg-12" id="{{ interface.id }}">
-                            <td class="col-xs-12 col-md-2 text-xs-left">{{ interface.interface }}</td>
-                            <td class="col-xs-12 col-md-2 text-xs-left">
-                                {% ifequal interface.channel None %}
-                                {% else %}
-                                    {% ifequal interface.sw_router None %}
-                                    {% else %}
+                            <td class="col-xs-12 col-md-1 text-xs-left">{{ interface.interface }}</td>
+                            <td class="col-xs-12 col-md-1 text-xs-left">
+                                {% if interface.channel %}
                                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                       href="{% url equip.interface.edit.channel interface.channel interface.equipamento_nome %}"
+                                       href="{% url equip.interface.edit.channel interface.channel.name interface.equipamento.name %}"
                                        title="Editar Channel">
                                         <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
                                     </a>
-                                    {% endifequal %}
-                                    {{ interface.channel }}
-                                {% endifequal %}
+                                    {{ interface.channel.name }}
+                                {% endif %}
                             </td>
-                            <td class="col-xs-12 col-md-2 text-xs-left">
-                                <a class="btn_equip" href="#" style="color: royalblue;">
-                                    {{ interface.nome_equip_l_front }}
-                                </a>
-                                {{ interface.nome_ligacao_front }}
-                            </td>
-                            <td class="col-xs-12 col-md-2 text-xs-left">
-                                {% ifequal pp "1" %}
+                            <td class="col-xs-12 col-md-3 text-xs-left">
+                                {% if interface.ligacao_front %}
                                     <a class="btn_equip" href="#" style="color: royalblue;">
-                                        {{ interface.nome_equip_l_back }}
+                                        {{ interface.ligacao_front.equipamento.name }}
                                     </a>
-                                    {{ interface.nome_ligacao_back }}
-                                {% endifequal %}
+                                    {{ interface.ligacao_front.interface }}
+                                {% endif %}
+                            </td>
+                            <td class="col-xs-12 col-md-3 text-xs-left">
+                                {% if interface.ligacao_back %}
+                                    <a class="btn_equip" href="#" style="color: royalblue;">
+                                        {{ interface.ligacao_back.equipamento.name }}
+                                    </a>
+                                    {{ interface.ligacao_back.interface }}
+                                {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% ifequal interface.tipo None %}
-                                {% else %}
-                                    {{ interface.tipo }}
-                                {% endifequal %}
+                                {% if interface.tipo %}
+                                    {{ interface.tipo.type }}
+                                {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% ifequal interface.vlan None %}
-                                {% else %}
-                                    {{ interface.vlan }}
-                                {% endifequal %}
+                                {{ interface.native_vlan }}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.edit.form interface.equipamento_nome interface.id %}"
+                                   href="{% url equip.interface.edit.form interface.equipamento.name interface.id %}"
                                    title="Editar Interface">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
                                 </a>
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% ifequal interface.channel None %}
+                                {% if not interface.channel %}
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.edit.form interface.equipamento_nome interface.id %}"
+                                   href="{% url equip.interface.edit.form interface.equipamento.name interface.id %}"
                                    title="Remover Interface">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
                                         delete_forever
@@ -179,11 +182,11 @@ $(document).ready(function() {
                                 </a>
                                 {% else %}
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.edit.form interface.equipamento_nome interface.id %}"
+                                   href="{% url equip.interface.edit.form interface.equipamento.name interface.id %}"
                                    title="Remover Channel">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
                                 </a>
-                                {% endifequal %}
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
