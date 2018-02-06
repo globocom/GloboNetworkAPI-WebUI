@@ -90,9 +90,12 @@
                                     <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
                                 </button>
                             </div>
-                            <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif"
-                                 style="display: none;" />
                         </div>
+                        <p id="error">
+                            {% for error in field.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        </p>
                     </form>
                 </div>
             </div>
@@ -174,7 +177,7 @@
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 {% if not interface.channel %}
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.edit.form interface.equipamento.name interface.id %}"
+                                   href="{% url interface.delete interface.id %}"
                                    title="Remover Interface">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
                                         delete_forever
@@ -182,7 +185,7 @@
                                 </a>
                                 {% else %}
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.edit.form interface.equipamento.name interface.id %}"
+                                   href="{% url channel.delete interface.id %}"
                                    title="Remover Channel">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
                                 </a>

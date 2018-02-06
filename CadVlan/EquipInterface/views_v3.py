@@ -19,12 +19,15 @@
 import logging
 
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from CadVlan.Util.Decorators import has_perm
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.settings import PATCH_PANEL_ID
+from CadVlan.messages import error_messages, equip_interface_messages
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
@@ -37,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 @log
 @login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
 def list_equipment_interfaces(request):
 
     lists = dict()
@@ -61,7 +65,8 @@ def list_equipment_interfaces(request):
                 data["custom_search"] = search_form
                 data["extends_search"] = []
 
-                search_equipment = client.create_api_equipment().search(fields=['id','name'],
+                search_equipment = client.create_api_equipment().search(fields=['id',
+                                                                                'name'],
                                                                         search=data)
 
                 equipments = search_equipment.get('equipments')
@@ -73,14 +78,14 @@ def list_equipment_interfaces(request):
                     data["searchable_columns"] = ["equipamento__id"]
                     data["custom_search"] = equipments[0].get('id')
                     search_interface = client.create_api_interface_request().search(fields=['id',
-                                                                                          'interface',
-                                                                                          'equipamento__basic',
-                                                                                          'native_vlan',
-                                                                                          'tipo__details',
-                                                                                          'channel__basic',
-                                                                                          'ligacao_front__basic',
-                                                                                          'ligacao_back__basic'],
-                                                                                  search=data)
+                                                                                            'interface',
+                                                                                            'equipamento__basic',
+                                                                                            'native_vlan',
+                                                                                            'tipo__details',
+                                                                                            'channel__basic',
+                                                                                            'ligacao_front__basic',
+                                                                                            'ligacao_back__basic'],
+                                                                                    search=data)
                     interface_list = search_interface.get('interfaces')
 
                 lists['equip_interface'] = interface_list
@@ -96,3 +101,56 @@ def list_equipment_interfaces(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return render_to_response(LIST_EQUIPMENT_INTERFACES, lists, RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def delete_interface (request, interface_id=None):
+
+    auth = AuthSession(request.session)
+    equip_interface = auth.get_clientFactory().create_interface()
+
+    try:
+
+        equip_interface.remover(interface_id)
+        messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_remove"))
+
+    except NetworkAPIClientError, e:
+        message = str(error_messages.get("can_not_remove_error")) + " " + str(e)
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, message)
+    except ValueError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def delete_channel (request, interface_id=None):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    try:
+        client.create_interface().delete_channel(interface_id)
+        messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_remove_channel"))
+
+    except ValueError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        message = str(error_messages.get("can_not_remove_error")) + " " + str(e)
+        messages.add_message(request, messages.ERROR, message)
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
