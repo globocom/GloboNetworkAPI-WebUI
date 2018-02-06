@@ -127,8 +127,8 @@ def delete_interface (request, interface_id=None):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
+    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+    return HttpResponseRedirect(url)
 
 @log
 @login_required
@@ -153,4 +153,5 @@ def delete_channel (request, interface_id=None):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+    return HttpResponseRedirect(url)
