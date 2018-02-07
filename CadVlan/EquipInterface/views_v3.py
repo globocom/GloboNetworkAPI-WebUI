@@ -60,7 +60,7 @@ def list_equipment_interfaces(request):
                 data = dict()
                 data["start_record"] = 0
                 data["end_record"] = 25
-                data["asorting_cols"] = []
+                data["asorting_cols"] = ["id"]
                 data["searchable_columns"] = ["nome"]
                 data["custom_search"] = search_form
                 data["extends_search"] = []
