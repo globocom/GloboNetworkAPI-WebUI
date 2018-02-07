@@ -116,7 +116,7 @@ $(document).ready(function() {
     </div>
 
     <div style="float: left; width: 160px; line-height: 190px;">
-        <a href="{% url equip.interface.search.list %}?equip_name={{ form.equip_name.value }}">
+        <a href="{% url interface.list %}?search_equipment={{ form.equip_name.value }}">
             {{ form.equip_name.value }}
         </a>
     </div>

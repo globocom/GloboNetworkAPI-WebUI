@@ -104,7 +104,7 @@ $(document).ready(function() {
 		});	
 	
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
-		location.href = "{% url equip.interface.search.list %}?equip_name={{ equip_name }}";
+		location.href = "{% url interface.list %}?search_equipment={{ equip_name }}";
 	});	
 	
 	
@@ -188,7 +188,7 @@ $(document).ready(function() {
 		</div>
 	</form>
 	<img src="{{ MEDIA_URL }}/img/{% ifequal equipment.id_tipo_equipamento '8' %}patch{% else %}serv{% endifequal %}.png" style="height: {% ifequal equipment.id_tipo_equipamento '8' %}28{% else %}74{% endifequal %}px; float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}40{% else %}0{% endifequal %}px; margin-left: 10px;" />
-	<a style="float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}45{% else %}25{% endifequal %}px; margin-left: 10px;" href="{% url equip.interface.search.list %}?equip_name={{ connect_form.equip_name.value }}">{{ connect_form.equip_name.value }}</a>
+	<a style="float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}45{% else %}25{% endifequal %}px; margin-left: 10px;" href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">{{ connect_form.equip_name.value }}</a>
 	<div style="clear: left;"></div>
 	</div>{% else %}<form id="search_form" action="{% url equip.interface.connect id_interface front_or_back %}">
 		{% for field in search_form %}{{ field }}{% endfor %}

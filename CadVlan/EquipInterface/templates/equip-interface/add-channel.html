@@ -57,7 +57,7 @@ $(document).ready(function() {
     });
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
-		location.href = "{% url equip.interface.search.list %}";
+		location.href = "{% url interface.list %}";
 	});
 
 	$("#ambiente").hide();

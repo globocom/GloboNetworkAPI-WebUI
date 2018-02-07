@@ -194,9 +194,9 @@ def delete_all(request):
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
-    url_param = reverse("equip.interface.search.list")
+    url_param = reverse("interface.list")
     if len(equip_nam) > 2:
-        url_param = url_param + "?equip_name=" + equip_nam
+        url_param = url_param + "?search_equipment=" + equip_nam
     return HttpResponseRedirect(url_param)
 
 @log
@@ -241,9 +241,9 @@ def channel_delete(request):
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
 
     # Redirect to list_all action
-    url_param = reverse("equip.interface.search.list")
+    url_param = reverse("interface.list")
     if len(equip_nam) > 2:
-        url_param = url_param + "?equip_name=" + equip_nam
+        url_param = url_param + "?search_equipment=" + equip_nam
     return HttpResponseRedirect(url_param)
 
 
@@ -263,7 +263,7 @@ def add_form(request, equip_name=None):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return redirect('equip.interface.search.list')
+        return redirect('interface.list')
 
     equip = equip.get('equipamento')
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
@@ -320,9 +320,9 @@ def add_form(request, equip_name=None):
                         client.create_interface().associar_ambiente(env, id_int['id'])
                     messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_associando_amb"))
 
-                url_param = reverse("equip.interface.search.list")
+                url_param = reverse("interface.list")
                 if len(equip_name) > 2:
-                    url_param = url_param + "?equip_name=" + equip_name
+                    url_param = url_param + "?search_equipment=" + equip_name
 
                 return HttpResponseRedirect(url_param)
             else:
@@ -354,7 +354,7 @@ def add_several_forms(request, equip_name):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return redirect('equip.interface.search.list')
+        return redirect('interface.list')
 
     equip = equip.get('equipamento')
 
@@ -375,9 +375,9 @@ def add_several_forms(request, equip_name):
         # Redirect to list_all action
         messages.add_message(
             request, messages.ERROR, equip_interface_messages.get("brand_error"))
-        url_param = reverse("equip.interface.search.list")
+        url_param = reverse("interface.list")
         if len(equip_name) > 2:
-            url_param = url_param + "?equip_name=" + equip_name
+            url_param = url_param + "?search_equipment=" + equip_name
         return HttpResponseRedirect(url_param)
 
     if request.method == 'POST':
@@ -468,16 +468,16 @@ def add_several_forms(request, equip_name):
                 if cont == goodCont:
                     messages.add_message(
                         request, messages.SUCCESS, equip_interface_messages.get("several_sucess"))
-                    url_param = reverse("equip.interface.search.list")
+                    url_param = reverse("interface.list")
                     if len(equip_name) > 2:
-                        url_param = url_param + "?equip_name=" + equip_name
+                        url_param = url_param + "?search_equipment=" + equip_name
                     return HttpResponseRedirect(url_param)
                 elif goodCont > 0 and evilCont > 0:
-                    url_param = reverse("equip.interface.search.list")
+                    url_param = reverse("interface.list")
                     messages.add_message(request, messages.WARNING, equip_interface_messages.get(
                         "several_warning") % (msg_erro))
                     if len(equip_name) > 2:
-                        url_param = url_param + "?equip_name=" + equip_name
+                        url_param = url_param + "?search_equipment=" + equip_name
                     return HttpResponseRedirect(url_param)
                 else:
 
@@ -543,9 +543,9 @@ def edit_form(request, equip_name, id_interface):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         # Redirect to list_all action with the equipment selected
-        url_param = reverse("equip.interface.search.list")
+        url_param = reverse("interface.list")
         if len(equip_name) > 2:
-            url_param = url_param + "?equip_name=" + equip_name
+            url_param = url_param + "?search_equipment=" + equip_name
         return HttpResponseRedirect(url_param)
 
     initials, params, equip_types, up, down, front_or_back = make_initials_and_params(related_list, int_type_list)
@@ -576,7 +576,7 @@ def edit(request, id_interface):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return redirect('equip.interface.search.list')
+        return redirect('interface.list')
 
     lig_front = interface.get('ligacao_front')
     lig_back = interface.get('ligacao_back')
@@ -589,7 +589,7 @@ def edit(request, id_interface):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return redirect('equip.interface.search.list')
+        return redirect('interface.list')
 
     equip = equip.get('equipamento')
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
@@ -889,9 +889,9 @@ def channel(request):
             return HttpResponseRedirect(url_param)
         else:
             messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
-            url_param = reverse("equip.interface.search.list")
+            url_param = reverse("interface.list")
             if len(equip_nam) > 2:
-                url_param = url_param + "?equip_name=" + equip_nam
+                url_param = url_param + "?search_equipment=" + equip_nam
             return HttpResponseRedirect(url_param)
 
     return redirect("home")
@@ -931,11 +931,11 @@ def add_channel(request, equip_name=None):
                         interface = interface.get('interface')
                     except:
                         messages.add_message(request, messages.ERROR, u'Interface %s não encontrada.' % var)
-                        return redirect('equip.interface.search.list')
+                        return redirect('interface.list')
 
                     if interface['channel'] is not None:
                         messages.add_message(request, messages.ERROR, u'Interface %s já está associada ao channel %s.' % (interface['interface'],interface['channel']))
-                        return redirect('equip.interface.search.list')
+                        return redirect('interface.list')
 
             try:
                 interface = interface['id_ligacao_front']
@@ -943,7 +943,7 @@ def add_channel(request, equip_name=None):
                 interface = interface.get('interface')
             except:
                 messages.add_message(request, messages.ERROR, u'Interface não conectada')
-                return redirect('equip.interface.search.list')
+                return redirect('interface.list')
 
             tipo = interface['tipo']
             if "access" in tipo:
@@ -1007,9 +1007,9 @@ def add_channel(request, equip_name=None):
                     messages.add_message(request, messages.ERROR, e)
                     return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
 
-                url_param = reverse("equip.interface.search.list")
+                url_param = reverse("interface.list")
                 if len(equip_nam) > 2:
-                    url_param = url_param + "?equip_name=" + equip_nam
+                    url_param = url_param + "?search_equipment=" + equip_nam
                 return HttpResponseRedirect(url_param)
 
     except NetworkAPIClientError, e:
@@ -1204,7 +1204,7 @@ def config_sync_all(request, equip_name, is_channel, ids):
 
 
     # Redirect to list_all action
-    url_param = reverse("equip.interface.search.list")
+    url_param = reverse("interface.list")
     if len(equip_nam) > 2:
-        url_param = url_param + "?equip_name=" + equip_nam
+        url_param = url_param + "?search_equipment=" + equip_nam
     return HttpResponseRedirect(url_param)

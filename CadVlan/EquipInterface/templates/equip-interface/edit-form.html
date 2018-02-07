@@ -170,7 +170,7 @@ $(document).ready(function() {
 	$("#page_tab").tabs();
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function() {
-		location.href = "{% url equip.interface.search.list %}?equip_name={{ equip_name }}";
+		location.href = "{% url interface.list %}?search_equipment={{ equip_name }}";
 	});
 	
 	$(".btn_close").button(

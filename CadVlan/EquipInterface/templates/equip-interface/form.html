@@ -160,9 +160,9 @@ $(document).ready(function() {
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
 		equip = $("#id_equip_name").val();
 		if (!isBlank(equip)) {
-			location.href = "{% url equip.interface.search.list %}?equip_name=" + equip;
+			location.href = "{% url interface.list %}?search_equipment=" + equip;
 		} else {
-			location.href = "{% url equip.interface.search.list %}";
+			location.href = "{% url interface.list %}";
 		}
 	});
 

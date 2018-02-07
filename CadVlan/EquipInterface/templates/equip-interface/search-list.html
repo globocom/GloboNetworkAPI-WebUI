@@ -141,7 +141,7 @@ $(document).ready(function() {
 		<div id="accordion">
 			<h3><a href="#">Equipamento</a></h3>
 			<div>
-				<form id="search_form" method="get" action="{% url equip.interface.search.list %}">
+				<form id="search_form" method="get" action="{% url interface.list %}">
 				{% csrf_token %}
 				{% for field in search_form %}
 					{{ field }}

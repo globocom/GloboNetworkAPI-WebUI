@@ -193,7 +193,7 @@
 
                             {% has_perm EQUIPMENT_MANAGEMENT None True %}
                             {% if has_perm %}
-                            <li><a href="{% url equip.interface.search.list %}">Interfaces</a></li>
+                            <li><a href="{% url interface.list %}">Interfaces</a></li>
                             {% endif %}
 
                             {% has_perm OPTION_VIP None True %}
