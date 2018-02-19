@@ -136,12 +136,15 @@
                             <td class="col-xs-12 col-md-1 text-xs-left">{{ interface.interface }}</td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 {% if interface.channel %}
-                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                       href="{% url equip.interface.edit.channel interface.channel.name interface.equipamento.name %}"
-                                       title="Editar Channel">
-                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
-                                    </a>
                                     {{ interface.channel.name }}
+                                {% elif  interface.ligacao_front.channel %}
+                                <span style="color:#cacab8">{{ interface.ligacao_front.channel.name }}</span>
+                                {% else %}
+                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                       href="{% url channel.add interface.id %}"
+                                       title="Incluir Channel">
+                                        <i style="color:#FFD17C;font-size:15px;left:50%;">+</i>
+                                    </a>
                                 {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-3 text-xs-left">

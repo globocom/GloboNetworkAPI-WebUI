@@ -137,6 +137,8 @@ urlpatterns += patterns(
         name='interface.delete', ),
     url('^interface/delete/channel/(?P<interface_id>[^/]+)[/]?$', 'delete_channel',
         name='channel.delete', ),
+    url('^interface/add-channel/(?P<interface_id>[^/]+)[/]?$', 'add_channel',
+        name='channel.add', ),
 )
 
 

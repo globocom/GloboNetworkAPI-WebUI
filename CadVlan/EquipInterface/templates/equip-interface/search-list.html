@@ -234,12 +234,12 @@ $(document).ready(function() {
 					<td>
 						{% ifequal interface.channel None %}
 						{% else %}
-						{% ifequal interface.sw_router None %}
-						{% else %}
-						<a href="{% url equip.interface.edit.channel interface.channel equip_name %}" style="width: 20px; height: 20px;"
-						   class="btn_edit_channel">Editar
-						</a>
-						{% endifequal %}
+							{% ifequal interface.sw_router None %}
+							{% else %}
+							<a href="{% url equip.interface.edit.channel interface.channel equip_name %}" style="width: 20px; height: 20px;"
+							   class="btn_edit_channel">Editar
+							</a>
+							{% endifequal %}
 							{{ interface.channel }}
 						{% endifequal %}
 					</td>

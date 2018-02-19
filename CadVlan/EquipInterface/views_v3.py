@@ -136,6 +136,25 @@ def delete_interface (request, interface_id=None):
     url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
     return HttpResponseRedirect(url)
 
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def add_channel(request, interface_id=None):
+
+    ref = request.META.get('HTTP_REFERER').split('=')
+    equipment_name = ref[-1]
+
+    if interface_id:
+        url_param = reverse("equip.interface.add.channel", args=[equipment_name])
+        url_param = url_param + "/?ids=" + interface_id + "?" + equipment_name
+    else:
+        messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+        url_param = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+
+    return HttpResponseRedirect(url_param)
+
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
