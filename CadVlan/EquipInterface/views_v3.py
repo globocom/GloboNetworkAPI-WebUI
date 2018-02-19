@@ -51,6 +51,8 @@ def list_equipment_interfaces(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        interface_flag = False
+
         if request.method == "GET":
 
             if request.GET.__contains__('search_equipment'):
@@ -87,9 +89,13 @@ def list_equipment_interfaces(request):
                                                                                             'ligacao_back__basic'],
                                                                                     search=data)
                     interface_list = search_interface.get('interfaces')
+                    interface_flag = True
+                    if not interface_list:
+                        messages.add_message(request, messages.WARNING, "Equipamento não possui interfaces cadastradas.")
 
                 lists['equip_interface'] = interface_list
                 lists['search_form'] = search_form
+                lists['interface_flag'] = interface_flag
 
         return render_to_response(LIST_EQUIPMENT_INTERFACES, lists, RequestContext(request))
 
