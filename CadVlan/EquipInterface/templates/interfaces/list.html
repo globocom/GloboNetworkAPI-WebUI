@@ -140,11 +140,18 @@
                                 {% elif  interface.ligacao_front.channel %}
                                 <span style="color:#cacab8">{{ interface.ligacao_front.channel.name }}</span>
                                 {% else %}
+                                    {% if interface.ligacao_front %}
                                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                                        href="{% url channel.add interface.id %}"
-                                       title="Incluir Channel">
+                                       title="Incluir Channel" >
                                         <i style="color:#FFD17C;font-size:15px;left:50%;">+</i>
                                     </a>
+                                    {% else %}
+                                    <a class="btn btn-social-bottom-disabled btn-responsive" style="vertical-align: bottom;"
+                                       title="Link a interface antes de adicionar o Channel." >
+                                        <i style="color:#ffe8bd;font-size:15px;left:50%;">+</i>
+                                    </a>
+                                    {% endif %}
                                 {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-3 text-xs-left">

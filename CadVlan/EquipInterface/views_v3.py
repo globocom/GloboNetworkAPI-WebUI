@@ -147,9 +147,9 @@ def add_channel(request, interface_id=None):
 
     if interface_id:
         url_param = reverse("equip.interface.add.channel", args=[equipment_name])
-        url_param = url_param + "/?ids=" + interface_id + "?" + equipment_name
+        url_param = url_param + "/?ids=" + interface_id
     else:
-        messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+        messages.add_message(request, messages.ERROR, "Select an interface.")
         url_param = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
 
     return HttpResponseRedirect(url_param)
