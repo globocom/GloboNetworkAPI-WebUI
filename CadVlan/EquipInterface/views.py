@@ -528,6 +528,7 @@ def edit_form(request, equip_name, id_interface):
         lists['channel'] = interface['channel']
         lists['sw_router'] = interface['sw_router']
         lists['equip_name'] = equip_name
+        lists['channel_id'] = interface['id_channel']
 
         # Get interface types
         int_type_list = client.create_interface().list_all_interface_types()
@@ -1023,28 +1024,29 @@ def add_channel(request, equip_name=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def edit_channel(request, channel_name, equip_name):
+def edit_channel(request, channel_name, equip_name, channel=None):
 
     lists = dict()
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
     lists['channel_name'] = channel_name
+    lists['channel'] = channel
 
     try:
 
         equip = client.create_equipamento().listar_por_nome(str(equip_name))
         equip = equip.get('equipamento')
 
-        equip_interface_list = client.create_interface().list_available_interfaces(channel_name, equip['id'])
+        equip_interface_list = client.create_interface().list_available_interfaces(channel, equip['id'])
 
         try:
             equip_interface_list.get('interface')['id']
             equip_interface_list = equip_interface_list.get('interface')
-            interface = []
+            interface = list()
             interface.append(equip_interface_list)
             equip_interface_list = dict()
-            equip_interface_list['interface'] = interface
+            equip_interface_list['interfaces'] = interface
         except:
             pass
 
