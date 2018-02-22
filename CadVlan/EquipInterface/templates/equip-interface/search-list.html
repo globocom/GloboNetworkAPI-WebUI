@@ -236,7 +236,7 @@ $(document).ready(function() {
 						{% else %}
 						{% ifequal interface.sw_router None %}
 						{% else %}
-						<a href="{% url equip.interface.edit.channel interface.channel equip_name %}" style="width: 20px; height: 20px;"
+						<a href="{% url equip.interface.edit.channel interface.id_channel equip_name interface.channel %}" style="width: 20px; height: 20px;"
 						   class="btn_edit_channel">Editar
 						</a>
 						{% endifequal %}
