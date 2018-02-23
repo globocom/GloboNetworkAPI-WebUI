@@ -525,16 +525,16 @@ def edit_form(request, equip_name, id_interface):
         if interface is None:
             raise InterfaceNaoExisteError("Interface não cadastrada")
 
-        lists['channel'] = interface['channel']
-        lists['sw_router'] = interface['sw_router']
+        lists['channel'] = interface.get('channel')
+        lists['sw_router'] = interface.get('sw_router')
         lists['equip_name'] = equip_name
-        lists['channel_id'] = interface['id_channel']
+        lists['channel_id'] = interface.get('id_channel')
 
         # Get interface types
         int_type_list = client.create_interface().list_all_interface_types()
 
         # Get related interfaces
-        related_list = client.create_interface().list_connections(interface["interface"], equip["id"])
+        related_list = client.create_interface().list_connections(interface.get("interface"), equip.get("id"))
 
         # Join
         related_list = related_list['interfaces']
