@@ -19,6 +19,7 @@ LOGIN = 'login.html'
 HOME = 'home.html'
 
 MENU = 'menu.html'
+HEADER = 'header.html'
 
 VERSION_HTML = 'version.html'
 

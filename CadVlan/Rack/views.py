@@ -25,20 +25,19 @@ from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_protect
 
+from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm, AlocarForm
-from CadVlan.messages import error_messages, rack_messages, environment_messages
+from CadVlan.messages import error_messages, rack_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.Rack.forms import RackForm
-from CadVlan import templates
-from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.Util.git import GITCommandError
-from CadVlan.Util.utility import check_regex, DataTablePaginator, validates_dict
-
 from CadVlan.Util.converters.util import split_to_array
+from CadVlan.Util.Decorators import log, login_required, has_perm
+from CadVlan.Util.utility import check_regex
 
-from networkapiclient.exception import NomeRackDuplicadoError, RackAllreadyConfigError, RacksError, \
-    InvalidParameterError, NetworkAPIClientError, NumeroRackDuplicadoError
+from networkapiclient.exception import RackAllreadyConfigError, RacksError
+from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError
+
 
 logger = logging.getLogger(__name__)
 
@@ -513,9 +512,6 @@ def rack_deploy(request):
 
 
 # ################################################################################   DC
-def menu(request):
-    return render_to_response(MENU, {'form': {}}, context_instance=RequestContext(request))
-
 
 @log
 @login_required

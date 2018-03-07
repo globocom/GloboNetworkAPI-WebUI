@@ -137,10 +137,10 @@
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 {% if interface.channel %}
                                     {{ interface.channel.name }}
-                                {% elif  interface.ligacao_front.channel %}
-                                <span style="color:#cacab8">{{ interface.ligacao_front.channel.name }}</span>
+                                {% elif  interface.front_interface.channel %}
+                                <span style="color:#cacab8">{{ interface.front_interface.channel.name }}</span>
                                 {% else %}
-                                    {% if interface.ligacao_front %}
+                                    {% if interface.front_interface %}
                                     <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                                        href="{% url channel.add interface.id %}"
                                        title="Incluir Channel" >
@@ -155,24 +155,24 @@
                                 {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-3 text-xs-left">
-                                {% if interface.ligacao_front %}
+                                {% if interface.front_interface %}
                                     <a class="btn_equip" href="#" style="color: royalblue;">
-                                        {{ interface.ligacao_front.equipamento.name }}
+                                        {{ interface.front_interface.equipment.name }}
                                     </a>
-                                    {{ interface.ligacao_front.interface }}
+                                    {{ interface.front_interface.interface }}
                                 {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-3 text-xs-left">
-                                {% if interface.ligacao_back %}
+                                {% if interface.back_interface %}
                                     <a class="btn_equip" href="#" style="color: royalblue;">
-                                        {{ interface.ligacao_back.equipamento.name }}
+                                        {{ interface.back_interface.equipment.name }}
                                     </a>
-                                    {{ interface.ligacao_back.interface }}
+                                    {{ interface.back_interface.interface }}
                                 {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% if interface.tipo %}
-                                    {{ interface.tipo.type }}
+                                {% if interface.type %}
+                                    {{ interface.type.type }}
                                 {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
@@ -180,7 +180,7 @@
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.edit.form interface.equipamento.name interface.id %}"
+                                   href="{% url equip.interface.edit.form interface.equipment.name interface.id %}"
                                    title="Editar Interface">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
                                 </a>

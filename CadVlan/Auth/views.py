@@ -131,13 +131,11 @@ def login(request):
 
         return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
 
-
 @log
 def logout(request):
     auth = AuthSession(request.session)
     auth.logout()
     return HttpResponseRedirect(URL_LOGIN)
-
 
 @log
 def handler404(request):
@@ -151,7 +149,6 @@ def handler404(request):
 
     return HttpResponseRedirect(URL_LOGIN)
 
-
 @log
 def handler500(request):
     auth = AuthSession(request.session)
@@ -163,12 +160,10 @@ def handler500(request):
 
     return HttpResponseRedirect(URL_LOGIN)
 
-
 @log
 @login_required
 def home(request):
     return render_to_response(templates.HOME, context_instance=RequestContext(request))
-
 
 @log
 def lost_pass(request):
@@ -255,7 +250,6 @@ def lost_pass(request):
 
     return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
 
-
 @log
 @login_required
 def change_password(request):
@@ -315,3 +309,14 @@ def change_password(request):
 
             lists['change_pass_form'] = change_pass_form
             return render_to_response_ajax(AJAX_NEW_PASS, lists, context_instance=RequestContext(request))
+
+#temporario
+@log
+@login_required
+def menu(request):
+    return render_to_response(templates.MENU, {'form': {}}, context_instance=RequestContext(request))
+
+@log
+@login_required
+def header(request):
+    return render_to_response(templates.HEADER, context_instance=RequestContext(request))

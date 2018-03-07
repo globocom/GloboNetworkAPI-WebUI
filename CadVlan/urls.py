@@ -46,8 +46,9 @@ urlpatterns += patterns(
         name="home.lost.pass",),
     url('^change-pass[/]?$', 'change_password',
         name="home.change.pass",),
+    url('^menu[/]?$', 'menu', name='menu', ),
+    url('^header[/]?$', 'header', name='header', ),
 )
-
 # URL's Script
 urlpatterns += patterns(
     'CadVlan.Script.views',
@@ -767,7 +768,6 @@ urlpatterns += patterns(
     url('^fabric/ambientes/(?P<fabric_id>\d+)[/]?$', 'fabric_ambiente', name='fabric.ambiente',),
     url('^fabric/bgp/(?P<fabric_id>\d+)[/]?$', 'fabric_bgp', name='fabric.bgp',),
     url('^fabric/(?P<fabric_id>\d+)[/]?$', 'fabric', name='fabric',),
-    url('^menu[/]?$', 'menu', name='menu',),
 )
 
 # URL's System
