@@ -85,7 +85,7 @@ EQUIPMENT_INTERFACE_ADD_FORM = 'equip-interface/add-form.html'
 EQUIPMENT_INTERFACE_EDIT = 'equip-interface/edit-port.html'
 EQUIPMENT_INTERFACE_ADD_CHANNEL = 'equip-interface/add-channel.html'
 EQUIPMENT_INTERFACE_EDIT_CHANNEL = 'equip-interface/edit-channel.html'
-EQUIPMENT_INTERFACES = 'equip-interface/equipinterfaces.html'
+EQUIPMENT_INTERFACES = 'equip-interface/equipInterfaces.html'
 
 # Interfaces
 LIST_EQUIPMENT_INTERFACES = 'interfaces/list.html'
