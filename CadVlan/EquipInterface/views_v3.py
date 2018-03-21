@@ -81,12 +81,12 @@ def list_equipment_interfaces(request):
                     data["custom_search"] = equipments[0].get('id')
                     search_interface = client.create_api_interface_request().search(fields=['id',
                                                                                             'interface',
-                                                                                            'equipamento__basic',
+                                                                                            'equipment__basic',
                                                                                             'native_vlan',
-                                                                                            'tipo__details',
+                                                                                            'type__details',
                                                                                             'channel__basic',
-                                                                                            'ligacao_front__basic',
-                                                                                            'ligacao_back__basic'],
+                                                                                            'front_interface__basic',
+                                                                                            'back_interface__basic'],
                                                                                     search=data)
                     interface_list = search_interface.get('interfaces')
                     interface_flag = True
