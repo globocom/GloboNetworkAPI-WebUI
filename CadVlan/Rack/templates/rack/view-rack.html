@@ -134,23 +134,43 @@ $(document).ready(function() {
                         <button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
                         {% has_perm EQUIPMENT_MANAGEMENT True True %}
                         {% if has_perm %}
-                            <button id="btn_new">Novo Rack</button>
+                            <button id="btn_new"
+                                    disabled
+                                    title="Modifições acesse: Listar->DataCenter">
+                                    Novo Rack
+                            </button>
                         {% endif %}
                         {% has_perm EQUIPMENT_MANAGEMENT True True %}
                         {% if has_perm %}
-                            <button id="btn_conf">Gerar Configuracao</button>
+                            <button id="btn_conf"
+                                    disabled
+                                    title="Modifições acesse: Listar->DataCenter">
+                                    Gerar Configuracao
+                            </button>
                         {% endif %}
                         {% has_perm EQUIPMENT_MANAGEMENT True True %}
                         {% if has_perm %}
-                            <button id="btn_alocar">Alocar</button>
+                            <button id="btn_alocar"
+                                    disabled
+                                    title="Modifições acesse: Listar->DataCenter">
+                                    Alocar
+                            </button>
                         {% endif %}
                         {% if has_perm %}
-                            <button id="btn_aplicar">Aplicar</button>
+                            <button id="btn_aplicar"
+                                    disabled
+                                    title="Modifições acesse: Listar->DataCenter">
+                                    Aplicar
+                            </button>
                         {% endif %}
                         <span id="tool">
                         {% has_perm EQUIPMENT_MANAGEMENT True None %}
                         {% if has_perm %}
-                            <button id="btn_del" >Excluir Rack</button>
+                            <button id="btn_del"
+                                    disabled
+                                    title="Modifições acesse: Listar->DataCenter">
+                                    Excluir Rack
+                            </button>
                         {% endif %}
                         </span>
                 </div>
@@ -231,7 +251,7 @@ $(document).ready(function() {
                                         <td class='{% if var.config == "False" %} text_red {% endif %}'>{{ var.mac_ilo }}</td>
                                         <td class='text_center'>{% ifequal var.config 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NAO'></span> {% endifequal %}</td>
                                         <td class='text_center'>{% ifequal var.create_vlan_amb 'True' %} <span class='ui-icon ui-icon-check text_center' title='SIM'></span> {% else %} <span class='ui-icon ui-icon-close text_center' title='NAO'></span> {% endifequal %}</td>
-                                        <td><a href="{% url rack.edit var.id %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
+                                        <td><a title="Modifições acesse: Listar->DataCenter" style="width: 20px; height: 20px;" class="btn_edit">Editar</a></td>
                                 </tr>
                                 {% endfor %}                            
                         </tbody>

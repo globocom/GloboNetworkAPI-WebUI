@@ -23,10 +23,16 @@
             $("#id_equip_name").val($(this).html().trim());
             $("#search_form").submit();
         });
+        $('[data-toggle="tooltip"]').tooltip();
     })
 </script>
+
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" />
+
+<link rel="stylesheet"
+      type="text/css"
+      href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+
 {% endblock %}
 
 {% block content %}
@@ -116,13 +122,17 @@
                             <td class="col-xs-12 col-md-1 text-xs-left"><b>Vlan</b></td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.form search_form %}" title="Adicionar Interface">
+                                   href="{% url equip.interface.form search_form %}"
+                                   data-toggle="tooltip"
+                                   title="Adicionar Interface">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">add</i>
                                 </a>
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.several.form search_form %}" title="Adicionar Vários">
+                                   href="{% url equip.interface.several.form search_form %}"
+                                   data-toggle="tooltip"
+                                   title="Adicionar Vários">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
                                         exposure_plus_2
                                     </i>
@@ -141,13 +151,17 @@
                                 <span style="color:#cacab8">{{ interface.front_interface.channel.name }}</span>
                                 {% else %}
                                     {% if interface.front_interface %}
-                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       data-toggle="tooltip"
                                        href="{% url channel.add interface.id %}"
                                        title="Incluir Channel" >
                                         <i style="color:#FFD17C;font-size:15px;left:50%;">+</i>
                                     </a>
                                     {% else %}
-                                    <a class="btn btn-social-bottom-disabled btn-responsive" style="vertical-align: bottom;"
+                                    <a class="btn btn-social-bottom-disabled btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       data-toggle="tooltip"
                                        title="Link a interface antes de adicionar o Channel." >
                                         <i style="color:#ffe8bd;font-size:15px;left:50%;">+</i>
                                     </a>
@@ -179,24 +193,30 @@
                                 {{ interface.native_vlan }}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
-                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                <a class="btn btn-social-bottom btn-responsive"
+                                   style="vertical-align: bottom;"
                                    href="{% url equip.interface.edit.form interface.equipment.name interface.id %}"
+                                   data-toggle="tooltip"
                                    title="Editar Interface">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
                                 </a>
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 {% if not interface.channel %}
-                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                <a class="btn btn-social-bottom btn-responsive"
+                                   style="vertical-align: bottom;"
                                    href="{% url interface.delete interface.id %}"
+                                   data-toggle="tooltip"
                                    title="Remover Interface">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
                                         delete_forever
                                     </i>
                                 </a>
                                 {% else %}
-                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                <a class="btn btn-social-bottom btn-responsive"
+                                   style="vertical-align: bottom;"
                                    href="{% url channel.delete interface.id %}"
+                                   data-toggle="tooltip"
                                    title="Remover Channel">
                                     <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
                                 </a>
