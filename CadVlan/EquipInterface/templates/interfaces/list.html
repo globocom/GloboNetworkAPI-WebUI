@@ -207,18 +207,18 @@
                                         <a class="btn btn-social-bottom-disabled btn-responsive"
                                            style="vertical-align: bottom;"
                                            data-toggle="tooltip"
-                                           title="Remover Interface">
+                                           title="Interface conectada. Edite antes de excluí-la.">
                                             <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
                                                 delete_forever
                                             </i>
                                         </a>
                                     {% else %}
-                                        <a onclick="javascript:if(confirm('Excluir a interface?')){return true;}"
+                                        <a onclick="javascript:if(!confirm('Excluir a interface?')){return false;}"
                                            class="btn btn-social-bottom btn-responsive"
                                            style="vertical-align: bottom;"
                                            href="{% url interface.delete interface.id %}"
                                            data-toggle="tooltip"
-                                           title="Interface conectada. Edite antes de excluí-la">
+                                           title="Remover Interface">
                                             <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
                                                 delete_forever
                                             </i>
