@@ -1,0 +1,238 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Interface - Cadastro]{% endblock %}
+
+{% block header %}
+<style>
+#fields ul li {
+    list-style: none;
+    display: inline-block;
+}
+
+</style>
+
+<script type="text/javascript">
+var marca_id_store;
+
+function defName(index) {
+	marca_id_store = {{ brand }};
+	if (marca_id_store == 0) {
+		pre_nome = '';
+		n_campos = 6;
+		n_split = ':';
+		exemplo = '00:22:31:3F:A0';
+	} else if (marca_id_store == 2) {
+		pre_nome = 'Int ';
+		n_campos = 1;
+		n_split = '';
+		exemplo = 'Int 12';
+	} else if (marca_id_store == 3) {
+		pre_nome = '';
+		n_campos = 3;
+		n_split = '/';
+		exemplo = 'Serial2/4/4 ou Fa12 ou Gi2/4 ou Eth1/11';
+	} else if (marca_id_store == 4) {
+		pre_nome = 'interface ';
+		n_campos = 2;
+		exemplo = 'interface 2/2.4';
+	} else if (marca_id_store == 5) {
+		pre_nome = 'eth';
+		n_campos = 2;
+		n_split = '/';
+		exemplo = 'eth2/4';
+	} else if (marca_id_store == 8) {
+		pre_nome = '';
+		n_campos = 1;
+		n_split = '';
+		exemplo = '1 ou 4 ou 15';
+	} else {
+		pre_nome = null;
+	}
+
+	if (isBlank($("#id_name").val())) {
+		$("#id_name").focus().val(pre_nome);
+	}
+
+}
+
+function setMask(index) {
+	valor = $("#id_combo").val();
+
+	if (valor == "") {
+		$("#id_name").val("");
+		$("#id_name").attr("readonly", "readonly");
+		pre_nome = null;
+	} else {
+		$("#id_name").focus().val(valor);
+		$("#id_name").removeAttr("readonly");
+		pre_nome = valor;
+	}
+}
+
+function fixName(input, index) {
+
+	aux = $("#id_combo").val();
+
+	if (isBlank(pre_nome) && !isBlank(aux)) {
+		pre_nome = aux;
+	} else if (pre_nome == null) {
+		return;
+	}
+
+	valor = input.value;
+	splitters = 0;
+	valor2 = "";
+
+	for (i = 0; i < (valor.length); i++) {
+
+		if (i < pre_nome.length) {
+			// Prefixo do nome
+			if (!valor.startsWith(pre_nome)) {
+				input.value = pre_nome;
+				return;
+			}
+		} else {
+			// Resto do campo
+			if (isNaN(valor.charAt(i)) || valor.charAt(i)==" ") { //nao é numero
+				if (valor[i] == n_split && splitters<(n_campos-1)) { //é um divisor
+					if ( isNaN(valor[i-1]) && marca_id_store!=0) {
+						for (j=i+1;j<(valor.length);j++) {
+							valor2 += valor[j];
+						}
+						input.value = valor2;
+						return;
+					} else {
+						splitters += 1;
+					}
+				} else {//é um campo
+					if (marca_id_store==0 && valor[i]<='z'){
+						//Caso especial para servidor
+					} else {
+						for (j=i+1;j<(valor.length);j++) {
+							valor2 += valor[j];
+						}
+						input.value = valor2;
+						return;
+					}
+				}
+			}
+		}
+
+		valor2 += valor[i]
+	}
+	return;
+}
+
+if (typeof String.prototype.startsWith != 'function') {
+	String.prototype.startsWith = function (str){
+		return this.slice(0, str.length) == str;
+	};
+}
+
+$(document).ready(function() {
+
+	defName();
+
+	$("#page_tab").tabs();
+
+	$("#btn_sav").button({ icons: {primary: "ui-icon-disk"} }).click(function() {
+		$("#add_form").submit();
+	});
+
+	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
+		equip = $("#id_equip_name").val();
+		if (!isBlank(equip)) {
+			location.href = "{% url interface.list %}?search_equipment=" + equip;
+		} else {
+			location.href = "{% url interface.list %}";
+		}
+	});
+
+    $("#btn_addvlan").button({ icons: {primary: "ui-icon-search"}, text: false });
+
+    $("#btn_addvlan").mouseover(function() {
+            $("#btn_addvlan").attr("title","Pesquisar Vlan");
+    });
+
+	$("textarea").maxlength();
+
+	$("#id_environment").pickList();
+	$(".pickList_addAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-s"}, text: false });
+	$(".pickList_add").button({ icons: {primary: "ui-icon-arrowthick-1-s"}, text: false });
+	$(".pickList_remove").button({ icons: {primary: "ui-icon-arrowthick-1-n"}, text: false });
+	$(".pickList_removeAll").button({ icons: {primary: "ui-icon-arrowthickstop-1-n"}, text: false });
+
+	if ($("#id_type").val() == 0) {
+	    $("#ambiente").hide();
+	};
+
+	$("#id_int_type_0").click( function() {
+		$("#ambiente").hide();
+	});
+
+	$("#id_int_type_1").click( function() {
+		$("#ambiente").show();
+	});
+
+    {% ifequal id None %}
+    {% else %}
+        {% has_perm EQUIPMENT_MANAGEMENT True None %}
+        {% if has_perm %}
+
+        $("#btn_config_sync").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+            if (confirm('Deseja aplicar a configuração na(s) Interface(s) selecionada(s)?')){
+                location.href = "{% url equip.interface.config.sync equip_name 0 id_interface %}";
+            }
+        });
+        {% endif %}
+    {% endifequal %}
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab">
+	<ul>
+		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">{% ifequal id None %}Cadastro de Interfaces{% else %}Editar Interface{% endifequal %}</a></li>
+	</ul>
+	<div id="tabs-1">
+		<div id="fields" class="ui-widget-content">
+            <form id="add_form" method="post" action="{% ifequal id None %}{% url equip.interface.form equip_name %}{% else %}{% url equip.interface.edit id %}{% endifequal %}">
+                <div id="interfaceform">
+                    {% include "equip-interface/add-form.html" %}
+                </div>
+                <div id="ambiente">
+                    {% include "equip-interface/add-env-form-3.html" %}
+                </div>
+            </form>
+			<div style="clear: both;"></div>
+		</div>
+
+		<div class="separator spacer"></div>
+
+		<div class="buttons-l ui-widget-header">
+			<button id="btn_sav" type="submit">Gravar</button>
+			{% ifequal id None %}{% else %}<button id="btn_config_sync">Aplicar</button>{% endifequal %}
+			<button id="btn_can" type="button">Cancelar</button>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -89,6 +89,7 @@ EQUIPMENT_INTERFACES = 'equip-interface/equipInterfaces.html'
 
 # Interfaces
 LIST_EQUIPMENT_INTERFACES = 'interfaces/list.html'
+ADD_EQUIPMENT_INTERFACE = 'interfaces/new_interface.html'
 
 # Equipment
 EQUIPMENT_SEARCH_LIST = 'equipment/search-list.html'

@@ -26,17 +26,134 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.messages import error_messages, equip_interface_messages
+from CadVlan.messages import equip_interface_messages
+from CadVlan.messages import error_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
+from CadVlan.templates import ADD_EQUIPMENT_INTERFACE
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
+
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 
 from networkapiclient.exception import NetworkAPIClientError
 
+from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm
+
 
 logger = logging.getLogger(__name__)
 
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def add_interface(request, equipment=None):
+
+    lists = dict()
+
+    # Get user
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+
+    try:
+        equip = client.create_equipamento().listar_por_nome(str(equipment))
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+        return HttpResponseRedirect(url)
+
+    equip = equip.get('equipamento')
+    brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
+    int_type_list = client.create_interface().list_all_interface_types()
+
+    environment_list = client.create_ambiente().listar_por_equip(equip['id'])
+
+    if environment_list is not None:
+        if environment_list.get('ambiente') is None:
+            environment_list = None
+    try:
+        environment = environment_list.get('ambiente')
+        environment.get('id')
+        ambiente = []
+        ambiente.append(environment)
+        environment_list = dict()
+        environment_list['ambiente'] = ambiente
+    except:
+        pass
+
+    lists['equip_type'] = equip['id_tipo_equipamento']
+    lists['equip_name'] = equip['nome']
+    lists['brand'] = brand
+    lists['int_type'] = int_type_list
+    lists['id'] = None
+
+    if request.method == "GET":
+        lists['form'] = AddInterfaceForm(int_type_list,
+                                         brand,
+                                         0,
+                                         initial={'equip_name': equip['nome'],'equip_id': equip['id']})
+        if environment_list is not None:
+            lists['envform'] = AddEnvInterfaceForm(environment_list)
+
+
+    if request.method == "POST":
+
+        form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
+        if environment_list is not None:
+            envform = AddEnvInterfaceForm(environment_list, request.POST)
+
+        try:
+
+            if form.is_valid():
+
+                name = form.cleaned_data['name']
+                description = form.cleaned_data['description']
+                protected = form.cleaned_data['protected']
+                int_type = form.cleaned_data['int_type']
+                vlan = form.cleaned_data['vlan']
+
+                envs = None
+                if environment_list is not None and envform.is_valid():
+                    envs = envform.cleaned_data['environment']
+
+                trunk = 0
+                if int_type=="0":
+                    int_type = "access"
+                else:
+                    int_type = "trunk"
+                    trunk = 1
+
+                id_int = client.create_interface().inserir(name,
+                                                           protected,
+                                                           description,
+                                                           None,
+                                                           None,
+                                                           equip['id'],
+                                                           int_type,
+                                                           vlan)
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
+
+                id_int = id_int.get("interface")
+
+                if trunk and envs is not None:
+                    for env in envs:
+                        client.create_interface().associar_ambiente(env, id_int['id'])
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         equip_interface_messages.get("success_associando_amb"))
+
+                return HttpResponseRedirect(url)
+            else:
+                lists['form'] = form
+                lists['envform'] = envform
+
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            lists['form'] = form
+            lists['envform'] = envform
+            messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(ADD_EQUIPMENT_INTERFACE, lists, context_instance=RequestContext(request))
 
 @log
 @login_required
