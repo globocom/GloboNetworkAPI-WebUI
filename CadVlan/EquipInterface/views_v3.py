@@ -74,9 +74,9 @@ def list_equipment_interfaces(request):
                 equipments = search_equipment.get('equipments')
 
                 if not equipments:
-                    raise Exception ("Equipment Does Not Exist.")
+                    raise Exception("Equipment Does Not Exist.")
 
-                if len(equipments)==1:
+                if len(equipments) == 1:
                     data["searchable_columns"] = ["equipamento__id"]
                     data["custom_search"] = equipments[0].get('id')
                     search_interface = client.create_api_interface_request().search(fields=['id',
@@ -91,7 +91,9 @@ def list_equipment_interfaces(request):
                     interface_list = search_interface.get('interfaces')
                     interface_flag = True
                     if not interface_list:
-                        messages.add_message(request, messages.WARNING, "Equipamento não possui interfaces cadastradas.")
+                        messages.add_message(request,
+                                             messages.WARNING,
+                                             "Equipamento não possui interfaces cadastradas.")
 
                 lists['equip_interface'] = interface_list
                 lists['search_form'] = search_form
@@ -112,14 +114,13 @@ def list_equipment_interfaces(request):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
-def delete_interface (request, interface_id=None):
+def delete_interface(request, interface_id=None):
 
     auth = AuthSession(request.session)
-    equip_interface = auth.get_clientFactory().create_interface()
+    equip_interface = auth.get_clientFactory().create_api_interface_request()
 
     try:
-
-        equip_interface.remover(interface_id)
+        equip_interface.remove([interface_id])
         messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_remove"))
 
     except NetworkAPIClientError, e:
@@ -158,7 +159,7 @@ def add_channel(request, interface_id=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
-def delete_channel (request, interface_id=None):
+def delete_channel(request, interface_id=None):
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()

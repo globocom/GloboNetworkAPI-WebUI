@@ -1,6 +1,6 @@
 (function($){
 
-	$('a[href*=#]').on('click', function(e) {
+	$('a[href*=\\#]').on('click', function(e) {
 		e.preventDefault();
 		var href_var = $($(this).attr('href'));
 		if (href_var.length) {

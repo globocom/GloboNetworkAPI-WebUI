@@ -18,9 +18,9 @@
 
 import logging
 from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, EQUIPMENT_INTERFACE_ADD_CHANNEL,\
-                              EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, EQUIPMENT_INTERFACE_CONNECT_FORM,\
-                              EQUIPMENT_INTERFACE_EDIT_CHANNEL, EQUIPMENT_INTERFACES
+from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, \
+    EQUIPMENT_INTERFACE_ADD_CHANNEL, EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, \
+    EQUIPMENT_INTERFACE_CONNECT_FORM, EQUIPMENT_INTERFACE_EDIT_CHANNEL, EQUIPMENT_INTERFACES
 from CadVlan.settings import PATCH_PANEL_ID
 from django.shortcuts import render_to_response, redirect, render
 from django.template.context import RequestContext
@@ -29,7 +29,7 @@ from networkapiclient.exception import NetworkAPIClientError, InterfaceNaoExiste
                                        NomeInterfaceDuplicadoParaEquipamentoError
 from django.contrib import messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm, AplicarForm
+from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm
 from CadVlan.Util.converters.util import split_to_array
 from CadVlan.messages import error_messages, equip_interface_messages
 from django.http import HttpResponseRedirect, Http404
@@ -145,7 +145,6 @@ def search_list(request):
 
     return render_to_response(EQUIPMENT_INTERFACE_SEARCH_LIST, lists, context_instance=RequestContext(request))
 
-
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
@@ -246,7 +245,6 @@ def channel_delete(request):
         url_param = url_param + "?search_equipment=" + equip_nam
     return HttpResponseRedirect(url_param)
 
-
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
@@ -336,7 +334,6 @@ def add_form(request, equip_name=None):
             messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(EQUIPMENT_INTERFACE_FORM, lists, context_instance=RequestContext(request))
-
 
 @log
 @login_required
@@ -501,7 +498,6 @@ def add_several_forms(request, equip_name):
 
     return render_to_response(EQUIPMENT_INTERFACE_SEVERAL_FORM, lists, context_instance=RequestContext(request))
 
-
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
@@ -558,7 +554,6 @@ def edit_form(request, equip_name, id_interface):
     lists['formset'] = EditFormSet(initial=initials)
 
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_FORM, lists, context_instance=RequestContext(request))
-
 
 @log
 @login_required
@@ -680,7 +675,6 @@ def edit(request, id_interface):
                     client.create_interface().associar_ambiente(env, id_interface)
 
     return render_to_response(EQUIPMENT_INTERFACE_FORM, lists, context_instance=RequestContext(request))
-
 
 @log
 @login_required
@@ -851,7 +845,6 @@ def connect(request, id_interface, front_or_back):
 
     return render_to_response(EQUIPMENT_INTERFACE_CONNECT_FORM, lists, context_instance=RequestContext(request))
 
-
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
@@ -896,8 +889,6 @@ def channel(request):
             return HttpResponseRedirect(url_param)
 
     return redirect("home")
-
-
 
 @log
 @login_required
@@ -1177,7 +1168,6 @@ def channel_insert_interface(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-
 
 def config_sync_all(request, equip_name, is_channel, ids):
 
