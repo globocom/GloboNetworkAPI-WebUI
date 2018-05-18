@@ -2258,9 +2258,14 @@ html.is-builder .article .lead:not([data-app-remove-it]) + div .btn {
   box-shadow: 2px 2px 10px rgba(10,10,10,0.3);
 }
 
-material-icons {
+a.material-icons {
   font-size: 35px;
-  color: #FFFFFF;
+  color: #FFD17C;
+}
+
+a.material-icons:hover {
+  font-size: 35px;
+  color: #FFECCA;
 }
 
 .ui-autocomplete {

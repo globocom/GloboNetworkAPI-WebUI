@@ -120,14 +120,7 @@
                             <td class="col-xs-12 col-md-3 text-xs-left"><b>Ligacao Back</b></td>
                             <td class="col-xs-12 col-md-1 text-xs-left"><b>Tipo</b></td>
                             <td class="col-xs-12 col-md-1 text-xs-left"><b>Vlan</b></td>
-                            <td class="col-xs-12 col-md-1 text-xs-left">
-                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.form search_form %}"
-                                   data-toggle="tooltip"
-                                   title="Adicionar Interface">
-                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">add</i>
-                                </a>
-                            </td>
+                            <td class="col-xs-12 col-md-1 text-xs-left"></td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
                                    href="{% url equip.interface.several.form search_form %}"
@@ -238,7 +231,18 @@
                         {% endfor %}
                     </tbody>
                 </table>
-        </div>
+            </div>
+            <div id="hamburger">
+                <div id="wrapper">
+                    <a class="material-icons"
+                       href="{% url equip.interface.form search_form %}"
+                       data-toggle="tooltip"
+                       title="Adicionar Interface">
+                        add
+                    </a>
+                </div>
+            </div>
+    </div>
     {% endif %}
 </section>
 {% endblock %}
