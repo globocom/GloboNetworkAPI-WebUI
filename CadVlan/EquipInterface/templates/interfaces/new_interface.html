@@ -16,7 +16,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12 col-lg-10 col-lg-offset-1">
-                    <form action="{% url interface.add equip_name %}" method="post" id="interface_form">
+                    <form action="{% url interface.add equip_id %}" method="post" id="interface_form">
                         {% csrf_token %}
                         <div class="row row-sm-offset">
                             <div class="col-xs-12 col-md-6">
@@ -46,46 +46,54 @@
                             </div>
                         </div>
                         <div class="row row-sm-offset">
-                            <div class="col-xs-12 col-md-6">
+                            <div class="col-xs-12 col-md-6 with-gap">
                                 <p class="form-control-label">Interface Protegida</p>
-                                <div class="form-group">
-                                    <label for="interface_protected">
-                                        <input class="radio-inline"
-                                               checked
-                                               type="radio"
-                                               name="protected"
-                                               data-form-field="protected"
-                                               id="interface_protected">
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           name="protected"
+                                           data-form-field="protected"
+                                           id="interface_protected"
+                                           value="sim"
+                                           checked>
+                                    <label class="form-check-label" for="interface_protected">
                                         Sim
                                     </label>
-                                    <label for="interface_not_protected">
-                                        <input class="radio-inline"
-                                               type="radio"
-                                               name="not_protected"
-                                               data-form-field="not_protected"
-                                               id="interface_not_protected">
+                                </div>
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           name="protected"
+                                           data-form-field="protected"
+                                           id="interface_not_protected"
+                                           value="nao">
+                                    <label class="form-check-label" for="interface_not_protected">
                                         Não
                                     </label>
                                 </div>
                             </div>
                             <div class="col-xs-12 col-md-6">
                                 <p class="form-control-label">Tipo da Interface</p>
-                                <div class="form-group">
-                                    <label for="interface_access">
-                                        <input class="radio-inline"
-                                               checked
-                                               type="radio"
-                                               name="access"
-                                               data-form-field="access"
-                                               id="interface_access">
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           name="type"
+                                           data-form-field="access"
+                                           id="interface_access"
+                                           value="access"
+                                           checked>
+                                    <label class="form-check-label" for="interface_access">
                                         Access
                                     </label>
-                                    <label for="interface_trunk">
-                                        <input class="radio-inline"
-                                               type="radio"
-                                               name="trunk"
-                                               data-form-field="trunk"
-                                               id="interface_trunk">
+                                </div>
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           name="type"
+                                           data-form-field="trunk"
+                                           id="interface_trunk"
+                                           value="trunk">
+                                    <label class="form-check-label" for="interface_trunk">
                                         Trunk
                                     </label>
                                 </div>
@@ -127,7 +135,7 @@
                                         <div class="checkbox">
                                             <label style="visibility:visible;">
                                                 <input type="checkbox" style="visibility:visible;">
-                                                {{ env.name }} (Vlans: {{ env.min_num_vlan_1 }} - {{ env.max_num_vlan_1 }})
+                                                {{ env.environment.name }} (Vlans: {{ env.environment.min_num_vlan_1 }} - {{ env.environment.max_num_vlan_1 }})
                                             </label>
                                         </div>
                                     {% endfor %}

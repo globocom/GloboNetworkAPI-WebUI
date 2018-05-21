@@ -178,8 +178,8 @@
                                 {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% if interface.tipo %}
-                                    {{ interface.tipo.type }}
+                                {% if interface.type %}
+                                    {{ interface.type.type }}
                                 {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
@@ -235,7 +235,7 @@
             <div id="hamburger">
                 <div id="wrapper">
                     <a class="material-icons"
-                       href="{% url interface.add search_form %}"
+                       href="{% url interface.add equip_id %}"
                        data-toggle="tooltip"
                        title="Adicionar Interface">
                         add
