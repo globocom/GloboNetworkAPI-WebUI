@@ -66,19 +66,20 @@ def add_interface(request, equipment=None):
     brand = equip['id_marca'] if equip['id_tipo_equipamento'] != "2" else "0"
     int_type_list = client.create_interface().list_all_interface_types()
 
-    environment_list = client.create_ambiente().listar_por_equip(equip['id'])
+    data = dict()
+    data["start_record"] = 0
+    data["end_record"] = 1000
+    data["asorting_cols"] = ["id"]
+    data["searchable_columns"] = []
+    data["custom_search"] = ""
+    data["extends_search"] = [{'equipamentoambiente__equipamento': 46033}]
 
-    if environment_list is not None:
-        if environment_list.get('ambiente') is None:
-            environment_list = None
     try:
-        environment = environment_list.get('ambiente')
-        environment.get('id')
-        ambiente = []
-        ambiente.append(environment)
-        environment_list = dict()
-        environment_list['ambiente'] = ambiente
+        envs = client.create_api_environment().search(search=data,
+                                                      fields=['id', 'name', 'min_num_vlan_1', 'max_num_vlan_1'])
+        lists['environments'] = envs.get('environments')
     except:
+        lists['environments'] = list()
         pass
 
     lists['equip_type'] = equip['id_tipo_equipamento']
@@ -92,15 +93,10 @@ def add_interface(request, equipment=None):
                                          brand,
                                          0,
                                          initial={'equip_name': equip['nome'],'equip_id': equip['id']})
-        if environment_list is not None:
-            lists['envform'] = AddEnvInterfaceForm(environment_list)
-
 
     if request.method == "POST":
 
         form = AddInterfaceForm(int_type_list, brand, 0, request.POST)
-        if environment_list is not None:
-            envform = AddEnvInterfaceForm(environment_list, request.POST)
 
         try:
 
@@ -112,9 +108,8 @@ def add_interface(request, equipment=None):
                 int_type = form.cleaned_data['int_type']
                 vlan = form.cleaned_data['vlan']
 
-                envs = None
-                if environment_list is not None and envform.is_valid():
-                    envs = envform.cleaned_data['environment']
+                # if environment_list is not None and envform.is_valid():
+                  #  envs = envform.cleaned_data['environment']
 
                 trunk = 0
                 if int_type=="0":
@@ -145,12 +140,10 @@ def add_interface(request, equipment=None):
                 return HttpResponseRedirect(url)
             else:
                 lists['form'] = form
-                lists['envform'] = envform
 
         except NetworkAPIClientError, e:
             logger.error(e)
             lists['form'] = form
-            lists['envform'] = envform
             messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(ADD_EQUIPMENT_INTERFACE, lists, context_instance=RequestContext(request))
