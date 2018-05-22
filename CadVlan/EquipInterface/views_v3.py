@@ -67,40 +67,53 @@ def add_interface(request, equipment=None):
     lists['equip_name'] = equips.get('name')
     equip_id = equips.get('id')
     lists['equip_id'] = equip_id
-    type_list = [{'id': 1, 'tipo': 'access'},{'id': 2, 'tipo': 'trunk'}]
+
+    data = dict()
+    data["start_record"] = 0
+    data["end_record"] = 1000
+    data["asorting_cols"] = ["id"]
+    data["searchable_columns"] = ["nome"]
+    data["custom_search"] = ""
+    data["extends_search"] = []
+
+    try:
+        types = client.create_api_interface_request().get_interface_type(search=data)
+        type_list = types.get('interfaces_type')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
+        return HttpResponseRedirect(url)
 
     lists['type_list'] = type_list
 
     if request.method == "POST":
 
-        type = int(request.POST.get('type'))
+        int_type = int(request.POST.get('type'))
 
         interface = {
             'name': request.POST.get('name'),
             'description': request.POST.get('description'),
             'protected': True if int(request.POST.get('protected')) else False,
             'vlan': int(request.POST.get('vlan_nativa')),
-            'type': type,
+            'type': int_type,
             'equipment_id': int(equip_id)
         }
 
         try:
-            client.create_api_interface_request().create([interface])
+            interface_obj = client.create_api_interface_request().create([interface])
+            interface_id = interface_obj.get('interfaces')[0].get('id')
             messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
         except NetworkAPIClientError, e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             return render_to_response(ADD_EQUIPMENT_INTERFACE, lists, context_instance=RequestContext(request))
 
-        for t in type_list:
-            if t.get('id') == type:
-                type_name = t.get('tipo')
+        environments = request.POST.getlist('environments')
 
-        if type_name == "trunk" and equips.get('environments'):
+        if environments:
             try:
-                for env in equips.get('environments'):
-                    client.create_interface().associar_ambiente(env.get('environment').get('id'), interface.get('id'))
-
+                for env in environments:
+                    client.create_interface().associar_ambiente(env, interface_id)
             except NetworkAPIClientError, e:
                 logger.error(e)
                 messages.add_message(request, messages.WARNING, 'Os ambientes não foram associados à interface')

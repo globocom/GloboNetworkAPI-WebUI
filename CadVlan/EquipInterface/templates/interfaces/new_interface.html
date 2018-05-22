@@ -1,5 +1,4 @@
 {% extends "menu.html" %}
-
 {% block content %}
 <section class="mbr-section mbr-after-navbar" id="form1-5"
          style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
@@ -86,12 +85,12 @@
                                         <input type="radio"
                                                class="form-check-input"
                                                name="type"
-                                               data-form-field="{{ type.tipo }}"
-                                               id="{{ type.tipo }}"
+                                               data-form-field="{{ type.type }}"
+                                               id="{{ type.type }}"
                                                required
                                                value="{{ type.id }}">
-                                        <label class="form-check-label" for="{{ type.tipo }}">
-                                            {{ type.tipo }}
+                                        <label class="form-check-label" for="{{ type.type }}">
+                                            {{ type.type }}
                                         </label>
                                     </div>
                                 {% endfor %}
@@ -133,7 +132,11 @@
                                     {% for env in environments %}
                                         <div class="checkbox">
                                             <label style="visibility:visible;">
-                                                <input type="checkbox" style="visibility:visible;">
+                                                <input class="source"
+                                                       type="checkbox"
+                                                       style="visibility:visible;"
+                                                       value="{{ env.environment.id }}"
+                                                       name="environments">
                                                 {{ env.environment.name }} (Vlans: {{ env.environment.min_num_vlan_1 }} - {{ env.environment.max_num_vlan_1 }})
                                             </label>
                                         </div>
