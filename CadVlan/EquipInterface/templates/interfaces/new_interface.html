@@ -29,6 +29,7 @@
                                            name="name"
                                            data-form-field="name"
                                            placeholder="Ex.: Eth10"
+                                           required
                                            id="interface_name">
                                 </div>
                             </div>
@@ -47,14 +48,17 @@
                         </div>
                         <div class="row row-sm-offset">
                             <div class="col-xs-12 col-md-6 with-gap">
-                                <p class="form-control-label">Interface Protegida</p>
+                                <p class="form-control-label">
+                                    Interface Protegida<span class="form-asterisk">*</span>
+                                </p>
                                 <div class="radio-inline form-check">
                                     <input type="radio"
                                            class="form-check-input"
                                            name="protected"
                                            data-form-field="protected"
                                            id="interface_protected"
-                                           value="sim"
+                                           value="1"
+                                           required
                                            checked>
                                     <label class="form-check-label" for="interface_protected">
                                         Sim
@@ -66,37 +70,31 @@
                                            name="protected"
                                            data-form-field="protected"
                                            id="interface_not_protected"
-                                           value="nao">
+                                           required
+                                           value="0">
                                     <label class="form-check-label" for="interface_not_protected">
                                         Não
                                     </label>
                                 </div>
                             </div>
                             <div class="col-xs-12 col-md-6">
-                                <p class="form-control-label">Tipo da Interface</p>
-                                <div class="radio-inline form-check">
-                                    <input type="radio"
-                                           class="form-check-input"
-                                           name="type"
-                                           data-form-field="access"
-                                           id="interface_access"
-                                           value="access"
-                                           checked>
-                                    <label class="form-check-label" for="interface_access">
-                                        Access
-                                    </label>
-                                </div>
-                                <div class="radio-inline form-check">
-                                    <input type="radio"
-                                           class="form-check-input"
-                                           name="type"
-                                           data-form-field="trunk"
-                                           id="interface_trunk"
-                                           value="trunk">
-                                    <label class="form-check-label" for="interface_trunk">
-                                        Trunk
-                                    </label>
-                                </div>
+                                <p class="form-control-label">
+                                    Tipo da Interface<span class="form-asterisk">*</span>
+                                </p>
+                                {% for type in type_list %}
+                                    <div class="radio-inline form-check">
+                                        <input type="radio"
+                                               class="form-check-input"
+                                               name="type"
+                                               data-form-field="{{ type.tipo }}"
+                                               id="{{ type.tipo }}"
+                                               required
+                                               value="{{ type.id }}">
+                                        <label class="form-check-label" for="{{ type.tipo }}">
+                                            {{ type.tipo }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
                             </div>
                         </div>
                         <div class="row row-sm-offset">
@@ -104,12 +102,13 @@
                                 <div class="form-group">
                                     <label class="form-control-label"
                                            for="interface_vlan_nativa">
-                                        Numero da Vlan Nativa
+                                        Numero da Vlan Nativa<span class="form-asterisk">*</span>
                                     </label>
                                     <input class="form-control"
                                            name="vlan_nativa"
                                            data-form-field="vlan_nativa"
                                            placeholder="Ex.: 1"
+                                           required
                                            id="interface_vlan_nativa">
                                 </div>
                             </div>

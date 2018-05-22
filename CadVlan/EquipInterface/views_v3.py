@@ -63,41 +63,40 @@ def add_interface(request, equipment=None):
         messages.add_message(request, messages.ERROR, e)
         return HttpResponseRedirect(url)
 
-    int_type_list = client.create_interface().list_all_interface_types()
-
     lists['environments'] = equips.get('environments')
     lists['equip_name'] = equips.get('name')
-    lists['int_type'] = int_type_list
-    lists['equip_id'] = equips.get('id')
+    equip_id = equips.get('id')
+    lists['equip_id'] = equip_id
+    type_list = [{'id': 1, 'tipo': 'access'},{'id': 2, 'tipo': 'trunk'}]
+
+    lists['type_list'] = type_list
 
     if request.method == "POST":
 
-        name = request.POST.get('name')
-        description = request.POST.get('description')
-        protected = True if request.POST.get('protected') == "sim" else False
-        vlan = request.POST.get('vlan_nativa')
-        int_type = request.POST.get('type')
+        type = int(request.POST.get('type'))
+
+        interface = {
+            'name': request.POST.get('name'),
+            'description': request.POST.get('description'),
+            'protected': True if int(request.POST.get('protected')) else False,
+            'vlan': int(request.POST.get('vlan_nativa')),
+            'type': type,
+            'equipment_id': int(equip_id)
+        }
 
         try:
-            obj = client.create_interface().inserir(name,
-                                                    protected,
-                                                    description,
-                                                    None,
-                                                    None,
-                                                    equips['id'],
-                                                    int_type,
-                                                    vlan)
-
-            interface = obj.get("interface")
-
+            client.create_api_interface_request().create([interface])
             messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_insert"))
-
         except NetworkAPIClientError, e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
-            return HttpResponseRedirect(url)
+            return render_to_response(ADD_EQUIPMENT_INTERFACE, lists, context_instance=RequestContext(request))
 
-        if int_type == "trunk" and equips.get('environments'):
+        for t in type_list:
+            if t.get('id') == type:
+                type_name = t.get('tipo')
+
+        if type_name == "trunk" and equips.get('environments'):
             try:
                 for env in equips.get('environments'):
                     client.create_interface().associar_ambiente(env.get('environment').get('id'), interface.get('id'))
