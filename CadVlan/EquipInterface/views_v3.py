@@ -91,12 +91,12 @@ def add_interface(request, equipment=None):
         int_type = int(request.POST.get('type'))
 
         interface = {
-            'name': request.POST.get('name'),
+            'interface': request.POST.get('name'),
             'description': request.POST.get('description'),
             'protected': True if int(request.POST.get('protected')) else False,
-            'vlan': int(request.POST.get('vlan_nativa')),
+            'native_vlan': request.POST.get('vlan_nativa'),
             'type': int_type,
-            'equipment_id': int(equip_id)
+            'equipment': int(equip_id)
         }
 
         try:
