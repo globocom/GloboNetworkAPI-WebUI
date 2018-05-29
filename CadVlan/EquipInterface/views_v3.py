@@ -315,6 +315,13 @@ def edit_interface(request, interface=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def link_interfaces(request, interface_a=None, interface_b=None):
+    pass
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def add_channel(request, interface_id=None):
     ref = request.META.get('HTTP_REFERER').split('=')
     equipment_name = ref[-1]
