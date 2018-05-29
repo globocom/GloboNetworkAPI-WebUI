@@ -27,14 +27,16 @@ section {
     justify-content: flex-start;
     align-content: center;
     vertical-align: top;
-    min-width: 30%;
+    min-width: 100%;
+    min-height: 100%;
+    height: auto;
 }
 
 div.text-fields {
-    height: 70px;
     min-width: 30%;
     max-width: 95%;
     margin: 5px;
+    height: auto;
 }
 
 div.connection-edit {
@@ -56,28 +58,42 @@ div.div-box{
 
 div.vertical-line {
     width: 1.5px;
-    height: 120px;
+    height: 110px;
     background: #0D84A5;
 }
 
 div.vertical-none-line {
     width: 1.5px;
-    height: 120px;
+    height: 110px;
     background: #FFF;    
 }
 
 i.remove-link {
-    color: #e58f6f;
+    color: #FFF;
     text-align: center;
     font-family: sans-serif;
     font-size: 15px;
 }
 
 i.remove-link:hover {
-    color: #FFF;
+    color: #e58f6f;
     text-align: center;
     font-family: sans-serif;
     font-size: 15px;
+}
+
+i.set-link {
+    color: #FFF;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 20px;
+}
+
+i.set-link:hover {
+    color: #56B087;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 20px;
 }
 
 .remove-label {
