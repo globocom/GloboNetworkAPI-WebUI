@@ -34,7 +34,9 @@ function myFunction(interface_id) {
         <div class="form-edit">
             {% include "interfaces/form.html" with default=interface %}
         </div>
-        <div class="connection-edit"></div>
+        <div class="connection-edit">
+            {% include "interfaces/connections.html" with default=interface total=total_itens item=forloop.counter0 %}
+        </div>
     </section>
 {% endfor%}
 {% endblock %}
