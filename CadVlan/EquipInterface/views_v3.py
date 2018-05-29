@@ -264,8 +264,7 @@ def edit_interface(request, interface=None):
     first_item, last_item, interface_map = facade.get_interface_map(client, interface)
 
     lists['interface_map'] = facade.get_ordered_list(first_item, last_item, interface_map)
-    lists['first_item'] = first_item
-    lists['last_item'] = last_item
+    lists['total_itens'] = last_item - first_item
 
     data = dict()
     data["start_record"] = 0

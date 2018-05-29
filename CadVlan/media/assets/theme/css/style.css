@@ -484,6 +484,26 @@ a.mbr-iconfont:hover {
   .btn-social + .btn {
     margin-left: 0.1rem; }
 
+.btn-social-remove {
+  margin: 0px;
+  border-radius: 50%;
+  max-width: 100%;
+  text-align: center;
+  position: relative;
+  border: 1px solid #e58f6f;
+  background: #fff5f1;
+  color: #FFF; }
+  .btn-social i {
+    top: 0;
+    top: 0;
+    line-height: 40px;
+    width: 40px;
+    }
+  .btn-social-remove:hover {
+    color: #fff;
+    background: #e58f6f;
+    }
+
 .btn-responsive {
   padding:4px 4px;
   font-size:10%;

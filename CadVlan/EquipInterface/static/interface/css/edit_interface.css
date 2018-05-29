@@ -9,7 +9,7 @@ div.header {
 section {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    margin: 10px 10%;
+    margin: 0px 10%;
     grid-column-gap: 10px;
 }
 
@@ -28,7 +28,6 @@ section {
     align-content: center;
     vertical-align: top;
     min-width: 30%;
-    max-width: 
 }
 
 div.text-fields {
@@ -38,10 +37,53 @@ div.text-fields {
     margin: 5px;
 }
 
-.connection-edit {
+div.connection-edit {
     border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
-div#envs {
-    height: 50px;
+div.div-box{
+    border: 1px solid #0D84A5; 
+    align-items: center;
+    text-align: center;
+    border-radius: 3px;
+    width: 200px;
+    background: #0D84A5;
+}
+
+div.vertical-line {
+    width: 1.5px;
+    height: 120px;
+    background: #0D84A5;
+}
+
+div.vertical-none-line {
+    width: 1.5px;
+    height: 120px;
+    background: #FFF;    
+}
+
+i.remove-link {
+    color: #e58f6f;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 15px;
+}
+
+i.remove-link:hover {
+    color: #FFF;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 15px;
+}
+
+.remove-label {
+    cursor: pointer;
+    font-size: 0.875rem;
+    margin-bottom: 0.357em;
+    padding: 0; 
+    color: #FFF;
 }

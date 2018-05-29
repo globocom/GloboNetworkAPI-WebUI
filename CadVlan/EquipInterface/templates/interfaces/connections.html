@@ -1,0 +1,27 @@
+{% if item %}
+<div class="vertical-line"></div>
+{% else %}
+<div class="vertical-none-line"></div>
+{% endif %}
+<div class="elements">
+    <div class="div-box">
+        <a class="remove-label"
+           href="#"
+           data-toggle="tooltip">
+            {{ default.equipment.name }}
+        </a>
+    </div>
+</div>
+{% if item != total  %}
+<div class="vertical-line"></div>
+<div class="elements">
+    <a class="btn btn-social-remove btn-responsive"
+       href="#"
+       data-toggle="tooltip"
+       title="Remover link">
+        <i class="remove-link">X</i>
+    </a>
+</div>
+{% else %}
+<div class="vertical-none-line"></div>
+{% endif %}
