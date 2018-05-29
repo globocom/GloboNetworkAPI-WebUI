@@ -46,8 +46,8 @@
   transition: all .3s ease-in-out; }
 
 .btn-sm {
-  padding: 0.625rem 2.1874rem;
-  font-size: 0.9687rem;
+  padding: 0.3rem 1.8rem;
+  font-size: 0.8rem;
   line-height: 1.5;
   border-radius: 3px;
   font-family: "Lora";
