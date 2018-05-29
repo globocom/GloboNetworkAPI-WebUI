@@ -44,72 +44,68 @@ def get_interface_map(client, interface):
     interface_map[str(item)] = interface_obj
     main_interface = interface_obj
 
-    try:
-        if interface_obj.get('front_interface'):
+    if interface_obj.get('front_interface'):
 
-            next_interface = interface_obj.get('front_interface')
-            front = True
+        next_interface = interface_obj.get('front_interface')
+        front = True
 
-            while next_interface:
+        while next_interface:
 
-                item += 1
+            item += 1
 
-                logger.info('loop back: %s' % item)
+            logger.info('loop back: %s' % item)
 
-                response = client.create_api_interface_request().get(ids=[next_interface], fields=fields)
-                interface_obj = response.get('interfaces')[0]
-                interface_map[str(item)] = interface_obj
+            response = client.create_api_interface_request().get(ids=[next_interface], fields=fields)
+            interface_obj = response.get('interfaces')[0]
+            interface_map[str(item)] = interface_obj
 
-                if front and interface_obj.get('back_interface'):
-                    next_interface = interface_obj.get('back_interface')
-                    front = False
-                    back = True
-                elif back and interface_obj.get('front_interface'):
-                    next_interface = interface_obj.get('front_interface')
-                    back = False
-                    front = True
-                else:
-                    next_interface = None
+            if front and interface_obj.get('back_interface'):
+                next_interface = interface_obj.get('back_interface')
+                front = False
+                back = True
+            elif back and interface_obj.get('front_interface'):
+                next_interface = interface_obj.get('front_interface')
+                back = False
+                front = True
+            else:
+                next_interface = None
 
-                if next_interface == main_interface.get('id'):
-                    next_interface = None
+            if next_interface == main_interface.get('id'):
+                next_interface = None
 
-        last = item
-        item = 100
-    except Exception:
-        raise Exception('primeiro')
-    try:
-        if main_interface.get('back_interface'):
+    last = item
+    item = 100
 
-            next_interface = main_interface.get('back_interface')
-            back = True
+    if main_interface.get('back_interface'):
 
-            while next_interface:
+        next_interface = main_interface.get('back_interface')
+        back = True
 
-                item -= 1
-                logger.info('loop back: %s' % item)
+        while next_interface:
 
-                response = client.create_api_interface_request().get(ids=[next_interface], fields=fields)
-                interface_obj = response.get('interfaces')[0]
-                interface_map[str(item)] = interface_obj
+            item -= 1
+            logger.info('loop back: %s' % item)
 
-                if front and interface_obj.get('back_interface'):
-                    next_interface = interface_obj.get('back_interface')
-                    front = False
-                    back = True
-                elif back and interface_obj.get('front_interface'):
-                    next_interface = interface_obj.get('front_interface')
-                    back = False
-                    front = True
-                else:
-                    next_interface = None
+            response = client.create_api_interface_request().get(ids=[next_interface], fields=fields)
+            interface_obj = response.get('interfaces')[0]
+            interface_map[str(item)] = interface_obj
 
-                if next_interface == main_interface.get('id'):
-                    next_interface = None
+            if front and interface_obj.get('back_interface'):
+                next_interface = interface_obj.get('back_interface')
+                front = False
+                back = True
+            elif back and interface_obj.get('front_interface'):
+                next_interface = interface_obj.get('front_interface')
+                back = False
+                front = True
+            else:
+                next_interface = None
 
-        first = item
-    except Exception:
-        raise Exception('segundo')
+            if next_interface == main_interface.get('id'):
+                next_interface = None
+
+    first = item
+
     return first, last, interface_map
 
 

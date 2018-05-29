@@ -1,5 +1,5 @@
 <div class="form-interfaces">
-    <form method="post" id="interface_form">
+    <form action="{% url interface.edit default.id %}" method="post" id="interface_form">
         {% csrf_token %}
         <div class="rows">
             <div class="text-fields">

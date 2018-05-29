@@ -1,8 +1,14 @@
-{% if item %}
-<div class="vertical-line"></div>
-{% else %}
-<div class="vertical-none-line"></div>
+{% if not item %}
+<div class="elements">
+    <a class="btn btn-social-link btn-responsive"
+       href="#"
+       data-toggle="tooltip"
+       title="linkar interfaces">
+        <i class="set-link">+</i>
+    </a>
+</div>
 {% endif %}
+<div class="vertical-line"></div>
 <div class="elements">
     <div class="div-box">
         <a class="remove-label"
@@ -12,8 +18,17 @@
         </a>
     </div>
 </div>
-{% if item != total  %}
 <div class="vertical-line"></div>
+{% ifequal item total %}
+<div class="elements">
+    <a class="btn btn-social-link btn-responsive"
+       href="#"
+       data-toggle="tooltip"
+       title="linkar interfaces">
+        <i class="set-link">+</i>
+    </a>
+</div>
+{% else %}
 <div class="elements">
     <a class="btn btn-social-remove btn-responsive"
        href="#"
@@ -22,6 +37,4 @@
         <i class="remove-link">X</i>
     </a>
 </div>
-{% else %}
-<div class="vertical-none-line"></div>
-{% endif %}
+{% endifequal %}

@@ -233,12 +233,20 @@ def edit_interface(request, interface=None):
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
-    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
 
-    first_item, last_item, interface_map = facade.get_interface_map(client, interface)
+    fields = ['id',
+              'equipment__details',
+              'front_interface',
+              'back_interface']
 
-    lists['interface_map'] = facade.get_ordered_list(first_item, last_item, interface_map)
-    lists['total_itens'] = last_item - first_item
+    try:
+        interface_obj = client.create_api_interface_request().get(ids=[interface], fields=fields)
+        interfaces = interface_obj.get('interfaces')[0]
+        equipment = interfaces.get('equipment')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, 'Erro ao buscar interface %s.' % interface)
+        return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment.get('name'))
 
     data = dict()
     data["start_record"] = 0
@@ -254,9 +262,52 @@ def edit_interface(request, interface=None):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
-        return HttpResponseRedirect(url)
+        return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment.get('name'))
 
     lists['type_list'] = type_list
+
+    if request.method == "POST":
+
+        interface_dict = {
+            'id': int(interfaces.get('id')),
+            'interface': request.POST.get('name'),
+            'description': request.POST.get('description'),
+            'protected': True if int(request.POST.get('protected')) else False,
+            'native_vlan': request.POST.get('vlan_nativa'),
+            'type': int(request.POST.get('type')),
+            'equipment': int(equipment.get('id')),
+            'front_interface': interfaces.get('front_interface'),
+            'back_interface': interfaces.get('back_interface')
+        }
+
+        try:
+            client.create_api_interface_request().update([interface_dict])
+            messages.add_message(request, messages.SUCCESS, 'Interface atualizada com sucesso.')
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+        except Exception, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+
+        environments = request.POST.getlist('environments')
+
+        #if environments:
+         #   try:
+          #      for env in environments:
+           #         client.create_interface().associar_ambiente(env, interface_id)
+            #except NetworkAPIClientError, e:
+             #   logger.error(e)
+              #  messages.add_message(request, messages.WARNING, 'Os ambientes não foram associados à interface')
+
+    try:
+        first_item, last_item, interface_map = facade.get_interface_map(client, interface)
+        lists['interface_map'] = facade.get_ordered_list(first_item, last_item, interface_map)
+        lists['total_itens'] = last_item - first_item
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, 'Não foi possível montar o map da interface.')
+        return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment.get('name'))
 
     return render_to_response(EDIT_EQUIPMENT_INTERFACE, lists, context_instance=RequestContext(request))
 
