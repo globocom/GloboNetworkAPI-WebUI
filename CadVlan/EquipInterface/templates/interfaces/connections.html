@@ -1,40 +1,42 @@
-{% if not item %}
-<div class="elements">
-    <a class="btn btn-social-link btn-responsive"
-       href="#"
-       data-toggle="tooltip"
-       title="linkar interfaces">
-        <i class="set-link">+</i>
-    </a>
-</div>
-{% endif %}
-<div class="vertical-line"></div>
-<div class="elements">
-    <div class="div-box">
-        <a class="remove-label"
+{% for interface in interface_map %}
+    {% if not forloop.counter0 %}
+    <div class="elements">
+        <a class="btn btn-social-link btn-responsive"
            href="#"
-           data-toggle="tooltip">
-            {{ default.equipment.name }}
+           data-toggle="tooltip"
+           title="linkar interfaces">
+            <i class="set-link">+</i>
         </a>
     </div>
-</div>
-<div class="vertical-line"></div>
-{% ifequal item total %}
-<div class="elements">
-    <a class="btn btn-social-link btn-responsive"
-       href="#"
-       data-toggle="tooltip"
-       title="linkar interfaces">
-        <i class="set-link">+</i>
-    </a>
-</div>
-{% else %}
-<div class="elements">
-    <a class="btn btn-social-remove btn-responsive"
-       href="#"
-       data-toggle="tooltip"
-       title="Remover link">
-        <i class="remove-link">X</i>
-    </a>
-</div>
-{% endifequal %}
+    {% endif %}
+    <div class="vertical-line"></div>
+    <div class="elements">
+        <div class="div-box">
+            <a class="remove-label"
+               href="/interface/?search_equipment={{interface.equipment.name}}"
+               data-toggle="tooltip">
+                {{ interface.equipment.name }}
+            </a>
+        </div>
+    </div>
+    <div class="vertical-line"></div>
+    {% ifequal forloop.counter0 total %}
+    <div class="elements">
+        <a class="btn btn-social-link btn-responsive"
+           href="#"
+           data-toggle="tooltip"
+           title="linkar interfaces">
+            <i class="set-link">+</i>
+        </a>
+    </div>
+    {% else %}
+    <div class="elements">
+        <a class="btn btn-social-remove btn-responsive"
+           href="interface/disconnect/{{interface.id}}/{{interface.next_interface}}"
+           data-toggle="tooltip"
+           title="Remover link">
+            <i class="remove-link">X</i>
+        </a>
+    </div>
+    {% endifequal %}
+{% endfor %}

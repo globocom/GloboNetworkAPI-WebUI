@@ -53,6 +53,7 @@ def get_interface_map(client, interface):
             response = client.create_api_interface_request().get(ids=[next_interface], fields=fields)
             interface_obj = response.get('interfaces')[0]
             interface_map[str(item)] = interface_obj
+            interface_map[str(item-1)]['next_interface'] = interface_obj.get('id')
 
             if interface_obj.get('back_interface') == prior_interface:
                 next_interface = interface_obj.get('front_interface') if interface_obj.get('front_interface') else None
@@ -77,6 +78,7 @@ def get_interface_map(client, interface):
             response = client.create_api_interface_request().get(ids=[next_interface], fields=fields)
             interface_obj = response.get('interfaces')[0]
             interface_map[str(item)] = interface_obj
+            interface_map[str(item)]['next_interface'] = interface_map[str(item+1)].get('id')
 
             if interface_obj.get('back_interface') == prior_interface:
                 next_interface = interface_obj.get('front_interface') if interface_obj.get('front_interface') else None

@@ -147,8 +147,10 @@ urlpatterns += patterns(
         name='interface.add', ),
     url('^interface/edit/(?P<interface>[^/]+)[/]?$', 'edit_interface',
         name='interface.edit', ),
-    url('^interface/connect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'link_interfaces',
+    url('^interface/connect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'connect_interfaces',
         name='interface.connect', ),
+    url('^interface/disconnect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'disconnect_interfaces',
+        name='interface.disconnect', ),
 )
 
 

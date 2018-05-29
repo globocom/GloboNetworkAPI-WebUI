@@ -341,8 +341,15 @@ def edit_interface(request, interface=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def link_interfaces(request, interface_a=None, interface_b=None):
-    pass
+def connect_interfaces(request, interface_a=None, interface_b=None):
+    return HttpResponseRedirect('/interface/')
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def disconnect_interfaces(request, interface_a=None, interface_b=None):
+    return HttpResponseRedirect('/interface')
 
 
 @log
