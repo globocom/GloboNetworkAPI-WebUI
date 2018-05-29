@@ -145,6 +145,8 @@ urlpatterns += patterns(
         name='channel.add', ),
     url('^interface/add/(?P<equipment>[^/]+)[/]?$', 'add_interface',
         name='interface.add', ),
+    url('^interface/edit/(?P<interface>[^/]+)[/]?$', 'edit_interface',
+        name='interface.edit', ),
 )
 
 
@@ -790,3 +792,6 @@ urlpatterns += patterns(
     url('^vrf/delete[/]?$', 'delete_vrf', name='vrf.delete'),
 
 )
+
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+urlpatterns += staticfiles_urlpatterns()

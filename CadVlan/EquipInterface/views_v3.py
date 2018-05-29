@@ -26,16 +26,20 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 
 from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.EquipInterface import facade
 from CadVlan.messages import equip_interface_messages
 from CadVlan.messages import error_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.templates import ADD_EQUIPMENT_INTERFACE
+from CadVlan.templates import EDIT_EQUIPMENT_INTERFACE
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
 
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 
 from networkapiclient.exception import NetworkAPIClientError
+
+from collections import OrderedDict
 
 
 logger = logging.getLogger(__name__)
@@ -45,7 +49,6 @@ logger = logging.getLogger(__name__)
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def add_interface(request, equipment=None):
-
     lists = dict()
 
     # Get user
@@ -127,7 +130,6 @@ def add_interface(request, equipment=None):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
 def list_equipment_interfaces(request):
-
     lists = dict()
     interface_list = list()
 
@@ -201,7 +203,6 @@ def list_equipment_interfaces(request):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def delete_interface(request, interface_id=None):
-
     auth = AuthSession(request.session)
     equip_interface = auth.get_clientFactory().create_api_interface_request()
 
@@ -227,8 +228,44 @@ def delete_interface(request, interface_id=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def add_channel(request, interface_id=None):
+def edit_interface(request, interface=None):
+    lists = dict()
 
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+
+    first_item, last_item, interface_map = facade.get_interface_map(client, interface)
+
+    lists['interface_map'] = facade.get_ordered_list(first_item, last_item, interface_map)
+    lists['first_item'] = first_item
+    lists['last_item'] = last_item
+
+    data = dict()
+    data["start_record"] = 0
+    data["end_record"] = 1000
+    data["asorting_cols"] = ["id"]
+    data["searchable_columns"] = ["nome"]
+    data["custom_search"] = ""
+    data["extends_search"] = []
+
+    try:
+        types = client.create_api_interface_request().get_interface_type(search=data)
+        type_list = types.get('interfaces_type')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
+        return HttpResponseRedirect(url)
+
+    lists['type_list'] = type_list
+
+    return render_to_response(EDIT_EQUIPMENT_INTERFACE, lists, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def add_channel(request, interface_id=None):
     ref = request.META.get('HTTP_REFERER').split('=')
     equipment_name = ref[-1]
 
@@ -246,7 +283,6 @@ def add_channel(request, interface_id=None):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def delete_channel(request, interface_id=None):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 

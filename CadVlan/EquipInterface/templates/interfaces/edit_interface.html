@@ -1,0 +1,41 @@
+{% extends "menu.html" %}
+
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}/static/interface/css/edit_interface.css" />
+{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+function myFunction(interface_id) {
+    element_id = "trunk".concat(interface_id);
+    range_id = "range_vlans".concat(interface_id);
+    env_id = "envs".concat(interface_id);
+    var checkBox = document.getElementById(element_id);
+    var text = document.getElementById("range_vlans");
+    if (checkBox.checked == true){
+        document.getElementById(range_id).style.display = "block";
+        document.getElementById(env_id).style.display = "block";
+    } else {
+        document.getElementById(range_id).style.display = "none";
+        document.getElementById(env_id).style.display = "none";
+    }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="header text-xs-center">
+    <h3 class="mbr-section-title display-2">Editar Interfaces</h3>
+</div>
+
+{% for interface in interface_map %}
+    <section>
+        <div class="form-edit">
+            {% include "interfaces/form.html" with default=interface %}
+        </div>
+        <div class="connection-edit"></div>
+    </section>
+{% endfor%}
+{% endblock %}
+s

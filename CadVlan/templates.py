@@ -90,6 +90,7 @@ EQUIPMENT_INTERFACES = 'equip-interface/equipInterfaces.html'
 # Interfaces
 LIST_EQUIPMENT_INTERFACES = 'interfaces/list.html'
 ADD_EQUIPMENT_INTERFACE = 'interfaces/new_interface.html'
+EDIT_EQUIPMENT_INTERFACE = 'interfaces/edit_interface.html'
 
 # Equipment
 EQUIPMENT_SEARCH_LIST = 'equipment/search-list.html'
@@ -103,7 +104,6 @@ EQUIPMENT_VIEW_AJAX = 'equipment/view-real.html'
 
 # Vlans
 VLAN_SEARCH_LIST = 'vlan/search-list.html'
-VLANS_DEETAIL = 'vlan/list-id.html'
 VLANS_DEETAIL = 'vlan/list-id.html'
 VLAN_FORM = 'vlan/vlan-form.html'
 VLAN_EDIT = 'vlan/vlan-edit.html'
@@ -213,7 +213,6 @@ LDAP_GROUP_FORM = 'ldap/group-form.html'
 LDAP_SUDOER_LIST = 'ldap/sudoer-list.html'
 LDAP_SUDOER_FORM = 'ldap/sudoer-form.html'
 LDAP_USER_LIST = 'ldap/user-list.html'
-LDAP_USER_FORM = 'ldap/user-form.html'
 LDAP_USER_FORM = 'ldap/user-form.html'
 
 # Filter
