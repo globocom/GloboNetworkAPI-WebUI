@@ -141,10 +141,11 @@
             </div>
         </div>
         <div class="rows" style="display:none;" id="envs{{ default.id }}">
+            {% if default.equipment.environments %}
             <div class="text-fields">
                 <p class="form-control-label">Selecione os Ambientes Permitidos</p>
                 <div class="form-control" style="overflow:auto;height:50px;">
-                    {% for env in environments %}
+                    {% for env in default.equipment.environments %}
                         <div class="checkbox">
                             <label style="visibility:visible;">
                                 <input class="source"
@@ -158,6 +159,11 @@
                     {% endfor %}
                 </div>
             </div>
+            {% else %}
+            <div class="text-fields">
+                <p class="form-control-label">Equipamento não possui ambientes associados.</p>
+            </div>
+            {% endif %}
         </div>
         <br><br>
         <div class="rows">
