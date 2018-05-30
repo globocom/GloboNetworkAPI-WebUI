@@ -162,6 +162,25 @@ def list_equipment_interfaces(request):
 
                 equipments = search_equipment.get('equipments')
 
+                for equip in equipments:
+
+                    if equip.get('name') == search_form:
+
+                        data["searchable_columns"] = ["equipamento__id"]
+                        data["custom_search"] = equip.get('id')
+
+                        search_interface = client.create_api_interface_request().search(fields=['id',
+                                                                                                'interface',
+                                                                                                'equipment__basic',
+                                                                                                'native_vlan',
+                                                                                                'type__details',
+                                                                                                'channel__basic',
+                                                                                                'front_interface__basic',
+                                                                                                'back_interface__basic'],
+                                                                                        search=data)
+                        interface_list = search_interface.get('interfaces')
+                        interface_flag = True
+
                 if not equipments:
                     raise Exception("Equipment Does Not Exist.")
 
