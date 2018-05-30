@@ -292,13 +292,20 @@ def edit_interface(request, interface=None):
 
         environments = request.POST.getlist('environments')
 
-        #if environments:
-         #   try:
-          #      for env in environments:
-           #         client.create_interface().associar_ambiente(env, interface_id)
-            #except NetworkAPIClientError, e:
-             #   logger.error(e)
-              #  messages.add_message(request, messages.WARNING, 'Os ambientes não foram associados à interface')
+        if environments:
+            # corrigir o dissassociar ambientes
+            # apenas associando mais ambiente, não removendo/editando
+            # try:
+            #     client.create_interface().dissociar(interface)
+            # except NetworkAPIClientError, e:
+            #     logger.error(e)
+            #     messages.add_message(request, messages.ERROR, 'Erro ao dessassociar os ambientes.')
+            try:
+                for env in environments:
+                    client.create_interface().associar_ambiente(env, interface)
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, 'Erro ao atualizar os ambientes.')
 
     try:
         first_item, last_item, interface_map = facade.get_interface_map(client, interface)
@@ -323,7 +330,41 @@ def connect_interfaces(request, interface_a=None, interface_b=None):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def disconnect_interfaces(request, interface_a=None, interface_b=None):
-    return HttpResponseRedirect('/interface')
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    try:
+        interface_obj = client.create_api_interface_request().get(ids=[interface_a])
+        interfaces = interface_obj.get('interfaces')[0]
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, 'Erro ao buscar interface %s.' % interface_a)
+        return HttpResponseRedirect(reverse("interface.edit", args=[interface_a]))
+
+    interface_dict = dict(id=int(interfaces.get('id')),
+                          interface=interfaces.get('interface'),
+                          description=interfaces.get('description'),
+                          protected=interfaces.get('protected'),
+                          native_vlan=interfaces.get('native_vlan'),
+                          type=interfaces.get('type'),
+                          equipment=interfaces.get('equipment'),
+                          front_interface=None if interfaces.get('front_interface') == int(interface_b) \
+                              else interfaces.get('front_interface'),
+                          back_interface=None if interfaces.get('back_interface') == int(interface_b) \
+                              else interfaces.get('back_interface'))
+
+    try:
+        client.create_api_interface_request().update([interface_dict])
+        messages.add_message(request, messages.SUCCESS, 'Conexão removida.')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return HttpResponseRedirect(reverse("interface.edit", args=[interface_a]))
 
 
 @log

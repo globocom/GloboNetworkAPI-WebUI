@@ -32,7 +32,7 @@
     {% else %}
     <div class="elements">
         <a class="btn btn-social-remove btn-responsive"
-           href="interface/disconnect/{{interface.id}}/{{interface.next_interface}}"
+           href="{% url interface.disconnect interface.id interface.next_interface %}"
            data-toggle="tooltip"
            title="Remover link">
             <i class="remove-link">X</i>
