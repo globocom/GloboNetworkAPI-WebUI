@@ -160,27 +160,32 @@ def list_equipment_interfaces(request):
 
                 equipments = search_equipment.get('equipments')
 
-                if not equipments:
-                    raise Exception("Equipment Does Not Exist.")
+                for equip in equipments:
 
-                if len(equipments) == 1:
-                    data["searchable_columns"] = ["equipamento__id"]
-                    data["custom_search"] = equipments[0].get('id')
-                    search_interface = client.create_api_interface_request().search(fields=['id',
-                                                                                            'interface',
-                                                                                            'equipment__basic',
-                                                                                            'native_vlan',
-                                                                                            'type__details',
-                                                                                            'channel__basic',
-                                                                                            'front_interface__basic',
-                                                                                            'back_interface__basic'],
-                                                                                    search=data)
-                    interface_list = search_interface.get('interfaces')
-                    interface_flag = True
-                    if not interface_list:
-                        messages.add_message(request,
-                                             messages.WARNING,
-                                             "Equipamento não possui interfaces cadastradas.")
+                    if equip.get('name') == search_form:
+
+                        data["searchable_columns"] = ["equipamento__id"]
+                        data["custom_search"] = equip.get('id')
+
+                        search_interface = client.create_api_interface_request().search(fields=['id',
+                                                                                                'interface',
+                                                                                                'equipment__basic',
+                                                                                                'native_vlan',
+                                                                                                'type__details',
+                                                                                                'channel__basic',
+                                                                                                'front_interface__basic',
+                                                                                                'back_interface__basic'],
+                                                                                        search=data)
+                        interface_list = search_interface.get('interfaces')
+                        interface_flag = True
+
+                if not equipments:
+                    raise Exception('Equipamento não encontrado.')
+
+                if not interface_list:
+                    messages.add_message(request,
+                                         messages.WARNING,
+                                         "Equipamento não possui interfaces cadastradas.")
 
                 lists['equip_interface'] = interface_list
                 lists['search_form'] = search_form
