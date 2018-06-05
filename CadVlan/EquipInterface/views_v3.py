@@ -129,7 +129,7 @@ def add_interface(request, equipment=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
-def list_equipment_interfaces(request):
+def list_equipment_interfaces(request, ids=False):
     lists = dict()
     interface_list = list()
 
