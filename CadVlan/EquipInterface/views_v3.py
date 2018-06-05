@@ -114,12 +114,21 @@ def add_interface(request, equipment=None):
         environments = request.POST.getlist('environments')
 
         if environments:
+            error = False
             try:
                 for env in environments:
-                    client.create_interface().associar_ambiente(env, interface_id)
+                    int_env_map = dict(interface=int(interface_id),
+                                       environment=int(env),
+                                       range_vlans=request.POST.get('vlans'))
+                    client.create_api_interface_request().associate_interface_environments([int_env_map])
             except NetworkAPIClientError, e:
+                error = True
                 logger.error(e)
-                messages.add_message(request, messages.WARNING, 'Os ambientes não foram associados à interface')
+                messages.add_message(request, messages.WARNING, 'Os ambientes não foram associados à interface.')
+            if not error:
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Os ambientes foram associados à interface corretamente.')
 
         return HttpResponseRedirect('/interface/?search_equipment=%s' % equips.get('name'))
 
@@ -313,17 +322,15 @@ def edit_interface(request, interface=None):
 
     if request.method == "POST":
 
-        interface_dict = {
-            'id': int(interfaces.get('id')),
-            'interface': request.POST.get('name'),
-            'description': request.POST.get('description'),
-            'protected': True if int(request.POST.get('protected')) else False,
-            'native_vlan': request.POST.get('vlan_nativa'),
-            'type': int(request.POST.get('type')),
-            'equipment': int(equipment.get('id')),
-            'front_interface': interfaces.get('front_interface'),
-            'back_interface': interfaces.get('back_interface')
-        }
+        interface_dict = dict(id=int(interfaces.get('id')),
+                              interface=request.POST.get('name'),
+                              description=request.POST.get('description'),
+                              protected=True if int(request.POST.get('protected')) else False,
+                              native_vlan=request.POST.get('vlan_nativa'),
+                              type=int(request.POST.get('type')),
+                              equipment=int(equipment.get('id')),
+                              front_interface=interfaces.get('front_interface'),
+                              back_interface=interfaces.get('back_interface'))
 
         try:
             client.create_api_interface_request().update([interface_dict])
