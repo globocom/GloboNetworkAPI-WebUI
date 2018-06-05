@@ -18,6 +18,8 @@
 
 import logging
 
+from django.contrib import messages
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,6 +41,32 @@ def get_interface_map(client, interface):
 
     response = client.create_api_interface_request().get(ids=[interface], fields=fields)
     interface_obj = response.get('interfaces')[0]
+
+    data = dict()
+    data["start_record"] = 0
+    data["end_record"] = 1000
+    data["asorting_cols"] = ["id"]
+    data["extends_search"] = []
+    data["searchable_columns"] = ["interface__id"]
+    data["custom_search"] = str(interface)
+
+    envs = list()
+    env_id = list()
+
+    try:
+        envs = client.create_api_interface_request().get_interface_environments(search=data)
+        envs = envs.get('interface_environments')
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(None, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
+                                                        'Error: %s' % e)
+
+    for env in envs:
+        env_id.append(env.get('environment'))
+
+    interface_obj['env_ids'] = env_id
+    interface_obj['range_vlans'] = envs[0].get('range_vlans') if envs else None
+
     interface_map[str(item)] = interface_obj
     main_interface = interface_obj
     prior_interface = interface_obj.get('id')
@@ -52,6 +80,27 @@ def get_interface_map(client, interface):
             item += 1
             response = client.create_api_interface_request().get(ids=[next_interface], fields=fields)
             interface_obj = response.get('interfaces')[0]
+
+            data["searchable_columns"] = ["interface__id"]
+            data["custom_search"] = str(interface)
+
+            envs = list()
+            env_id = list()
+
+            try:
+                envs = client.create_api_interface_request().get_interface_environments(search=data)
+                envs = envs.get('interface_environments')
+            except Exception, e:
+                logger.error(e)
+                messages.add_message(None, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
+                                                             'Error: %s' % e)
+
+            for env in envs:
+                env_id.append(env.get('environment'))
+
+            interface_obj['env_ids'] = env_id
+            interface_obj['range_vlans'] = envs[0].get('range_vlans') if envs else None
+
             interface_map[str(item)] = interface_obj
             interface_map[str(item-1)]['next_interface'] = interface_obj.get('id')
 
@@ -77,6 +126,27 @@ def get_interface_map(client, interface):
             item -= 1
             response = client.create_api_interface_request().get(ids=[next_interface], fields=fields)
             interface_obj = response.get('interfaces')[0]
+
+            data["searchable_columns"] = ["interface__id"]
+            data["custom_search"] = str(interface)
+
+            envs = list()
+            env_id = list()
+
+            try:
+                envs = client.create_api_interface_request().get_interface_environments(search=data)
+                envs = envs.get('interface_environments')
+            except Exception, e:
+                logger.error(e)
+                messages.add_message(None, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
+                                                             'Error: %s' % e)
+
+            for env in envs:
+                env_id.append(env.get('environment'))
+
+            interface_obj['env_ids'] = env_id
+            interface_obj['range_vlans'] = envs[0].get('range_vlans') if envs else None
+
             interface_map[str(item)] = interface_obj
             interface_map[str(item)]['next_interface'] = interface_map[str(item+1)].get('id')
 

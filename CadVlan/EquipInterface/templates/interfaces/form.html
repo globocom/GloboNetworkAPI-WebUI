@@ -136,6 +136,7 @@
                            name="vlans"
                            data-form-field="vlans"
                            placeholder="Ex.: 2-100"
+                           value="{{ default.range_vlans }}"
                            id="interface_range_vlan">
                 </div>
             </div>
@@ -148,11 +149,20 @@
                     {% for env in default.equipment.environments %}
                         <div class="checkbox">
                             <label style="visibility:visible;">
+                                {% if env.environment.id in default.env_ids %}
+                                <input class="source"
+                                       checked
+                                       type="checkbox"
+                                       style="visibility:visible;"
+                                       value="{{ env.environment.id }}"
+                                       name="environments">
+                                {% else %}
                                 <input class="source"
                                        type="checkbox"
                                        style="visibility:visible;"
                                        value="{{ env.environment.id }}"
                                        name="environments">
+                                {% endif %}
                                 {{ env.environment.name }} (Vlans: {{ env.environment.min_num_vlan_1 }} - {{ env.environment.max_num_vlan_1 }})
                             </label>
                         </div>

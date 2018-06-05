@@ -39,8 +39,6 @@ from CadVlan.Util.Decorators import login_required
 
 from networkapiclient.exception import NetworkAPIClientError
 
-from collections import OrderedDict
-
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +112,6 @@ def add_interface(request, equipment=None):
         environments = request.POST.getlist('environments')
 
         if environments:
-            error = False
             try:
                 for env in environments:
                     int_env_map = dict(interface=int(interface_id),
@@ -122,13 +119,8 @@ def add_interface(request, equipment=None):
                                        range_vlans=request.POST.get('vlans'))
                     client.create_api_interface_request().associate_interface_environments([int_env_map])
             except NetworkAPIClientError, e:
-                error = True
                 logger.error(e)
                 messages.add_message(request, messages.WARNING, 'Os ambientes não foram associados à interface.')
-            if not error:
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Os ambientes foram associados à interface corretamente.')
 
         return HttpResponseRedirect('/interface/?search_equipment=%s' % equips.get('name'))
 
@@ -285,6 +277,19 @@ def edit_interface(request, interface=None):
 
     if request.method == "POST":
 
+        data["searchable_columns"] = ["interface__id"]
+        data["custom_search"] = str(interface)
+
+        int_envs = list()
+
+        try:
+            int_envs = client.create_api_interface_request().get_interface_environments(search=data)
+            int_envs = int_envs.get('interface_environments')
+        except Exception, e:
+            logger.error(e)
+            messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
+                                                         'Error: %s' % e)
+
         interface_dict = dict(id=int(interfaces.get('id')),
                               interface=request.POST.get('name'),
                               description=request.POST.get('description'),
@@ -307,17 +312,21 @@ def edit_interface(request, interface=None):
 
         environments = request.POST.getlist('environments')
 
+        if int_envs:
+            try:
+                for env in int_envs:
+                    client.create_api_interface_request().disassociate_interface_environments([env.get('id')])
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, 'Erro ao remover os ambientes associados anteriormente.')
+
         if environments:
-            # corrigir o dissassociar ambientes
-            # apenas associando mais ambiente, não removendo/editando
-            # try:
-            #     client.create_interface().dissociar(interface)
-            # except NetworkAPIClientError, e:
-            #     logger.error(e)
-            #     messages.add_message(request, messages.ERROR, 'Erro ao dessassociar os ambientes.')
             try:
                 for env in environments:
-                    client.create_interface().associar_ambiente(env, interface)
+                    int_env_map = dict(interface=int(interface),
+                                       environment=int(env),
+                                       range_vlans=request.POST.get('vlans'))
+                    client.create_api_interface_request().associate_interface_environments([int_env_map])
             except NetworkAPIClientError, e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, 'Erro ao atualizar os ambientes.')
