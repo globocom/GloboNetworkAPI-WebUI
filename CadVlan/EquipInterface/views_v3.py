@@ -129,7 +129,7 @@ def add_interface(request, equipment=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
-def list_equipment_interfaces(request):
+def list_equipment_interfaces(request, ids=False):
     lists = dict()
     interface_list = list()
 
@@ -191,6 +191,9 @@ def list_equipment_interfaces(request):
                 lists['search_form'] = search_form
                 lists['interface_flag'] = interface_flag
                 lists['equip_id'] = equipments[0].get('id')
+
+                if ids:
+                    HttpResponseRedirect(reverse("interface.edit", args=[interface_a]))
 
         return render_to_response(LIST_EQUIPMENT_INTERFACES, lists, RequestContext(request))
 
