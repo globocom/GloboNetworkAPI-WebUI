@@ -192,7 +192,7 @@ $(document).ready(function() {
 	</div>{% else %}<form id="search_form" action="{% url interface.connect id_interface front_or_back %}">
 		{% for field in search_form %}{{ field }}{% endfor %}
 		<img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
-		<button id="btn_search" type="submit">Selecionar</button>
+		<button id="btn_search">Selecionar</button>
 		{% for field in search_form %}{% if field.errors %}<p id="error">
 			{% for error in field.errors %}{{ error|escape }}{% endfor %}
 		</p>{% endif %}{% endfor %}

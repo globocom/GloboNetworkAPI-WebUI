@@ -33,7 +33,7 @@ from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.templates import ADD_EQUIPMENT_INTERFACE
 from CadVlan.templates import EDIT_EQUIPMENT_INTERFACE
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
-from CadVlan.templates import EQUIPMENT_INTERFACE_CONNECT_FORM
+from CadVlan.templates import NEW_INTERFACE_CONNECT_FORM
 from CadVlan.EquipInterface.forms import ConnectForm
 from CadVlan.forms import SearchEquipForm
 
@@ -437,7 +437,6 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
                     lists['equipment'] = equipment
 
         elif request.method == "POST":
-
             equip_id = request.POST['equip_id']
 
             # Get equipment by name from NetworkAPI
@@ -531,9 +530,15 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
                                                  interface['ligacao_back'],
                                                  interface['tipo'], interface['vlan'])
 
-                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
+                messages.add_message(
+                    request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
 
-                return HttpResponseRedirect(reverse("interface.edit", args=[id_interface]))
+                url_param = reverse(
+                    "equip.interface.edit.form", args=[interface['equipamento_nome'], id_interface])
+                response = HttpResponseRedirect(url_param)
+                response.status_code = 278
+
+                return response
 
             else:
                 lists['connect_form'] = form
@@ -546,7 +551,7 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(EQUIPMENT_INTERFACE_CONNECT_FORM, lists, RequestContext(request))
+    return render_to_response(NEW_INTERFACE_CONNECT_FORM, lists, RequestContext(request))
 
 
 @log
