@@ -530,12 +530,9 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
                                                  interface['ligacao_back'],
                                                  interface['tipo'], interface['vlan'])
 
-                messages.add_message(
-                    request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
 
-                url_param = reverse(
-                    "equip.interface.edit.form", args=[interface['equipamento_nome'], id_interface])
-                response = HttpResponseRedirect(url_param)
+                response = HttpResponseRedirect(reverse("interface.edit", args=[id_interface]))
                 response.status_code = 278
 
                 return response
