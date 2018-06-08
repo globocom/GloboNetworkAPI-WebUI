@@ -92,6 +92,8 @@ LIST_EQUIPMENT_INTERFACES = 'interfaces/list.html'
 ADD_EQUIPMENT_INTERFACE = 'interfaces/new_interface.html'
 EDIT_EQUIPMENT_INTERFACE = 'interfaces/edit_interface.html'
 CONNECTIONS_INTERFACES = 'interfaces/connections.html'
+NEW_CONNECTION = 'interfaces/new_connection.html'
+NEW_INTERFACE_CONNECT_FORM = 'interface/connect-form-new.html'
 
 # Equipment
 EQUIPMENT_SEARCH_LIST = 'equipment/search-list.html'

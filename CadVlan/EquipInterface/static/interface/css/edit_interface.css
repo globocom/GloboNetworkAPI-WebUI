@@ -100,3 +100,37 @@ i.set-link:hover {
     padding: 0; 
     color: #FFF;
 }
+
+div.modal-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;    
+}
+
+div.modal-rows {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center; 
+}
+
+button.search-button {
+    background-color:#f5f5f5;
+    margin:0px;
+    height:30px;
+    width:30px;
+    border: 1px solid #e8e8e8;
+    padding: none;
+}
+
+input#search_equip.form-control {
+    height: 30px;
+    min-width: 300px;
+}
+
+.hide-div {
+    display: none;
+}
+a:focus {outline:0 !important;}
+button:focus {outline:0 !important;}

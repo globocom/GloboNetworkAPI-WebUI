@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 def get_interface_map(client, interface):
-
     interface_map = dict()
     item = 100
 
@@ -59,7 +58,7 @@ def get_interface_map(client, interface):
     except Exception, e:
         logger.error(e)
         messages.add_message(None, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
-                                                        'Error: %s' % e)
+                                                     'Error: %s' % e)
 
     for env in envs:
         env_id.append(env.get('environment'))
@@ -102,12 +101,12 @@ def get_interface_map(client, interface):
             interface_obj['range_vlans'] = envs[0].get('range_vlans') if envs else None
 
             interface_map[str(item)] = interface_obj
-            interface_map[str(item-1)]['next_interface'] = interface_obj.get('id')
+            interface_map[str(item - 1)]['next_interface'] = interface_obj.get('id')
 
             if interface_obj.get('back_interface') == prior_interface:
                 next_interface = interface_obj.get('front_interface') if interface_obj.get('front_interface') else None
             elif interface_obj.get('front_interface') == prior_interface:
-                next_interface = interface_obj.get('back_interface')  if interface_obj.get('back_interface') else None
+                next_interface = interface_obj.get('back_interface') if interface_obj.get('back_interface') else None
             else:
                 next_interface = None
 
@@ -148,12 +147,12 @@ def get_interface_map(client, interface):
             interface_obj['range_vlans'] = envs[0].get('range_vlans') if envs else None
 
             interface_map[str(item)] = interface_obj
-            interface_map[str(item)]['next_interface'] = interface_map[str(item+1)].get('id')
+            interface_map[str(item)]['next_interface'] = interface_map[str(item + 1)].get('id')
 
             if interface_obj.get('back_interface') == prior_interface:
                 next_interface = interface_obj.get('front_interface') if interface_obj.get('front_interface') else None
             elif interface_obj.get('front_interface') == prior_interface:
-                next_interface = interface_obj.get('back_interface')  if interface_obj.get('back_interface') else None
+                next_interface = interface_obj.get('back_interface') if interface_obj.get('back_interface') else None
             else:
                 next_interface = None
 
@@ -165,10 +164,9 @@ def get_interface_map(client, interface):
 
 
 def get_ordered_list(first, last, interface_map):
-
     interface_list = list()
 
-    for j in range(first, last+1):
+    for j in range(first, last + 1):
         interface_list.append(interface_map.get(str(j)))
 
     return interface_list

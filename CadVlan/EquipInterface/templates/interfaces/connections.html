@@ -1,61 +1,12 @@
 {% for interface in interface_map %}
     {% if not forloop.counter0 %}
     <div class="elements">
-        <button type="button"
-                class="btn btn-social-link btn-responsive"
-                data-toggle="modal"
-                data-target="#myModal"
-                title="linkar interfaces">
-            <i class="set-link">+</i>
-        </button>
-        <div class="modal fade" id="myModal" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Associar interfaces</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <form id="search_form" action="{% url interface.list 1 %}">
-                                {% csrf_token %}
-                                <div class="input-group input-group-sm">
-                                    <input autocomplete="off"
-                                           class="form-control"
-                                           name="search_equipment"
-                                           data-form-field="dcname"
-                                           id="id_equip_name"
-                                           placeholder="Nome do equipamento..."
-                                           autofocus value="{{ search_form }}">
-                                    <span class="input-group-addon">
-                                        <img id="loading-autocomplete"
-                                             src="{{ MEDIA_URL }}/img/input-loading.gif"
-                                             style="display: none;"/>
-                                    </span>
-                                    <div class="input-group-btn">
-                                        <button class="btn primary"
-                                                style="background-color:#f5f5f5;margin:0px;height:60px;">
-                                            <i class="material-icons"
-                                               style="color:#FFD17C;font-size:30px">
-                                                search
-                                            </i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <p id="error">
-                                    {% for error in field.errors %}
-                                        {{ error|escape }}
-                                    {% endfor %}
-                                </p>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn-sm btn-success-outline btn-success" >Associar!</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <a href="{{ interface.id }}"
+           lang="/1"
+           class="connect">
+                +
+        </a>
+        <div id="dialog-form" title="Ligar ao Equipamento"></div>
     </div>
     {% endif %}
     <div class="vertical-line"></div>

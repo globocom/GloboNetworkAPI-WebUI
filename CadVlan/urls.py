@@ -135,7 +135,7 @@ urlpatterns += patterns(
 # URL's Equipment Interface - NEW
 urlpatterns += patterns(
     'CadVlan.EquipInterface.views_v3',
-    url('^interface/(?P<ids>[^/]+)[/]?$', 'list_equipment_interfaces',
+    url('^interface[/]?$', 'list_equipment_interfaces',
         name='interface.list',),
     url('^interface[/]?$', 'list_equipment_interfaces',
         name='interface.list', ),
@@ -149,7 +149,7 @@ urlpatterns += patterns(
         name='interface.add', ),
     url('^interface/edit/(?P<interface>[^/]+)[/]?$', 'edit_interface',
         name='interface.edit', ),
-    url('^interface/connect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'connect_interfaces',
+    url('^interface/connect/(?P<id_interface>[^/]+)/(?P<front_or_back>[^/]+)[/]?$', 'connect_interfaces',
         name='interface.connect', ),
     url('^interface/disconnect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'disconnect_interfaces',
         name='interface.disconnect', ),
