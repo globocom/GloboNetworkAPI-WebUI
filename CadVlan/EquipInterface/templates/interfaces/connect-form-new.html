@@ -17,11 +17,11 @@
 {% load util %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
+
 {% if connect_form %}
 	$("#connect_form").submit(function(event) {
 		event.preventDefault();
-		url = "{% url equip.interface.connect id_interface front_or_back %}";
+		url = "{% url interface.connect id_interface front_or_back %}";
 		form = $("#connect_form").serialize();
 		$.ajax({
 			url: url,
@@ -49,35 +49,35 @@ $(document).ready(function() {
 		autoOpen: false,
 		draggable: false,
 		resizable: false,
-		buttons: [ 
-		          { 
+		buttons: [
+		          {
 		        	  text: "Voltar",
 		              id: "back",
-		              click: function() { 
-		              } 
+		              click: function() {
+		              }
 		          },
-		          { 
+		          {
 		        	  text: "Associar",
 		        	  id: "ass",
-		              click: function() { 
+		              click: function() {
 		  				$("#connect_form").submit();
-		              } 
+		              }
 		          },
-		          { 
+		          {
 		        	  text: "Cancelar",
 		        	  id: "can",
-		              click: function() { 
+		              click: function() {
 		            	  $(this).dialog("close");
-		              } 
+		              }
 		          }
 		      ]
-	});	
-	
+	});
+
 	$(".ui-dialog-buttonset").attr("style","width: 578px;");
 	$("#back").attr("style","float: left;");
 	$("#ass").attr("style","float: right;");
 	$("#can").attr("style","float: right;");
-	
+
 	$("#back").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }
 		).click(function(event) {
 			event.preventDefault();
@@ -100,15 +100,15 @@ $(document).ready(function() {
 					}
 				}
 			});
-		});	
-	
+		});
+
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
 		location.href = "{% url interface.list %}?search_equipment={{ equip_name }}";
-	});	
-	
-	
-	
-	
+	});
+
+
+
+
 {% else %}
 
 	$("#dialog-form").dialog({
@@ -128,7 +128,7 @@ $(document).ready(function() {
 	});
 	$("#search_form").submit(function(event) {
 		event.preventDefault();
-		url = "{% url equip.interface.connect id_interface front_or_back %}";
+		url = "{% url interface.connect id_interface front_or_back %}";
 		form = $("#search_form").serialize();
 		$.ajax({
 			url: url,
@@ -153,7 +153,7 @@ $(document).ready(function() {
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	$("#btn_search").button({ icons: {primary: "ui-icon-check"} }).click(function(){ $("#search_form").submit(); });
 {% endif %}
-	
+
 });
 </script>
 {% if messages %}{% for message in messages %}<div class='ui-widget error-messages'>
@@ -164,7 +164,7 @@ $(document).ready(function() {
 </div>{% endfor %}{% endif %}
 <div{% if not connect_form %} style="text-align: center;"{% endif %}>
 	{% if connect_form %}<div>
-	<form id="connect_form" action="{% url equip.interface.connect id_interface front_or_back %}">
+	<form id="connect_form" action="{% url interface.connect id_interface front_or_back %}">
 		<div style="float: left;">
 		{% csrf_token %}
 		{% for field in connect_form %}
@@ -175,7 +175,7 @@ $(document).ready(function() {
 				{% if forloop.counter = 1 %}<div>Front:</div>{% endif %}{% if forloop.counter = 2 %}{% ifequal equipment.id_tipo_equipamento '8' %}<div>Back:</div>{% endifequal %}{% endif %}
 				{{ field }}
 				<p id="error">
-				{% if field.errors %} 
+				{% if field.errors %}
 					{% for error in field.errors %}
 						{{ error|escape }}
 					{% endfor %}
@@ -189,7 +189,7 @@ $(document).ready(function() {
 	<img src="{{ MEDIA_URL }}/img/{% ifequal equipment.id_tipo_equipamento '8' %}patch{% else %}serv{% endifequal %}.png" style="height: {% ifequal equipment.id_tipo_equipamento '8' %}28{% else %}74{% endifequal %}px; float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}40{% else %}0{% endifequal %}px; margin-left: 10px;" />
 	<a style="float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}45{% else %}25{% endifequal %}px; margin-left: 10px;" href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">{{ connect_form.equip_name.value }}</a>
 	<div style="clear: left;"></div>
-	</div>{% else %}<form id="search_form" action="{% url equip.interface.connect id_interface front_or_back %}">
+	</div>{% else %}<form id="search_form" action="{% url interface.connect id_interface front_or_back %}">
 		{% for field in search_form %}{{ field }}{% endfor %}
 		<img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
 		<button id="btn_search" type="submit">Selecionar</button>
