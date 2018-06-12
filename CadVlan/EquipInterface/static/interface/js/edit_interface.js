@@ -47,11 +47,37 @@ $(document).ready(function() {
 			$(".line_" + num).css("background-color", "black");
 		}
 	);
-	$(".connect").button(
-		{ icons: {primary: "ui-icon-arrowthick-2-n-s"} }
-	).click(function(event) {
+
+	$("#connect0").click(function(event) {
+	    console.log('back')
 		event.preventDefault();
 		url = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang")
+		console.log(url)
+		$.ajax({
+			url: url,
+			type: "GET",
+			complete: function(xhr, status) {
+				if (xhr.status == "500") {
+					$("#dialog-form").dialog("close");
+					location.reload();
+				} else if (xhr.status == "278" || xhr.status == "302") {
+					$("#dialog-form").dialog("close");
+					window.location = xhr.getResponseHeader('Location');
+				} else if (xhr.status == "200") {
+					$("#dialog-form").html(xhr.responseText);
+					$("#dialog-form").dialog("open");
+				} else {
+					$("#dialog-form").dialog("close");
+				}
+			}
+		});
+	});
+
+	$("#connect1").click(function(event) {
+		console.log('front')
+		event.preventDefault();
+		url = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang")
+		console.log(url)
 		$.ajax({
 			url: url,
 			type: "GET",
