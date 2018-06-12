@@ -65,6 +65,12 @@ div.vertical-line {
     background: #0D84A5;
 }
 
+div.vertical-line-sm {
+    width: 1.5px;
+    height: 20px;
+    background: #0D84A5;
+}
+
 i.remove-link {
     color: #FFF;
     text-align: center;

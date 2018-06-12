@@ -105,12 +105,7 @@ $(document).ready(function() {
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
 		location.href = "{% url interface.list %}?search_equipment={{ equip_name }}";
 	});
-
-
-
-
 {% else %}
-
 	$("#dialog-form").dialog({
 		width: 600,
 		modal: true,
@@ -153,48 +148,83 @@ $(document).ready(function() {
 	autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
 	$("#btn_search").button({ icons: {primary: "ui-icon-check"} }).click(function(){ $("#search_form").submit(); });
 {% endif %}
-
 });
 </script>
-{% if messages %}{% for message in messages %}<div class='ui-widget error-messages'>
-	<div id="messagesError" style="padding: 4px;{% if connect_form %} margin: 10px 20px 5px 20px;  {% else %} margin: 10px 185px 5px 79px; {% endif %}" class="{% if message.tags == 'error'%}ui-state-error{% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
-		<span class="ui-icon"></span>
-		{{ message }}
-	</div>
-</div>{% endfor %}{% endif %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class='ui-widget error-messages'>
+            <div id="messagesError"
+                 style="padding: 4px;{% if connect_form %} margin: 10px 20px 5px 20px;  {% else %} margin: 10px 185px 5px 79px; {% endif %}"
+                 class="{% if message.tags == 'error'%}ui-state-error{% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
+                <span class="ui-icon"></span>
+                {{ message }}
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+
 <div{% if not connect_form %} style="text-align: center;"{% endif %}>
-	{% if connect_form %}<div>
-	<form id="connect_form" action="{% url interface.connect id_interface front_or_back %}">
-		<div style="float: left;">
-		{% csrf_token %}
-		{% for field in connect_form %}
-			{% if field.is_hidden %}
-				{{ field }}
-			{% else %}<div>
-				{% if forloop.counter = 1 %}<div><b>Selecione uma interface:</b></div>{% endif %}
-				{% if forloop.counter = 1 %}<div>Front:</div>{% endif %}{% if forloop.counter = 2 %}{% ifequal equipment.id_tipo_equipamento '8' %}<div>Back:</div>{% endifequal %}{% endif %}
-				{{ field }}
-				<p id="error">
-				{% if field.errors %}
-					{% for error in field.errors %}
-						{{ error|escape }}
-					{% endfor %}
-				{% endif %}
-				</p>
-			</div>
-			{% endif %}
-		{% endfor %}
-		</div>
-	</form>
-	<img src="{{ MEDIA_URL }}/img/{% ifequal equipment.id_tipo_equipamento '8' %}patch{% else %}serv{% endifequal %}.png" style="height: {% ifequal equipment.id_tipo_equipamento '8' %}28{% else %}74{% endifequal %}px; float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}40{% else %}0{% endifequal %}px; margin-left: 10px;" />
-	<a style="float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}45{% else %}25{% endifequal %}px; margin-left: 10px;" href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">{{ connect_form.equip_name.value }}</a>
-	<div style="clear: left;"></div>
-	</div>{% else %}<form id="search_form" action="{% url interface.connect id_interface front_or_back %}">
-		{% for field in search_form %}{{ field }}{% endfor %}
-		<img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
-		<button id="btn_search">Selecionar</button>
-		{% for field in search_form %}{% if field.errors %}<p id="error">
-			{% for error in field.errors %}{{ error|escape }}{% endfor %}
-		</p>{% endif %}{% endfor %}
-	</form>{% endif %}
+	{% if connect_form %}
+        <div>
+            <form id="connect_form" action="{% url interface.connect id_interface front_or_back %}">
+                <div style="float: left;">
+                    {% csrf_token %}
+                    {% for field in connect_form %}
+                        {% if field.is_hidden %}
+                            {{ field }}
+                        {% else %}
+                            <div>
+                                {% if forloop.counter = 1 %}
+                                    <div><b>Selecione uma interface:</b></div>
+                                {% endif %}
+                                {% if forloop.counter = 1 %}
+                                    <div>Front:</div>
+                                {% endif %}
+                                {% if forloop.counter = 2 %}
+                                    {% ifequal equipment.id_tipo_equipamento '8' %}
+                                        <div>Back:</div>
+                                    {% endifequal %}
+                                {% endif %}
+                                {{ field }}
+                                <p id="error">
+                                    {% if field.errors %}
+                                        {% for error in field.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </form>
+            <img src="{{ MEDIA_URL }}/img/{% ifequal equipment.id_tipo_equipamento '8' %}patch{% else %}serv{% endifequal %}.png"
+                 style="height: {% ifequal equipment.id_tipo_equipamento '8' %}28{% else %}74{% endifequal %}px; float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}40{% else %}0{% endifequal %}px; margin-left: 10px;" />
+            <a style="float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}45{% else %}25{% endifequal %}px; margin-left: 10px;"
+               href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">
+                {{ connect_form.equip_name.value }}
+            </a>
+            <div style="clear: left;"></div>
+        </div>
+    {% else %}
+        <form id="search_form" action="{% url interface.connect id_interface front_or_back %}">
+            {% for field in search_form %}
+                {{ field }}
+            {% endfor %}
+            <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
+            <button id="btn_search">
+                Selecionar
+            </button>
+            {% for field in search_form %}
+                {% if field.errors %}
+                    <p id="error">
+                        {% for error in field.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                    </p>
+                {% endif %}
+            {% endfor %}
+        </form>
+    {% endif %}
 </div>
