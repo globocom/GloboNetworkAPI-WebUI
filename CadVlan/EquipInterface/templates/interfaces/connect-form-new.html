@@ -81,7 +81,7 @@ $(document).ready(function() {
 	$("#back").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }
 		).click(function(event) {
 			event.preventDefault();
-			url = "/equip-interface/connect/" + $(".connect").attr("href") + $(".connect").attr("lang")
+			url = "/interface/connect/23206/1"
 			$.ajax({
 				url: url,
 				type: "GET",
@@ -151,20 +151,15 @@ $(document).ready(function() {
 });
 </script>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class='ui-widget error-messages'>
-            <div id="messagesError"
-                 style="padding: 4px;{% if connect_form %} margin: 10px 20px 5px 20px;  {% else %} margin: 10px 185px 5px 79px; {% endif %}"
-                 class="{% if message.tags == 'error'%}ui-state-error{% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
-                <span class="ui-icon"></span>
-                {{ message }}
-            </div>
-        </div>
-    {% endfor %}
-{% endif %}
+<p id="error">
+    {% if field.errors %}
+        {% for error in field.errors %}
+            {{ error|escape }}
+        {% endfor %}
+    {% endif %}
+</p>
 
-<div{% if not connect_form %} style="text-align: center;"{% endif %}>
+<div style="text-align: center;">
 	{% if connect_form %}
         <div>
             <form id="connect_form" action="{% url interface.connect id_interface front_or_back %}">
@@ -182,7 +177,7 @@ $(document).ready(function() {
                                     <div>Front:</div>
                                 {% endif %}
                                 {% if forloop.counter = 2 %}
-                                    {% ifequal equipment.id_tipo_equipamento '8' %}
+                                    {% ifequal equipment.equipment_type 8 %}
                                         <div>Back:</div>
                                     {% endifequal %}
                                 {% endif %}
@@ -199,32 +194,39 @@ $(document).ready(function() {
                     {% endfor %}
                 </div>
             </form>
-            <img src="{{ MEDIA_URL }}/img/{% ifequal equipment.id_tipo_equipamento '8' %}patch{% else %}serv{% endifequal %}.png"
-                 style="height: {% ifequal equipment.id_tipo_equipamento '8' %}28{% else %}74{% endifequal %}px; float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}40{% else %}0{% endifequal %}px; margin-left: 10px;" />
-            <a style="float: left; margin-top: {% ifequal equipment.id_tipo_equipamento '8' %}45{% else %}25{% endifequal %}px; margin-left: 10px;"
+            <img src="{{ MEDIA_URL }}/img/{% ifequal equipment.equipment_type 8 %}patch{% else %}serv{% endifequal %}.png"
+                 style="height: {% ifequal equipment.equipment_type 8 %}28{% else %}74{% endifequal %}px; float: left; margin-top: {% ifequal equipment.equipment_type 8 %}40{% else %}0{% endifequal %}px; margin-left: 10px;" />
+            <a style="float: left; margin-top: {% ifequal equipment.equipment_type 8 %}45{% else %}25{% endifequal %}px; margin-left: 10px;"
                href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">
                 {{ connect_form.equip_name.value }}
             </a>
             <div style="clear: left;"></div>
         </div>
     {% else %}
-        <form id="search_form" action="{% url interface.connect id_interface front_or_back %}">
-            {% for field in search_form %}
-                {{ field }}
-            {% endfor %}
-            <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;" />
-            <button id="btn_search">
-                Selecionar
-            </button>
-            {% for field in search_form %}
-                {% if field.errors %}
-                    <p id="error">
-                        {% for error in field.errors %}
-                            {{ error|escape }}
-                        {% endfor %}
-                    </p>
-                {% endif %}
-            {% endfor %}
+        <form id="search_form" action="{% url interface.connect id_interface front_or_back %}" class="modal-rows">
+            <div class="input-group input-group-sm">
+                <input name="search_equip"
+                       id="search_input"
+                       class="form-control"
+                       data-form-field="search_equip"
+                       placeholder="Busque pelo nome do Equip..."
+                       required>
+            </div>
+            <div>
+                <span class="input-group-addon">
+                    <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;"/>
+                </span>
+            </div>
+            <div>
+                <button class="btn_search">
+                    <i class="material-icons" style="color:#FFD17C;font-size:20px">search</i>
+                </button>
+            </div>
+            <p id="error">
+                {% for error in field.errors %}
+                    {{ error|escape }}
+                {% endfor %}
+            </p>
         </form>
     {% endif %}
 </div>

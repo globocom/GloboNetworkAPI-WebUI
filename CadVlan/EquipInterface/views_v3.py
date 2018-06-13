@@ -34,8 +34,7 @@ from CadVlan.templates import ADD_EQUIPMENT_INTERFACE
 from CadVlan.templates import EDIT_EQUIPMENT_INTERFACE
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
 from CadVlan.templates import NEW_INTERFACE_CONNECT_FORM
-from CadVlan.EquipInterface.forms import ConnectForm
-from CadVlan.forms import SearchEquipForm
+from CadVlan.EquipInterface.forms import ConnectFormV3
 
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
@@ -388,53 +387,75 @@ def edit_interface(request, interface=None):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def connect_interfaces(request, id_interface=None, front_or_back=None):
-    lists = dict()
 
-    if not (front_or_back == "0" or front_or_back == "1"):
-        raise Http404
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    lists = dict()
+    lists['id_interface'] = id_interface
+    lists['front_or_back'] = front_or_back
 
     try:
-
-        # Get user
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        lists['id_interface'] = id_interface
-        lists['front_or_back'] = front_or_back
-        lists['search_form'] = SearchEquipForm()
-
         if request.method == "GET":
 
-            if request.GET.__contains__('equip_name'):
+            if request.GET.__contains__('search_equip'):
 
-                lists['search_form'] = search_form = SearchEquipForm(
-                    request.GET)
+                equipment_name = request.GET.get('search_equip')
 
-                if search_form.is_valid():
+                data = dict()
+                data["start_record"] = 0
+                data["end_record"] = 1000
+                data["asorting_cols"] = ["id"]
+                data["searchable_columns"] = ["nome"]
+                data["custom_search"] = equipment_name
+                data["extends_search"] = []
 
-                    # Get equip name in form
-                    name_equip = search_form.cleaned_data['equip_name']
+                equipment = list()
 
-                    # Get equipment by name from NetworkAPI
-                    equipment = client.create_equipamento().listar_por_nome(
-                        name_equip)['equipamento']
-                    # Get interfaces related to equipment selected
-                    interf_list = client.create_interface().list_all_by_equip(
-                        equipment['id'])
+                try:
+                    search_equipment = client.create_api_equipment().search(search=data)
+                    equipment = search_equipment.get('equipments')
 
-                    # Remove interface that is being added to the combobox
-                    i = []
-                    for inter in interf_list['interfaces']:
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
+                except Exception, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, e)
 
-                        if id_interface != inter['id']:
-                            i.append(inter)
+                interface_list = list()
 
-                    interf_list = dict()
-                    interf_list['interfaces'] = i
+                for equip in equipment:
 
-                    lists['connect_form'] = ConnectForm(equipment, interf_list['interfaces'], initial={
-                        'equip_name': equipment['nome'], 'equip_id': equipment['id']})
-                    lists['equipment'] = equipment
+                    data["searchable_columns"] = ["equipamento__id"]
+                    data["custom_search"] = equip.get('id')
+
+                    try:
+                        search_interface = client.create_api_interface_request().search(
+                            fields=['id',
+                                    'interface',
+                                    'front_interface__basic',
+                                    'back_interface__basic'],
+                            search=data)
+
+                        interface_list = search_interface.get('interfaces')
+
+                    except NetworkAPIClientError, e:
+                        logger.error(e)
+                        messages.add_message(request, messages.ERROR, e)
+                    except Exception, e:
+                        logger.error(e)
+                        messages.add_message(request, messages.ERROR, e)
+
+                for i in interface_list:
+                    if front_or_back and i.get('front_interface') or not front_or_back and i.get('back_interface'):
+                        interface_list.remove(i)
+
+                lists['connect_form'] = ConnectFormV3(equipment[0],
+                                                      interface_list,
+                                                      initial={'equip_name': equipment[0].get('name'),
+                                                               'equip_id': equipment[0].get('id')})
+                lists['equipment'] = equipment[0]
 
         elif request.method == "POST":
             equip_id = request.POST['equip_id']
@@ -446,7 +467,7 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
             interf_list = client.create_interface().list_all_by_equip(
                 equipment['id'])
 
-            form = ConnectForm(
+            form = ConnectFormV3(
                 equipment, interf_list['interfaces'], request.POST)
 
             if form.is_valid():
@@ -540,7 +561,6 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
             else:
                 lists['connect_form'] = form
                 lists['equipment'] = equipment
-
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)

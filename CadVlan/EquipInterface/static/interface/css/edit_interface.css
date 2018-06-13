@@ -114,20 +114,26 @@ div.modal-body {
     align-items: center;    
 }
 
-div.modal-rows {
+form#search_form.modal-rows {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center; 
 }
 
-button.search-button {
+button.btn_search {
     background-color:#f5f5f5;
     margin:0px;
     height:30px;
     width:30px;
-    border: 1px solid #e8e8e8;
+    border: none;
     padding: none;
+}
+
+input#search_input.form-control {
+    height: 30px;
+    min-width: 300px;
+    border: none;
 }
 
 input#search_equip.form-control {
@@ -138,5 +144,10 @@ input#search_equip.form-control {
 .hide-div {
     display: none;
 }
+
+span.input-group-addon {
+    height: 30px;
+}
+
 a:focus {outline:0 !important;}
 button:focus {outline:0 !important;}
