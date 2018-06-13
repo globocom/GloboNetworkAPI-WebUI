@@ -92,11 +92,16 @@ class ConnectFormV3(forms.Form):
         back_choices.append(("", "Selecione"))
 
         if equipment['equipment_type'] == str(PATCH_PANEL_ID):
-            front_choices = interf_list
-            back_choices = interf_list
+            for interf in interf_list:
+                if not interf["front_interface"]:
+                    front_choices.append((interf['id'], interf['interface']))
+                if not interf['ligacao_back']:
+                    back_choices.append((interf['id'], interf['interface']))
         else:
             attrs["style"] = "display: none;"
-            front_choices = interf_list
+            for interf in interf_list:
+                if not interf["front_interface"]:
+                    front_choices.append((interf['id'], interf['interface']))
 
         if not front_choices:
             front_choices = [("", "Nenhuma interface disponível")]

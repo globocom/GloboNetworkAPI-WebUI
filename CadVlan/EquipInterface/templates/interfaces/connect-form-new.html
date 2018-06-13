@@ -19,6 +19,7 @@
 $(document).ready(function() {
 
 {% if connect_form %}
+
 	$("#connect_form").submit(function(event) {
 		event.preventDefault();
 		url = "{% url interface.connect id_interface front_or_back %}";
@@ -78,8 +79,7 @@ $(document).ready(function() {
 	$("#ass").attr("style","float: right;");
 	$("#can").attr("style","float: right;");
 
-	$("#back").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }
-		).click(function(event) {
+	$("#back").click(function(event) {
 			event.preventDefault();
 			url = "/interface/connect/23206/1"
 			$.ajax({
@@ -105,6 +105,7 @@ $(document).ready(function() {
 	$("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
 		location.href = "{% url interface.list %}?search_equipment={{ equip_name }}";
 	});
+
 {% else %}
 	$("#dialog-form").dialog({
 		width: 600,
