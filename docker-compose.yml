@@ -17,7 +17,7 @@ services:
             - "8081:8081"
         command: sh scripts/docker-start.sh
         env_file:
-            - netapi_webui.env
+            - config/netapi_webui.env
         volumes:
             - .:/netapi_webui
         networks:
