@@ -13,6 +13,7 @@ help:
 	@echo "  start      to containers locally using docker-compose"
 	@echo "  stop       to stop all project running containers"
 	@echo "  logs       to follow logs of application container"
+	@echo "  shell      to enter a shell on running container"
 	@echo "  docs       to create documentation files"
 	@echo "  clean      to clean garbage left by builds and installation"
 	@echo "  compile    to compile .py files (just to check for syntax errors)"
@@ -30,6 +31,10 @@ stop: docker-compose.yml
 
 logs:
 	@docker logs --tail 100 --follow netapi_webui_app
+
+
+shell:
+	@docker exec -it netapi_webui_app bash
 
 
 clean:
