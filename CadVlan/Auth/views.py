@@ -74,7 +74,6 @@ def login(request):
                     request.session.set_expiry(SESSION_EXPIRY_AGE)
 
                     auth = AuthSession(request.session)
-                    # auth.login(User(**user.get('user')))
 
                     user = user.get('user')
 
