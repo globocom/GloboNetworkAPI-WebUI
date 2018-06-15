@@ -23,7 +23,7 @@ from django.contrib import messages
 logger = logging.getLogger(__name__)
 
 
-def get_interface_map(client, interface):
+def get_interface_map(request, client, interface):
     interface_map = dict()
     item = 100
 
@@ -57,7 +57,7 @@ def get_interface_map(client, interface):
         envs = envs.get('interface_environments')
     except Exception, e:
         logger.error(e)
-        messages.add_message(None, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
+        messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
                                                      'Error: %s' % e)
 
     for env in envs:
@@ -91,7 +91,7 @@ def get_interface_map(client, interface):
                 envs = envs.get('interface_environments')
             except Exception, e:
                 logger.error(e)
-                messages.add_message(None, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
+                messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
                                                              'Error: %s' % e)
 
             for env in envs:
@@ -137,7 +137,7 @@ def get_interface_map(client, interface):
                 envs = envs.get('interface_environments')
             except Exception, e:
                 logger.error(e)
-                messages.add_message(None, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
+                messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
                                                              'Error: %s' % e)
 
             for env in envs:
