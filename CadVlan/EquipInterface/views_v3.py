@@ -185,7 +185,7 @@ def list_equipment_interfaces(request):
                 if not interface_list:
                     messages.add_message(request,
                                          messages.WARNING,
-                                         str(interface_list))
+                                         'Equipamento não tem interfaces associadas.')
 
                 lists['equip_interface'] = interface_list
                 lists['search_form'] = search_form
@@ -331,7 +331,7 @@ def edit_interface(request, interface=None):
                 messages.add_message(request, messages.ERROR, 'Erro ao atualizar os ambientes.')
 
     try:
-        first_item, last_item, interface_map = facade.get_interface_map(client, interface)
+        first_item, last_item, interface_map = facade.get_interface_map(request, client, interface)
         lists['interface_map'] = facade.get_ordered_list(first_item, last_item, interface_map)
         lists['total_itens'] = last_item - first_item
     except NetworkAPIClientError, e:
@@ -467,83 +467,24 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
                 front = form.cleaned_data['front']
                 back = form.cleaned_data['back']
 
-                # Get interface to link
-                interface_client = client.create_interface()
-                interface = interface_client.get_by_id(id_interface)
-                interface = interface.get("interface")
-                if interface['protegida'] == "True":
-                    interface['protegida'] = 1
+
+                link_a = "front" if front_or_back else "back"
+                interface_a = dict(link=link_a, id=id_interface)
+
+                if front:
+                    interface_b = dict(link="front", id=front)
                 else:
-                    interface['protegida'] = 0
+                    interface_b = dict(link="back", id=back)
 
-                if len(front) > 0:
-                    # Get front interface selected
-                    inter_front = interface_client.get_by_id(front)
-                    inter_front = inter_front.get("interface")
-                    if inter_front['protegida'] == "True":
-                        inter_front['protegida'] = 1
-                    else:
-                        inter_front['protegida'] = 0
-
-                    related_list = client.create_interface().list_connections(
-                        inter_front["interface"], inter_front["equipamento"])
-                    for i in related_list.get('interfaces'):
-
-                        if i['equipamento'] == interface['equipamento']:
-                            lists['connect_form'] = form
-                            lists['equipment'] = equipment
-                            raise Exception(
-                                'Configuração inválida. Loop detectado nas ligações entre patch-panels')
-
-                    # Business Rules
-                    interface_client.alterar(inter_front['id'], inter_front['interface'], inter_front['protegida'],
-                                             inter_front['descricao'], interface['id'], inter_front['ligacao_back'],
-                                             inter_front['tipo'], inter_front['vlan'])
-                    if front_or_back == "0":
-                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'],
-                                                 interface['descricao'], interface['ligacao_front'],
-                                                 inter_front['id'],
-                                                 interface['tipo'], interface['vlan'])
-                    else:
-                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'],
-                                                 interface['descricao'], inter_front['id'],
-                                                 interface['ligacao_back'],
-                                                 interface['tipo'], interface['vlan'])
-
-                else:
-                    # Get back interface selected
-                    inter_back = interface_client.get_by_id(back)
-                    inter_back = inter_back.get("interface")
-                    if inter_back['protegida'] == "True":
-                        inter_back['protegida'] = 1
-                    else:
-                        inter_back['protegida'] = 0
-
-                    related_list = client.create_interface().list_connections(inter_back["interface"],
-                                                                              inter_back["equipamento"])
-
-                    for i in related_list.get('interfaces'):
-                        if i['equipamento'] == interface['equipamento']:
-                            lists['connect_form'] = form
-                            lists['equipment'] = equipment
-                            raise Exception('Configuração inválida. Loop detectado nas ligações entre patch-panels')
-
-                    # Business Rules
-                    interface_client.alterar(inter_back['id'], inter_back['interface'], inter_back['protegida'],
-                                             inter_back['descricao'], inter_back['ligacao_front'], interface['id'],
-                                             inter_back['tipo'], inter_back['vlan'])
-                    if front_or_back == "0":
-                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'],
-                                                 interface['descricao'], interface['ligacao_front'],
-                                                 inter_back['id'],
-                                                 interface['tipo'], interface['vlan'])
-                    else:
-                        interface_client.alterar(interface['id'], interface['interface'], interface['protegida'],
-                                                 interface['descricao'], inter_back['id'],
-                                                 interface['ligacao_back'],
-                                                 interface['tipo'], interface['vlan'])
-
-                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
+                try:
+                    client.create_api_interface_request().connecting_interfaces([interface_a, interface_b])
+                    messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
+                except NetworkAPIClientError, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, 'Erro linkando as interfaces: %s' % e)
+                except Exception, e:
+                    logger.error(e)
+                    messages.add_message(request, messages.ERROR, 'Erro linkando as interfaces: %s' % e)
 
                 response = HttpResponseRedirect(reverse("interface.edit", args=[id_interface]))
                 response.status_code = 278
@@ -552,7 +493,8 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
 
             else:
                 lists['connect_form'] = form
-                lists['equipment'] = equipment
+                lists['equipment'] = equipment[0]
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -571,27 +513,7 @@ def disconnect_interfaces(request, interface_a=None, interface_b=None):
     client = auth.get_clientFactory()
 
     try:
-        interface_obj = client.create_api_interface_request().get(ids=[interface_a])
-        interfaces = interface_obj.get('interfaces')[0]
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.WARNING, 'Erro ao buscar interface %s.' % interface_a)
-        return HttpResponseRedirect(reverse("interface.edit", args=[interface_a]))
-
-    interface_dict = dict(id=int(interfaces.get('id')),
-                          interface=interfaces.get('interface'),
-                          description=interfaces.get('description'),
-                          protected=interfaces.get('protected'),
-                          native_vlan=interfaces.get('native_vlan'),
-                          type=interfaces.get('type'),
-                          equipment=interfaces.get('equipment'),
-                          front_interface=None if interfaces.get('front_interface') == int(
-                              interface_b) else interfaces.get('front_interface'),
-                          back_interface=None if interfaces.get('back_interface') == int(
-                              interface_b) else interfaces.get('back_interface'))
-
-    try:
-        client.create_api_interface_request().update([interface_dict])
+        client.create_api_interface_request().disconnecting_interfaces([interface_a, interface_b])
         messages.add_message(request, messages.SUCCESS, 'Conexão removida.')
     except NetworkAPIClientError, e:
         logger.error(e)
