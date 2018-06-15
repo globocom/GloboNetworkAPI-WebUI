@@ -7,6 +7,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #config.omnibus.chef_version = :latest
   #config.vm.provision :chef_solo do |chef|
   #end
-  config.vm.provision :shell, path: "vagrant_provision.sh"
+  config.vm.provision :shell, path: "scripts/vagrant_provision.sh"
 end
 

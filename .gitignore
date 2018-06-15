@@ -13,3 +13,5 @@ Documentation/_build/*
 .DS_STORE
 build
 GloboNetworkAPI-client-python/*
+.settings/
+.project/
