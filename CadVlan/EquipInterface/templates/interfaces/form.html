@@ -126,7 +126,11 @@
                     </div>
                 {% endfor %}
             </div>
+            {% ifequal default.type.type 'trunk' %}
+            <div class="text-fields" id="range_vlans{{ default.id }}">
+            {% else %}
             <div class="text-fields" style="display:none;" id="range_vlans{{ default.id }}">
+            {% endifequal %}
                 <div class="form-group">
                     <label class="form-control-label"
                            for="interface_range_vlan">
@@ -141,7 +145,11 @@
                 </div>
             </div>
         </div>
+        {% ifequal default.type.type 'trunk' %}
+        <div class="rows" id="envs{{ default.id }}">
+        {% else %}
         <div class="rows" style="display:none;" id="envs{{ default.id }}">
+        {% endifequal %}
             {% if default.equipment.environments %}
             <div class="text-fields">
                 <p class="form-control-label">Selecione os Ambientes Permitidos</p>
