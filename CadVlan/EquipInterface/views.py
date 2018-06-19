@@ -1004,7 +1004,7 @@ def add_channel(request, equip_name=None):
                 interfaces_ids = form.cleaned_data['ids']
                 equip_nam = form.cleaned_data['equip_name']
 
-                if int_type=="0":
+                if int_type == "0":
                     int_type = "access"
                     env_vlans_list = []
                 else:
