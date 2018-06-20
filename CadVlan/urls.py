@@ -17,16 +17,23 @@ import settings
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 from django.http import HttpResponse
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 handler404 = 'CadVlan.Auth.views.handler404'
 handler500 = 'CadVlan.Auth.views.handler500'
 
-urlpatterns = patterns(
+
+# Add static urls (useful for development environment)
+urlpatterns = staticfiles_urlpatterns()
+
+
+urlpatterns += patterns(
     '',
     # CSS - JS
     (r'^media/(.*)$', 'django.views.static.serve',
      {'document_root': settings.MEDIA_ROOT})
 )
+
 
 # Healthcheck
 urlpatterns += patterns(
