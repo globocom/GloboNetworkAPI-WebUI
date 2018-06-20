@@ -42,6 +42,7 @@ urlpatterns += patterns(
         lambda _: HttpResponse("WORKING")),
 )
 
+
 # URL's Auth
 urlpatterns += patterns(
     'CadVlan.Auth.views',
@@ -56,6 +57,8 @@ urlpatterns += patterns(
     url('^menu[/]?$', 'menu', name='menu', ),
     url('^header[/]?$', 'header', name='header', ),
 )
+
+
 # URL's Script
 urlpatterns += patterns(
     'CadVlan.Script.views',
@@ -64,6 +67,7 @@ urlpatterns += patterns(
     url('^script/form[/]?$', 'add_form', name='script.form',),
     url('^script/edit/(?P<id_script>\d+)[/]?$', 'edit_form', name='script.edit.form',),
 )
+
 
 # URL's ScriptType
 urlpatterns += patterns(
@@ -75,6 +79,7 @@ urlpatterns += patterns(
     url('^script-type/form[/]?$',
         'show_form', name='script.type.form',)
 )
+
 
 # URL's EquipAccess
 urlpatterns += patterns(
@@ -91,6 +96,7 @@ urlpatterns += patterns(
         'delete', name='equip.access.delete',),
 )
 
+
 # URL's Equipment Script
 urlpatterns += patterns(
     'CadVlan.EquipScript.views',
@@ -101,6 +107,7 @@ urlpatterns += patterns(
     url('^equip-script/add[/]?$', 'ajax_add_form',
         name='equip.script.add.ajax',),
 )
+
 
 # URL's Equipment Interface
 urlpatterns += patterns(
@@ -196,8 +203,8 @@ urlpatterns += patterns(
         'delete_equipment', name='equip.delete.id',),
     url('^equipment/ajax_check_real/(?P<id_vip>\d+)[/]?$',
         'ajax_check_real', name='equip.check.real',),
-
 )
+
 
 # URL's Environment
 urlpatterns += patterns(
@@ -229,6 +236,7 @@ urlpatterns += patterns(
     url('^environment/configuration/remove/(?P<environment_id>\d+)/(?P<configuration_id>\d+)/',
         'remove_configuration', name='environment.configuration.remove',),
 )
+
 
 # URL's Vlans
 urlpatterns += patterns(
@@ -277,6 +285,7 @@ urlpatterns += patterns(
     url('^vlan/form/get/available/environment/configuration/by/environment/id[/]?$',
         'ajax_get_available_ip_config_by_environment_id', name='vlan.get.available.environment.configuration'),
 )
+
 
 # URL's Network
 urlpatterns += patterns(
@@ -347,6 +356,7 @@ urlpatterns += patterns(
         'available_evip', name='network.available.evips'),
 )
 
+
 # URL's Option Vip
 urlpatterns += patterns(
     'CadVlan.OptionVip.views',
@@ -364,6 +374,7 @@ urlpatterns += patterns(
         'option_vip_associate_net6', name='option-vip.associate.net6',),
 )
 
+
 # URL's Environment Vip
 urlpatterns += patterns(
     'CadVlan.EnvironmentVip.views',
@@ -380,6 +391,7 @@ urlpatterns += patterns(
 
 )
 
+
 # URL's Group Equipment
 urlpatterns += patterns(
     'CadVlan.GroupEquip.views',
@@ -392,6 +404,7 @@ urlpatterns += patterns(
     url('^group-equip/form/(?P<id_group_equipament>\d+)[/]?$',
         'edit_form', name='group-equip.edit',),
 )
+
 
 # URL's Equipment Group
 urlpatterns += patterns(
@@ -410,6 +423,7 @@ urlpatterns += patterns(
         'delete_right', name='equip-user-group.delete',),
 )
 
+
 # URL's Group User
 urlpatterns += patterns(
     'CadVlan.GroupUser.views',
@@ -423,6 +437,7 @@ urlpatterns += patterns(
         'edit_form', name='group-user.edit',),
 
 )
+
 
 # URL's User
 urlpatterns += patterns(
@@ -446,6 +461,7 @@ urlpatterns += patterns(
         name='user.autocomplete.ajax')
 
 )
+
 
 # URL's User Group
 urlpatterns += patterns(
@@ -491,6 +507,7 @@ urlpatterns += patterns(
         'delete_perm', name='user-group-perm.delete',),
 )
 
+
 # URL's ACL
 urlpatterns += patterns(
     'CadVlan.Acl.views',
@@ -519,6 +536,7 @@ urlpatterns += patterns(
     url('^acl/remove/draft$', 'remove_draft', name='acl.remove.draft',),
 
 )
+
 
 # URL's Vip Requests
 urlpatterns += patterns(
@@ -557,32 +575,6 @@ urlpatterns += patterns(
         'ajax_popular_options', name='vip-request.options.ajax',),
     url('^vip-request/ajax_options/external[/]?$',
         'ajax_popular_options_external', name='vip-request.options.ajax.external',),
-    # url('^vip-request/ajax_modal_real_server[/]?$',
-    #     'ajax_model_ip_real_server', name='vip-request.modal.real.server.ajax',),
-    # url('^vip-request/ajax_modal_real_server/external[/]?$',
-    #     'ajax_model_ip_real_server_external', name='vip-request.modal.real.server.ajax.external',),
-    # url('^vip-request/operation/ajax/(?P<id_vip>\d+)/(?P<operation>\d+)[/]?$',
-    #     'ajax_validate_create_remove', name='vip.ajax.create.validate.remove',),
-    # url('^vip-request/tab/real-server/(?P<id_vip>\d+)[/]?$',
-    #     'tab_real_server', name='vip-request.tab.real.server',),
-    # url('^vip-request/tab/real-server/(?P<id_vip>\d+)/status[/]?$',
-    #     'tab_real_server_status', name='vip-request.tab.real.server.status.edit',),
-    # url('^vip-request/tab/real-server/(?P<id_vip>\d+)/status/(?P<status>enable|disable)[/]?$',
-    #     'status_real_server', name='vip-request.tab.real.server.status',),
-    # url('^vip-request/tab/healthcheck/(?P<id_vip>\d+)[/]?$',
-    #     'tab_healthcheck', name='vip-request.tab.healthcheck',),
-    # url('^vip-request/tab/maxcon/(?P<id_vip>\d+)[/]?$',
-    #     'tab_maxcon', name='vip-request.tab.maxcon',),
-    # url('^vip-request/tab/l7filter/(?P<id_vip>\d+)[/]?$',
-    #     'tab_l7filter', name='vip-request.tab.l7filter',),
-    # url('^vip-request/pool_datatable/(?P<id_vip>\d+)[/]?$',
-    #     'pool_datatable', name='vip-request.pool_datatable',),
-    # url('^vip-request/ajax_rule[/]?$',
-    #     'ajax_popular_rule', name='vip-request.rule.ajax',),
-    # url('^vip-request/ajax_rule/external[/]?$',
-    #     'ajax_popular_rule_external', name='vip-request.rule.ajax.external',),
-    # list of pools by vip
-
     # tab with data of vips
     url('^vip-request/tab/edit/(?P<id_vip>\d+)[/]?$',
         'tab_vip_edit', name='vip-request.tab.edit',),
@@ -621,6 +613,7 @@ urlpatterns += patterns(
 
 )
 
+
 # URL's Event Log
 urlpatterns += patterns(
     'CadVlan.EventLog.views',
@@ -632,12 +625,14 @@ urlpatterns += patterns(
         name='version.check',),
 )
 
+
 # URL's Access Type Requests
 urlpatterns += patterns(
     'CadVlan.AccessType.views',
     url('^access-type/form[/]?$',
         'access_type_form', name='access-type.form',),
 )
+
 
 # URL's Network Type Requests
 urlpatterns += patterns(
@@ -646,6 +641,7 @@ urlpatterns += patterns(
         'network_type_form', name='network-type.form',),
 )
 
+
 # URL's Equipment Type Requests
 urlpatterns += patterns(
     'CadVlan.EquipmentType.views',
@@ -653,12 +649,14 @@ urlpatterns += patterns(
         'equipment_type_form', name='equipment-type.form',),
 )
 
+
 # URL's HealthcheckExpect Type Requests
 urlpatterns += patterns(
     'CadVlan.HealthcheckExpect.views',
     url('^healthcheck-expect/form[/]?$',
         'healthcheck_expect_form', name='healthcheck-expect.form',),
 )
+
 
 # URL's LDAP
 urlpatterns += patterns(
@@ -695,6 +693,7 @@ urlpatterns += patterns(
         name='ldap.user.unlock.ajax',),
 )
 
+
 # URL's Filter
 urlpatterns += patterns(
     'CadVlan.Filter.views',
@@ -708,6 +707,7 @@ urlpatterns += patterns(
         'edit_form', name='filter.edit',),
 
 )
+
 
 # URL's Block Rules'
 urlpatterns += patterns(
@@ -728,6 +728,7 @@ urlpatterns += patterns(
         'rule_remove', name='block.rules.remove',),
     url('^block/ajax', 'block_ajax', name='block.ajax',),
 )
+
 
 # URL's Pool
 urlpatterns += patterns(
@@ -763,6 +764,7 @@ urlpatterns += patterns(
     url('^pool/add_healthcheck_expect/external[/]?$', 'add_healthcheck_expect_external', name='pool.add.healthcheck.expect.external',),
 )
 
+
 # URL's Rack
 urlpatterns += patterns(
     'CadVlan.Rack.views',
@@ -787,6 +789,7 @@ urlpatterns += patterns(
     url('^fabric/(?P<fabric_id>\d+)[/]?$', 'fabric', name='fabric',),
 )
 
+
 # URL's System
 urlpatterns += patterns(
     'CadVlan.System.views',
@@ -796,6 +799,7 @@ urlpatterns += patterns(
     url('^system/variables/delete[/]?$', 'delete_all', name='variables.delete'),
 )
 
+
 # URL's Vrf
 urlpatterns += patterns(
     'CadVlan.Vrf.views',
@@ -803,8 +807,4 @@ urlpatterns += patterns(
     url('^vrf/form/(?P<id_vrf>\d+)[/]?$', 'edit_vrf', name='vrf.edit'),
     url('^vrf/list[/]?$', 'list_vrf', name='vrf.list'),
     url('^vrf/delete[/]?$', 'delete_vrf', name='vrf.delete'),
-
 )
-
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-urlpatterns += staticfiles_urlpatterns()
