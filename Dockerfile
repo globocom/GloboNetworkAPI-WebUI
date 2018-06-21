@@ -1,5 +1,7 @@
 FROM python:2.7
 
+SHELL ["/bin/bash", "-c"]
+
 RUN mkdir -p /netapi_webui
 WORKDIR /netapi_webui
 
@@ -18,6 +20,6 @@ RUN apt-get update && \
                        dnsutils
 
 RUN pip install --upgrade pip
+RUN pip install virtualenv && virtualenv venv && source venv/bin/activate
 RUN pip install -r requirements.txt
-RUN pip install virtualenv
 RUN pip install gunicorn
