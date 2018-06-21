@@ -15,7 +15,7 @@ services:
         ports:
             - "8080:8080"
             - "8081:8081"
-        command: sh scripts/docker/docker-start.sh
+        command: sh scripts/docker/docker-start-debug.sh
         env_file:
             - config/netapi_webui.env
         volumes:
