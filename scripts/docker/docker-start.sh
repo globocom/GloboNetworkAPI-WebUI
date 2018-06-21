@@ -26,6 +26,19 @@ chmod 777 /etc/init.d/gunicorn_networkapi_webui
 update-rc.d gunicorn_networkapi_webui defaults
 export PYTHONPATH="/netapi_webui/networkapi_webui:/netapi_webui/$PYTHONPATH"
 
+
+# Use NetworkAPI python client library locally
+[ ! -d "GloboNetworkAPI-client-python" ] && {
+    git clone https://github.com/globocom/GloboNetworkAPI-client-python.git
+}
+
+# Update and install as development package
+cd GloboNetworkAPI-client-python
+git pull origin master
+python setup.py develop
+cd ..
+
+
 echo "starting gunicorn"
 /etc/init.d/gunicorn_networkapi_webui start
 
