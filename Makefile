@@ -10,6 +10,7 @@ help:
 	@echo "Network API Web UI project"
 	@echo
 	@echo "Available target rules:"
+	@echo "  build      to build docker image locally"
 	@echo "  start      to containers locally using docker-compose"
 	@echo "  stop       to stop all project running containers"
 	@echo "  logs       to follow logs of application container"
@@ -19,6 +20,10 @@ help:
 	@echo "  compile    to compile .py files (just to check for syntax errors)"
 	@echo "  test       to execute all tests"
 	@echo
+
+
+build: Dockerfile
+	@docker build . --no-cache
 
 
 start: docker-compose.yml
