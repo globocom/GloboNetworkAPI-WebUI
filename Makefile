@@ -57,10 +57,3 @@ compile: clean
 	@echo "Compiling source code..."
 	@python -tt -m compileall .
 	@pep8 --format=pylint --statistics networkapiclient setup.py
-
-
-test: compile
-	@make clean
-	@echo "Nothing yet"
-#	@echo "Starting tests..."
-# 	@nosetests -s --verbose --with-coverage --cover-erase --cover-package=networkapiclient tests
