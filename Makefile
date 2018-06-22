@@ -13,6 +13,7 @@ help:
 	@echo "  build      to build docker image locally"
 	@echo "  start      to containers locally using docker-compose"
 	@echo "  stop       to stop all project running containers"
+	@echo "  restart    to restart main container"
 	@echo "  logs       to follow logs of application container"
 	@echo "  shell      to enter a shell on running container"
 	@echo "  docs       to create documentation files"
@@ -32,6 +33,10 @@ start: docker-compose.yml
 
 stop: docker-compose.yml
 	@docker-compose down --remove-orphans
+
+
+restart:
+	@docker restart netapi_webui_app
 
 
 logs:
