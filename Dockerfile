@@ -20,6 +20,5 @@ RUN apt-get update && \
                        dnsutils
 
 RUN pip install --upgrade pip
-RUN pip install virtualenv && virtualenv venv && source venv/bin/activate
+RUN pip install virtualenv && virtualenv venv && . ./venv/bin/activate
 RUN pip install -r requirements.txt
-RUN pip install gunicorn
