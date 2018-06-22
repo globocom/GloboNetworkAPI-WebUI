@@ -4,3 +4,4 @@ py2-ipaddress==3.4.1
 pycrypto==2.6
 python-ldap==2.3.13
 python-memcached==1.48
+gunicorn==19.8.1
