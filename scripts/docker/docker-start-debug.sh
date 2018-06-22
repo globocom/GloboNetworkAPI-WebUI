@@ -4,7 +4,7 @@
 if [ ! -d venv ]; then
     virtualenv venv
 fi
-source venv/bin/activate
+. ./venv/bin/activate
 
 
 # Resolves the networkapi container IP and sets it on the /etc/hosts
