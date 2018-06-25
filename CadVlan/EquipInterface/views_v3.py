@@ -47,7 +47,6 @@ logger = logging.getLogger(__name__)
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def add_interface(request, equipment=None):
-    lists = dict()
 
     # Get user
     auth = AuthSession(request.session)
@@ -64,18 +63,20 @@ def add_interface(request, equipment=None):
         messages.add_message(request, messages.ERROR, e)
         return HttpResponseRedirect(url)
 
-    lists['environments'] = equips.get('environments')
-    lists['equip_name'] = equips.get('name')
-    equip_id = equips.get('id')
-    lists['equip_id'] = equip_id
+    lists = {
+        'environments': equips.get('environments'),
+        'equip_name': equips.get('name'),
+        'equip_id':  equips.get('id')
+    }
 
-    data = dict()
-    data["start_record"] = 0
-    data["end_record"] = 1000
-    data["asorting_cols"] = ["id"]
-    data["searchable_columns"] = ["nome"]
-    data["custom_search"] = ""
-    data["extends_search"] = []
+    data = {
+        "start_record": 0,
+        "end_record": 1000,
+        "asorting_cols": ["id"],
+        "searchable_columns": ["nome"],
+        "custom_search": "",
+        "extends_search": []
+    }
 
     try:
         types = client.create_api_interface_request().get_interface_type(search=data)
