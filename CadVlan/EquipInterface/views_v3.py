@@ -235,7 +235,8 @@ def delete_interface(request, interface_id=None):
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def edit_interface(request, interface=None):
-    lists = dict()
+
+    lists = {}
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
@@ -257,7 +258,7 @@ def edit_interface(request, interface=None):
         messages.add_message(request, messages.WARNING, 'Erro ao buscar interface %s.' % interface)
         return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment_name)
 
-    data = dict()
+    data = {}
     data["start_record"] = 0
     data["end_record"] = 1000
     data["asorting_cols"] = ["id"]
