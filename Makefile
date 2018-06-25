@@ -10,6 +10,7 @@ help:
 	@echo "Network API Web UI project"
 	@echo
 	@echo "Available target rules:"
+	@echo
 	@echo "  build      to build docker image locally"
 	@echo "  start      to containers locally using docker-compose"
 	@echo "  stop       to stop all project running containers"
