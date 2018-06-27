@@ -66,7 +66,7 @@ def add_interface(request, equipment=None):
     lists = {
         'environments': equips.get('environments'),
         'equip_name': equips.get('name'),
-        'equip_id':  equips.get('id')
+        'equip_id': equips.get('id')
     }
 
     data = {
@@ -98,7 +98,7 @@ def add_interface(request, equipment=None):
             'protected': True if int(request.POST.get('protected')) else False,
             'native_vlan': request.POST.get('vlan_nativa'),
             'type': int_type,
-            'equipment': int(equip_id)
+            'equipment': int(equips.get('id'))
         }
 
         try:
@@ -253,6 +253,7 @@ def edit_interface(request, interface=None):
         interfaces = interface_obj.get('interfaces')[0]
         equipment = interfaces.get('equipment')
         equipment_name = equipment.get('name')
+        lists["equip_name"] = equipment_name
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.WARNING, 'Erro ao buscar interface %s.' % interface)
