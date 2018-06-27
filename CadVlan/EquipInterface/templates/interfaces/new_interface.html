@@ -162,7 +162,7 @@ function myFunction() {
                         <br><br><br><br>
                         <div class="text-xs-center">
                             <a class="btn btn-danger-outline btn-danger"
-                               href="'{% url interface.list %}?search_equipment=' + equip_name">
+                               href="{% url interface.list %}?search_equipment={{ equip_name|urlencode }}">
                                 Voltar
                             </a>
                             <button class="btn btn-success-outline btn-success" >
