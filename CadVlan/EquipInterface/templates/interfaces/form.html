@@ -186,6 +186,10 @@
         <br><br>
         <div class="rows">
             <div class="text-fields">
+                <a class="btn btn-danger-outline btn-danger"
+                   href="{% url interface.list %}?search_equipment={{ default.equipment.name|urlencode }}">
+                    Voltar
+                </a>
                 <button class="btn-sm btn-success-outline btn-success" >
                     Salvar
                 </button>
