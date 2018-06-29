@@ -10,9 +10,9 @@ pip install -r /vagrant/requirements.txt
 pip install gunicorn
 
 echo -e "PYTHONPATH=\"/vagrant/:$PYTHONPATH\"" >> /etc/environment
-echo -e '#!/bin/bash\n/usr/local/bin/gunicorn -c /vagrant/gunicorn.conf.py cadvlan_wsgi:application' > /etc/init.d/gunicorn_cadvlan
+echo -e '#!/bin/bash\n/usr/local/bin/gunicorn -c /vagrant/gunicorn.conf.py wsgi:application' > /etc/init.d/gunicorn_cadvlan
 chmod 777 /etc/init.d/gunicorn_cadvlan
 update-rc.d gunicorn_cadvlan defaults
 export PYTHONPATH="/vagrant:$PYTHONPATH"
-/usr/local/bin/gunicorn  -c /vagrant/gunicorn.conf.py cadvlan_wsgi:application
+/usr/local/bin/gunicorn  -c /vagrant/gunicorn.conf.py wsgi:application
 
