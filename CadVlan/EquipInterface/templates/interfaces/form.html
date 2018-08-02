@@ -185,17 +185,19 @@
             {% endif %}
         </div>
         <div class="rows">
-            <div class="text-fields"></div>
             <div class="text-fields">
                 <a class="btn-sm btn-danger-outline btn-danger"
                    href="{% url interface.list %}?search_equipment={{ default.equipment.name|urlencode }}" >
                     Voltar
                 </a>
+                <a class="btn-sm btn-warning-outline btn-warning"
+                   href="{% url equip.interface.config.sync default.equipment.name 0 default.id %}" >
+                    Aplicar
+                </a>
                 <button class="btn-sm btn-success-outline btn-success" >
                     Salvar
                 </button>
             </div>
-            <div class="text-fields"></div>
         </div>
     </form>
 </div>
