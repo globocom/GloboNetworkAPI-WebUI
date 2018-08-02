@@ -1,6 +1,7 @@
 <div class="form-interfaces">
     <form action="{% url interface.edit default.id %}" method="post" id="interface_form">
         {% csrf_token %}
+        <p class="interface-title">{{ default.equipment.name }}</p>
         <div class="rows">
             <div class="text-fields">
                 <label class="form-control-label"
@@ -153,7 +154,7 @@
             {% if default.equipment.environments %}
             <div class="text-fields">
                 <p class="form-control-label">Selecione os Ambientes Permitidos</p>
-                <div class="form-control" style="overflow:auto;height:50px;">
+                <div class="form-control" style="overflow:scroll;height:50px;">
                     {% for env in default.equipment.environments %}
                         <div class="checkbox">
                             <label style="visibility:visible;">
@@ -183,17 +184,18 @@
             </div>
             {% endif %}
         </div>
-        <br><br>
         <div class="rows">
+            <div class="text-fields"></div>
             <div class="text-fields">
-                <a class="btn btn-danger-outline btn-danger"
-                   href="{% url interface.list %}?search_equipment={{ default.equipment.name|urlencode }}">
+                <a class="btn-sm btn-danger-outline btn-danger"
+                   href="{% url interface.list %}?search_equipment={{ default.equipment.name|urlencode }}" >
                     Voltar
                 </a>
                 <button class="btn-sm btn-success-outline btn-success" >
                     Salvar
                 </button>
             </div>
+            <div class="text-fields"></div>
         </div>
     </form>
 </div>
