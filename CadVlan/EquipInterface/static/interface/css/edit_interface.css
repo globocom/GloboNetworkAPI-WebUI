@@ -13,6 +13,17 @@ section {
     grid-column-gap: 10px;
 }
 
+p.interface-title{
+    margin: 0px;
+    text-align: center;
+    align-content: center;
+}
+
+div.form-interfaces{
+    box-shadow: 1px 1px 5px rgba(10,10,10,0.3);
+    border-radius: 10px;
+}
+
 .form-edit {
     display: flex;
     flex-direction: column;
@@ -20,25 +31,22 @@ section {
     vertical-align: top;
 }
 
-.forms {
-    border-bottom: 2px solid #f8f8f8;
-}
 .rows {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-content: center;
     vertical-align: top;
-    min-width: 100%;
+    max-width: 100%;
     min-height: 100%;
-    height: auto;
+    height: 80px;
 }
 
 div.text-fields {
-    min-width: 30%;
-    max-width: 95%;
+    flex-basis: 100%;
     margin: 5px;
     height: auto;
+    margin-top: auto;
 }
 
 div.connection-edit {
@@ -151,3 +159,14 @@ span.input-group-addon {
 
 a:focus {outline:0 !important;}
 button:focus {outline:0 !important;}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: rgba(0,0,0,.5);
+  -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
