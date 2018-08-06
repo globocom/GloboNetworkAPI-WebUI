@@ -19,15 +19,7 @@ $(document).ready(function() {
 		modal: true,
 		autoOpen: false,
 		draggable: false,
-		resizable: false,
-		buttons: {
-			"Associar": function() {
-				$("#connect_form").submit();
-			},
-			"Cancelar": function() {
-				$(this).dialog("close");
-			}
-		}
+		resizable: false
 	});
 	$("#page_tab").tabs();
 
