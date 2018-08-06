@@ -205,6 +205,12 @@ urlpatterns += patterns(
         'ajax_check_real', name='equip.check.real',),
 )
 
+# URL's Equipments V3
+urlpatterns += patterns(
+    'CadVlan.Equipment.views_v3',
+    url('^autocomplete/equipment[/]?$', 'ajax_autocomplete_equipment',
+        name='ajax.autocomplete.equipment',),
+)
 
 # URL's Environment
 urlpatterns += patterns(

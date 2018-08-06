@@ -19,11 +19,14 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
+
+        autocomplete("{% url ajax.autocomplete.equipment %}", true, "id_equip_name", false);
+
         $(".btn_equip").on("click", function() {
             $("#id_equip_name").val($(this).html().trim());
             $("#search_form").submit();
         });
+
         $('[data-toggle="tooltip"]').tooltip();
     })
 </script>
@@ -203,7 +206,7 @@
                                         <a class="btn btn-social-bottom-disabled btn-responsive"
                                            style="vertical-align: bottom;"
                                            data-toggle="tooltip"
-                                           title="Interface conectada. Edite antes de excluí-la.">
+                                           title="Antes de excluír a interface, remova a ligação em: editar > x.">
                                             <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
                                                 delete_forever
                                             </i>
