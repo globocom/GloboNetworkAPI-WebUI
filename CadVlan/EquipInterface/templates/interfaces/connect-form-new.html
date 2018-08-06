@@ -33,22 +33,7 @@ $(document).ready(function() {
             modal: true,
             autoOpen: false,
             draggable: false,
-            resizable: false,
-            buttons: [
-                      {
-                          text: "Voltar",
-                          id: "back",
-                          click: function() {
-                          }
-                      },
-                      {
-                          text: "Associar",
-                          id: "ass",
-                          click: function() {
-                            $("#connect_form").submit();
-                          }
-                      }
-                  ]
+            resizable: false
         });
 
         $(".ui-dialog-buttonset").attr("style","width: 578px;");
@@ -90,7 +75,7 @@ $(document).ready(function() {
             modal: true,
             autoOpen: false,
             draggable: false,
-            resizable: false,
+            resizable: false
         });
 
         autocomplete("{% url ajax.autocomplete.equipment %}", true, "search_equip", false);
@@ -146,17 +131,19 @@ $(document).ready(function() {
                         {% else %}
                             <div>
                                 {% if forloop.counter = 1 %}
-                                    <div><b>Selecione uma interface:</b></div>
+                                    Selecione uma interface do
+                                    <a href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">
+                                        {{ connect_form.equip_name.value }}
+                                    </a>
                                 {% endif %}
                                 {% if forloop.counter = 1 %}
-                                    <div>Front:</div>
+                                    <div>Front: {{ field }}</div>
                                 {% endif %}
                                 {% if forloop.counter = 2 %}
                                     {% ifequal equipment.equipment_type 8 %}
-                                        <div>Back:</div>
+                                        <div>Back: {{ field }}</div>
                                     {% endifequal %}
                                 {% endif %}
-                                {{ field }}
                                 <p id="error">
                                     {% if field.errors %}
                                         {% for error in field.errors %}
@@ -169,13 +156,6 @@ $(document).ready(function() {
                     {% endfor %}
                 </div>
             </form>
-            <img src="{{ MEDIA_URL }}/img/{% ifequal equipment.equipment_type 8 %}patch{% else %}serv{% endifequal %}.png"
-                 style="height: {% ifequal equipment.equipment_type 8 %}28{% else %}74{% endifequal %}px; float: left; margin-top: {% ifequal equipment.equipment_type 8 %}40{% else %}0{% endifequal %}px; margin-left: 10px;" />
-            <a style="float: left; margin-top: {% ifequal equipment.equipment_type 8 %}45{% else %}25{% endifequal %}px; margin-left: 10px;"
-               href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">
-                {{ connect_form.equip_name.value }}
-            </a>
-            <div style="clear: left;"></div>
         </div>
     {% else %}
         <form id="search_form" action="{% url interface.connect id_interface front_or_back %}" class="modal-rows">
