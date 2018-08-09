@@ -30,8 +30,8 @@ $(document).ready(function() {
         });
 
         $("#dialog-form").dialog({
-            width: 600,
-            height: 300,
+            width: 500,
+            height: 250,
             modal: true,
             autoOpen: false,
             draggable: false,
@@ -45,8 +45,8 @@ $(document).ready(function() {
     {% else %}
 
         $("#dialog-form").dialog({
-            width: 600,
-            height: 300,
+            width: 500,
+            height: 250,
             modal: true,
             autoOpen: false,
             draggable: false,
@@ -95,11 +95,11 @@ $(document).ready(function() {
     {% endif %}
 </p>
 
-<div style="text-align: center;">
+<div>
 	{% if connect_form %}
         <div>
             <form id="connect_form" method="post" action="{% url interface.connect id_interface front_or_back %}">
-                <div style="float: left;">
+                <div class="dialog-form">
                     {% csrf_token %}
                     {% for field in connect_form %}
                         {% if field.is_hidden %}
@@ -141,18 +141,18 @@ $(document).ready(function() {
             <div class="input-group input-group-sm">
                 <input name="search_equip"
                        id="search_equip"
-                       class="form-control"
+                       class="form-control dialog"
                        data-form-field="search_equip"
                        placeholder="Busque pelo nome do Equip..."
                        required>
             </div>
             <div>
-                <span class="input-group-addon">
-                    <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display: none;"/>
+                <span class="input-group-addon dialog">
+                    <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display:none;"/>
                 </span>
             </div>
             <div>
-                <button class="btn_search">
+                <button class="btn_search dialog">
                     <i class="material-icons" style="color:#FFD17C;font-size:20px">search</i>
                 </button>
             </div>

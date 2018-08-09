@@ -170,3 +170,31 @@ button:focus {outline:0 !important;}
   background-color: rgba(0,0,0,.5);
   -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
+
+div.ui-dialog.ui-widget.ui-widget-content.ui-corner-all.ui-front,
+div.ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix,
+button.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close {
+    background: #FFF2D5;
+    border: #FFF2D5;
+}
+
+span#ui-id-1.ui-dialog-title {
+    color: #FFB60B;
+}
+
+span.ui-button-icon-primary.ui-icon.ui-icon-closethick {
+    color: aqua;
+    font-family: 'Raleway', sans-serif;
+}
+
+button.btn_search.dialog,
+span.input-group-addon.dialog,
+input#search_equip.form-control.dialog,
+input.form-control.ui-autocomplete-input.dialog {
+    border: #fffdfa;
+    background: #fffdfa;
+}
+
+span.input-group-addon.dialog {
+    width: 5px;  
+}
