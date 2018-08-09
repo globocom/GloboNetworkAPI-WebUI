@@ -105,35 +105,38 @@ $(document).ready(function() {
                         {% if field.is_hidden %}
                             {{ field }}
                         {% else %}
-                            <div>
-                                {% if forloop.counter = 1 %}
+                            {% if forloop.counter = 1 %}
+                                <div>
                                     Selecione uma interface do
-                                    <a href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">
+                                    <a class="dialog-a"
+                                       href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">
                                         {{ connect_form.equip_name.value }}
                                     </a>
+                                </div>
+                            {% endif %}
+                            {% if forloop.counter = 1 %}
+                                <div>Front: {{ field }}</div>
+                            {% endif %}
+                            {% if forloop.counter = 2 %}
+                                {% ifequal equipment.equipment_type 8 %}
+                                    <div>Back: {{ field }}</div>
+                                {% endifequal %}
+                            {% endif %}
+                            <p id="error">
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        {{ error|escape }}
+                                    {% endfor %}
                                 {% endif %}
-                                {% if forloop.counter = 1 %}
-                                    <div>Front: {{ field }}</div>
-                                {% endif %}
-                                {% if forloop.counter = 2 %}
-                                    {% ifequal equipment.equipment_type 8 %}
-                                        <div>Back: {{ field }}</div>
-                                    {% endifequal %}
-                                {% endif %}
-                                <p id="error">
-                                    {% if field.errors %}
-                                        {% for error in field.errors %}
-                                            {{ error|escape }}
-                                        {% endfor %}
-                                    {% endif %}
-                                </p>
-                            </div>
+                            </p>
                         {% endif %}
                     {% endfor %}
                 </div>
-                <button class="btn-sm btn-success-outline btn-success" >
-                    Salvar
-                </button>
+                <div>
+                    <button class="btn-sm btn-success-outline btn-success dialog">
+                        Salvar
+                    </button>
+                </div>
             </form>
         </div>
     {% else %}
