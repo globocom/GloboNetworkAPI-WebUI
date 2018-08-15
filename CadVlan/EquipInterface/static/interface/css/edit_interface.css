@@ -17,6 +17,7 @@ p.interface-title{
     margin: 0px;
     text-align: center;
     align-content: center;
+    box-shadow: 0 3px 10px -1px rgba(40,33,31,.2)    
 }
 
 div.form-interfaces{

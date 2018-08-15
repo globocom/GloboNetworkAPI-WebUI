@@ -18,7 +18,9 @@
 LOGIN = 'login.html'
 HOME = 'home.html'
 
+MENUBAR = 'modulo/menubar.html'
 MENU = 'menu.html'
+
 HEADER = 'header.html'
 
 VERSION_HTML = 'version.html'
@@ -87,6 +89,9 @@ EQUIPMENT_INTERFACE_EDIT = 'equip-interface/edit-port.html'
 EQUIPMENT_INTERFACE_ADD_CHANNEL = 'equip-interface/add-channel.html'
 EQUIPMENT_INTERFACE_EDIT_CHANNEL = 'equip-interface/edit-channel.html'
 EQUIPMENT_INTERFACES = 'equip-interface/equipInterfaces.html'
+
+# Channel
+NEW_CHANNEL_EQUIPMENTS = 'channels/new_channel.html'
 
 # Interfaces
 LIST_EQUIPMENT_INTERFACES = 'interfaces/list.html'
