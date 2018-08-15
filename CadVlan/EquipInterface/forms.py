@@ -79,6 +79,7 @@ class ConnectForm(forms.Form):
 
         return self.cleaned_data.get("back")
 
+
 class ConnectFormV3(forms.Form):
 
     def __init__(self, equipment, interf_list, *args, **kwargs):

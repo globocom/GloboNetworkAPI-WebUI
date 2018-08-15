@@ -1,0 +1,50 @@
+html body {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 10%;
+    background-color: #f2fcff;
+}
+
+#menu-8 .navbar,
+#menu-8 .nav-dropdown-sm,
+#menu-8 .nav-dropdown-sm .link[aria-expanded="true"],
+#menu-8 .nav-dropdown-sm .dropdown-menu {
+  background: #0D84A5;
+  background: -webkit-linear-gradient(#0D84A5, rgba(255,0,0,0)); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#0D84A5, rgba(255,0,0,0)); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#0D84A5, rgba(255,0,0,0)); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#0D84A5, rgba(255,0,0,0)); /* Standard syntax (must be last) */
+  height: 65px
+}
+
+section.container-cadvlan {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-basis: 100%;
+
+}
+
+div.form-row-cadvlan {
+    display: flex;
+    flex-direction: row;
+    align-content: space-between;
+    margin: 10px;
+}
+
+div.form-group {
+    margin: 10px;
+}
+
+a.btn-sm.btn-danger-outline.btn-danger {
+    margin-left: 10px;
+}
+
+.form-control {
+    background-color : #FFFFFF; 
+}
+
+input:required {
+    border-left-color: #c87392;
+    border-left-width: 1px;
+}
