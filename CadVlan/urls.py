@@ -167,6 +167,9 @@ urlpatterns += patterns(
         name='interface.connect', ),
     url('^interface/disconnect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'disconnect_interfaces',
         name='interface.disconnect', ),
+
+    url('^channel/add/', 'add_channel_equipments',
+        name='add.channel', ),
 )
 
 
