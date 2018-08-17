@@ -91,7 +91,7 @@ EQUIPMENT_INTERFACE_EDIT_CHANNEL = 'equip-interface/edit-channel.html'
 EQUIPMENT_INTERFACES = 'equip-interface/equipInterfaces.html'
 
 # Channel
-NEW_CHANNEL_EQUIPMENTS = 'channels/new_channel.html'
+NEW_CHANNEL = 'channels/new_channel.html'
 
 # Interfaces
 LIST_EQUIPMENT_INTERFACES = 'interfaces/list.html'

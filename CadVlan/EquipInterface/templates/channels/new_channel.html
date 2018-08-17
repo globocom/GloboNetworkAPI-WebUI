@@ -30,7 +30,7 @@
                 <h3 class="mbr-section-title display-3"> Channel </h3>
             </div>
             <div>
-                <form action="{% url add.channel.basic %}" method="post" id="channel_form_basic">
+                <form action="{% url add.channel %}" method="post" id="channel_form_basic">
                     {% csrf_token %}
                     <div class="form-group-cadvlan">
                         <div class="form-row-cadvlan">
@@ -40,7 +40,7 @@
                                     Numero do Channel
                                 </label>
                                 <input required
-                                       type="number"
+                                       type="text"
                                        placeholder="Ex.:  13"
                                        class="form-control"
                                        name="channelnumber"
