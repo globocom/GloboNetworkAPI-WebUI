@@ -30,6 +30,7 @@ from CadVlan.messages import equip_interface_messages
 from CadVlan.messages import error_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.templates import ADD_EQUIPMENT_INTERFACE
+from CadVlan.templates import NEW_CHANNEL_EQUIPMENTS
 from CadVlan.templates import EDIT_EQUIPMENT_INTERFACE
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
 from CadVlan.templates import NEW_INTERFACE_CONNECT_FORM
@@ -544,6 +545,25 @@ def add_channel(request, interface_id=None):
 
     return HttpResponseRedirect(url_param)
 
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def add_channel_equipments(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    # try:
+    #
+    # except NetworkAPIClientError, e:
+    #     logger.error(e)
+    #     messages.add_message(request, messages.ERROR, e)
+    # except Exception, e:
+    #     logger.error(e)
+    #     messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(NEW_CHANNEL_EQUIPMENTS, {}, RequestContext(request))
 
 @log
 @login_required
