@@ -30,7 +30,7 @@ from CadVlan.messages import equip_interface_messages
 from CadVlan.messages import error_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.templates import ADD_EQUIPMENT_INTERFACE
-from CadVlan.templates import NEW_CHANNEL_EQUIPMENTS
+from CadVlan.templates import NEW_CHANNEL
 from CadVlan.templates import EDIT_EQUIPMENT_INTERFACE
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
 from CadVlan.templates import NEW_INTERFACE_CONNECT_FORM
@@ -593,21 +593,40 @@ def add_channel(request, interface_id=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def add_channel_equipments(request):
+def add_channel_(request):
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
-    # try:
-    #
-    # except NetworkAPIClientError, e:
-    #     logger.error(e)
-    #     messages.add_message(request, messages.ERROR, e)
-    # except Exception, e:
-    #     logger.error(e)
-    #     messages.add_message(request, messages.ERROR, e)
+    interfaces = list()
+    envs = list()
+    envs_vlans = dict()
 
-    return render_to_response(NEW_CHANNEL_EQUIPMENTS, {}, RequestContext(request))
+    if request.method == "POST":
+
+        envs_vlans["env"] = request.POST.get('environment')
+        envs_vlans["vlans"] = request.POST.get('rangevlan')
+
+        channel = {
+            'name': request.POST.get('channelnumber'),
+            'lacp':  True if int(request.POST.get('lacp_yes')) else False,
+            'int_type': "Access" if int(request.POST.get('access')) else "Trunk",
+            'vlan': int(request.POST.get('channelvlan')),
+            'interfaces': [request.POST.get('switchInt')],
+            'envs_vlans': []
+        }
+
+        try:
+            channel_obj = client.create_api_interface_request().create_channel([channel])
+            channel_id = channel_obj[0].get('id')
+            messages.add_message(request, messages.SUCCESS, "O channel foi criado com sucesso!")
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+            return render_to_response(NEW_CHANNEL, {}, RequestContext(request)) # HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))
+
+    return render_to_response(NEW_CHANNEL, {}, RequestContext(request))
+
 
 @log
 @login_required
