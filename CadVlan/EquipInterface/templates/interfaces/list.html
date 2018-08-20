@@ -1,20 +1,36 @@
-{% extends "menu.html" %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="NAPI-WEB">
 
-{% block css %}
-    {% load static %}
-    <link rel="stylesheet" href="{{ STATIC_URL }}/static/interface/css/list_interface.css"/>
-    <link rel="stylesheet"
-          type="text/css"
-          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
-{% endblock %}
+        <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+        <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <!-- Bootstrap tooltips requere Thether -->
+        <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+        <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+        {% load util %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
 
-{% block header %}
-<script inline type="text/javascript" src="{{ STATIC_URL }}/static/interface/js/list_interface.js"></script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-{% endblock %}
-
-{% block content %}
-<section class="mbr-section mbr-after-navbar"
+        {% load static %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/interface/css/list_interface.css"/>
+        <script inline type="text/javascript" src="{{ STATIC_URL }}/static/interface/js/list_interface.js"></script>
+    </head>
+    <body>
+        <section id="menu-8">
+            {% include "modulo/menubar.html" %}
+        </section>
+        <section class="mbr-section mbr-after-navbar"
          id="form1-5"
          style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
     <div class="mbr-section mbr-section__container mbr-section__container--middle">
@@ -175,7 +191,25 @@
                                 </a>
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% if not interface.channel %}
+                                {% if interface.channel or  interface.front_interface.channel %}
+                                    {% if interface.channel %}
+                                        <a class="btn btn-social-bottom btn-responsive"
+                                           style="vertical-align: bottom;"
+                                           href="{% url channel.delete interface.channel.id %}"
+                                           data-toggle="tooltip"
+                                           title="Remover Channel">
+                                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
+                                        </a>
+                                    {% else %}
+                                        <a class="btn btn-social-bottom btn-responsive"
+                                           style="vertical-align: bottom;"
+                                           href="{% url channel.delete interface.front_interface.channel.id %}"
+                                           data-toggle="tooltip"
+                                           title="Remover Channel">
+                                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
+                                        </a>
+                                    {% endif %}
+                                {% else %}
                                     {% if interface.front_interface or interface.back_interface %}
                                         <a class="btn btn-social-bottom-disabled btn-responsive"
                                            style="vertical-align: bottom;"
@@ -197,14 +231,6 @@
                                             </i>
                                         </a>
                                     {% endif %}
-                                {% else %}
-                                <a class="btn btn-social-bottom btn-responsive"
-                                   style="vertical-align: bottom;"
-                                   href="{% url channel.delete interface.id %}"
-                                   data-toggle="tooltip"
-                                   title="Remover Channel">
-                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
-                                </a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -225,4 +251,5 @@
     </div>
     {% endif %}
 </section>
-{% endblock %}
+    </body>
+</html>
