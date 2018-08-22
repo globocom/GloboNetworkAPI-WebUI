@@ -26,16 +26,16 @@ from django.template.context import RequestContext
 
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.EquipInterface import facade
+from CadVlan.EquipInterface.forms import ConnectFormV3
 from CadVlan.messages import equip_interface_messages
 from CadVlan.messages import error_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.templates import ADD_EQUIPMENT_INTERFACE
-from CadVlan.templates import NEW_CHANNEL
+from CadVlan.templates import EDIT_CHANNEL
 from CadVlan.templates import EDIT_EQUIPMENT_INTERFACE
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
+from CadVlan.templates import NEW_CHANNEL
 from CadVlan.templates import NEW_INTERFACE_CONNECT_FORM
-from CadVlan.EquipInterface.forms import ConnectFormV3
-
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 
@@ -235,6 +235,40 @@ def delete_interface(request, interface_id=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def basic_edit_interface(request, interface=None):
+
+    if request.method == "POST":
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        try:
+            interface_obj = client.create_api_interface_request().get(ids=[interface])
+            interface = interface_obj.get('interfaces')[0]
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.WARNING, 'Erro ao buscar interface id %s.' % interface)
+
+        interface_dict = interface
+        interface_dict["interface"] = request.POST.get('sw_interface_name')
+        interface_dict["description"] = request.POST.get('sw_int_desc')
+
+        try:
+            client.create_api_interface_request().update([interface_dict])
+            messages.add_message(request, messages.SUCCESS, 'Interface atualizada com sucesso.')
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+        except Exception, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+
+    return HttpResponseRedirect(reverse("edit.channel", args=[interface.get('channel')]))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
 def edit_interface(request, interface=None):
 
     lists = {}
@@ -260,7 +294,7 @@ def edit_interface(request, interface=None):
         messages.add_message(request, messages.WARNING, 'Erro ao buscar interface %s.' % interface)
         return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment_name)
 
-    data = {}
+    data = dict()
     data["start_record"] = 0
     data["end_record"] = 1000
     data["asorting_cols"] = ["id"]
@@ -457,7 +491,6 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
 
-
             for i in interface_list:
                 if front_or_back and i.get('front_interface') or not front_or_back and i.get('back_interface'):
                     interface_list.remove(i)
@@ -470,7 +503,6 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
 
                 front = form.cleaned_data['front']
                 back = form.cleaned_data['back']
-
 
                 link_a = "front" if front_or_back else "back"
                 interface_a = dict(link=link_a, id=id_interface)
@@ -554,9 +586,8 @@ def add_channel_(request):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
-    interfaces = list()
-    envs = list()
     envs_vlans = dict()
+    lists = list()
 
     if request.method == "POST":
 
@@ -574,14 +605,102 @@ def add_channel_(request):
 
         try:
             channel_obj = client.create_api_interface_request().create_channel([channel])
-            channel_id = channel_obj[0].get('id')
+            channel_obj[0].get('id')
             messages.add_message(request, messages.SUCCESS, "O channel foi criado com sucesso!")
         except NetworkAPIClientError, e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
-            return render_to_response(NEW_CHANNEL, {}, RequestContext(request)) # HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))
+            return render_to_response(NEW_CHANNEL, {}, RequestContext(request))
+            # HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))
 
-    return render_to_response(NEW_CHANNEL, {}, RequestContext(request))
+    return render_to_response(NEW_CHANNEL, lists, RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def edit_channel_(request, channel_id=None):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    lists = dict()
+
+    sw_ids = []
+    server_ids = []
+
+    fields = ['id', 'front_interface__id']
+
+    fields_get = ['id',
+                  'interface',
+                  'description',
+                  'protected',
+                  'type__details',
+                  'native_vlan',
+                  'equipment__details',
+                  'front_interface',
+                  'back_interface']
+
+    search = {
+        "start_record": 0,
+        "end_record": 10,
+        "asorting_cols": [],
+        "searchable_columns": ["channel__id"],
+        "custom_search": channel_id,
+        "extends_search": []
+    }
+
+    try:
+        interfaces = client.create_api_interface_request().search(search=search, fields=fields).get('interfaces')
+        for i in interfaces:
+            sw_ids.append(i.get('id'))
+            server_ids.append(i.get('front_interface'))
+        sw_interfaces = client.create_api_interface_request().get(sw_ids, fields=fields_get).get('interfaces')
+        server_interfaces = client.create_api_interface_request().get(server_ids, fields=fields_get)
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, 'Erro ao buscar o channel de Id %s.' % channel_id)
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
+
+    data = dict()
+    data["start_record"] = 0
+    data["end_record"] = 1000
+    data["asorting_cols"] = ["id"]
+    data["searchable_columns"] = ["nome"]
+    data["custom_search"] = ""
+    data["extends_search"] = []
+
+    try:
+        types = client.create_api_interface_request().get_interface_type(search=data)
+        type_list = types.get('interfaces_type')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
+
+    lists['type_list'] = type_list
+
+    if request.method == "POST":
+        pass
+
+    lists['server_map'] = server_interfaces.get('interfaces')
+    lists['total_itens'] = len(server_interfaces) - 1
+
+    try:
+        sw_int_map, channel_map = facade.get_channel_map(sw_interfaces)
+        lists['channel_map'] = channel_map
+        lists['total_channel'] = len(channel_map) - 1
+        lists['sw_int_map'] = sw_int_map
+        lists['total_sw'] = len(sw_int_map) - 1
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, 'Não foi possível montar o map do channel.')
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
+
+    return render_to_response(EDIT_CHANNEL, lists, RequestContext(request))
 
 
 @log

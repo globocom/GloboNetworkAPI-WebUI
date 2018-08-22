@@ -126,7 +126,8 @@ urlpatterns += patterns(
         'edit', name='equip.interface.edit',),
     url('^equip-interface/addseveral/(?P<equip_name>[^/]+)[/]?$',
         'add_several_forms', name='equip.interface.several.form',),
-    url('^equip-interface/disconnect/(?P<id_interface>\d+)/(?P<back_or_front>\d+)/(?P<equip_name>[^/]+)/(?P<id_interf_edit>\d+)[/]?$',
+    url('^equip-interface/disconnect/'
+        '(?P<id_interface>\d+)/(?P<back_or_front>\d+)/(?P<equip_name>[^/]+)/(?P<id_interf_edit>\d+)[/]?$',
         'disconnect', name='equip.interface.disconnect',),
     url('^equip-interface/connect/(?P<id_interface>\d+)/(?P<front_or_back>\d+)[/]?$',
         'connect', name='equip.interface.connect',),
@@ -163,6 +164,8 @@ urlpatterns += patterns(
         name='interface.add', ),
     url('^interface/edit/(?P<interface>[^/]+)[/]?$', 'edit_interface',
         name='interface.edit', ),
+    url('^interface/edit/basic/(?P<interface>[^/]+)[/]?$', 'basic_edit_interface',
+        name='interface.basic.edit', ),
     url('^interface/connect/(?P<id_interface>[^/]+)/(?P<front_or_back>[^/]+)[/]?$', 'connect_interfaces',
         name='interface.connect', ),
     url('^interface/disconnect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'disconnect_interfaces',
@@ -170,6 +173,8 @@ urlpatterns += patterns(
 
     url('^channel/add/', 'add_channel_',
         name='add.channel', ),
+    url('^channel/edit/(?P<channel_id>[^/]+)/', 'edit_channel_',
+        name='edit.channel', ),
 )
 
 

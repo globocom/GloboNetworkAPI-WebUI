@@ -163,6 +163,22 @@ def get_interface_map(request, client, interface):
     return first, last, interface_map
 
 
+def get_channel_map(interfaces):
+
+    sw_interfaces = list()
+
+    for i in interfaces:
+        sw_int_obj = dict(
+            id=i.get('id'),
+            equip_name=i.get('equipment').get('name'),
+            interface_name=i.get('interface'),
+            description=i.get('description')
+        )
+        sw_interfaces.append(sw_int_obj)
+
+    return i, sw_interfaces
+
+
 def get_ordered_list(first, last, interface_map):
     interface_list = list()
 
