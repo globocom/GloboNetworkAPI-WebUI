@@ -182,13 +182,33 @@
                                 {{ interface.native_vlan }}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
-                                <a class="btn btn-social-bottom btn-responsive"
-                                   style="vertical-align: bottom;"
-                                   href="{% url interface.edit interface.id %}"
-                                   data-toggle="tooltip"
-                                   title="Editar Interface">
-                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
-                                </a>
+                                {% if interface.channel or  interface.front_interface.channel %}
+                                    {% if interface.channel %}
+                                        <a class="btn btn-social-bottom btn-responsive"
+                                           style="vertical-align: bottom;"
+                                           href="{% url edit.channel interface.channel.id %}"
+                                           data-toggle="tooltip"
+                                           title="Editar Interface">
+                                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
+                                        </a>
+                                    {% else %}
+                                        <a class="btn btn-social-bottom btn-responsive"
+                                           style="vertical-align: bottom;"
+                                           href="{% url edit.channel interface.front_interface.channel.id %}"
+                                           data-toggle="tooltip"
+                                           title="Editar Interface">
+                                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       href="{% url interface.edit interface.id %}"
+                                       data-toggle="tooltip"
+                                       title="Editar Interface">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
+                                    </a>
+                                {% endif %}
                             </td>
                             <td class="col-xs-12 col-md-1 text-xs-left">
                                 {% if interface.channel or  interface.front_interface.channel %}
