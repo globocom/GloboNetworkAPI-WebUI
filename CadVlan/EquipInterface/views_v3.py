@@ -309,7 +309,65 @@ def basic_edit_interface(request, interface=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def edit_interface(request, interface=None):
+def edit_interface_get(request, interface=None):
+
+    lists = {}
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    fields = ['id',
+              'equipment__details',
+              'front_interface',
+              'back_interface']
+
+    equipment_name = ""
+
+    try:
+        interface_obj = client.create_api_interface_request().get(ids=[interface], fields=fields)
+        interfaces = interface_obj.get('interfaces')[0]
+        equipment = interfaces.get('equipment')
+        equipment_name = equipment.get('name')
+        lists["equip_name"] = equipment_name
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, 'Erro ao buscar interface %s.' % interface)
+        return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment_name)
+
+    data = dict()
+    data["start_record"] = 0
+    data["end_record"] = 1000
+    data["asorting_cols"] = ["id"]
+    data["searchable_columns"] = ["nome"]
+    data["custom_search"] = ""
+    data["extends_search"] = []
+
+    try:
+        types = client.create_api_interface_request().get_interface_type(search=data)
+        type_list = types.get('interfaces_type')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
+        return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment.get('name'))
+
+    lists['type_list'] = type_list
+
+    try:
+        first_item, last_item, interface_map = facade.get_interface_map(request, client, interface)
+        lists['interface_map'] = facade.get_ordered_list(first_item, last_item, interface_map)
+        lists['total_itens'] = last_item - first_item
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, 'Não foi possível montar o map da interface.')
+        return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment.get('name'))
+
+    return render_to_response(EDIT_EQUIPMENT_INTERFACE, lists, RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def edit_interface_post(request, interface=None):
 
     lists = {}
 
@@ -415,9 +473,11 @@ def edit_interface(request, interface=None):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.WARNING, 'Não foi possível montar o map da interface.')
-        return HttpResponseRedirect('/interface/?search_equipment=%s' % equipment.get('name'))
 
-    return render_to_response(EDIT_EQUIPMENT_INTERFACE, lists, RequestContext(request))
+    url_list = '/interface/?search_equipment=%s' % equipment.get('name')
+    url_edit = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse(url_list)
+
+    return HttpResponseRedirect(url_edit)
 
 
 @log
