@@ -1,5 +1,5 @@
 <div class="form-interfaces">
-    <form action="{% url interface.edit default.id %}" method="post" id="interface_form">
+    <form action="{% url interface.post.edit default.id %}" method="post" id="interface_form">
         {% csrf_token %}
         <p class="interface-title">{{ default.equipment.name }}</p>
         <div class="rows">
