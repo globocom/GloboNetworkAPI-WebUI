@@ -743,7 +743,8 @@ def edit_channel_(request, channel_id=None):
                   'native_vlan',
                   'equipment__details',
                   'front_interface',
-                  'back_interface']
+                  'back_interface',
+                  'channel__basic']
 
     search = {
         "start_record": 0,
