@@ -1177,6 +1177,7 @@ def edit_channel(request, channel_name, equip_name, channel=None):
 
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_CHANNEL, lists, context_instance=RequestContext(request))
 
+
 def channel_insert_interface(request):
 
     try:
@@ -1198,6 +1199,7 @@ def channel_insert_interface(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+
 
 def config_sync_all(request, equip_name, is_channel, ids):
 
@@ -1226,9 +1228,7 @@ def config_sync_all(request, equip_name, is_channel, ids):
     else:
         messages.add_message(request, messages.WARNING, error_messages.get("can_not_sync_error"))
 
+    url_list = '/interface/?search_equipment=%s' % equip_name
+    url_edit = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse(url_list)
 
-    # Redirect to list_all action
-    url_param = reverse("interface.list")
-    if len(equip_nam) > 2:
-        url_param = url_param + "?search_equipment=" + equip_nam
-    return HttpResponseRedirect(url_param)
+    return HttpResponseRedirect(url_edit)
