@@ -692,6 +692,7 @@ def add_channel_(request):
 
     envs_vlans = dict()
     lists = list()
+    channel_id = None
 
     if request.method == "POST":
 
@@ -704,20 +705,20 @@ def add_channel_(request):
             'int_type': "Access" if int(request.POST.get('access')) else "Trunk",
             'vlan': int(request.POST.get('channelvlan')),
             'interfaces': [request.POST.get('switchInt')],
+
             'envs_vlans': []
         }
 
         try:
             channel_obj = client.create_api_interface_request().create_channel([channel])
-            channel_obj[0].get('id')
+            channel_id = channel_obj[0].get('id')
             messages.add_message(request, messages.SUCCESS, "O channel foi criado com sucesso!")
         except NetworkAPIClientError, e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
-            return render_to_response(NEW_CHANNEL, {}, RequestContext(request))
-            # HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))
+            return render_to_response(NEW_CHANNEL, lists, RequestContext(request))
 
-    return render_to_response(NEW_CHANNEL, lists, RequestContext(request))
+    return HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))
 
 
 @log
@@ -790,11 +791,13 @@ def edit_channel_(request, channel_id=None):
 
         lacp = True if int(request.POST.get('lacp')) else False
         int_type = "Access" if int(request.POST.get('type')) else "Trunk"
+        protected = True if int(request.POST.get('protected')) else False
 
         channel_obj = dict(
             id=channel_id,
             name=str(request.POST.get('channelnumber')),
             lacp=lacp,
+            protected=protected,
             int_type=int_type,
             vlan=int(request.POST.get('vlan_nativa')),
             interfaces=sw_ids,
