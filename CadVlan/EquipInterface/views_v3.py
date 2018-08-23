@@ -730,9 +730,6 @@ def edit_channel_(request, channel_id=None):
 
     lists = dict()
 
-    sw_ids = []
-    server_ids = []
-
     fields = ['id', 'front_interface__id']
 
     fields_get = ['id',
@@ -756,6 +753,8 @@ def edit_channel_(request, channel_id=None):
     }
 
     try:
+        sw_ids = []
+        server_ids = []
         interfaces = client.create_api_interface_request().search(search=search, fields=fields).get('interfaces')
         for i in interfaces:
             sw_ids.append(i.get('id'))
@@ -788,7 +787,42 @@ def edit_channel_(request, channel_id=None):
     lists['type_list'] = type_list
 
     if request.method == "POST":
-        pass
+
+        lacp = True if int(request.POST.get('lacp')) else False
+        int_type = "Access" if int(request.POST.get('type')) else "Trunk"
+
+        channel_obj = dict(
+            id=channel_id,
+            name=str(request.POST.get('channelnumber')),
+            lacp=lacp,
+            int_type=int_type,
+            vlan=int(request.POST.get('vlan_nativa')),
+            interfaces=sw_ids,
+            envs_vlans=[]
+        )
+
+        try:
+            client.create_api_interface_request().update_channel([channel_obj])
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, 'Erro ao atualizar o channel. Error: %s' % e)
+            url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+            return HttpResponseRedirect(url)
+
+        try:
+            sw_ids = []
+            server_ids = []
+            interfaces = client.create_api_interface_request().search(search=search, fields=fields).get('interfaces')
+            for i in interfaces:
+                sw_ids.append(i.get('id'))
+                server_ids.append(i.get('front_interface'))
+            sw_interfaces = client.create_api_interface_request().get(sw_ids, fields=fields_get).get('interfaces')
+            server_interfaces = client.create_api_interface_request().get(server_ids, fields=fields_get)
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.WARNING, 'Erro ao buscar o channel de Id %s.' % channel_id)
+            url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+            return HttpResponseRedirect(url)
 
     lists['server_map'] = server_interfaces.get('interfaces')
     lists['total_itens'] = len(server_interfaces) - 1
