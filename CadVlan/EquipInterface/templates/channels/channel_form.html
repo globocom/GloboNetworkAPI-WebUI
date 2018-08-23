@@ -1,10 +1,219 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<div class="form-interfaces">
+    <form action="" method="post" id="interface_form">
+        {% csrf_token %}
+        <p class="interface-title">Channel info</p>
+        <div class="rows">
+            <div class="text-fields">
+                <label class="form-control-label"
+                       for="channel_number">
+                    Numero do Channel
+                </label>
+                <input required
+                       type="text"
+                       placeholder="Ex.:  13"
+                       class="form-control"
+                       name="channelnumber"
+                       data-form-field="channelnumber"
+                       value="{{ default.channel.name }}"
+                       id="channel_number">
+            </div>
+            <div class="text-fields">
+                <p class="form-control-label">
+                    LACP
+                </p>
+                <div class="radio-inline form-check">
+                    <input type="radio"
+                           class="form-check-input"
+                           name="lacp_yes"
+                           data-form-field="lacp_yes"
+                           id="lacp_yes"
+                           value="1"
+                           checked>
+                    <label class="form-check-label" for="lacp_yes">
+                        Sim
+                    </label>
+                </div>
+                <div class="radio-inline form-check">
+                    <input type="radio"
+                           class="form-check-input"
+                           name="lacp_yes"
+                           data-form-field="lacp_no"
+                           id="lacp_no"
+                           value="1">
+                    <label class="form-check-label" for="lacp_no">
+                        Não
+                    </label>
+                </div>
+            </div>
+            <div class="text-fields">
+                <label class="form-control-label"
+                       for="interface_vlan_nativa">
+                    Vlan Nativa<span class="form-asterisk">*</span>
+                </label>
+                <input class="form-control"
+                       name="vlan_nativa"
+                       data-form-field="vlan_nativa"
+                       placeholder="Ex.: 1"
+                       required
+                       id="interface_vlan_nativa"
+                       value="{{ default.native_vlan }}">
+            </div>
+        </div>
+        <div class="rows">
+            <div class="text-fields">
+                <p class="form-control-label">
+                    Interface Protegida<span class="form-asterisk">*</span>
+                </p>
+                <div class="radio-inline form-check">
+                    {% if default.protected %}
+                    <input type="radio"
+                           class="form-check-input"
+                           name="protected"
+                           data-form-field="protected"
+                           id="interface_protected"
+                           value="1"
+                           required
+                           checked>
+                    {% else %}
+                    <input type="radio"
+                           class="form-check-input"
+                           name="protected"
+                           data-form-field="protected"
+                           id="interface_protected"
+                           value="1"
+                           required>
+                    {% endif %}
+                    <label class="form-check-label" for="interface_protected">
+                        Sim
+                    </label>
+                </div>
+                <div class="radio-inline form-check">
+                    {% if default.protected %}
+                    <input type="radio"
+                           class="form-check-input"
+                           name="protected"
+                           data-form-field="protected"
+                           id="interface_not_protected"
+                           required
+                           value="0">
+                    {% else %}
+                     <input type="radio"
+                            class="form-check-input"
+                            name="protected"
+                            data-form-field="protected"
+                            id="interface_not_protected"
+                            required
+                            value="0"
+                            checked>
+                    {% endif %}
+                    <label class="form-check-label" for="interface_not_protected">
+                        Não
+                    </label>
+                </div>
+            </div>
+            <div class="text-fields">
+                <p class="form-control-label">
+                    Tipo da Interface<span class="form-asterisk">*</span>
+                </p>
+                {% for type in type_list %}
+                    <div class="radio-inline form-check">
+                        {% ifequal default.type.id type.id %}
+                        <input type="radio"
+                               onclick="myFunction( {{ default.id }} )"
+                               class="form-check-input"
+                               name="type"
+                               data-form-field="{{ type.type }}"
+                               id="{{ type.type }}{{ default.id }}"
+                               required
+                               value="{{ type.id }}"
+                               checked>
+                        {% else %}
+                        <input type="radio"
+                               onclick="myFunction( {{ default.id }} )"
+                               class="form-check-input"
+                               name="type"
+                               data-form-field="{{ type.type }}"
+                               id="{{ type.type }}{{ default.id }}"
+                               required
+                               value="{{ type.id }}">
+                        {% endifequal %}
+                        <label class="form-check-label" for="{{ type.type }}">
+                            {{ type.type }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+            {% ifequal default.type.type 'trunk' %}
+            <div class="text-fields" id="range_vlans{{ default.id }}">
+            {% else %}
+            <div class="text-fields" style="display:none;" id="range_vlans{{ default.id }}">
+            {% endifequal %}
+                <div class="form-group">
+                    <label class="form-control-label"
+                           for="interface_range_vlan">
+                        Range de Vlans
+                    </label>
+                    <input class="form-control"
+                           name="vlans"
+                           data-form-field="vlans"
+                           placeholder="Ex.: 2-100"
+                           value="{{ default.range_vlans }}"
+                           id="interface_range_vlan">
+                </div>
+            </div>
+        </div>
+        {% ifequal default.type.type 'trunk' %}
+        <div class="rows" id="envs{{ default.id }}">
+        {% else %}
+        <div class="rows" style="display:none;" id="envs{{ default.id }}">
+        {% endifequal %}
+            {% if default.equipment.environments %}
+            <div class="text-fields">
+                <p class="form-control-label">Selecione os Ambientes Permitidos</p>
+                <div class="form-control" style="overflow:scroll;height:50px;">
+                    {% for env in default.equipment.environments %}
+                        <div class="checkbox">
+                            <label style="visibility:visible;">
+                                {% if env.environment.id in default.env_ids %}
+                                <input class="source"
+                                       checked
+                                       type="checkbox"
+                                       style="visibility:visible;"
+                                       value="{{ env.environment.id }}"
+                                       name="environments">
+                                {% else %}
+                                <input class="source"
+                                       type="checkbox"
+                                       style="visibility:visible;"
+                                       value="{{ env.environment.id }}"
+                                       name="environments">
+                                {% endif %}
+                                {{ env.environment.name }} (Vlans: {{ env.environment.min_num_vlan_1 }} - {{ env.environment.max_num_vlan_1 }})
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-fields">
+                <p class="form-control-label">Equipamento não possui ambientes associados.</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="rows">
+            <div class="text-fields">
+                <a class="btn-sm btn-danger-outline btn-danger"
+                   href="{% url interface.list %}?search_equipment={{ default.equipment.name|urlencode }}" >
+                    Voltar
+                </a>
+                <a class="btn-sm btn-warning-outline btn-warning"
+                   href="" >
+                    Aplicar
+                </a>
+                <button class="btn-sm btn-success-outline btn-success" >
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
