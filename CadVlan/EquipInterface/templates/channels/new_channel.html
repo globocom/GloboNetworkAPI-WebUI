@@ -145,7 +145,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="form-group-cadvlan">
+                    <div class="form-group-cadvlan"  id="id_env_vlans">
                         <div class="form-row-cadvlan">
                             <div class="form-group">
                                 <label class="form-control-label"
@@ -167,6 +167,7 @@
                                 <div class="radio-inline form-check">
                                     <input type="radio"
                                            class="form-check-input"
+                                           onclick="interfaceAccess()"
                                            name="access"
                                            data-form-field="access"
                                            id="access"
@@ -178,6 +179,7 @@
                                 </div>
                                 <div class="radio-inline form-check">
                                     <input type="radio"
+                                           onclick="interfaceTrunk()"
                                            class="form-check-input"
                                            name="access"
                                            data-form-field="trunk"
@@ -189,29 +191,41 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-row-cadvlan">
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="channel_number">
-                                    Ambiente
-                                </label>
-                                <input type="text"
-                                       class="form-control"
-                                       name="environment"
-                                       data-form-field="environment"
-                                       id="environment">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="rangevlan">
-                                    Range de Vlan
-                                </label>
-                                <input type="text"
-                                       placeholder="Ex.: 1-10"
-                                       class="form-control"
-                                       name="rangevlan"
-                                       data-form-field="rangevlan"
-                                       id="rangevlan">
+                        <div id="more_envs" style="display:none;">
+                            <div class="form-row-cadvlan">
+                                <div class="form-group">
+                                    <label class="form-control-label"
+                                           for="channel_number">
+                                        Ambiente
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           name="environment"
+                                           data-form-field="environment"
+                                           placeholder="Busque pelo nome..."
+                                           id="envs">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-control-label"
+                                           for="rangevlans">
+                                        Range de Vlan
+                                    </label>
+                                    <input type="text"
+                                           placeholder="Ex.: 1-10"
+                                           class="form-control"
+                                           name="rangevlan"
+                                           data-form-field="rangevlan"
+                                           id="rangevlans">
+                                </div>
+                                <button class="btn btn-social-bottom btn-responsive channel"
+                                        type="button"
+                                        id="btn_channel_env"
+                                        data-toggle="tooltip"
+                                        title="Selecionar mais um Ambiente">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                        add
+                                    </i>
+                                </button>
                             </div>
                         </div>
                     </div>
