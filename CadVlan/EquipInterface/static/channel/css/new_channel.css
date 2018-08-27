@@ -22,6 +22,7 @@ div.form-row-cadvlan {
     display: flex;
     flex-direction: row;
     align-content: space-between;
+    align-items:center;
     margin: 10px;
 }
 
@@ -36,4 +37,8 @@ div.form-group {
 input:required {
     border-left-color: #c87392;
     border-left-width: 1px;
+}
+
+button.btn.btn-social-bottom.btn-responsive.channel {
+    margin-top: 35px;
 }
