@@ -93,6 +93,7 @@ EQUIPMENT_INTERFACES = 'equip-interface/equipInterfaces.html'
 # Channel
 NEW_CHANNEL = 'channels/new_channel.html'
 EDIT_CHANNEL = 'channels/edit_channel.html'
+AJAX_LIST_INTERFACES = 'ajax/equipments-interface.json'
 
 # Interfaces
 LIST_EQUIPMENT_INTERFACES = 'interfaces/list.html'

@@ -173,10 +173,13 @@ urlpatterns += patterns(
     url('^interface/disconnect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'disconnect_interfaces',
         name='interface.disconnect', ),
 
-    url('^channel/add/', 'add_channel_',
+    url('^channel/add[/]?$', 'add_channel_',
         name='add.channel', ),
-    url('^channel/edit/(?P<channel_id>[^/]+)/', 'edit_channel_',
+    url('^channel/edit/(?P<channel_id>[^/]+)[/]?$', 'edit_channel_',
         name='edit.channel', ),
+    url('^channel/interface/connect/(?P<id_interface>[^/]+)/(?P<front_or_back>[^/]+)/(?P<all_interfaces>[^/]+)[/]?$',
+        'connect_interfaces',
+        name='interface.connect', ),
 )
 
 
