@@ -19,6 +19,7 @@
         <!-- Bootstrap tooltips requere Thether -->
         <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
         <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+        <!-- Autocomplete -->
         {% load util %}
         <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
 
@@ -140,13 +141,13 @@
                                 <span style="color:#cacab8">{{ interface.front_interface.channel.name }}</span>
                                 {% else %}
                                     {% if interface.front_interface %}
-                                    <a class="btn btn-social-bottom btn-responsive"
-                                       style="vertical-align: bottom;"
-                                       data-toggle="tooltip"
-                                       href="{% url add.channel %}"
-                                       title="Incluir Channel" >
-                                        <i style="color:#FFD17C;font-size:15px;left:50%;">+</i>
-                                    </a>
+                                        <a class="btn btn-social-bottom btn-responsive"
+                                           style="vertical-align: bottom;"
+                                           data-toggle="tooltip"
+                                           href="{% url add.channel %}"
+                                           title="Incluir Channel" >
+                                            <i style="color:#FFD17C;font-size:15px;left:50%;">+</i>
+                                        </a>
                                     {% else %}
                                     <a class="btn btn-social-bottom-disabled btn-responsive"
                                        style="vertical-align: bottom;"

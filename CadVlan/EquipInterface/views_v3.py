@@ -31,6 +31,7 @@ from CadVlan.messages import equip_interface_messages
 from CadVlan.messages import error_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.templates import ADD_EQUIPMENT_INTERFACE
+from CadVlan.templates import AJAX_LIST_INTERFACES
 from CadVlan.templates import EDIT_CHANNEL
 from CadVlan.templates import EDIT_EQUIPMENT_INTERFACE
 from CadVlan.templates import LIST_EQUIPMENT_INTERFACES
@@ -38,6 +39,7 @@ from CadVlan.templates import NEW_CHANNEL
 from CadVlan.templates import NEW_INTERFACE_CONNECT_FORM
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.shortcuts import render_to_response_ajax
 
 from networkapiclient.exception import NetworkAPIClientError
 
@@ -171,7 +173,7 @@ def list_equipment_interfaces(request):
                         search_interface = client.create_api_interface_request().search(
                             fields=['id',
                                     'interface',
-                                    'equipment__basic',
+                                    'equipment__details',
                                     'native_vlan',
                                     'type__details',
                                     'channel__basic',
@@ -443,7 +445,7 @@ def edit_interface_post(request, interface=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def connect_interfaces(request, id_interface=None, front_or_back=None):
+def connect_interfaces(request, id_interface=None, front_or_back=None, all_interfaces=None):
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
@@ -452,151 +454,155 @@ def connect_interfaces(request, id_interface=None, front_or_back=None):
     lists['id_interface'] = id_interface
     lists['front_or_back'] = front_or_back
 
-    try:
-        if request.method == "GET":
+    if request.method == "GET":
 
-            if request.GET.__contains__('search_equip'):
+        if request.GET.__contains__('search_equip'):
+            equipment_name = request.GET.get('search_equip')
+        elif all_interfaces:
+            equipment_name = all_interfaces
+        else:
+            raise Exception('No equipment name.')
 
-                equipment_name = request.GET.get('search_equip')
+        data = dict()
+        data["start_record"] = 0
+        data["end_record"] = 1000
+        data["asorting_cols"] = ["id"]
+        data["searchable_columns"] = ["nome"]
+        data["custom_search"] = equipment_name
+        data["extends_search"] = []
 
-                data = dict()
-                data["start_record"] = 0
-                data["end_record"] = 1000
-                data["asorting_cols"] = ["id"]
-                data["searchable_columns"] = ["nome"]
-                data["custom_search"] = equipment_name
-                data["extends_search"] = []
+        equipment = list()
 
-                equipment = list()
-
-                try:
-                    search_equipment = client.create_api_equipment().search(search=data)
-                    equipment = search_equipment.get('equipments')
-
-                except NetworkAPIClientError, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
-                except Exception, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
-
-                interface_list = list()
-
-                for equip in equipment:
-
-                    data["searchable_columns"] = [""]
-                    data["custom_search"] = ""
-                    data["extends_search"] = [{'equipamento__id': equip.get('id')}]
-
-                    try:
-                        search_interface = client.create_api_interface_request().search(
-                            fields=['id',
-                                    'interface',
-                                    'front_interface__basic',
-                                    'back_interface__basic'],
-                            search=data)
-
-                        interface_list = search_interface.get('interfaces')
-
-                    except NetworkAPIClientError, e:
-                        logger.error(e)
-                        messages.add_message(request, messages.ERROR, e)
-                    except Exception, e:
-                        logger.error(e)
-                        messages.add_message(request, messages.ERROR, e)
-
-                for i in interface_list:
-                    if front_or_back and i.get('front_interface') or not front_or_back and i.get('back_interface'):
-                        interface_list.remove(i)
-
-                lists['connect_form'] = ConnectFormV3(equipment[0],
-                                                      interface_list,
-                                                      initial={'equip_name': equipment[0].get('name'),
-                                                               'equip_id': equipment[0].get('id')})
-                lists['equipment'] = equipment[0]
-
-        elif request.method == "POST":
-            equip_id = request.POST['equip_id']
-
-            search_equipment = client.create_api_equipment().get([equip_id])
+        try:
+            search_equipment = client.create_api_equipment().search(search=data)
             equipment = search_equipment.get('equipments')
 
-            interface_list = list()
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+        except Exception, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
 
-            data = dict()
-            data["start_record"] = 0
-            data["end_record"] = 1000
-            data["asorting_cols"] = ["id"]
+        interface_list = list()
+
+        for equip in equipment:
+
             data["searchable_columns"] = [""]
             data["custom_search"] = ""
+            data["extends_search"] = [{'equipamento__id': equip.get('id')}]
 
-            for equip in equipment:
+            try:
+                search_interface = client.create_api_interface_request().search(
+                    fields=['id',
+                            'interface',
+                            'front_interface__basic',
+                            'back_interface__basic'],
+                    search=data)
 
-                data["extends_search"] = [{'equipamento__id': equip.get('id')}]
+                interface_list = search_interface.get('interfaces')
 
-                try:
-                    search_interface = client.create_api_interface_request().search(
-                        fields=['id',
-                                'interface',
-                                'front_interface__basic',
-                                'back_interface__basic'],
-                        search=data)
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+            except Exception, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
 
-                    interface_list = search_interface.get('interfaces')
+        if all_interfaces:
+            allInt = list()
+            for i in interface_list:
+                allInt.append({'id': i.get('id'), 'interface': i.get('interface')})
+            lists['all_interfaces'] = allInt
 
-                except NetworkAPIClientError, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
-                except Exception, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, e)
+            return render_to_response_ajax(AJAX_LIST_INTERFACES, lists, context_instance=RequestContext(request))
 
+        else:
             for i in interface_list:
                 if front_or_back and i.get('front_interface') or not front_or_back and i.get('back_interface'):
                     interface_list.remove(i)
 
-            form = ConnectFormV3(equipment[0],
-                                 interface_list,
-                                 request.POST)
+            lists['connect_form'] = ConnectFormV3(equipment[0],
+                                                  interface_list,
+                                                  initial={'equip_name': equipment[0].get('name'),
+                                                           'equip_id': equipment[0].get('id')})
+            lists['equipment'] = equipment[0]
 
-            if form.is_valid():
+    elif request.method == "POST":
+        equip_id = request.POST['equip_id']
 
-                front = form.cleaned_data['front']
-                back = form.cleaned_data['back']
+        search_equipment = client.create_api_equipment().get([equip_id])
+        equipment = search_equipment.get('equipments')
 
-                link_a = "front" if front_or_back else "back"
-                interface_a = dict(link=link_a, id=id_interface)
+        interface_list = list()
 
-                if front:
-                    interface_b = dict(link="front", id=front)
-                else:
-                    interface_b = dict(link="back", id=back)
+        data = dict()
+        data["start_record"] = 0
+        data["end_record"] = 1000
+        data["asorting_cols"] = ["id"]
+        data["searchable_columns"] = [""]
+        data["custom_search"] = ""
 
-                try:
-                    client.create_api_interface_request().connecting_interfaces([interface_a, interface_b])
-                    messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
-                except NetworkAPIClientError, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, 'Erro linkando as interfaces: %s' % e)
-                except Exception, e:
-                    logger.error(e)
-                    messages.add_message(request, messages.ERROR, 'Erro linkando as interfaces: %s' % e)
+        for equip in equipment:
 
-                response = HttpResponseRedirect(reverse("interface.edit", args=[id_interface]))
-                response.status_code = 278
+            data["extends_search"] = [{'equipamento__id': equip.get('id')}]
 
-                return response
+            try:
+                search_interface = client.create_api_interface_request().search(
+                    fields=['id',
+                            'interface',
+                            'front_interface__basic',
+                            'back_interface__basic'],
+                    search=data)
 
+                interface_list = search_interface.get('interfaces')
+
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+            except Exception, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, e)
+
+        for i in interface_list:
+            if front_or_back and i.get('front_interface') or not front_or_back and i.get('back_interface'):
+                interface_list.remove(i)
+
+        form = ConnectFormV3(equipment[0],
+                             interface_list,
+                             request.POST)
+
+        if form.is_valid():
+
+            front = form.cleaned_data['front']
+            back = form.cleaned_data['back']
+
+            link_a = "front" if front_or_back else "back"
+            interface_a = dict(link=link_a, id=id_interface)
+
+            if front:
+                interface_b = dict(link="front", id=front)
             else:
-                lists['connect_form'] = form
-                lists['equipment'] = equipment[0]
+                interface_b = dict(link="back", id=back)
 
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-    except Exception, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
+            try:
+                client.create_api_interface_request().connecting_interfaces([interface_a, interface_b])
+                messages.add_message(request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
+            except NetworkAPIClientError, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, 'Erro linkando as interfaces: %s' % e)
+            except Exception, e:
+                logger.error(e)
+                messages.add_message(request, messages.ERROR, 'Erro linkando as interfaces: %s' % e)
+
+            response = HttpResponseRedirect(reverse("interface.edit", args=[id_interface]))
+            response.status_code = 278
+
+            return response
+
+        else:
+            lists['connect_form'] = form
+            lists['equipment'] = equipment[0]
 
     return render_to_response(NEW_INTERFACE_CONNECT_FORM, lists, RequestContext(request))
 
@@ -647,8 +653,7 @@ def add_channel_(request):
     client = auth.get_clientFactory()
 
     envs_vlans = dict()
-    lists = list()
-    channel_id = None
+    lists = dict()
 
     if request.method == "POST":
 
@@ -674,7 +679,9 @@ def add_channel_(request):
             messages.add_message(request, messages.ERROR, e)
             return render_to_response(NEW_CHANNEL, lists, RequestContext(request))
 
-    return HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))
+        return HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))
+
+    return render_to_response(NEW_CHANNEL, lists, RequestContext(request))
 
 
 @log

@@ -11,13 +11,18 @@
         <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
         <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
         <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
         <!-- Bootstrap tooltips requere Thether -->
         <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
         <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
         <!-- Autocomplete -->
         {% load util %}
         <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+
         {% load static %}
         <link rel="stylesheet" href="{{ STATIC_URL }}/static/channel/css/new_channel.css"/>
         <script type="text/javascript" src="{{ STATIC_URL }}/static/channel/js/new_channel.js"></script>
@@ -88,9 +93,9 @@
                                 </label>
                                 <input required
                                        type="text"
-                                       placeholder="Busque pelo nome"
-                                       class="form-control"
                                        autocomplete="off"
+                                       placeholder="Busque pelo nome"
+                                       class="form-control bs-autocomplete"
                                        name="search_equipment"
                                        data-form-field="servername"
                                        id="id_equip_name">
@@ -100,12 +105,14 @@
                                        for="form_server_interface">
                                     Interface
                                 </label>
-                                <input type="text"
-                                       required
-                                       class="form-control"
-                                       name="serverInt"
-                                       data-form-field="serverInt"
-                                       id="form_server_interface">
+                                <select type="text"
+                                        required
+                                        class="form-control"
+                                        name="serverInt"
+                                        data-form-field="serverInt"
+                                        id="form_server_interface">
+                                    <option>Selecione</option>
+                                </select>
                             </div>
                         </div>
                         <div class="form-row-cadvlan">
@@ -116,8 +123,9 @@
                                 </label>
                                 <input type="text"
                                        required
+                                       autocomplete="off"
                                        placeholder="Busque pelo nome"
-                                       class="form-control"
+                                       class="form-control bs-autocomplete"
                                        name="switchname"
                                        data-form-field="switchname"
                                        id="form_switch_name">
@@ -127,12 +135,14 @@
                                        for="form_switch_interface">
                                     Interface
                                 </label>
-                                <input type="text"
-                                       required
-                                       class="form-control"
-                                       name="switchInt"
-                                       data-form-field="switchInt"
-                                       id="form_switch_interface">
+                                <select type="text"
+                                        required
+                                        class="form-control"
+                                        name="switchInt"
+                                        data-form-field="switchInt"
+                                        id="form_switch_interface">
+                                    <option>Selecione</option>
+                                </select>
                             </div>
                             <button class="btn btn-social-bottom btn-responsive channel"
                                     type="button"
