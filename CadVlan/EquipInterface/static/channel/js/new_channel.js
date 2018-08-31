@@ -197,13 +197,16 @@ function fillInterfaceField(equipmentFieldId, storageName, interfaceFieldId) {
         minLength: 1,
         select: function(event, ui) {
             $(equipmentFieldId).val(ui.item.label);
-            let url = "interface/connect/1/1/".concat(ui.item.label);
+            let url = "interface/connect/1/front/".concat(ui.item.label);
             $.ajax({
                 url: url,
                 type: "GET",
                 success: function(data) {
                     data_list = JSON.parse(data).list;
-                    let dropdown = document.getElementById(interfaceFieldId);
+                    var dropdown = document.getElementById(interfaceFieldId);
+                    while (dropdown.length > 1) {
+                        dropdown.remove(dropdown.length-1);
+                    }
                     let option;
                     for (let i = 0; i < data_list.length; i++) {
                         option = document.createElement('option');

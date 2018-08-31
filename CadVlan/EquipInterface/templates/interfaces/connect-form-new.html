@@ -7,7 +7,7 @@ $(document).ready(function() {
 
         $("#connect_form").submit(function(event) {
             event.preventDefault();
-            url = "{% url interface.connect id_interface front_or_back %}";
+            url = "{% url interface.connect id_interface front_or_back 0 %}";
             form = $("#connect_form").serialize();
             $.ajax({
                 url: url,
@@ -58,7 +58,7 @@ $(document).ready(function() {
 
         $("#search_form").submit(function(event) {
             event.preventDefault();
-            url = "{% url interface.connect id_interface front_or_back %}";
+            url = "{% url interface.connect id_interface front_or_back 0 %}";
             form = $("#search_form").serialize();
             $.ajax({
                 url: url,
@@ -96,9 +96,12 @@ $(document).ready(function() {
 </p>
 
 <div>
+    {% if messages %}
+        {% include "modulo/errormessages.html" with messages=messages %}
+    {% endif %}
 	{% if connect_form %}
         <div>
-            <form id="connect_form" method="post" action="{% url interface.connect id_interface front_or_back %}">
+            <form id="connect_form" method="post" action="{% url interface.connect id_interface front_or_back connect_form.equip_name.value %}">
                 <div class="dialog-form">
                     {% csrf_token %}
                     {% for field in connect_form %}
@@ -140,7 +143,7 @@ $(document).ready(function() {
             </form>
         </div>
     {% else %}
-        <form id="search_form" action="{% url interface.connect id_interface front_or_back %}" class="modal-rows">
+        <form id="search_form" action="interface/connect/{{ id_interface }}/{{ front_or_back }}/0/" class="modal-rows">
             <div class="input-group input-group-sm">
                 <input name="search_equip"
                        id="search_equip"
