@@ -458,10 +458,13 @@ def connect_interfaces(request, id_interface=None, front_or_back=None, all_inter
 
         if request.GET.__contains__('search_equip'):
             equipment_name = request.GET.get('search_equip')
-        elif all_interfaces:
-            equipment_name = all_interfaces
+            logger.debug(equipment_name)
         else:
-            raise Exception('No equipment name.')
+            try:
+                int(all_interfaces)
+                return render_to_response(NEW_INTERFACE_CONNECT_FORM, lists, RequestContext(request))
+            except Exception:
+                equipment_name = all_interfaces
 
         data = dict()
         data["start_record"] = 0
@@ -501,7 +504,6 @@ def connect_interfaces(request, id_interface=None, front_or_back=None, all_inter
                     search=data)
 
                 interface_list = search_interface.get('interfaces')
-
             except NetworkAPIClientError, e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
@@ -509,15 +511,13 @@ def connect_interfaces(request, id_interface=None, front_or_back=None, all_inter
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
 
-        if all_interfaces:
-            allInt = list()
-            for i in interface_list:
-                allInt.append({'id': i.get('id'), 'interface': i.get('interface')})
-            lists['all_interfaces'] = allInt
+        if not interface_list:
+            logger.error('Equipment do not have interfaces availables.')
+            messages.add_message(request, messages.ERROR, 'Equipment do not have interfaces availables.')
+            return render_to_response(NEW_INTERFACE_CONNECT_FORM, lists, RequestContext(request))
 
-            return render_to_response_ajax(AJAX_LIST_INTERFACES, lists, context_instance=RequestContext(request))
-
-        else:
+        try:
+            int(front_or_back)
             for i in interface_list:
                 if front_or_back and i.get('front_interface') or not front_or_back and i.get('back_interface'):
                     interface_list.remove(i)
@@ -528,7 +528,19 @@ def connect_interfaces(request, id_interface=None, front_or_back=None, all_inter
                                                            'equip_id': equipment[0].get('id')})
             lists['equipment'] = equipment[0]
 
+        except Exception:
+                if all_interfaces:
+                    allInt = list()
+                    for i in interface_list:
+                        allInt.append({'id': i.get('id'), 'interface': i.get('interface')})
+                    lists['all_interfaces'] = allInt
+
+                    return render_to_response_ajax(AJAX_LIST_INTERFACES,
+                                                   lists,
+                                                   context_instance=RequestContext(request))
+
     elif request.method == "POST":
+
         equip_id = request.POST['equip_id']
 
         search_equipment = client.create_api_equipment().get([equip_id])
@@ -660,13 +672,15 @@ def add_channel_(request):
         envs_vlans["env"] = request.POST.get('environment')
         envs_vlans["vlans"] = request.POST.get('rangevlan')
 
+        switches = request.POST.get('switchInt') if type(request.POST.get('switchInt')) is list() \
+            else [request.POST.get('switchInt')]
+
         channel = {
             'name': request.POST.get('channelnumber'),
             'lacp':  True if int(request.POST.get('lacp_yes')) else False,
             'int_type': "Access" if int(request.POST.get('access')) else "Trunk",
             'vlan': int(request.POST.get('channelvlan')),
-            'interfaces': [request.POST.get('switchInt')],
-
+            'interfaces': switches,
             'envs_vlans': []
         }
 
@@ -674,9 +688,9 @@ def add_channel_(request):
             channel_obj = client.create_api_interface_request().create_channel([channel])
             channel_id = channel_obj[0].get('id')
             messages.add_message(request, messages.SUCCESS, "O channel foi criado com sucesso!")
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
-            messages.add_message(request, messages.ERROR, e)
+            messages.add_message(request, messages.ERROR, "Erro ao criar o channel. %s" % e)
             return render_to_response(NEW_CHANNEL, lists, RequestContext(request))
 
         return HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))

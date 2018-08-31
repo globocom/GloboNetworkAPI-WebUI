@@ -43,7 +43,7 @@ $(document).ready(function() {
 	$("#connect0").click(function(event) {
 	    console.log('back')
 		event.preventDefault();
-		url = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang")
+		url = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang") + "/0/"
 		console.log(url)
 		$.ajax({
 			url: url,
@@ -68,7 +68,7 @@ $(document).ready(function() {
 	$("#connect1").click(function(event) {
 		console.log('front')
 		event.preventDefault();
-		url = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang")
+		url = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang") + "/0/"
 		console.log(url)
 		$.ajax({
 			url: url,

@@ -168,8 +168,8 @@ urlpatterns += patterns(
         name='interface.post.edit', ),
     url('^interface/edit/basic/(?P<interface>[^/]+)[/]?$', 'basic_edit_interface',
         name='interface.basic.edit', ),
-    url('^interface/connect/(?P<id_interface>[^/]+)/(?P<front_or_back>[^/]+)[/]?$', 'connect_interfaces',
-        name='interface.connect', ),
+    url('^interface/connect/(?P<id_interface>[^/]+)/(?P<front_or_back>[^/]+)/(?P<all_interfaces>[^/]+)[/]?$',
+        'connect_interfaces', name='interface.connect', ),
     url('^interface/disconnect/(?P<interface_a>[^/]+)/(?P<interface_b>[^/]+)[/]?$', 'disconnect_interfaces',
         name='interface.disconnect', ),
 
@@ -178,8 +178,7 @@ urlpatterns += patterns(
     url('^channel/edit/(?P<channel_id>[^/]+)[/]?$', 'edit_channel_',
         name='edit.channel', ),
     url('^channel/interface/connect/(?P<id_interface>[^/]+)/(?P<front_or_back>[^/]+)/(?P<all_interfaces>[^/]+)[/]?$',
-        'connect_interfaces',
-        name='interface.connect', ),
+        'connect_interfaces', name='interface.channel', ),
 )
 
 
