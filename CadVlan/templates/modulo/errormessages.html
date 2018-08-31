@@ -1,0 +1,18 @@
+<div class="mbr-section mbr-section__container mbr-section__container--middle">
+    <div class="container">
+        <div id="messages">
+            {% for message in messages %}
+                <div data-toggle="collapse" data-target="#messagesError">
+                    <div id="messagesError" class="{% if message.tags == 'error'%}ui-state-error
+                    {% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
+                        <!--span class="ui-icon"></span-->
+                        <p class="{% if message.tags == 'error'%}text-danger
+                         {% elif message.tags == 'success' %}text-success
+                         {% else %}text-info{% endif %}
+                         form-control-label text-xs-center">{{ message }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
