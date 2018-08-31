@@ -32,6 +32,9 @@
         <section id="menu-8">
             {% include "modulo/menubar.html" %}
         </section>
+        {% if messages %}
+            {% include "modulo/errormessages.html" with messages=messages %}
+        {% endif %}
         <section class="container-cadvlan">
             <div>
                 <h3 class="mbr-section-title display-3"> Channel </h3>
@@ -76,7 +79,7 @@
                                            name="lacp_yes"
                                            data-form-field="lacp_no"
                                            id="lacp_no"
-                                           value="1">
+                                           value="0">
                                     <label class="form-check-label" for="lacp_no">
                                         Não
                                     </label>
@@ -99,20 +102,6 @@
                                        name="search_equipment"
                                        data-form-field="servername"
                                        id="id_equip_name">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="form_server_interface">
-                                    Interface
-                                </label>
-                                <select type="text"
-                                        required
-                                        class="form-control"
-                                        name="serverInt"
-                                        data-form-field="serverInt"
-                                        id="form_server_interface">
-                                    <option>Selecione</option>
-                                </select>
                             </div>
                         </div>
                         <div class="form-row-cadvlan">
@@ -194,7 +183,7 @@
                                            name="access"
                                            data-form-field="trunk"
                                            id="trunk"
-                                           value="1">
+                                           value="0">
                                     <label class="form-check-label" for="trunk">
                                         Trunk
                                     </label>
