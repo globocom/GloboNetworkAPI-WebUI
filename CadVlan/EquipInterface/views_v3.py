@@ -737,7 +737,7 @@ def add_channel_(request):
             messages.add_message(request, messages.ERROR, "Erro ao criar o channel. %s" % e)
             return render_to_response(NEW_CHANNEL, lists, RequestContext(request))
 
-        return HttpResponseRedirect(reverse("channel.edit", args=[channel_id]))
+        return HttpResponseRedirect(reverse("edit.channel", args=[channel_id]))
 
     return render_to_response(NEW_CHANNEL, lists, RequestContext(request))
 
