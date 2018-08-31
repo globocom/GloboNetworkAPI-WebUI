@@ -25,6 +25,10 @@
         <section id="menu-8">
             {% include "modulo/menubar.html" %}
         </section>
+        {% if messages %}
+            <br><br><br>
+            {% include "modulo/errormessages.html" with messages=messages %}
+        {% endif %}
         <section id="container">
             <div class="channel-connection">
                 channel-connection
