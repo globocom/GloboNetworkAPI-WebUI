@@ -716,15 +716,13 @@ def add_channel_(request):
         envs_vlans["env"] = request.POST.get('environment')
         envs_vlans["vlans"] = request.POST.get('rangevlan')
 
-        switches = request.POST.get('switchInt') if type(request.POST.get('switchInt')) is list() \
-            else [request.POST.get('switchInt')]
 
         channel = {
             'name': request.POST.get('channelnumber'),
             'lacp':  True if int(request.POST.get('lacp_yes')) else False,
             'int_type': "Access" if int(request.POST.get('access')) else "Trunk",
             'vlan': int(request.POST.get('channelvlan')),
-            'interfaces': switches,
+            'interfaces': request.POST.getlist('switchInt'),
             'envs_vlans': []
         }
 
