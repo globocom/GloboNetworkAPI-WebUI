@@ -1,10 +1,11 @@
 function myFunction(interface_id) {
-    element_id = "trunk".concat(interface_id);
-    range_id = "range_vlans".concat(interface_id);
-    env_id = "envs".concat(interface_id);
-    var checkBox = document.getElementById(element_id);
-    var text = document.getElementById("range_vlans");
-    if (checkBox.checked == true){
+    "use strict";
+    var element_id = "trunk".concat(interface_id),
+        range_id = "range_vlans".concat(interface_id),
+        env_id = "envs".concat(interface_id),
+        checkBox = document.getElementById(element_id),
+        text = document.getElementById("range_vlans");
+    if (checkBox.checked == true) {
         document.getElementById(range_id).style.display = "block";
         document.getElementById(env_id).style.display = "block";
     } else {
@@ -13,7 +14,7 @@ function myFunction(interface_id) {
     }
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
 	$("#dialog-form").dialog({
 		width: 600,
 		modal: true,
@@ -23,32 +24,32 @@ $(document).ready(function() {
 	});
 	$("#page_tab").tabs();
 
-	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function() {
+	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function () {
 		location.href = "{% url interface.list %}?search_equipment={{ equip_name }}";
 	});
 
 	$(".btn_close").button(
 		{ icons: {primary: "ui-icon-close"}, text: false }
 	).hover(
-		function() {
-			num = $(this).attr("lang");
+		function () {
+			var num = $(this).attr("lang");
 			$(".line_" + num).css("background-color", "red");
 		},
-		function() {
-			num = $(this).attr("lang");
+		function () {
+			var num = $(this).attr("lang");
 			$(".line_" + num).css("background-color", "black");
 		}
 	);
 
-	$("#connect0").click(function(event) {
-	    console.log('back')
+	$("#connect0").click(function (event) {
+	    console.log('back');
 		event.preventDefault();
-		url = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang") + "/0/"
-		console.log(url)
+		var url0 = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang") + "/0/";
+		console.log(url0);
 		$.ajax({
-			url: url,
+			url: url0,
 			type: "GET",
-			complete: function(xhr, status) {
+			complete: function (xhr, status) {
 				if (xhr.status == "500") {
 					$("#dialog-form").dialog("close");
 					location.reload();
@@ -65,15 +66,15 @@ $(document).ready(function() {
 		});
 	});
 
-	$("#connect1").click(function(event) {
-		console.log('front')
+	$("#connect1").click(function (event) {
+		console.log('front');
 		event.preventDefault();
-		url = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang") + "/0/"
-		console.log(url)
+		var url1 = "/interface/connect/" + $(this).attr("href") + $(this).attr("lang") + "/0/";
+		console.log(url1);
 		$.ajax({
-			url: url,
+			url: url1,
 			type: "GET",
-			complete: function(xhr, status) {
+			complete: function (xhr, status) {
 				if (xhr.status == "500") {
 					$("#dialog-form").dialog("close");
 					location.reload();

@@ -40,6 +40,7 @@ $(document).ready(function() {
 
         let inputEquip = document.createElement('input');
         $(inputEquip).addClass('form-control bs-autocomplete');
+        $(inputEquip).attr('autocomplete', 'off');
         $(inputEquip).attr('required', 'required');
         $(inputEquip).attr('type','text');
         $(inputEquip).attr('name','switchname');

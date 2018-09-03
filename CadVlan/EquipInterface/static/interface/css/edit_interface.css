@@ -16,8 +16,10 @@ section {
 p.interface-title{
     margin: 0px;
     text-align: center;
+    font-weight: bold;
     align-content: center;
-    box-shadow: 0 3px 10px -1px rgba(40,33,31,.2)    
+    box-shadow: 0 3px 10px -1px rgba(40,33,31,.2);
+    background-color: #f2fcff;
 }
 
 div.form-interfaces{
