@@ -664,14 +664,28 @@ def add_channel_(request):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
-    envs_vlans = dict()
     lists = dict()
 
     if request.method == "POST":
 
-        envs_vlans["env"] = request.POST.get('environment')
-        envs_vlans["vlans"] = request.POST.get('rangevlan')
+        data = dict()
+        data["start_record"] = 0
+        data["end_record"] = 30000
+        data["asorting_cols"] = []
+        data["searchable_columns"] = []
+        data["custom_search"] = ""
+        data["extends_search"] = []
 
+        envs = client.create_api_environment().search(fields=["name", "id"], search=data)
+
+        envs_vlans = list()
+        for e, v in zip(request.POST.getlist('environment'), request.POST.getlist('rangevlan')):
+            for obj in envs.get('environments'):
+                if obj.get('name') in e:
+                    env_id = obj.get('id')
+
+            group = dict(env=env_id, vlans=v)
+            envs_vlans.append(group)
 
         channel = {
             'name': request.POST.get('channelnumber'),
@@ -679,7 +693,7 @@ def add_channel_(request):
             'int_type': "Access" if int(request.POST.get('access')) else "Trunk",
             'vlan': int(request.POST.get('channelvlan')),
             'interfaces': request.POST.getlist('switchInt'),
-            'envs_vlans': []
+            'envs_vlans': envs_vlans
         }
 
         try:
@@ -760,6 +774,17 @@ def edit_channel_(request, channel_id=None):
         url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
         return HttpResponseRedirect(url)
 
+    data["searchable_columns"] = ["interface__id"]
+    data["custom_search"] = str(sw_ids[0])
+
+    try:
+        environments = client.create_api_interface_request().get_interface_environments(search=data)
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
+
     lists['type_list'] = type_list
 
     if request.method == "POST":
@@ -807,6 +832,7 @@ def edit_channel_(request, channel_id=None):
 
     try:
         sw_int_map, channel_map = facade.get_channel_map(sw_interfaces)
+        sw_int_map['environments'] = environments
         lists['channel_map'] = channel_map
         lists['total_channel'] = len(channel_map) - 1
         lists['sw_int_map'] = sw_int_map
