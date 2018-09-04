@@ -31,14 +31,16 @@ from CadVlan.Util.shortcuts import render_to_response_ajax
 logger = logging.getLogger(__name__)
 
 
-
 @log
 @login_required
 def ajax_autocomplete_equipment(request):
-    try:
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
 
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    equip_list = dict()
+
+    try:
         data = {
             "start_record": 0,
             "end_record": 30000,
@@ -50,7 +52,6 @@ def ajax_autocomplete_equipment(request):
 
         equipment = client.create_api_equipment().search(fields=["name"], search=data)
 
-        equip_list = dict()
         equip_list = cache_equipment_list(equipment.get('equipments'))
 
     except NetworkAPIClientError, e:

@@ -54,6 +54,7 @@ AJAX_LDAP_USERS_BY_GROUP = 'ajax/select-ldap-user.html'
 AJAX_LDAP_USER_POP_NAME_MAIL = 'ajax/pop_ldap_user_mail.json'
 
 AJAX_AUTOCOMPLETE_EQUIPMENTS = 'ajax/autocomplete-equipment-ajax.json'
+AJAX_AUTOCOMPLETE_ENVIRONMENT = 'ajax/autocomplete-environment-ajax.json'
 
 # Script
 SCRIPT_LIST = 'script/list.html'

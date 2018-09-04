@@ -17,8 +17,20 @@ $(document).ready(function() {
             }
 	}});
 
+    $.ajax({
+        url: "/autocomplete/environment/",
+        dataType: "json",
+        success: function(data) {
+            if (data.errors.length > 0) {
+                alert(data.errors);
+            } else {
+                localStorage.setItem("environment_list", JSON.stringify(data.list));
+            }
+	}});
+
     fillInterfaceField("#id_equip_name", "equipment_list", "form_server_interface");
     fillInterfaceField("#form_switch_name", "equipment_list", "form_switch_interface");
+    fillEnvironmentField("#envs", "environment_list", "rangevlans");
 
     $('#btn_channel_sw').click(function() {
 
@@ -121,8 +133,10 @@ $(document).ready(function() {
         $(labelEquip).appendTo($(addBlockElemSw));
 
         let inputEquip = document.createElement('input');
-        $(inputEquip).addClass('form-control');
+        $(inputEquip).addClass('form-control bs-autocomplete');
+        $(inputEquip).attr('autocomplete','off');
         $(inputEquip).attr('type','text');
+        $(inputEquip).attr('id','envs' + addBlockId);
         $(inputEquip).attr('name','environment');
         $(inputEquip).attr('placeholder','Busque pelo nome...');
         $(inputEquip).appendTo($(addBlockElemSw));
@@ -140,7 +154,8 @@ $(document).ready(function() {
         let inputInt = document.createElement('input');
         $(inputInt).addClass('form-control');
         $(inputInt).attr('type','text');
-        $(inputInt).attr('name','rangevlans' + addBlockId);
+        $(inputInt).attr('id','rangevlans' + addBlockId);
+        $(inputInt).attr('name','rangevlan');
         $(inputInt).attr('placeholder','Ex.: 1-10');
         $(inputInt).appendTo($(addBlockElemInt));
 
@@ -168,6 +183,11 @@ $(document).ready(function() {
         $(addBlockI).appendTo($(addBlockButton));
 
         $(addBlockRow).appendTo($('#more_envs'));
+
+        let autocompleteId = '#envs'.concat(addBlockId);
+        let vlanId = 'rangevlans'.concat(addBlockId);
+        fillInterfaceField( autocompleteId, "environment_list", vlanId);
+
     });
 });
 
@@ -220,6 +240,21 @@ function fillInterfaceField(equipmentFieldId, storageName, interfaceFieldId) {
                     location.reload();
                 }
             });
+        }
+    });
+}
+
+function fillEnvironmentField(envFieldId, storageName, vlanFieldId) {
+    $(envFieldId).autocomplete({
+        source: JSON.parse(localStorage.getItem(storageName)),
+        minLength: 1,
+        select: function(event, ui) {
+            let name = ui.item.label.split('(');
+            name = name[1].split(')');
+            name = name[0];
+            $(envFieldId).val(ui.item.label);
+            let vlanField = document.getElementById(vlanFieldId);
+            $(vlanField).val(name);
         }
     });
 }
