@@ -141,27 +141,27 @@
             </div>
             <div class="text-fields">
                 <p class="form-control-label">
-                    Tipo da Interface<span class="form-asterisk">*</span>
+                    Tipo:
                 </p>
                 {% for type in type_list %}
                     <div class="radio-inline form-check">
                         {% ifequal default.type.id type.id %}
                         <input type="radio"
-                               onclick="myFunction( {{ default.id }} )"
+                               onclick="interfaceTrunk()"
                                class="form-check-input"
                                name="type"
                                data-form-field="{{ type.type }}"
-                               id="{{ type.type }}{{ default.id }}"
+                               id="{{ type.type }}"
                                required
                                value="{{ type.id }}"
                                checked>
                         {% else %}
                         <input type="radio"
-                               onclick="myFunction( {{ default.id }} )"
+                               onclick="interfaceAccess()"
                                class="form-check-input"
                                name="type"
                                data-form-field="{{ type.type }}"
-                               id="{{ type.type }}{{ default.id }}"
+                               id="{{ type.type }}"
                                required
                                value="{{ type.id }}">
                         {% endifequal %}
@@ -171,62 +171,52 @@
                     </div>
                 {% endfor %}
             </div>
-            {% ifequal default.type.type 'trunk' %}
-            <div class="text-fields" id="range_vlans{{ default.id }}">
-            {% else %}
-            <div class="text-fields" style="display:none;" id="range_vlans{{ default.id }}">
-            {% endifequal %}
-                <div class="form-group">
-                    <label class="form-control-label"
-                           for="interface_range_vlan">
-                        Range de Vlans
-                    </label>
-                    <input class="form-control"
-                           name="vlans"
-                           data-form-field="vlans"
-                           placeholder="Ex.: 2-100"
-                           value="{{ default.range_vlans }}"
-                           id="interface_range_vlan">
-                </div>
-            </div>
         </div>
         {% ifequal default.type.type 'trunk' %}
-        <div class="rows" id="envs{{ default.id }}">
+        <div id="more_envs">
         {% else %}
-        <div class="rows" style="display:none;" id="envs{{ default.id }}">
+        <div style="display:none;" id="more_envs">
         {% endifequal %}
-            {% if default.equipment.environments %}
-            <div class="text-fields">
-                <p class="form-control-label">Selecione os Ambientes Permitidos</p>
-                <div class="form-control" style="overflow:scroll;height:50px;">
-                    {% for env in default.equipment.environments %}
-                        <div class="checkbox">
-                            <label style="visibility:visible;">
-                                {% if env.environment.id in default.env_ids %}
-                                <input class="source"
-                                       checked
-                                       type="checkbox"
-                                       style="visibility:visible;"
-                                       value="{{ env.environment.id }}"
-                                       name="environments">
-                                {% else %}
-                                <input class="source"
-                                       type="checkbox"
-                                       style="visibility:visible;"
-                                       value="{{ env.environment.id }}"
-                                       name="environments">
-                                {% endif %}
-                                {{ env.environment.name }} (Vlans: {{ env.environment.min_num_vlan_1 }} - {{ env.environment.max_num_vlan_1 }})
-                            </label>
-                        </div>
-                    {% endfor %}
+            {% for env in  default.environments %}
+                <div class="rows">
+                    <div class="text-fields">
+                        <label class="form-control-label"
+                               for="envs">
+                            Ambiente
+                        </label>
+                        <input type="text"
+                               autocomplete="off"
+                               class="form-control bs-autocomplete"
+                               name="environment"
+                               data-form-field="environment"
+                               value="{{ env.environment.name }}"
+                               id="envs">
+                    </div>
+                    <div class="text-fields">
+                        <label class="form-control-label"
+                               for="rangevlans">
+                            Range de Vlan
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               name="rangevlan"
+                               data-form-field="rangevlan"
+                               value="{{ env.range_vlans }}"
+                               id="rangevlans">
+                    </div>
+                    <div class="text-fields">
+                        <button class="btn btn-social-bottom btn-responsive channel"
+                                type="button"
+                                id="btn_channel_env"
+                                data-toggle="tooltip"
+                                title="Selecionar mais um Ambiente">
+                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                add
+                            </i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            {% else %}
-            <div class="text-fields">
-                <p class="form-control-label">Equipamento não possui ambientes associados.</p>
-            </div>
-            {% endif %}
+            {% endfor %}
         </div>
         <div class="rows">
             <div class="text-fields">
@@ -245,3 +235,4 @@
         </div>
     </form>
 </div>
+

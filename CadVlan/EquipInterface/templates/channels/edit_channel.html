@@ -12,9 +12,17 @@
         <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
         <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js">
+        </script>
         <!-- Bootstrap tooltips requere Thether -->
         <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
         <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+        <!-- Autocomplete -->
+        {% load util %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
 
         {% load static %}
         <link rel="stylesheet" href="{{ STATIC_URL }}/static/channel/css/edit_channel.css"/>

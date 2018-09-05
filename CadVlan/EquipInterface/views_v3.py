@@ -778,7 +778,10 @@ def edit_channel_(request, channel_id=None):
     data["custom_search"] = str(sw_ids[0])
 
     try:
-        environments = client.create_api_interface_request().get_interface_environments(search=data)
+        environments = client.create_api_interface_request().get_interface_environments(search=data,
+                                                                                        fields=['environment__basic',
+                                                                                                'range_vlans'])
+        environments = environments.get('interface_environments')
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -869,3 +872,4 @@ def delete_channel(request, channel_id=None):
 
     url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
     return HttpResponseRedirect(url)
+

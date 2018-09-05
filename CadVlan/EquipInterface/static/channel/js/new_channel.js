@@ -148,7 +148,7 @@ $(document).ready(function() {
         let labelInt = document.createElement('Label');
         $(labelInt).addClass('form-control-label');
         $(labelInt).attr('for', 'rangevlans' + addBlockId);
-        labelInt.innerHTML = "Interface";
+        labelInt.innerHTML = "Range de Vlan";
         $(labelInt).appendTo($(addBlockElemInt));
 
         let inputInt = document.createElement('input');
@@ -186,7 +186,7 @@ $(document).ready(function() {
 
         let autocompleteId = '#envs'.concat(addBlockId);
         let vlanId = 'rangevlans'.concat(addBlockId);
-        fillInterfaceField( autocompleteId, "environment_list", vlanId);
+        fillEnvironmentField( autocompleteId, "environment_list", vlanId);
 
     });
 });
