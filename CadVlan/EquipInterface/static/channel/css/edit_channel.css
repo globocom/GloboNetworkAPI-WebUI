@@ -249,3 +249,13 @@ select#id_front {
     background-color: #fffdfa;
     border-color: #0D84A5;
 }
+
+select.form-control,
+input.form-control.bs-autocomplete {
+    height: 36px;
+    font-size: 0.875rem;
+    border: 1px solid #e8e8e8;
+    border-radius: 3px;
+    padding: 0.5em 1.07em 0.5em;
+    width: 100%;
+}
