@@ -818,27 +818,37 @@ def edit_channel_(request, channel_id=None):
         url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
         return HttpResponseRedirect(url)
 
-    data["searchable_columns"] = ["interface__id"]
-    data["custom_search"] = str(sw_ids[0])
-
-    try:
-        environments = client.create_api_interface_request().get_interface_environments(search=data,
-                                                                                        fields=['environment__basic',
-                                                                                                'range_vlans'])
-        environments = environments.get('interface_environments')
-    except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
-        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
-        return HttpResponseRedirect(url)
-
     lists['type_list'] = type_list
 
     if request.method == "POST":
 
         lacp = True if int(request.POST.get('lacp')) else False
-        int_type = "Access" if int(request.POST.get('type')) else "Trunk"
         protected = True if int(request.POST.get('protected')) else False
+
+        envs_vlans = list()
+
+        if str(request.POST.get('type')).lower() in "Access".lower():
+            int_type = "Access"
+        else:
+            int_type = "Trunk"
+
+            data = dict()
+            data["start_record"] = 0
+            data["end_record"] = 30000
+            data["asorting_cols"] = []
+            data["searchable_columns"] = []
+            data["custom_search"] = ""
+            data["extends_search"] = []
+
+            envs = client.create_api_environment().search(fields=["name", "id"], search=data)
+
+            for e, v in zip(request.POST.getlist('environment'), request.POST.getlist('rangevlan')):
+                for obj in envs.get('environments'):
+                    if obj.get('name') in e:
+                        env_id = obj.get('id')
+
+                group = dict(env=env_id, vlans=v)
+                envs_vlans.append(group)
 
         channel_obj = dict(
             id=channel_id,
@@ -848,11 +858,12 @@ def edit_channel_(request, channel_id=None):
             int_type=int_type,
             vlan=int(request.POST.get('vlan_nativa')),
             interfaces=sw_ids,
-            envs_vlans=[]
+            envs_vlans=envs_vlans
         )
 
         try:
             client.create_api_interface_request().update_channel([channel_obj])
+            messages.add_message(request, messages.SUCCESS, "O channel foi editado com sucesso!")
         except NetworkAPIClientError, e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, 'Erro ao atualizar o channel. Error: %s' % e)
@@ -873,6 +884,21 @@ def edit_channel_(request, channel_id=None):
             messages.add_message(request, messages.WARNING, 'Erro ao buscar o channel de Id %s.' % channel_id)
             url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
             return HttpResponseRedirect(url)
+
+    data["asorting_cols"] = ["id"]
+    data["searchable_columns"] = ["interface__id"]
+    data["custom_search"] = str(sw_ids[0])
+
+    try:
+        environments = client.create_api_interface_request().get_interface_environments(search=data,
+                                                                                        fields=['environment__basic',
+                                                                                                'range_vlans'])
+        environments = environments.get('interface_environments')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
 
     lists['server_map'] = server_interfaces.get('interfaces')
     lists['total_itens'] = len(server_interfaces) - 1
