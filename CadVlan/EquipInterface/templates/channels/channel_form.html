@@ -147,25 +147,25 @@
                     <div class="radio-inline form-check">
                         {% ifequal default.type.id type.id %}
                         <input type="radio"
-                               onclick="interfaceTrunk()"
+                               onclick="channelTrunk (2)"
                                class="form-check-input"
                                name="type"
                                data-form-field="{{ type.type }}"
-                               id="{{ type.type }}"
+                               id="channel{{ type.type }}{{ type.id }}"
                                required
-                               value="{{ type.id }}"
+                               value="{{ type.type }}"
                                checked>
                         {% else %}
                         <input type="radio"
-                               onclick="interfaceAccess()"
+                               onclick="channelTrunk (2)"
                                class="form-check-input"
                                name="type"
                                data-form-field="{{ type.type }}"
-                               id="{{ type.type }}"
+                               id="channel{{ type.type }}{{ type.id }}"
                                required
-                               value="{{ type.id }}">
+                               value="{{ type.type }}">
                         {% endifequal %}
-                        <label class="form-check-label" for="{{ type.type }}">
+                        <label class="form-check-label" for="channel{{ type.type }}{{ type.id }}">
                             {{ type.type }}
                         </label>
                     </div>
@@ -174,11 +174,8 @@
         </div>
         {% ifequal default.type.type 'trunk' %}
         <div id="more_envs">
-        {% else %}
-        <div style="display:none;" id="more_envs">
-        {% endifequal %}
             {% for env in  default.environments %}
-                <div class="rows">
+                <div class="rows" id="env_row{{ forloop.counter0 }}">
                     <div class="text-fields">
                         <label class="form-control-label"
                                for="envs">
@@ -206,18 +203,74 @@
                     </div>
                     <div class="text-fields">
                         <button class="btn btn-social-bottom btn-responsive channel"
+                                onclick="removeEnvs ({{ forloop.counter0 }})"
+                                type="button"
+                                id="btn_remove_envs"
+                                data-toggle="tooltip"
+                                title="Remover este ambiente.">
+                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                delete
+                            </i>
+                        </button>
+                        {% if forloop.first %}
+                        <button class="btn btn-social-bottom btn-responsive channel"
                                 type="button"
                                 id="btn_channel_env"
                                 data-toggle="tooltip"
-                                title="Selecionar mais um Ambiente">
+                                title="Selecionar mais um Ambiente.">
                             <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
                                 add
                             </i>
                         </button>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
         </div>
+        {% else %}
+        <div style="display:none;" id="more_envs">
+            <div class="rows">
+                <div class="text-fields">
+                    <label class="form-control-label"
+                           for="envs">
+                        Ambiente
+                    </label>
+                    <input type="text"
+                           autocomplete="off"
+                           class="form-control bs-autocomplete"
+                           placeholder="Busque pelo nome..."
+                           name="environment"
+                           data-form-field="environment"
+                           value="{{ env.environment.name }}"
+                           id="envs">
+                </div>
+                <div class="text-fields">
+                    <label class="form-control-label"
+                           for="rangevlans">
+                        Range de Vlan
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           name="rangevlan"
+                           data-form-field="rangevlan"
+                           value="{{ env.range_vlans }}"
+                           placeholder="Ex.: 1-10"
+                           id="rangevlans">
+                </div>
+                <div class="text-fields">
+                    <button class="btn btn-social-bottom btn-responsive channel"
+                            type="button"
+                            id="btn_channel_env"
+                            data-toggle="tooltip"
+                            title="Selecionar mais um Ambiente">
+                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                            add
+                        </i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endifequal %}
         <div class="rows">
             <div class="text-fields">
                 <a class="btn-sm btn-danger-outline btn-danger"

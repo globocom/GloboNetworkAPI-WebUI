@@ -95,7 +95,7 @@
             </div>
             <div class="text-fields">
                 <p class="form-control-label">
-                    Tipo da Interface<span class="form-asterisk">*</span>
+                    Tipo:
                 </p>
                 {% for type in type_list %}
                     <div class="radio-inline form-check">
@@ -119,7 +119,7 @@
                                required
                                value="{{ type.id }}">
                         {% endifequal %}
-                        <label class="form-check-label" for="{{ type.type }}">
+                        <label class="form-check-label" for="{{ type.type }}{{ default.id }}">
                             {{ type.type }}
                         </label>
                     </div>

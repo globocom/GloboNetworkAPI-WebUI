@@ -1,5 +1,4 @@
 var total_env = 1;
-
 $(document).ready(function() {
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function() {
@@ -16,6 +15,8 @@ $(document).ready(function() {
                 localStorage.setItem("environment_list", JSON.stringify(data.list));
             }
 	}});
+
+    fillEnvironmentField( "#envs", "environment_list", "rangevlans");
 
     $('#btn_channel_env').click(function() {
 
@@ -98,24 +99,11 @@ $(document).ready(function() {
     });
 });
 
-function interfaceTrunk() {
-
-    let checkBox = document.getElementById("trunk");
-    let envsDiv = document.getElementById("more_envs");
-
-    if (checkBox.checked == true){
-        envsDiv.style.display = "flex";
-        envsDiv.style.flexDirection = "column";
-    }
-}
-
-function interfaceAccess() {
-
-    let checkBox = document.getElementById("access");
-    let envsDiv = document.getElementById("more_envs");
-
-    if (checkBox.checked == true){
-        envsDiv.style.display = "none";
+function removeEnvs(counter) {
+    let elementId = "env_row".concat(counter);
+    let node = document.getElementById(elementId);
+    if (node.parentNode) {
+        node.parentNode.removeChild(node);
     }
 }
 
@@ -132,4 +120,33 @@ function fillEnvironmentField(envFieldId, storageName, vlanFieldId) {
             $(vlanField).val(name);
         }
     });
+}
+
+function myFunction(interface_id) {
+    let element_id = "trunk".concat(interface_id);
+    let range_id = "range_vlans".concat(interface_id);
+    let env_id = "envs".concat(interface_id);
+    let checkBox = document.getElementById(element_id);
+    let text = document.getElementById("range_vlans");
+
+    if (checkBox.checked == true){
+        document.getElementById(range_id).style.display = "block";
+        document.getElementById(env_id).style.display = "block";
+    } else {
+        document.getElementById(range_id).style.display = "none";
+        document.getElementById(env_id).style.display = "none";
+    }
+}
+
+function channelTrunk(interface_id) {
+    let trunk_id = "channeltrunk".concat(interface_id);
+    let envsDiv = document.getElementById("more_envs");
+    let checkBoxTrunk = document.getElementById(trunk_id);
+
+    if (checkBoxTrunk.checked == true){
+        envsDiv.style.display = "flex";
+        envsDiv.style.flexDirection = "column";
+    } else {
+        envsDiv.style.display = "none";
+    }
 }
