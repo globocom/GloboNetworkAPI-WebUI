@@ -1,0 +1,41 @@
+<p class="interface-title">Channel Map</p>
+<br>
+{% for obj in default %}
+<div class="rows-connecting">
+    <div class="div-server">
+        <div class="server-int">
+            {{ obj.server_interface_name }}
+        </div>
+    </div>
+    <div class="ch-line">
+        <div id="line"></div>
+        <div id="line2"></div>
+    </div>
+    <div class="div-button">
+        <a class="btn btn-social-bottom btn-responsive channel"
+           id="btn_remove_int"
+           data-toggle="tooltip"
+           style="margin-bottom: 0px;"
+           title="Remover interface do channel."
+           href="{% url channel.remove.interface obj.channel obj.id %}">
+            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;font-weight:bold;">
+                X
+            </i>
+        </a>
+    </div>
+    <div class="div-sw">
+        <div class="sw-int">
+            {{ obj.equip_name}}: {{ obj.interface_name }}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<div class="rows-connecting">
+    <div class="ch-line">
+        <a class="btn-sm btn-warning-outline btn-warning"
+           href="">
+            + Interfaces
+        </a>
+    </div>
+</div>

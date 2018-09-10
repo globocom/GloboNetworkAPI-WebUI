@@ -26,6 +26,8 @@
 
         {% load static %}
         <link rel="stylesheet" href="{{ STATIC_URL }}/static/channel/css/edit_channel.css"/>
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/channel/css/channel_map.css"></script>
+
         <script type="text/javascript" src="{{ STATIC_URL }}/static/channel/js/edit_channel.js"></script>
 
     </head>
@@ -39,7 +41,7 @@
         {% endif %}
         <section id="container">
             <div class="channel-connection">
-                channel-connection
+                {% include "channels/channel_connection_map.html" with default=channel_map %}
             </div>
             <div class="server-form">
                 {% for interface in server_map %}
