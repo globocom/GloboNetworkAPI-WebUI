@@ -170,9 +170,13 @@ def get_channel_map(interfaces):
     for i in interfaces:
         sw_int_obj = dict(
             id=i.get('id'),
+            channel=i.get('channel').get('id'),
             equip_name=i.get('equipment').get('name'),
             interface_name=i.get('interface'),
-            description=i.get('description')
+            description=i.get('description'),
+            server_name=i.get('front_interface').get('equipment').get('name'),
+            server_interface_id=i.get('front_interface').get('id'),
+            server_interface_name=i.get('front_interface').get('interface')
         )
         sw_interfaces.append(sw_int_obj)
 

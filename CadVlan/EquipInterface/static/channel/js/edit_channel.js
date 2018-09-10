@@ -1,4 +1,5 @@
 var total_env = 1;
+
 $(document).ready(function() {
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function() {

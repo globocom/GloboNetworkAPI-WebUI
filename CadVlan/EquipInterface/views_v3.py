@@ -729,13 +729,13 @@ def edit_channel_(request, channel_id=None):
                   'type__details',
                   'native_vlan',
                   'equipment__details',
-                  'front_interface',
+                  'front_interface__basic',
                   'back_interface',
                   'channel__basic']
 
     search = {
         "start_record": 0,
-        "end_record": 10,
+        "end_record": 50,
         "asorting_cols": [],
         "searchable_columns": ["channel__id"],
         "custom_search": channel_id,
@@ -899,3 +899,85 @@ def delete_channel(request, channel_id=None):
     url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
     return HttpResponseRedirect(url)
 
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def dissociate_channel_interface(request, channel_id, interface_id):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    fields_get = ['id',
+                  'protected',
+                  'type__details',
+                  'native_vlan',
+                  'equipment__details',
+                  'front_interface__basic',
+                  'back_interface',
+                  'channel__basic']
+
+    data = dict()
+    data["start_record"] = 0
+    data["end_record"] = 50
+    data["extends_search"] = []
+    data["asorting_cols"] = []
+    data["searchable_columns"] = ["channel__id"]
+    data["custom_search"] = channel_id
+
+    try:
+        sw_ids = list()
+        interfaces = client.create_api_interface_request().search(search=data, fields=fields_get).get('interfaces')
+        interface_obj = interfaces[0]
+        for i in interfaces:
+            sw_ids.append(int(i.get('id')))
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.WARNING, 'Erro ao buscar o channel de Id %s.' % channel_id)
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
+
+    sw_ids.remove(int(interface_id))
+
+    data["asorting_cols"] = ["id"]
+    data["searchable_columns"] = ["interface__id"]
+    data["custom_search"] = str(sw_ids[0])
+
+    try:
+        environments = client.create_api_interface_request().get_interface_environments(search=data,
+                                                                                        fields=['environment__basic',
+                                                                                                'range_vlans'])
+        environments = environments.get('interface_environments')
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
+
+    envs_vlans = list()
+
+    for obj in environments:
+        group = dict(env=obj.get('environment').get('id'), vlans=obj.get('range_vlans'))
+        envs_vlans.append(group)
+
+    channel_obj = dict(
+        id=channel_id,
+        name=interface_obj.get('channel').get('name'),
+        lacp=interface_obj.get('channel').get('lacp'),
+        protected=interface_obj.get('protected'),
+        int_type=interface_obj.get('type').get('type'),
+        vlan=interface_obj.get('native_vlan'),
+        interfaces=sw_ids,
+        envs_vlans=envs_vlans
+    )
+
+    try:
+        client.create_api_interface_request().update_channel([channel_obj])
+        messages.add_message(request, messages.SUCCESS, "Interface foi removida do channel com sucesso.")
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, "Erro ao retirar a interface do channel. Err: " + " " + str(e))
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
+
+    return HttpResponseRedirect(reverse("edit.channel", args=[channel_id]))
