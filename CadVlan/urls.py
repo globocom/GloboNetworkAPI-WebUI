@@ -179,8 +179,13 @@ urlpatterns += patterns(
         name='edit.channel', ),
     url('^channel/interface/connect/(?P<id_interface>[^/]+)/(?P<front_or_back>[^/]+)/(?P<all_interfaces>[^/]+)[/]?$',
         'connect_interfaces', name='interface.channel', ),
+    url('^channel/edit/interface/connect/(?P<id_interface>[^/]+)/'
+        '(?P<front_or_back>[^/]+)/(?P<all_interfaces>[^/]+)[/]?$',
+        'connect_interfaces', name='interface.channel', ),
     url('^channel/remove-interface/(?P<channel_id>[^/]+)/(?P<interface_id>[^/]+)[/]?$', 'dissociate_channel_interface',
         name='channel.remove.interface', ),
+    url('^channel/associate-interface/(?P<channel_id>[^/]+)[/]?$', 'associate_channel_interface',
+        name='channel.associate.interface', ),
 )
 
 

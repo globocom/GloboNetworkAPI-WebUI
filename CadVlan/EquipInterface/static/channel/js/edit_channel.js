@@ -17,7 +17,25 @@ $(document).ready(function() {
             }
 	}});
 
+    $.ajax({
+        url: "/autocomplete/equipment/",
+        dataType: "json",
+        success: function(data) {
+            if (data.errors.length > 0) {
+                alert(data.errors);
+            } else {
+                localStorage.setItem("equipment_list", JSON.stringify(data.list));
+            }
+	}});
+
     fillEnvironmentField( "#envs", "environment_list", "rangevlans");
+
+    fillInterfaceField("#form_switch_name", "equipment_list", "form_switch_interface");
+
+    $('#associateLink').click(function() {
+        let buttonAss = document.getElementById('associate_interfaces');
+        buttonAss.style.display = "grid";
+    });
 
     $('#btn_channel_env').click(function() {
 
@@ -106,6 +124,38 @@ function removeEnvs(counter) {
     if (node.parentNode) {
         node.parentNode.removeChild(node);
     }
+}
+
+function fillInterfaceField(equipmentFieldId, storageName, interfaceFieldId) {
+    $(equipmentFieldId).autocomplete({
+        source: JSON.parse(localStorage.getItem(storageName)),
+        minLength: 1,
+        select: function(event, ui) {
+            $(equipmentFieldId).val(ui.item.label);
+            let url = "interface/connect/1/front/".concat(ui.item.label);
+            $.ajax({
+                url: url,
+                type: "GET",
+                success: function(data) {
+                    data_list = JSON.parse(data).list;
+                    var dropdown = document.getElementById(interfaceFieldId);
+                    while (dropdown.length > 1) {
+                        dropdown.remove(dropdown.length-1);
+                    }
+                    let option;
+                    for (let i = 0; i < data_list.length; i++) {
+                        option = document.createElement('option');
+                        option.text = data_list[i].interface;
+                        option.value = data_list[i].id;
+                        dropdown.add(option);
+                    }
+                },
+                error: function (xhr, error, thrown) {
+                    location.reload();
+                }
+            });
+        }
+    });
 }
 
 function fillEnvironmentField(envFieldId, storageName, vlanFieldId) {
