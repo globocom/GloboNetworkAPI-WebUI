@@ -34,8 +34,51 @@
 <div class="rows-connecting">
     <div class="ch-line">
         <a class="btn-sm btn-warning-outline btn-warning"
-           href="">
+           id="associateLink">
             + Interfaces
         </a>
     </div>
+</div>
+
+<div class="rows-connecting" id="associate_interfaces" style="display:none;">
+    <form action="{% url channel.associate.interface channel %}" method="post">
+        {% csrf_token %}
+        <div class="div-server" style="background-color:#FFFFFF;">
+            <div class="form-group">
+                <label class="form-control-label"
+                       for="form_switch_name">
+                    Nome do Switch
+                </label>
+                <input type="text"
+                       required
+                       autocomplete="off"
+                       placeholder="Busque pelo nome..."
+                       class="form-control bs-autocomplete"
+                       name="switchname"
+                       data-form-field="switchname"
+                       id="form_switch_name">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-control-label"
+                   for="form_switch_interface">
+                Interface
+            </label>
+            <select required
+                    class="form-control"
+                    name="switchInt"
+                    data-form-field="switchInt"
+                    id="form_switch_interface">
+                <option>Selecione</option>
+            </select>
+        </div>
+        <button class="btn btn-social-bottom btn-responsive channel"
+                id="btn_channel_int"
+                data-toggle="tooltip"
+                title="Adicionar interface ao channel.">
+            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                add
+            </i>
+        </button>
+    </form>
 </div>
