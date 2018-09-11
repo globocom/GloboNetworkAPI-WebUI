@@ -43,7 +43,7 @@ from CadVlan.Util.shortcuts import render_to_response_ajax
 
 from networkapiclient.exception import NetworkAPIClientError
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('networkapiclient')
 
 
 @log
@@ -1059,10 +1059,11 @@ def associate_channel_interface(request, channel_id):
 
     try:
         client.create_api_interface_request().update_channel([channel_obj])
-        messages.add_message(request, messages.SUCCESS, "Interface foi removida do channel com sucesso.")
+        messages.add_message(request, messages.SUCCESS, "Interface foi adicionada ao channel com sucesso.")
     except NetworkAPIClientError, e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, "Erro ao retirar a interface do channel. Err: " + " " + str(e))
+        logger.error(str(e))
+        messages.add_message(request, messages.ERROR, "Erro ao adicionar interface ao channel. Err: "
+                             + " " + str(e))
         url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
         return HttpResponseRedirect(url)
 
