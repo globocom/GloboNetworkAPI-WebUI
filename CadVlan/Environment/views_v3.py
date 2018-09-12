@@ -21,7 +21,7 @@ from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError
 
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Equipment.business import cache_equipment_list
+from CadVlan.Environment.business import cache_environment_list
 from CadVlan.templates import AJAX_AUTOCOMPLETE_ENVIRONMENT
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
@@ -51,7 +51,7 @@ def ajax_autocomplete_environment(request):
         }
 
         envs = client.create_api_environment().search(fields=["name", "min_num_vlan_1", "max_num_vlan_1"], search=data)
-        env_list = cache_equipment_list(envs.get('environments'))
+        env_list = cache_environment_list(envs.get('environments'))
 
     except NetworkAPIClientError, e:
         logger.error(e)
