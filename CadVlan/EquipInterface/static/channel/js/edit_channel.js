@@ -34,7 +34,9 @@ $(document).ready(function() {
 
     $('#associateLink').click(function() {
         let buttonAss = document.getElementById('associate_interfaces');
+        let buttonPlus = document.getElementById('associateLink');
         buttonAss.style.display = "grid";
+        buttonPlus.style.backgroundColor = "#fff9ea";
     });
 
     $('#btn_channel_env').click(function() {
