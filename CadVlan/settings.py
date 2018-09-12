@@ -216,6 +216,7 @@ CACHES = {
     }
 }
 
+CACHE_ENVIRONMENTS_TIMEOUT = 900
 CACHE_EQUIPMENTS_TIMEOUT = 900  # Values in seconds
 CACHE_VLANS_TIMEOUT = 300  # Values in seconds
 
