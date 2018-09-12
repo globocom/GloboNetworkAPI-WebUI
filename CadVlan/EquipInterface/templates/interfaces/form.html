@@ -191,6 +191,7 @@
                     Voltar
                 </a>
                 <a class="btn-sm btn-warning-outline btn-warning"
+                   onclick="javascript:if(!confirm('Aplicar a configuração da interface no equipamento??')){return false;}"
                    href="{% url equip.interface.config.sync default.equipment.name 0 default.id %}" >
                     Aplicar
                 </a>
