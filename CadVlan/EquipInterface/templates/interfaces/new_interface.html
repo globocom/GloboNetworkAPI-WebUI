@@ -1,68 +1,89 @@
-{% extends "menu.html" %}
-{% block header %}
-<script type="text/javascript">
-function myFunction() {
-    var checkBox = document.getElementById("trunk");
-    var text = document.getElementById("range_vlans");
-    if (checkBox.checked == true){
-        document.getElementById("range_vlans").style.display = "block";
-        document.getElementById("envs").style.display = "block";
-    } else {
-        document.getElementById("range_vlans").style.display = "none";
-        document.getElementById("envs").style.display = "none";    }
-}
-</script>
-{% endblock %}
-{% block content %}
-<section class="mbr-section mbr-after-navbar" id="form1-5"
-         style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
-    <div class="mbr-section mbr-section__container mbr-section__container--middle">
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-12 text-xs-center">
-                    <h3 class="mbr-section-title display-3">{{ equip_name }}</h3>
-                </div>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="NAPI-WEB">
+
+        <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+        <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <!-- Bootstrap tooltips requere Thether -->
+        <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+        <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+        <!-- Autocomplete -->
+        {% load util %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+
+        {% load static %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/interface/css/new_interface.css"/>
+        <script type="text/javascript" src="{{ STATIC_URL }}/static/interface/js/new_interface.js"></script>
+    </head>
+    <body>
+        <section id="menu-8">
+            {% include "modulo/menubar.html" %}
+        </section>
+        {% if messages %}
+            {% include "modulo/errormessages.html" with messages=messages %}
+        {% endif %}
+        <section class="container-cadvlan">
+            <div>
+                <h3 class="mbr-section-title display-3"> {{ equip_name }} </h3>
             </div>
-        </div>
-    </div>
-    <div class="mbr-section mbr-section-nopadding">
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-12 col-lg-10 col-lg-offset-1">
-                    <form action="{% url interface.add equip_id %}" method="post" id="interface_form">
-                        {% csrf_token %}
-                        <div class="row row-sm-offset">
-                            <div class="col-xs-12 col-md-6">
-                                <div class="form-group">
-                                    <label class="form-control-label"
-                                           for="interface_name">
-                                        Nome da Interface<span class="form-asterisk">*</span>
-                                    </label>
-                                    <input class="form-control"
-                                           name="name"
-                                           data-form-field="name"
-                                           placeholder="Ex.: Eth10"
-                                           required
-                                           id="interface_name">
-                                </div>
+            <div>
+                <form action="{% url interface.add equip_id %}" method="post" id="interface_form">
+                    {% csrf_token %}
+                    <div class="form-group-cadvlan">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <label class="form-control-label"
+                                       for="interface_name">
+                                    Nome da Interface
+                                </label>
+                                <input class="form-control"
+                                       name="name"
+                                       data-form-field="name"
+                                       placeholder="Ex.: Eth10"
+                                       required
+                                       id="interface_name">
                             </div>
-                            <div class="col-xs-12 col-md-6">
-                                <div class="form-group">
-                                    <label class="form-control-label"
-                                           for="interface_description">
-                                        Descrição
-                                    </label>
-                                    <input class="form-control"
-                                           name="description"
-                                           data-form-field="description"
-                                           id="interface_description">
-                                </div>
+                            <div class="form-group">
+                                <label class="form-control-label"
+                                       for="interface_description">
+                                    Descrição
+                                </label>
+                                <input class="form-control"
+                                       name="description"
+                                       data-form-field="description"
+                                       id="interface_description">
                             </div>
                         </div>
-                        <div class="row row-sm-offset">
-                            <div class="col-xs-12 col-md-6 with-gap">
+                    </div>
+                    <div class="form-group-cadvlan">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <label class="form-control-label"
+                                       for="interface_vlan_nativa">
+                                    Numero da Vlan Nativa:
+                                </label>
+                                <input class="form-control"
+                                       name="vlan_nativa"
+                                       data-form-field="vlan_nativa"
+                                       placeholder="Ex.: 1"
+                                       required
+                                       id="interface_vlan_nativa">
+                            </div>
+                            <div class="form-group">
                                 <p class="form-control-label">
-                                    Interface Protegida<span class="form-asterisk">*</span>
+                                    Protegida:
                                 </p>
                                 <div class="radio-inline form-check">
                                     <input type="radio"
@@ -90,90 +111,97 @@ function myFunction() {
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-xs-12 col-md-6">
+                        </div>
+                    </div>
+                    <div class="form-group-cadvlan"  id="id_env_vlans">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
                                 <p class="form-control-label">
-                                    Tipo da Interface<span class="form-asterisk">*</span>
+                                    Tipo:
                                 </p>
-                                {% for type in type_list %}
-                                    <div class="radio-inline form-check">
-                                        <input type="radio"
-                                               onclick="myFunction()"
-                                               class="form-check-input"
-                                               name="type"
-                                               data-form-field="{{ type.type }}"
-                                               id="{{ type.type }}"
-                                               required
-                                               value="{{ type.id }}">
-                                        <label class="form-check-label" for="{{ type.type }}">
-                                            {{ type.type }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           onclick="interfaceAccess()"
+                                           name="access"
+                                           data-form-field="access"
+                                           id="access"
+                                           value="1"
+                                           checked>
+                                    <label class="form-check-label" for="access">
+                                        Access
+                                    </label>
+                                </div>
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           onclick="interfaceTrunk()"
+                                           class="form-check-input"
+                                           name="access"
+                                           data-form-field="trunk"
+                                           id="trunk"
+                                           value="2">
+                                    <label class="form-check-label" for="trunk">
+                                        Trunk
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                        <div class="row row-sm-offset">
-                            <div class="col-xs-12 col-md-6">
+                        <div id="more_envs" style="display:none;">
+                            <div class="form-row-cadvlan">
                                 <div class="form-group">
                                     <label class="form-control-label"
-                                           for="interface_vlan_nativa">
-                                        Numero da Vlan Nativa<span class="form-asterisk">*</span>
+                                           for="envs">
+                                        Ambiente
                                     </label>
-                                    <input class="form-control"
-                                           name="vlan_nativa"
-                                           data-form-field="vlan_nativa"
-                                           placeholder="Ex.: 1"
-                                           required
-                                           id="interface_vlan_nativa">
+                                    <input type="text"
+                                           autocomplete="off"
+                                           class="form-control bs-autocomplete"
+                                           name="environment"
+                                           data-form-field="environment"
+                                           placeholder="Busque pelo nome..."
+                                           id="envs">
                                 </div>
-                            </div>
-                            <div class="col-xs-12 col-md-6" style="display:none;" id="range_vlans">
                                 <div class="form-group">
                                     <label class="form-control-label"
-                                           for="interface_range_vlan">
-                                        Range de Vlans
+                                           for="rangevlans">
+                                        Range de Vlan
                                     </label>
-                                    <input class="form-control"
-                                           name="vlans"
-                                           data-form-field="vlans"
-                                           placeholder="Ex.: 2-100"
-                                           id="interface_range_vlan">
+                                    <input type="text"
+                                           placeholder="Ex.: 1-10"
+                                           class="form-control"
+                                           name="rangevlan"
+                                           data-form-field="rangevlan"
+                                           id="rangevlans">
                                 </div>
+                                <button class="btn btn-social-bottom btn-responsive channel"
+                                        type="button"
+                                        id="btn_channel_env"
+                                        data-toggle="tooltip"
+                                        title="Selecionar mais um Ambiente">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                        add
+                                    </i>
+                                </button>
                             </div>
                         </div>
-                        <div class="row row-sm-offset" style="display:none;" id="envs">
-                            <div class="col-xs-12 col-md-12">
-                                <p class="form-control-label">Selecione os Ambientes Permitidos</p>
-                                <div class="form-control" style="overflow:auto;height:150px;">
-                                    {% for env in environments %}
-                                        <div class="checkbox">
-                                            <label style="visibility:visible;">
-                                                <input class="source"
-                                                       type="checkbox"
-                                                       style="visibility:visible;"
-                                                       value="{{ env.environment.id }}"
-                                                       name="environments">
-                                                {{ env.environment.name }} (Vlans: {{ env.environment.min_num_vlan_1 }} - {{ env.environment.max_num_vlan_1 }})
-                                            </label>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                        <br><br><br><br>
-                        <div class="text-xs-center">
+                    </div>
+                    <br>
+                    <div class="form-row-cadvlan">
+                        <div>
                             <a class="btn btn-danger-outline btn-danger"
                                href="{% url interface.list %}?search_equipment={{ equip_name|urlencode }}">
                                 Voltar
                             </a>
+                        </div>
+                        <div>
                             <button class="btn btn-success-outline btn-success" >
                                 Salvar
                             </button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
-        </div>
-    </div>
-</section>
-{% endblock %}
+        </section>
+    </body>
+</html>
 

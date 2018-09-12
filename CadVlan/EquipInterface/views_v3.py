@@ -93,14 +93,12 @@ def add_interface(request, equipment=None):
 
     if request.method == "POST":
 
-        int_type = int(request.POST.get('type'))
-
         interface = {
             'interface': request.POST.get('name'),
             'description': request.POST.get('description'),
             'protected': True if int(request.POST.get('protected')) else False,
             'native_vlan': request.POST.get('vlan_nativa'),
-            'type': int_type,
+            'type': int(request.POST.get('access')),
             'equipment': int(equips.get('id'))
         }
 
@@ -113,18 +111,23 @@ def add_interface(request, equipment=None):
             messages.add_message(request, messages.ERROR, e)
             return render_to_response(ADD_EQUIPMENT_INTERFACE, lists, RequestContext(request))
 
-        environments = request.POST.getlist('environments')
+        data["end_record"] = 30000
+        data["asorting_cols"] = []
+        data["searchable_columns"] = []
 
-        if environments:
-            try:
-                for env in environments:
-                    int_env_map = dict(interface=int(interface_id),
-                                       environment=int(env),
-                                       range_vlans=request.POST.get('vlans'))
-                    client.create_api_interface_request().associate_interface_environments([int_env_map])
-            except NetworkAPIClientError, e:
-                logger.error(e)
-                messages.add_message(request, messages.WARNING, 'Os ambientes não foram associados à interface.')
+        envs = client.create_api_environment().search(fields=["name", "id"], search=data)
+
+        try:
+            for e, v in zip(request.POST.getlist('environment'), request.POST.getlist('rangevlan')):
+                for obj in envs.get('environments'):
+                    if obj.get('name') in e:
+                        int_env_map = dict(interface=int(interface_id),
+                                           environment=int(obj.get('id')),
+                                           range_vlans=v)
+                        client.create_api_interface_request().associate_interface_environments([int_env_map])
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.WARNING, 'Os ambientes não foram associados à interface.')
 
         return HttpResponseRedirect('/interface/?search_equipment=%s' % equips.get('name'))
 
