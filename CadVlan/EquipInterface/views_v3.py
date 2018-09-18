@@ -240,7 +240,7 @@ def delete_interface(request, interface_id=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
-def basic_edit_interface(request, interface=None):
+def server_edit_interface(request, interface=None):
 
     if request.method == "POST":
 
@@ -253,6 +253,33 @@ def basic_edit_interface(request, interface=None):
         except NetworkAPIClientError, e:
             logger.error(e)
             messages.add_message(request, messages.WARNING, 'Erro ao buscar interface id %s.' % interface)
+
+        interface_dict = interface
+        interface_dict["interface"] = request.POST.get('sw_interface_name')
+        interface_dict["description"] = request.POST.get('sw_int_desc')
+
+        try:
+            client.create_api_interface_request().update([interface_dict])
+            messages.add_message(request, messages.SUCCESS, 'Interface atualizada com sucesso.')
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+        except Exception, e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, e)
+
+    return HttpResponseRedirect(reverse("edit.channel", args=[interface.get('channel')]))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
+def basic_edit_interface(request, interface=None):
+
+    if request.method == "POST":
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
 
         interface_dict = interface
         interface_dict["interface"] = request.POST.get('sw_interface_name')
@@ -381,6 +408,13 @@ def edit_interface_post(request, interface=None):
         data["custom_search"] = str(interface)
 
         int_envs = list()
+        trunk = False
+
+        for tipo in type_list:
+            if str(tipo.get('type')).lower() == str(request.POST.get('type')).lower():
+                int_type = tipo.get('id')
+                if str(tipo.get('type')).lower() == "trunk":
+                    trunk = True
 
         try:
             int_envs = client.create_api_interface_request().get_interface_environments(search=data)
@@ -395,7 +429,7 @@ def edit_interface_post(request, interface=None):
                               description=request.POST.get('description'),
                               protected=True if int(request.POST.get('protected')) else False,
                               native_vlan=request.POST.get('vlan_nativa'),
-                              type=int(request.POST.get('type')),
+                              type=int(int_type),
                               equipment=int(equipment.get('id')),
                               front_interface=interfaces.get('front_interface'),
                               back_interface=interfaces.get('back_interface'))
@@ -410,8 +444,6 @@ def edit_interface_post(request, interface=None):
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
 
-        environments = request.POST.getlist('environments')
-
         if int_envs:
             try:
                 for env in int_envs:
@@ -420,13 +452,34 @@ def edit_interface_post(request, interface=None):
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, 'Erro ao remover os ambientes associados anteriormente.')
 
-        if environments:
+        if request.POST.getlist('environments'):
+            environments = request.POST.getlist('environments')
+            range_vlans = request.POST.getlist('rangevlan')
+        elif request.POST.getlist('environmentCh' + str(interface)):
+            environments = request.POST.getlist('environmentCh' + str(interface))
+            range_vlans = request.POST.get('rangevlanCh' + str(interface))
+        else:
+            environments = None
+
+        if trunk:
+            data = dict()
+            data["start_record"] = 0
+            data["end_record"] = 30000
+            data["asorting_cols"] = []
+            data["searchable_columns"] = []
+            data["custom_search"] = ""
+            data["extends_search"] = []
+
+            envs = client.create_api_environment().search(fields=["name", "id"], search=data)
+
             try:
-                for env in environments:
-                    int_env_map = dict(interface=int(interface),
-                                       environment=int(env),
-                                       range_vlans=request.POST.get('vlans'))
-                    client.create_api_interface_request().associate_interface_environments([int_env_map])
+                for e, v in zip(environments, range_vlans):
+                    for obj in envs.get('environments'):
+                        if obj.get('name') in e:
+                            int_env_map = dict(interface=int(interface),
+                                               environment=int(obj.get('id')),
+                                               range_vlans=v)
+                            client.create_api_interface_request().associate_interface_environments([int_env_map])
             except NetworkAPIClientError, e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, 'Erro ao atualizar os ambientes.')
@@ -733,7 +786,7 @@ def edit_channel_(request, channel_id=None):
                   'protected',
                   'type__details',
                   'native_vlan',
-                  'equipment__details',
+                  'equipment__basic',
                   'front_interface__basic',
                   'back_interface',
                   'channel__basic']
@@ -861,7 +914,14 @@ def edit_channel_(request, channel_id=None):
         url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
         return HttpResponseRedirect(url)
 
-    lists['server_map'] = server_interfaces.get('interfaces')
+    try:
+        lists['server_map'] = facade.get_environments(client, server_interfaces.get('interfaces'))
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
+        url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
+        return HttpResponseRedirect(url)
+
     lists['total_itens'] = len(server_interfaces) - 1
 
     try:

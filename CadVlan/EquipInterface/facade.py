@@ -58,7 +58,7 @@ def get_interface_map(request, client, interface):
     except Exception, e:
         logger.error(e)
         messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
-                                                     'Error: %s' % e)
+                                                        'Error: %s' % e)
 
     for env in envs:
         env_id.append(env.get('environment'))
@@ -92,7 +92,7 @@ def get_interface_map(request, client, interface):
             except Exception, e:
                 logger.error(e)
                 messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
-                                                             'Error: %s' % e)
+                                                                'Error: %s' % e)
 
             for env in envs:
                 env_id.append(env.get('environment'))
@@ -137,8 +137,8 @@ def get_interface_map(request, client, interface):
                 envs = envs.get('interface_environments')
             except Exception, e:
                 logger.error(e)
-                messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
-                                                             'Error: %s' % e)
+                messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface.'
+                                                                'Error: %s' % e)
 
             for env in envs:
                 env_id.append(env.get('environment'))
@@ -166,6 +166,7 @@ def get_interface_map(request, client, interface):
 def get_channel_map(interfaces):
 
     sw_interfaces = list()
+    i = dict()
 
     for i in interfaces:
         sw_int_obj = dict(
@@ -190,3 +191,22 @@ def get_ordered_list(first, last, interface_map):
         interface_list.append(interface_map.get(str(j)))
 
     return interface_list
+
+
+def get_environments(client, interfaces):
+
+    data = dict()
+    data["start_record"] = 0
+    data["end_record"] = 1000
+    data["extends_search"] = []
+    data["asorting_cols"] = ["id"]
+    data["searchable_columns"] = ["interface__id"]
+
+    for i in interfaces:
+        data["custom_search"] = str(i.get('id'))
+        environments = client.create_api_interface_request().get_interface_environments(search=data,
+                                                                                        fields=['environment__basic',
+                                                                                                'range_vlans'])
+        i['environments'] = environments.get('interface_environments')
+
+    return interfaces
