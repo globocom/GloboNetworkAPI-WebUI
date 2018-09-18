@@ -50,21 +50,18 @@ def get_interface_map(request, client, interface):
     data["custom_search"] = str(interface)
 
     envs = list()
-    env_id = list()
 
     try:
-        envs = client.create_api_interface_request().get_interface_environments(search=data)
-        envs = envs.get('interface_environments')
+        environments = client.create_api_interface_request().get_interface_environments(search=data,
+                                                                                        fields=['environment__basic',
+                                                                                                'range_vlans'])
+        envs = environments.get('interface_environments')
     except Exception, e:
         logger.error(e)
         messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
                                                         'Error: %s' % e)
 
-    for env in envs:
-        env_id.append(env.get('environment'))
-
-    interface_obj['env_ids'] = env_id
-    interface_obj['range_vlans'] = envs[0].get('range_vlans') if envs else None
+    interface_obj['environments'] = envs
 
     interface_map[str(item)] = interface_obj
     main_interface = interface_obj
@@ -84,21 +81,19 @@ def get_interface_map(request, client, interface):
             data["custom_search"] = str(interface)
 
             envs = list()
-            env_id = list()
 
             try:
-                envs = client.create_api_interface_request().get_interface_environments(search=data)
-                envs = envs.get('interface_environments')
+                environments = client.create_api_interface_request().get_interface_environments(search=data,
+                                                                                                fields=[
+                                                                                                    'environment__basic',
+                                                                                                    'range_vlans'])
+                envs = environments.get('interface_environments')
             except Exception, e:
                 logger.error(e)
                 messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
                                                                 'Error: %s' % e)
 
-            for env in envs:
-                env_id.append(env.get('environment'))
-
-            interface_obj['env_ids'] = env_id
-            interface_obj['range_vlans'] = envs[0].get('range_vlans') if envs else None
+            interface_obj['environments'] = envs
 
             interface_map[str(item)] = interface_obj
             interface_map[str(item - 1)]['next_interface'] = interface_obj.get('id')
@@ -130,21 +125,19 @@ def get_interface_map(request, client, interface):
             data["custom_search"] = str(interface)
 
             envs = list()
-            env_id = list()
 
             try:
-                envs = client.create_api_interface_request().get_interface_environments(search=data)
-                envs = envs.get('interface_environments')
+                environments = client.create_api_interface_request().get_interface_environments(search=data,
+                                                                                                fields=[
+                                                                                                    'environment__basic',
+                                                                                                    'range_vlans'])
+                envs = environments.get('interface_environments')
             except Exception, e:
                 logger.error(e)
-                messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface.'
+                messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
                                                                 'Error: %s' % e)
 
-            for env in envs:
-                env_id.append(env.get('environment'))
-
-            interface_obj['env_ids'] = env_id
-            interface_obj['range_vlans'] = envs[0].get('range_vlans') if envs else None
+            interface_obj['environments'] = envs
 
             interface_map[str(item)] = interface_obj
             interface_map[str(item)]['next_interface'] = interface_map[str(item + 1)].get('id')

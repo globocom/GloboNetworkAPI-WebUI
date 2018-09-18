@@ -6,7 +6,7 @@
             <div class="text-fields">
                 <label class="form-control-label"
                        for="interface_name">
-                    Nome<span class="form-asterisk">*</span>
+                    Nome
                 </label>
                 <input class="form-control"
                        name="name"
@@ -44,7 +44,7 @@
         <div class="rows">
             <div class="text-fields">
                 <p class="form-control-label">
-                    Interface Protegida<span class="form-asterisk">*</span>
+                    Protegida:
                 </p>
                 <div class="radio-inline form-check">
                     {% if default.protected %}
@@ -95,95 +95,183 @@
             </div>
             <div class="text-fields">
                 <p class="form-control-label">
-                    Tipo da Interface<span class="form-asterisk">*</span>
+                    Tipo:
                 </p>
                 {% for type in type_list %}
                     <div class="radio-inline form-check">
-                        {% with type.type|add:default.id as field_id %}
                         {% ifequal default.type.id type.id %}
                         <input type="radio"
-                               onclick="myFunction( {{ default.id }} )"
+                               onclick="serverTrunk ({{ default.id }}, 2)"
                                class="form-check-input"
                                name="type"
                                data-form-field="{{ type.type }}"
-                               id="{{ type.type }}{{ default.id }}"
+                               id="server{{ default.id }}{{ type.type }}{{ type.id }}"
                                required
-                               value="{{ type.id }}"
+                               value="{{ type.type }}"
                                checked>
                         {% else %}
                         <input type="radio"
-                               onclick="myFunction( {{ default.id }} )"
+                               onclick="serverTrunk ({{ default.id }}, 2)"
                                class="form-check-input"
                                name="type"
                                data-form-field="{{ type.type }}"
-                               id="{{ type.type }}{{ default.id }}"
+                               id="server{{ default.id }}{{ type.type }}{{ type.id }}"
                                required
-                               value="{{ type.id }}">
+                               value="{{ type.type }}">
                         {% endifequal %}
-                        {% endwith %}
-                        <label class="form-check-label" for="{{ type.type }}">
+                        <label class="form-check-label" for="server{{ default.id }}{{ type.type }}{{ type.id }}">
                             {{ type.type }}
                         </label>
                     </div>
                 {% endfor %}
             </div>
-            {% ifequal default.type.type 'trunk' %}
-            <div class="text-fields" id="range_vlans{{ default.id }}">
-            {% else %}
-            <div class="text-fields" style="display:none;" id="range_vlans{{ default.id }}">
-            {% endifequal %}
-                <div class="form-group">
-                    <label class="form-control-label"
-                           for="interface_range_vlan">
-                        Range de Vlans
-                    </label>
-                    <input class="form-control"
-                           name="vlans"
-                           data-form-field="vlans"
-                           placeholder="Ex.: 2-100"
-                           value="{{ default.range_vlans }}"
-                           id="interface_range_vlan">
-                </div>
-            </div>
         </div>
         {% ifequal default.type.type 'trunk' %}
-        <div class="rows" id="envs{{ default.id }}">
-        {% else %}
-        <div class="rows" style="display:none;" id="envs{{ default.id }}">
-        {% endifequal %}
-            {% if default.equipment.environments %}
-            <div class="text-fields">
-                <p class="form-control-label">Selecione os Ambientes Permitidos</p>
-                <div class="form-control" style="overflow:scroll;height:50px;">
-                    {% for env in default.equipment.environments %}
-                        <div class="checkbox">
-                            <label style="visibility:visible;">
-                                {% if env.environment.id in default.env_ids %}
-                                <input class="source"
-                                       checked
-                                       type="checkbox"
-                                       style="visibility:visible;"
-                                       value="{{ env.environment.id }}"
-                                       name="environments">
-                                {% else %}
-                                <input class="source"
-                                       type="checkbox"
-                                       style="visibility:visible;"
-                                       value="{{ env.environment.id }}"
-                                       name="environments">
-                                {% endif %}
-                                {{ env.environment.name }} (Vlans: {{ env.environment.min_num_vlan_1 }} - {{ env.environment.max_num_vlan_1 }})
-                            </label>
-                        </div>
-                    {% endfor %}
+        <div id="more_envs_ch{{ default.id }}">
+            {% for env in  default.environments %}
+                <div class="rows" id="ch_env_row{{ default.id }}_div_{{ forloop.counter0 }}">
+                    <div class="text-fields">
+                        <label class="form-control-label"
+                               for="ch_envs{{ default.id }}_div_{{ forloop.counter0 }}">
+                            Ambiente
+                        </label>
+                        <input type="text"
+                               autocomplete="off"
+                               class="form-control bs-autocomplete"
+                               name="environmentCh{{ default.id }}"
+                               data-form-field="environment"
+                               value="{{ env.environment.name }}"
+                               id="ch_envs{{ default.id }}_div_{{ forloop.counter0 }}">
+                    </div>
+                    <div class="text-fields">
+                        <label class="form-control-label"
+                               for="ch_rangevlans{{ default.id }}_div_{{ forloop.counter0 }}">
+                            Range de Vlan
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               name="rangevlanCh{{ default.id }}"
+                               data-form-field="rangevlan"
+                               value="{{ env.range_vlans }}"
+                               id="ch_rangevlans{{ default.id }}_div_{{ forloop.counter0 }}">
+                    </div>
+                    <div class="text-fields">
+                        <button class="btn btn-social-bottom btn-responsive channel"
+                                onclick="removeEnvsCh ({{ forloop.counter0 }})"
+                                type="button"
+                                id="btn_remove_envs_ch"
+                                data-toggle="tooltip"
+                                title="Remover este ambiente.">
+                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                delete
+                            </i>
+                        </button>
+                        {% if forloop.first %}
+                        <button class="btn btn-social-bottom btn-responsive channel"
+                                type="button"
+                                id="btn_channel_env_ch{{ default.id }}_div_{{ forloop.counter0 }}"
+                                data-toggle="tooltip"
+                                onclick="moreEnvsCh({{ default.id }}, {{ forloop.counter0 }})"
+                                title="Selecionar mais um Ambiente.">
+                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                add
+                            </i>
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-            {% else %}
-            <div class="text-fields">
-                <p class="form-control-label">Equipamento não possui ambientes associados.</p>
-            </div>
+            {% endfor %}
+            {% if not default.environments %}
+                <div id="more_envs_ch{{ default.id }}">
+                    <div class="rows" id="ch_env_row{{ default.id }}_div_1">
+                        <div class="text-fields">
+                            <label class="form-control-label"
+                                   for="ch_envs{{ default.id }}_div_1">
+                                Ambiente
+                            </label>
+                            <input type="text"
+                                   autocomplete="off"
+                                   class="form-control bs-autocomplete"
+                                   placeholder="Busque pelo nome..."
+                                   name="environmentCh{{ default.id }}"
+                                   data-form-field="environment"
+                                   value="{{ env.environment.name }}"
+                                   id="ch_envs{{ default.id }}_div_1">
+                        </div>
+                        <div class="text-fields">
+                            <label class="form-control-label"
+                                   for="ch_rangevlans{{ default.id }}_div_1">
+                                Range de Vlan
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   name="rangevlanCh{{ default.id }}"
+                                   data-form-field="rangevlan"
+                                   value="{{ env.range_vlans }}"
+                                   placeholder="Ex.: 1-10"
+                                   id="ch_rangevlans{{ default.id }}_div_1">
+                        </div>
+                        <div class="text-fields">
+                            <button class="btn btn-social-bottom btn-responsive channel"
+                                    type="button"
+                                    onclick="moreEnvsCh({{ default.id }}, 0)"
+                                    id="btn_channel_env_ch{{ default.id }}_div_1"
+                                    data-toggle="tooltip"
+                                    title="Selecionar mais um Ambiente">
+                                <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                    add
+                                </i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             {% endif %}
         </div>
+        {% else %}
+        <div id="more_envs_ch{{ default.id }}" style="display:none;">
+            <div class="rows" id="ch_env_row{{ default.id }}_div_1">
+                <div class="text-fields">
+                    <label class="form-control-label"
+                           for="ch_envs{{ default.id }}_div_1">
+                        Ambiente
+                    </label>
+                    <input type="text"
+                           autocomplete="off"
+                           class="form-control bs-autocomplete"
+                           placeholder="Busque pelo nome..."
+                           name="environmentCh{{ default.id }}"
+                           data-form-field="environment"
+                           value="{{ env.environment.name }}"
+                           id="ch_envs{{ default.id }}_div_1">
+                </div>
+                <div class="text-fields">
+                    <label class="form-control-label"
+                           for="ch_rangevlans{{ default.id }}_div_1">
+                        Range de Vlan
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           name="rangevlanCh{{ default.id }}"
+                           data-form-field="rangevlan"
+                           value="{{ env.range_vlans }}"
+                           placeholder="Ex.: 1-10"
+                           id="ch_rangevlans{{ default.id }}_div_1">
+                </div>
+                <div class="text-fields">
+                    <button class="btn btn-social-bottom btn-responsive channel"
+                            type="button"
+                            onclick="moreEnvsCh({{ default.id }}, 0)"
+                            id="btn_channel_env_ch{{ default.id }}_div_1"
+                            data-toggle="tooltip"
+                            title="Selecionar mais um Ambiente">
+                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                            add
+                        </i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endifequal %}
         <div class="rows">
             <div class="text-fields">
                 <a class="btn-sm btn-danger-outline btn-danger"

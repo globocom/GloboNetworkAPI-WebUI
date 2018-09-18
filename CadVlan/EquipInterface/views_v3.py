@@ -450,6 +450,7 @@ def edit_interface_post(request, interface=None):
         int_envs = list()
         trunk = False
 
+        int_type = None
         for tipo in type_list:
             if str(tipo.get('type')).lower() == str(request.POST.get('type')).lower():
                 int_type = tipo.get('id')
@@ -492,15 +493,6 @@ def edit_interface_post(request, interface=None):
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, 'Erro ao remover os ambientes associados anteriormente.')
 
-        if request.POST.getlist('environments'):
-            environments = request.POST.getlist('environments')
-            range_vlans = request.POST.getlist('rangevlan')
-        elif request.POST.getlist('environmentCh' + str(interface)):
-            environments = request.POST.getlist('environmentCh' + str(interface))
-            range_vlans = request.POST.get('rangevlanCh' + str(interface))
-        else:
-            environments = None
-
         if trunk:
             data = dict()
             data["start_record"] = 0
@@ -513,7 +505,8 @@ def edit_interface_post(request, interface=None):
             envs = client.create_api_environment().search(fields=["name", "id"], search=data)
 
             try:
-                for e, v in zip(environments, range_vlans):
+                for e, v in zip(request.POST.getlist('environmentCh' + str(interface)),
+                                request.POST.get('rangevlanCh' + str(interface))):
                     for obj in envs.get('environments'):
                         if obj.get('name') in e:
                             int_env_map = dict(interface=int(interface),
@@ -900,6 +893,7 @@ def edit_channel_(request, channel_id=None):
 
             envs = client.create_api_environment().search(fields=["name", "id"], search=data)
 
+            env_id = None
             for e, v in zip(request.POST.getlist('environment'), request.POST.getlist('rangevlan')):
                 for obj in envs.get('environments'):
                     if obj.get('name') in e:
