@@ -57,8 +57,8 @@ def ajax_ldap_pop_name_mail(request, cn):
         # Get user
         auth = AuthSession(request.session)
         ldap_user = Ldap(auth).get_user(cn)
-        lists['ldap_name'] = ldap_user['givenName'] + ' ' + \
-            ldap_user.get('initials', '') + ' ' + ldap_user['sn']
+        lists['ldap_name'] = '%s %s %s' % (ldap_user['givenName'],
+            ldap_user.get('initials', ''), ldap_user['sn'])
         lists['ldap_email'] = ldap_user['mail']
         lists['error'] = ' '
 
