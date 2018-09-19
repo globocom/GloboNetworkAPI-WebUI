@@ -321,6 +321,13 @@ def basic_edit_interface(request, interface=None):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        try:
+            interface_obj = client.create_api_interface_request().get(ids=[interface])
+            interface = interface_obj.get('interfaces')[0]
+        except NetworkAPIClientError, e:
+            logger.error(e)
+            messages.add_message(request, messages.WARNING, 'Erro ao buscar interface id %s.' % interface)
+
         interface_dict = interface
         interface_dict["interface"] = request.POST.get('sw_interface_name')
         interface_dict["description"] = request.POST.get('sw_int_desc')
