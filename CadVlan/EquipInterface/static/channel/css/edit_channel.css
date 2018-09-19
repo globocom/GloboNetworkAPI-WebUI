@@ -18,22 +18,26 @@ p.interface-title{
     background-color: #f2fcff;
 }
 
-.channel-connection {
-    grid-column: 2 / 3;
-    grid-row: 1 / auto;    
-}
 .server-form {
     grid-column: 1 / 2;
     grid-row: 3 / auto;    
 }
+
 .basic-info {
     grid-column: 1 / 2;
-    grid-row: 1 / 2;    
+    grid-row: 2 / 3;    
 }
+
 .channel-info {
     grid-column: 1 / 2; 
-    grid-row: 2 / 3;
+    grid-row: 1 / 2;
 }
+
+.channel-connection {
+    grid-column: 2 / 3;
+    grid-row: 1 / auto;    
+}
+
 div.channel-connection,
 div.server-form,
 div.basic-info,
