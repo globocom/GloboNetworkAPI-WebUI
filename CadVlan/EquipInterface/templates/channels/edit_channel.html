@@ -46,7 +46,7 @@
             <div class="server-form">
                 {% for interface in server_map %}
                     <div>
-                        {% include "channels/server_form.html" with default=interface  type_list=type_list %}
+                        {% include "interfaces/form.html" with default=interface  type_list=type_list %}
                     </div>
                 {% endfor %}
             </div>
