@@ -466,7 +466,7 @@ def edit_interface_post(request, interface=None):
 
             try:
                 for e, v in zip(request.POST.getlist('environmentCh' + str(interface)),
-                                request.POST.get('rangevlanCh' + str(interface))):
+                                request.POST.getlist('rangevlanCh' + str(interface))):
                     for obj in envs.get('environments'):
                         if obj.get('name') in e:
                             int_env_map = dict(interface=int(interface),
