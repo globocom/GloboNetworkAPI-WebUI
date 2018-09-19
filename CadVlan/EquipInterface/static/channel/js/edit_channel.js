@@ -131,8 +131,9 @@ function removeEnvs(counter) {
     }
 }
 
-function removeEnvsCh(counter) {
-    let elementId = "ch_env_row".concat(counter);
+function removeEnvsCh(interface_id, counter) {
+    let divId = interface_id + "_div_" + counter;
+    let elementId = "ch_env_row".concat(divId);
     let node = document.getElementById(elementId);
     if (node.parentNode) {
         node.parentNode.removeChild(node);
