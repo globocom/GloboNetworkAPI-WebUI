@@ -1,0 +1,104 @@
+{% ifequal total 0 %}
+    {% for interface in interface_map %}
+        {% ifequal interface.equipment.equipment_type.id '8' %}
+            <div class="elements">
+                <a href="{{ interface.id }}"
+                   lang="/0"
+                   id="connect0"
+                   class="btn btn-social-link btn-responsive"
+                   title="linkar Back-interface">
+                    <i class="set-link">+</i>
+                </a>
+                <div id="dialog-form" title="Associar interface"></div>
+            </div>
+            <div class="vertical-line-sm"></div>
+        {% endifequal %}
+        <div class="elements">
+            <div class="div-box">
+                <a class="remove-label"
+                   id="equipment_name_label"
+                   href="/interface/?search_equipment={{interface.equipment.name}}"
+                   data-toggle="tooltip">
+                    {{ interface.equipment.name }}
+                </a>
+            </div>
+        </div>
+        <div class="vertical-line-sm"></div>
+        <div class="elements">
+            <a href="{{ interface.id }}"
+               lang="/1"
+               id="connect1"
+               class="btn btn-social-link btn-responsive"
+               title="linkar Front-interface">
+                <i class="set-link">+</i>
+            </a>
+            <div id="dialog-form" title="Associar interface"></div>
+        </div>
+    {% endfor %}
+{% else %}
+    {% for interface in interface_map %}
+        {% if not forloop.counter0 %}
+            {% ifequal interface.equipment.equipment_type.id 8 %}
+                <div class="elements">
+                    <a href="{{ interface.id }}"
+                       lang="/0"
+                       id="connect0"
+                       class="btn btn-social-link btn-responsive"
+                       title="linkar Back-interface">
+                        <i class="set-link">+</i>
+                    </a>
+                    <div id="dialog-form" title="Associar interface"></div>
+                </div>
+                <div class="vertical-line"></div>
+            {% endifequal %}
+        {% endif %}
+        <div class="elements">
+            <div class="div-box">
+                <a class="remove-label"
+                   href="/interface/?search_equipment={{interface.equipment.name}}"
+                   data-toggle="tooltip">
+                    {{ interface.equipment.name }}
+                </a>
+            </div>
+        </div>
+        {% ifequal forloop.counter0 total %}
+            {% ifequal interface.equipment.equipment_type.id 8 %}
+                <div class="vertical-line"></div>
+                {% if interface.front_interface %}
+                <div class="elements">
+                    <a href="{{ interface.id }}"
+                       lang="/0"
+                       id="connect0"
+                       class="btn btn-social-link btn-responsive"
+                       title="linkar Back-interface">
+                        <i class="set-link">+</i>
+                    </a>
+                    <div id="dialog-form" title="Associar interface"></div>
+                </div>
+                {% else %}
+                <div class="elements">
+                    <a href="{{ interface.id }}"
+                       lang="/1"
+                       id="connect1"
+                       class="btn btn-social-link btn-responsive"
+                       title="linkar Front-interface">
+                        <i class="set-link">+</i>
+                    </a>
+                    <div id="dialog-form" title="Associar interface"></div>
+                </div>
+                {% endif %}
+            {% endifequal %}
+        {% else %}
+        <div class="vertical-line"></div>
+        <div class="elements">
+            <a class="btn btn-social-remove btn-responsive"
+               href="{% url interface.disconnect interface.id interface.next_interface %}"
+               data-toggle="tooltip"
+               title="Remover link">
+                <i class="remove-link">X</i>
+            </a>
+        </div>
+        <div class="vertical-line"></div>
+        {% endifequal %}
+    {% endfor %}
+{% endifequal %}

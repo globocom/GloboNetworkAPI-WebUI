@@ -114,7 +114,7 @@ There is no need to install a nginx or apache to proxy pass the requests, once t
 Edit ``$WEBUI_FOLDER/gunicorn.conf.py`` to use your log files location and `user preferentes <http://gunicorn-docs.readthedocs.org/en/latest/settings.html#config-file>`_ and run gunicorn::
 
 	cd $WEBUI_FOLDER/
-	gunicorn cadvlan_wsgi:application
+	gunicorn wsgi:application
 
 Install CVS
 *****************

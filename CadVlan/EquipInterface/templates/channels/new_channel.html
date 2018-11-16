@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="NAPI-WEB">
+
+        <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+        <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <!-- Bootstrap tooltips requere Thether -->
+        <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+        <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+        <!-- Autocomplete -->
+        {% load util %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+
+        {% load static %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/channel/css/new_channel.css"/>
+        <script type="text/javascript" src="{{ STATIC_URL }}/static/channel/js/new_channel.js"></script>
+    </head>
+    <body>
+        <section id="menu-8">
+            {% include "modulo/menubar.html" %}
+        </section>
+        {% if messages %}
+            {% include "modulo/errormessages.html" with messages=messages %}
+        {% endif %}
+        <section class="container-cadvlan">
+            <div>
+                <h3 class="mbr-section-title display-3"> Channel </h3>
+            </div>
+            <div>
+                <form action="{% url add.channel %}" method="post" id="channel_form_basic">
+                    {% csrf_token %}
+                    <div class="form-group-cadvlan">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <label class="form-control-label"
+                                       for="channel_number">
+                                    Numero do Channel
+                                </label>
+                                <input required
+                                       type="text"
+                                       placeholder="Ex.:  13"
+                                       class="form-control"
+                                       name="channelnumber"
+                                       data-form-field="channelnumber"
+                                       id="channel_number">
+                            </div>
+                            <div class="form-group">
+                                <p class="form-control-label">
+                                    LACP
+                                </p>
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           name="lacp_yes"
+                                           data-form-field="lacp_yes"
+                                           id="lacp_yes"
+                                           value="1"
+                                           checked>
+                                    <label class="form-check-label" for="lacp_yes">
+                                        Sim
+                                    </label>
+                                </div>
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           name="lacp_yes"
+                                           data-form-field="lacp_no"
+                                           id="lacp_no"
+                                           value="0">
+                                    <label class="form-check-label" for="lacp_no">
+                                        Não
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group-cadvlan" id="sw_content">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <label class="form-control-label"
+                                       for="id_equip_name">
+                                    Nome do Servidor
+                                </label>
+                                <input required
+                                       type="text"
+                                       autocomplete="off"
+                                       placeholder="Busque pelo nome..."
+                                       class="form-control bs-autocomplete"
+                                       name="search_equipment"
+                                       data-form-field="servername"
+                                       id="id_equip_name">
+                            </div>
+                        </div>
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <label class="form-control-label"
+                                       for="form_switch_name">
+                                    Nome do Switch<span class="form-asterisk">*</span>
+                                </label>
+                                <input type="text"
+                                       required
+                                       autocomplete="off"
+                                       placeholder="Busque pelo nome..."
+                                       class="form-control bs-autocomplete"
+                                       name="switchname"
+                                       data-form-field="switchname"
+                                       id="form_switch_name">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-control-label"
+                                       for="form_switch_interface">
+                                    Interface
+                                </label>
+                                <select required
+                                        class="form-control"
+                                        name="switchInt"
+                                        data-form-field="switchInt"
+                                        id="form_switch_interface">
+                                    <option>Selecione</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-social-bottom btn-responsive channel"
+                                    type="button"
+                                    id="btn_channel_sw"
+                                    data-toggle="tooltip"
+                                    title="Selecionar mais um equipamento">
+                                <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                    add
+                                </i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group-cadvlan"  id="id_env_vlans">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <label class="form-control-label"
+                                       for="channel_vlan_native">
+                                    Vlan Nativa
+                                </label>
+                                <input type="text"
+                                       placeholder="Ex.: 1"
+                                       required
+                                       class="form-control"
+                                       name="channelvlan"
+                                       data-form-field="channelvlan"
+                                       id="channel_vlan_native">
+                            </div>
+                            <div class="form-group">
+                                <p class="form-control-label">
+                                    Tipo:
+                                </p>
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           onclick="interfaceAccess()"
+                                           name="access"
+                                           data-form-field="access"
+                                           id="access"
+                                           value="1"
+                                           checked>
+                                    <label class="form-check-label" for="access">
+                                        Access
+                                    </label>
+                                </div>
+                                <div class="radio-inline form-check">
+                                    <input type="radio"
+                                           onclick="interfaceTrunk()"
+                                           class="form-check-input"
+                                           name="access"
+                                           data-form-field="trunk"
+                                           id="trunk"
+                                           value="0">
+                                    <label class="form-check-label" for="trunk">
+                                        Trunk
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="more_envs" style="display:none;">
+                            <div class="form-row-cadvlan">
+                                <div class="form-group">
+                                    <label class="form-control-label"
+                                           for="channel_number">
+                                        Ambiente
+                                    </label>
+                                    <input type="text"
+                                           autocomplete="off"
+                                           class="form-control bs-autocomplete"
+                                           name="environment"
+                                           data-form-field="environment"
+                                           placeholder="Busque pelo nome..."
+                                           id="envs">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-control-label"
+                                           for="rangevlans">
+                                        Range de Vlan
+                                    </label>
+                                    <input type="text"
+                                           placeholder="Ex.: 1-10"
+                                           class="form-control"
+                                           name="rangevlan"
+                                           data-form-field="rangevlan"
+                                           id="rangevlans">
+                                </div>
+                                <button class="btn btn-social-bottom btn-responsive channel"
+                                        type="button"
+                                        id="btn_channel_env"
+                                        data-toggle="tooltip"
+                                        title="Selecionar mais um Ambiente">
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                        add
+                                    </i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-row-cadvlan">
+                        <div>
+                            <a class="btn-sm btn-danger-outline btn-danger"
+                               href="{% url interface.list %}" >
+                                Voltar
+                            </a>
+                        </div>
+                        <div>
+                            <button class="btn-sm btn-success-outline btn-success" >
+                                Salvar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </body>
+</html>
+

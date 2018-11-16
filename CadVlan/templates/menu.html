@@ -26,6 +26,7 @@
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/dataTable_new.css" />
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/global_new.css" />
 
+    {% block css %}{% endblock %}
 
 </head>
 
@@ -141,6 +142,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}/js/global_new.js"></script>
 
     {% block header %}{% endblock %}
+    {% block js %}{% endblock %}
 
     <input name="animation" type="hidden">
 

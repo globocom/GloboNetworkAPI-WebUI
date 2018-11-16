@@ -18,7 +18,9 @@
 LOGIN = 'login.html'
 HOME = 'home.html'
 
+MENUBAR = 'modulo/menubar.html'
 MENU = 'menu.html'
+
 HEADER = 'header.html'
 
 VERSION_HTML = 'version.html'
@@ -51,6 +53,8 @@ TOKEN_INVALID = "token_invalid.html"
 AJAX_LDAP_USERS_BY_GROUP = 'ajax/select-ldap-user.html'
 AJAX_LDAP_USER_POP_NAME_MAIL = 'ajax/pop_ldap_user_mail.json'
 
+AJAX_AUTOCOMPLETE_EQUIPMENTS = 'ajax/autocomplete-equipment-ajax.json'
+AJAX_AUTOCOMPLETE_ENVIRONMENT = 'ajax/autocomplete-environment-ajax.json'
 
 # Script
 SCRIPT_LIST = 'script/list.html'
@@ -87,8 +91,18 @@ EQUIPMENT_INTERFACE_ADD_CHANNEL = 'equip-interface/add-channel.html'
 EQUIPMENT_INTERFACE_EDIT_CHANNEL = 'equip-interface/edit-channel.html'
 EQUIPMENT_INTERFACES = 'equip-interface/equipInterfaces.html'
 
+# Channel
+NEW_CHANNEL = 'channels/new_channel.html'
+EDIT_CHANNEL = 'channels/edit_channel.html'
+AJAX_LIST_INTERFACES = 'ajax/equipments-interface.json'
+
 # Interfaces
 LIST_EQUIPMENT_INTERFACES = 'interfaces/list.html'
+ADD_EQUIPMENT_INTERFACE = 'interfaces/new_interface.html'
+EDIT_EQUIPMENT_INTERFACE = 'interfaces/edit_interface.html'
+CONNECTIONS_INTERFACES = 'interfaces/connections.html'
+NEW_CONNECTION = 'interfaces/new_connection.html'
+NEW_INTERFACE_CONNECT_FORM = 'interfaces/connect-form-new.html'
 
 # Equipment
 EQUIPMENT_SEARCH_LIST = 'equipment/search-list.html'
@@ -102,7 +116,6 @@ EQUIPMENT_VIEW_AJAX = 'equipment/view-real.html'
 
 # Vlans
 VLAN_SEARCH_LIST = 'vlan/search-list.html'
-VLANS_DEETAIL = 'vlan/list-id.html'
 VLANS_DEETAIL = 'vlan/list-id.html'
 VLAN_FORM = 'vlan/vlan-form.html'
 VLAN_EDIT = 'vlan/vlan-edit.html'
@@ -212,7 +225,6 @@ LDAP_GROUP_FORM = 'ldap/group-form.html'
 LDAP_SUDOER_LIST = 'ldap/sudoer-list.html'
 LDAP_SUDOER_FORM = 'ldap/sudoer-form.html'
 LDAP_USER_LIST = 'ldap/user-list.html'
-LDAP_USER_FORM = 'ldap/user-form.html'
 LDAP_USER_FORM = 'ldap/user-form.html'
 
 # Filter

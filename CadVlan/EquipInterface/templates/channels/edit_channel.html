@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="NAPI-WEB">
+
+        <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+        <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js">
+        </script>
+        <!-- Bootstrap tooltips requere Thether -->
+        <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+        <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+        <!-- Autocomplete -->
+        {% load util %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+
+        {% load static %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/channel/css/edit_channel.css"/>
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/channel/css/channel_map.css"></script>
+
+        <script type="text/javascript" src="{{ STATIC_URL }}/static/channel/js/edit_channel.js"></script>
+
+    </head>
+    <body>
+        <section id="menu-8">
+            {% include "modulo/menubar.html" %}
+        </section>
+        {% if messages %}
+            <br><br><br>
+            {% include "modulo/errormessages.html" with messages=messages %}
+        {% endif %}
+        <section id="container">
+            <div class="channel-connection">
+                {% include "channels/channel_connection_map.html" with default=channel_map channel=channel_id %}
+            </div>
+            <div class="server-form">
+                {% for interface in server_map %}
+                    <div>
+                        {% include "interfaces/form.html" with default=interface  type_list=type_list %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="basic-info">
+                {% for sw in channel_map %}
+                    <div>
+                        {% include "channels/sw_basic_form.html" with default=sw %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="channel-info">
+                {% include "channels/channel_form.html" with default=sw_int_map %}
+            </div>
+        </section>
+    </body>
+</html>

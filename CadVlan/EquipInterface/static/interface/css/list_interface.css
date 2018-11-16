@@ -1,0 +1,21 @@
+.ui-widget-content {
+    border: 1px solid #f5f5f5;
+    background: #f5f5f5  50% 50% repeat-x;
+    color: #9d9d9d;
+}
+
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus {
+    border: 1px solid #FFF2D5;
+    background: #FFF2D5 50% 50% repeat-x;
+    font-weight: bold; color: #9d9d9d;
+}
+
+.ui-state-hover a, .ui-state-hover a:hover {
+    color: #9d9d9d;
+    text-decoration: none;
+}
