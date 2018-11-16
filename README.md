@@ -34,4 +34,3 @@ have CMDB functionalities.
 
 ## Authors
 [Authors](./AUTHORS.md)
-
