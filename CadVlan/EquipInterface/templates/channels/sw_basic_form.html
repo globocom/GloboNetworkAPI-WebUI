@@ -1,0 +1,45 @@
+<div class="form-interfaces">
+    <form action="{% url interface.basic.edit default.id %}" method="post" id="sw_basic_form">
+        {% csrf_token %}
+        <p class="interface-title">{{ default.equip_name }}</p>
+        <div class="rows">
+            <div class="text-fields">
+                <label class="form-control-label"
+                       for="sw_interface_name">
+                    Interface
+                </label>
+                <input class="form-control"
+                       name="sw_interface_name"
+                       data-form-field="sw_interface_name"
+                       placeholder="Ex.: Eth10"
+                       required
+                       id="sw_interface_name"
+                       value="{{ default.interface_name }}">
+            </div>
+            <div class="text-fields">
+                <label class="form-control-label"
+                       for="sw_int_desc">
+                    Descrição
+                </label>
+                <input class="form-control"
+                       name="sw_int_desc"
+                       data-form-field="sw_int_desc"
+                       required
+                       id="sw_int_desc"
+                       value="{{ default.description }}">
+            </div>
+        </div>
+        <div class="rows">
+            <div class="text-fields">
+                <a class="btn-sm btn-danger-outline btn-danger"
+                   href="{% url interface.list %}?search_equipment={{ default.equip_name|urlencode }}" >
+                    Voltar
+                </a>
+                <button class="btn-sm btn-success-outline btn-success" >
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+

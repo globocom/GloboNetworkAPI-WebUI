@@ -26,6 +26,10 @@ def cache_list_equipment(equipment):
     elist["list"] = equipments["equipamentos"]
     return elist
 
+@cache_function(CACHE_EQUIPMENTS_TIMEOUT)
+def cache_equipment_list(equipment):
+    equipment_list = dict(list=equipment)
+    return equipment_list
 
 @cache_function(CACHE_EQUIPMENTS_TIMEOUT)
 def cache_list_equipment_all(equipment):

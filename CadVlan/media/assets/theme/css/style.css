@@ -46,8 +46,8 @@
   transition: all .3s ease-in-out; }
 
 .btn-sm {
-  padding: 0.625rem 2.1874rem;
-  font-size: 0.9687rem;
+  padding: 0.3rem 1.8rem;
+  font-size: 0.8rem;
   line-height: 1.5;
   border-radius: 3px;
   font-family: "Lora";
@@ -483,6 +483,46 @@ a.mbr-iconfont:hover {
     background: #0D84A5; }
   .btn-social + .btn {
     margin-left: 0.1rem; }
+
+.btn-social-remove {
+  margin: 0px;
+  border-radius: 50%;
+  max-width: 100%;
+  text-align: center;
+  position: relative;
+  border: 1px solid #e58f6f;
+  background: #e58f6f;
+  color: #FFF; }
+  .btn-social i {
+    top: 0;
+    top: 0;
+    line-height: 40px;
+    width: 40px;
+    }
+  .btn-social-remove:hover {
+    color: #fff;
+    background: #fff5f1;
+    }
+
+.btn-social-link {
+  margin: 0px;
+  border-radius: 50%;
+  max-width: 100%;
+  text-align: center;
+  position: relative;
+  border: 1px solid #56B087;
+  background: #56B087;
+  color: #FFF; }
+  .btn-social i {
+    top: 0;
+    top: 0;
+    line-height: 40px;
+    width: 40px;
+    }
+  .btn-social-link:hover {
+    color: #fff;
+    background: #eef7f3;
+    }
 
 .btn-responsive {
   padding:4px 4px;
@@ -2244,6 +2284,7 @@ html.is-builder .article .lead:not([data-app-remove-it]) + div .btn {
 
 #hamburger {
   position: fixed;
+  z-index: 999;
   display: flex;
   flex-direction: column;
   justify-content: center;

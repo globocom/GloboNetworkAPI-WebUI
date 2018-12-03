@@ -79,6 +79,64 @@ class ConnectForm(forms.Form):
 
         return self.cleaned_data.get("back")
 
+
+class ConnectFormV3(forms.Form):
+
+    def __init__(self, equipment, interf_list, *args, **kwargs):
+        super(ConnectFormV3, self).__init__(*args, **kwargs)
+
+        front_choices = list()
+        back_choices = list()
+        attrs = dict()
+
+        front_choices.append(("", "Selecione"))
+        back_choices.append(("", "Selecione"))
+
+        if equipment['equipment_type'] == str(PATCH_PANEL_ID):
+            for interf in interf_list:
+                if not interf["front_interface"]:
+                    front_choices.append((interf['id'], interf['interface']))
+                if not interf['ligacao_back']:
+                    back_choices.append((interf['id'], interf['interface']))
+        else:
+            attrs["style"] = "display: none;"
+            for interf in interf_list:
+                if not interf["front_interface"]:
+                    front_choices.append((interf['id'], interf['interface']))
+
+        if not front_choices:
+            front_choices = [("", "Nenhuma interface disponível")]
+        if not back_choices:
+            back_choices = [("", "Nenhuma interface disponível")]
+
+        self.fields['front'].choices = front_choices
+        self.fields['back'].widget = forms.Select(attrs=attrs)
+        self.fields['back'].choices = back_choices
+
+    front = forms.ChoiceField(
+        label="", required=False, error_messages=error_messages)
+    back = forms.ChoiceField(
+        label="", required=False, error_messages=error_messages)
+    equip_name = forms.CharField(
+        widget=forms.HiddenInput(), label='', required=False)
+    equip_id = forms.IntegerField(
+        widget=forms.HiddenInput(), label='', required=False)
+
+    def clean_back(self):
+        front = self.cleaned_data.get("front")
+        back = self.cleaned_data.get("back")
+
+        if not len(front) == 0 and not len(back) == 0:
+            # Only one must be filled
+            raise forms.ValidationError("Preencha apenas um: Front ou Back")
+
+        elif len(front) == 0 and len(back) == 0:
+            # Only one must be filled
+            raise forms.ValidationError(
+                "Preencha pelo menos um: Front ou Back")
+
+        return self.cleaned_data.get("back")
+
 class AddInterfaceForm(forms.Form):
 
     def __init__(self, int_type_list, marca, index, *args, **kwargs):

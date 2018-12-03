@@ -1,248 +1,297 @@
-{% extends "menu.html" %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="NAPI-WEB">
 
-{% block header %}
+        <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+        <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js">
+        </script>
+        <!-- Bootstrap tooltips requere Thether -->
+        <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+        <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+        <!-- Autocomplete -->
+        {% load util %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
 
-<style>
-    .ui-widget-content {
-        border: 1px solid #f5f5f5;
-        background: #f5f5f5  50% 50% repeat-x;
-        color: #9d9d9d;}
-    .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
-        border: 1px solid #FFF2D5;
-        background: #FFF2D5 50% 50% repeat-x;
-        font-weight: bold; color: #9d9d9d;}
-    .ui-state-hover a, .ui-state-hover a:hover {
-        color: #9d9d9d;
-        text-decoration: none; }
-</style>
-
-<script type="text/javascript">
-    $(document).ready(function() {
-        autocomplete("{% url equipment.autocomplete.ajax %}", true, "id_equip_name", false);
-        $(".btn_equip").on("click", function() {
-            $("#id_equip_name").val($(this).html().trim());
-            $("#search_form").submit();
-        });
-        $('[data-toggle="tooltip"]').tooltip();
-    })
-</script>
-
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-
-<link rel="stylesheet"
-      type="text/css"
-      href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
-
-{% endblock %}
-
-{% block content %}
-<section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
-    <div class="mbr-section mbr-section__container mbr-section__container--middle">
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-12 text-xs-center">
-                    <h3 class="mbr-section-title display-2">Interfaces do Equipamento</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% if not interface_flag %}
-    <div class="mbr-section mbr-section-nopadding">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-10 col-md-10 col-lg-10 col-md-offset-1">
-                    <form id="search_form" action="{% url interface.list %}">
-                        {% csrf_token %}
-                        <div class="input-group input-group-lg">
-                            <input autocomplete="off" class="form-control bs-autocomplete" name="search_equipment"
-                                   data-form-field="dcname" id="id_equip_name" placeholder="Nome do equipamento..."
-                                   autofocus value="{{ search_form }}">
-                            <span class="input-group-addon">
-                                <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif"
-                                 style="display: none;"/>
-                            </span>
-                            <div class="input-group-btn">
-                                <button class="btn primary" style="background-color:#f5f5f5;margin:0px;height:60px;">
-                                    <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
-                                </button>
-                            </div>
+        {% load static %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/interface/css/list_interface.css"/>
+        <script inline type="text/javascript" src="{{ STATIC_URL }}/static/interface/js/list_interface.js"></script>
+    </head>
+    <body>
+        <section id="menu-8">
+            {% include "modulo/menubar.html" %}
+        </section>
+        {% if messages %}
+            {% include "modulo/errormessages.html" with messages=messages %}
+        {% endif %}
+        <section class="mbr-section mbr-after-navbar"
+                 id="form1-5"
+                 style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
+            <div class="mbr-section mbr-section__container mbr-section__container--middle">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xs-12 text-xs-center">
+                            <h3 class="mbr-section-title display-2">Interfaces do Equipamento</h3>
                         </div>
-                        <p id="error">
-                            {% for error in field.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        </p>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    {% else %}
-    <div class="mbr-section mbr-section-nopadding">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-12 col-md-12 col-lg-12">
-                    <form id="search_form" action="{% url interface.list %}">
-                        {% csrf_token %}
-                        <div class="input-group input-group-sm">
-                            <input autocomplete="off" class="form-control bs-autocomplete menor" name="search_equipment"
-                                   data-form-field="dcname" id="id_equip_name" placeholder="Nome do equipamento..."
-                                   autofocus value="{{ search_form }}">
-                            <span class="input-group-addon">
-                                <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif"
-                                 style="display: none;"/>
-                            </span>
-                            <div class="input-group-btn">
-                                <button class="btn primary" style="background-color:#f5f5f5;margin:0px;height:50px;">
-                                    <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
-                                </button>
-                            </div>
+            {% if not interface_flag %}
+            <div class="mbr-section mbr-section-nopadding">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-10 col-md-10 col-lg-10 col-md-offset-1">
+                            <form id="search_form" action="{% url interface.list %}">
+                                {% csrf_token %}
+                                <div class="input-group input-group-lg">
+                                    <input autocomplete="off"
+                                           class="form-control bs-autocomplete"
+                                           name="search_equipment"
+                                           data-form-field="dcname"
+                                           id="id_equip_name"
+                                           placeholder="Nome do equipamento..."
+                                           autofocus value="{{ search_form }}">
+                                    <span class="input-group-addon">
+                                        <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif"
+                                         style="display: none;"/>
+                                    </span>
+                                    <div class="input-group-btn">
+                                        <button class="btn primary"
+                                                style="background-color:#f5f5f5;margin:0px;height:60px;">
+                                            <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p id="error">
+                                    {% for error in field.errors %}
+                                        {{ error|escape }}
+                                    {% endfor %}
+                                </p>
+                            </form>
                         </div>
-                        <p id="error">
-                            {% for error in field.errors %}
-                                {{ error|escape }}
-                            {% endfor %}
-                        </p>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <br>
-    <div class="container">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr class="col-xs-12  col-md-12 col-lg-12">
-                            <td class="col-xs-12 col-md-1 text-xs-left"><b>Interface</b></td>
-                            <td class="col-xs-12 col-md-1 text-xs-left"><b>Channel</b></td>
-                            <td class="col-xs-12 col-md-3 text-xs-left"><b>Ligacao Front</b></td>
-                            <td class="col-xs-12 col-md-3 text-xs-left"><b>Ligacao Back</b></td>
-                            <td class="col-xs-12 col-md-1 text-xs-left"><b>Tipo</b></td>
-                            <td class="col-xs-12 col-md-1 text-xs-left"><b>Vlan</b></td>
-                            <td class="col-xs-12 col-md-1 text-xs-left"></td>
-                            <td class="col-xs-12 col-md-1 text-xs-left">
-                                <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                   href="{% url equip.interface.several.form search_form %}"
-                                   data-toggle="tooltip"
-                                   title="Adicionar Vários">
-                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
-                                        exposure_plus_2
-                                    </i>
-                                </a>
-                            </td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for interface in equip_interface %}
-                        <tr class="col-xs-12  col-md-12 col-lg-12" id="{{ interface.id }}">
-                            <td class="col-xs-12 col-md-1 text-xs-left">{{ interface.interface }}</td>
-                            <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% if interface.channel %}
-                                    {{ interface.channel.name }}
-                                {% elif  interface.front_interface.channel %}
-                                <span style="color:#cacab8">{{ interface.front_interface.channel.name }}</span>
-                                {% else %}
-                                    {% if interface.front_interface %}
-                                    <a class="btn btn-social-bottom btn-responsive"
-                                       style="vertical-align: bottom;"
+            {% else %}
+            <div class="mbr-section mbr-section-nopadding">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12 col-lg-12">
+                            <form id="search_form" action="{% url interface.list %}">
+                                {% csrf_token %}
+                                <div class="input-group input-group-sm">
+                                    <input autocomplete="off"
+                                           class="form-control bs-autocomplete menor"
+                                           name="search_equipment"
+                                           data-form-field="dcname"
+                                           id="id_equip_name"
+                                           placeholder="Nome do equipamento..."
+                                           autofocus value="{{ search_form }}">
+                                    <span class="input-group-addon">
+                                        <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif"
+                                         style="display: none;"/>
+                                    </span>
+                                    <div class="input-group-btn">
+                                        <button class="btn primary"
+                                                style="background-color:#f5f5f5;margin:0px;height:50px;">
+                                            <i class="material-icons" style="color:#FFD17C;font-size:30px">search</i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p id="error">
+                                    {% for error in field.errors %}
+                                        {{ error|escape }}
+                                    {% endfor %}
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="col-xs-12  col-md-12 col-lg-12">
+                                <td class="col-xs-12 col-md-1 text-xs-left"><b>Interface</b></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"><b>Channel</b></td>
+                                <td class="col-xs-12 col-md-3 text-xs-left"><b>Ligacao Front</b></td>
+                                <td class="col-xs-12 col-md-3 text-xs-left"><b>Ligacao Back</b></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"><b>Tipo</b></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"><b>Vlan</b></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left"></td>
+                                <td class="col-xs-12 col-md-1 text-xs-left">
+                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
+                                       href="{% url equip.interface.several.form search_form %}"
                                        data-toggle="tooltip"
-                                       href="{% url channel.add interface.id %}"
-                                       title="Incluir Channel" >
-                                        <i style="color:#FFD17C;font-size:15px;left:50%;">+</i>
+                                       title="Adicionar Vários">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                            exposure_plus_2
+                                        </i>
                                     </a>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for interface in equip_interface %}
+                            <tr class="col-xs-12  col-md-12 col-lg-12" id="{{ interface.id }}">
+                                <td class="col-xs-12 col-md-1 text-xs-left">{{ interface.interface }}</td>
+                                <td class="col-xs-12 col-md-1 text-xs-left">
+                                    {% if interface.channel %}
+                                        {{ interface.channel.name }}
+                                    {% elif  interface.front_interface.channel %}
+                                    <span style="color:#cacab8">{{ interface.front_interface.channel.name }}</span>
                                     {% else %}
-                                    <a class="btn btn-social-bottom-disabled btn-responsive"
-                                       style="vertical-align: bottom;"
-                                       data-toggle="tooltip"
-                                       title="Link a interface antes de adicionar o Channel." >
-                                        <i style="color:#ffe8bd;font-size:15px;left:50%;">+</i>
-                                    </a>
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                            <td class="col-xs-12 col-md-3 text-xs-left">
-                                {% if interface.front_interface %}
-                                    <a class="btn_equip" href="#" style="color: royalblue;">
-                                        {{ interface.front_interface.equipment.name }}
-                                    </a>
-                                    {{ interface.front_interface.interface }}
-                                {% endif %}
-                            </td>
-                            <td class="col-xs-12 col-md-3 text-xs-left">
-                                {% if interface.back_interface %}
-                                    <a class="btn_equip" href="#" style="color: royalblue;">
-                                        {{ interface.back_interface.equipment.name }}
-                                    </a>
-                                    {{ interface.back_interface.interface }}
-                                {% endif %}
-                            </td>
-                            <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% if interface.tipo %}
-                                    {{ interface.tipo.type }}
-                                {% endif %}
-                            </td>
-                            <td class="col-xs-12 col-md-1 text-xs-left">
-                                {{ interface.native_vlan }}
-                            </td>
-                            <td class="col-xs-12 col-md-1 text-xs-left">
-                                <a class="btn btn-social-bottom btn-responsive"
-                                   style="vertical-align: bottom;"
-                                   href="{% url equip.interface.edit.form interface.equipment.name interface.id %}"
-                                   data-toggle="tooltip"
-                                   title="Editar Interface">
-                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
-                                </a>
-                            </td>
-                            <td class="col-xs-12 col-md-1 text-xs-left">
-                                {% if not interface.channel %}
-                                    {% if interface.front_interface or interface.back_interface %}
+                                        {% if interface.front_interface %}
+                                            <a class="btn btn-social-bottom btn-responsive"
+                                               style="vertical-align: bottom;"
+                                               data-toggle="tooltip"
+                                               href="{% url add.channel %}"
+                                               title="Incluir Channel" >
+                                                <i style="color:#FFD17C;font-size:15px;left:50%;">+</i>
+                                            </a>
+                                        {% else %}
                                         <a class="btn btn-social-bottom-disabled btn-responsive"
                                            style="vertical-align: bottom;"
                                            data-toggle="tooltip"
-                                           title="Interface conectada. Edite antes de excluí-la.">
-                                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
-                                                delete_forever
-                                            </i>
+                                           title="Link a interface antes de adicionar o Channel." >
+                                            <i style="color:#ffe8bd;font-size:15px;left:50%;">+</i>
                                         </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td class="col-xs-12 col-md-3 text-xs-left">
+                                    {% if interface.front_interface %}
+                                        <a class="btn_equip" href="#" style="color: royalblue;">
+                                            {{ interface.front_interface.equipment.name }}
+                                        </a>
+                                        {{ interface.front_interface.interface }}
+                                    {% endif %}
+                                </td>
+                                <td class="col-xs-12 col-md-3 text-xs-left">
+                                    {% if interface.back_interface %}
+                                        <a class="btn_equip" href="#" style="color: royalblue;">
+                                            {{ interface.back_interface.equipment.name }}
+                                        </a>
+                                        {{ interface.back_interface.interface }}
+                                    {% endif %}
+                                </td>
+                                <td class="col-xs-12 col-md-1 text-xs-left">
+                                    {% if interface.type %}
+                                        {{ interface.type.type }}
+                                    {% endif %}
+                                </td>
+                                <td class="col-xs-12 col-md-1 text-xs-left">
+                                    {{ interface.native_vlan }}
+                                </td>
+                                <td class="col-xs-12 col-md-1 text-xs-left">
+                                    {% if interface.channel or  interface.front_interface.channel %}
+                                        {% if interface.channel %}
+                                            <a class="btn btn-social-bottom btn-responsive"
+                                               style="vertical-align: bottom;"
+                                               href="{% url edit.channel interface.channel.id %}"
+                                               data-toggle="tooltip"
+                                               title="Editar Interface">
+                                                <i class="material-icons"
+                                                   style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
+                                            </a>
+                                        {% else %}
+                                            <a class="btn btn-social-bottom btn-responsive"
+                                               style="vertical-align: bottom;"
+                                               href="{% url edit.channel interface.front_interface.channel.id %}"
+                                               data-toggle="tooltip"
+                                               title="Editar Interface">
+                                                <i class="material-icons"
+                                                   style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
+                                            </a>
+                                        {% endif %}
                                     {% else %}
-                                        <a onclick="javascript:if(!confirm('Excluir a interface?')){return false;}"
-                                           class="btn btn-social-bottom btn-responsive"
+                                        <a class="btn btn-social-bottom btn-responsive"
                                            style="vertical-align: bottom;"
-                                           href="{% url interface.delete interface.id %}"
+                                           href="{% url interface.edit interface.id %}"
                                            data-toggle="tooltip"
-                                           title="Remover Interface">
-                                            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
-                                                delete_forever
-                                            </i>
+                                           title="Editar Interface">
+                                            <i class="material-icons"
+                                               style="color:#FFD17C;font-size:15px;left:50%;">edit</i>
                                         </a>
                                     {% endif %}
-                                {% else %}
-                                <a class="btn btn-social-bottom btn-responsive"
-                                   style="vertical-align: bottom;"
-                                   href="{% url channel.delete interface.id %}"
-                                   data-toggle="tooltip"
-                                   title="Remover Channel">
-                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
-                                </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div id="hamburger">
-                <div id="wrapper">
-                    <a class="material-icons"
-                       href="{% url equip.interface.form search_form %}"
-                       data-toggle="tooltip"
-                       title="Adicionar Interface">
-                        add
-                    </a>
+                                </td>
+                                <td class="col-xs-12 col-md-1 text-xs-left">
+                                    {% if interface.channel or  interface.front_interface.channel %}
+                                        {% if interface.channel %}
+                                            <a class="btn btn-social-bottom btn-responsive"
+                                               style="vertical-align: bottom;"
+                                               href="{% url channel.delete interface.channel.id %}"
+                                               data-toggle="tooltip"
+                                               title="Remover Channel">
+                                                <i class="material-icons"
+                                                   style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
+                                            </a>
+                                        {% else %}
+                                            <a class="btn btn-social-bottom btn-responsive"
+                                               style="vertical-align: bottom;"
+                                               href="{% url channel.delete interface.front_interface.channel.id %}"
+                                               data-toggle="tooltip"
+                                               title="Remover Channel">
+                                                <i class="material-icons"
+                                                   style="color:#FFD17C;font-size:15px;left:50%;">delete</i>
+                                            </a>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if interface.front_interface or interface.back_interface %}
+                                            <a class="btn btn-social-bottom-disabled btn-responsive"
+                                               style="vertical-align: bottom;"
+                                               data-toggle="tooltip"
+                                               title="Antes de excluír a interface, remova a ligação em: editar > x.">
+                                                <i class="material-icons"
+                                                   style="color:#FFD17C;font-size:15px;left:50%;">
+                                                    delete_forever
+                                                </i>
+                                            </a>
+                                        {% else %}
+                                            <a onclick="javascript:if(!confirm('Excluir a interface?')){return false;}"
+                                               class="btn btn-social-bottom btn-responsive"
+                                               style="vertical-align: bottom;"
+                                               href="{% url interface.delete interface.id %}"
+                                               data-toggle="tooltip"
+                                               title="Remover Interface">
+                                                <i class="material-icons"
+                                                   style="color:#FFD17C;font-size:15px;left:50%;">
+                                                    delete_forever
+                                                </i>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="hamburger">
+                    <div id="wrapper">
+                        <a class="material-icons"
+                           href="{% url interface.add equip_id %}"
+                           data-toggle="tooltip"
+                           title="Adicionar Interface">
+                            add
+                        </a>
+                    </div>
                 </div>
             </div>
-    </div>
-    {% endif %}
-</section>
-{% endblock %}
+            {% endif %}
+        </section>
+    </body>
+</html>
