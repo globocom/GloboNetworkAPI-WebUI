@@ -189,38 +189,12 @@ def list_equipment_interfaces(request):
                         interface_flag = True
 
                 if not equipments:
-<<<<<<< HEAD
-                    raise Exception("Equipment Does Not Exist.")
-
-                if len(equipments) == 1:
-                    data["searchable_columns"] = ["equipamento__id"]
-                    data["custom_search"] = equipments[0].get('id')
-                    search_interface = client.create_api_interface_request(
-                        ).search(fields=['id',
-                                         'interface',
-                                         'equipment__basic',
-                                         'native_vlan',
-                                         'type__details',
-                                         'channel__basic',
-                                         'front_interface__basic',
-                                         'back_interface__basic'],
-                                 search=data)
-                    interface_list = search_interface.get('interfaces')
-                    interface_flag = True
-                    if not interface_list:
-                        messages.add_message(
-                            request,
-                            messages.WARNING,
-                            "Equipamento não possui interfaces cadastradas."
-                        )
-=======
                     raise Exception('Equipamento não encontrado.')
 
                 if not interface_list:
                     messages.add_message(request,
                                          messages.WARNING,
                                          'Equipamento não tem interfaces associadas.')
->>>>>>> a2b02a7e6b86e10d0c33ddbfb602c23d3e1cfd7e
 
                 lists['equip_interface'] = interface_list
                 lists['search_form'] = search_form
@@ -279,10 +253,7 @@ def delete_interface(request, interface_id=None):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    url = request.META.get('HTTP_REFERER')
-    if request.META.get('HTTP_REFERER')
-    else reverse('interface.list')
-
+    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
     return HttpResponseRedirect(url)
 
 
@@ -758,9 +729,7 @@ def add_channel(request, interface_id=None):
     else:
         messages.add_message(request, messages.ERROR,
                              "Select an interface.")
-        url_param = request.META.get('HTTP_REFERER')
-        if request.META.get('HTTP_REFERER')
-        else reverse('interface.list')
+        url_param = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
 
     return HttpResponseRedirect(url_param)
 
@@ -854,14 +823,6 @@ def edit_channel_(request, channel_id=None):
     }
 
     try:
-<<<<<<< HEAD
-        client.create_interface().delete_channel(interface_id)
-        messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    equip_interface_messages.get("success_remove_channel")
-                )
-=======
         sw_ids = []
         server_ids = []
         interfaces = client.create_api_interface_request().search(search=search, fields=fields).get('interfaces')
@@ -964,7 +925,6 @@ def edit_channel_(request, channel_id=None):
     data["asorting_cols"] = ["id"]
     data["searchable_columns"] = ["interface__id"]
     data["custom_search"] = str(sw_ids[0])
->>>>>>> a2b02a7e6b86e10d0c33ddbfb602c23d3e1cfd7e
 
     try:
         environments = client.create_api_interface_request().get_interface_environments(search=data,
@@ -1026,10 +986,7 @@ def delete_channel(request, channel_id=None):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    url = request.META.get('HTTP_REFERER')
-    if request.META.get('HTTP_REFERER')
-    else reverse('interface.list')
-
+    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
     return HttpResponseRedirect(url)
 
 
