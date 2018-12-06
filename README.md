@@ -1,6 +1,8 @@
 GloboNetworkAPI Web UI 
 ======================
 
+[![Documentation Status](https://readthedocs.org/projects/globonetworkapi-webui/badge/?version=latest)](https://globonetworkapi-webui.readthedocs.io/en/latest/?badge=latest)
+
 This web tool helps network administrator manage and automate networking
 resources (routers, switches and load balancers) and document logical and
 physical networking.
