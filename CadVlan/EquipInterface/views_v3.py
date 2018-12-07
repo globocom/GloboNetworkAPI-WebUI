@@ -157,9 +157,7 @@ def delete_interface(request, interface_id=None):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    url = request.META.get('HTTP_REFERER')
-    if request.META.get('HTTP_REFERER')
-    else reverse('interface.list')
+    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
 
     return HttpResponseRedirect(url)
 
@@ -179,9 +177,7 @@ def add_channel(request, interface_id=None):
     else:
         messages.add_message(request, messages.ERROR,
                              "Select an interface.")
-        url_param = request.META.get('HTTP_REFERER')
-        if request.META.get('HTTP_REFERER')
-        else reverse('interface.list')
+        url_param = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
 
     return HttpResponseRedirect(url_param)
 
@@ -215,8 +211,6 @@ def delete_channel(request, interface_id=None):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    url = request.META.get('HTTP_REFERER')
-    if request.META.get('HTTP_REFERER')
-    else reverse('interface.list')
+    url = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse('interface.list')
 
     return HttpResponseRedirect(url)
