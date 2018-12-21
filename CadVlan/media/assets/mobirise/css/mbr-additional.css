@@ -60,6 +60,7 @@ h6,
 .mbr-cards .card-subtitle,
 .mbr-testimonial .card-block {
   font-family: 'Lora', serif;
+  text-decoration: none;
 }
 .mbr-author-name {
   font-family: 'Montserrat', sans-serif;
@@ -102,6 +103,7 @@ h6,
   color: #ffffff;
   background-color: #a07e49;
   border-color: #a07e49;
+  text-decoration: none
 }
 .btn-primary.disabled,
 .btn-primary:disabled {
@@ -160,8 +162,8 @@ h6,
 .btn-success:active,
 .btn-success.active {
   color: #ffffff;
-  background-color: #7CFFC7;
-  border-color: #7CFFC7;
+  background-color: #0da57a;
+  border-color: #0da57a;
 }
 .btn-success.disabled,
 .btn-success:disabled {
@@ -170,8 +172,8 @@ h6,
   border-color: #6a8153 !important;
 }
 .btn-warning {
-  background-color: #f3c649;
-  border-color: #f3c649;
+  background-color: #FFC336;
+  border-color: #FFC336;
   color: #ffffff;
 }
 .btn-warning:hover,
@@ -190,8 +192,8 @@ h6,
   border-color: #e1a90f !important;
 }
 .btn-danger {
-  background-color: #FFA17C;
-  border-color: #FFA17C;
+  background-color: #a50d38;
+  border-color: #a50d38;
   color: #ffffff;
 }
 .btn-danger:hover,
@@ -202,6 +204,7 @@ h6,
   color: #ffffff;
   background-color: #eb3d3c;
   border-color: #eb3d3c;
+  text-decoration: none
 }
 .btn-danger.disabled,
 .btn-danger:disabled {
@@ -271,8 +274,8 @@ h6,
 }
 .btn-success-outline {
   background: none;
-  border-color: #7CFFC7;
-  color: #7CFFC7;
+  border-color: #0da57a;
+  color: #0da57a;
 }
 .btn-success-outline:hover,
 .btn-success-outline:focus,
@@ -280,8 +283,9 @@ h6,
 .btn-success-outline:active,
 .btn-success-outline.active {
   color: #ffffff;
-  background-color: #7CFFC7;
-  border-color: #7CFFC7;
+  background-color: #0da57a;
+  border-color: #0da57a;
+  text-decoration: none
 }
 .btn-success-outline.disabled,
 .btn-success-outline:disabled {
@@ -291,8 +295,8 @@ h6,
 }
 .btn-warning-outline {
   background: none;
-  border-color: #c9970d;
-  color: #c9970d;
+  border-color: #FFC336;
+  color: #FFC336;
 }
 .btn-warning-outline:hover,
 .btn-warning-outline:focus,
@@ -300,8 +304,9 @@ h6,
 .btn-warning-outline:active,
 .btn-warning-outline.active {
   color: #ffffff;
-  background-color: #f3c649;
-  border-color: #f3c649;
+  background-color: #FFC336;
+  border-color: #FFC336;
+  text-decoration: none
 }
 .btn-warning-outline.disabled,
 .btn-warning-outline:disabled {
@@ -311,8 +316,8 @@ h6,
 }
 .btn-danger-outline {
   background: none;
-  border-color: #FFA17C;
-  color: #FFA17C;
+  border-color: #a50d38;
+  color: #a50d38;
 }
 .btn-danger-outline:hover,
 .btn-danger-outline:focus,
@@ -320,8 +325,9 @@ h6,
 .btn-danger-outline:active,
 .btn-danger-outline.active {
   color: #ffffff;
-  background-color: #FFA17C;
-  border-color: #FFA17C;
+  background-color: #a50d38;
+  border-color: #a50d38;
+  text-decoration: none
 }
 .btn-danger-outline.disabled,
 .btn-danger-outline:disabled {

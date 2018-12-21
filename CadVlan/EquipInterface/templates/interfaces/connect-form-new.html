@@ -1,0 +1,172 @@
+{% load util %}
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+    {% if connect_form %}
+
+        $("#connect_form").submit(function(event) {
+            event.preventDefault();
+            url = "{% url interface.connect id_interface front_or_back 0 %}";
+            form = $("#connect_form").serialize();
+            $.ajax({
+                url: url,
+                data: form,
+                type: "POST",
+                complete: function(xhr, status) {
+                    if (xhr.status == "500") {
+                        $("#dialog-form").dialog("close");
+                        location.reload();
+                    } else if (xhr.status == "278" || xhr.status == "302") {
+                        $("#dialog-form").dialog("close");
+                        window.location = xhr.getResponseHeader('Location');
+                    } else if (xhr.status == "200") {
+                        $("#dialog-form").html(xhr.responseText);
+                    } else {
+                        $("#dialog-form").dialog("close");
+                    }
+                }
+            });
+        });
+
+        $("#dialog-form").dialog({
+            width: 500,
+            height: 250,
+            modal: true,
+            autoOpen: false,
+            draggable: false,
+            resizable: false,
+        });
+
+        $("#btn_can").button({ icons: {primary: "ui-icon-cancel"} }).click(function() {
+            location.href = "{% url interface.list %}?search_equipment={{ equip_name }}";
+        });
+
+    {% else %}
+
+        $("#dialog-form").dialog({
+            width: 500,
+            height: 250,
+            modal: true,
+            autoOpen: false,
+            draggable: false,
+            resizable: false,
+            buttons: {}
+        });
+
+        autocomplete("{% url ajax.autocomplete.equipment %}", true, "search_equip", false);
+
+        $("#search_form").submit(function(event) {
+            event.preventDefault();
+            url = "{% url interface.connect id_interface front_or_back 0 %}";
+            form = $("#search_form").serialize();
+            $.ajax({
+                url: url,
+                data: form,
+                type: "GET",
+                complete: function(xhr, status) {
+                    if (xhr.status == "500") {
+                        $("#dialog-form").dialog("close");
+                        location.reload();
+                    } else if (xhr.status == "278" || xhr.status == "302") {
+                        $("#dialog-form").dialog("close");
+                        window.location = xhr.getResponseHeader('Location');
+                    } else if (xhr.status == "200") {
+                        $("#dialog-form").html(xhr.responseText);
+                        $("#dialog-form").dialog("open");
+                    } else {
+                        $("#dialog-form").dialog("close");
+                    }
+                }
+            });
+        });
+
+        $("#btn_search").button({ icons: {primary: "ui-icon-check"} }).click(function(){ $("#search_form").submit(); });
+
+    {% endif %}
+});
+</script>
+
+<p id="error">
+    {% if field.errors %}
+        {% for error in field.errors %}
+            {{ error|escape }}
+        {% endfor %}
+    {% endif %}
+</p>
+
+<div>
+    {% if messages %}
+        {% include "modulo/errormessages.html" with messages=messages %}
+    {% endif %}
+	{% if connect_form %}
+        <div>
+            <form id="connect_form" method="post" action="{% url interface.connect id_interface front_or_back connect_form.equip_name.value %}">
+                <div class="dialog-form">
+                    {% csrf_token %}
+                    {% for field in connect_form %}
+                        {% if field.is_hidden %}
+                            {{ field }}
+                        {% else %}
+                            {% if forloop.counter = 1 %}
+                                <div>
+                                    Selecione uma interface do
+                                    <a class="dialog-a"
+                                       href="{% url interface.list %}?search_equipment={{ connect_form.equip_name.value }}">
+                                        {{ connect_form.equip_name.value }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {% if forloop.counter = 1 %}
+                                <div>Front: {{ field }}</div>
+                            {% endif %}
+                            {% if forloop.counter = 2 %}
+                                {% ifequal equipment.equipment_type 8 %}
+                                    <div>Back: {{ field }}</div>
+                                {% endifequal %}
+                            {% endif %}
+                            <p id="error">
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        {{ error|escape }}
+                                    {% endfor %}
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div>
+                    <button class="btn-sm btn-success-outline btn-success dialog">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    {% else %}
+        <form id="search_form" action="interface/connect/{{ id_interface }}/{{ front_or_back }}/0/" class="modal-rows">
+            <div class="input-group input-group-sm">
+                <input name="search_equip"
+                       id="search_equip"
+                       class="form-control dialog"
+                       data-form-field="search_equip"
+                       placeholder="Busque pelo nome do Equip..."
+                       required>
+            </div>
+            <div>
+                <span class="input-group-addon dialog">
+                    <img id="loading-autocomplete" src="{{ MEDIA_URL }}/img/input-loading.gif" style="display:none;"/>
+                </span>
+            </div>
+            <div>
+                <button class="btn_search dialog">
+                    <i class="material-icons" style="color:#FFD17C;font-size:20px">search</i>
+                </button>
+            </div>
+            <p id="error">
+                {% for error in field.errors %}
+                    {{ error|escape }}
+                {% endfor %}
+            </p>
+        </form>
+    {% endif %}
+</div>

@@ -19,12 +19,25 @@ cat > /etc/init.d/gunicorn_networkapi_webui <<- EOM
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
-/usr/local/bin/gunicorn -c /netapi_webui/gunicorn.conf.py cadvlan_wsgi:application --reload
+/usr/local/bin/gunicorn -c /netapi_webui/gunicorn.conf.py wsgi:application --reload
 EOM
 
 chmod 777 /etc/init.d/gunicorn_networkapi_webui
 update-rc.d gunicorn_networkapi_webui defaults
 export PYTHONPATH="/netapi_webui/networkapi_webui:/netapi_webui/$PYTHONPATH"
+
+
+# Use NetworkAPI python client library locally
+[ ! -d "GloboNetworkAPI-client-python" ] && {
+    git clone https://github.com/globocom/GloboNetworkAPI-client-python.git
+}
+
+# Update and install as development package
+cd GloboNetworkAPI-client-python
+git pull origin master
+python setup.py develop
+cd ..
+
 
 echo "starting gunicorn"
 /etc/init.d/gunicorn_networkapi_webui start

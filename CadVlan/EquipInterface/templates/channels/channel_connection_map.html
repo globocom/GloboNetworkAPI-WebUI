@@ -1,0 +1,91 @@
+<p class="interface-title">Channel Map</p>
+<br>
+{% for obj in default %}
+<div class="rows-connecting">
+    <div class="div-server">
+        <div class="server-int">
+            {{ obj.server_interface_name }}
+        </div>
+    </div>
+    <div class="ch-line">
+        <div id="line"></div>
+        <div id="line2"></div>
+    </div>
+    <div class="div-button">
+        <a class="btn btn-social-bottom btn-responsive channel"
+           id="btn_remove_int"
+           data-toggle="tooltip"
+           style="margin-bottom: 0px;"
+           title="Remover interface do channel."
+           href="{% url channel.remove.interface obj.channel obj.id %}">
+            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;font-weight:bold;">
+                X
+            </i>
+        </a>
+    </div>
+    <div class="div-sw">
+        <div class="sw-int">
+            {{ obj.equip_name}}: {{ obj.interface_name }}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<br>
+<div class="rows-connecting">
+    <div class="ch-line">
+        <a class="btn-sm btn-warning-outline btn-warning"
+           id="associateLink">
+            + Interfaces
+        </a>
+    </div>
+</div>
+
+<div id="associate_interfaces" style="display:none;">
+    <form class="rows-connecting" action="{% url channel.associate.interface channel %}" method="post">
+        {% csrf_token %}
+        <div class="div-server" style="background-color:#fff9ea;border-radius: 2px 0px 0px 2px;">
+            <div class="form-group">
+                <label class="form-control-label"
+                       for="form_switch_name">
+                    Nome do Switch
+                </label>
+                <input type="text"
+                       required
+                       autocomplete="off"
+                       placeholder="Busque pelo nome..."
+                       class="form-control bs-autocomplete"
+                       name="switchname"
+                       data-form-field="switchname"
+                       id="form_switch_name">
+            </div>
+        </div>
+        <div class="ch-line" style="background-color:#fff9ea;">
+            <div class="form-group">
+                <label class="form-control-label"
+                       for="form_switch_interface">
+                    Interface
+                </label>
+                <select required
+                        class="form-control"
+                        name="switchInt"
+                        data-form-field="switchInt"
+                        id="form_switch_interface">
+                    <option>Selecione</option>
+                </select>
+            </div>
+        </div>
+        <div class="div-button" style="background-color:#fff9ea;">
+            <button class="btn btn-social-bottom btn-responsive channel"
+                    style="margin:0px;"
+                    id="btn_channel_int"
+                    data-toggle="tooltip"
+                    title="Adicionar interface ao channel.">
+                <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                    add
+                </i>
+            </button>
+        </div>
+        <div class="div-sw" style="background-color:#fff9ea;border-radius: 0px 2px 2px 0px;"></div>
+    </form>
+</div>

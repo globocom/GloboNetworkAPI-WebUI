@@ -1,0 +1,31 @@
+{% extends "menu.html" %}
+
+{% block css %}
+    {% load static %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}/static/interface/css/edit_interface.css"/>
+{% endblock %}
+
+{% block header %}
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}/static/interface/js/edit_interface.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="header text-xs-center">
+        <h3 class="mbr-section-title display-2">Editar Interfaces</h3>
+    </div>
+    <section>
+        <div class="form-edit">
+            {% for interface in interface_map %}
+                <div class="forms">
+                    {% include "interfaces/form.html" with default=interface %}
+                </div>
+            {% endfor%}
+        </div>
+        <div class="connection-edit">
+            {% include "interfaces/connections.html" with default=interface_map total=total_itens %}
+        </div>
+    </section>
+{% endblock %}

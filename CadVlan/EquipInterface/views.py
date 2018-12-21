@@ -17,27 +17,57 @@
 
 
 import logging
-from CadVlan.Util.Decorators import log, login_required, has_perm
-from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST, EQUIPMENT_INTERFACE_FORM, \
-    EQUIPMENT_INTERFACE_ADD_CHANNEL, EQUIPMENT_INTERFACE_SEVERAL_FORM, EQUIPMENT_INTERFACE_EDIT_FORM, \
-    EQUIPMENT_INTERFACE_CONNECT_FORM, EQUIPMENT_INTERFACE_EDIT_CHANNEL, EQUIPMENT_INTERFACES
-from CadVlan.settings import PATCH_PANEL_ID
-from django.shortcuts import render_to_response, redirect, render
-from django.template.context import RequestContext
-from CadVlan.Auth.AuthSession import AuthSession
-from networkapiclient.exception import NetworkAPIClientError, InterfaceNaoExisteError, InvalidParameterError, \
-                                       NomeInterfaceDuplicadoParaEquipamentoError
+
+from django.shortcuts import render_to_response
+from django.shortcuts import redirect
+from django.shortcuts import render
 from django.contrib import messages
-from CadVlan.permissions import EQUIPMENT_MANAGEMENT
-from CadVlan.forms import DeleteForm, SearchEquipForm, ChannelForm, DeleteChannelForm
-from CadVlan.Util.converters.util import split_to_array
-from CadVlan.messages import error_messages, equip_interface_messages
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect
+from django.http import Http404
 from django.core.urlresolvers import reverse
-from CadVlan.EquipInterface.forms import AddInterfaceForm, AddEnvInterfaceForm, AddSeveralInterfaceForm, ConnectForm, \
-                                         EditForm, ChannelAddForm, EnvInterfaceForm
-from CadVlan.EquipInterface.business import make_initials_and_params
+from django.template.context import RequestContext
+
+from CadVlan.Util.Decorators import log
+from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.Decorators import has_perm
+from CadVlan.Util.converters.util import split_to_array
 from CadVlan.Util.extends.formsets import formset_factory
+
+from CadVlan.templates import EQUIPMENT_INTERFACE_SEARCH_LIST
+from CadVlan.templates import EQUIPMENT_INTERFACE_FORM
+from CadVlan.templates import EQUIPMENT_INTERFACE_CONNECT_FORM
+from CadVlan.templates import EQUIPMENT_INTERFACE_EDIT_FORM
+from CadVlan.templates import EQUIPMENT_INTERFACE_SEVERAL_FORM
+from CadVlan.templates import EQUIPMENT_INTERFACE_ADD_CHANNEL
+from CadVlan.templates import EQUIPMENT_INTERFACES
+from CadVlan.templates import EQUIPMENT_INTERFACE_EDIT_CHANNEL
+
+from CadVlan.forms import DeleteForm
+from CadVlan.forms import SearchEquipForm
+from CadVlan.forms import ChannelForm
+from CadVlan.forms import DeleteChannelForm
+
+from CadVlan.EquipInterface.forms import EnvInterfaceForm
+from CadVlan.EquipInterface.forms import ChannelAddForm
+from CadVlan.EquipInterface.forms import EditForm
+from CadVlan.EquipInterface.forms import ConnectForm
+from CadVlan.EquipInterface.forms import AddSeveralInterfaceForm
+from CadVlan.EquipInterface.forms import AddEnvInterfaceForm
+from CadVlan.EquipInterface.forms import AddInterfaceForm
+
+from CadVlan.EquipInterface.business import make_initials_and_params
+
+from CadVlan.settings import PATCH_PANEL_ID
+from CadVlan.Auth.AuthSession import AuthSession
+from CadVlan.permissions import EQUIPMENT_MANAGEMENT
+from CadVlan.messages import equip_interface_messages
+from CadVlan.messages import error_messages
+
+from networkapiclient.exception import NetworkAPIClientError
+from networkapiclient.exception import InterfaceNaoExisteError
+from networkapiclient.exception import InvalidParameterError
+from networkapiclient.exception import NomeInterfaceDuplicadoParaEquipamentoError
+
 
 
 logger = logging.getLogger(__name__)
@@ -974,7 +1004,7 @@ def add_channel(request, equip_name=None):
                 interfaces_ids = form.cleaned_data['ids']
                 equip_nam = form.cleaned_data['equip_name']
 
-                if int_type=="0":
+                if int_type == "0":
                     int_type = "access"
                     env_vlans_list = []
                 else:
@@ -1147,6 +1177,7 @@ def edit_channel(request, channel_name, equip_name, channel=None):
 
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_CHANNEL, lists, context_instance=RequestContext(request))
 
+
 def channel_insert_interface(request):
 
     try:
@@ -1168,6 +1199,7 @@ def channel_insert_interface(request):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+
 
 def config_sync_all(request, equip_name, is_channel, ids):
 
@@ -1196,9 +1228,7 @@ def config_sync_all(request, equip_name, is_channel, ids):
     else:
         messages.add_message(request, messages.WARNING, error_messages.get("can_not_sync_error"))
 
+    url_list = '/interface/?search_equipment=%s' % equip_name
+    url_edit = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') else reverse(url_list)
 
-    # Redirect to list_all action
-    url_param = reverse("interface.list")
-    if len(equip_nam) > 2:
-        url_param = url_param + "?search_equipment=" + equip_nam
-    return HttpResponseRedirect(url_param)
+    return HttpResponseRedirect(url_edit)

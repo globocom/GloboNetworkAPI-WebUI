@@ -74,11 +74,15 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT_PATH, 'media')
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = "/media"
 
+STATIC_DIRS = (
+    os.path.join(PROJECT_ROOT_PATH, 'static'),
+)
+
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(PROJECT_ROOT_PATH, 'static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -212,6 +216,7 @@ CACHES = {
     }
 }
 
+CACHE_ENVIRONMENTS_TIMEOUT = 900
 CACHE_EQUIPMENTS_TIMEOUT = 900  # Values in seconds
 CACHE_VLANS_TIMEOUT = 300  # Values in seconds
 

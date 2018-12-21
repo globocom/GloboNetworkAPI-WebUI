@@ -78,8 +78,7 @@ $(document).ready(function() {
 	$("#ass").attr("style","float: right;");
 	$("#can").attr("style","float: right;");
 	
-	$("#back").button(
-			{ icons: {primary: "ui-icon-arrowthick-1-w"} }
+	$("#back").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }
 		).click(function(event) {
 			event.preventDefault();
 			url = "/equip-interface/connect/" + $(".connect").attr("href") + $(".connect").attr("lang")

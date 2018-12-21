@@ -7,6 +7,6 @@ echo "killing gunicorn"
 sudo killall gunicorn
 
 echo "starting gunicorn"
-sudo /usr/local/bin/gunicorn  -c /vagrant/gunicorn.conf.py cadvlan_wsgi:application
+sudo /usr/local/bin/gunicorn  -c /vagrant/gunicorn.conf.py wsgi:application
 
 tail -f CadVlan/log.log
