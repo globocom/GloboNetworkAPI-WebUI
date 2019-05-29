@@ -765,7 +765,7 @@ def _modal_ip_list_real(request, client_api):
         data['custom_search'] = pagination.custom_search or ''
         data['extends_search'] = [extends_search] if extends_search else []
         # Valid Equipament
-        equip = client_api.create_api_equipment().search(
+        equip_response = client_api.create_api_equipment().search(
             search=data,
             include=[
                 'ipv4__basic__networkipv4__basic',
@@ -774,7 +774,11 @@ def _modal_ip_list_real(request, client_api):
                 'equipment_type__details'
             ],
             environment=ambiente
-        ).get('equipments')[0]
+        ).get('equipments', None)
+        if not len(equip_response) == 0:
+            equip = equip_response[0]
+        else:
+            raise NetworkAPIClientError('Equipment not found')
     except NetworkAPIClientError, e:
         logger.error(e)
         status_code = 500
