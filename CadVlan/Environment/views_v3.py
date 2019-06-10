@@ -17,15 +17,23 @@
 import logging
 
 from django.contrib import messages
+from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from networkapiclient.exception import NetworkAPIClientError
 
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Environment.business import cache_environment_list
+from CadVlan.Environment.business import cache_dc_environment
+
+from CadVlan.templates import ADD_ENVIRONMENT
 from CadVlan.templates import AJAX_AUTOCOMPLETE_ENVIRONMENT
+from CadVlan.templates import AJAX_AUTOCOMPLETE_DC_ENVIRONMENT
+
+
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 from CadVlan.Util.shortcuts import render_to_response_ajax
+
 
 
 logger = logging.getLogger(__name__)
@@ -61,3 +69,34 @@ def ajax_autocomplete_environment(request):
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+
+@log
+@login_required
+def ajax_autocomplete_environment_dc(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    env_list = dict()
+
+    try:
+        envs = client.create_api_environment_dc().get()
+        env_list = cache_dc_environment(envs.get('environments_dc'))
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_DC_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+
+@log
+@login_required
+def add_environment(request):
+
+    # auth = AuthSession(request.session)
+    # client = auth.get_clientFactory()
+    lists = list()
+
+    return render_to_response(ADD_ENVIRONMENT, lists, RequestContext(request))

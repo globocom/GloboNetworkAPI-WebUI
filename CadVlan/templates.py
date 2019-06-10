@@ -55,6 +55,7 @@ AJAX_LDAP_USER_POP_NAME_MAIL = 'ajax/pop_ldap_user_mail.json'
 
 AJAX_AUTOCOMPLETE_EQUIPMENTS = 'ajax/autocomplete-equipment-ajax.json'
 AJAX_AUTOCOMPLETE_ENVIRONMENT = 'ajax/autocomplete-environment-ajax.json'
+AJAX_AUTOCOMPLETE_DC_ENVIRONMENT = 'ajax/autocomplete-dc-env-ajax.json'
 
 # Script
 SCRIPT_LIST = 'script/list.html'
@@ -69,6 +70,7 @@ SCRIPTTYPE_FORM = 'script-type/form.html'
 ENVIRONMENT_LIST = 'environment/list.html'
 ENVIRONMENT_FORM = 'environment/form.html'
 ENVIRONMENT_CONFIGURATION_FORM = 'environment/configuration.html'
+ADD_ENVIRONMENT = 'v3/form.html'
 
 # Equipment Access
 EQUIPMENTACESS_SEARCH_LIST = 'equip-access/search-list.html'

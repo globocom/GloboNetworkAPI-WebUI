@@ -262,11 +262,15 @@ urlpatterns += patterns(
         'remove_configuration', name='environment.configuration.remove',),
 )
 
-# URL's Equipments V3
+# URL's Environment V3
 urlpatterns += patterns(
     'CadVlan.Environment.views_v3',
+    url('^autocomplete/environment/dc[/]?$', 'ajax_autocomplete_environment_dc',
+        name='ajax.autocomplete.dc.environment', ),
     url('^autocomplete/environment[/]?$', 'ajax_autocomplete_environment',
         name='ajax.autocomplete.environment',),
+    url('^environment/add[/]?$', 'add_environment',
+        name='environment.add', ),
 )
 
 # URL's Vlans
