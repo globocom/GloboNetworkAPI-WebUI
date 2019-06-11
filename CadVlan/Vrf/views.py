@@ -20,6 +20,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.views.decorators.csrf import ensure_csrf_cookie
+
 from networkapiclient.exception import NetworkAPIClientError
 
 from CadVlan.Auth.AuthSession import AuthSession
@@ -28,10 +29,14 @@ from CadVlan.permissions import ADMINISTRATION
 from CadVlan.templates import VRF_CREATE
 from CadVlan.templates import VRF_EDIT
 from CadVlan.templates import VRF_LIST
+from CadVlan.templates import AJAX_VRF
 from CadVlan.Util.Decorators import has_perm
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
+from CadVlan.Util.shortcuts import render_to_response_ajax
+from CadVlan.Vrf.business import cache_vrf_list
 from CadVlan.Vrf.forms import VrfForm
+
 
 logger = logging.getLogger(__name__)
 
@@ -181,3 +186,33 @@ def create_fake_vrfs():
         })
 
     return vetor
+
+
+@log
+@login_required
+def ajax_autocomplete_vrf(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    vrf_list = dict()
+
+    try:
+        data = {
+            "start_record": 0,
+            "end_record": 1000,
+            "asorting_cols": ["internal_name"],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        vrfs = client.create_api_vrf().search(search=data)
+        vrf_list = cache_vrf_list(vrfs.get('vrfs'))
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response_ajax(AJAX_VRF, vrf_list, context_instance=RequestContext(request))

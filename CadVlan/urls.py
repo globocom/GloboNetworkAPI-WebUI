@@ -267,6 +267,12 @@ urlpatterns += patterns(
     'CadVlan.Environment.views_v3',
     url('^autocomplete/environment/dc[/]?$', 'ajax_autocomplete_environment_dc',
         name='ajax.autocomplete.dc.environment', ),
+    url('^autocomplete/environment/l3[/]?$', 'ajax_autocomplete_environment_l3',
+        name='ajax.autocomplete.l3.environment', ),
+    url('^autocomplete/environment/logic[/]?$', 'ajax_autocomplete_environment_logic',
+        name='ajax.autocomplete.logic.environment', ),
+    url('^autocomplete/environment/vlan[/]?$', 'ajax_autocomplete_environment_vlan',
+        name='ajax.autocomplete.vlan.environment', ),
     url('^autocomplete/environment[/]?$', 'ajax_autocomplete_environment',
         name='ajax.autocomplete.environment',),
     url('^environment/add[/]?$', 'add_environment',
@@ -842,4 +848,5 @@ urlpatterns += patterns(
     url('^vrf/form/(?P<id_vrf>\d+)[/]?$', 'edit_vrf', name='vrf.edit'),
     url('^vrf/list[/]?$', 'list_vrf', name='vrf.list'),
     url('^vrf/delete[/]?$', 'delete_vrf', name='vrf.delete'),
+    url('^autocomplete/vrf[/]?$', 'ajax_autocomplete_vrf', name='vrf.autocomplete')
 )
