@@ -1,0 +1,75 @@
+html body {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 10%;
+    background-color: #f2fcff;
+}
+
+section.container-cadvlan {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-basis: 100%;
+
+}
+
+div.form-group-cadvlan {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border-left: 2px solid #0D84A5;
+    margin: 20px;
+}
+
+div.form-row-cadvlan {
+    display: flex;
+    flex-direction: row;
+    align-content: space-between;
+    align-items: flex-start;
+    margin: 10px;
+    margin-top: 16px;
+}
+
+div.form-group {
+    display: flex;
+    flex-direction: row;
+    align-content: flex-start;
+    align-items: flex-end;
+    margin: 5px;
+}
+
+div.field-group {
+    vertical-align: bottom;
+}
+
+.form-control,
+.input.form-control.bs-autocomplete {
+    background-color : #FFFFFF;
+}
+
+input:required,
+select.form-control:required {
+    border-left-color: #c87392;
+    border-left-width: 1px;
+}
+
+button.btn.btn-social-add.btn-responsive.env {
+    margin-top: 35px;
+}
+
+button#btn_add_router_env.btn.btn-social-add.btn-responsive.channel, 
+button#btn_add_logic_env.btn.btn-social-add.btn-responsive.channel, 
+button#btn_add_vrf.btn.btn-social-add.btn-responsive.channel, 
+button#btn_add_fisic_env.btn.btn-social-add.btn-responsive.channel {
+    margin-bottom: 0px;
+}
+
+select.form-control,
+input.form-control.bs-autocomplete {
+    height: 36px;
+    font-size: 0.875rem;
+    border: 1px solid #e8e8e8;
+    border-radius: 3px;
+    padding: 0.5em 1.07em 0.5em;
+    width: 100%;
+}

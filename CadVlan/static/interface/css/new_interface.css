@@ -1,0 +1,4 @@
+input#interface_environments.form-control {
+    overflow: scroll;
+    height: 110px;
+}

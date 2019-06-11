@@ -23,17 +23,14 @@ from networkapiclient.exception import NetworkAPIClientError
 
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Environment.business import cache_environment_list
-from CadVlan.Environment.business import cache_dc_environment
 
 from CadVlan.templates import ADD_ENVIRONMENT
 from CadVlan.templates import AJAX_AUTOCOMPLETE_ENVIRONMENT
-from CadVlan.templates import AJAX_AUTOCOMPLETE_DC_ENVIRONMENT
-
+from CadVlan.templates import AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT
 
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 from CadVlan.Util.shortcuts import render_to_response_ajax
-
 
 
 logger = logging.getLogger(__name__)
@@ -41,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 @log
 @login_required
-def ajax_autocomplete_environment(request):
+def ajax_autocomplete_environment_vlan(request):
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
@@ -68,7 +65,40 @@ def ajax_autocomplete_environment(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+def ajax_autocomplete_environment(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    env_list = dict()
+
+    try:
+        data = {
+            "start_record": 0,
+            "end_record": 30000,
+            "asorting_cols": ["divisao_dc", "ambiente_logico", "grupo_l3"],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+
+        envs = client.create_api_environment().search(fields=["name"], search=data)
+        env_list = cache_environment_list(envs.get('environments'))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
     return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -80,8 +110,16 @@ def ajax_autocomplete_environment_dc(request):
     env_list = dict()
 
     try:
-        envs = client.create_api_environment_dc().get()
-        env_list = cache_dc_environment(envs.get('environments_dc'))
+        data = {
+            "start_record": 0,
+            "end_record": 1000,
+            "asorting_cols": ["nome"],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        envs = client.create_api_environment_dc().search(search=data)
+        env_list = cache_environment_list(envs.get('environments_dc'))
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -89,7 +127,65 @@ def ajax_autocomplete_environment_dc(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response_ajax(AJAX_AUTOCOMPLETE_DC_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+
+@log
+@login_required
+def ajax_autocomplete_environment_l3(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    env_list = dict()
+
+    try:
+        data = {
+            "start_record": 0,
+            "end_record": 1000,
+            "asorting_cols": ["nome"],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        envs = client.create_api_environment_l3().search(search=data)
+        env_list = cache_environment_list(envs.get('l3_environments'))
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+
+@log
+@login_required
+def ajax_autocomplete_environment_logic(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    env_list = dict()
+
+    try:
+        data = {
+            "start_record": 0,
+            "end_record": 1000,
+            "asorting_cols": ["nome"],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        envs = client.create_api_environment_logic().search(search=data)
+        env_list = cache_environment_list(envs.get('logic_environments'))
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
 
 @log
 @login_required
