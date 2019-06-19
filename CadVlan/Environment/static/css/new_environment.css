@@ -57,6 +57,7 @@ button.btn.btn-social-add.btn-responsive.env {
     margin-top: 35px;
 }
 
+button#more_range.btn.btn-social-add.btn-responsive.channel, 
 button#btn_add_router_env.btn.btn-social-add.btn-responsive.channel, 
 button#btn_add_logic_env.btn.btn-social-add.btn-responsive.channel, 
 button#btn_add_vrf.btn.btn-social-add.btn-responsive.channel, 

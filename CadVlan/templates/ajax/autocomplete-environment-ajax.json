@@ -1,4 +1,4 @@
 {
   "errors": [{% if messages %}{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}],
-  "list": [{% for item in list %}"{{ item.name }}"{% if not forloop.last %},{% endif %}{% endfor %}]
+  "list": [{% for item in list %}{"id": "{{ item.id }}", "name": "{{ item.name }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
 }
