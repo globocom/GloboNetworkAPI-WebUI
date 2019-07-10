@@ -63,13 +63,60 @@
                                     <button class="btn btn-social-add btn-responsive channel"
                                             type="button"
                                             id="btn_add_router_env"
-                                            disabled
-                                            data-toggle="tooltip"
+                                            data-toggle="modal"
+                                            data-target="#modal_add_router_env"
                                             title="Adicionar novo Ambiente de Roteamento">
                                         <i class="material-icons" style="font-size:15px;left:50%;">
                                             add
                                         </i>
                                     </button>
+                                    <div class="modal fade"
+                                         id="modal_add_router_env"
+                                         tabindex="-1"
+                                         role="dialog"
+                                         aria-labelledby="ModalLabel_add_router_env"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered"
+                                             role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="ModalLabel_add_router_env">
+                                                        Adicionar novo Ambiente de Roteamento
+                                                    </h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <br>
+                                                    <form action="{% url environment.dc.add %}"
+                                                          method="post"
+                                                          id="router_env_form">
+                                                        {% csrf_token %}
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <input class="form-control"
+                                                                       required
+                                                                       name="routerName"
+                                                                       data-form-field="routerName"
+                                                                       placeholder="Nome do ambiente de roteamento..."
+                                                                       id="routerName">
+                                                            </div>
+                                                        </div>
+                                                        <br>
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <button class="btn-sm btn-danger-outline btn-danger"
+                                                                        data-dismiss="modal">
+                                                                    Fechar
+                                                                </button>
+                                                                <button class="btn-sm btn-success-outline btn-success">
+                                                                    Salvar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -89,13 +136,61 @@
                                     <button class="btn btn-social-add btn-responsive channel"
                                             type="button"
                                             id="btn_add_logic_env"
-                                            disabled
-                                            data-toggle="tooltip"
+                                            data-toggle="modal"
+                                            data-target="#modal_add_logic_env"
                                             title="Adicionar novo Ambiente Logico">
                                         <i class="material-icons" style="font-size:15px;left:50%;">
                                             add
                                         </i>
                                     </button>
+                                    <div class="modal fade"
+                                         id="modal_add_logic_env"
+                                         tabindex="-1"
+                                         role="dialog"
+                                         aria-labelledby="ModalLabel_add_logic_env"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered"
+                                             role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="ModalLabel_add_logic_env">
+                                                        Adicionar novo Ambiente Logico
+                                                    </h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <br>
+                                                    <form action="{% url environment.logic.add %}"
+                                                          method="post"
+                                                          id="logic_env_form">
+                                                        {% csrf_token %}
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <input class="form-control"
+                                                                       required
+                                                                       name="logicName"
+                                                                       data-form-field="logicName"
+                                                                       placeholder="Nome do ambiente lógico..."
+                                                                       id="logicName">
+                                                            </div>
+                                                        </div>
+                                                        <br>
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <button class="btn-sm btn-danger-outline btn-danger"
+                                                                        data-dismiss="modal">
+                                                                    Fechar
+                                                                </button>
+                                                                <button class="btn-sm btn-success-outline btn-success">
+                                                                    Salvar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -115,13 +210,60 @@
                                     <button class="btn btn-social-add btn-responsive channel"
                                             type="button"
                                             id="btn_add_fisic_env"
-                                            disabled
-                                            data-toggle="tooltip"
+                                            data-toggle="modal"
+                                            data-target="#modal_add_fisic_env"
                                             title="Adicionar novo Ambiente Físico">
                                         <i class="material-icons" style="font-size:15px;left:50%;">
                                             add
                                         </i>
                                     </button>
+                                    <div class="modal fade"
+                                         id="modal_add_fisic_env"
+                                         tabindex="-1"
+                                         role="dialog"
+                                         aria-labelledby="ModalLabel_add_fisic_env"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered"
+                                             role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="ModalLabel_add_fisic_env">
+                                                        Adicionar novo Ambiente Físico
+                                                    </h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <br>
+                                                    <form action="{% url environment.l3.add %}"
+                                                          method="post"
+                                                          id="fisic_env_form">
+                                                        {% csrf_token %}
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <input class="form-control"
+                                                                       required
+                                                                       name="fisicName"
+                                                                       data-form-field="fisicName"
+                                                                       placeholder="Nome do ambiente físico..."
+                                                                       id="fisicName">
+                                                            </div>
+                                                        </div>
+                                                        <br>
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <button class="btn-sm btn-danger-outline btn-danger"
+                                                                        data-dismiss="modal">
+                                                                    Fechar
+                                                                </button>
+                                                                <button class="btn-sm btn-success-outline btn-success">
+                                                                    Salvar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -158,13 +300,74 @@
                                     <button class="btn btn-social-add btn-responsive channel"
                                             type="button"
                                             id="btn_add_vrf"
-                                            disabled
-                                            data-toggle="tooltip"
+                                            data-toggle="modal"
+                                            data-target="#modal_vrf"
                                             title="Adicionar nova VRF">
                                         <i class="material-icons" style="font-size:15px;left:50%;">
                                             add
                                         </i>
                                     </button>
+                                    <div class="modal fade"
+                                         id="modal_vrf"
+                                         tabindex="-1"
+                                         role="dialog"
+                                         aria-labelledby="ModalLabel_vrf"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered"
+                                             role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="ModalLabel_vrf">
+                                                        Adicionar nova VRF
+                                                    </h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <br>
+                                                    <form action="{% url environment.insert.divisao.dc %}"
+                                                          method="post"
+                                                          id="vrf_form">
+                                                        {% csrf_token %}
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <label>
+                                                                    Nome
+                                                                </label>
+                                                                <input class="form-control"
+                                                                       required
+                                                                       name="vrfName"
+                                                                       data-form-field="vrfName"
+                                                                       placeholder="Nome da VRF..."
+                                                                       id="vrfName">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>
+                                                                    Nome Interno
+                                                                </label>
+                                                                <input class="form-control"
+                                                                       required
+                                                                       name="vrfInternalName"
+                                                                       data-form-field="vrfInternalName"
+                                                                       placeholder="Nome Interno da VRF..."
+                                                                       id="vrfInternalName">
+                                                            </div>
+                                                        </div>
+                                                        <br>
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <button class="btn-sm btn-danger-outline btn-danger"
+                                                                        data-dismiss="modal">
+                                                                    Fechar
+                                                                </button>
+                                                                <button class="btn-sm btn-success-outline btn-success">
+                                                                    Salvar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -241,7 +444,7 @@
                             </div>
                         </div>
                     </div-->
-                    <div class="form-group-cadvlan" id="div_more_range">
+                    <div class="form-group-cadvlan">
                         <div class="form-row-cadvlan">
                             <div class="form-group">
                                 <div class="field-group">
@@ -271,6 +474,32 @@
                             </div>
                         </div>
                     </div>
+                    <!--div class="form-group-cadvlan" id="div_more_vlan_range">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <div class="field-group">
+                                    <input class="form-control"
+                                           name="vlan_range"
+                                           data-form-field="vlan_range"
+                                           placeholder="MIN-MAX"
+                                           required
+                                           id="vlan_range">
+                                </div>
+                                <div class="field-group">
+                                    <button class="btn btn-social-add btn-responsive channel"
+                                            type="button"
+                                            id="more_range"
+                                            data-toggle="tooltip"
+                                            disabled
+                                            title="Adicionar Range">
+                                        <i class="material-icons" style="font-size:15px;left:50%;">
+                                            add
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div-->
                     <br>
                     <div class="form-row-cadvlan">
                         <div>

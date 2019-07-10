@@ -69,15 +69,15 @@ from networkapiclient.exception import InvalidParameterError
 from networkapiclient.exception import NomeInterfaceDuplicadoParaEquipamentoError
 
 
-
 logger = logging.getLogger(__name__)
+
 
 def env_vlans(env_list, env_id, range):
 
     env_vlans_list = []
 
     for i, env in enumerate(env_id):
-        #verifica se o numero das vlans está dentro do intervalo do ambiente
+        # verifica se o numero das vlans está dentro do intervalo do ambiente
         for e in env_list:
             if e.get('id') == env:
                 if not "None" in e.get('range') :
@@ -99,8 +99,8 @@ def env_vlans(env_list, env_id, range):
         env_vlans_list.append(env_vlans_dict)
     return env_vlans_list
 
-def get_equip_environment(client, equip_id):
 
+def get_equip_environment(client, equip_id):
 
     environment_list = client.create_ambiente().listar_por_equip(equip_id)
 
@@ -110,13 +110,14 @@ def get_equip_environment(client, equip_id):
     try:
         environment = environment_list.get('ambiente')
         environment.get('id')
-        ambiente = []
+        ambiente = list()
         ambiente.append(environment)
         environment_list = dict()
         environment_list['ambiente'] = ambiente
     except:
         pass
     return environment_list
+
 
 @log
 @login_required
@@ -175,6 +176,7 @@ def search_list(request):
 
     return render_to_response(EQUIPMENT_INTERFACE_SEARCH_LIST, lists, context_instance=RequestContext(request))
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
@@ -228,6 +230,7 @@ def delete_all(request):
         url_param = url_param + "?search_equipment=" + equip_nam
     return HttpResponseRedirect(url_param)
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
@@ -275,6 +278,7 @@ def channel_delete(request):
         url_param = url_param + "?search_equipment=" + equip_nam
     return HttpResponseRedirect(url_param)
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
@@ -309,7 +313,6 @@ def add_form(request, equip_name=None):
         lists['form'] = AddInterfaceForm(int_type_list, brand, 0, initial={'equip_name': equip['nome'],'equip_id': equip['id']})
         if environment_list is not None:
             lists['envform'] = AddEnvInterfaceForm(environment_list)
-
 
     if request.method == "POST":
 
@@ -364,6 +367,7 @@ def add_form(request, equip_name=None):
             messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(EQUIPMENT_INTERFACE_FORM, lists, context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -528,6 +532,7 @@ def add_several_forms(request, equip_name):
 
     return render_to_response(EQUIPMENT_INTERFACE_SEVERAL_FORM, lists, context_instance=RequestContext(request))
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
@@ -584,6 +589,7 @@ def edit_form(request, equip_name, id_interface):
     lists['formset'] = EditFormSet(initial=initials)
 
     return render_to_response(EQUIPMENT_INTERFACE_EDIT_FORM, lists, context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -705,6 +711,7 @@ def edit(request, id_interface):
                     client.create_interface().associar_ambiente(env, id_interface)
 
     return render_to_response(EQUIPMENT_INTERFACE_FORM, lists, context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -875,6 +882,7 @@ def connect(request, id_interface, front_or_back):
 
     return render_to_response(EQUIPMENT_INTERFACE_CONNECT_FORM, lists, context_instance=RequestContext(request))
 
+
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True, "read": True}])
@@ -890,6 +898,7 @@ def disconnect(request, id_interface, back_or_front, equip_name, id_interf_edit)
         messages.add_message(request, messages.ERROR, e)
 
     return redirect("equip.interface.edit.form", equip_name, id_interf_edit)
+
 
 @log
 @login_required
@@ -919,6 +928,7 @@ def channel(request):
             return HttpResponseRedirect(url_param)
 
     return redirect("home")
+
 
 @log
 @login_required
@@ -1041,6 +1051,7 @@ def add_channel(request, equip_name=None):
         return HttpResponseRedirect(url_param)
 
     return render_to_response(EQUIPMENT_INTERFACE_ADD_CHANNEL, lists, context_instance=RequestContext(request))
+
 
 @log
 @login_required

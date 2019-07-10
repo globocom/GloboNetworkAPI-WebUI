@@ -131,6 +131,7 @@ def ajax_autocomplete_environment_dc(request):
 
     return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
 
+
 @log
 @login_required
 def ajax_autocomplete_environment_l3(request):
@@ -159,6 +160,7 @@ def ajax_autocomplete_environment_l3(request):
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -189,6 +191,7 @@ def ajax_autocomplete_environment_logic(request):
 
     return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
 
+
 @log
 @login_required
 def add_environment(request):
@@ -198,7 +201,7 @@ def add_environment(request):
     lists = list()
 
     if request.method == 'POST':
-        vlan_range = request.POST.get('vlan_range').split('-')
+        vlan_range = request.POST.get('vlan_range', '').split('-')
         env = {
             "grupo_l3": int(request.POST.get('fisic_env')),
             "ambiente_logico": int(request.POST.get('logic_env')),
@@ -217,4 +220,55 @@ def add_environment(request):
         return HttpResponseRedirect(reverse("environment.list"))
 
     return render_to_response(ADD_ENVIRONMENT, lists, RequestContext(request))
+
+
+@log
+@login_required
+def add_dc_environment(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    if request.method == 'POST':
+
+        env = dict(name=request.POST.get('routerName'))
+
+        client.create_api_environment_dc().create([env])
+        messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+
+    return HttpResponseRedirect(reverse("environment.add"))
+
+
+@log
+@login_required
+def add_fisic_environment(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    if request.method == 'POST':
+
+        env = dict(name=request.POST.get('fisicName'))
+
+        client.create_api_environment_l3().create([env])
+        messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+
+    return HttpResponseRedirect(reverse("environment.add"))
+
+
+@log
+@login_required
+def add_logic_environment(request):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    if request.method == 'POST':
+
+        env = dict(name=request.POST.get('logicName'))
+
+        client.create_api_environment_logic().create([env])
+        messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+
+    return HttpResponseRedirect(reverse("environment.add"))
 

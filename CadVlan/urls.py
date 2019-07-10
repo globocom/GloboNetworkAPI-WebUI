@@ -277,6 +277,12 @@ urlpatterns += patterns(
         name='ajax.autocomplete.environment',),
     url('^environment/add[/]?$', 'add_environment',
         name='environment.add', ),
+    url('^environment/dc/add[/]?$', 'add_dc_environment',
+        name='environment.dc.add', ),
+    url('^environment/l3/add[/]?$', 'add_fisic_environment',
+        name='environment.l3.add', ),
+    url('^environment/logic/add[/]?$', 'add_logic_environment',
+        name='environment.logic.add', ),
 )
 
 # URL's Vlans
