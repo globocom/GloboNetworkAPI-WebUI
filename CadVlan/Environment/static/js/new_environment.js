@@ -118,3 +118,58 @@ function envACL() {
         envsDiv.style.display = "none";
     }
 }
+
+function display_more_range() {
+
+    let addBlockRow = document.createElement('div');
+    $(addBlockRow).addClass('form-row-cadvlan');
+    $(addBlockRow).attr('id','div_more_vlan_range');
+
+    let addBlockGroup = document.createElement('div');
+    $(addBlockGroup).addClass('form-group');
+    $(addBlockGroup).appendTo($(addBlockRow));
+
+    let addBlockField = document.createElement('div');
+    $(addBlockField).addClass('field-group');
+    $(addBlockField).appendTo($(addBlockGroup));
+
+    let inputEquip = document.createElement('input');
+    $(inputEquip).addClass('form-control');
+    $(inputEquip).attr('id','more_vlan_range');
+    $(inputEquip).attr('name','vlan_range2');
+    $(inputEquip).attr('placeholder','MIN-MAX');
+    $(inputEquip).attr('required');
+    $(inputEquip).appendTo($(addBlockField));
+
+    let addBlockField2 = document.createElement('div');
+    $(addBlockField2).addClass('field-group');
+    $(addBlockField2).appendTo($(addBlockGroup));
+
+    let addBlockButton = document.createElement('button');
+    $(addBlockButton).addClass('btn btn-social-bottom btn-responsive channel');
+    $(addBlockButton).attr('type', 'button');
+    $(addBlockButton).attr('id','remove_more_range');
+    $(addBlockButton).attr('data-toggle', 'tooltip');
+    $(addBlockButton).attr('title','Remover extra range.');
+    addBlockButton.addEventListener( 'click', function(){
+        let node = document.getElementById('div_more_vlan_range');
+        if (node.parentNode) {
+            node.parentNode.removeChild(node);
+        }
+        let bttAddId = document.getElementById("btt_more_range");
+        bttAddId.disabled = false;
+        } );
+    $(addBlockButton).appendTo($(addBlockField2));
+
+    let addBlockI = document.createElement('i');
+    $(addBlockI).addClass('material-icons');
+    $(addBlockI).attr('style', 'color:#FFD17C;font-size:15px;left:50%;');
+    addBlockI.innerHTML = "delete";
+    $(addBlockI).appendTo($(addBlockButton));
+
+    let divId = document.getElementById("range_vlans");
+    $(addBlockRow).appendTo($(divId));
+
+    let bttAddId = document.getElementById("btt_more_range");
+    bttAddId.disabled = true;
+}
