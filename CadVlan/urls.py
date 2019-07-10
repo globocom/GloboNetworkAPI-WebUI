@@ -854,5 +854,6 @@ urlpatterns += patterns(
     url('^vrf/form/(?P<id_vrf>\d+)[/]?$', 'edit_vrf', name='vrf.edit'),
     url('^vrf/list[/]?$', 'list_vrf', name='vrf.list'),
     url('^vrf/delete[/]?$', 'delete_vrf', name='vrf.delete'),
-    url('^autocomplete/vrf[/]?$', 'ajax_autocomplete_vrf', name='vrf.autocomplete')
+    url('^autocomplete/vrf[/]?$', 'ajax_autocomplete_vrf', name='vrf.autocomplete'),
+    url('^vrf/add[/]?$', 'add_vrf', name='vrf.add')
 )

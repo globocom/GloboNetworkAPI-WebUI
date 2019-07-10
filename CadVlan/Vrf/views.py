@@ -13,9 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import logging
 
 from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -188,6 +191,8 @@ def create_fake_vrfs():
     return vetor
 
 
+# v3
+
 @log
 @login_required
 def ajax_autocomplete_vrf(request):
@@ -216,3 +221,33 @@ def ajax_autocomplete_vrf(request):
         messages.add_message(request, messages.ERROR, e)
 
     return render_to_response_ajax(AJAX_VRF, vrf_list, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ADMINISTRATION, "read": True}, {"permission": ADMINISTRATION, "write": True}])
+def add_vrf(request):
+    """ function to handle the creation of a new vrf
+    """
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        if request.method == 'POST':
+            name = request.POST.get('vrfName')
+            internal_name = request.POST.get('vrfInternalName')
+
+            vrf = dict(vrf=name, internal_name=internal_name)
+            client.create_api_vrf().create([vrf])
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 vrf_messages.get("success_insert"))
+
+    except NetworkAPIClientError, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return HttpResponseRedirect(reverse("environment.add"))
