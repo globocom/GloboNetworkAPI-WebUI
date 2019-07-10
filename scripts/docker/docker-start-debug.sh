@@ -4,7 +4,7 @@
 if [ ! -d venv ]; then
     virtualenv venv
 fi
-. ./venv/bin/activate
+../venv/bin/activate
 
 
 # Resolves the networkapi container IP and sets it on the /etc/hosts
@@ -36,8 +36,5 @@ export DJANGO_SETTINGS_MODULE='CadVlan.settings'
 
 
 echo "starting runserver 0.0.0.0:8080"
-<<<<<<< HEAD
+
 python manage.py runserver 0.0.0.0:8080
-=======
-python manage.py runserver 0.0.0.0:8080
->>>>>>> a2b02a7e6b86e10d0c33ddbfb602c23d3e1cfd7e

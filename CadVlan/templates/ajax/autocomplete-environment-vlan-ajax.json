@@ -1,0 +1,4 @@
+{
+  "errors": [{% if messages %}{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}],
+  "list": [{% for item in list %}"{{ item.name }} ({{ item.min_num_vlan_1 }} - {{ item.max_num_vlan_1 }})"{% if not forloop.last %},{% endif %}{% endfor %}]
+}

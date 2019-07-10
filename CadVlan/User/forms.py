@@ -29,6 +29,7 @@ class UserForm(forms.Form):
                 (gl['id'], gl['nome']) for gl in group_list["user_group"]]
 
         if ldap_group_list is not None:
+            ldap_group_list.sort(key=lambda x: x[1].lower())
             self.fields['ldap_group'].choices = [
                 (ldap_grp[0], ldap_grp[1]) for ldap_grp in ldap_group_list]
 

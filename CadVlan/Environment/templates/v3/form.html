@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="NAPI-WEB">
+
+        <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+        <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <!-- Bootstrap tooltips requere Thether -->
+        <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+        <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+
+        <!-- Autocomplete -->
+        {% load util %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+
+        {% load static %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/css/new_environment.css"/>
+        <script type="text/javascript" src="{{ STATIC_URL }}/static/js/new_environment.js"></script>
+
+    </head>
+    <body>
+        <section id="menu-8">
+            {% include "modulo/menubar.html" %}
+        </section>
+        {% if messages %}
+            {% include "modulo/errormessages.html" with messages=messages %}
+        {% endif %}
+        <section class="container-cadvlan">
+            <div>
+                <h3 class="mbr-section-title display-3"> Ambiente </h3>
+            </div>
+            <div>
+                <form action="{% url environment.add %}" method="post" id="interface_form">
+                    {% csrf_token %}
+                    <div class="form-group-cadvlan">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <div class="field-group">
+                                    <label class="form-control-label"
+                                           for="router_env">
+                                        Ambiente Roteamento
+                                    </label>
+                                    <select class="form-control"
+                                            name="router_env"
+                                            required
+                                            id="router_env">
+                                        <option selected>Roteamento</option>
+                                    </select>
+                                </div>
+                                <div class="field-group">
+                                    <button class="btn btn-social-add btn-responsive channel"
+                                            type="button"
+                                            id="btn_add_router_env"
+                                            data-toggle="modal"
+                                            data-target="#modal_add_router_env"
+                                            title="Adicionar novo Ambiente de Roteamento">
+                                        <i class="material-icons" style="font-size:15px;left:50%;">
+                                            add
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="field-group">
+                                    <label class="form-control-label"
+                                           for="logic_env">
+                                        Ambiente lógico
+                                    </label>
+                                    <select class="form-control"
+                                            name="logic_env"
+                                            required
+                                            id="logic_env">
+                                        <option selected>Lógico</option>
+                                    </select>
+                                </div>
+                                <div class="field-group">
+                                    <button class="btn btn-social-add btn-responsive channel"
+                                            type="button"
+                                            id="btn_add_logic_env"
+                                            data-toggle="modal"
+                                            data-target="#modal_add_logic_env"
+                                            title="Adicionar novo Ambiente Logico">
+                                        <i class="material-icons" style="font-size:15px;left:50%;">
+                                            add
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="field-group">
+                                    <label class="form-control-label"
+                                           for="fisic_env">
+                                        Ambiente Físico
+                                    </label>
+                                    <select class="form-control"
+                                            name="fisic_env"
+                                            required
+                                            id="fisic_env">
+                                        <option selected>Físico</option>
+                                    </select>
+                                </div>
+                                <div class="field-group">
+                                    <button class="btn btn-social-add btn-responsive channel"
+                                            type="button"
+                                            id="btn_add_fisic_env"
+                                            data-toggle="modal"
+                                            data-target="#modal_add_fisic_env"
+                                            title="Adicionar novo Ambiente Físico">
+                                        <i class="material-icons" style="font-size:15px;left:50%;">
+                                            add
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group-cadvlan">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <div class="field-group">
+                                    <label class="form-control-label"
+                                           for="father_env">
+                                        Ambiente Pai
+                                    </label>
+                                    <select class="form-control"
+                                            name="father_env"
+                                            id="father_env">
+                                        <option selected>Ambiente Pai</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="field-group">
+                                    <label class="form-control-label"
+                                           for="vrf">
+                                        VRF
+                                    </label>
+                                    <select class="form-control"
+                                            name="vrf"
+                                            required
+                                            id="vrf">
+                                        <option selected>VRF</option>
+                                    </select>
+                                </div>
+                                <div class="field-group">
+                                    <button class="btn btn-social-add btn-responsive channel"
+                                            type="button"
+                                            id="btn_add_vrf"
+                                            data-toggle="modal"
+                                            data-target="#modal_vrf"
+                                            title="Adicionar nova VRF">
+                                        <i class="material-icons" style="font-size:15px;left:50%;">
+                                            add
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group-cadvlan">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <div class="field-group radio">
+                                    <label>
+                                        <input type="checkbox"
+                                               name="vxlan"
+                                               id="vxlan">
+                                        VxLAN
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group-cadvlan" id="range_vlans">
+                        <div class="form-row-cadvlan">
+                            <div class="form-group">
+                                <div class="field-group">
+                                    <label class="form-control-label"
+                                           for="vlan_range">
+                                        Range da Vlan
+                                    </label>
+                                    <input class="form-control"
+                                           name="vlan_range"
+                                           data-form-field="vlan_range"
+                                           placeholder="MIN-MAX"
+                                           required
+                                           id="vlan_range">
+                                </div>
+                                <div class="field-group">
+                                    <button class="btn btn-social-add btn-responsive channel"
+                                            type="button"
+                                            id="btt_more_range"
+                                            onclick="display_more_range()"
+                                            data-toggle="tooltip"
+                                            title="Adicionar Range">
+                                        <i class="material-icons" style="font-size:15px;left:50%;">
+                                            add
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-row-cadvlan">
+                        <div>
+                            <a class="btn-sm btn-danger-outline btn-danger"
+                               href="{% url environment.list %}">
+                                Voltar
+                            </a>
+                        </div>
+                        <div>
+                            <button class="btn-sm btn-success-outline btn-success" >
+                                Salvar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div class="modal fade"
+                     id="modal_add_router_env"
+                     tabindex="-1"
+                     role="dialog"
+                     aria-labelledby="ModalLabel_add_router_env"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered"
+                         role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="ModalLabel_add_router_env">
+                                    Adicionar novo Ambiente de Roteamento
+                                </h5>
+                            </div>
+                            <div class="modal-body">
+                                <br>
+                                <form action="{% url environment.dc.add %}"
+                                      method="post"
+                                      id="router_env_form">
+                                    {% csrf_token %}
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <input class="form-control"
+                                                   required
+                                                   name="routerName"
+                                                   data-form-field="routerName"
+                                                   placeholder="Nome do ambiente de roteamento..."
+                                                   id="routerName">
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <button class="btn-sm btn-danger-outline btn-danger"
+                                                    data-dismiss="modal">
+                                                Fechar
+                                            </button>
+                                            <button class="btn-sm btn-success-outline btn-success">
+                                                Salvar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade"
+                     id="modal_add_logic_env"
+                     tabindex="-1"
+                     role="dialog"
+                     aria-labelledby="ModalLabel_add_logic_env"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered"
+                         role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="ModalLabel_add_logic_env">
+                                    Adicionar novo Ambiente Logico
+                                </h5>
+                            </div>
+                            <div class="modal-body">
+                                <br>
+                                <form action="{% url environment.logic.add %}"
+                                      method="post"
+                                      id="logic_env_form">
+                                    {% csrf_token %}
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <input class="form-control"
+                                                   required
+                                                   name="logicName"
+                                                   data-form-field="logicName"
+                                                   placeholder="Nome do ambiente lógico..."
+                                                   id="logicName">
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <button class="btn-sm btn-danger-outline btn-danger"
+                                                    data-dismiss="modal">
+                                                Fechar
+                                            </button>
+                                            <button class="btn-sm btn-success-outline btn-success">
+                                                Salvar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade"
+                     id="modal_add_fisic_env"
+                     tabindex="-1"
+                     role="dialog"
+                     aria-labelledby="ModalLabel_add_fisic_env"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered"
+                         role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="ModalLabel_add_fisic_env">
+                                    Adicionar novo Ambiente Físico
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <br>
+                            <form action="{% url environment.l3.add %}"
+                                  method="post"
+                                  id="fisic_env_form">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input class="form-control"
+                                               required
+                                               name="fisicName"
+                                               data-form-field="fisicName"
+                                               placeholder="Nome do ambiente físico..."
+                                               id="fisicName">
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <button class="btn-sm btn-danger-outline btn-danger"
+                                                data-dismiss="modal">
+                                            Fechar
+                                        </button>
+                                        <button class="btn-sm btn-success-outline btn-success">
+                                            Salvar
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade"
+                     id="modal_vrf"
+                     tabindex="-1"
+                     role="dialog"
+                     aria-labelledby="ModalLabel_vrf"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered"
+                         role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="ModalLabel_vrf">
+                                    Adicionar nova VRF
+                                </h5>
+                            </div>
+                            <div class="modal-body">
+                                <br>
+                                <form action="{% url vrf.add %}"
+                                      method="post"
+                                      id="vrf_form">
+                                    {% csrf_token %}
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>
+                                                Nome
+                                            </label>
+                                            <input class="form-control"
+                                                   required
+                                                   name="vrfName"
+                                                   data-form-field="vrfName"
+                                                   placeholder="Nome da VRF..."
+                                                   id="vrfName">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>
+                                                Nome Interno
+                                            </label>
+                                            <input class="form-control"
+                                                   required
+                                                   name="vrfInternalName"
+                                                   data-form-field="vrfInternalName"
+                                                   placeholder="Nome Interno da VRF..."
+                                                   id="vrfInternalName">
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <button class="btn-sm btn-danger-outline btn-danger"
+                                                    data-dismiss="modal">
+                                                Fechar
+                                            </button>
+                                            <button class="btn-sm btn-success-outline btn-success">
+                                                Salvar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
+</html>
+

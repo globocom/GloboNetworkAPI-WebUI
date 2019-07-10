@@ -79,7 +79,7 @@ $(document).ready(function () {
 	});
 
     $.ajax({
-        url: "/autocomplete/environment/",
+        url: "/autocomplete/environment/vlan/",
         dataType: "json",
         success: function(data) {
             if (data.errors.length > 0) {
