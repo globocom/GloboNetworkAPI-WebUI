@@ -197,8 +197,7 @@ def list_all(request):
                                                                      'children__basic',
                                                                      'vrf',
                                                                      'name',
-                                                                     'configs__details',
-                                                                     'dcroom__details'],
+                                                                     'configs__details'],
                                                              search=data)
 
         lists['envs'] = json.dumps(environment.get("environments"))
