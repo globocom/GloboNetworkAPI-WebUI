@@ -406,7 +406,6 @@ def vlan_form(request):
         # Get all environments from NetworkAPI
         environment = get_environments(client)
 
-
         if request.method == 'POST':
 
             form = VlanForm(environment, request.POST)
@@ -430,14 +429,16 @@ def vlan_form(request):
                                                             acl_file_v6, network_ipv4, network_ipv6)
                     id_vlan = vlan.get('vlan').get('id')
                 else:
-                    vlan = client.create_vlan().allocate_without_network(environment_id, name, description, None)
+                    vlan = client.create_vlan().allocate_without_network(
+                        environment_id, name, description, None)
                     id_vlan = vlan.get('vlan').get('id')
                     if int(network_ipv4):
                         client.create_network().add_network_ipv4(id_vlan, None, None, None)
                     if int(network_ipv6):
                         client.create_network().add_network_ipv6(id_vlan, None, None, None)
 
-                messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
+                messages.add_message(
+                    request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
 
                 # redireciona para a listagem de vlans
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
@@ -1213,6 +1214,7 @@ def apply_acl_for_network(request, client, equipments, vlan, environment, networ
     except Exception, e:
         raise e
 
+
 def get_environments(client):
     try:
         # Get all environments from NetworkAPI
@@ -1229,7 +1231,6 @@ def get_environments(client):
 
     except Exception, e:
         raise e
-
 
 
 @log
