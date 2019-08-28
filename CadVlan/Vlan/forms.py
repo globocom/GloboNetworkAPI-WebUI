@@ -27,8 +27,8 @@ class SearchVlanForm(forms.Form):
     def __init__(self, environment_list, net_type_list, *args, **kwargs):
         super(SearchVlanForm, self).__init__(*args, **kwargs)
 
-        env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
-                         " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
+        env_choices = ([(env['id'], env["name"])
+                        for env in environment_list["environments"]])
         env_choices.insert(0, (0, "-"))
 
         net_choices = [(net["id"], net["name"])
@@ -83,8 +83,8 @@ class VlanForm(forms.Form):
     def __init__(self, environment_list, *args, **kwargs):
         super(VlanForm, self).__init__(*args, **kwargs)
 
-        env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
-                         " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
+        env_choices = ([(env['id'], env["name"])
+                        for env in environment_list["environments"]])
         env_choices.insert(0, (0, "-"))
 
         self.fields['environment'].choices = env_choices
@@ -97,12 +97,14 @@ class VlanForm(forms.Form):
                                error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     acl_file_v6 = forms.CharField(label="Acl - IPv6", required=False, min_length=3, max_length=200,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
-    vlan_number = forms.BooleanField(label="O número da Vlan será setado automaticamente. Click se deseja especificar o Número da Vlan.", required=False, error_messages=error_messages)
+    vlan_number = forms.BooleanField(
+        label="O número da Vlan será setado automaticamente. Click se deseja especificar o Número da Vlan.", required=False, error_messages=error_messages)
     number = forms.IntegerField(label="Número", required=False, error_messages=error_messages, widget=forms.TextInput(
         attrs={"style": "width: 150px", "maxlength": "9"}))
     description = forms.CharField(label="Descrição", required=False, min_length=3, max_length=200,
                                   error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
-    apply_vlan = forms.BooleanField(widget=forms.HiddenInput(), label='', required=False)
+    apply_vlan = forms.BooleanField(
+        widget=forms.HiddenInput(), label='', required=False)
 
     network_ipv4 = forms.ChoiceField(label='Adicionar rede IPv4 automaticamente', required=False,
                                      choices=CHOICES_NETWORK, widget=forms.Select())

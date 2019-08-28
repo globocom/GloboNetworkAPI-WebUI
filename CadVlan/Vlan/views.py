@@ -92,7 +92,7 @@ def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environ
             client = auth.get_clientFactory()
 
             # Get all environments from NetworkAPI
-            env_list = client.create_ambiente().list_all()
+            env_list = get_environments(client)
             # Get all network types from NetworkAPI
             net_list = client.create_tipo_rede().listar()
 
@@ -273,7 +273,7 @@ def search_list(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment
         client = auth.get_clientFactory()
 
         # Get all environments from NetworkAPI
-        env_list = client.create_ambiente().list_all()
+        env_list = get_environments(client)
         # Get all network types from NetworkAPI
         net_list = client.create_tipo_rede().listar()
 
@@ -327,15 +327,17 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
 
         vlans = client.create_vlan().get(id_vlan)
 
-        # recuperando ambientes
-        environment = client.create_ambiente().listar()
-        environment = environment.get('ambiente')
-        vlans = vlans.get('vlan')
+        # Get all environments from NetworkAPI
+        env_list = get_environments(client)
+        environment = env_list.get('environments')
 
+        vlans = vlans.get('vlan')
         for ambiente in environment:
-            if vlans.get('ambiente') == ambiente.get('id'):
-                vlans['ambiente'] = ambiente.get('nome_divisao') + ' - ' + ambiente.get(
-                    'nome_ambiente_logico') + ' - ' + ambiente.get('nome_grupo_l3')
+            logger.info(ambiente)
+            logger.info(vlans)
+            if int(vlans.get('ambiente')) == int(ambiente.get('id')):
+                vlans['ambiente'] = ambiente.get("name")
+                vlans['ambiente_id'] = ambiente.get("id")
                 break
 
         # FE - PORTAL - CORE/DENSIDADE
@@ -401,7 +403,8 @@ def vlan_form(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        environment = client.create_ambiente().list_all()
+        # Get all environments from NetworkAPI
+        environment = get_environments(client)
 
         if request.method == 'POST':
 
@@ -426,14 +429,16 @@ def vlan_form(request):
                                                             acl_file_v6, network_ipv4, network_ipv6)
                     id_vlan = vlan.get('vlan').get('id')
                 else:
-                    vlan = client.create_vlan().allocate_without_network(environment_id, name, description, None)
+                    vlan = client.create_vlan().allocate_without_network(
+                        environment_id, name, description, None)
                     id_vlan = vlan.get('vlan').get('id')
                     if int(network_ipv4):
                         client.create_network().add_network_ipv4(id_vlan, None, None, None)
                     if int(network_ipv6):
                         client.create_network().add_network_ipv6(id_vlan, None, None, None)
 
-                messages.add_message(request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
+                messages.add_message(
+                    request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
 
                 # redireciona para a listagem de vlans
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
@@ -482,7 +487,9 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
 
         if request.method == 'GET':
 
-            environment = client.create_ambiente().list_all()
+            # Get all environments from NetworkAPI
+            environment = get_environments(client)
+
             vlan = vlan.get("vlan")
 
             lists['form'] = VlanForm(environment, initial={'name': vlan.get('nome'), "number": vlan.get('num_vlan'), "environment": vlan.get(
@@ -490,7 +497,8 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
 
         if request.method == 'POST':
 
-            environment = client.create_ambiente().list_all()
+            # Get all environments from NetworkAPI
+            environment = get_environments(client)
             form = VlanForm(environment, request.POST)
             lists['form'] = form
             vlan = vlan.get('vlan')
@@ -1202,6 +1210,24 @@ def apply_acl_for_network(request, client, equipments, vlan, environment, networ
         if is_apply != '0':
             raise Exception(
                 'Não foi possível aplicar ACL aos equipamentos da rede')
+
+    except Exception, e:
+        raise e
+
+
+def get_environments(client):
+    try:
+        # Get all environments from NetworkAPI
+        search_env = {
+            'extends_search': [],
+            'start_record': 0,
+            'custom_search': '',
+            'end_record': 99999999,
+            'asorting_cols': [],
+            'searchable_columns': []}
+        env_cli = client.create_api_environment()
+        # env_list = env_cli.search()
+        return client.create_api_environment().search(search=search_env, kind='basic')
 
     except Exception, e:
         raise e
