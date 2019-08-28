@@ -27,8 +27,7 @@ class SearchVlanForm(forms.Form):
     def __init__(self, environment_list, net_type_list, *args, **kwargs):
         super(SearchVlanForm, self).__init__(*args, **kwargs)
 
-        env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
-                         " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
+        env_choices = ([(env['id'], env["name"]) for env in environment_list["environments"]])
         env_choices.insert(0, (0, "-"))
 
         net_choices = [(net["id"], net["name"])
@@ -83,8 +82,7 @@ class VlanForm(forms.Form):
     def __init__(self, environment_list, *args, **kwargs):
         super(VlanForm, self).__init__(*args, **kwargs)
 
-        env_choices = ([(env['id'], env["divisao_dc_name"] + " - " + env["ambiente_logico_name"] +
-                         " - " + env["grupo_l3_name"]) for env in environment_list["ambiente"]])
+        env_choices = ([(env['id'], env["name"]) for env in environment_list["environments"]])
         env_choices.insert(0, (0, "-"))
 
         self.fields['environment'].choices = env_choices
