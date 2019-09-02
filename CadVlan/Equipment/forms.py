@@ -23,8 +23,7 @@ class SearchEquipmentForm(forms.Form):
     def __init__(self, environment_list, type_list, groups_list, *args, **kwargs):
         super(SearchEquipmentForm, self).__init__(*args, **kwargs)
 
-        env_choices = ([(env['id'], env['divisao_dc_name'] + ' - ' + env['ambiente_logico_name'] +
-                         ' - ' + env['grupo_l3_name']) for env in environment_list['ambiente']])
+        env_choices = ([(env['id'], env['name']) for env in environment_list['environments']])
         env_choices.insert(0, (0, '-'))
 
         type_choices = [(tp['id'], tp['nome'])

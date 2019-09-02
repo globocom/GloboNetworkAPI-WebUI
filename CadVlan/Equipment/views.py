@@ -280,7 +280,7 @@ def ajax_list_equips(request):
             client = auth.get_clientFactory()
 
             # Get all environments from NetworkAPI
-            env_list = client.create_ambiente().list_all()
+            env_list = get_environments(client)
             # Get all equipment types from NetworkAPI
             type_equip_list = client.create_tipo_equipamento().listar()
             # Get all groups from NetworkAPI
@@ -370,7 +370,8 @@ def search_list(request):
         client = auth.get_clientFactory()
 
         # Get all environments from NetworkAPI
-        env_list = client.create_ambiente().list_all()
+        env_list = get_environments(client)
+
         # Get all equipment types from NetworkAPI
         type_equip_list = client.create_tipo_equipamento().listar()
         # Get all groups from NetworkAPI
@@ -942,3 +943,21 @@ def delete_equipment(request, id_equip):
 
     # Redirect to list_all action
     return redirect('equipment.search.list')
+
+
+def get_environments(client):
+    try:
+        # Get all environments from NetworkAPI
+        search_env = {
+            'extends_search': [],
+            'start_record': 0,
+            'custom_search': '',
+            'end_record': 99999999,
+            'asorting_cols': [],
+            'searchable_columns': []}
+        env_cli = client.create_api_environment()
+        # env_list = env_cli.search()
+        return client.create_api_environment().search(search=search_env, kind='basic')
+
+    except Exception, e:
+        raise e
