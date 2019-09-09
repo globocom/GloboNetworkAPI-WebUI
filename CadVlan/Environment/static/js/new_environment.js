@@ -96,7 +96,7 @@ function fillEnvironmentField(envFieldId, storageName) {
 function autocompleteAjax(url, object) {
     $.ajax({
         url: url,
-        async: false;
+        async: false,
         dataType: "json",
         success: function(data) {
             if (data.errors.length > 0) {
