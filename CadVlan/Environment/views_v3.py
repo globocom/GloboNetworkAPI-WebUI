@@ -26,6 +26,9 @@ from networkapiclient.exception import NetworkAPIClientError
 
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Environment.business import cache_environment_list
+from CadVlan.Environment.business import cache_environment_dc
+from CadVlan.Environment.business import cache_environment_logic
+from CadVlan.Environment.business import cache_environment_l3
 from CadVlan.messages import environment_messages
 from CadVlan.templates import ADD_ENVIRONMENT
 from CadVlan.templates import AJAX_AUTOCOMPLETE_ENVIRONMENT
@@ -60,14 +63,16 @@ def ajax_autocomplete_environment_vlan(request):
         envs = client.create_api_environment().search(fields=["name", "min_num_vlan_1", "max_num_vlan_1"], search=data)
         env_list = cache_environment_list(envs.get('environments'))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response_ajax(AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT,
+                                   env_list,
+                                   context_instance=RequestContext(request))
 
 
 @log
@@ -92,10 +97,10 @@ def ajax_autocomplete_environment(request):
         envs = client.create_api_environment().search(fields=["id", "name"], search=data)
         env_list = cache_environment_list(envs.get('environments'))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -121,11 +126,11 @@ def ajax_autocomplete_environment_dc(request):
             "extends_search": []
         }
         envs = client.create_api_environment_dc().search(search=data)
-        env_list = cache_environment_list(envs.get('environments_dc'))
-    except NetworkAPIClientError, e:
+        env_list = cache_environment_dc(envs.get('environments_dc'))
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -151,11 +156,11 @@ def ajax_autocomplete_environment_l3(request):
             "extends_search": []
         }
         envs = client.create_api_environment_l3().search(search=data)
-        env_list = cache_environment_list(envs.get('l3_environments'))
-    except NetworkAPIClientError, e:
+        env_list = cache_environment_l3(envs.get('l3_environments'))
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -181,11 +186,11 @@ def ajax_autocomplete_environment_logic(request):
             "extends_search": []
         }
         envs = client.create_api_environment_logic().search(search=data)
-        env_list = cache_environment_list(envs.get('logic_environments'))
-    except NetworkAPIClientError, e:
+        env_list = cache_environment_logic(envs.get('logic_environments'))
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 

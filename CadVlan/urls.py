@@ -265,11 +265,11 @@ urlpatterns += patterns(
 # URL's Environment V3
 urlpatterns += patterns(
     'CadVlan.Environment.views_v3',
-    url('^autocomplete/environment/dc[/]?$', 'ajax_autocomplete_environment_dc',
+    url('^autocomplete/dc[/]?$', 'ajax_autocomplete_environment_dc',
         name='ajax.autocomplete.dc.environment', ),
-    url('^autocomplete/environment/l3[/]?$', 'ajax_autocomplete_environment_l3',
+    url('^autocomplete/l3[/]?$', 'ajax_autocomplete_environment_l3',
         name='ajax.autocomplete.l3.environment', ),
-    url('^autocomplete/environment/logic[/]?$', 'ajax_autocomplete_environment_logic',
+    url('^autocomplete/logic[/]?$', 'ajax_autocomplete_environment_logic',
         name='ajax.autocomplete.logic.environment', ),
     url('^autocomplete/environment/vlan[/]?$', 'ajax_autocomplete_environment_vlan',
         name='ajax.autocomplete.vlan.environment', ),
