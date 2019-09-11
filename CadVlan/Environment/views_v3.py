@@ -200,34 +200,44 @@ def ajax_autocomplete_environment_logic(request):
 @log
 @login_required
 def add_environment(request):
+    """
+    Function to create a new environment.
+    """
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
     lists = list()
 
-    if request.method == 'POST':
+    try:
+        if request.method == 'POST':
 
-        vlan_range1 = request.POST.get('vlan_range', '')
-        range1 = vlan_range1.split('-')
-        vlan_range2 = request.POST.get('vlan_range2', '')
-        range2 = vlan_range2.split('-')
+            vlan_range1 = request.POST.get('vlan_range', '')
+            range1 = vlan_range1.split('-')
+            vlan_range2 = request.POST.get('vlan_range2', '')
+            range2 = vlan_range2.split('-')
 
-        env = {
-            "grupo_l3": int(request.POST.get('fisic_env')),
-            "ambiente_logico": int(request.POST.get('logic_env')),
-            "divisao_dc": int(request.POST.get('router_env')),
-            "min_num_vlan_1": int(range1[0]),
-            "max_num_vlan_1": int(range1[1]),
-            "min_num_vlan_2": int(range2[0]) if vlan_range2 else int(range1[0]),
-            "max_num_vlan_2": int(range2[1]) if vlan_range2 else int(range1[1]),
-            "default_vrf": int(request.POST.get('vrf')),
-            "father_environment": int(request.POST.get('father_env')) if request.POST.get('father_env') else None,
-            'vxlan': True if request.POST.get('vxlan') else False
-        }
-        client.create_api_environment().create([env])
-        messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+            env = {
+                "grupo_l3": int(request.POST.get('fisic_env')),
+                "ambiente_logico": int(request.POST.get('logic_env')),
+                "divisao_dc": int(request.POST.get('router_env')),
+                "min_num_vlan_1": int(range1[0]),
+                "max_num_vlan_1": int(range1[1]),
+                "min_num_vlan_2": int(range2[0]) if vlan_range2 else int(range1[0]),
+                "max_num_vlan_2": int(range2[1]) if vlan_range2 else int(range1[1]),
+                "default_vrf": int(request.POST.get('vrf')),
+                "father_environment": int(request.POST.get('father_env')) if request.POST.get('father_env') else None,
+                'vxlan': True if request.POST.get('vxlan') else False
+            }
+            client.create_api_environment().create([env])
+            messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
 
-        return HttpResponseRedirect(reverse("environment.list"))
+            return HttpResponseRedirect(reverse("environment.list"))
+    except NetworkAPIClientError as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(ADD_ENVIRONMENT, lists, RequestContext(request))
 
