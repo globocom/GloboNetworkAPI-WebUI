@@ -142,11 +142,12 @@ def ajax_list_all(request, search_term=None):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def list_all(request):
+
+    lists = dict()
+
     try:
 
-        lists = dict()
         lists['form'] = DeleteForm()
-
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
@@ -197,7 +198,8 @@ def list_all(request):
                                                                      'children__basic',
                                                                      'vrf',
                                                                      'name',
-                                                                     'configs__details'],
+                                                                     'configs__details',
+                                                                     'vxlan'],
                                                              search=data)
 
         lists['envs'] = json.dumps(environment.get("environments"))
@@ -205,7 +207,6 @@ def list_all(request):
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-
     return render_to_response(ENVIRONMENT_LIST, lists, context_instance=RequestContext(request))
 
 
@@ -329,13 +330,14 @@ def ajax_autocomplete_acl_path(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def add_configuration(request, id_environment):
+
+    context = dict()
+
     try:
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         net_type_list = client.create_tipo_rede().listar()
-
-        context = dict()
 
         form = IpConfigForm(net_type_list, request.POST or None)
 
@@ -416,9 +418,11 @@ def remove_configuration(request, environment_id, configuration_id):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_ambiente(request):
+
+    lists = dict()
+    config_forms = list()
+
     try:
-        lists = dict()
-        config_forms = list()
 
         # Get User
         auth = AuthSession(request.session)
@@ -541,8 +545,9 @@ def insert_ambiente(request):
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def edit(request, id_environment):
 
+    lists = dict()
+
     try:
-        lists = dict()
 
         # Get User
         auth = AuthSession(request.session)
@@ -692,7 +697,6 @@ def edit(request, id_environment):
                 # If invalid, send all error messages in fields
                 lists['ambiente'] = ambiente_form
 
-
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -703,11 +707,14 @@ def edit(request, id_environment):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_grupo_l3(request):
+
+    lists = dict()
+
     # If form was submited
     if request.method == 'POST':
 
         try:
-            lists = dict()
+
 
             # Get User
             auth = AuthSession(request.session)
