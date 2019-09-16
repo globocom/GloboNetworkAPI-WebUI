@@ -2359,7 +2359,7 @@ var ElementsRenderer = /** @class */ (function () {
                 netv6 = node.configs[net].subnet;
             }
         }
-        div.appendChild(this.createTitleSpan(node.name, node.vrf, netv4, netv6, level, is_selected, node.is_open, true));
+        div.appendChild(this.createTitleSpan(node.name, node.vxlan, node.vrf, netv4, netv6, level, is_selected, node.is_open, true));
         if (!this.tree_widget.options.buttonLeft) {
             div.appendChild(button_link);
         }
@@ -2389,10 +2389,11 @@ var ElementsRenderer = /** @class */ (function () {
                 netv6 = node.configs[net].subnet;
             }
         }
-        div.appendChild(this.createTitleSpan(node.name, node.vrf, netv4, netv6, level, is_selected, node.is_open, false));
+        div.appendChild(this.createTitleSpan(node.name, node.vxlan, node.vrf, netv4, netv6, level, is_selected, node.is_open, false));
         return li;
     };
-    ElementsRenderer.prototype.createTitleSpan = function (node_name, node_vrf, netv4, netv6, level, is_selected, is_open, is_folder) {
+    ElementsRenderer.prototype.createTitleSpan = function (node_name, node_vxlan, node_vrf, netv4, netv6, level, is_selected, is_open, is_folder) {
+
         var title_span = document.createElement("span");
         var classes = "jqtree-title jqtree_common";
         if (is_folder) {
@@ -2409,7 +2410,12 @@ var ElementsRenderer = /** @class */ (function () {
         if (node_vrf==null) node_vrf = "";
         if (netv4==undefined) netv4 = "";
         if (netv6==undefined) netv6 = "";
-        title_span.innerHTML = this.escapeIfNecessary(node_name+"   "+node_vrf+"    "+netv4+"   "+netv6);
+        if (node_vxlan==1) {
+            node_vxlan = "(VXLAN)";
+        } else {
+            node_vxlan = ""
+        }
+        title_span.innerHTML = this.escapeIfNecessary(node_name+"   "+node_vxlan+"   "+node_vrf+"    "+netv4+"   "+netv6);
         return title_span;
     };
     ElementsRenderer.prototype.getButtonClasses = function (node) {

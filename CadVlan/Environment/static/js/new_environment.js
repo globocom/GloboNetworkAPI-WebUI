@@ -85,7 +85,7 @@ $(document).ready(function() {
 
 function fillEnvironmentField(envFieldId, storageName) {
 
-    let jsonEnv = JSON.parse(localStorage.getItem(storageName));
+    let jsonEnv = JSON.parse(sessionStorage.getItem(storageName));
     let envField = document.getElementById(envFieldId);
 
     $.each(jsonEnv, function(){
@@ -102,7 +102,7 @@ function autocompleteAjax(url, object) {
             if (data.errors.length > 0) {
                 alert(data.errors);
             } else {
-                localStorage.setItem(object, JSON.stringify(data.list));
+                sessionStorage.setItem(object, JSON.stringify(data.list));
             }
 	}});
 }
