@@ -26,7 +26,6 @@ HEADER = 'header.html'
 VERSION_HTML = 'version.html'
 
 # Ajax
-AJAX_AUTOCOMPLETE_ENVIRONMENTS = 'ajax/environment-autocomplete-list.txt'
 AJAX_AUTOCOMPLETE_LIST = 'ajax/autocomplete-list.json'
 AJAX_VLAN_AUTOCOMPLETE = 'ajax/vlan-autocomplete-list.json'
 AJAX_VLAN_LIST = 'ajax/vlan-list.json'
@@ -46,6 +45,7 @@ AJAX_VIPREQUEST_RULE = 'ajax/request-vip-rule.json'
 AJAX_VIPREQUEST_HEALTHCHECK = 'ajax/request-vip-add-healthcheck.json'
 AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER = 'ajax/request-vip-model-ip-real-server.json'
 AJAX_VIPREQUEST_MODEL_IP_REAL_SERVER_HTML = 'ajax/request-vip-model-ip-real-server.html'
+AJAX_VRF = 'ajax/autocomplete-vrf-ajax.json'
 AJAX_LDAP_RESET_PASSWORD = 'ajax/ldap-reset-password.html'
 JSON_ERROR = "error.json"
 TOKEN_INVALID = "token_invalid.html"
@@ -54,6 +54,7 @@ AJAX_LDAP_USERS_BY_GROUP = 'ajax/select-ldap-user.html'
 AJAX_LDAP_USER_POP_NAME_MAIL = 'ajax/pop_ldap_user_mail.json'
 
 AJAX_AUTOCOMPLETE_EQUIPMENTS = 'ajax/autocomplete-equipment-ajax.json'
+AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT = 'ajax/autocomplete-environment-vlan-ajax.json'
 AJAX_AUTOCOMPLETE_ENVIRONMENT = 'ajax/autocomplete-environment-ajax.json'
 
 # Script
@@ -69,6 +70,7 @@ SCRIPTTYPE_FORM = 'script-type/form.html'
 ENVIRONMENT_LIST = 'environment/list.html'
 ENVIRONMENT_FORM = 'environment/form.html'
 ENVIRONMENT_CONFIGURATION_FORM = 'environment/configuration.html'
+ADD_ENVIRONMENT = 'v3/form.html'
 
 # Equipment Access
 EQUIPMENTACESS_SEARCH_LIST = 'equip-access/search-list.html'

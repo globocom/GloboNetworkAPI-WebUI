@@ -465,6 +465,30 @@ a.mbr-iconfont:hover {
   .btn-social + .btn {
     margin-left: 0.1rem; }
 
+.btn-social-add {
+  border-radius: 50%;
+  max-width: 100%;
+  text-align: center;
+  position: relative;
+  border: 2px solid #e8e8e8;
+  background: #fff;
+  color: #FFD17C; }
+  .btn-social i {
+    top: 0;
+    top: 0;
+    line-height: 40px;
+    width: 40px; }
+  .btn-social:hover {
+    color: #fff;
+    background: #0D84A5; }
+  .btn-social + .btn {
+    margin-left: 0.1rem; }
+
+.btn-social-add:hover {
+  color: #fff;
+  background: #0D84A5;
+  border: 2px solid #0D84A5;}
+
 .btn-social-bottom-disabled {
   border-radius: 50%;
   max-width: 100%;

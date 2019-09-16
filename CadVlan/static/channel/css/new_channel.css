@@ -1,0 +1,55 @@
+html body {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 10%;
+    background-color: #f2fcff;
+}
+
+section.container-cadvlan {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-basis: 100%;
+
+}
+
+div.form-group-cadvlan {
+    border-left: 2px solid #0D84A5;
+    margin: 20px;
+}
+
+div.form-row-cadvlan {
+    display: flex;
+    flex-direction: row;
+    align-content: space-between;
+    align-items:center;
+    margin: 10px;
+}
+
+div.form-group {
+    margin: 10px;
+}
+
+.form-control,
+.input.form-control.bs-autocomplete {
+    background-color : #FFFFFF; 
+}
+
+input:required {
+    border-left-color: #c87392;
+    border-left-width: 1px;
+}
+
+button.btn.btn-social-bottom.btn-responsive.channel {
+    margin-top: 35px;
+}
+
+select.form-control,
+input.form-control.bs-autocomplete {
+    height: 36px;
+    font-size: 0.875rem;
+    border: 1px solid #e8e8e8;
+    border-radius: 3px;
+    padding: 0.5em 1.07em 0.5em;
+    width: 100%;
+}

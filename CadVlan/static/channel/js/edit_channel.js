@@ -1,38 +1,39 @@
 var total_env = 1;
-var opt_empty = '<option></option>'
 
 $(document).ready(function() {
 
-    $('[data-toggle="tooltip"]').tooltip();
+	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function() {
+		location.href = "{% url interface.list %}?search_equipment={{ equip_name }}";
+	});
 
     $.ajax({
         url: "/autocomplete/environment/vlan/",
         dataType: "json",
-        success: function(dataenv) {
-            if (dataenv.errors.length > 0) {
-                alert(dataenv.errors);
+        success: function(data) {
+            if (data.errors.length > 0) {
+                alert(data.errors);
             } else {
-                localStorage.setItem("environment_list", JSON.stringify(dataenv.list));
+                localStorage.setItem("environment_list", JSON.stringify(data.list));
             }
 	}});
 
-    fillEnvironmentField("#envs", "environment_list", "rangevlans");
+    fillEnvironmentField( "#envs", "environment_list", "rangevlans");
 
     $('#btn_channel_env').click(function() {
 
         let addBlockId = total_env = total_env + 1;
 
         let addBlockRow = document.createElement('div');
-        $(addBlockRow).addClass('form-row-cadvlan');
+        $(addBlockRow).addClass('rows');
         $(addBlockRow).attr('id','form_env_vlans_' + addBlockId);
 
         let addBlockElemSw = document.createElement('div');
-        $(addBlockElemSw).addClass('form-group');
+        $(addBlockElemSw).addClass('text-fields');
         $(addBlockElemSw).appendTo($(addBlockRow));
 
         let labelEquip = document.createElement('Label');
         $(labelEquip).addClass('form-control-label');
-        $(labelEquip).attr('for', 'channel_number' + addBlockId);
+        $(labelEquip).attr('for', 'envs' + addBlockId);
         labelEquip.innerHTML = "Ambiente";
         $(labelEquip).appendTo($(addBlockElemSw));
 
@@ -46,7 +47,7 @@ $(document).ready(function() {
         $(inputEquip).appendTo($(addBlockElemSw));
 
         let addBlockElemInt = document.createElement('div');
-        $(addBlockElemInt).addClass('form-group');
+        $(addBlockElemInt).addClass('text-fields');
         $(addBlockElemInt).appendTo($(addBlockRow));
 
         let labelInt = document.createElement('Label');
@@ -63,6 +64,10 @@ $(document).ready(function() {
         $(inputInt).attr('placeholder','Ex.: 1-10');
         $(inputInt).appendTo($(addBlockElemInt));
 
+        let addBlockElemButton = document.createElement('div');
+        $(addBlockElemButton).addClass('text-fields');
+        $(addBlockElemButton).appendTo($(addBlockRow));
+
         let addBlockButton = document.createElement('button');
         $(addBlockButton).addClass('btn btn-social-bottom btn-responsive channel');
         $(addBlockButton).attr('type', 'button');
@@ -78,7 +83,7 @@ $(document).ready(function() {
                 node.parentNode.removeChild(node);
             }
         } );
-        $(addBlockButton).appendTo($(addBlockRow));
+        $(addBlockButton).appendTo($(addBlockElemButton));
 
         let addBlockI = document.createElement('i');
         $(addBlockI).addClass('material-icons');
@@ -95,24 +100,11 @@ $(document).ready(function() {
     });
 });
 
-function interfaceTrunk() {
-
-    let checkBox = document.getElementById("trunk");
-    let envsDiv = document.getElementById("more_envs");
-
-    if (checkBox.checked == true){
-        envsDiv.style.display = "flex";
-        envsDiv.style.flexDirection = "column";
-    }
-}
-
-function interfaceAccess() {
-
-    let checkBox = document.getElementById("access");
-    let envsDiv = document.getElementById("more_envs");
-
-    if (checkBox.checked == true){
-        envsDiv.style.display = "none";
+function removeEnvs(counter) {
+    let elementId = "env_row".concat(counter);
+    let node = document.getElementById(elementId);
+    if (node.parentNode) {
+        node.parentNode.removeChild(node);
     }
 }
 
@@ -129,4 +121,33 @@ function fillEnvironmentField(envFieldId, storageName, vlanFieldId) {
             $(vlanField).val(name);
         }
     });
+}
+
+function myFunction(interface_id) {
+    let element_id = "trunk".concat(interface_id);
+    let range_id = "range_vlans".concat(interface_id);
+    let env_id = "envs".concat(interface_id);
+    let checkBox = document.getElementById(element_id);
+    let text = document.getElementById("range_vlans");
+
+    if (checkBox.checked == true){
+        document.getElementById(range_id).style.display = "block";
+        document.getElementById(env_id).style.display = "block";
+    } else {
+        document.getElementById(range_id).style.display = "none";
+        document.getElementById(env_id).style.display = "none";
+    }
+}
+
+function channelTrunk(interface_id) {
+    let trunk_id = "channeltrunk".concat(interface_id);
+    let envsDiv = document.getElementById("more_envs");
+    let checkBoxTrunk = document.getElementById(trunk_id);
+
+    if (checkBoxTrunk.checked == true){
+        envsDiv.style.display = "flex";
+        envsDiv.style.flexDirection = "column";
+    } else {
+        envsDiv.style.display = "none";
+    }
 }

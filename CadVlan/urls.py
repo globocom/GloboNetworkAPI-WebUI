@@ -262,11 +262,27 @@ urlpatterns += patterns(
         'remove_configuration', name='environment.configuration.remove',),
 )
 
-# URL's Equipments V3
+# URL's Environment V3
 urlpatterns += patterns(
     'CadVlan.Environment.views_v3',
+    url('^autocomplete/dc[/]?$', 'ajax_autocomplete_environment_dc',
+        name='ajax.autocomplete.dc.environment', ),
+    url('^autocomplete/l3[/]?$', 'ajax_autocomplete_environment_l3',
+        name='ajax.autocomplete.l3.environment', ),
+    url('^autocomplete/logic[/]?$', 'ajax_autocomplete_environment_logic',
+        name='ajax.autocomplete.logic.environment', ),
+    url('^autocomplete/environment/vlan[/]?$', 'ajax_autocomplete_environment_vlan',
+        name='ajax.autocomplete.vlan.environment', ),
     url('^autocomplete/environment[/]?$', 'ajax_autocomplete_environment',
         name='ajax.autocomplete.environment',),
+    url('^environment/add[/]?$', 'add_environment',
+        name='environment.add', ),
+    url('^environment/dc/add[/]?$', 'add_dc_environment',
+        name='environment.dc.add', ),
+    url('^environment/l3/add[/]?$', 'add_fisic_environment',
+        name='environment.l3.add', ),
+    url('^environment/logic/add[/]?$', 'add_logic_environment',
+        name='environment.logic.add', ),
 )
 
 # URL's Vlans
@@ -838,4 +854,6 @@ urlpatterns += patterns(
     url('^vrf/form/(?P<id_vrf>\d+)[/]?$', 'edit_vrf', name='vrf.edit'),
     url('^vrf/list[/]?$', 'list_vrf', name='vrf.list'),
     url('^vrf/delete[/]?$', 'delete_vrf', name='vrf.delete'),
+    url('^autocomplete/vrf[/]?$', 'ajax_autocomplete_vrf', name='vrf.autocomplete'),
+    url('^vrf/add[/]?$', 'add_vrf', name='vrf.add')
 )

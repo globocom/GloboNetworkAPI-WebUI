@@ -20,11 +20,11 @@ $(document).ready(function() {
     $.ajax({
         url: "/autocomplete/environment/vlan/",
         dataType: "json",
-        success: function(dataenv) {
-            if (dataenv.errors.length > 0) {
-                alert(dataenv.errors);
+        success: function(data) {
+            if (data.errors.length > 0) {
+                alert(data.errors);
             } else {
-                localStorage.setItem("environment_list", JSON.stringify(dataenv.list));
+                localStorage.setItem("environment_list", JSON.stringify(data.list));
             }
 	}});
 

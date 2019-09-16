@@ -164,6 +164,18 @@ $(document).ready(function() {
 				{% endfor %}
 				
 				<div>
+					<div>
+						{% if vxlan %}
+						<input type="checkbox" id="vxlan" name="is_vxlan" checked>
+						{% else %}
+						<input type="checkbox" id="vxlan" name="is_vxlan">
+						{% endif %}
+						<label for="vxlan">Ambiente VXLAN</label>
+					</div>
+					<br>
+				</div>
+
+				<div>
 					<div><label for="{{ ambiente.min_num_vlan_1.auto_id }}">Min/Max VLAN 1</label></div>
 					{{ ambiente.min_num_vlan_1 }}
 					{{ ambiente.max_num_vlan_1 }}
