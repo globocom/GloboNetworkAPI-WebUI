@@ -51,7 +51,7 @@ $(document).ready(function() {
 				</tr>
 				<tr>
 					<td><label for="nome_vlan">Nome da Vlan</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.nome}}</label></td>
+					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal vlan.vxlan "True"%}(VXLAN){% endifequal%} {{vlan.nome}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="num_vlan">Número da Vlan</label></td>
