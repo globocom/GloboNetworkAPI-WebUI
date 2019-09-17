@@ -37,4 +37,4 @@ export DJANGO_SETTINGS_MODULE='CadVlan.settings'
 
 echo "starting runserver 0.0.0.0:8080"
 
-python manage.py runserver 0.0.0.0:8080
+python manage.py runserver 0.0.0.0:8080 > /tmp/cadvlan.log 2>&1

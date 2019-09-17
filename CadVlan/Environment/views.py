@@ -46,7 +46,7 @@ def ajax_view_env(request, env_id):
 
         lists = dict()
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -133,7 +133,7 @@ def ajax_list_all(request, search_term=None):
 
         return render_to_response(ENVIRONMENT_LIST, lists, context_instance=RequestContext(request))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -142,11 +142,12 @@ def ajax_list_all(request, search_term=None):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def list_all(request):
+
+    lists = dict()
+
     try:
 
-        lists = dict()
         lists['form'] = DeleteForm()
-
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
@@ -198,15 +199,14 @@ def list_all(request):
                                                                      'vrf',
                                                                      'name',
                                                                      'configs__details',
-                                                                     'dcroom__details'],
+                                                                     'vxlan'],
                                                              search=data)
 
         lists['envs'] = json.dumps(environment.get("environments"))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-
     return render_to_response(ENVIRONMENT_LIST, lists, context_instance=RequestContext(request))
 
 
@@ -215,6 +215,10 @@ def list_all(request):
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def remove_environment(request):
 
+    error_not_found = list()
+    error_associated = list()
+    have_errors = False
+
     if request.method == 'POST':
 
         auth = AuthSession(request.session)
@@ -222,45 +226,41 @@ def remove_environment(request):
 
         ids = request.POST.getlist('ids[]')
 
-        error_not_found = list()
-        error_associated = list()
-        have_errors = False
-
         try:
             client.create_api_environment().delete_environment(';'.join(str(id) for id in ids))
-        except DetailedEnvironmentError, e:
+        except DetailedEnvironmentError as e:
             # Detailed message for VLAN errors
             logger.error(e)
             have_errors = True
             messages.add_message(request, messages.ERROR, e)
-        except AmbienteNaoExisteError, e:
+        except AmbienteNaoExisteError as e:
             # Environment doesn't exist.
             logger.error(e)
             have_errors = True
-            error_not_found.append(id_env)
-        except AmbienteError, e:
+            error_not_found.append(ids)
+        except AmbienteError as e:
             # Environment associated to equipment and/or VLAN that
             # couldn't be removed.
             logger.error(e)
             have_errors = True
-            error_associated.append(id_env)
-        except InvalidParameterError, e:
+            error_associated.append(ids)
+        except InvalidParameterError as e:
             # Environment id is null or invalid.
             logger.error(e)
             have_errors = True
             messages.add_message(
                 request, messages.ERROR, environment_messages.get("invalid_id"))
-        except DataBaseError, e:
+        except DataBaseError as e:
             # NetworkAPI fail to access database.
             logger.error(e)
             have_errors = True
             messages.add_message(request, messages.ERROR, e)
-        except XMLError, e:
+        except XMLError as e:
             # NetworkAPI fail generating XML response.
             logger.error(e)
             have_errors = True
             messages.add_message(request, messages.ERROR, e)
-        except Exception, e:
+        except Exception as e:
             # Other errors
             logger.error(e)
             have_errors = True
@@ -304,21 +304,22 @@ def remove_environment(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def ajax_autocomplete_acl_path(request):
-    try:
 
+    path_list = dict()
+
+    try:
         # Get user auth
         auth = AuthSession(request.session)
         environment = auth.get_clientFactory().create_ambiente()
 
-        path_list = {}
         paths = environment.list_acl_path().get(
             "acl_paths") if environment.list_acl_path() else list()
         path_list['list'] = paths
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -329,13 +330,14 @@ def ajax_autocomplete_acl_path(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def add_configuration(request, id_environment):
+
+    context = dict()
+
     try:
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         net_type_list = client.create_tipo_rede().listar()
-
-        context = dict()
 
         form = IpConfigForm(net_type_list, request.POST or None)
 
@@ -363,18 +365,18 @@ def add_configuration(request, id_environment):
                 "success_configuration_insert"))
             context["form"] = IpConfigForm(net_type_list)
 
-    except AmbienteNaoExisteError, e:
+    except AmbienteNaoExisteError as e:
         messages.add_message(request, messages.ERROR, e)
         return redirect('environment.list')
 
-    except InvalidParameterError, e:
+    except InvalidParameterError as e:
         messages.add_message(request, messages.ERROR, e)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -401,11 +403,11 @@ def remove_configuration(request, environment_id, configuration_id):
 
         return redirect('environment.edit', environment_id)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -416,9 +418,11 @@ def remove_configuration(request, environment_id, configuration_id):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_ambiente(request):
+
+    lists = dict()
+    config_forms = list()
+
     try:
-        lists = dict()
-        config_forms = list()
 
         # Get User
         auth = AuthSession(request.session)
@@ -431,7 +435,7 @@ def insert_ambiente(request):
         filters = client.create_filter().list_all()
         try:
             templates = get_templates(auth.get_user(), True)
-        except GITCommandError, e:
+        except GITCommandError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             templates = {
@@ -529,7 +533,7 @@ def insert_ambiente(request):
 
         lists['config_forms'] = config_forms
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -540,8 +544,10 @@ def insert_ambiente(request):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def edit(request, id_environment):
+
+    lists = dict()
+
     try:
-        lists = dict()
 
         # Get User
         auth = AuthSession(request.session)
@@ -561,7 +567,7 @@ def edit(request, id_environment):
 
         try:
             templates = get_templates(auth.get_user(), True)
-        except GITCommandError, e:
+        except GITCommandError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             templates = {
@@ -578,7 +584,7 @@ def edit(request, id_environment):
         try:
             env = client.create_api_environment().get_environment(id_environment)
             env = env.get("environments")[0]
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             return redirect('environment.list')
@@ -602,12 +608,15 @@ def edit(request, id_environment):
             'link': env.get('link'),
             'father_environment': env.get('father_environment'),
             'vrf': env.get('default_vrf'),
+            'vxlan': 1 if env.get('vxlan') else 0
         }
+
         env_form = AmbienteForm(
             env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
 
         # Forms
         lists['ambiente'] = env_form
+        lists['vxlan'] = env.get('vxlan', False)
         lists['divisaodc_form'] = DivisaoDCForm(
             initial={"id_env": id_environment}
         )
@@ -625,6 +634,8 @@ def edit(request, id_environment):
 
             # Return data to form in case of error
             lists['ambiente'] = ambiente_form
+
+            vxlan = True if request.POST.get('is_vxlan') else False
 
             # Validate
             if ambiente_form.is_valid():
@@ -672,7 +683,8 @@ def edit(request, id_environment):
                     "max_num_vlan_2": max_num_vlan_2,
                     "default_vrf": int(vrf),
                     "father_environment": int(father_environment) if father_environment else None,
-                    'vrf': vrf_internal
+                    'vrf': vrf_internal,
+                    'vxlan': vxlan
                 }
                 client.create_api_environment().update_environment(dict_env, id_env)
 
@@ -685,10 +697,9 @@ def edit(request, id_environment):
                 # If invalid, send all error messages in fields
                 lists['ambiente'] = ambiente_form
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-
     return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
 
 
@@ -696,11 +707,14 @@ def edit(request, id_environment):
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_grupo_l3(request):
+
+    lists = dict()
+
     # If form was submited
     if request.method == 'POST':
 
         try:
-            lists = dict()
+
 
             # Get User
             auth = AuthSession(request.session)
@@ -727,7 +741,7 @@ def insert_grupo_l3(request):
                 # If invalid, send all error messages in fields
                 lists['grupol3_form'] = grupo_l3_form
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             lists['grupol3_form'] = grupo_l3_form
             messages.add_message(request, messages.ERROR, e)
@@ -741,7 +755,7 @@ def insert_grupo_l3(request):
 
             try:
                 templates = get_templates(auth.get_user(), True)
-            except GITCommandError, e:
+            except GITCommandError as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
                 templates = {
@@ -784,7 +798,7 @@ def insert_grupo_l3(request):
 
             return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             return redirect('environment.list')
@@ -831,7 +845,7 @@ def insert_divisao_dc(request):
                 # If invalid, send all error messages in fields
                 lists['divisaodc_form'] = divisao_dc_form
 
-        except (NetworkAPIClientError, GITCommandError), e:
+        except (NetworkAPIClientError, GITCommandError) as e:
             logger.error(e)
             lists['divisaodc_form'] = divisao_dc_form
             messages.add_message(request, messages.ERROR, e)
@@ -844,7 +858,7 @@ def insert_divisao_dc(request):
             filters = client.create_filter().list_all()
             try:
                 templates = get_templates(auth.get_user(), True)
-            except GITCommandError, e:
+            except GITCommandError as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
                 templates = {
@@ -888,7 +902,7 @@ def insert_divisao_dc(request):
 
             return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             return redirect('environment.list')
@@ -934,7 +948,7 @@ def insert_ambiente_logico(request):
                 # If invalid, send all error messages in fields
                 lists['ambientelogico_form'] = ambiente_logico_form
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             lists['ambientelogico_form'] = ambiente_logico_form
             messages.add_message(request, messages.ERROR, e)
@@ -947,7 +961,7 @@ def insert_ambiente_logico(request):
             filters = client.create_filter().list_all()
             try:
                 templates = get_templates(auth.get_user(), True)
-            except GITCommandError, e:
+            except GITCommandError as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
                 templates = {
@@ -991,7 +1005,7 @@ def insert_ambiente_logico(request):
 
             return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             return redirect('environment.list')

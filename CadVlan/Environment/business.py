@@ -23,3 +23,21 @@ from CadVlan.settings import CACHE_EQUIPMENTS_TIMEOUT
 def cache_environment_list(envs):
     environment_list = dict(list=envs)
     return environment_list
+
+
+@cache_function(CACHE_EQUIPMENTS_TIMEOUT)
+def cache_environment_dc(envs):
+    environment_list = dict(list=envs)
+    return environment_list
+
+
+@cache_function(CACHE_EQUIPMENTS_TIMEOUT)
+def cache_environment_logic(envs):
+    environment_list = dict(list=envs)
+    return environment_list
+
+
+@cache_function(CACHE_EQUIPMENTS_TIMEOUT)
+def cache_environment_l3(envs):
+    environment_list = dict(list=envs)
+    return environment_list
