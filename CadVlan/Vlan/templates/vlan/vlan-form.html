@@ -26,6 +26,9 @@
 <script type="text/javascript">
 $(document).ready(function() {
 
+	$('#id_prefixv4').parent().hide();
+	$('#id_prefixv6').parent().hide();
+
     $("#page_tab").tabs();
 
     $("#btn_sav").button({ icons: {primary: "ui-icon-disk"} });
@@ -146,9 +149,31 @@ $(document).ready(function() {
        get_environment_configuration_available();
     });
 
+    $("#id_network_ipv4").change(function(){
+        var options = $(this).children("option:selected").text();
+
+		if (options == "Sim") {
+			$('#id_prefixv4').parent().show();
+		} else {
+			$('#id_prefixv4').parent().hide();
+		}
+	});
+
+    $("#id_network_ipv6").change(function(){
+        var options = $(this).children("option:selected").text();
+
+		if (options == "Sim") {
+			$('#id_prefixv6').parent().show();
+		} else {
+			$('#id_prefixv6').parent().hide();
+		}
+	});
+
 	$("#id_vlan_number").change(function(){
-		if ($(this).attr('checked')) {
-		    $('#id_number').parent().show();
+        var options = $(this).children("option:selected").text();
+
+		if (options == "Sim") {
+			$('#id_number').parent().show();
 		} else {
             $('#id_number').parent().hide();
 		}
@@ -176,11 +201,10 @@ function get_environment_configuration_available() {
 			} else {
 				$('#id_network_ipv4').parent().hide();
 			}
-			
+
 			if (data.available_environment_config_ipv6 == true) {
 				$('#id_network_ipv6').parent().show();
 			} else {
-				
 				$('#id_network_ipv6').parent().hide();
 			}
 
@@ -208,34 +232,22 @@ function get_environment_configuration_available() {
 {% endblock %}
 
 {% block content %}
-<div id="page_tab">
-	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Cadastro de Vlan</a></li>
-	</ul>
+<div id="page_tab" style="margin-left:10%; margin-right:10%;border:none">
+	<div style="font-size: 40px;margin: 20px;border:none;">
+		<p style="text-align: center;">Cadastrar Vlan</p>
+	</div>
 	<div id="tabs-1">
-	
 		<form id="add_form" method="post" action="{% url vlan.form %}">
 			{% csrf_token %}
 			<div id="fields" class="ui-widget-content">
 			{% for field in form %}
 				<div>
-					{% if forloop.counter == 5 %}
-                        {{ field }}	<label for="{{ field.auto_id }}">{{ field.label_tag }}</label>
-                    {% else %}
-                        <div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}
+						<span style="color: red;">*</span>{% endif %}</label>
+					</div>
 
-                        {{ field }}
+					{{ field }}
 
-                        {% if forloop.counter == 3 %}
-                            <button id="btn_suggest_v4" type="button">Sugerir nome do arquivo ACL</button>
-                        {% endif %}
-
-                        {% if forloop.counter == 4 %}
-                            <button id="btn_suggest_v6" type="button">Sugerir nome do arquivo ACL</button>
-                        {% endif %}
-					{% endif %}
-
-					
 					<p id="error">
 					{% if field.errors %} 
 						{% for error in field.errors %}
@@ -247,9 +259,8 @@ function get_environment_configuration_available() {
 				</div>
 			{% endfor %}
 			
-			<div class="separator spacer"></div>
-			
-			<div class="buttons-l ui-widget-header">
+
+			<div class="buttons-l ui-widget-header" style="margin-top:5%;">
 				<button id="btn_sav" type="submit">Gravar</button>
 				<button id="btn_can" type="button">Cancelar</button>
 			</div>
