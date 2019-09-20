@@ -79,8 +79,8 @@ logger = logging.getLogger(__name__)
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "read": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True},
            {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
-def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0',
-                    sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+def ajax_list_vlans(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0',
+                    sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
 
     try:
 
@@ -401,7 +401,8 @@ def list_by_id(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment=
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True},
+           {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def vlan_form(request):
     lists = dict()
     try:
@@ -421,34 +422,34 @@ def vlan_form(request):
             if form.is_valid():
 
                 name = form.cleaned_data['name']
-                acl_file = form.cleaned_data['acl_file']
-                acl_file_v6 = form.cleaned_data['acl_file_v6']
                 description = form.cleaned_data['description']
                 number = form.cleaned_data['number']
                 environment_id = form.cleaned_data['environment']
                 network_ipv4 = form.cleaned_data['network_ipv4']
                 network_ipv6 = form.cleaned_data['network_ipv6']
+                prefixv4 = form.cleaned_data['prefixv4']
+                prefixv6 = form.cleaned_data['prefixv6']
 
-                # Criar a Vlan
                 if number:
-                    vlan = client.create_vlan().insert_vlan(environment_id, name, number, description, acl_file,
-                                                            acl_file_v6, network_ipv4, network_ipv6)
+                    vlan = client.create_vlan().insert_vlan(environment_id, name, number, description, None,
+                                                            None, network_ipv4, network_ipv6)
                     id_vlan = vlan.get('vlan').get('id')
+
                 else:
                     vlan = client.create_vlan().allocate_without_network(
                         environment_id, name, description, None)
                     id_vlan = vlan.get('vlan').get('id')
                     if int(network_ipv4):
-                        client.create_network().add_network_ipv4(id_vlan, None, None, None)
+                        client.create_network().add_network_ipv4(id_vlan, None, None, prefixv4)
                     if int(network_ipv6):
-                        client.create_network().add_network_ipv6(id_vlan, None, None, None)
+                        client.create_network().add_network_ipv6(id_vlan, None, None, prefixv6)
 
-                messages.add_message(
-                    request, messages.SUCCESS, vlan_messages.get("vlan_sucess"))
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     vlan_messages.get("vlan_sucess"))
 
-                # redireciona para a listagem de vlans
                 return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
-        # Get
+
         if request.method == 'GET':
             lists['form'] = VlanForm(environment)
 
@@ -464,6 +465,7 @@ def vlan_form(request):
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0',
               sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
     lists = dict()
     lists['id_vlan'] = id_vlan
     lists['acl_created_v4'] = "False"
@@ -499,9 +501,11 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
 
             vlan = vlan.get("vlan")
 
-            lists['form'] = VlanForm(environment, initial={'name': vlan.get('nome'), "number": vlan.get('num_vlan'),
-                                                           "environment": vlan.get(
-                "ambiente"), "description": vlan.get('descricao'), "acl_file": vlan.get('acl_file_name'),
+            lists['form'] = VlanForm(environment, initial={'name': vlan.get('nome'),
+                                                           "number": vlan.get('num_vlan'),
+                                                           "environment": vlan.get("ambiente"),
+                                                           "description": vlan.get('descricao'),
+                                                           "acl_file": vlan.get('acl_file_name'),
                                                            "acl_file_v6": vlan.get('acl_file_name_v6')})
 
         if request.method == 'POST':
@@ -797,7 +801,7 @@ def delete_all(request, sf_number='0', sf_name='0', sf_environment='0', sf_netty
                     #             deleteAclGit(
                     #                 vlan.get(key_acl_v6), environment, NETWORK_TYPES.v6, user)
 
-                    # except GITError, e:
+                    # except GITError as e:
                     #     messages.add_message(
                     #         request, messages.WARNING, vlan_messages.get("vlan_git_error"))
 
@@ -950,8 +954,8 @@ def create(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0',
 @log
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0',
-                   sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0',
+                   sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
     """ Set column 'active = 1' in tables  """
     try:
         if request.method == 'POST':
@@ -1044,8 +1048,9 @@ def create_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environm
 @log
 @login_required
 @has_perm([{"permission": VLAN_CREATE_SCRIPT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
-def remove_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0', sf_subnet='0',
-                   sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+def remove_network(request, id_vlan="0", sf_number='0', sf_name='0', sf_environment='0', sf_nettype='0',
+                   sf_subnet='0', sf_ipversion='0', sf_network='0', sf_iexact='0', sf_acl='0'):
+
     """ Set column 'active = 0' in tables  """
     try:
         if request.method == 'POST':
@@ -1270,6 +1275,7 @@ def ajax_get_available_ip_config_by_environment_id(request):
     available_environment_config_ipv6 = False
     vlan_range = False
     hide_vlan_range = True
+    mask = ""
 
     if request.method == 'GET':
         environment_id = request.GET.get('environment_id')
@@ -1296,6 +1302,8 @@ def ajax_get_available_ip_config_by_environment_id(request):
                 if ambiente.get('min_num_vlan_1'):
                     vlan_range = True
 
+                mask = ambiente.get('subnet').split('/')[2] if ambiente.get('subnet') else ""
+
             except NetworkAPIClientError as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
@@ -1307,5 +1315,6 @@ def ajax_get_available_ip_config_by_environment_id(request):
     context['available_environment_config_ipv6'] = available_environment_config_ipv6
     context['vlan_range'] = vlan_range
     context['hide_vlan_range'] = hide_vlan_range
+    context['mask'] = mask
 
     return render_json(json.dumps(context))
