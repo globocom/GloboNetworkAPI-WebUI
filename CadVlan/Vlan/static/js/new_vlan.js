@@ -74,6 +74,9 @@ function get_environment_configuration_available() {
 
 	var environment_id = $(id_environment).val();
 
+    var maskv4;
+    var maskv6;
+
 	$.ajax({
 		data: {environment_id: environment_id},
 		url: "/vlan/form/get/available/environment/configuration/by/environment/id/",
@@ -109,9 +112,16 @@ function get_environment_configuration_available() {
 			    $(id_vlan_number).parent().hide();
     			$(id_number).parent().hide();
 			}
+
+			if (data.maskv4){
+			    id_prefixv4.value = data.maskv4
+			}
+
+			if (data.maskv6){
+			    id_prefixv6.value = data.maskv6
+			}
 		},
 		error: function(data) {
-
 			console.log(data);
 		}
 	});
