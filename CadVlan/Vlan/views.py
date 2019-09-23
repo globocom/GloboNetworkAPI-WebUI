@@ -1248,8 +1248,8 @@ def apply_acl_for_network(request, client, equipments, vlan, environment, networ
 
 
 def get_environments(client):
+
     try:
-        # Get all environments from NetworkAPI
         search_env = {
             'extends_search': [],
             'start_record': 0,
@@ -1257,10 +1257,7 @@ def get_environments(client):
             'end_record': 99999999,
             'asorting_cols': [],
             'searchable_columns': []}
-        env_cli = client.create_api_environment()
-        # env_list = env_cli.search()
         return client.create_api_environment().search(search=search_env, kind='basic')
-
     except Exception as e:
         raise e
 
@@ -1275,7 +1272,8 @@ def ajax_get_available_ip_config_by_environment_id(request):
     available_environment_config_ipv6 = False
     vlan_range = False
     hide_vlan_range = True
-    mask = ""
+    maskv4 = ""
+    maskv6 = ""
 
     if request.method == 'GET':
         environment_id = request.GET.get('environment_id')
@@ -1293,16 +1291,16 @@ def ajax_get_available_ip_config_by_environment_id(request):
                 for config in lists_configuration:
                     if config.get('type', '').upper() == 'V4':
                         available_environment_config_ipv4 = True
+                        maskv4 = config.get('new_prefix')
                     if config.get('type', '').upper() == 'V6':
                         available_environment_config_ipv6 = True
+                        maskv6 = config.get('new_prefix')
 
                 # if range:
                 ambiente = client.create_ambiente().buscar_por_id(environment_id)
                 ambiente = ambiente.get("ambiente")
                 if ambiente.get('min_num_vlan_1'):
                     vlan_range = True
-
-                mask = ambiente.get('subnet').split('/')[2] if ambiente.get('subnet') else ""
 
             except NetworkAPIClientError as e:
                 logger.error(e)
@@ -1315,6 +1313,7 @@ def ajax_get_available_ip_config_by_environment_id(request):
     context['available_environment_config_ipv6'] = available_environment_config_ipv6
     context['vlan_range'] = vlan_range
     context['hide_vlan_range'] = hide_vlan_range
-    context['mask'] = mask
+    context['maskv4'] = maskv4
+    context['maskv6'] = maskv6
 
     return render_json(json.dumps(context))
