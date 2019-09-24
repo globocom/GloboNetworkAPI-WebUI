@@ -28,7 +28,7 @@ class IPForm(forms.Form):
     equip_name = forms.CharField(label="Nome do Equipamento",
                                  min_length=3,
                                  required=True,
-                                 widget=forms.TextInput(attrs={'style': "width: 400px; ",
+                                 widget=forms.TextInput(attrs={'style': "width: 450px; ",
                                                                'class': "ui-state-default",
                                                                'autocomplete': "off"}),
                                  error_messages=error_messages)
@@ -38,7 +38,7 @@ class IPForm(forms.Form):
                                 max_length=100,
                                 required=False,
                                 error_messages=error_messages,
-                                widget=forms.Textarea(attrs={'style': "width: 400px; height: 19px;",
+                                widget=forms.Textarea(attrs={'style': "width: 450px; height: 19px;",
                                                              'data-maxlenght': 100}))
 
 
