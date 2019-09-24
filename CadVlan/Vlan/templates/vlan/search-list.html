@@ -264,6 +264,10 @@ input {
 .ui-accordion .ui-accordion-content {
 	padding: 5px !important;
 }
+
+.ui-tabs-nav.ui-helper-reset.ui-helper-clearfix.ui-widget-header.ui-corner-all {
+	background: #F6F6F6;
+}
 </style>
 {% endblock %}
 
@@ -303,7 +307,7 @@ input {
 							<td>{{ search_form.iexact }}<label for="id_iexact"> Buscar nomes exatos</label></td>
 							<td></td>
 							<td></td>
-							<td><div id="subnet" style="background:#F6F6F6">{{ search_form.subnet }}</div></td>
+							<td style="background:#F6F6F6"><div id="subnet">{{ search_form.subnet }}</div></td>
 							<td></td>
 						</tr>
 					</tbody>
