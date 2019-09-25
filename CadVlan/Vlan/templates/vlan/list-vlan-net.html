@@ -40,9 +40,7 @@ $(document).ready(function() {
 		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
 		$("#checkAll").attr("checked", false);
 	});
-	
-	$("#page_tab_2").tabs();
-	
+
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
 	        location.href = "{% url vlan.search.list '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
         });
@@ -107,10 +105,10 @@ $(document).ready(function() {
 }
 </style>
 
-<div id="page_tab_2">
-	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Redes da Vlan</a></li>
-	</ul>
+<div id="page_tab_2" style="border:none">
+	<div style="font-size: 30px;margin: 20px;border:none;">
+		<p style="text-align: center;color: #7C6767">Redes</p>
+	</div>
 	<div id="tabs-2">
 		<div class="buttons">
 			<button id="btn_can" >Voltar</button>
@@ -200,7 +198,4 @@ $(document).ready(function() {
 			</tbody>
 		</table>
 	</div>
-	
-	
-	
 </div>

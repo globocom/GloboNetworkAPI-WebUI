@@ -23,61 +23,55 @@
 {% block header %}
 <script type="text/javascript">
 $(document).ready(function() {
-	
-	$("#page_tab").tabs();
-	
 	$("textarea").maxlength();
-	
 })
 </script>
 {% endblock %}
 
 {% block content %}
-<div id="page_tab">
-	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Detalhes da Vlan</a></li>
-	</ul>
+<div id="page_tab" style="border:none">
+	<div style="font-size: 40px;margin: 20px;border:none;">
+		<p style="text-align: center;color: #7C6767">Vlan</p>
+	</div>
 	<div id="tabs-1">
 		{% csrf_token %}
-		<div id="fields" class="ui-widget-content">
+		<div id="fields" class="ui-widget-content" style="border:none;margin-bottom: 5%;">
 			<table border="5">
 				<tr>
 					<td style="width: 150px"><label for="nome_ambiente">Nome do Ambiente</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.ambiente}}</label></td>
+					<td><label style="width: 350px;color: #0D84A5;text-align: center;" >{{vlan.ambiente}}</label></td>
 				</tr>
 				<tr>
 					<td style="width: 150px"><label for="nome_ambiente">ID do Ambiente</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.ambiente_id}}</label></td>
+					<td><label style="width: 350px;color: #0D84A5;text-align: center;" >{{vlan.ambiente_id}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="nome_vlan">Nome da Vlan</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{% ifequal vlan.vxlan "True"%}(VXLAN){% endifequal%} {{vlan.nome}}</label></td>
+					<td><label style="width: 350px;color: #0D84A5;text-align: center;" >{% ifequal vlan.vxlan "True"%}(VXLAN){% endifequal%} {{vlan.nome}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="num_vlan">Número da Vlan</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.num_vlan}}</label></td>
+					<td><label style="width: 350px;color: #0D84A5;text-align: center;" >{{vlan.num_vlan}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="acl_vlan">ACL's</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.acl_file_name}}</label></td>
+					<td><label style="width: 350px;color: #0D84A5;text-align: center;" >{{vlan.acl_file_name}}</label></td>
 				</tr>
 				<tr>
 					<td><label for="sit_vlan">Situacao</label></td>
 					{% if vlan.ativada == 'False'%}
-					<td><label style="width: 350px;color: blue;text-align: center;" >NÃO ATIVADA</label></td>
+					<td><label style="width: 350px;color: #FF7F00;text-align: center;" >Não Ativada</label></td>
 					{% else %}
-					<td><label style="width: 350px;color: blue;text-align: center;" >ATIVADA</label></td>
+					<td><label style="width: 350px;color: #3B9C00;text-align: center;" >Ativada</label></td>
 					{% endif %}
 				</tr>
 				<tr>
 					<td><label for="desc_vlan">Descrição</label></td>
-					<td><label style="width: 350px;color: blue;text-align: center;" >{{vlan.descricao}}</label></td>
+					<td><label style="width: 350px;color: #0D84A5;text-align: center;" >{{vlan.descricao}}</label></td>
 				</tr>
 			</table>
 		</div>
-		
-		<div class="separator spacer"></div>
-		
+
 		<div id="redes_vlan">
 			{% include "vlan/list-vlan-net.html" %}
 		</div>

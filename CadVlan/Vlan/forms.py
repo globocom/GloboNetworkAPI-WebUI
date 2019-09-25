@@ -148,3 +148,56 @@ class VlanForm(forms.Form):
             raise forms.ValidationError('Este campo é obrigatório')
 
         return self.cleaned_data['environment']
+
+
+class VlanEditForm(forms.Form):
+    """ VlanEditForm Class
+    """
+
+    CHOICES_NETWORK = (
+        ('0', 'Não'),
+        ('1', 'Sim'),
+    )
+
+    def __init__(self, environment_list, *args, **kwargs):
+        super(VlanEditForm, self).__init__(*args, **kwargs)
+
+        env_choices = ([(env['id'], env["name"])
+                        for env in environment_list["environments"]])
+        env_choices.insert(0, (0, "-"))
+
+        self.fields['environment'].choices = env_choices
+
+    environment = forms.ChoiceField(label="Ambiente",
+                                    choices=[(0, "Selecione")],
+                                    error_messages=error_messages,
+                                    widget=forms.Select(attrs={"class": "select2", "style": "width: 500px"}))
+
+    name = forms.CharField(label="Nome",
+                           required=True,
+                           min_length=3,
+                           max_length=50,
+                           error_messages=error_messages,
+                           widget=forms.TextInput(attrs={"style": "width: 400px"}))
+
+    description = forms.CharField(label="Descrição",
+                                  required=False,
+                                  min_length=3,
+                                  max_length=200,
+                                  error_messages=error_messages,
+                                  widget=forms.TextInput(attrs={"style": "width: 400px"}))
+
+    number = forms.IntegerField(label="Número da Vlan",
+                                required=False,
+                                error_messages=error_messages,
+                                widget=forms.TextInput(attrs={"style": "width: 80px", "maxlength": "9"}))
+
+    apply_vlan = forms.BooleanField(widget=forms.HiddenInput(),
+                                    label='',
+                                    required=False)
+
+    def clean_environment(self):
+        if int(self.cleaned_data['environment']) <= 0:
+            raise forms.ValidationError('Este campo é obrigatório')
+
+        return self.cleaned_data['environment']

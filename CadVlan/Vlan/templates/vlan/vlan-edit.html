@@ -62,8 +62,6 @@ $(document).ready(function() {
 	
 	
 	$("#add_form").submit( function () {
-		$("#id_acl_file").removeAttr("disabled");
-		$("#id_acl_file_v6").removeAttr("disabled");
 		$("#id_environment").removeAttr("disabled");
 		return true
 	} );
@@ -85,129 +83,6 @@ $(document).ready(function() {
     $("#id_name").mouseover(function() {
     	$(this).attr("title","Somente letras maiúsculas e minúsculas, números, '-' e '_' são permitidos.");
     });
-    
-    $("#id_acl_file").mouseover(function() {
-    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
-   	});
-    
-    $("#id_acl_file_v6").mouseover(function() {
-    	$(this).attr("title","Somente letras maiúsculas, números, '-' e '_' são permitidos.");
-   	});
-    
-    $("#id_acl_file").keyup(function() {
-        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
-        $(this).val(valor);
-    });
-    
-	$("#id_acl_file_v6").keyup(function() {
-        var valor = $(this).val().replace(/[^0-9A-Z_-]+/g,'');
-        $(this).val(valor);
- 	}); 
-    
-	{% ifequal acl_created_v4 'False' %}
-	
-		$("#btn_create_acl_v4").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
-			location.href = "{% url acl.create id_vlan 'v4' %}";
-		});
-		
-		$("#btn_suggest_v4").button().click(function() {
-			ajax = true
-			
-			if ($("#id_name").val() == ""){
-				
-				alert("Digite um nome para a Vlan");
-				ajax = false;
-				
-			}
-			else {
-				if ($("#id_environment").val() == 0){
-					
-					alert("Selecione um ambiente");
-					ajax = false;
-				}
-			}
-			
-			if (ajax){
-			
-			$.ajax({
-				data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
-				url: "{% url ajax.vlan.acl.file.name %}",
-				dataType: 'text',
-				success: function(data) {
-					data = data.toUpperCase();
-					$("#id_acl_file").val(data);
-				}
-			});
-		}
-		});
-	
-	
-	{% else %}
-	
-		$("#btn_remove_acl_v4").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-			location.href = "{% url acl.remove id_vlan 'v4' %}";
-		});
-	
-		$("#btn_edit_acl_v4").button({ icons: {primary: "ui-icon-pencil"} }).click(function(){
-			location.href = "{% url acl.edit id_vlan 'v4' %}";
-		});
-		
-		
-		$("#btn_validate_v4").button({ icons: {primary: "ui-icon-carat-1-s"} }).click(function() {
-			location.href = "{% url acl.validate id_vlan 'v4' %}";
-		});
-		
-	{% endifequal %}
-	
-	
-	
-	{% ifequal acl_created_v6 'False' %}
-	
-		$("#btn_create_acl_v6").button({ icons: {primary: "ui-icon-disk"} }).click(function(){
-			location.href = "{% url acl.create id_vlan 'v6' %}";
-		});
-		
-		$("#btn_suggest_v6").button().click(function() {
-			ajax = true
-			if ($("#id_name").val() == ""){
-				alert("Digite um nome para a Vlan");
-				ajax = false;
-			} else {
-				if ($("#id_environment").val() == 0){
-					alert("Selecione um ambiente");
-					ajax = false;
-				}
-			}
-			if (ajax){
-				$.ajax({
-					data: { nome: $("#id_name").val(), id_ambiente: $("#id_environment").val() },
-					url: "{% url ajax.vlan.acl.file.name %}",
-					dataType: 'text',
-					success: function(data) {
-						data = data.toUpperCase();
-						$("#id_acl_file_v6").val(data);
-					}
-				});
-			}
-		});
-
-
-	{% else %}
-	
-		$("#btn_remove_acl_v6").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-			location.href = "{% url acl.remove id_vlan 'v6' %}";
-		});
-	
-		$("#btn_edit_acl_v6").button({ icons: {primary: "ui-icon-pencil"} }).click(function(){
-			location.href = "{% url acl.edit id_vlan 'v6' %}";
-		});
-		
-		
-		$("#btn_validate_v6").button({ icons: {primary: "ui-icon-carat-1-s"} }).click(function() {
-			location.href = "{% url acl.validate id_vlan 'v6' %}";
-		});
-		
-	{% endifequal %}
 	
 	$('#id_network_ipv4').parent().remove();
 	$('#id_network_ipv6').parent().remove();
@@ -217,14 +92,14 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block content %}
-<div id="page_tab">
-	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Edição de Vlan</a></li>
-	</ul>
+<div id="page_tab" style="border:none;margin-right: 10%;margin-left: 10%;">
+	<div style="font-size: 40px;margin: 20px;border:none;">
+		<p style="text-align: center;color: #7C6767">Edição de Vlan</p>
+	</div>
 	<div id="tabs-1">
 	<form id="add_form" method="post" action="{% url vlan.edit.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}">
 			{% csrf_token %}
-			<div id="fields" class="ui-widget-content">
+			<div id="fields" class="ui-widget-content" style="border: none;">
 			{% for field in form %}
 				<div>
 					<div><label for="{{ field.auto_id }}">{{ field.label_tag }}{% if field.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
@@ -303,10 +178,8 @@ $(document).ready(function() {
 			{% endfor %}
 			
 			</div>
-			
-			<div class="separator spacer"></div>
-			
-			<div class="buttons-l ui-widget-header">
+
+			<div class="buttons-l ui-widget-header" style="margin-top: 5%;">
 				<button id="btn_apply" type="button">Aplicar</button>
 				<button id="btn_sav" type="button">Gravar</button>
 				<button id="btn_can" type="button">Cancelar</button>
