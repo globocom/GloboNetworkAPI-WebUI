@@ -40,7 +40,7 @@ class SearchVlanForm(forms.Form):
 
     number = forms.IntegerField(label="Número", required=False, error_messages=error_messages,
                                 widget=forms.TextInput(attrs={"style": "width: 50px"}))
-    name = forms.CharField(label="Nome", required=False, min_length=3, max_length=80,
+    name = forms.CharField(label="Nome", required=False, max_length=80,
                            error_messages=error_messages, widget=forms.TextInput(attrs={"style": "width: 150px"}))
     iexact = forms.BooleanField(label="Buscar nomes exatos", required=False, error_messages=error_messages)
     environment = forms.ChoiceField(label="Ambiente", required=False, choices=[(0, "Selecione")],

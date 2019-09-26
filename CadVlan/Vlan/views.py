@@ -699,7 +699,7 @@ def ajax_confirm_vlan(request):
 
         # Concatenate the question in message
         if is_number and message_confirm:
-            message_confirm += '. Deseja criar essa vlan mesmo assim?'
+            message_confirm += 'Deseja criar essa vlan mesmo assim?'
 
         if not message_confirm:
             message_confirm = "Salvar a Vlan?"

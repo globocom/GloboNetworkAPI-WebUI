@@ -14,7 +14,9 @@ $(document).ready(function() {
 	$(id_prefixv4).parent().hide();
 	$(id_prefixv6).parent().hide();
 
-    $(btn_sav).button({ icons: {primary: "ui-icon-disk"} });
+	$(btn_sav).button({ icons: {primary: "ui-icon-disk"} }).click(function(){
+		confirm_vlan();
+	});;
 
     $(btn_can).button({ icons: {primary: "ui-icon-cancel"} }).click(function(){
         location.href = "vlan/list/";
@@ -125,4 +127,36 @@ function get_environment_configuration_available() {
 			console.log(data);
 		}
 	});
+}
+
+function confirm_vlan(){
+
+    id_vlan = "{{id_vlan}}"
+    number = $.trim($("#id_number").val())
+    id_environment = $.trim($("#id_environment").val())
+    let add_form = document.getElementById("add_form");
+
+    if( number != "" && id_environment != ""){
+        $.ajax({
+            //async: false,
+            data: { number: number, id_environment: id_environment, is_number : 1, id_vlan : id_vlan },
+            url: "confirmvlan/",
+            dataType: 'text',
+            success: function(data) {
+                if (data != ""){
+                    if(confirm(data)){
+                        $(add_form).submit();
+                    }else{
+                        return false;
+                    }
+                }
+                else{
+                    $(add_form).submit();
+                }
+            }
+        });
+        return false;
+    }else{
+        $(add_form).submit();
+    }
 }
