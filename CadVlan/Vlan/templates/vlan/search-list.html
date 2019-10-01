@@ -346,13 +346,11 @@ input {
 				<span style='float:left; padding-left:3px;'> Clique para visualizar mais redes.</span>
 			</div>
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
-			<span class="tool">
 			<button id="btn_new">Novo Registro</button>
 			{% has_perm VLAN_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir Registro</button>
 			{% endif %}
-			</span>
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}

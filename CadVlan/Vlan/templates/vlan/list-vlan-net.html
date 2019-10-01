@@ -127,13 +127,12 @@ $(document).ready(function() {
 			<button id="btn_remove_networks" >Undeploy Rede</button>
 			{% endif%}
 			
-			<span id="tool">
 			<button id="btn_new" type="button"> Nova Rede</button>
 			{% has_perm VLAN_MANAGEMENT True None %}
 			{% if has_perm %}
+
 			<button id="btn_del">Excluir Rede</button>
 			{% endif %}
-			</span>
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
