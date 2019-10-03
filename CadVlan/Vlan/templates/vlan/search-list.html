@@ -43,7 +43,6 @@ function setupAjaxForm() {
 	
 }
 
-
 function more_than_three(id){
 	retorno = false
 	$("th[id^='expandir_rede_"+ id +"']").each(function (){
@@ -52,11 +51,6 @@ function more_than_three(id){
 	});
 	return retorno;
 }
-
-function teste(){
-	alert('dasds')
-}
-
 
 $(document).ready(function() {
 	setupAjaxForm();
@@ -264,69 +258,99 @@ input {
 .ui-accordion .ui-accordion-content {
 	padding: 5px !important;
 }
+
+.ui-tabs-nav.ui-helper-reset.ui-helper-clearfix.ui-widget-header.ui-corner-all {
+	background: #F6F6F6;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 
-<div id="page_tab">
-	<ul>
-		<li><span class="ui-icon ui-icon-triangle-1-e page_tab_icon"></span><a href="#tabs-1">Listagem de Vlans</a></li>
-	</ul>
+<div id="page_tab" style="border:none">
+	<div style="font-size: 30px;margin: 20px;border:none;">
+		<p style="text-align: center;color: #7C6767">Pesquisar Vlans</p>
+	</div>
 	<div id="tabs-1">
-		<div id="accordion">
-			<h3><a href="#">Pesquisar</a></h3>
-			<div id="search">
-				<form id="search_form" method="post" action="">
-					{% csrf_token %}
-					{{ search_form.networkv4 }}{{ search_form.networkv6 }}
-					<table style="width: 100%">
-						<thead>
-							<tr>
-								<th>Número</th>
-								<th>Nome</th>
-								<th>Ambiente</th>
-								<th>Tipo</th>
-								<th>Rede <label for="ip_all"><input type="radio" id="ip_all" name="ip_version" value="2" />L2 + IPv4 + IPv6</label> <label for="ip_v4"><input type="radio" id="ip_v4" name="ip_version" checked="checked" value="0" />IPv4</label> <label for="ip_v6"><input type="radio" id="ip_v6" name="ip_version" value="1" />IPv6</label></th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>{{ search_form.number }}</td>
-								<td>{{ search_form.name }}</td>
-								<td>{{ search_form.environment }}</td>
-								<td>{{ search_form.net_type }}</td>
-								<td><input type="text" class="ip_input ipv6 ipv4" name="oct1" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct2" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct3" onkeyup="changeInput(this, true)" /><label class="ipv4">.</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct4" onkeyup="changeInput(this, true)" /><label class="ipv4">/</label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6 ipv4" name="oct5" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct6" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct7" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">:</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct8" onkeyup="changeInput(this, true)" /><label></label><label style="display: none;" class="ipv6">/</label><input type="text" class="ip_input ipv6" style="display: none;" name="oct9" onkeyup="changeInput(this, true)" /></td>
-								<td style="padding-top: 4px;"><span class="tool"><button id="btn_search" type="submit">Pesquisar</button><button id="btn_clear" type="reset">Limpar</button></span></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>{{ search_form.iexact }}<label for="id_iexact"> Buscar nomes exatos</label></td>
-								<td></td>
-								<td></td>
-								<td><div id="subnet">{{ search_form.subnet }}</div></td>
-								<td>{{ search_form.acl }}<label for="id_acl"> Apenas Acls não validadas</label></td>
-							</tr>
-						</tbody>
-					</table>
-				</form>
-			</div>
+		<div id="search">
+			<form id="search_form" method="post" action="">
+				{% csrf_token %}
+				{{ search_form.networkv4 }}{{ search_form.networkv6 }}
+				<table style="width: 100%; font-color: ##0D84A5;">
+					<thead>
+						<tr>
+							<th>Número</th>
+							<th>Nome</th>
+							<th>Ambiente</th>
+							<th>Tipo</th>
+							<th>Rede <label for="ip_all"><input type="radio" id="ip_all" name="ip_version" value="2" />
+								L2 + IPv4 + IPv6</label>
+								<label for="ip_v4"><input type="radio" id="ip_v4" name="ip_version" checked="checked"
+														  value="0" />IPv4</label> <label for="ip_v6">
+									<input type="radio" id="ip_v6" name="ip_version" value="1" />IPv6</label></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>{{ search_form.number }}</td>
+							<td>{{ search_form.name }}</td>
+							<td>{{ search_form.environment }}</td>
+							<td>{{ search_form.net_type }}</td>
+							<td>
+								<input type="text" class="ip_input ipv6 ipv4" name="oct1"
+									   onkeyup="changeInput(this, true)" /><label class="ipv4">.</label>
+								<label style="display: none;" class="ipv6">:</label>
+								<input type="text" class="ip_input ipv6 ipv4" name="oct2"
+									   onkeyup="changeInput(this, true)" /><label class="ipv4">.</label>
+								<label style="display: none;" class="ipv6">:</label>
+								<input type="text" class="ip_input ipv6 ipv4" name="oct3"
+									   onkeyup="changeInput(this, true)" /><label class="ipv4">.</label>
+								<label style="display: none;" class="ipv6">:</label>
+								<input type="text" class="ip_input ipv6 ipv4" name="oct4"
+									   onkeyup="changeInput(this, true)" /><label class="ipv4">/</label>
+								<label style="display: none;" class="ipv6">:</label>
+								<input type="text" class="ip_input ipv6 ipv4" name="oct5"
+									   onkeyup="changeInput(this, true)" /><label></label>
+								<label style="display: none;" class="ipv6">:</label>
+								<input type="text" class="ip_input ipv6" style="display: none;" name="oct6"
+									   onkeyup="changeInput(this, true)" /><label></label>
+								<label style="display: none;" class="ipv6">:</label>
+								<input type="text" class="ip_input ipv6" style="display: none;" name="oct7"
+									   onkeyup="changeInput(this, true)" /><label></label>
+								<label style="display: none;" class="ipv6">:</label>
+								<input type="text" class="ip_input ipv6" style="display: none;" name="oct8"
+									   onkeyup="changeInput(this, true)" /><label></label>
+								<label style="display: none;" class="ipv6">/</label>
+								<input type="text" class="ip_input ipv6" style="display: none;" name="oct9"
+									   onkeyup="changeInput(this, true)" /></td>
+							<td style="padding-top: 4px;">
+								<span class="tool"><button id="btn_search" type="submit">Pesquisar</button>
+									<button id="btn_clear" type="reset">Limpar</button></span></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>{{ search_form.iexact }}<label for="id_iexact"> Buscar nomes exatos</label></td>
+							<td></td>
+							<td></td>
+							<td style="background:#F6F6F6"><div id="subnet">{{ search_form.subnet }}</div></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+			</form>
 		</div>
-		<div class="buttons">
-			<div style=" color:#EE0000; float:left; margin-top: 6px; margin-left: 4px;">
-				<img border="0" src="/media/img/quadrado.gif"/> Redes ainda sem validação de Acl fornecida pela Equipe de Segurança.<br/>
-				<img style='float: left' border="0" src="/media/img/max_red_legend.png"/> <span style='float: left; padding-left: 3px;'> Clique para visualizar mais redes.</span>
-			
+		<div class="buttons" style="margin-bottom: 5%;">
+			<div style="float:left; margin-top:6px; margin-left:4px;">
+				<img style='float: left' border="0" src="/media/img/max_red_legend.png"/>
+				<span style='float:left; padding-left:3px;'> Clique para visualizar mais redes.</span>
 			</div>
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
-			<span class="tool">
 			<button id="btn_new">Novo Registro</button>
 			{% has_perm VLAN_MANAGEMENT True None %}
 			{% if has_perm %}
 			<button id="btn_del">Excluir Registro</button>
 			{% endif %}
-			</span>
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
@@ -342,27 +366,23 @@ input {
 			<col width="3%" />
 			<col width="6%" />
 			<col width="16%" />
-			<col width="8%" />
-			<col width="28%" />
+			<col width="32%" />
 			<col width="13%" />
-			<col width="14%" />
-			<col width="10%" />
+			<col width="16%" />
+			<col width="12%" />
 			<thead>
 				<tr>
 					<th><input id="checkAll" type="checkbox" /></th>
 					<th></th>
 					<th>Número</th>
 					<th>Nome</th>
-					<th>VXLAN</th>
 					<th>Ambiente</th>
 					<th>Tipo Rede</th>
 					<th>Rede</th>
 					<th>Roteamento Em</th>
 				</tr>
 			</thead>
-			<tbody>
-				
-			</tbody>
+			<tbody></tbody>
 		</table>
 	</div>
 </div>

@@ -71,6 +71,7 @@ from CadVlan.Vlan.business import cache_list_vlans
 from CadVlan.Vlan.business import montaIPRede
 from CadVlan.Vlan.forms import SearchVlanForm
 from CadVlan.Vlan.forms import VlanForm
+from CadVlan.Vlan.forms import VlanEditForm
 
 logger = logging.getLogger(__name__)
 
@@ -439,10 +440,17 @@ def vlan_form(request):
                     vlan = client.create_vlan().allocate_without_network(
                         environment_id, name, description, None)
                     id_vlan = vlan.get('vlan').get('id')
-                    if int(network_ipv4):
-                        client.create_network().add_network_ipv4(id_vlan, None, None, prefixv4)
-                    if int(network_ipv6):
-                        client.create_network().add_network_ipv6(id_vlan, None, None, prefixv6)
+
+                    try:
+                        if int(network_ipv4):
+                            client.create_network().add_network_ipv4(id_vlan, None, None, prefixv4)
+                        if int(network_ipv6):
+                            client.create_network().add_network_ipv6(id_vlan, None, None, prefixv6)
+                    except NetworkAPIClientError as e:
+                        logger.error(e)
+                        messages.add_message(request, messages.WARNING,
+                                             "As redes não foram criadas. Erro: {}".format(e))
+                        return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -494,41 +502,35 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
             messages.add_message(request, messages.ERROR, e)
             return redirect('vlan.search.list')
 
+        vlan = vlan.get("vlan")
+
         if request.method == 'GET':
 
-            # Get all environments from NetworkAPI
             environment = get_environments(client)
 
-            vlan = vlan.get("vlan")
-
-            lists['form'] = VlanForm(environment, initial={'name': vlan.get('nome'),
-                                                           "number": vlan.get('num_vlan'),
-                                                           "environment": vlan.get("ambiente"),
-                                                           "description": vlan.get('descricao'),
-                                                           "acl_file": vlan.get('acl_file_name'),
-                                                           "acl_file_v6": vlan.get('acl_file_name_v6')})
+            lists['form'] = VlanEditForm(environment, initial={'name': vlan.get('nome'),
+                                                               "number": vlan.get('num_vlan'),
+                                                               "environment": vlan.get("ambiente"),
+                                                               "description": vlan.get('descricao')})
 
         if request.method == 'POST':
 
             # Get all environments from NetworkAPI
             environment = get_environments(client)
-            form = VlanForm(environment, request.POST)
+            form = VlanEditForm(environment, request.POST)
             lists['form'] = form
-            vlan = vlan.get('vlan')
 
             if form.is_valid():
 
                 nome = form.cleaned_data['name']
                 numero = form.cleaned_data['number']
-                acl_file = form.cleaned_data['acl_file']
-                acl_file_v6 = form.cleaned_data['acl_file_v6']
                 descricao = form.cleaned_data['description']
                 ambiente = form.cleaned_data['environment']
                 apply_vlan = form.cleaned_data['apply_vlan']
 
                 # client.editar
                 client.create_vlan().edit_vlan(
-                    ambiente, nome, numero, descricao, acl_file, acl_file_v6, id_vlan)
+                    ambiente, nome, numero, descricao, None, None, id_vlan)
                 messages.add_message(
                     request, messages.SUCCESS, vlan_messages.get("vlan_edit_sucess"))
 
@@ -551,31 +553,6 @@ def vlan_edit(request, id_vlan='0', sf_number='0', sf_name='0', sf_environment='
         lists['acl_valida_v6'] = vlan.get("acl_valida_v6")
 
     except NetworkAPIClientError as e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    try:
-
-        environment = client.create_ambiente().buscar_por_id(
-            vlan.get("ambiente")).get("ambiente")
-
-        if vlan.get('acl_file_name') is not None:
-
-            is_acl_created = checkAclGit(vlan.get(
-                'acl_file_name'), environment, NETWORK_TYPES.v4, AuthSession(request.session).get_user())
-
-            lists[
-                'acl_created_v4'] = "False" if is_acl_created is False else "True"
-
-        if vlan.get('acl_file_name_v6') is not None:
-
-            is_acl_created = checkAclGit(vlan.get(
-                'acl_file_name_v6'), environment, NETWORK_TYPES.v6, AuthSession(request.session).get_user())
-
-            lists[
-                'acl_created_v6'] = "False" if is_acl_created is False else "True"
-
-    except GITCommandError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -676,34 +653,32 @@ def ajax_confirm_vlan(request):
             number, '', False, None, None, network, ip_version, subnet, False, pag)
         """Filter end"""
 
-        if 'vlan' in vlans:
-            for vlan in vlans.get('vlan'):
-                # Ignore the same Vlan for validation
-                if vlan['id'] != id_vlan:
-                    # is_number means that validation is with number vlan
-                    # (number used in another environment)
-                    if is_number == 1:
-                        if int(vlan['ambiente']) != int(id_environment):
-                            needs_confirmation = client.create_vlan().confirm_vlan(
-                                number, id_environment).get('needs_confirmation')
-                            if needs_confirmation == 'True':
-                                message_confirm = "a vlan de número " + \
-                                    str(number) + " já existe no ambiente " + \
-                                    str(vlan['ambiente_name'])
-                        else:
-                            message_confirm = ''
-                            break
-                    # else the validation is with network
-                    else:
-                        network_confirm = network.replace('/', 'net_replace')
+        for vlan in vlans.get('vlan'):
+            # Ignore the same Vlan for validation
+            if vlan['id'] != id_vlan:
+                # is_number means that validation is with number vlan
+                # (number used in another environment)
+                if is_number == 1:
+                    if int(vlan['ambiente']) != int(id_environment):
                         needs_confirmation = client.create_vlan().confirm_vlan(
-                            network_confirm, id_vlan, ip_version).get('needs_confirmation')
+                            number, id_environment).get('needs_confirmation')
                         if needs_confirmation == 'True':
-                            message_confirm = "A rede compatível " + str(network) + " já existe no ambiente " + str(
-                                vlan['ambiente_name']) + ". Deseja alocar essa rede mesmo assim?"
-                        else:
-                            message_confirm = ''
-                            break
+                            message_confirm = "A vlan de número {} já existe no ambiente {}.".format(
+                                number, vlan.get('ambiente_name'))
+                    else:
+                        message_confirm = ''
+                        break
+                # else the validation is with network
+                else:
+                    network_confirm = network.replace('/', 'net_replace')
+                    needs_confirmation = client.create_vlan().confirm_vlan(
+                        network_confirm, id_vlan, ip_version).get('needs_confirmation')
+                    if needs_confirmation == 'True':
+                        message_confirm = "A rede compatível " + str(network) + " já existe no ambiente " + str(
+                            vlan['ambiente_name']) + ". Deseja alocar essa rede mesmo assim?"
+                    else:
+                        message_confirm = ''
+                        break
 
         # also validate if the number is in valid range
         if is_number:
@@ -712,34 +687,31 @@ def ajax_confirm_vlan(request):
             has_numbers_availables = convert_string_to_boolean(
                 has_numbers_availables)
             if not has_numbers_availables:
-                message_confirm_numbers = 'O número está fora do range definido'
+                message_confirm_numbers = 'O número está fora do range definido para o ambiente.'
 
         # The number is in another environment and the number isn't in right
         # range, so concatenate the messages
         if message_confirm and message_confirm_numbers:
-            message_confirm = message_confirm_numbers + \
-                ' e a ' + message_confirm
+            message_confirm = "{}.{}".format(message_confirm_numbers,message_confirm)
         # Only the number isn't in right range
         elif not message_confirm and message_confirm_numbers:
             message_confirm = message_confirm_numbers
 
         # Concatenate the question in message
         if is_number and message_confirm:
-            message_confirm += '. Deseja criar essa vlan mesmo assim?'
+            message_confirm += 'Deseja criar essa vlan mesmo assim?'
 
-        # Upcase only first letter in message and add to dict
+        if not message_confirm:
+            message_confirm = "Salvar a Vlan?"
+
         lists['confirm_message'] = upcase_first_letter(message_confirm)
 
-        # Returns HTML
         response = HttpResponse(loader.render_to_string(
             AJAX_CONFIRM_VLAN, lists, context_instance=RequestContext(request)))
-        # Send response status with error
         response.status_code = 200
         return response
-
     except:
-
-        lists['confirm_message'] = ''
+        lists['confirm_message'] = "Deseja salvar a Vlan?"
         # Returns HTML
         response = HttpResponse(loader.render_to_string(
             AJAX_CONFIRM_VLAN, lists, context_instance=RequestContext(request)))
