@@ -42,9 +42,9 @@ TOKEN = 'token'
 
 
 def login_required(view_func):
-    """
+    '''
     Validates that the user is logged
-    """
+    '''
     def _decorated(request, *args, **kwargs):
 
         auth = AuthSession(request.session)
@@ -65,11 +65,13 @@ def login_required(view_func):
 
 
 def has_perm(permission):
-    """
+    '''
     Validates that the user has access permission
 
     :param permission: access permission to be validated
-    """
+    :param write: permission be write
+    :param read: permission be read
+    '''
     def _decorated(view_func):
 
         def _has_perm(request, *args, **kwargs):
@@ -99,9 +101,9 @@ def has_perm(permission):
 
 
 def log(view_func):
-    """
+    '''
     Logs all requests
-    """
+    '''
     def _decorated(request, *args, **kwargs):
 
         post_data = request.raw_post_data
@@ -154,7 +156,7 @@ def has_perm_external(required_permissions=None):
             user_hash = data_from_cache.get('user_hash')
             permissions = data_from_cache.get('permissions')
 
-            # Check Has Permission
+            #Check Has Permission
             if required_permissions:
                 for perm in required_permissions:
 
@@ -205,7 +207,7 @@ def cache_function(length):
             key = sha1(str(func.__module__) + str(func.__name__)).hexdigest()
 
             # Search in cache if it exists
-            if cache in key:
+            if cache.has_key(key):
 
                 # Get value in cache
                 value = cache.get(key)
