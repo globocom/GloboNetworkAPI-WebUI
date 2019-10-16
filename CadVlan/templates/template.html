@@ -259,7 +259,7 @@
 
                             {% has_perm ENVIRONMENT_MANAGEMENT True None %}
                             {% if has_perm %}
-                            <li><a href="{% url environment.form %}">Ambiente</a></li>
+                            <li><a href="{% url environment.add %}">Ambiente</a></li>
                             {% endif %}
 
                             {% has_perm ENVIRONMENT_VIP True None %}

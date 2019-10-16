@@ -29,7 +29,6 @@ from django.core.cache import cache
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import loader
 from hashlib import sha1
-import json
 import logging
 import time
 import re

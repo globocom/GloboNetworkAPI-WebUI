@@ -4,20 +4,11 @@ $(document).ready(function() {
 
     $('[data-toggle="tooltip"]').tooltip();
 
-    autocompleteAjax ("/autocomplete/environment/", "env_list")
-    fillEnvironmentField("father_env", "env_list");
-
-    autocompleteAjax ("/autocomplete/dc/", "router_env_list")
-    fillEnvironmentField("router_env", "router_env_list");
-
-    autocompleteAjax ("/autocomplete/l3/", "l3_env_list")
-    fillEnvironmentField("fisic_env", "l3_env_list");
-
-    autocompleteAjax ("/autocomplete/logic/", "logic_env_list")
-    fillEnvironmentField("logic_env", "logic_env_list");
-
-    autocompleteAjax ("/autocomplete/vrf/", "vrf_list")
-    fillEnvironmentField("vrf", "vrf_list");
+    autocompleteAjax ("/autocomplete/environment/", "father_env")
+    autocompleteAjax ("/autocomplete/dc/", "router_env")
+    autocompleteAjax ("/autocomplete/l3/", "fisic_env")
+    autocompleteAjax ("/autocomplete/logic/", "logic_env")
+    autocompleteAjax ("/autocomplete/vrf/", "vrf")
 
     $('#more_range').click(function() {
 
@@ -83,17 +74,7 @@ $(document).ready(function() {
 
 });
 
-function fillEnvironmentField(envFieldId, storageName) {
-
-    let jsonEnv = JSON.parse(sessionStorage.getItem(storageName));
-    let envField = document.getElementById(envFieldId);
-
-    $.each(jsonEnv, function(){
-        $(envField).append($("<option />").val(this.id).text(this.name));
-    })
-}
-
-function autocompleteAjax(url, object) {
+function autocompleteAjax(url, envFieldId) {
     $.ajax({
         url: url,
         async: false,
@@ -102,22 +83,13 @@ function autocompleteAjax(url, object) {
             if (data.errors.length > 0) {
                 alert(data.errors);
             } else {
-                sessionStorage.setItem(object, JSON.stringify(data.list));
+                let envField = document.getElementById(envFieldId);
+
+                $.each(data.list, function(){
+                    $(envField).append($("<option />").val(this.id).text(this.name));
+                })
             }
 	}});
-}
-
-function envACL() {
-
-    let checkBox = document.getElementById("acl_option");
-    let envsDiv = document.getElementById("acl_info");
-
-    if (checkBox.checked == true){
-        envsDiv.style.display = "flex";
-        envsDiv.style.flexDirection = "column";
-    } else {
-        envsDiv.style.display = "none";
-    }
 }
 
 function display_more_range() {
