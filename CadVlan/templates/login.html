@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-{% extends "template.html" %}
+{% extends "main.html" %}
 
 {% load util %}
 
@@ -45,41 +45,8 @@ $(document).ready(function() {
 			}
 		}
 	});
-	
+
 })
 
 </script>
-{% endblock %}
-
-{% block content %}
-
-<div id="login">
-	<form action="login" method="post"> {% csrf_token %}
-	
-		{% for field in form %}
-			<p>
-				<label>{{ field.label_tag }}</label>
-				{{ field }}
-			</p>
-			<p id="error">
-				{% if field.errors %} 
-					{% for error in field.errors %}
-						{{ error|escape }}
-					{% endfor %}
-				{% endif %}
-			</p>
-		{% endfor %}
-		
-		<a id="new_pass" href="#" style="float: left;">Esqueci minha senha</a>
-		<p style="text-align: right;"><button>Entrar</button></p>
-		
-	</form>
-	
-	<br/>
-	
-	<div id="dialog-form" title="Solicitar Nova Senha">
-		{% include 'mail/lost-pass.html' %}
-	</div>
-	
-</div>
 {% endblock %}
