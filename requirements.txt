@@ -1,4 +1,4 @@
-Django==1.4.15
+Django==1.11.23
 GloboNetworkAPI==0.8.19
 py2-ipaddress==3.4.1
 pycrypto==2.6
