@@ -807,7 +807,7 @@ def add_channel_(request):
         envs_vlans = list()
         for e, v in zip(request.POST.getlist('environment'), request.POST.getlist('rangevlan')):
             for obj in envs.get('environments'):
-                if obj.get('name') in e:
+                if obj.get('name') == e:
                     env_id = obj.get('id')
             if env_id:
                 group = dict(env=env_id, vlans=v)
