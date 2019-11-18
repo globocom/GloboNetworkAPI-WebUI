@@ -213,58 +213,60 @@ def list_all(request):
 @log
 @login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
-def remove_environment(request):
+def remove_environment(request, environment_id=None):
 
     error_not_found = list()
     error_associated = list()
     have_errors = False
 
-    if request.method == 'POST':
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
 
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
+    if environment_id:
+        env_id = int(environment_id)
+    else:
         ids = request.POST.getlist('ids[]')
+        env_id = ';'.join(str(id) for id in ids)
 
-        try:
-            client.create_api_environment().delete_environment(';'.join(str(id) for id in ids))
-        except DetailedEnvironmentError as e:
-            # Detailed message for VLAN errors
-            logger.error(e)
-            have_errors = True
-            messages.add_message(request, messages.ERROR, e)
-        except AmbienteNaoExisteError as e:
-            # Environment doesn't exist.
-            logger.error(e)
-            have_errors = True
-            error_not_found.append(ids)
-        except AmbienteError as e:
-            # Environment associated to equipment and/or VLAN that
-            # couldn't be removed.
-            logger.error(e)
-            have_errors = True
-            error_associated.append(ids)
-        except InvalidParameterError as e:
-            # Environment id is null or invalid.
-            logger.error(e)
-            have_errors = True
-            messages.add_message(
-                request, messages.ERROR, environment_messages.get("invalid_id"))
-        except DataBaseError as e:
-            # NetworkAPI fail to access database.
-            logger.error(e)
-            have_errors = True
-            messages.add_message(request, messages.ERROR, e)
-        except XMLError as e:
-            # NetworkAPI fail generating XML response.
-            logger.error(e)
-            have_errors = True
-            messages.add_message(request, messages.ERROR, e)
-        except Exception as e:
-            # Other errors
-            logger.error(e)
-            have_errors = True
-            messages.add_message(request, messages.ERROR, e)
+    try:
+        client.create_api_environment().delete_environment(env_id)
+    except DetailedEnvironmentError as e:
+        # Detailed message for VLAN errors
+        logger.error(e)
+        have_errors = True
+        messages.add_message(request, messages.ERROR, e)
+    except AmbienteNaoExisteError as e:
+        # Environment doesn't exist.
+        logger.error(e)
+        have_errors = True
+        error_not_found.append(ids)
+    except AmbienteError as e:
+        # Environment associated to equipment and/or VLAN that
+        # couldn't be removed.
+        logger.error(e)
+        have_errors = True
+        error_associated.append(ids)
+    except InvalidParameterError as e:
+        # Environment id is null or invalid.
+        logger.error(e)
+        have_errors = True
+        messages.add_message(
+            request, messages.ERROR, environment_messages.get("invalid_id"))
+    except DataBaseError as e:
+        # NetworkAPI fail to access database.
+        logger.error(e)
+        have_errors = True
+        messages.add_message(request, messages.ERROR, e)
+    except XMLError as e:
+        # NetworkAPI fail generating XML response.
+        logger.error(e)
+        have_errors = True
+        messages.add_message(request, messages.ERROR, e)
+    except Exception as e:
+        # Other errors
+        logger.error(e)
+        have_errors = True
+        messages.add_message(request, messages.ERROR, e)
 
     # Build not found message
     if len(error_not_found) > 0:

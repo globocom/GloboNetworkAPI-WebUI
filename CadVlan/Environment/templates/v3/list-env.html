@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="NAPI-WEB">
+
+        <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap.min.css">
+        <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+        <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script type="text/javascript"
+                src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <!-- Bootstrap tooltips requere Thether -->
+        <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+        <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-1.10.20.dataTables.min.js"></script>
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/dataTables.bootstrap.min.js"></script>
+
+        <!-- Autocomplete -->
+        {% load util %}
+        <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/jqc-1.12.4/dt-1.10.20/af-2.3.4/datatables.min.css"/>
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/jqc-1.12.4/dt-1.10.20/af-2.3.4/datatables.min.js"></script>
+        {% load static %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}/static/css/list-env.css"/>
+        <script type="text/javascript" src="{{ STATIC_URL }}/static/js/list-env.js"></script>
+
+
+    </head>
+    <body>
+        <section id="menu-8">
+            {% include "modulo/menubar.html" %}
+        </section>
+        {% if messages %}
+            {% include "modulo/errormessages.html" with messages=messages %}
+        {% endif %}
+        <section class="container-cadvlan">
+            <div>
+                <h3 class="mbr-section-title display-3"> Ambiente </h3>
+            </div>
+            <div>
+                <table class="table table-sm table-hover" id="envtable">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Nome</th>
+                            <th>VRF</th>
+                            <th>VXLAN</th>
+                            <th>Blocos</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for env in envs %}
+                        <tr>
+                            <td>{{ env.id }}</td>
+                            <td>{{ env.name }}</td>
+                            <td>{% if env.vrf %}
+                                    {{ env.vrf }}
+                                {% else %}
+                                <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                    -
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{% if env.vxlan %}
+                                <span class="material-icons"
+                                      style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                    done
+                                </span>
+                                {% else %}
+                                <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                    -
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{% if env.configs %}
+                                    {% for net in env.configs %}
+                                    <p style="margin:0px;">{{ net.subnet}} ({{ net.new_prefix }})</p>
+                                    {% endfor %}
+                                {% else %}
+                                <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                    -
+                                </span>
+                                {% endif %}
+
+                            </td>
+                            <td>
+                                <div style="border: 1px solid #0D84A5;border-radius:3px;width: 20px;height: 20px;">
+                                    <a href='{% url environment.edit env.id %}'
+                                       class="material-icons" style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                        edit
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="border: 1px solid #0D84A5;border-radius:3px;width: 20px;height: 20px;">
+                                    <a href='{% url environment.remove env.id %}'
+                                       class="material-icons" style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                        delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </body>
+</html>

@@ -68,6 +68,21 @@
         border: 1px #f28281 solid;
         border-radius: 3px;
     }
+
+    .kickstart-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin: 80px 5% 0px 5%;
+    }
+
+    .kickstart-div {
+        display: flex;
+        flex-direction: row;
+        justify-content:flex-start;
+        max-width: 100%;
+        min-width: 100%;
+        align-items: center;
+    }
     </style>
 </head>
 
@@ -211,6 +226,17 @@
         </div>
     </div>
 {% endif %}
+</section>
+<section class="kickstart-section">
+    <div class="kickstart-div">
+        <div class="kickstart-img">
+            <!--<img src="{{ MEDIA_URL }}/img/cadvlan-v3.jpg">-->
+        </div>
+        <div class="kickstart-text">
+            <div id="vlantext"></div>
+            <div id="loadbalancertext"></div>
+        </div>
+    </div>
 </section>
 
     {% block content %}{% endblock %}

@@ -51,6 +51,13 @@ def cache_list_vlans(vlan):
     return elist
 
 
+@cache_function(CACHE_VLANS_TIMEOUT)
+def cache_vlans(vlan):
+    elist = dict()
+    elist["list"] = vlan
+    return elist
+
+
 def is_valid_name(name):
     """
     Validates Name of Vlan
