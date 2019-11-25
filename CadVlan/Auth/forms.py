@@ -21,16 +21,16 @@ from CadVlan.messages import error_messages
 
 
 class LoginForm(forms.Form):
-    redirect = forms.CharField(
-        widget=forms.HiddenInput(), label='', required=False)
-    is_ldap_user = forms.BooleanField(
-        widget=forms.HiddenInput(), label='', required=False)
     username = forms.CharField(label=u'Usuário', min_length=3, max_length=45, required=True,
                                error_messages=error_messages, widget=forms.TextInput(
             attrs={'style': "width: 150px;border-radius:3px;height:30.59px;"}))
     password = forms.CharField(label=u'Senha', min_length=3, max_length=45, required=True,
                                error_messages=error_messages, widget=forms.PasswordInput(
             attrs={'style': "width: 150px;border-radius:3px;height:30.59px;"}))
+    redirect = forms.CharField(
+        widget=forms.HiddenInput(), label='', required=False)
+    is_ldap_user = forms.BooleanField(
+        widget=forms.HiddenInput(), label='', required=False)
 
 
 class PassForm(forms.Form):
@@ -41,10 +41,14 @@ class PassForm(forms.Form):
 
 
 class ChangePassForm(forms.Form):
-    new_pass = forms.CharField(label=u'Nova senha (somente autenticacao local)', min_length=6, max_length=20, required=True,
-                               error_messages=error_messages, widget=forms.PasswordInput(attrs={'style': "width: 200px"}))
-    confirm_new_password = forms.CharField(label=u'Confirme a nova senha (somente autenticacao local)', min_length=6, max_length=20,
-                                           required=True, error_messages=error_messages, widget=forms.PasswordInput(attrs={'style': "width: 200px"}))
+    new_pass = forms.CharField(label=u'Nova senha (somente autenticacao local)',
+                               min_length=6, max_length=20, required=True,
+                               error_messages=error_messages,
+                               widget=forms.PasswordInput(attrs={'style': "width: 200px"}))
+    confirm_new_password = forms.CharField(label=u'Confirme a nova senha (somente autenticacao local)',
+                                           min_length=6, max_length=20,
+                                           required=True, error_messages=error_messages,
+                                           widget=forms.PasswordInput(attrs={'style': "width: 200px"}))
 
     def clean_confirm_new_password(self):
         if self.cleaned_data['confirm_new_password'] != self.data['new_pass']:
