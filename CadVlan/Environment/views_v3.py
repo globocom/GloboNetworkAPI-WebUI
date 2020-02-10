@@ -212,18 +212,37 @@ def add_environment(request):
         if request.method == 'POST':
 
             vlan_range1 = request.POST.get('vlan_range', '')
-            range1 = vlan_range1.split('-')
+            # range1 = vlan_range1.split('-')
             vlan_range2 = request.POST.get('vlan_range2', '')
-            range2 = vlan_range2.split('-')
+            # range2 = vlan_range2.split('-')
 
+            range1 = vlan_range1.split('-')
+            if len(range1) > 1:
+                range1_begin = int(range1[0])
+                range1_end = int(range1[1])
+            else:
+                range1_begin = None
+                range1_end = None
+            range2 = vlan_range2.split('-')
+            if len(range2) > 1:
+                range2_begin = int(range2[0])
+                range2_end = int(range2[1])
+            else:
+                range2_begin = range1_begin
+                range2_end = range1_end
+                
             env = {
                 "grupo_l3": int(request.POST.get('fisic_env')),
                 "ambiente_logico": int(request.POST.get('logic_env')),
                 "divisao_dc": int(request.POST.get('router_env')),
-                "min_num_vlan_1": int(range1[0]),
-                "max_num_vlan_1": int(range1[1]),
-                "min_num_vlan_2": int(range2[0]) if vlan_range2 else int(range1[0]),
-                "max_num_vlan_2": int(range2[1]) if vlan_range2 else int(range1[1]),
+                # "min_num_vlan_1": int(range1[0]) if vlan_range1,
+                # "max_num_vlan_1": int(range1[1]) if vlan_range1,
+                # "min_num_vlan_2": int(range2[0]) if vlan_range2 else int(range1[0]),
+                # "max_num_vlan_2": int(range2[1]) if vlan_range2 else int(range1[1]),
+                "min_num_vlan_1": range1_begin,
+                "max_num_vlan_1": range1_end,
+                "min_num_vlan_2": range2_begin,
+                "max_num_vlan_2": range2_end,
                 "default_vrf": int(request.POST.get('vrf')),
                 "father_environment": int(request.POST.get('father_env')) if request.POST.get('father_env') else None,
                 'vxlan': True if request.POST.get('vxlan') else False
