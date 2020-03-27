@@ -382,7 +382,7 @@ def add_configuration(request, id_environment):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(templates.ENVIRONMENT_CONFIGURATION_FORM, context,
+    return render_to_response(templates.ENVIRONMENT_CIDR, context,
                               context_instance=RequestContext(request))
 
 

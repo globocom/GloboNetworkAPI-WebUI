@@ -1,0 +1,149 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+{% extends "template.html" %}
+
+{% load util %}
+
+{% block title %}[Prefixo de Ambiente - Cadastro]{% endblock %}
+
+{% block header %}
+{% load static %}
+<link rel="stylesheet" href="{{ STATIC_URL }}/static/css/environment_cidr.css"/>
+<script type="text/javascript" src="{{ STATIC_URL }}/static/js/environment_cidr.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="page_tab" style="border:none;margin: 10%;margin-top: 5%">
+	<div style="font-size: 40px;border:none;">
+		<p style="text-align: center;color: #7C6767">Prefixos do Ambiente</p>
+	</div>
+	<div id="tabs-1" style="border:none;">
+
+		<form id="add_form" method="post" action="{{ action }}">
+			{% csrf_token %}
+
+			<div style="margin-bottom: 15px;">
+				<div><label for="id_environment">Nome do Ambiente:</label></div>
+				<input style="width: 100%;" type="text" id="id_enviroment" name="enviroment" value="{{ environment.ambiente_rede }}" disabled="disabled">
+			</div>
+
+			<div style="margin-bottom: 15px;">
+				<div><label for="{{ form.ip_version.auto_id }}">{{ form.ip_version.label_tag }}{% if form.ip_version.field.required %}<span style="color: red;">*</span>{% endif %}</label></div>
+				{{ form.ip_version }}
+				<p id="error">
+				{% if form.ip_version.errors %}
+					{% for error in form.ip_version.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+
+			<div id="network_ipv4" style="margin-left: 15px;margin-bottom: 15px;{% if form.ip_version.value != 'v4' %} display: none;{% endif %}">
+				{{ form.v4oct1 }}<label> . </label>
+				{{ form.v4oct2 }}<label> . </label>
+				{{ form.v4oct3 }}<label> . </label>
+				{{ form.v4oct4 }}<label> / </label>
+				{{ form.v4oct5 }}<label></label>
+				<p id="error">
+				{% if form.network_validate.errors %}
+					{% for error in form.network_validate.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+
+			<div id="network_ipv6" style="margin-left: 15px;margin-bottom: 15px;{% if form.ip_version.value != 'v6' %} display: none;{% endif %}">
+				{{ form.v6oct1 }}<label> : </label>
+				{{ form.v6oct2 }}<label> : </label>
+				{{ form.v6oct3 }}<label> : </label>
+				{{ form.v6oct4 }}<label> : </label>
+				{{ form.v6oct5 }}<label> : </label>
+				{{ form.v6oct6 }}<label> : </label>
+				{{ form.v6oct7 }}<label> : </label>
+				{{ form.v6oct8 }}<label> / </label>
+				{{ form.v6oct9 }}<label></label>
+				<p id="error">
+				{% if form.network_validate.errors %}
+					{% for error in form.network_validate.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+			<div id="cidr_v4_auto" style="margin-left: 15px;margin-bottom: 15px;{% if form.ip_version.value != 'cidr_auto' %} display: none;{% endif %}">
+				<label for="v4_auto" >Rede IPv4:</label>
+				<select id="v4_auto">
+				  <option value="No">Não</option>
+				  <option value="yes">Sim</option>
+				</select>
+				<label for="prefixv4" style="margin-left: 10px;">Prefix:</label>
+				<input name="prefixv4"
+					   data-form-field="prefixv4"
+					   style="width: 26px;"
+					   id="prefixv4">
+			</div>
+			<div id="cidr_v6_auto" style="margin-left: 15px;margin-bottom: 15px;{% if form.ip_version.value != 'cidr_auto' %} display: none;{% endif %}">
+				<label for="v6_auto">Rede IPv6:</label>
+				<select id="v6_auto">
+				  <option value="No">Não</option>
+				  <option value="yes">Sim</option>
+				</select>
+				<label for="prefixv6" style="margin-left: 10px;">Prefix:</label>
+				<input name="prefixv6"
+					   data-form-field="prefixv6"
+					   style="width: 26px;"
+					   id="prefixv6">
+			</div>
+
+			<div id="prefix" style="margin-left: 15px;margin-bottom: 15px;{% if form.ip_version.value == 'cidr_auto' %} display: none;{% endif %}">
+				<div>
+					<label for="{{ form.prefix.auto_id }}">{{ form.prefix.label_tag }}{% if form.prefix.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+				</div>
+				{{ form.prefix }}
+				<p id="error">
+				{% if form.prefix.errors %}
+					{% for error in form.prefix.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+
+			<div id="net_type" style="margin-bottom: 15px;">
+				<div>
+					<label for="{{ form.net_type.auto_id }}">{{ form.net_type.label_tag }}{% if form.net_type.field.required %}<span style="color: red;">*</span>{% endif %}</label>
+				</div>
+				{{ form.net_type }}
+				<p id="error">
+				{% if form.net_type.errors %}
+					{% for error in form.net_type.errors %}
+						{{ error|escape }}
+					{% endfor %}
+				{% endif %}
+				</p>
+			</div>
+
+			<div class="buttons-l ui-widget-header">
+				<button id="btn_sav" type="submit">Gravar</button>
+				<button id="btn_can" type="button">Cancelar</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}
