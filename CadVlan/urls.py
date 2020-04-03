@@ -258,8 +258,6 @@ urlpatterns += patterns(
         'edit', name='environment.edit',),
     url('^environment/acl_paths[/]$',
         'ajax_autocomplete_acl_path', name='acl_path.autocomplete',),
-    url('^environment/configuration/form/(?P<id_environment>\d+)[/]?$',
-        'add_configuration', name='environment.configuration.add',),
     url('^environment/configuration/remove/(?P<environment_id>\d+)/(?P<configuration_id>\d+)/',
         'remove_configuration', name='environment.configuration.remove',),
 )
@@ -287,6 +285,8 @@ urlpatterns += patterns(
         name='environment.logic.add', ),
     url('^environment/search[/]?$',
         'list_environments', name='environment.search', ),
+    url('^environment/configuration/form/(?P<id_environment>\d+)[/]?$',
+        'allocate_cidr', name='environment.configuration.add', ),
 )
 
 # URL's Vlans
