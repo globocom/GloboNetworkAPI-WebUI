@@ -867,9 +867,9 @@ def edit_channel_(request, channel_id=None):
         "start_record": 0,
         "end_record": 50,
         "asorting_cols": [],
-        "searchable_columns": ["channel__id"],
-        "custom_search": channel_id,
-        "extends_search": []
+        "searchable_columns": [],
+        "custom_search": "",
+        "extends_search": [{"channel": channel_id}]
     }
 
     try:
