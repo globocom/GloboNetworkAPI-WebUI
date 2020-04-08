@@ -2354,9 +2354,9 @@ var ElementsRenderer = /** @class */ (function () {
         var net, netv4, netv6 = "";
         for (net in node.configs) {
             if (node.configs[net].type=="v4") {
-                netv4 = node.configs[net].subnet;
+                netv4 = node.configs[net].network + " (" + node.configs[net].subnet_mask + ")";
             } else {
-                netv6 = node.configs[net].subnet;
+                netv6 = node.configs[net].network  + " (" + node.configs[net].subnet_mask + ")";
             }
         }
         div.appendChild(this.createTitleSpan(node.name, node.vxlan, node.vrf, netv4, netv6, level, is_selected, node.is_open, true));
@@ -2384,9 +2384,9 @@ var ElementsRenderer = /** @class */ (function () {
         var net, netv4, netv6 = "";
         for (net in node.configs) {
             if (node.configs[net].type=="v4") {
-                netv4 = node.configs[net].subnet;
+                netv4 = node.configs[net].network + " (" + node.configs[net].subnet_mask + ")";
             } else {
-                netv6 = node.configs[net].subnet;
+                netv6 = node.configs[net].network  + " (" + node.configs[net].subnet_mask + ")";
             }
         }
         div.appendChild(this.createTitleSpan(node.name, node.vxlan, node.vrf, netv4, netv6, level, is_selected, node.is_open, false));
