@@ -109,7 +109,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'nx@6034rdr+jh!0_*0j4ueqzd9#=a3h87jzl!xc@9x2l-1n4nv'
+SECRET_KEY = os.getenv('CADVLAN_SECRET_KEY', '')
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -224,15 +224,15 @@ URL_LOGIN = '/login'
 URL_HOME = '/home'
 
 NETWORK_API_URL = os.getenv('NETWORK_API_URL', 'http://10.0.0.2:8000/')
-NETWORK_API_USERNAME = 'CadVlan'
-NETWORK_API_PASSWORD = '12345678'
+NETWORK_API_USERNAME = os.getenv('NETWORK_API_USERNAME', '')
+NETWORK_API_PASSWORD = os.getenv('NETWORK_API_PASSWORD', '')
 
 # Configurações de Email
 EMAIL_FROM = 'globo@s2it.com.br'
 EMAIL_HOST = 'pod51028.outlook.com'
 EMAIL_PORT = '587'
-EMAIL_HOST_USER = 'globo@s2it.com.br'
-EMAIL_HOST_PASSWORD = '123$mudar'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = True
 
 MAX_RESULT_DEFAULT = 25  # Options-> 10, 25, 50, 100
@@ -256,8 +256,6 @@ LDAP_PASSWORD_DEFAULT_HASH = "{MD5}a5BE2fasdfwUZ8q82LTDvcQ=="
 LDAP_PASSWORD_DEFAULT = "ldap_password_default"
 
 ACCESS_EXTERNAL_TTL = 1800  # Values in seconds
-
-SECRET_KEY = '12345678'  # Generates key encryption
 
 LOG_FILE = PROJECT_ROOT_PATH + '/log.log'
 
