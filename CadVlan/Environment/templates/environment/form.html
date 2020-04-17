@@ -216,7 +216,8 @@ $(document).ready(function() {
 				<h3><a href="#"><b>Prefixos de Ambiente</b></a></h3>
 				<div id="row-configurations" class="ui-widget-content">	
 					<div style="margin-left: 4px;">
-						<a href="{% url environment.configuration.add id_environment %}" target="_blank">
+						<a href="{% url environment.configuration.add id_environment %}"
+						   target="_blank">
 							<button type="button" 
 							class="btn_add4 ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-state-focus" 
 							role="button" 
@@ -231,7 +232,9 @@ $(document).ready(function() {
 					</div>
 				</div>
 				<!-- configurations -->
-				<div id="row-list-configurations" class="ui-widget-content" style="max-height:200px; overflow-y:auto;">
+				<div id="row-list-configurations"
+					 class="ui-widget-content"
+					 style="max-height:200px; overflow-y:auto;">
 					<table style="padding: 6px; text-align: center;">
 						<tbody>
 							<tr>			
@@ -250,12 +253,21 @@ $(document).ready(function() {
 							</tr>
 								{% for configuration in configurations_prefix %}
 								<tr>
-									<td>{{ configuration.subnet }}</td>
-									<td>{{ configuration.new_prefix }}</td>
-									<td>{% if configuration.network_type %}{{ configuration.network_type }}{% endif %}</td>
+									<td>{{ configuration.network }}</td>
+									<td>{{ configuration.subnet_mask }}</td>
+									<td>{% if configuration.network_type_name %}
+											{{ configuration.network_type_name }}
+										{% endif %}
+									</td>
 									<td>
 										<a href="{% url environment.configuration.remove id_environment configuration.id %}">
-											<button onclick="return confirm('Deseja deletar a configuração de prefixo ?');" type="button" class="btn_del4 ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" id="btn_del" role="button" aria-disabled="false" title="Remover">
+											<button onclick="return confirm('Deseja deletar a configuração de prefixo ?');"
+													type="button"
+													class="btn_del4 ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"
+													id="btn_del"
+													role="button"
+													aria-disabled="false"
+													title="Remover">
 												<span class="ui-button-icon-primary ui-icon ui-icon-close"></span>
 												<span class="ui-button-text">Remover</span>
 											</button>

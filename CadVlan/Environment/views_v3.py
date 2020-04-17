@@ -18,25 +18,29 @@ import logging
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.http import HttpResponseRedirect
 
+from networkapiclient.exception import AmbienteNaoExisteError
+from networkapiclient.exception import InvalidParameterError
 from networkapiclient.exception import NetworkAPIClientError
 
+from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Environment.business import cache_environment_list
 from CadVlan.Environment.business import cache_environment_dc
 from CadVlan.Environment.business import cache_environment_logic
 from CadVlan.Environment.business import cache_environment_l3
+from CadVlan.Environment.forms import IpConfigForm
 from CadVlan.messages import environment_messages
-from CadVlan.templates import ADD_ENVIRONMENT
-from CadVlan.templates import AJAX_AUTOCOMPLETE_ENVIRONMENT
-from CadVlan.templates import AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT
-from CadVlan.templates import ENVIRONMENT_LIST_V3
+from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
+from CadVlan.Util.Decorators import has_perm
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 from CadVlan.Util.shortcuts import render_to_response_ajax
+
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +63,9 @@ def ajax_autocomplete_environment_vlan(request):
             "extends_search": []
         }
 
-        envs = client.create_api_environment().search(fields=["name", "min_num_vlan_1", "max_num_vlan_1"], search=data)
+        envs = client.create_api_environment().search(
+            fields=["name", "min_num_vlan_1", "max_num_vlan_1"],
+            search=data)
         env_list = cache_environment_list(envs.get('environments'))
 
     except NetworkAPIClientError as e:
@@ -69,7 +75,7 @@ def ajax_autocomplete_environment_vlan(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response_ajax(AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT,
+    return render_to_response_ajax(templates.AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT,
                                    env_list,
                                    context_instance=RequestContext(request))
 
@@ -102,7 +108,9 @@ def ajax_autocomplete_environment(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+    return render_to_response_ajax(templates.AJAX_AUTOCOMPLETE_ENVIRONMENT,
+                                   env_list,
+                                   context_instance=RequestContext(request))
 
 
 @log
@@ -131,7 +139,9 @@ def ajax_autocomplete_environment_dc(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+    return render_to_response_ajax(templates.AJAX_AUTOCOMPLETE_ENVIRONMENT,
+                                   env_list,
+                                   context_instance=RequestContext(request))
 
 
 @log
@@ -160,7 +170,9 @@ def ajax_autocomplete_environment_l3(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+    return render_to_response_ajax(templates.AJAX_AUTOCOMPLETE_ENVIRONMENT,
+                                   env_list,
+                                   context_instance=RequestContext(request))
 
 
 @log
@@ -189,7 +201,9 @@ def ajax_autocomplete_environment_logic(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response_ajax(AJAX_AUTOCOMPLETE_ENVIRONMENT, env_list, context_instance=RequestContext(request))
+    return render_to_response_ajax(templates.AJAX_AUTOCOMPLETE_ENVIRONMENT,
+                                   env_list,
+                                   context_instance=RequestContext(request))
 
 
 @log
@@ -238,7 +252,8 @@ def add_environment(request):
                 "min_num_vlan_2": range2_begin,
                 "max_num_vlan_2": range2_end,
                 "default_vrf": int(request.POST.get('vrf')),
-                "father_environment": int(request.POST.get('father_env')) if request.POST.get('father_env') else None,
+                "father_environment": int(request.POST.get('father_env')) \
+                    if request.POST.get('father_env') else None,
                 'vxlan': True if request.POST.get('vxlan') else False
             }
             client.create_api_environment().create([env])
@@ -252,7 +267,9 @@ def add_environment(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ADD_ENVIRONMENT, lists, RequestContext(request))
+    return render_to_response(templates.ADD_ENVIRONMENT,
+                              lists,
+                              RequestContext(request))
 
 
 @log
@@ -265,7 +282,9 @@ def add_dc_environment(request):
         env = dict(name=request.POST.get('routerName'))
 
         client.create_api_environment_dc().create([env])
-        messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             environment_messages.get("success_insert"))
 
     return HttpResponseRedirect(reverse("environment.add"))
 
@@ -280,7 +299,9 @@ def add_fisic_environment(request):
         env = dict(name=request.POST.get('fisicName'))
 
         client.create_api_environment_l3().create([env])
-        messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             environment_messages.get("success_insert"))
 
     return HttpResponseRedirect(reverse("environment.add"))
 
@@ -295,7 +316,9 @@ def add_logic_environment(request):
         env = dict(name=request.POST.get('logicName'))
 
         client.create_api_environment_logic().create([env])
-        messages.add_message(request, messages.SUCCESS, environment_messages.get("success_insert"))
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             environment_messages.get("success_insert"))
 
     return HttpResponseRedirect(reverse("environment.add"))
 
@@ -341,4 +364,94 @@ def list_environments(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ENVIRONMENT_LIST_V3, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.ENVIRONMENT_LIST_V3,
+                              lists,
+                              context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+def allocate_cidr(request, id_environment):
+
+    context = dict()
+
+    try:
+
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        net_type_list = client.create_tipo_rede().listar()
+        form = IpConfigForm(net_type_list, request.POST or None)
+
+        environment = client.create_api_environment().get(
+            [id_environment]).get('environments')[0]
+
+        context["form"] = form
+        context["action"] = reverse('environment.configuration.add',
+                                    args=[id_environment])
+        context["environment"] = environment
+
+        if request.method == 'POST':
+            ip_version = request.POST.get('ip_version')
+
+            if str(ip_version) == 'cidr_auto':
+                v4 = request.POST.get('v4_auto')
+                v6 = request.POST.get('v6_auto')
+                network_type = request.POST.get('net_type')
+                cidr = list()
+
+                if int(v4):
+                    prefix_v4 = request.POST.get('prefixv4')
+                    cidrv4 = dict(ip_version='v4',
+                                  network_type=network_type,
+                                  subnet_mask=prefix_v4,
+                                  environment=int(id_environment))
+                    cidr.append(cidrv4)
+                if int(v6):
+                    prefix_v6 = request.POST.get('prefixv6')
+                    cidrv6 = dict(ip_version='v6',
+                                  network_type=network_type,
+                                  subnet_mask=str(prefix_v6),
+                                  environment=int(id_environment))
+                    cidr.append(cidrv6)
+
+                client.create_api_environment_cidr().post(cidr)
+
+            elif form.is_valid():
+                network = form.cleaned_data['network_validate']
+                network_type = form.cleaned_data['net_type']
+                prefix = form.cleaned_data['prefix']
+
+                cidr = dict(ip_version=ip_version,
+                            network_type=int(network_type),
+                            subnet_mask=str(prefix),
+                            network=network,
+                            environment=int(id_environment))
+
+                client.create_api_environment_cidr().post([cidr])
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 environment_messages.get(
+                                     "success_configuration_insert"))
+
+            context["form"] = IpConfigForm(net_type_list)
+
+    except AmbienteNaoExisteError as e:
+        messages.add_message(request, messages.ERROR, e)
+        return redirect('environment.list')
+
+    except InvalidParameterError as e:
+        messages.add_message(request, messages.ERROR, e)
+
+    except NetworkAPIClientError as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except Exception as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(templates.ENVIRONMENT_CIDR,
+                              context,
+                              context_instance=RequestContext(request))

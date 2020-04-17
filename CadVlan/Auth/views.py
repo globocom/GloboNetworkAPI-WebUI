@@ -15,12 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+import hashlib
 
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from django.contrib import messages
-from CadVlan.settings import NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD, URL_HOME, URL_LOGIN, SESSION_EXPIRY_AGE, EMAIL_FROM, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+from CadVlan.settings import NETWORK_API_URL, NETWORK_API_USERNAME, NETWORK_API_PASSWORD, URL_HOME, URL_LOGIN, \
+    SESSION_EXPIRY_AGE, EMAIL_FROM, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from CadVlan import templates
 from CadVlan.Util.Decorators import login_required, log
 from CadVlan.messages import auth_messages
@@ -33,13 +36,8 @@ from CadVlan.Util.utility import make_random_password
 from CadVlan.templates import MAIL_NEW_PASS, AJAX_NEW_PASS
 from django.core.mail import EmailMessage
 from django.template import loader
-import logging
 from CadVlan.Util.shortcuts import render_to_response_ajax
-
-from CadVlan.Ldap.model import Ldap, LDAPNotFoundError
-import re
-import hashlib
-import base64
+from CadVlan.Ldap.model import LDAPNotFoundError
 from django.core.mail.backends.smtp import EmailBackend
 
 logger = logging.getLogger(__name__)
@@ -80,7 +78,9 @@ def login(request):
                     if user.get('permission') is None:
                         messages.add_message(
                             request, messages.ERROR, auth_messages.get("nogroup_error"))
-                        return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
+                        return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass,
+                                                                    'modal': modal_auto_open},
+                                                  context_instance=RequestContext(request))
 
                     auth.login(User(user.get('id'), user.get('user'), user.get('nome'), user.get(
                         'email'), user.get('pwd'), user.get('permission'), user.get('ativo'), user.get('user_ldap')))
@@ -90,30 +90,31 @@ def login(request):
 
                     return HttpResponseRedirect(URL_HOME)
 
-            except InvalidParameterError, e:
+            except InvalidParameterError as e:
                 logger.error(e)
                 messages.add_message(
                     request, messages.ERROR, auth_messages.get("user_invalid"))
 
-            except NetworkAPIClientError, e:
+            except NetworkAPIClientError as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
 
-            except LDAPNotFoundError, e:
+            except LDAPNotFoundError as e:
                 logger.error(e)
                 messages.add_message(
                     request, messages.ERROR, auth_messages.get("user_ldap_not_found"))
 
-            except Exception, e:
+            except Exception as e:
                 logger.error(e)
-                user = {}
                 messages.add_message(
                     request, messages.ERROR, auth_messages.get("500"))
 
-            return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
+            return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open},
+                                      context_instance=RequestContext(request))
 
         else:
-            return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
+            return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open},
+                                      context_instance=RequestContext(request))
 
     else:
 
@@ -128,13 +129,16 @@ def login(request):
         if request.GET is not None:
             form.fields['redirect'].initial = request.GET.get('redirect')
 
-        return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
+        return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open},
+                                  context_instance=RequestContext(request))
+
 
 @log
 def logout(request):
     auth = AuthSession(request.session)
     auth.logout()
     return HttpResponseRedirect(URL_LOGIN)
+
 
 @log
 def handler404(request):
@@ -148,6 +152,7 @@ def handler404(request):
 
     return HttpResponseRedirect(URL_LOGIN)
 
+
 @log
 def handler500(request):
     auth = AuthSession(request.session)
@@ -159,15 +164,19 @@ def handler500(request):
 
     return HttpResponseRedirect(URL_LOGIN)
 
+
 @log
 @login_required
 def home(request):
     return render_to_response(templates.HOME, context_instance=RequestContext(request))
 
+
 @log
 def lost_pass(request):
+
     form = LoginForm()
     modal_auto_open = "true"
+    form_pass = None
 
     try:
 
@@ -193,15 +202,11 @@ def lost_pass(request):
                                 pass_open = make_random_password()
                                 password = hashlib.md5(pass_open).hexdigest()
 
-                                ativo = None
-
-                                if user.get('ativo'):
-                                    ativo = '1'
-                                else:
-                                    ativo = '0'
+                                ativo = '1' if user.get('ativo') else '0'
 
                                 client.create_usuario().alterar(user.get('id'), user.get('user'), password,
-                                                                user.get('nome'), ativo, user.get('email'), user.get('user_ldap'))
+                                                                user.get('nome'), ativo, user.get('email'),
+                                                                user.get('user_ldap'))
 
                                 lists = dict()
                                 lists['user'] = user.get('user')
@@ -218,36 +223,44 @@ def lost_pass(request):
                                 messages.add_message(
                                     request, messages.SUCCESS, auth_messages.get("email_success"))
                                 modal_auto_open = 'false'
-                                return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
+                                return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass,
+                                                                            'modal': modal_auto_open},
+                                                          context_instance=RequestContext(request))
                             else:
                                 messages.add_message(
                                     request, messages.ERROR, auth_messages.get("user_ldap_cant_recover_pass"))
                                 modal_auto_open = 'false'
-                                return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
+                                return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass,
+                                                                            'modal': modal_auto_open},
+                                                          context_instance=RequestContext(request))
 
                 for user in users:
                     if user.get("user_ldap") is not None and user.get("user_ldap").upper() == username.upper():
                         messages.add_message(
                             request, messages.ERROR, auth_messages.get("user_ldap_cant_recover_pass"))
                         modal_auto_open = 'false'
-                        return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
+                        return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass,
+                                                                    'modal': modal_auto_open},
+                                                  context_instance=RequestContext(request))
 
                 messages.add_message(
                     request, messages.ERROR, auth_messages.get("user_email_invalid"))
                 modal_auto_open = 'false'
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         modal_auto_open = 'false'
-    except BaseException, e:
+    except BaseException as e:
         logger.exception(e)
         logger.error("URLError Invalid EMAIL_HOST in settings.py")
         messages.add_message(
             request, messages.ERROR, "Invalid EMAIL_HOST in settings.py")
         modal_auto_open = 'false'
 
-    return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open}, context_instance=RequestContext(request))
+    return render_to_response(templates.LOGIN, {'form': form, 'form_pass': form_pass, 'modal': modal_auto_open},
+                              context_instance=RequestContext(request))
+
 
 @log
 @login_required
@@ -302,18 +315,20 @@ def change_password(request):
                 response.status_code = 412
                 return response
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
 
             lists['change_pass_form'] = change_pass_form
             return render_to_response_ajax(AJAX_NEW_PASS, lists, context_instance=RequestContext(request))
 
-#temporario
+
+# temporario
 @log
 @login_required
 def menu(request):
     return render_to_response(templates.MENU, {'form': {}}, context_instance=RequestContext(request))
+
 
 @log
 @login_required
