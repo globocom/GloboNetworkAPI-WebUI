@@ -59,7 +59,9 @@ def ajax_autocomplete_environment_vlan(request):
             "extends_search": []
         }
 
-        envs = client.create_api_environment().search(fields=["name", "min_num_vlan_1", "max_num_vlan_1"], search=data)
+        envs = client.create_api_environment().search(
+            fields=["id", "name", "min_num_vlan_1", "max_num_vlan_1"],
+            search=data)
         env_list = cache_environment_list(envs.get('environments'))
 
     except NetworkAPIClientError as e:
