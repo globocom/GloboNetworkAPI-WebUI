@@ -325,52 +325,6 @@ def add_logic_environment(request):
 
 @log
 @login_required
-def list_environments(request):
-    """
-    Function to list all environments.
-    """
-
-    auth = AuthSession(request.session)
-    client = auth.get_clientFactory()
-    lists = dict()
-
-    try:
-        if request.method == 'GET':
-            data = {
-                "start_record": 0,
-                "end_record": 30000,
-                "asorting_cols": ['divisao_dc__nome',
-                                  'ambiente_logico__nome',
-                                  'grupo_l3__nome'],
-                "searchable_columns": [],
-                "custom_search": "",
-                "extends_search": []
-            }
-
-            fields = ['id',
-                      'children__basic',
-                      'vrf',
-                      'name',
-                      'configs__details',
-                      'vxlan']
-
-            envs = client.create_api_environment().search(search=data, fields=fields)
-            lists["envs"] = envs.get("environments")
-
-    except NetworkAPIClientError as e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-    except BaseException as e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    return render_to_response(templates.ENVIRONMENT_LIST_V3,
-                              lists,
-                              context_instance=RequestContext(request))
-
-
-@log
-@login_required
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def allocate_cidr(request, id_environment):
 
@@ -454,4 +408,49 @@ def allocate_cidr(request, id_environment):
 
     return render_to_response(templates.ENVIRONMENT_CIDR,
                               context,
+                              context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+def search_environment(request):
+    """
+    Function to list all environments.
+    """
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    lists = dict()
+    try:
+        if request.method == 'GET':
+            data = {
+                "start_record": 0,
+                "end_record": 30000,
+                "asorting_cols": ['divisao_dc__nome',
+                                  'ambiente_logico__nome',
+                                  'grupo_l3__nome'],
+                "searchable_columns": [],
+                "custom_search": "",
+                "extends_search": []
+            }
+
+            fields = ['id',
+                      'children__basic',
+                      'default_vrf__basic',
+                      'name',
+                      'configs__details']
+
+            envs = client.create_api_environment().search(search=data, fields=fields)
+            lists["envs"] = envs.get("environments")
+
+    except NetworkAPIClientError as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(templates.ENVIRONMENT_LIST_V3,
+                              lists,
                               context_instance=RequestContext(request))

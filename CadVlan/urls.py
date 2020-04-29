@@ -284,7 +284,7 @@ urlpatterns += patterns(
     url('^environment/logic/add[/]?$', 'add_logic_environment',
         name='environment.logic.add', ),
     url('^environment/search[/]?$',
-        'list_environments', name='environment.search', ),
+        'search_environment', name='environment.search', ),
     url('^environment/configuration/form/(?P<id_environment>\d+)[/]?$',
         'allocate_cidr', name='environment.configuration.add', ),
 )

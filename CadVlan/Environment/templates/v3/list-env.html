@@ -46,17 +46,22 @@
             {% include "modulo/errormessages.html" with messages=messages %}
         {% endif %}
         <section class="container-cadvlan">
-            <div>
+            <div style="margin-bottom: 20px;">
                 <h3 class="mbr-section-title display-3"> Ambiente </h3>
             </div>
             <div>
                 <table class="table table-sm table-hover" id="envtable">
+                    <col width="4%" />
+                    <col width="50%" />
+                    <col width="10%" />
+                    <col width="32%" />
+                    <col width="2%" />
+                    <col width="2%" />
                     <thead>
                         <tr>
                             <th>Id</th>
                             <th>Nome</th>
                             <th>VRF</th>
-                            <th>VXLAN</th>
                             <th>Blocos</th>
                             <th></th>
                             <th></th>
@@ -67,19 +72,8 @@
                         <tr>
                             <td>{{ env.id }}</td>
                             <td>{{ env.name }}</td>
-                            <td>{% if env.vrf %}
-                                    {{ env.vrf }}
-                                {% else %}
-                                <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
-                                    -
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td>{% if env.vxlan %}
-                                <span class="material-icons"
-                                      style="font-size:20px;vertical-align:middle;color:#0D84A5">
-                                    done
-                                </span>
+                            <td>{% if env.default_vrf %}
+                                    {{ env.default_vrf.vrf }}
                                 {% else %}
                                 <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
                                     -

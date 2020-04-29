@@ -4,6 +4,6 @@ $(document).ready(function() {
 		"aaSorting": [],
 		"bJQueryUI": true,
 		"sPaginationType": "full_numbers",
-		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 5, 6] }]
+		"aoColumnDefs": [{ "bSortable": false, "aTargets": [ 4, 5] }]
 	});
 });
