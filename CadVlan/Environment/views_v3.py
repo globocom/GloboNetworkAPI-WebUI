@@ -458,16 +458,15 @@ def search_environment(request):
                 dtp.custom_search
             )
 
-            extends_search = dict()
-            extends_search["father_environment__isnull"] = True
-
             data = dict()
             data["start_record"] = pagination.start_record
             data["end_record"] = pagination.end_record
-            data["asorting_cols"] = ['divisao_dc__nome', 'ambiente_logico__nome', 'grupo_l3__nome']
+            data["asorting_cols"] = ['divisao_dc__nome',
+                                     'ambiente_logico__nome',
+                                     'grupo_l3__nome']
             data["searchable_columns"] = pagination.searchable_columns
             data["custom_search"] = pagination.custom_search or ""
-            data["extends_search"] = [extends_search] if extends_search else []
+            data["extends_search"] = []
 
             fields = ['id',
                       'children__basic',
