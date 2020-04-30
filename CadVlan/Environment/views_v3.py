@@ -40,6 +40,8 @@ from CadVlan.Util.Decorators import has_perm
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 from CadVlan.Util.shortcuts import render_to_response_ajax
+from networkapiclient.Pagination import Pagination
+from CadVlan.Util.utility import DataTablePaginator
 
 
 logger = logging.getLogger(__name__)
@@ -424,24 +426,57 @@ def search_environment(request):
     lists = dict()
     try:
         if request.method == 'GET':
-            data = {
-                "start_record": 0,
-                "end_record": 30000,
-                "asorting_cols": ['divisao_dc__nome',
-                                  'ambiente_logico__nome',
-                                  'grupo_l3__nome'],
-                "searchable_columns": [],
-                "custom_search": "",
-                "extends_search": []
+            column_index_name_map = {
+                0: '',
+                1: 'id',
+                2: 'divisao_dc__nome',
+                3: 'vrf',
+                4: 'dcroom__dc__dcname',
+                5: ''
             }
+
+            dtp = DataTablePaginator(request, column_index_name_map)
+
+            dtp.build_server_side_list()
+
+            dtp.searchable_columns = [
+                'grupo_l3__nome',
+                'ambiente_logico__nome',
+                'divisao_dc__nome',
+                'vrf',
+                'dcroom__dc__dcname',
+                'dcroom__name'
+            ]
+
+            dtp.end_record = 10000
+
+            pagination = Pagination(
+                dtp.start_record,
+                dtp.end_record,
+                dtp.asorting_cols,
+                dtp.searchable_columns,
+                dtp.custom_search
+            )
+
+            extends_search = dict()
+            extends_search["father_environment__isnull"] = True
+
+            data = dict()
+            data["start_record"] = pagination.start_record
+            data["end_record"] = pagination.end_record
+            data["asorting_cols"] = ['divisao_dc__nome', 'ambiente_logico__nome', 'grupo_l3__nome']
+            data["searchable_columns"] = pagination.searchable_columns
+            data["custom_search"] = pagination.custom_search or ""
+            data["extends_search"] = [extends_search] if extends_search else []
 
             fields = ['id',
                       'children__basic',
-                      'default_vrf__basic',
+                      'vrf',
                       'name',
                       'configs__details']
 
-            envs = client.create_api_environment().search(search=data, fields=fields)
+            envs = client.create_api_environment().search(search=data,
+                                                          fields=fields)
             lists["envs"] = envs.get("environments")
 
     except NetworkAPIClientError as e:
