@@ -72,8 +72,8 @@
                         <tr>
                             <td>{{ env.id }}</td>
                             <td>{{ env.name }}</td>
-                            <td>{% if env.default_vrf %}
-                                    {{ env.default_vrf.vrf }}
+                            <td>{% if env.vrf %}
+                                    {{ env.vrf }}
                                 {% else %}
                                 <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
                                     -
