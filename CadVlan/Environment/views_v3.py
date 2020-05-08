@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import logging
+import yaml
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -466,7 +468,7 @@ def search_environment(request):
                                      'grupo_l3__nome']
             data["searchable_columns"] = pagination.searchable_columns
             data["custom_search"] = pagination.custom_search or ""
-            data["extends_search"] = []
+            data["extends_search"] = [dict(father_environment__isnull=True)]
 
             fields = ['id',
                       'children__basic',
@@ -476,7 +478,8 @@ def search_environment(request):
 
             envs = client.create_api_environment().search(search=data,
                                                           fields=fields)
-            lists["envs"] = envs.get("environments")
+
+            lists["envs"] = yaml.safe_load(json.dumps(envs.get('environments')))
 
     except NetworkAPIClientError as e:
         logger.error(e)
