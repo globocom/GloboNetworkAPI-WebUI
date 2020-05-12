@@ -560,7 +560,7 @@ def edit(request, id_environment):
         filters = client.create_filter().list_all()
 
         cidr = client.create_api_environment_cidr().\
-            get_by_env(env_id=id_environment)
+            get_by_env(env_id=[id_environment])
 
         lists['configurations_prefix'] = cidr.get('cidr')
 
