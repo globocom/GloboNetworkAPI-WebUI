@@ -24,6 +24,7 @@
         <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-1.10.20.dataTables.min.js"></script>
         <script type="text/javascript" src="{{ MEDIA_URL }}/js/dataTables.bootstrap.min.js"></script>
+        <script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
 
         <!-- Autocomplete -->
         {% load util %}
@@ -70,9 +71,20 @@
                     <tbody>
                         {% for env in envs %}
                         <tr>
-                            <td>{{ env.id }}</td>
-                            <td>{{ env.name }}</td>
-                            <td>{% if env.vrf %}
+                            <td onclick="childrenInfo()"
+                                data-children="{{ env.children }}"
+                                id="clickable">
+                                {{ env.id }}
+                            </td>
+                            <td onclick="childrenInfo()"
+                                data-children="{{ env.children }}"
+                                id="clickable">
+                                {{ env.name }}
+                            </td>
+                            <td onclick="childrenInfo()"
+                                data-children="{{ env.children }}"
+                                id="clickable">
+                                {% if env.vrf %}
                                     {{ env.vrf }}
                                 {% else %}
                                 <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
@@ -80,7 +92,8 @@
                                 </span>
                                 {% endif %}
                             </td>
-                            <td>{% if env.configs %}
+                            <td onclick="return confirm('Are you sure you want to delete this item?');">
+                                {% if env.configs %}
                                     {% for net in env.configs %}
                                     <p style="margin:0px;">{{ net.network}} ({{ net.subnet_mask }})</p>
                                     {% endfor %}
