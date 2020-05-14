@@ -382,7 +382,7 @@ def add_configuration(request, id_environment):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(templates.ENVIRONMENT_CONFIGURATION_FORM, context,
+    return render_to_response(templates.ENVIRONMENT_CIDR, context,
                               context_instance=RequestContext(request))
 
 
@@ -393,15 +393,13 @@ def remove_configuration(request, environment_id, configuration_id):
     try:
 
         auth = AuthSession(request.session)
-        environment_client = auth.get_clientFactory().create_ambiente()
+        environment_client = auth.get_clientFactory().create_api_environment_cidr()
 
-        environment_client.buscar_por_id(environment_id)
+        environment_client.delete(cidr_id=[configuration_id])
 
-        environment_client.configuration_remove(
-            environment_id, configuration_id)
-
-        messages.add_message(request, messages.SUCCESS, environment_messages.get(
-            "success_configuration_remove"))
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             environment_messages.get("success_configuration_remove"))
 
         return redirect('environment.edit', environment_id)
 
@@ -561,11 +559,10 @@ def edit(request, id_environment):
         group_l3 = client.create_grupo_l3().listar()
         filters = client.create_filter().list_all()
 
-        configurations_prefix = client.create_ambiente().configuration_list_all(
-            id_environment)
+        cidr = client.create_api_environment_cidr().\
+            get_by_env(env_id=[id_environment])
 
-        lists['configurations_prefix'] = configurations_prefix.get(
-            'lists_configuration')
+        lists['configurations_prefix'] = cidr.get('cidr')
 
         try:
             templates = get_templates(auth.get_user(), True)
