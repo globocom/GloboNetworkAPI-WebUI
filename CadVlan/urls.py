@@ -244,6 +244,8 @@ urlpatterns += patterns(
         'ajax_list_all', name='ajax.environment.list', ),
     url('^environment/remove[/]?$',
         'remove_environment', name='environment.remove',),
+    url('^environment/remove/(?P<environment_id>\d+)[/]?$',
+        'remove_environment', name='environment.remove', ),
     url('^environment/ambiente-logico[/]?$', 'insert_ambiente_logico',
         name='environment.insert.ambiente.logico',),
     url('^environment/grupo-l3[/]?$', 'insert_grupo_l3',
@@ -283,12 +285,14 @@ urlpatterns += patterns(
         name='environment.l3.add', ),
     url('^environment/logic/add[/]?$', 'add_logic_environment',
         name='environment.logic.add', ),
+    url('^environment/search[/]?$',
+        'list_environments', name='environment.search', ),
 )
 
 # URL's Vlans
 urlpatterns += patterns(
     'CadVlan.Vlan.views',
-    url('^vlan/autocomplete[/]?$', 'ajax_autocomplete_vlans',
+    url('^vlan/autocomplete[/]?$', 'ajax_autocomplete_vlans_v3',
         name='vlan.autocomplete.ajax',),
     url('^vlan/get/(?P<id_vlan>\d+)[/]?$',
         'list_by_id', name='vlan.list.by.id',),

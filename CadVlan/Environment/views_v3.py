@@ -33,10 +33,10 @@ from CadVlan.messages import environment_messages
 from CadVlan.templates import ADD_ENVIRONMENT
 from CadVlan.templates import AJAX_AUTOCOMPLETE_ENVIRONMENT
 from CadVlan.templates import AJAX_AUTOCOMPLETE_VLAN_ENVIRONMENT
+from CadVlan.templates import ENVIRONMENT_LIST_V3
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 from CadVlan.Util.shortcuts import render_to_response_ajax
-
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,6 @@ logger = logging.getLogger(__name__)
 @log
 @login_required
 def ajax_autocomplete_environment_vlan(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
@@ -60,7 +59,9 @@ def ajax_autocomplete_environment_vlan(request):
             "extends_search": []
         }
 
-        envs = client.create_api_environment().search(fields=["name", "min_num_vlan_1", "max_num_vlan_1"], search=data)
+        envs = client.create_api_environment().search(
+            fields=["id", "name", "min_num_vlan_1", "max_num_vlan_1"],
+            search=data)
         env_list = cache_environment_list(envs.get('environments'))
 
     except NetworkAPIClientError as e:
@@ -78,7 +79,6 @@ def ajax_autocomplete_environment_vlan(request):
 @log
 @login_required
 def ajax_autocomplete_environment(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
@@ -110,7 +110,6 @@ def ajax_autocomplete_environment(request):
 @log
 @login_required
 def ajax_autocomplete_environment_dc(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
@@ -140,7 +139,6 @@ def ajax_autocomplete_environment_dc(request):
 @log
 @login_required
 def ajax_autocomplete_environment_l3(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
@@ -170,7 +168,6 @@ def ajax_autocomplete_environment_l3(request):
 @log
 @login_required
 def ajax_autocomplete_environment_logic(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
@@ -210,7 +207,6 @@ def add_environment(request):
 
     try:
         if request.method == 'POST':
-
             vlan_range1 = request.POST.get('vlan_range', '')
             # range1 = vlan_range1.split('-')
             vlan_range2 = request.POST.get('vlan_range2', '')
@@ -235,12 +231,6 @@ def add_environment(request):
                 "grupo_l3": int(request.POST.get('fisic_env')),
                 "ambiente_logico": int(request.POST.get('logic_env')),
                 "divisao_dc": int(request.POST.get('router_env')),
-
-                # "min_num_vlan_1": int(range1[0]),
-                # "max_num_vlan_1": int(range1[1]),
-                # "min_num_vlan_2": int(range2[0]) if vlan_range2 else int(range1[0]),
-                # "max_num_vlan_2": int(range2[1]) if vlan_range2 else int(range1[1]),
-
                 "min_num_vlan_1": range1_begin,
                 "max_num_vlan_1": range1_end,
                 "min_num_vlan_2": range2_begin,
@@ -266,12 +256,10 @@ def add_environment(request):
 @log
 @login_required
 def add_dc_environment(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
     if request.method == 'POST':
-
         env = dict(name=request.POST.get('routerName'))
 
         client.create_api_environment_dc().create([env])
@@ -283,12 +271,10 @@ def add_dc_environment(request):
 @log
 @login_required
 def add_fisic_environment(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
     if request.method == 'POST':
-
         env = dict(name=request.POST.get('fisicName'))
 
         client.create_api_environment_l3().create([env])
@@ -300,12 +286,10 @@ def add_fisic_environment(request):
 @log
 @login_required
 def add_logic_environment(request):
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
     if request.method == 'POST':
-
         env = dict(name=request.POST.get('logicName'))
 
         client.create_api_environment_logic().create([env])
@@ -313,3 +297,46 @@ def add_logic_environment(request):
 
     return HttpResponseRedirect(reverse("environment.add"))
 
+
+@log
+@login_required
+def list_environments(request):
+    """
+    Function to list all environments.
+    """
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    lists = dict()
+
+    try:
+        if request.method == 'GET':
+            data = {
+                "start_record": 0,
+                "end_record": 30000,
+                "asorting_cols": ['divisao_dc__nome',
+                                  'ambiente_logico__nome',
+                                  'grupo_l3__nome'],
+                "searchable_columns": [],
+                "custom_search": "",
+                "extends_search": []
+            }
+
+            fields = ['id',
+                      'children__basic',
+                      'vrf',
+                      'name',
+                      'configs__details',
+                      'vxlan']
+
+            envs = client.create_api_environment().search(search=data, fields=fields)
+            lists["envs"] = envs.get("environments")
+
+    except NetworkAPIClientError as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response(ENVIRONMENT_LIST_V3, lists, context_instance=RequestContext(request))

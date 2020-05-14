@@ -1,0 +1,296 @@
+{% load util %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Site made with Mobirise Website Builder v3.12.1, https://mobirise.com -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="generator" content="Mobirise v3.12.1, mobirise.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ MEDIA_URL }}/assets/images/logo.png" type="image/x-icon">
+    <meta name="description" content="NAPI-WEB">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic&amp;subset=latin">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap-material-design-font/css/material.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/tether/tether.min.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/animate.css/animate.min.css">
+    <link rel="stylesheet" href="{{ MEDIA_URL }}/assets/theme/css/style.css">
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/select2.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/assets/mobirise/css/mbr-additional.css" >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+
+    {% block css %}{% endblock %}
+    <style>
+    div label label {
+        margin-bottom: 0px;
+        color: #0D84A5;
+    }
+
+    nav.navbar.navbar-dropdown.navbar-fixed-top {
+        background-color: white;
+        box-shadow: 1px 1px 5px rgba(10,10,10,0.3);
+        height: 95px;
+    }
+
+    a.navbar-caption.text-primary {
+        color: #0D84A5;
+        font-weight:  bold;
+        text-shadow: 1px 1px 1px rgba(10,10,10,0.3);
+    }
+
+    .text-primary {
+        color: #0D84A5 !important;
+    }
+
+    label {
+        color: #7C6767;
+        font-size: 12px;
+    }
+
+    input, textarea {
+        color: #7C6767;
+        font-size: 12px;
+    }
+
+    .menu-relative {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    p.text-danger.form-control-label.text-xs-center {
+        border: 1px #f28281 solid;
+        border-radius: 3px;
+    }
+
+    .kickstart-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin: 80px 5% 0px 5%;
+    }
+
+    .kickstart-div {
+        display: flex;
+        flex-direction: row;
+        justify-content:flex-start;
+        max-width: 100%;
+        min-width: 100%;
+        align-items: center;
+    }
+    </style>
+</head>
+
+<body>
+<div class="loading">
+    <div style="text-align: center;"><img src="{{ MEDIA_URL }}/img/reload.gif" width="100" height="100" /></div>
+</div>
+<section id="">
+    <nav class="navbar navbar-dropdown navbar-fixed-top">
+        <div class="container">
+            <div class="mbr-table">
+                <div class="mbr-table-cell">
+                    <div class="navbar-brand">
+                        <a class="navbar-caption text-primary h2" href="/home">CadVlan</a>
+                    </div>
+                </div>
+                <div class="mbr-table-cell">
+                    {% if request|is_authenticated %}
+                    <button class="navbar-toggler pull-xs-right hidden-md-up" type="button" data-toggle="collapse" data-target="#exCollapsingNavbar">
+                        <div class="hamburger-icon"></div>
+                    </button>
+                    <ul class="nav-dropdown collapse pull-xs-right nav navbar-nav navbar-toggleable-sm" id="exCollapsingNavbar">
+                        <li class="nav-item">
+                            <a class="nav-link link"
+                               href="http://globonetworkapi-webui.readthedocs.io/en/latest/about.html">
+                                About
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link link dropdown-toggle" href="#" aria-expanded="false" data-toggle="dropdown">Features</a>
+                            <ol class="dropdown-menu">
+                                <div class="dropdown">
+                                <a class="dropdown-item" href="/equip-access/search-list">Acessos</a>
+                                <a class="dropdown-item" href="/acl/template">ACL</a>
+                                <a class="dropdown-item" href="/environment/list">Ambiente</a>
+                                <a class="dropdown-item" href="/environment-vip/list">Ambientes VIP</a>
+                                <a class="dropdown-item" href="/datacenter/">Data Center</a>
+                                <a class="dropdown-item" href="/equipment/list">Equipamentos</a>
+                                <a class="dropdown-item" href="/filter/list">Filtros</a>
+                                <a class="dropdown-item" href="/interface/">Interfaces</a>
+                                <a class="dropdown-item" href="/option-vip/list">Opções VIP</a>
+                                <a class="dropdown-item" href="/pool/list/new">Pool</a>
+                                <a class="dropdown-item" href="/rack/ajax-view">Racks</a>
+                                <a class="dropdown-item" href="/script/list">Roteiros</a>
+                                <a class="dropdown-item" href="/script/list">Roteiros do Equipamento</a>
+                                <a class="dropdown-item" href="/script-type/list">Tipo de Roteiros</a>
+                                <a class="dropdown-item" href="/vip-request/list">VIP</a>
+                                <a class="dropdown-item" href="/vlan/list">Vlans</a>
+                                </div>
+                            </ol>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link link dropdown-toggle" href="#" aria-expanded="false" data-toggle="dropdown">Admin</a>
+                            <ol class="dropdown-menu">
+                                <div class="dropdown">
+                                <a class="dropdown-item" href="/group-equip/list">Grupos de Equipamentos</a>
+                                <a class="dropdown-item" href="/group-user/list">Grupos de Usuários</a>
+                                <a class="dropdown-item" href="/user/list/0/0">Usuários</a>
+                                <a class="dropdown-item" href="/system/variables/list">Variáveis do sistema</a>
+                                </div>
+                            </ol>
+                        </li>
+                        <!--li class="nav-item dropdown">
+                            <a class="nav-link link dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">Conta</a>
+                            <ol class="dropdown-menu">
+                                <a class="dropdown-item" href="/home">Senha</a>
+                                <a class="dropdown-item" href="/home">Logout</a>
+                            </ol>
+                        </--li-->
+                    </ul>
+                    {% else %}
+                    <div class="menu-relative">
+                        <div>
+                            <form action="login" method="post">
+                                {% csrf_token %}
+                                <ul class="nav-dropdown collapse pull-xs-right nav navbar-nav navbar-toggleable-sm" id="signin">
+                                    {% for field in form %}
+                                    <li class="nav-item">
+                                        <div>
+                                            <div><label style="margin-bottom:0px;" for="{{ field.auto_id }}">{{ field.label_tag }}</label></div>
+                                            {{ field }}
+                                            <p id="error">
+                                                {% if field.errors %}
+                                                    {% for error in field.errors %}
+                                                        {{ error|escape }}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </li>
+                                    {% endfor %}
+                                    <li class="nav-item">
+                                        <div><label></label></div>
+                                        <button class="btn-sm btn-blue-outline btn-blue">
+                                            Entrar
+                                        </button>
+                                    </li>
+                                </ul>
+                            </form>
+                        </div>
+                        <div>
+                            <a id="new_pass" href="#" style="color:#0D84A5;float:none!important">
+                                Esqueceu a senha?
+                            </a>
+                        </div>
+                    </div>
+                    <br/>
+
+                    <div id="dialog-form" title="Solicitar Nova Senha">
+                        {% include 'mail/lost-pass.html' %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</section>
+
+<section class="engine">
+    <a rel="external" href="https:/globo.com">CadVlan</a>
+</section>
+<br><br><br><br><br>
+<section>
+{% if messages %}
+    <div class="mbr-section mbr-section__container mbr-section__container--middle">
+        <div class="container">
+            <div id="messages">
+                {% for message in messages %}
+                    <div data-toggle="collapse" data-target="#messagesError">
+                        <div id="messagesError" class="{% if message.tags == 'error'%}ui-state-error
+                        {% else %}ui-state-highlight{% endif %} ui-corner-all {{ message.tags }}">
+                            <!--span class="ui-icon"></span-->
+                            <p class="{% if message.tags == 'error'%}text-danger
+                             {% elif message.tags == 'success' %}text-success
+                             {% else %}text-info{% endif %}
+                             form-control-label text-xs-center">{{ message }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+</section>
+<section class="kickstart-section">
+    <div class="kickstart-div">
+        <div class="kickstart-img">
+            <!--<img src="{{ MEDIA_URL }}/img/cadvlan-v3.jpg">-->
+        </div>
+        <div class="kickstart-text">
+            <div id="vlantext"></div>
+            <div id="loadbalancertext"></div>
+        </div>
+    </div>
+</section>
+
+    {% block content %}{% endblock %}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/tether/tether.min.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/smooth-scroll/smooth-scroll.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/viewport-checker/jquery.viewportchecker.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/theme/js/script.js"></script>
+    <script src="{{ MEDIA_URL }}/assets/formoid/formoid.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery-ui.custom.min.js"></script>
+
+    <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}/js/utils.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}/js/global_new.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}/js/select2.min.js"></script>
+    <script type="text/javascript">
+        var select2_basic = {
+            placeholder: 'Selecione',
+            allowClear: true, // Adds X image to clear select
+            closeOnSelect: true, // Only applies to multiple selects. Closes the select upon selection.
+            minimumResultsForSearch: 3 // Removes search when there are 3 or fewer options
+        };
+        $(document).ready(function() {
+
+            $(".select2").select2(select2_basic);
+
+            $(".error-messages").each(function() {
+                var $divMessage = $(this);
+
+                $divMessage.click(function(){
+
+                  $divMessage.animate({ opacity: 'toggle', height: 'toggle' }, "slow");
+
+                });
+            });
+
+            $(".loading").ajaxStart(function() {
+                $(this).show();
+            });
+
+            $(".loading").ajaxStop(function() {
+                $(this).hide();
+            });
+
+            $("#id_new_pass").val("");
+
+        })
+    </script>
+    {% block header %}{% endblock %}
+    {% block js %}{% endblock %}
+
+    <input name="animation" type="hidden">
+</body>
+</html>
+

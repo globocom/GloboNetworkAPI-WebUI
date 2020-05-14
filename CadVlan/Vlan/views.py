@@ -33,7 +33,6 @@ from networkapiclient.exception import VlanError
 from networkapiclient.exception import VlanNaoExisteError
 from networkapiclient.Pagination import Pagination
 
-from CadVlan.Acl.acl import checkAclGit
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.forms import CreateForm
 from CadVlan.forms import DeleteForm
@@ -61,13 +60,13 @@ from CadVlan.Util.Decorators import has_perm
 from CadVlan.Util.Decorators import log
 from CadVlan.Util.Decorators import login_required
 from CadVlan.Util.Enum import NETWORK_TYPES
-from CadVlan.Util.git import GITCommandError
 from CadVlan.Util.shortcuts import render_json
 from CadVlan.Util.shortcuts import render_to_response_ajax
 from CadVlan.Util.utility import convert_string_to_boolean
 from CadVlan.Util.utility import DataTablePaginator
 from CadVlan.Util.utility import upcase_first_letter
 from CadVlan.Vlan.business import cache_list_vlans
+from CadVlan.Vlan.business import cache_vlans
 from CadVlan.Vlan.business import montaIPRede
 from CadVlan.Vlan.forms import SearchVlanForm
 from CadVlan.Vlan.forms import VlanForm
@@ -247,6 +246,41 @@ def ajax_autocomplete_vlans(request):
 
         # Get list of vlans from cache
         vlan_list = cache_list_vlans(vlan)
+
+    except NetworkAPIClientError as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+    except BaseException as e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
+
+    return render_to_response_ajax(AJAX_VLAN_AUTOCOMPLETE, vlan_list, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "read": True}])
+def ajax_autocomplete_vlans_v3(request):
+
+    vlan_list = dict()
+
+    try:
+
+        # Get user auth
+        auth = AuthSession(request.session)
+        vlan = auth.get_clientFactory().create_api_vlan()
+
+        data = {
+            "start_record": 0,
+            "end_record": 15000,
+            "asorting_cols": ["id"],
+            "searchable_columns": ["nome"],
+            "custom_search": "",
+            "extends_search": []
+        }
+
+        # Get list of vlans from cache
+        vlan_list = cache_vlans(vlan)
 
     except NetworkAPIClientError as e:
         logger.error(e)

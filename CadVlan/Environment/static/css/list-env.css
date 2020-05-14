@@ -1,0 +1,13 @@
+html body {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 10%;
+    background-color: #FFF;
+}
+
+section.container-cadvlan {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-basis: 100%;
+}

@@ -68,6 +68,7 @@ SCRIPTTYPE_FORM = 'script-type/form.html'
 
 # Environment
 ENVIRONMENT_LIST = 'environment/list.html'
+ENVIRONMENT_LIST_V3 = 'v3/list-env.html'
 ENVIRONMENT_FORM = 'environment/form.html'
 ENVIRONMENT_CONFIGURATION_FORM = 'environment/configuration.html'
 ADD_ENVIRONMENT = 'v3/form.html'
