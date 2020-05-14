@@ -20,7 +20,7 @@ from CadVlan.messages import error_messages
 from CadVlan.Util.utility import check_regex
 
 
-NETWORK_IP_CHOICES = (("v4", "IPv4"), ("v6", "IPv6"))
+NETWORK_IP_CHOICES = (("v4", "IPv4"), ("v6", "IPv6"), ("cidr_auto", "Alocar próximo bloco disponível"))
 
 
 class DivisaoDCForm(forms.Form):
