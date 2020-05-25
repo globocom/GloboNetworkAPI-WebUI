@@ -468,12 +468,13 @@ def search_environment(request):
                                      'grupo_l3__nome']
             data["searchable_columns"] = pagination.searchable_columns
             data["custom_search"] = pagination.custom_search or ""
-            data["extends_search"] = [dict(father_environment__isnull=True)]
+            data["extends_search"] = []
 
             fields = ['id',
                       'children__basic',
                       'vrf',
                       'name',
+                      'father_environment',
                       'configs__details']
 
             envs = client.create_api_environment().search(search=data,
