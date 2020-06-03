@@ -205,7 +205,7 @@ def ajax_autocomplete_environment_logic(request):
             "extends_search": []
         }
         envs = client.create_api_environment_logic().search(search=data)
-        #Desativando cahce para ambiente lógico
+        #Desativando cache para ambiente lógico
         # env_list = cache_environment_logic(envs.get('logic_environments'))
 
         env_list = dict(list=envs.get('logic_environments'))
