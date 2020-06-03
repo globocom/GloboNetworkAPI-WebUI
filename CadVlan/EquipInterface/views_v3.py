@@ -62,7 +62,7 @@ def add_interface(request, equipment=None):
                                                              kind='details',
                                                              fields=['id', 'name', 'environments'])
         equips = search_equipment.get('equipments')[0]
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return HttpResponseRedirect(url)
@@ -85,7 +85,7 @@ def add_interface(request, equipment=None):
     try:
         types = client.create_api_interface_request().get_interface_type(search=data)
         type_list = types.get('interfaces_type')
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -103,14 +103,13 @@ def add_interface(request, equipment=None):
             'type': int(request.POST.get('access')),
             'equipment': int(equips.get('id'))
         }
-
         try:
             interface_obj = client.create_api_interface_request().create([
                 interface])
             interface_id = interface_obj.get('interfaces')[0].get('id')
             messages.add_message(request, messages.SUCCESS,
                                  equip_interface_messages.get("success_insert"))
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             return render_to_response(ADD_EQUIPMENT_INTERFACE, lists, RequestContext(request))
@@ -131,7 +130,7 @@ def add_interface(request, equipment=None):
                                            range_vlans=v)
                         client.create_api_interface_request(
                         ).associate_interface_environments([int_env_map])
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.WARNING,
                                  'Os ambientes não foram associados à interface.')
@@ -214,7 +213,7 @@ def list_equipment_interfaces(request):
             RequestContext(request)
         )
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return render_to_response(
@@ -222,7 +221,7 @@ def list_equipment_interfaces(request):
             lists,
             RequestContext(request)
         )
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return render_to_response(
@@ -247,16 +246,16 @@ def delete_interface(request, interface_id=None):
             equip_interface_messages.get("success_remove")
         )
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         message = str(
             error_messages.get("can_not_remove_error")
         ) + " " + str(e)
         logger.error(e)
         messages.add_message(request, messages.WARNING, message)
-    except ValueError, e:
+    except ValueError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -280,7 +279,7 @@ def server_edit_interface(request, interface=None):
             interface_obj = client.create_api_interface_request().get(ids=[
                 interface])
             interface = interface_obj.get('interfaces')[0]
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.WARNING,
                                  'Erro ao buscar interface id %s.' % interface)
@@ -293,10 +292,10 @@ def server_edit_interface(request, interface=None):
             client.create_api_interface_request().update([interface_dict])
             messages.add_message(request, messages.SUCCESS,
                                  'Interface atualizada com sucesso.')
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
 
@@ -317,7 +316,7 @@ def basic_edit_interface(request, interface=None):
             interface_obj = client.create_api_interface_request().get(ids=[
                 interface])
             interface = interface_obj.get('interfaces')[0]
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.WARNING,
                                  'Erro ao buscar interface id %s.' % interface)
@@ -330,10 +329,10 @@ def basic_edit_interface(request, interface=None):
             client.create_api_interface_request().update([interface_dict])
             messages.add_message(request, messages.SUCCESS,
                                  'Interface atualizada com sucesso.')
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
 
@@ -364,7 +363,7 @@ def edit_interface_get(request, interface=None):
         equipment = interfaces.get('equipment')
         equipment_name = equipment.get('name')
         lists["equip_name"] = equipment_name
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
                              'Erro ao buscar interface %s.' % interface)
@@ -381,7 +380,7 @@ def edit_interface_get(request, interface=None):
     try:
         types = client.create_api_interface_request().get_interface_type(search=data)
         type_list = types.get('interfaces_type')
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -395,7 +394,7 @@ def edit_interface_get(request, interface=None):
         lists['interface_map'] = facade.get_ordered_list(
             first_item, last_item, interface_map)
         lists['total_itens'] = last_item - first_item
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
                              'Não foi possível montar o map da interface.')
@@ -428,7 +427,7 @@ def edit_interface_post(request, interface=None):
         equipment = interfaces.get('equipment')
         equipment_name = equipment.get('name')
         lists["equip_name"] = equipment_name
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
                              'Erro ao buscar interface %s.' % interface)
@@ -445,7 +444,7 @@ def edit_interface_post(request, interface=None):
     try:
         types = client.create_api_interface_request().get_interface_type(search=data)
         type_list = types.get('interfaces_type')
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -472,7 +471,7 @@ def edit_interface_post(request, interface=None):
             int_envs = client.create_api_interface_request(
             ).get_interface_environments(search=data)
             int_envs = int_envs.get('interface_environments')
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
             messages.add_message(request, messages.WARNING, 'Erro ao buscar os ambientes associados a interface. '
                                                             'Error: %s' % e)
@@ -493,10 +492,10 @@ def edit_interface_post(request, interface=None):
             client.create_api_interface_request().update([interface_dict])
             messages.add_message(request, messages.SUCCESS,
                                  'Interface atualizada com sucesso.')
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
 
@@ -505,7 +504,7 @@ def edit_interface_post(request, interface=None):
                 for env in int_envs:
                     client.create_api_interface_request(
                     ).disassociate_interface_environments([env.get('id')])
-            except NetworkAPIClientError, e:
+            except NetworkAPIClientError as e:
                 logger.error(e)
                 messages.add_message(
                     request, messages.ERROR, 'Erro ao remover os ambientes associados anteriormente.')
@@ -532,7 +531,7 @@ def edit_interface_post(request, interface=None):
                                                range_vlans=v)
                             client.create_api_interface_request(
                             ).associate_interface_environments([int_env_map])
-            except NetworkAPIClientError, e:
+            except NetworkAPIClientError as e:
                 logger.error(e)
                 messages.add_message(
                     request, messages.ERROR, 'Erro ao atualizar os ambientes.')
@@ -543,7 +542,7 @@ def edit_interface_post(request, interface=None):
         lists['interface_map'] = facade.get_ordered_list(
             first_item, last_item, interface_map)
         lists['total_itens'] = last_item - first_item
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
                              'Não foi possível montar o map da interface.')
@@ -593,10 +592,10 @@ def connect_interfaces(request, id_interface=None, front_or_back=None, all_inter
             search_equipment = client.create_api_equipment().search(search=data)
             equipment = search_equipment.get('equipments')
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
 
@@ -617,10 +616,10 @@ def connect_interfaces(request, id_interface=None, front_or_back=None, all_inter
                     search=data)
 
                 interface_list = search_interface.get('interfaces')
-            except NetworkAPIClientError, e:
+            except NetworkAPIClientError as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
-            except Exception, e:
+            except Exception as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
 
@@ -684,10 +683,10 @@ def connect_interfaces(request, id_interface=None, front_or_back=None, all_inter
 
                 interface_list = search_interface.get('interfaces')
 
-            except NetworkAPIClientError, e:
+            except NetworkAPIClientError as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
-            except Exception, e:
+            except Exception as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
 
@@ -717,11 +716,11 @@ def connect_interfaces(request, id_interface=None, front_or_back=None, all_inter
                     interface_a, interface_b])
                 messages.add_message(
                     request, messages.SUCCESS, equip_interface_messages.get("success_connect"))
-            except NetworkAPIClientError, e:
+            except NetworkAPIClientError as e:
                 logger.error(e)
                 messages.add_message(
                     request, messages.ERROR, 'Erro linkando as interfaces: %s' % e)
-            except Exception, e:
+            except Exception as e:
                 logger.error(e)
                 messages.add_message(
                     request, messages.ERROR, 'Erro linkando as interfaces: %s' % e)
@@ -750,10 +749,10 @@ def disconnect_interfaces(request, interface_a=None, interface_b=None):
         client.create_api_interface_request().disconnecting_interfaces([
             interface_a, interface_b])
         messages.add_message(request, messages.SUCCESS, 'Conexão removida.')
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -884,7 +883,7 @@ def edit_channel_(request, channel_id=None):
             sw_ids, fields=fields_get).get('interfaces')
         server_interfaces = client.create_api_interface_request().get(server_ids,
                                                                       fields=fields_get)
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
                              'Erro ao buscar o channel de Id %s.' % channel_id)
@@ -903,7 +902,7 @@ def edit_channel_(request, channel_id=None):
     try:
         types = client.create_api_interface_request().get_interface_type(search=data)
         type_list = types.get('interfaces_type')
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -925,24 +924,9 @@ def edit_channel_(request, channel_id=None):
         else:
             int_type = "Trunk"
 
-            data = dict()
-            data["start_record"] = 0
-            data["end_record"] = 30000
-            data["asorting_cols"] = []
-            data["searchable_columns"] = []
-            data["custom_search"] = ""
-            data["extends_search"] = []
-
-            envs = client.create_api_environment().search(
-                fields=["name", "id"], search=data)
-
-            env_id = None
             for e, v in zip(request.POST.getlist('environment'), request.POST.getlist('rangevlan')):
-                for obj in envs.get('environments'):
-                    if obj.get('name') in e:
-                        env_id = obj.get('id')
-
-                group = dict(env=env_id, vlans=v)
+                env_id = e.split("-")[0]
+                group = dict(env=int(env_id), vlans=v)
                 envs_vlans.append(group)
 
         channel_obj = dict(
@@ -960,7 +944,7 @@ def edit_channel_(request, channel_id=None):
             client.create_api_interface_request().update_channel([channel_obj])
             messages.add_message(request, messages.SUCCESS,
                                  "O channel foi editado com sucesso!")
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR,
                                  'Erro ao atualizar o channel. Error: %s' % e)
@@ -980,7 +964,7 @@ def edit_channel_(request, channel_id=None):
                 sw_ids, fields=fields_get).get('interfaces')
             server_interfaces = client.create_api_interface_request().get(server_ids,
                                                                           fields=fields_get)
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(
                 request, messages.WARNING, 'Erro ao buscar o channel de Id %s.' % channel_id)
@@ -997,7 +981,7 @@ def edit_channel_(request, channel_id=None):
                                                                                         fields=['environment__basic',
                                                                                                 'range_vlans'])
         environments = environments.get('interface_environments')
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -1008,7 +992,7 @@ def edit_channel_(request, channel_id=None):
     try:
         lists['server_map'] = facade.get_environments(
             client, server_interfaces.get('interfaces'))
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -1025,7 +1009,7 @@ def edit_channel_(request, channel_id=None):
         lists['total_channel'] = len(channel_map) - 1
         lists['sw_int_map'] = sw_int_map
         lists['total_sw'] = len(sw_int_map) - 1
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
                              'Não foi possível montar o map do channel.')
@@ -1047,16 +1031,16 @@ def delete_channel(request, channel_id=None):
         client.create_api_interface_request().remove_channel([channel_id])
         messages.add_message(request, messages.SUCCESS, equip_interface_messages.get(
             "success_remove_channel"))
-    except ValueError, e:
+    except ValueError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         message = str(
             error_messages.get("can_not_remove_error")
         ) + " " + str(e)
         messages.add_message(request, messages.ERROR, message)
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -1098,7 +1082,7 @@ def dissociate_channel_interface(request, channel_id, interface_id):
         interface_obj = interfaces[0]
         for i in interfaces:
             sw_ids.append(int(i.get('id')))
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
                              'Erro ao buscar o channel de Id %s.' % channel_id)
@@ -1117,7 +1101,7 @@ def dissociate_channel_interface(request, channel_id, interface_id):
                                                                                         fields=['environment__basic',
                                                                                                 'range_vlans'])
         environments = environments.get('interface_environments')
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -1147,7 +1131,7 @@ def dissociate_channel_interface(request, channel_id, interface_id):
         client.create_api_interface_request().update_channel([channel_obj])
         messages.add_message(request, messages.SUCCESS,
                              "Interface foi removida do channel com sucesso.")
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, "Erro ao retirar a interface do channel. Err: " + " " + str(e))
@@ -1190,7 +1174,7 @@ def associate_channel_interface(request, channel_id):
         interface_obj = interfaces[0]
         for i in interfaces:
             sw_ids.append(int(i.get('id')))
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
                              'Erro ao buscar o channel de Id %s.' % channel_id)
@@ -1210,7 +1194,7 @@ def associate_channel_interface(request, channel_id):
                                                                                         fields=['environment__basic',
                                                                                                 'range_vlans'])
         environments = environments.get('interface_environments')
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(
             request, messages.ERROR, 'Erro ao buscar os tipos de interface. Error: %s' % e)
@@ -1240,7 +1224,7 @@ def associate_channel_interface(request, channel_id):
         client.create_api_interface_request().update_channel([channel_obj])
         messages.add_message(request, messages.SUCCESS,
                              "Interface foi adicionada ao channel com sucesso.")
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(str(e))
         messages.add_message(request, messages.ERROR, "Erro ao adicionar interface ao channel. Err: "
                              + " " + str(e))

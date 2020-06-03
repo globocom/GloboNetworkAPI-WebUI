@@ -68,7 +68,7 @@ def ajax_autocomplete_environment_vlan(request):
         }
 
         envs = client.create_api_environment().search(
-            fields=["name", "min_num_vlan_1", "max_num_vlan_1"],
+            fields=["id", "name", "min_num_vlan_1", "max_num_vlan_1"],
             search=data)
         env_list = cache_environment_list(envs.get('environments'))
 
@@ -135,7 +135,11 @@ def ajax_autocomplete_environment_dc(request):
             "extends_search": []
         }
         envs = client.create_api_environment_dc().search(search=data)
-        env_list = cache_environment_dc(envs.get('environments_dc'))
+        # Desativando cache para ambiente de roteamento
+        # env_list = cache_environment_dc(envs.get('environments_dc'))
+
+        env_list = dict(list=envs.get('environments_dc'))
+
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -166,7 +170,11 @@ def ajax_autocomplete_environment_l3(request):
             "extends_search": []
         }
         envs = client.create_api_environment_l3().search(search=data)
-        env_list = cache_environment_l3(envs.get('l3_environments'))
+        #Desativando cache para ambiente físico
+        #env_list = cache_environment_l3(envs.get('l3_environments'))
+
+        env_list = dict(list=envs.get('l3_environments'))
+
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -197,7 +205,11 @@ def ajax_autocomplete_environment_logic(request):
             "extends_search": []
         }
         envs = client.create_api_environment_logic().search(search=data)
-        env_list = cache_environment_logic(envs.get('logic_environments'))
+        #Desativando cache para ambiente lógico
+        # env_list = cache_environment_logic(envs.get('logic_environments'))
+
+        env_list = dict(list=envs.get('logic_environments'))
+
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -247,10 +259,6 @@ def add_environment(request):
                 "grupo_l3": int(request.POST.get('fisic_env')),
                 "ambiente_logico": int(request.POST.get('logic_env')),
                 "divisao_dc": int(request.POST.get('router_env')),
-                # "min_num_vlan_1": int(range1[0]) if vlan_range1,
-                # "max_num_vlan_1": int(range1[1]) if vlan_range1,
-                # "min_num_vlan_2": int(range2[0]) if vlan_range2 else int(range1[0]),
-                # "max_num_vlan_2": int(range2[1]) if vlan_range2 else int(range1[1]),
                 "min_num_vlan_1": range1_begin,
                 "max_num_vlan_1": range1_end,
                 "min_num_vlan_2": range2_begin,
