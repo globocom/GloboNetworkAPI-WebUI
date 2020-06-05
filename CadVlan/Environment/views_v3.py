@@ -135,7 +135,11 @@ def ajax_autocomplete_environment_dc(request):
             "extends_search": []
         }
         envs = client.create_api_environment_dc().search(search=data)
-        env_list = cache_environment_dc(envs.get('environments_dc'))
+        # Desativando cache para ambiente de roteamento
+        # env_list = cache_environment_dc(envs.get('environments_dc'))
+
+        env_list = dict(list=envs.get('environments_dc'))
+
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -166,7 +170,11 @@ def ajax_autocomplete_environment_l3(request):
             "extends_search": []
         }
         envs = client.create_api_environment_l3().search(search=data)
-        env_list = cache_environment_l3(envs.get('l3_environments'))
+        #Desativando cache para ambiente físico
+        #env_list = cache_environment_l3(envs.get('l3_environments'))
+
+        env_list = dict(list=envs.get('l3_environments'))
+
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
@@ -197,7 +205,11 @@ def ajax_autocomplete_environment_logic(request):
             "extends_search": []
         }
         envs = client.create_api_environment_logic().search(search=data)
-        env_list = cache_environment_logic(envs.get('logic_environments'))
+        #Desativando cache para ambiente lógico
+        # env_list = cache_environment_logic(envs.get('logic_environments'))
+
+        env_list = dict(list=envs.get('logic_environments'))
+
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
