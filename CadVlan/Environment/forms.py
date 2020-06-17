@@ -473,6 +473,8 @@ class IpConfigForm(forms.Form):
 
     def clean(self):
 
+        if self._errors:
+            return self._errors
         if not self._errors:
             ip_version = self.cleaned_data.get('ip_version', '')
             prefix = int(self.cleaned_data.get('prefix', ''))
@@ -494,6 +496,7 @@ class IpConfigForm(forms.Form):
                         self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix')])
                 except Exception:
                     pass
+
 
                 self.cleaned_data['network_validate'] = v4oct1 + '.' + \
                     v4oct2 + '.' + v4oct3 + '.' + v4oct4 + '/' + v4oct5
