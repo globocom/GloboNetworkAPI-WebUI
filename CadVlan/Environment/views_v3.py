@@ -373,22 +373,34 @@ def allocate_cidr(request, id_environment):
                 client.create_api_environment_cidr().post(cidr)
 
             elif form.is_valid():
-                network = form.cleaned_data['network_validate']
-                network_type = form.cleaned_data['net_type']
-                prefix = form.cleaned_data['prefix']
+                if form._errors:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         environment_messages.get(
+                                             "invalid_parameters"))
+                else:
+                    network = form.cleaned_data['network_validate']
+                    network_type = form.cleaned_data['net_type']
+                    prefix = form.cleaned_data['prefix']
 
-                cidr = dict(ip_version=ip_version,
-                            network_type=int(network_type),
-                            subnet_mask=str(prefix),
-                            network=network,
-                            environment=int(id_environment))
+                    cidr = dict(ip_version=ip_version,
+                                network_type=int(network_type),
+                                subnet_mask=str(prefix),
+                                network=network,
+                                environment=int(id_environment))
 
-                client.create_api_environment_cidr().post([cidr])
+                    client.create_api_environment_cidr().post([cidr])
 
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 environment_messages.get(
-                                     "success_configuration_insert"))
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         environment_messages.get(
+                                             "success_configuration_insert"))
+            elif not form.is_valid():
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     environment_messages.get(
+                                         "invalid_parameters"))
+
 
             context["form"] = IpConfigForm(net_type_list)
 
