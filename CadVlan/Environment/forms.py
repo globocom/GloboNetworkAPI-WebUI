@@ -488,7 +488,6 @@ class IpConfigForm(forms.Form):
                 except Exception:
                     pass
 
-
                 self.cleaned_data['network_validate'] = v4oct1 + '.' + \
                     v4oct2 + '.' + v4oct3 + '.' + v4oct4 + '/' + v4oct5
 

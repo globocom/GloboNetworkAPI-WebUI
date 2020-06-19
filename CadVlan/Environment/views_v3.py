@@ -376,7 +376,6 @@ def allocate_cidr(request, id_environment):
                                      environment_messages.get(
                                          "success_configuration_insert"))
 
-
             elif form.is_valid():
                 network = form.cleaned_data['network_validate']
                 network_type = form.cleaned_data['net_type']
