@@ -273,15 +273,6 @@ class AmbienteForm(forms.Form):
         ),
         error_messages=error_messages
     )
-    # father_environment = forms.CharField(
-    #     label=u'Father Environment',
-    #     max_length=250,
-    #     required=False,
-    #     error_messages=error_messages,
-    #     widget=forms.TextInput(
-    #         attrs={'style': "width: 310px", 'autocomplete': "off"}
-    #     )
-    # )
 
     def clean_min_num_vlan_1(self):
         max_num_vlan_1 = self.cleaned_data.get('max_num_vlan_1')
