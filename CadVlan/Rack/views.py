@@ -180,16 +180,16 @@ def rack_config_delete (request, client, form, operation):
                         var = client.create_rack().alocar_configuracao(id_rack)
                         var = var.get('sucesso')
                         get_msg(request, var, nome, operation)
-                except RackAllreadyConfigError, e:
+                except RackAllreadyConfigError as e:
                     logger.error(e)
                     error_list_config.append(id_rack)
-                except RacksError, e:
+                except RacksError as e:
                     logger.error(e)
                     if not all_ready_msg_rack_error:
                         messages.add_message(request, messages.ERROR, e)
                     all_ready_msg_rack_error = True
                     error_list.append(id_rack)
-                except NetworkAPIClientError, e:
+                except NetworkAPIClientError as e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
@@ -283,7 +283,7 @@ def rack_form(request):
                 form = RackForm()
                 return redirect('ajax.view.rack')
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(templates.RACK_FORM, {'form': form}, context_instance=RequestContext(request))
@@ -345,7 +345,7 @@ def ajax_rack_view(request, client_api):
         racks['alocar_form'] = AlocarForm()
 
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -436,7 +436,7 @@ def rack_edit(request, id_rack):
 
                 return redirect('ajax.view.rack')
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -583,7 +583,7 @@ def newrack(request, fabric_id):
 
                 return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return HttpResponseRedirect(reverse('rack.add', args=[fabric_id]))
@@ -661,7 +661,7 @@ def put_rack(request, rack_id, fabric_id):
 
                 return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return render_to_response(templates.RACK_NEWEDIT, lists, context_instance=RequestContext(request))
@@ -672,15 +672,32 @@ def put_rack(request, rack_id, fabric_id):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
-def remove_rack (request, fabric_id, rack_id):
+def remove_rack(request, fabric_id, rack_id):
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
     try:
         client.create_apirack().delete_rack(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("success_remove"))
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         messages.add_message(request, messages.ERROR, "Não foi possivel remover o rack. Erro: %s" % e)
+    finally:
+        return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def remove_rack_env(request, fabric_id, rack_id):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    try:
+        client.create_apirack().remove_rack_environments(rack_id)
+        messages.add_message(request, messages.SUCCESS, "Os ambientes e vlans do rack foram removidos.")
+    except NetworkAPIClientError as e:
+        messages.add_message(request, messages.ERROR, "Não foi possivel remover os ambientes e vlans do rack. "
+                                                      "Erro: %s" % e)
     finally:
         return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
@@ -695,7 +712,7 @@ def vlans_rack (request, fabric_id, rack_id):
         client = auth.get_clientFactory()
         client.create_apirack().rackenvironments(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_alocar_config"))
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         messages.add_message(request, messages.ERROR, "Os ambientes do rack não foram alocados. Erro: %s" % e)
 
     return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
@@ -711,7 +728,7 @@ def files_rack (request, fabric_id, rack_id):
     try:
         client.create_apirack().rackfiles(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_create_config"))
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         messages.add_message(request, messages.ERROR, "Os arquivos de configuração não foram gerados. Erro: %s" % e)
 
     return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
@@ -728,7 +745,7 @@ def deploy_rack_new (request, fabric_id, rack_id):
     try:
         client.create_apirack().rack_deploy(rack_id)
         messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_aplicar_config"))
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         messages.add_message(request, messages.ERROR, "Erro ao deployar. Erro: %s" % e)
 
     return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
@@ -750,7 +767,7 @@ def datacenter(request):
         lists = dict()
         lists["dc"] = dc_list
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(templates.LISTDC, lists, context_instance=RequestContext(request))
@@ -861,7 +878,7 @@ def new_fabric(request, dc_id):
 
             return HttpResponseRedirect(reverse('fabric.ambiente', args=[dc_id]))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, "Erro cadastrando o Fabric. Erro: %s " % e)
     return render_to_response(templates.DCROOM_FORM, lists, context_instance=RequestContext(request))
@@ -1473,7 +1490,7 @@ def fabric_ambiente(request, fabric_id):
 
             return HttpResponseRedirect(reverse('fabric.bgp', args=[fabric_id]))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, "Houve algum problema ao alocar os ambientes do Fabric. "
                                                       "Erro: %s" % e)
@@ -1545,7 +1562,7 @@ def fabric_bgp(request, fabric_id):
 
             return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, "Erro salvando a configuração do Fabric. Erro: %s" % e)
         return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
