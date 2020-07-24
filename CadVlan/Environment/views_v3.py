@@ -369,6 +369,9 @@ def allocate_cidr(request, id_environment):
 
                 if int(v4):
                     prefix_v4 = request.POST.get('prefixv4')
+                    if not prefix_v4:
+                        raise Exception("Informe a máscara da subnet da redev4.")
+
                     cidrv4 = dict(ip_version='v4',
                                   network_type=network_type,
                                   subnet_mask=prefix_v4,
@@ -376,11 +379,16 @@ def allocate_cidr(request, id_environment):
                     cidr.append(cidrv4)
                 if int(v6):
                     prefix_v6 = request.POST.get('prefixv6')
+                    if not prefix_v6:
+                        raise Exception("Informe a máscara da subnet da redev6.")
                     cidrv6 = dict(ip_version='v6',
                                   network_type=network_type,
                                   subnet_mask=str(prefix_v6),
                                   environment=int(id_environment))
                     cidr.append(cidrv6)
+
+                if not cidr:
+                    raise Exception("Escolha uma das opções abaixo.")
 
                 client.create_api_environment_cidr().post(cidr)
 

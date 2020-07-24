@@ -744,7 +744,6 @@ def datacenter(request):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-
         dc = client.create_apirack().list()
         dc_list = dc.get("dc")
 
@@ -779,7 +778,7 @@ def new_datacenter(request):
 
             return HttpResponseRedirect(reverse('fabric.cadastro', args=[id]))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, "Datacenter não foi cadastrado. Erro: %s" % e)
     return render_to_response(templates.DC_FORM, {'form': {}}, context_instance=RequestContext(request))
@@ -825,9 +824,10 @@ def fabric(request, fabric_id):
 
             lists["fabric"] = fabric_dict
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, "Erro cadastrando o Fabric. Erro: %s " % e)
+
     return render_to_response(templates.FABRIC, lists, context_instance=RequestContext(request))
 
 
@@ -908,7 +908,7 @@ def fabric_ambiente(request, fabric_id):
             env_interno_fe = dict()
             env_interno_be = dict()
 
-            net_type_list  = client.create_tipo_rede().listar().get("net_type")
+            net_type_list = client.create_tipo_rede().listar().get("net_type")
             for type in net_type_list:
                 if type.get("name")=="Rede invalida equipamentos":
                     net_type_id = type.get("id")
@@ -1349,6 +1349,7 @@ def fabric_ambiente(request, fabric_id):
                     env_lflf_bo["vlan_min"] = int(request.POST.get('vlanminlflfbo')) if request.POST.get('vlanminlflfbo') else None
                     env_lflf_bo["vlan_max"] = int(request.POST.get('vlanminlflfbo'))+1 if request.POST.get('vlanminlflfbo') else None
                     env_lflf_bo["config"] = configs_lf
+                    envs.append(env_lflf_bo)
                 elif dc.get("nome")=="BO_DSR":
                     env_prod_dsr["dc_id"] = dc.get("id")
                     env_prod_dsr["logic_id"] = logic_id_host
