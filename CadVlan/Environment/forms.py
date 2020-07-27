@@ -450,7 +450,7 @@ class IpConfigForm(forms.Form):
     )
 
     prefix = forms.IntegerField(
-        label=u'Prefixo:',
+        label=u'Mascara da Subnet:',
         error_messages=error_messages,
         widget=forms.TextInput(
             attrs={
