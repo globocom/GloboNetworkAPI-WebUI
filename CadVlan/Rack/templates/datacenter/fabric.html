@@ -85,9 +85,13 @@
                                 <td class="col-xs-12 col-md-1 text-xs-left"></td>
                                 <td class="col-xs-12 col-md-1 text-xs-left"></td>
                                 <td class="col-xs-12 col-md-1 text-xs-left">
-                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                       href="{% url rack.add fabric_id %}" title="Adicionar Rack">
-                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">add</i>
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       href="{% url rack.add fabric_id %}"
+                                       title="Adicionar Rack">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">
+                                            add
+                                        </i>
                                     </a>
                                 </td>
                             </tr>
@@ -96,35 +100,66 @@
                             {% for rack in racks %}
                             <tr class="col-xs-12 col-lg-12 col-lg-offset-1" id="{{ rack.id }}">
                                 <td class="col-xs-12 col-md-4 text-xs-left">RACK {{ rack.nome }}</td>
-                                <td class="col-xs-12 col-md-2">{{ rack.numero }}</td>
+                                <td class="col-xs-12 col-md-1">{{ rack.numero }}</td>
                                 <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
-                                    <a id="edit_rack" class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                            href="{% url rack.new.edit rack.id fabric_id %}" title="Editar as informações do Rack">
-                                       <i class="material-icons" style="color:#FFD17C;font-size:15px">edit</i>
+                                    <a id="edit_rack"
+                                       class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       href="{% url rack.new.edit rack.id fabric_id %}"
+                                       title="Editar as informações do Rack">
+                                       <i class="material-icons" style="color:#FFD17C;font-size:15px">
+                                           edit
+                                       </i>
                                     </a>
                                 </td>
                                 <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
-                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                            href="{% url rack.vlans rack.dcroom rack.id %}" title="Alocar os ambientes e vlans do Rack">
-                                        <p style="font-size:8px;color:#FFD17C">NET</p>
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       href="{% url rack.vlans rack.dcroom rack.id %}"
+                                       title="Alocar os ambientes e vlans do Rack">
+                                        <p style="font-size:8px;color:#FFD17C">
+                                            NET
+                                        </p>
                                     </a>
                                 </td>
                                 <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
-                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                            href="{% url rack.files rack.dcroom rack.id %}" title="Criar os arquivos de configuração dos Leafs e OOBs">
-                                        <i class="material-icons" style="color:#FFD17C;font-size:15px">insert_drive_file</i>
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       href="{% url rack.files rack.dcroom rack.id %}"
+                                       title="Criar os arquivos de configuração dos Leafs e OOBs">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px">
+                                            insert_drive_file
+                                        </i>
                                     </a>
                                 </td>
                                 <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
-                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                            href="{% url rack.deploy.new rack.dcroom rack.id %}" title="Integração com o Foreman">
-                                        <i class="material-icons" style="color:#FFD17C;font-size:15px">launch</i>
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       href="{% url rack.deploy.new rack.dcroom rack.id %}"
+                                       title="Integração com o Foreman">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px">
+                                            launch
+                                        </i>
                                     </a>
                                 </td>
                                 <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
-                                    <a class="btn btn-social-bottom btn-responsive" style="vertical-align: bottom;"
-                                            href="{% url rack.delete.new rack.dcroom rack.id %}" title="Remover o Rack">
-                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">delete</i>
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       href="{% url rack.env.delete rack.dcroom rack.id %}"
+                                       title="Remover os ambientes e vlans do Rack">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">
+                                            clear
+                                        </i>
+                                    </a>
+                                </td>
+                                <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       style="vertical-align: bottom;"
+                                       href="{% url rack.delete.new rack.dcroom rack.id %}"
+                                       title="Remover o Rack">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%">
+                                            delete
+                                        </i>
                                     </a>
                                 </td>
                                 </tr>

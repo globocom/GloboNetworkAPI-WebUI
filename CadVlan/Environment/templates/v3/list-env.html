@@ -70,57 +70,59 @@
                     </thead>
                     <tbody>
                         {% for env in envs %}
-                        <tr>
-                            <td onclick="childrenInfo()"
-                                data-children="{{ env.children }}"
-                                id="clickable">
-                                {{ env.id }}
-                            </td>
-                            <td onclick="childrenInfo()"
-                                data-children="{{ env.children }}"
-                                id="clickable">
-                                {{ env.name }}
-                            </td>
-                            <td onclick="childrenInfo()"
-                                data-children="{{ env.children }}"
-                                id="clickable">
-                                {% if env.vrf %}
-                                    {{ env.vrf }}
-                                {% else %}
-                                <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
-                                    -
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td onclick="return confirm('Are you sure you want to delete this item?');">
-                                {% if env.configs %}
-                                    {% for net in env.configs %}
-                                    <p style="margin:0px;">{{ net.network}} ({{ net.subnet_mask }})</p>
-                                    {% endfor %}
-                                {% else %}
-                                <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
-                                    -
-                                </span>
-                                {% endif %}
+                            {% if not env.father_environment %}
+                                <tr id="{{ env.id }}">
+                                    <td onclick="childrenInfo({{ env.id }})"
+                                        data-children="{{ env.children }}"
+                                        id="clickable{{ env.id }}">
+                                        {{ env.id }}
+                                    </td>
+                                    <td onclick="childrenInfo({{ env.id }})"
+                                        data-children="{{ env.children }}"
+                                        id="clickable{{ env.id }}">
+                                        {{ env.name }}
+                                    </td>
+                                    <td onclick="childrenInfo({{ env.id }})"
+                                        data-children="{{ env.children }}"
+                                        id="clickable{{ env.id }}">
+                                        {% if env.vrf %}
+                                            {{ env.vrf }}
+                                        {% else %}
+                                        <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                            -
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td onclick="return confirm('Are you sure you want to delete this item?');">
+                                        {% if env.configs %}
+                                            {% for net in env.configs %}
+                                            <p style="margin:0px;">{{ net.network}} ({{ net.subnet_mask }})</p>
+                                            {% endfor %}
+                                        {% else %}
+                                        <span style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                            -
+                                        </span>
+                                        {% endif %}
 
-                            </td>
-                            <td>
-                                <div style="border: 1px solid #0D84A5;border-radius:3px;width: 20px;height: 20px;">
-                                    <a href='{% url environment.edit env.id %}'
-                                       class="material-icons" style="font-size:20px;vertical-align:middle;color:#0D84A5">
-                                        edit
-                                    </a>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="border: 1px solid #0D84A5;border-radius:3px;width: 20px;height: 20px;">
-                                    <a href='{% url environment.remove env.id %}'
-                                       class="material-icons" style="font-size:20px;vertical-align:middle;color:#0D84A5">
-                                        delete
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
+                                    </td>
+                                    <td>
+                                        <div style="border: 1px solid #0D84A5;border-radius:3px;width: 20px;height: 20px;">
+                                            <a href='{% url environment.edit env.id %}'
+                                               class="material-icons" style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                                edit
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="border: 1px solid #0D84A5;border-radius:3px;width: 20px;height: 20px;">
+                                            <a href='{% url environment.remove env.id %}'
+                                               class="material-icons" style="font-size:20px;vertical-align:middle;color:#0D84A5">
+                                                delete
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
