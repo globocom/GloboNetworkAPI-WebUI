@@ -23,6 +23,7 @@
                                 <td class="col-xs-12 col-md-2 text-xs-left accordion-toggle" data-toggle="collapse" data-target="#{{ dc.id }}">{{ dc.address }}</td>
                                 <td class="col-xs-12 col-md-1">
                                     <a class="material-icons"
+                                       onclick="javascript:if(!confirm('Deseja remover este Datacenter?')){return false;}"
                                        style="color:#0D84A5;font-size:15px;"
                                        href="{% url datacenter.delete dc.id %}"
                                        title="Deletar Datacenter">
@@ -46,6 +47,7 @@
                                 </td>
                                 <td class="col-xs-12 col-md-1">
                                     <a class="material-icons"
+                                       onclick="javascript:if(!confirm('Deseja remover este Fabric?')){return false;}"
                                        style="color:#0D84A5;font-size:15px;"
                                        href="{% url fabric.delete fabric.id %}"
                                        title="Deletar este fabric">
