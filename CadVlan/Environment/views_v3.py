@@ -391,6 +391,10 @@ def allocate_cidr(request, id_environment):
                     raise Exception("Escolha uma das opções abaixo.")
 
                 client.create_api_environment_cidr().post(cidr)
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     environment_messages.get(
+                                         "success_configuration_insert"))
 
             elif form.is_valid():
                 network = form.cleaned_data['network_validate']
@@ -404,11 +408,16 @@ def allocate_cidr(request, id_environment):
                             environment=int(id_environment))
 
                 client.create_api_environment_cidr().post([cidr])
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     environment_messages.get(
+                                         "success_configuration_insert"))
 
-            messages.add_message(request,
-                                 messages.SUCCESS,
+            else:
+                messages.add_message(request,
+                                 messages.ERROR,
                                  environment_messages.get(
-                                     "success_configuration_insert"))
+                                     "invalid_parameters"))
 
             context["form"] = IpConfigForm(net_type_list)
 
