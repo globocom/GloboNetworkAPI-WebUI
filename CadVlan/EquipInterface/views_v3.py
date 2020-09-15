@@ -1023,13 +1023,13 @@ def edit_channel_(request, channel_id=None):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
-def delete_channel(request, channel_id=None):
+def delete_channel(request, interface_id=None):
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
 
     try:
         #client.create_api_interface_request().remove_channel([channel_id])
-        client.create_interface().delete_channel(channel_id)
+        client.create_interface().delete_channel(interface_id)
         messages.add_message(request, messages.SUCCESS, equip_interface_messages.get(
             "success_remove_channel"))
     except ValueError as e:
