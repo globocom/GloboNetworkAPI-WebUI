@@ -834,11 +834,13 @@ urlpatterns += patterns(
     url('^rack/save/deploy[/]?$', 'rack_deploy', name='rack.deploy',),
     url('^rack/deploy/(?P<fabric_id>\d+)/(?P<rack_id>\d+)[/]?$', 'deploy_rack_new', name='rack.deploy.new',),
     url('^datacenter/cadastro[/]?$', 'new_datacenter', name='dc.cadastro',),
+    url('^datacenter/delete/(?P<dc_id>\d+)[/]?$', 'remove_datacenter', name='datacenter.delete', ),
     url('^datacenter[/]?$', 'datacenter', name='listdc',),
     url('^fabric/cadastro/(?P<dc_id>\d+)[/]?$', 'new_fabric', name='fabric.cadastro',),
     url('^fabric/ambientes/(?P<fabric_id>\d+)[/]?$', 'fabric_ambiente', name='fabric.ambiente',),
     url('^fabric/bgp/(?P<fabric_id>\d+)[/]?$', 'fabric_bgp', name='fabric.bgp',),
     url('^fabric/(?P<fabric_id>\d+)[/]?$', 'fabric', name='fabric',),
+    url('^fabric/delete/(?P<fabric_id>\d+)[/]?$', 'remove_fabric', name='fabric.delete', ),
 )
 
 

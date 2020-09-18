@@ -148,6 +148,7 @@ environment_messages = {
     'invalid_prefix': u'O prefixo informado deve ser maior que o bloco da rede.',
     'success_configuration_insert': u'Prefixo de ambiente incluído com sucesso.',
     'success_configuration_remove': u'Prefixo de ambiente excluído com sucesso.',
+    'invalid_parameters': u'Parametros inválidos.',
 }
 
 equip_messages = {

@@ -757,6 +757,7 @@ def deploy_rack_new (request, fabric_id, rack_id):
 def datacenter(request):
 
     try:
+        lists = dict()
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -764,7 +765,6 @@ def datacenter(request):
         dc = client.create_apirack().list()
         dc_list = dc.get("dc")
 
-        lists = dict()
         lists["dc"] = dc_list
 
     except NetworkAPIClientError as e:
@@ -799,6 +799,22 @@ def new_datacenter(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, "Datacenter não foi cadastrado. Erro: %s" % e)
     return render_to_response(templates.DC_FORM, {'form': {}}, context_instance=RequestContext(request))
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def remove_datacenter(request, dc_id):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    try:
+        client.create_apirack().delete_datacenter(dc_id)
+        messages.add_message(request, messages.SUCCESS, "O datacenter foi removido com sucesso.")
+    except NetworkAPIClientError as e:
+        messages.add_message(request, messages.ERROR, "Não foi possivel remover o datacenter. Erro: %s" % e)
+    finally:
+        return HttpResponseRedirect(reverse("listdc"))
 
 
 @log
@@ -1568,3 +1584,18 @@ def fabric_bgp(request, fabric_id):
         return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
 
     return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def remove_fabric(request, fabric_id):
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    try:
+        client.create_apirack().delete_fabric(fabric_id)
+        messages.add_message(request, messages.SUCCESS, "A sala do datacenter foi removida com sucesso.")
+    except NetworkAPIClientError as e:
+        messages.add_message(request, messages.ERROR, "Não foi possivel remover a sala de datacenter. Erro: %s" % e)
+    finally:
+        return HttpResponseRedirect(reverse("listdc"))
