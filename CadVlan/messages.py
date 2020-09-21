@@ -68,6 +68,7 @@ rack_messages = {
     'can_not_aplicar_config': u'A configuracao não pode ser aplicada nos equipamentos do rack.',
     'sucess_alocar_config': u'Os ambientes, vlans e redes do rack %s foram alocadas com sucesso.',
     'can_not_alocar_config': u'Os ambientes, vlans e redes do rack %s não puderam ser alocadas.',
+    'sucess-foreman': u'O ambiente foi registrado no Foreman.'
 }
 
 equip_access_messages = {
