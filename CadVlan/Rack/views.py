@@ -753,6 +753,23 @@ def deploy_rack_new (request, fabric_id, rack_id):
 
 @log
 @login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+def foreman_rack_new (request, fabric_id, rack_id):
+
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+    try:
+        client.create_apirack().rack_foreman(rack_id)
+        messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_aplicar_config"))
+    except NetworkAPIClientError as e:
+        messages.add_message(request, messages.ERROR, "Erro ao registrar no Foremanr. Erro: %s" % e)
+
+    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+
+
+@log
+@login_required
 @csrf_protect
 def datacenter(request):
 

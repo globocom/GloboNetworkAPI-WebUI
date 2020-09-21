@@ -1,4 +1,18 @@
 {% extends "menu.html" %}
+{% block header %}
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+    var obj_btn_sav = $("#btn_deploy");
+
+    obj_btn_sav.click(function () {
+        if (confirm('Confirme o deploy nos Switchs de Produção.')) {
+        }
+    });
+});
+</script>
+{% endblock %}
 {% block content %}
 <section class="mbr-section mbr-after-navbar" id="form1-5" style="background-color: rgb(255, 255, 255); padding-top: 120px; padding-bottom: 120px;">
     <div class="mbr-section mbr-section__container mbr-section__container--middle">
@@ -137,6 +151,17 @@
                                        style="vertical-align: bottom;"
                                        href="{% url rack.deploy.new rack.dcroom rack.id %}"
                                        title="Integração com o Foreman">
+                                        <i class="material-icons" style="color:#FFD17C;font-size:15px">
+                                            engineering
+                                        </i>
+                                    </a>
+                                </td>
+                                <td class="col-xs-12 col-md-1" style="padding: 1px 1px">
+                                    <a class="btn btn-social-bottom btn-responsive"
+                                       id="btn_deploy"
+                                       style="vertical-align: bottom;"
+                                       href="{% url rack.deploy.new rack.dcroom rack.id %}"
+                                       title="Deploy de configuração nos Switchs">
                                         <i class="material-icons" style="color:#FFD17C;font-size:15px">
                                             launch
                                         </i>
