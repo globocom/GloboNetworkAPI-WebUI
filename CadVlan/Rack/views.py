@@ -754,7 +754,7 @@ def deploy_rack_new (request, fabric_id, rack_id):
 @log
 @login_required
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
-def foreman_rack_new (request, fabric_id, rack_id):
+def rack_foreman (request, fabric_id, rack_id):
 
 
     auth = AuthSession(request.session)
