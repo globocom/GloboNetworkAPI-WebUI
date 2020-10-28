@@ -841,6 +841,7 @@ urlpatterns += patterns(
     url('^fabric/bgp/(?P<fabric_id>\d+)[/]?$', 'fabric_bgp', name='fabric.bgp',),
     url('^fabric/(?P<fabric_id>\d+)[/]?$', 'fabric', name='fabric',),
     url('^fabric/delete/(?P<fabric_id>\d+)[/]?$', 'remove_fabric', name='fabric.delete', ),
+    url('^rack/foreman/(?P<fabric_id>\d+)/(?P<rack_id>\d+)[/]?$', 'rack_foreman', name='rack.foreman.new', ),
 )
 
 
