@@ -7,7 +7,7 @@ physical networking.
 
 It lays on top of
 [GloboNetworkAPI](https://github.com/globocom/GloboNetworkAPI/), so you need
-it installed and acessible in order to use the WebUI.
+it installed and accessible in order to use the WebUI.
 They were created to be vendor agnostic and to support different orquestrators
 and environments without loosing the centralized view of all network resources
 allocated.
