@@ -233,7 +233,7 @@
                                         {% if interface.channel %}
                                             <a class="btn btn-social-bottom btn-responsive"
                                                style="vertical-align: bottom;"
-                                               href="{% url channel.delete interface.channel.id %}"
+                                               href="{% url channel.delete interface.id %}"
                                                data-toggle="tooltip"
                                                title="Remover Channel">
                                                 <i class="material-icons"
@@ -242,7 +242,7 @@
                                         {% else %}
                                             <a class="btn btn-social-bottom btn-responsive"
                                                style="vertical-align: bottom;"
-                                               href="{% url channel.delete interface.front_interface.channel.id %}"
+                                               href="{% url channel.delete interface.id %}"
                                                data-toggle="tooltip"
                                                title="Remover Channel">
                                                 <i class="material-icons"

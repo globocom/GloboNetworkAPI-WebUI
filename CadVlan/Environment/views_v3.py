@@ -68,7 +68,7 @@ def ajax_autocomplete_environment_vlan(request):
         }
 
         envs = client.create_api_environment().search(
-            fields=["id", "name", "min_num_vlan_1", "max_num_vlan_1"],
+            fields=["id", "name", "min_num_vlan_1", "max_num_vlan_1", "min_num_vlan_2", "max_num_vlan_2"],
             search=data)
         env_list = cache_environment_list(envs.get('environments'))
 

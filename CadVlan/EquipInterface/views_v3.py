@@ -1028,7 +1028,8 @@ def delete_channel(request, channel_id=None):
     client = auth.get_clientFactory()
 
     try:
-        client.create_api_interface_request().remove_channel([channel_id])
+        #client.create_api_interface_request().remove_channel([channel_id])
+        client.create_interface().delete_channel(channel_id)
         messages.add_message(request, messages.SUCCESS, equip_interface_messages.get(
             "success_remove_channel"))
     except ValueError as e:
