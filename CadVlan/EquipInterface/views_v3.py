@@ -1089,8 +1089,8 @@ def dissociate_channel_interface(request, channel_id, interface_id):
             'HTTP_REFERER') else reverse('interface.list')
         return HttpResponseRedirect(url)
 
+    # Channel must be deleted if has only one interface
     if len(interfaces) <= 1:
-        logger.error("debug iuri - remove_channel {}".format(channel_id))
         client.create_api_interface_request().remove_channel([channel_id])
         return HttpResponseRedirect(reverse("interface.edit", args=[interface_id]))
 
