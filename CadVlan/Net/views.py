@@ -685,7 +685,8 @@ def insert_ip4(request, id_net='0', id_vlan='0', sf_number='0',
                     lists['oct2'] = oct2
                     lists['oct3'] = oct3
                     lists['oct4'] = oct4
-                    return render_to_response(IP4, lists, context_instance=RequestContext(request))
+                    return render_to_response(IP4, lists,
+                                              context_instance=RequestContext(request))
 
                 else:
                     try:
@@ -696,11 +697,12 @@ def insert_ip4(request, id_net='0', id_vlan='0', sf_number='0',
                             ip, equip, descricao, id_net)
                         messages.add_message(
                             request, messages.SUCCESS, network_ip_messages.get("ip_sucess"))
-                        return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_net, id_vlan, sf_number,
-                                                                                            sf_name, sf_environment,
-                                                                                            sf_nettype, sf_subnet,
-                                                                                            sf_ipversion, sf_network,
-                                                                                            sf_iexact, sf_acl]))
+                        return HttpResponseRedirect(reverse('network.ip4.list.by.id',
+                                                            args=[id_net, id_vlan, sf_number,
+                                                                  sf_name, sf_environment,
+                                                                  sf_nettype, sf_subnet,
+                                                                  sf_ipversion, sf_network,
+                                                                  sf_iexact, sf_acl]))
 
                     except NetworkAPIClientError as e:
                         logger.error(e)
@@ -712,7 +714,8 @@ def insert_ip4(request, id_net='0', id_vlan='0', sf_number='0',
                         lists['oct3'] = oct3
                         lists['oct4'] = oct4
 
-                        return render_to_response(IP4, lists, context_instance=RequestContext(request))
+                        return render_to_response(IP4, lists,
+                                                  context_instance=RequestContext(request))
 
         ip = client.create_ip().get_available_ip4(id_net)
         ip = ip.get('ip')
