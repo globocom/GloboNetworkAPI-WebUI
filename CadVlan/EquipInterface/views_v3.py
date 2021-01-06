@@ -802,16 +802,16 @@ def add_channel_(request):
         envs = client.create_api_environment().search(
             fields=["name", "id"], search=data)
 
-        env_id = None
         envs_vlans = list()
+
         for e, v in zip(request.POST.getlist('environment'), request.POST.getlist('rangevlan')):
-            for obj in envs.get('environments'):
-                if obj.get('name') == e:
-                    env_id = obj.get('id')
-            if env_id:
+            try:
+                env_id = int(e.split(" ")[0])
                 group = dict(env=env_id, vlans=v)
                 envs_vlans.append(group)
-
+            except:
+                messages.add_message(request, messages.WARNING,
+                                     "Os ambientes não foram associados ao channel.")
         channel = {
             'name': request.POST.get('channelnumber'),
             'lacp':  True if int(request.POST.get('lacp_yes')) else False,
