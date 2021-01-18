@@ -802,16 +802,16 @@ def add_channel_(request):
         envs = client.create_api_environment().search(
             fields=["name", "id"], search=data)
 
-        env_id = None
         envs_vlans = list()
+
         for e, v in zip(request.POST.getlist('environment'), request.POST.getlist('rangevlan')):
-            for obj in envs.get('environments'):
-                if obj.get('name') == e:
-                    env_id = obj.get('id')
-            if env_id:
+            try:
+                env_id = int(e.split(" ")[0])
                 group = dict(env=env_id, vlans=v)
                 envs_vlans.append(group)
-
+            except:
+                messages.add_message(request, messages.WARNING,
+                                     "Os ambientes não foram associados ao channel.")
         channel = {
             'name': request.POST.get('channelnumber'),
             'lacp':  True if int(request.POST.get('lacp_yes')) else False,
@@ -1080,9 +1080,7 @@ def dissociate_channel_interface(request, channel_id, interface_id):
         sw_ids = list()
         interfaces = client.create_api_interface_request().search(
             search=data, fields=fields_get).get('interfaces')
-        interface_obj = interfaces[0]
-        for i in interfaces:
-            sw_ids.append(int(i.get('id')))
+
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.WARNING,
@@ -1090,6 +1088,15 @@ def dissociate_channel_interface(request, channel_id, interface_id):
         url = request.META.get('HTTP_REFERER') if request.META.get(
             'HTTP_REFERER') else reverse('interface.list')
         return HttpResponseRedirect(url)
+
+    # Channel must be deleted if has only one interface
+    if len(interfaces) <= 1:
+        client.create_api_interface_request().remove_channel([channel_id])
+        return HttpResponseRedirect(reverse("interface.edit", args=[interface_id]))
+
+    interface_obj = interfaces[0]
+    for i in interfaces:
+        sw_ids.append(int(i.get('id')))
 
     sw_ids.remove(int(interface_id))
 

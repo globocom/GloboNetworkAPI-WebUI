@@ -68,7 +68,7 @@ def ajax_autocomplete_environment_vlan(request):
         }
 
         envs = client.create_api_environment().search(
-            fields=["id", "name", "min_num_vlan_1", "max_num_vlan_1"],
+            fields=["id", "name", "min_num_vlan_1", "max_num_vlan_1", "min_num_vlan_2", "max_num_vlan_2"],
             search=data)
         env_list = cache_environment_list(envs.get('environments'))
 
@@ -365,6 +365,11 @@ def allocate_cidr(request, id_environment):
                 v4 = request.POST.get('v4_auto')
                 v6 = request.POST.get('v6_auto')
                 network_type = request.POST.get('net_type')
+                network_mask4 = request.POST.get('maskv4') \
+                    if request.POST.get('maskv4') else None
+                network_mask6 = request.POST.get('maskv6') \
+                    if request.POST.get('maskv6') else None
+
                 cidr = list()
 
                 if int(v4):
@@ -375,7 +380,8 @@ def allocate_cidr(request, id_environment):
                     cidrv4 = dict(ip_version='v4',
                                   network_type=network_type,
                                   subnet_mask=prefix_v4,
-                                  environment=int(id_environment))
+                                  environment=int(id_environment),
+                                  network_mask=network_mask4)
                     cidr.append(cidrv4)
                 if int(v6):
                     prefix_v6 = request.POST.get('prefixv6')
@@ -384,7 +390,8 @@ def allocate_cidr(request, id_environment):
                     cidrv6 = dict(ip_version='v6',
                                   network_type=network_type,
                                   subnet_mask=str(prefix_v6),
-                                  environment=int(id_environment))
+                                  environment=int(id_environment),
+                                  network_mask=network_mask6)
                     cidr.append(cidrv6)
 
                 if not cidr:
