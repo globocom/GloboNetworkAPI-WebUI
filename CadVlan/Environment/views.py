@@ -553,9 +553,19 @@ def edit(request, id_environment):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
+        data = {
+            "start_record": 0,
+            "end_record": 1000,
+            "asorting_cols": ["nome"],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        dc_envs = client.create_api_environment_dc().search(search=data)
+
         # Get all needs from NetworkAPI
         env_logic = client.create_ambiente_logico().listar()
-        division_dc = client.create_divisao_dc().listar()
+        division_dc = dc_envs
         group_l3 = client.create_grupo_l3().listar()
         filters = client.create_filter().list_all()
 
@@ -832,11 +842,9 @@ def insert_divisao_dc(request):
 
                 nome_divisao_dc = divisao_dc_form.cleaned_data['nome']
 
-                mkdir_divison_dc(
-                    nome_divisao_dc, AuthSession(request.session).get_user())
+                env = dict(name=nome_divisao_dc.upper())
 
-                # Business
-                client.create_divisao_dc().inserir(nome_divisao_dc.upper())
+                client.create_api_environment_dc().create([env])
                 messages.add_message(
                     request, messages.SUCCESS, environment_messages.get("divisao_dc_sucess"))
 
@@ -850,9 +858,17 @@ def insert_divisao_dc(request):
             messages.add_message(request, messages.ERROR, e)
 
         try:
+            data = {
+                "start_record": 0,
+                "end_record": 1000,
+                "asorting_cols": ["nome"],
+                "searchable_columns": [],
+                "custom_search": "",
+                "extends_search": []
+            }
             # Get all needs from NetworkAPI
             env_logic = client.create_ambiente_logico().listar()
-            division_dc = client.create_divisao_dc().listar()
+            division_dc = client.create_api_environment_dc().search(search=data)
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
             try:

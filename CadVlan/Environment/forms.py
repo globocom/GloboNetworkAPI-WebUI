@@ -86,7 +86,7 @@ class AmbienteForm(forms.Form):
     def __init__(self, env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, *args, **kwargs):
         super(AmbienteForm, self).__init__(*args, **kwargs)
         self.fields['divisao'].choices = [
-            (div['id'], div['nome']) for div in division_dc["division_dc"]]
+            (div['id'], div['name']) for div in division_dc["environments_dc"]]
         self.fields['ambiente_logico'].choices = [
             (amb_log['id'], amb_log['nome']) for amb_log in env_logic["logical_environment"]]
         self.fields['grupol3'].choices = [
