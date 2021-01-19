@@ -13,6 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+
 import logging
 import json
 from django.http import HttpResponseBadRequest
@@ -20,21 +22,23 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render_to_response
 from django.template.context import RequestContext
-from networkapiclient.exception import AmbienteError, AmbienteNaoExisteError, DataBaseError, \
+from networkapiclient.exception import AmbienteError, AmbienteNaoExisteError, \
+    DataBaseError, \
     DetailedEnvironmentError
-from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError, XMLError
+from networkapiclient.exception import InvalidParameterError, \
+    NetworkAPIClientError, XMLError
 from networkapiclient.Pagination import Pagination
 
 from CadVlan import templates
 from CadVlan.Acl.acl import get_templates
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Environment.forms import AmbienteForm, AmbienteLogicoForm, DivisaoDCForm, \
-    Grupol3Form, IpConfigForm
+from CadVlan.Environment.forms import AmbienteForm, AmbienteLogicoForm, \
+    DivisaoDCForm, Grupol3Form, IpConfigForm
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import environment_messages
 from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
-from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, ENVIRONMENT_FORM, ENVIRONMENT_LIST, \
-    AJAX_CHILDREN_ENV
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, ENVIRONMENT_FORM, \
+    ENVIRONMENT_LIST, AJAX_CHILDREN_ENV
 from CadVlan.Util.Decorators import has_perm, log, login_required
 from CadVlan.Util.git import GITCommandError
 from CadVlan.Util.shortcuts import render_to_response_ajax
@@ -44,6 +48,11 @@ logger = logging.getLogger(__name__)
 
 
 def ajax_view_env(request, env_id):
+    """
+    :param request:
+    :return:
+    """
+
     try:
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
@@ -54,12 +63,20 @@ def ajax_view_env(request, env_id):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(AJAX_CHILDREN_ENV, lists, context_instance=RequestContext(request))
+    return render_to_response(AJAX_CHILDREN_ENV, lists,
+                              context_instance=RequestContext(request))
+
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True}])
 def ajax_list_all(request, search_term=None):
+    """
+    :param request:
+    :return: 
+    """
+
     try:
 
         lists = dict()
@@ -120,7 +137,9 @@ def ajax_list_all(request, search_term=None):
         data = dict()
         data["start_record"] = pagination.start_record
         data["end_record"] = pagination.end_record
-        data["asorting_cols"] = ['divisao_dc__nome','ambiente_logico__nome','grupo_l3__nome']
+        data["asorting_cols"] = ['divisao_dc__nome',
+                                 'ambiente_logico__nome',
+                                 'grupo_l3__nome']
         data["searchable_columns"] = pagination.searchable_columns
         data["custom_search"] = pagination.custom_search or ""
         data["extends_search"] = [extends_search_dict] if extends_search_dict else []
@@ -135,7 +154,8 @@ def ajax_list_all(request, search_term=None):
 
         lists['envs'] = json.dumps(environment.get("environments"))
 
-        return render_to_response(ENVIRONMENT_LIST, lists, context_instance=RequestContext(request))
+        return render_to_response(ENVIRONMENT_LIST, lists,
+                                  context_instance=RequestContext(request))
 
     except NetworkAPIClientError as e:
         logger.error(e)
@@ -144,8 +164,13 @@ def ajax_list_all(request, search_term=None):
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True}])
 def list_all(request):
+    """
+    :param request:
+    :return:
+    """
 
     lists = dict()
 
@@ -193,7 +218,9 @@ def list_all(request):
         data = dict()
         data["start_record"] = pagination.start_record
         data["end_record"] = pagination.end_record
-        data["asorting_cols"] = ['divisao_dc__nome','ambiente_logico__nome','grupo_l3__nome']
+        data["asorting_cols"] = ['divisao_dc__nome',
+                                 'ambiente_logico__nome',
+                                 'grupo_l3__nome']
         data["searchable_columns"] = pagination.searchable_columns
         data["custom_search"] = pagination.custom_search or ""
         data["extends_search"] = [extends_search] if extends_search else []
@@ -211,14 +238,22 @@ def list_all(request):
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(ENVIRONMENT_LIST, lists, context_instance=RequestContext(request))
+    return render_to_response(ENVIRONMENT_LIST, lists,
+                              context_instance=RequestContext(request))
 
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def remove_environment(request, environment_id=None):
+    """
+    :param request:
+    :return:
+    """
 
+    ids = list()
     error_not_found = list()
     error_associated = list()
     have_errors = False
@@ -301,15 +336,22 @@ def remove_environment(request, environment_id=None):
     # Success message
     if not have_errors:
         messages.add_message(
-            request, messages.SUCCESS, environment_messages.get("success_delete_all"))
+            request, messages.SUCCESS,
+            environment_messages.get("success_delete_all"))
 
     return redirect('environment.list')
 
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def ajax_autocomplete_acl_path(request):
+    """
+    :param request:
+    :return:
+    """
 
     path_list = dict()
 
@@ -329,13 +371,20 @@ def ajax_autocomplete_acl_path(request):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response_ajax(AJAX_AUTOCOMPLETE_LIST, path_list, context_instance=RequestContext(request))
+    return render_to_response_ajax(AJAX_AUTOCOMPLETE_LIST, path_list,
+                                   context_instance=RequestContext(request))
 
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def add_configuration(request, id_environment):
+    """
+    :param request:
+    :return:
+    """
 
     context = dict()
 
@@ -367,8 +416,9 @@ def add_configuration(request, id_environment):
 
             environment_client.configuration_save(
                 id_environment, network, prefix, ip_version, network_type)
-            messages.add_message(request, messages.SUCCESS, environment_messages.get(
-                "success_configuration_insert"))
+            messages.add_message(request, messages.SUCCESS,
+                                 environment_messages.get(
+                                     "success_configuration_insert"))
             context["form"] = IpConfigForm(net_type_list)
 
     except AmbienteNaoExisteError as e:
@@ -392,8 +442,15 @@ def add_configuration(request, id_environment):
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def remove_configuration(request, environment_id, configuration_id):
+    """
+    :param request:
+    :return:
+    """
+
     try:
 
         auth = AuthSession(request.session)
@@ -403,7 +460,8 @@ def remove_configuration(request, environment_id, configuration_id):
 
         messages.add_message(request,
                              messages.SUCCESS,
-                             environment_messages.get("success_configuration_remove"))
+                             environment_messages.get(
+                                 "success_configuration_remove"))
 
         return redirect('environment.edit', environment_id)
 
@@ -420,8 +478,14 @@ def remove_configuration(request, environment_id, configuration_id):
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def insert_ambiente(request):
+    """
+    :param request:
+    :return:
+    """
 
     # lists = dict()
     # config_forms = list()
@@ -541,14 +605,22 @@ def insert_ambiente(request):
     #     logger.error(e)
     #     messages.add_message(request, messages.ERROR, e)
     #
-    # return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
-    return HttpResponseBadRequest("Bad request. Example: /environment/form/environment_id/.",
+    # return render_to_response(ENVIRONMENT_FORM, lists,
+    # context_instance=RequestContext(request))
+    return HttpResponseBadRequest("Bad request. Example: "
+                                  "/environment/form/environment_id/.",
                                   status=400)
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def edit(request, id_environment):
+    """
+    :param request:
+    :return:
+    """
 
     lists = dict()
 
@@ -566,12 +638,9 @@ def edit(request, id_environment):
             "custom_search": "",
             "extends_search": []
         }
-        dc_envs = client.create_api_environment_dc().search(search=data)
-
-        # Get all needs from NetworkAPI
         env_logic = client.create_ambiente_logico().listar()
-        division_dc = dc_envs
-        group_l3 = client.create_grupo_l3().listar()
+        division_dc = client.create_api_environment_dc().search(search=data)
+        group_l3 = client.create_api_environment_l3().search(search=data)
         filters = client.create_filter().list_all()
 
         cidr = client.create_api_environment_cidr().\
@@ -719,37 +788,37 @@ def edit(request, id_environment):
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def insert_grupo_l3(request):
+    """
+    :param request:
+    :return:
+    """
 
     lists = dict()
+    id_env = None
 
-    # If form was submited
     if request.method == 'POST':
 
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists['grupol3_form'] = Grupol3Form()
+        grupo_l3_form = Grupol3Form(request.POST)
+
         try:
-
-
-            # Get User
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
-
-            lists['grupol3_form'] = Grupol3Form()
-
-            # Set data in form
-            grupo_l3_form = Grupol3Form(request.POST)
-
             id_env = request.POST['id_env']
 
-            # Validate
             if grupo_l3_form.is_valid():
-
                 nome_grupo_l3 = grupo_l3_form.cleaned_data['nome']
+                env = dict(name=nome_grupo_l3.upper())
 
-                # Business
-                client.create_grupo_l3().inserir(nome_grupo_l3.upper())
+                client.create_api_environment_l3().create([env])
                 messages.add_message(
-                    request, messages.SUCCESS, environment_messages.get("grupo_l3_sucess"))
+                    request, messages.SUCCESS, environment_messages.get(
+                        "grupo_l3_sucess"))
 
             else:
                 # If invalid, send all error messages in fields
@@ -772,7 +841,7 @@ def insert_grupo_l3(request):
             # Get all needs from NetworkAPI
             env_logic = client.create_ambiente_logico().listar()
             division_dc = client.create_api_environment_dc().search(search=data)
-            group_l3 = client.create_grupo_l3().listar()
+            group_l3 = client.create_api_environment_l3().search(search=data)
             filters = client.create_filter().list_all()
 
             try:
@@ -802,13 +871,15 @@ def insert_grupo_l3(request):
                 env = env.get("ambiente")
 
                 # Set Environment data
-                initial = {"id_env": env.get("id"), "divisao": env.get("id_divisao"),
+                initial = {"id_env": env.get("id"),
+                           "divisao": env.get("id_divisao"),
                            "ambiente_logico": env.get("id_ambiente_logico"),
                            "grupol3": env.get("id_grupo_l3"),
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6,
+                    envs, vrfs, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -818,7 +889,8 @@ def insert_grupo_l3(request):
             lists['ambientelogico_form'] = amb_form
             lists['action'] = action
 
-            return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
+            return render_to_response(ENVIRONMENT_FORM, lists,
+                                      context_instance=RequestContext(request))
 
         except NetworkAPIClientError as e:
             logger.error(e)
@@ -831,26 +903,29 @@ def insert_grupo_l3(request):
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def insert_divisao_dc(request):
-    # If form was submited
+    """
+    :param request:
+    :return:
+    """
+
+    lists = dict()
+    id_env = None
+
     if request.method == 'POST':
 
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists['divisaodc_form'] = DivisaoDCForm()
+        divisao_dc_form = DivisaoDCForm(request.POST)
+
         try:
-            lists = dict()
-
-            # Get User
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
-
-            lists['divisaodc_form'] = DivisaoDCForm()
-
-            # Set data in form
-            divisao_dc_form = DivisaoDCForm(request.POST)
-
             id_env = request.POST['id_env']
 
-            # Validate
             if divisao_dc_form.is_valid():
 
                 nome_divisao_dc = divisao_dc_form.cleaned_data['nome']
@@ -859,7 +934,8 @@ def insert_divisao_dc(request):
 
                 client.create_api_environment_dc().create([env])
                 messages.add_message(
-                    request, messages.SUCCESS, environment_messages.get("divisao_dc_sucess"))
+                    request, messages.SUCCESS, environment_messages.get(
+                        "divisao_dc_sucess"))
 
             else:
                 # If invalid, send all error messages in fields
@@ -882,7 +958,7 @@ def insert_divisao_dc(request):
             # Get all needs from NetworkAPI
             env_logic = client.create_ambiente_logico().listar()
             division_dc = client.create_api_environment_dc().search(search=data)
-            group_l3 = client.create_grupo_l3().listar()
+            group_l3 = client.create_api_environment_l3().search(search=data)
             filters = client.create_filter().list_all()
             try:
                 templates = get_templates(auth.get_user(), True)
@@ -912,13 +988,15 @@ def insert_divisao_dc(request):
                 env = env.get("ambiente")
 
                 # Set Environment data
-                initial = {"id_env": env.get("id"), "divisao": env.get("id_divisao"),
+                initial = {"id_env": env.get("id"),
+                           "divisao": env.get("id_divisao"),
                            "ambiente_logico": env.get("id_ambiente_logico"),
                            "grupol3": env.get("id_grupo_l3"),
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6,
+                    envs, vrfs, initial=initial)
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 amb_form = AmbienteLogicoForm(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -928,7 +1006,8 @@ def insert_divisao_dc(request):
             lists['ambientelogico_form'] = amb_form
             lists['action'] = action
 
-            return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
+            return render_to_response(ENVIRONMENT_FORM, lists,
+                                      context_instance=RequestContext(request))
 
         except NetworkAPIClientError as e:
             logger.error(e)
@@ -941,36 +1020,39 @@ def insert_divisao_dc(request):
 
 @log
 @login_required
-@has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
+@has_perm([{"permission": ENVIRONMENT_MANAGEMENT,
+            "read": True,
+            "write": True}])
 def insert_ambiente_logico(request):
-    # If form was submited
+    """
+    :param request:
+    :return:
+    """
+
+    lists = dict()
+    id_env = None
+
     if request.method == 'POST':
 
+        auth = AuthSession(request.session)
+        client = auth.get_clientFactory()
+
+        lists['ambientelogico_form'] = AmbienteLogicoForm()
+        ambiente_logico_form = AmbienteLogicoForm(request.POST)
+
         try:
-            lists = dict()
-
-            # Get User
-            auth = AuthSession(request.session)
-            client = auth.get_clientFactory()
-
-            lists['ambientelogico_form'] = AmbienteLogicoForm()
-
-            # Set data in form
-            ambiente_logico_form = AmbienteLogicoForm(request.POST)
-
             id_env = request.POST['id_env']
 
-            # Validate
             if ambiente_logico_form.is_valid():
 
                 nome_ambiente_logico = ambiente_logico_form.cleaned_data[
                     'nome']
 
-                # Business
                 client.create_ambiente_logico().inserir(
                     nome_ambiente_logico.upper())
                 messages.add_message(
-                    request, messages.SUCCESS, environment_messages.get("ambiente_log_sucess"))
+                    request, messages.SUCCESS, environment_messages.get(
+                        "ambiente_log_sucess"))
 
             else:
                 # If invalid, send all error messages in fields
@@ -993,7 +1075,7 @@ def insert_ambiente_logico(request):
             # Get all needs from NetworkAPI
             env_logic = client.create_ambiente_logico().listar()
             division_dc = client.create_api_environment_dc().search(search=data)
-            group_l3 = client.create_grupo_l3().listar()
+            group_l3 = client.create_api_environment_l3().search(search=data)
             filters = client.create_filter().list_all()
             try:
                 templates = get_templates(auth.get_user(), True)
@@ -1012,7 +1094,8 @@ def insert_ambiente_logico(request):
 
             # Forms
             env_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs)
+                env_logic, division_dc, group_l3, filters, ipv4, ipv6,
+                envs, vrfs)
             div_form = DivisaoDCForm()
             gro_form = Grupol3Form()
             action = reverse("environment.form")
@@ -1023,13 +1106,15 @@ def insert_ambiente_logico(request):
                 env = env.get("ambiente")
 
                 # Set Environment data
-                initial = {"id_env": env.get("id"), "divisao": env.get("id_divisao"),
+                initial = {"id_env": env.get("id"),
+                           "divisao": env.get("id_divisao"),
                            "ambiente_logico": env.get("id_ambiente_logico"),
                            "grupol3": env.get("id_grupo_l3"),
                            "filter": env.get("id_filter"),
                            "link": env.get("link")}
                 env_form = AmbienteForm(
-                    env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
+                    env_logic, division_dc, group_l3, filters, ipv4, ipv6,
+                    envs, vrfs, initial=initial)
                 div_form = DivisaoDCForm(initial={"id_env": id_env})
                 gro_form = Grupol3Form(initial={"id_env": id_env})
                 action = reverse("environment.edit", args=[id_env])
@@ -1039,7 +1124,8 @@ def insert_ambiente_logico(request):
             lists['grupol3_form'] = gro_form
             lists['action'] = action
 
-            return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
+            return render_to_response(ENVIRONMENT_FORM, lists,
+                                      context_instance=RequestContext(request))
 
         except NetworkAPIClientError as e:
             logger.error(e)

@@ -90,7 +90,7 @@ class AmbienteForm(forms.Form):
         self.fields['ambiente_logico'].choices = [
             (amb_log['id'], amb_log['nome']) for amb_log in env_logic["logical_environment"]]
         self.fields['grupol3'].choices = [
-            (grupo['id'], grupo['nome']) for grupo in group_l3["group_l3"]]
+            (grupo['id'], grupo['name']) for grupo in group_l3["l3_environments"]]
         self.fields['filter'].choices = [
             (filter_['id'], filter_['name']) for filter_ in filters["filter"]]
         self.fields['filter'].choices.insert(0, ('', '--------'))
