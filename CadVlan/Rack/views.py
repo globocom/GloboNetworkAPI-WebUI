@@ -27,7 +27,8 @@ from django.views.decorators.csrf import csrf_protect
 
 from CadVlan import templates
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, AplicarForm, AlocarForm
+from CadVlan.forms import CriarVlanAmbForm, DeleteForm, ConfigForm, \
+    AplicarForm, AlocarForm
 from CadVlan.messages import error_messages, rack_messages
 from CadVlan.permissions import EQUIPMENT_MANAGEMENT
 from CadVlan.Rack.forms import RackForm
@@ -62,50 +63,61 @@ def proximo_rack(racks, qtd_rack=119):
 
     return str(rack_anterior+1)
 
+
 def validar_mac(mac):
 
     if not mac=='':
         if not (mac.count(':') == 5):
-            raise InvalidParameterError(u'Endereco MAC invalido. Formato: FF:FF:FF:FF:FF:FF')
+            raise InvalidParameterError(u'Endereco MAC invalido. '
+                                        u'Formato: FF:FF:FF:FF:FF:FF')
         mac_val = mac.split(':')
-        if ((len(mac_val[0])>2) or (len(mac_val[1])>2) or (len(mac_val[2])>2) or (len(mac_val[3])>2) or (len(mac_val[4])>2) or (len(mac_val[5])>2)):
-            raise InvalidParameterError(u'Endereco MAC invalido. Formato: FF:FF:FF:FF:FF:FF')
+        if len(mac_val[0]) > 2 \
+                or len(mac_val[1]) > 2  \
+                or len(mac_val[2]) > 2 \
+                or len(mac_val[3]) > 2 \
+                or len(mac_val[4]) > 2 \
+                or (len(mac_val[5]) > 2):
+            raise InvalidParameterError(u'Endereco MAC invalido. '
+                                        u'Formato: FF:FF:FF:FF:FF:FF')
 
 
 def buscar_id_equip(client, nome):
                 
-    id_equip = None
-    if not nome=='':
+    if not nome == '':
             equip = client.create_equipamento().listar_por_nome(nome)
             equip = equip.get('equipamento')
             id_equip = equip['id']
-            return (id_equip)
+            return id_equip
 
 
 def buscar_nome_equip(client, rack, tipo):
+
     id_equip = rack.get(tipo)
-    if not id_equip==None:
+    if not id_equip == None:
         equip = client.create_equipamento().listar_por_id(id_equip)
         equip = equip.get('equipamento')
-        nome_eq =  equip.get('nome')
+        nome_eq = equip.get('nome')
         rack[tipo] = nome_eq
     else:
         rack[tipo] = ''
 
 
 def valid_rack_number(rack_number):
-   if not rack_number < 120:
-      raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - 119') 
+
+    if not rack_number < 120:
+        raise InvalidParameterError(u'Numero de Rack invalido. '
+                                    u'Intervalo valido: 0 - 119')
 
 
 def valid_rack_number_dc(rack_number, racks):
-   if not int(rack_number) < int(racks):
-      raise InvalidParameterError(u'Numero de Rack invalido. Intervalo valido: 0 - %s' % str(racks))
+    if not int(rack_number) < int(racks):
+        raise InvalidParameterError(u'Numero de Rack invalido. '
+                                    u'Intervalo valido: 0 - %s' % str(racks))
 
 
 def valid_rack_name(rack_name):
-   if not check_regex(rack_name, r'^[A-Z][A-Z][0-9][0-9]'):
-      raise InvalidParameterError('Nome inválido. Ex: AA00')
+    if not check_regex(rack_name, r'^[A-Z][A-Z][0-9][0-9]'):
+        raise InvalidParameterError('Nome inválido. Ex: AA00')
 
 
 def get_msg(request, var, nome, operation):
@@ -114,20 +126,20 @@ def get_msg(request, var, nome, operation):
     var = str(var)
     msg = ""
 
-    if var=="True":
-        if operation=='CONFIG':
+    if var == "True":
+        if operation == 'CONFIG':
             msg = rack_messages.get('sucess_create_config') % nome
-        elif operation=='ALOCAR':
+        elif operation == 'ALOCAR':
             msg = rack_messages.get('sucess_alocar_config') % nome
-        elif operation=='APLICAR':
+        elif operation == 'APLICAR':
             msg = rack_messages.get('sucess_aplicar_config') % nome
         messages.add_message(request, messages.SUCCESS, msg)
     else:
-        if operation=='CONFIG':
+        if operation == 'CONFIG':
             msg = rack_messages.get('can_not_create_all') % nome    
-        elif operation=='ALOCAR':
+        elif operation == 'ALOCAR':
             msg = rack_messages.get('can_not_alocar_config') % nome
-        elif operation=='APLICAR':
+        elif operation == 'APLICAR':
             msg = rack_messages.get('can_not_aplicar_config') % nome
         messages.add_message(request, messages.ERROR, msg)
 
@@ -136,17 +148,18 @@ def rack_config_delete (request, client, form, operation):
 
         if form.is_valid():
 
-            if operation=='CONFIG':
-                id = 'ids_config'
+            ids = None
+            if operation == 'CONFIG':
+                ids = 'ids_config'
             elif operation == 'DELETE':
-                id = 'ids'
-            elif operation=='APLICAR':
-                id = 'ids_aplicar'
-            elif operation=='ALOCAR':
-                id = 'ids_alocar'
+                ids = 'ids'
+            elif operation == 'APLICAR':
+                ids = 'ids_aplicar'
+            elif operation == 'ALOCAR':
+                ids = 'ids_alocar'
 
             # All ids selected
-            ids = split_to_array(form.cleaned_data[id])
+            ids = split_to_array(form.cleaned_data[ids])
 
             # All messages to display
             error_list = list()
@@ -162,7 +175,7 @@ def rack_config_delete (request, client, form, operation):
                     racks = client.create_rack().list()
                     racks = racks.get('rack')
                     for ra in racks:
-                        if ra.get('id')==id_rack:
+                        if ra.get('id') == id_rack:
                             rack = ra
                     nome = rack.get('nome')
                     if operation == 'DELETE':
@@ -172,11 +185,11 @@ def rack_config_delete (request, client, form, operation):
                         var = client.create_rack().gerar_arq_config(id_rack)
                         var = var.get('sucesso')
                         get_msg(request, var, nome, operation)
-                    elif operation=='APLICAR':
+                    elif operation == 'APLICAR':
                         var = client.create_apirack().rack_deploy(id_rack)
                         var = var.get('sucesso')
                         get_msg(request, var, nome, 'APLICAR')
-                    elif operation=='ALOCAR':
+                    elif operation == 'ALOCAR':
                         var = client.create_rack().alocar_configuracao(id_rack)
                         var = var.get('sucesso')
                         get_msg(request, var, nome, operation)
@@ -206,7 +219,8 @@ def rack_config_delete (request, client, form, operation):
 
             if len(error_list) == len(ids):
                 messages.add_message(
-                    request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                    request, messages.ERROR,
+                    error_messages.get("can_not_remove_all"))
 
             elif len(error_list) > 0:
                 msg = ""
@@ -217,15 +231,17 @@ def rack_config_delete (request, client, form, operation):
 
                 messages.add_message(request, messages.WARNING, msg)
 
-            elif (not operation=='CONFIG') and (not operation=='ALOCAR') and (not operation=='APLICAR') and (have_errors == False):
-                messages.add_message(request, messages.SUCCESS, rack_messages.get(msg_sucess))
+            elif not operation == 'CONFIG' and not operation == 'ALOCAR' \
+                    and not operation == 'APLICAR' and not have_errors:
+                messages.add_message(request, messages.SUCCESS,
+                                     rack_messages.get(msg_sucess))
 
             return redirect("ajax.view.rack")
 
         else:
-            messages.add_message(request, messages.ERROR, error_messages.get("select_one"))
+            messages.add_message(request, messages.ERROR,
+                                 error_messages.get("select_one"))
 
-         # Redirect to list_all action
         return redirect("ajax.view.rack")
 
 
@@ -236,7 +252,6 @@ def rack_form(request):
    
     try:
 
-        lists = dict()
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
@@ -262,13 +277,8 @@ def rack_form(request):
                 nome_sw2 = form.cleaned_data['nome_sw2']
                 nome_ilo = form.cleaned_data['nome_ilo']
 
-                # validacao: Numero do Rack
                 valid_rack_number(rack['numero'])
- 
-                # validacao: Nome do Rack
                 valid_rack_name(rack['nome'])
-
-                # Validacao: MAC 
                 validar_mac(rack['mac_sw1'])
                 validar_mac(rack['mac_sw2'])
                 validar_mac(rack['mac_ilo'])
@@ -278,7 +288,8 @@ def rack_form(request):
                 rack['id_ilo'] = buscar_id_equip(client,nome_ilo)
  
                 rack = client.create_apirack().insert_rack(rack)
-                messages.add_message(request, messages.SUCCESS, rack_messages.get("success_insert"))
+                messages.add_message(request, messages.SUCCESS,
+                                     rack_messages.get("success_insert"))
 
                 form = RackForm()
                 return redirect('ajax.view.rack')
@@ -286,12 +297,16 @@ def rack_form(request):
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(templates.RACK_FORM, {'form': form}, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_FORM, {'form': form},
+                              context_instance=RequestContext(request))
 
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}, {"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT,
+            "read": True},
+           {"permission": EQUIPMENT_MANAGEMENT,
+            "write": True}])
 def ajax_view(request):
 
     # Get user
@@ -306,8 +321,6 @@ def ajax_rack_view(request, client_api):
     try:
 
         racks = dict()
-
-        # Get all racks from NetworkAPI
         racks = client_api.create_rack().list()
 
         if not racks.has_key("rack"):
@@ -324,11 +337,11 @@ def ajax_rack_view(request, client_api):
             buscar_nome_equip(client_api, var, 'id_sw2')
             buscar_nome_equip(client_api, var, 'id_ilo')
 
-            if mac_1==None:
+            if mac_1 == None:
                 var['mac_sw1'] = ''
-            if mac_2==None:
+            if mac_2 == None:
                 var['mac_sw2'] = ''
-            if mac_3==None:
+            if mac_3 == None:
                 var['mac_ilo'] = ''
 
             var['config'] = var.get("config")
@@ -349,7 +362,9 @@ def ajax_rack_view(request, client_api):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(templates.RACK_VIEW_AJAX, racks, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_VIEW_AJAX,
+                              racks,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -372,7 +387,7 @@ def rack_edit(request, id_rack):
 
         rackn = racks.get('rack')
         for var in rackn:
-            if (var['id']==id_rack):
+            if var['id'] == id_rack:
                 rack = var
 
         if request.method == 'GET':
@@ -384,29 +399,37 @@ def rack_edit(request, id_rack):
                 pass
             lists['numero'] = rack_num
             try:
-                nome_sw1 = client.create_equipamento().listar_por_id(rack.get('id_sw1'))['equipamento']['nome']
+                nome_sw1 = client.create_equipamento().listar_por_id(
+                    rack.get('id_sw1'))['equipamento']['nome']
                 mac_sw1 = rack.get('mac_sw1')
             except:
                 nome_sw1 = None
                 mac_sw1 = None
                 pass
             try:
-                nome_sw2 = client.create_equipamento().listar_por_id(rack.get('id_sw2'))['equipamento']['nome']
+                nome_sw2 = client.create_equipamento().listar_por_id(
+                    rack.get('id_sw2'))['equipamento']['nome']
                 mac_sw2 = rack.get("mac_sw2")
             except:
                 nome_sw2 = None
                 mac_sw2 = None
                 pass
             try:
-                nome_ilo = client.create_equipamento().listar_por_id(rack.get('id_ilo'))['equipamento']['nome']
+                nome_ilo = client.create_equipamento().listar_por_id(
+                    rack.get('id_ilo'))['equipamento']['nome']
                 mac_ilo = rack.get('mac_ilo')
             except:
                 nome_ilo = None
                 mac_ilo = None
                 pass
-            lists['form'] = RackForm(initial={'rack_number': rack_num, 'rack_name': rack_name, "nome_sw1": nome_sw1,
-                                              'mac_address_sw1': mac_sw1, 'mac_address_sw2': mac_sw2, 'nome_sw2': nome_sw2,
-                                              'mac_address_ilo': mac_ilo, 'nome_ilo': nome_ilo})
+            lists['form'] = RackForm(initial={'rack_number': rack_num,
+                                              'rack_name': rack_name,
+                                              'nome_sw1': nome_sw1,
+                                              'mac_address_sw1': mac_sw1,
+                                              'mac_address_sw2': mac_sw2,
+                                              'nome_sw2': nome_sw2,
+                                              'mac_address_ilo': mac_ilo,
+                                              'nome_ilo': nome_ilo})
     
         if request.method == 'POST':
             form = RackForm(request.POST)
@@ -431,8 +454,11 @@ def rack_edit(request, id_rack):
                 id_sw2 = buscar_id_equip(client,nome_sw2)
                 id_ilo = buscar_id_equip(client,nome_ilo)
 
-                rack = client.create_rack().edit_rack(id_rack, numero, nome, mac_sw1, mac_sw2, mac_ilo, id_sw1, id_sw2, id_ilo)
-                messages.add_message(request, messages.SUCCESS, rack_messages.get("success_edit"))
+                rack = client.create_rack().edit_rack(id_rack, numero, nome,
+                                                      mac_sw1, mac_sw2, mac_ilo,
+                                                      id_sw1, id_sw2, id_ilo)
+                messages.add_message(request, messages.SUCCESS,
+                                     rack_messages.get("success_edit"))
 
                 return redirect('ajax.view.rack')
 
@@ -440,7 +466,9 @@ def rack_edit(request, id_rack):
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(templates.RACK_EDIT, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_EDIT,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -529,14 +557,17 @@ def newrack(request, fabric_id):
         lists["fabric_id"] = fabric_id
         lists["action"] = reverse('rack.add', args=[fabric_id])
 
-        fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
+        fabric = client.create_apirack().get_fabric(
+            fabric_id=fabric_id).get("fabric")[0]
         fabric_racks = fabric.get("racks")
 
         if request.method == 'GET':
-            racks = client.create_apirack().get_rack(fabric_id=fabric_id)
+            racks = client.create_apirack().get_rack(
+                fabric_id=fabric_id)
             numero = proximo_rack(racks.get("racks"), fabric_racks)
             if numero < 0:
-                messages.add_message(request, messages.ERROR, "Fabric já possui %s racks." % str(fabric_racks))
+                messages.add_message(request, messages.ERROR,
+                                     "Fabric já possui %s racks." % str(fabric_racks))
                 return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
             form = RackForm(initial={'rack_number': numero})
 
@@ -555,8 +586,6 @@ def newrack(request, fabric_id):
                 nome_sw1 = form.cleaned_data['nome_sw1']
                 nome_sw2 = form.cleaned_data['nome_sw2']
                 nome_ilo = form.cleaned_data['nome_ilo']
-
-                #valid_rack_name(rack_name)
 
                 validar_mac(mac_sw1)
                 validar_mac(mac_sw2)
@@ -579,7 +608,8 @@ def newrack(request, fabric_id):
                 }
 
                 rack = client.create_apirack().newrack(rack)
-                messages.add_message(request, messages.SUCCESS, rack_messages.get("success_insert"))
+                messages.add_message(request, messages.SUCCESS,
+                                     rack_messages.get("success_insert"))
 
                 return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
@@ -588,7 +618,8 @@ def newrack(request, fabric_id):
         messages.add_message(request, messages.ERROR, e)
         return HttpResponseRedirect(reverse('rack.add', args=[fabric_id]))
 
-    return render_to_response(templates.RACK_DC_ADD, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_DC_ADD, lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -604,7 +635,6 @@ def put_rack(request, rack_id, fabric_id):
         lists['id'] = rack_id
         lists["fabric_id"] = fabric_id
         lists["action"] = reverse('rack.new.edit', args=[rack_id, fabric_id])
-
 
         racks = client.create_apirack().get_rack(rack_id=rack_id)
 
@@ -657,16 +687,19 @@ def put_rack(request, rack_id, fabric_id):
                     'fabric_id': fabric_id
                 }
                 rack = client.create_apirack().put_rack(rack_id, rack)
-                messages.add_message(request, messages.SUCCESS, "Rack foi editado.")
+                messages.add_message(request, messages.SUCCESS,
+                                     "Rack foi editado.")
 
                 return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-        return render_to_response(templates.RACK_NEWEDIT, lists, context_instance=RequestContext(request))
+        return render_to_response(templates.RACK_NEWEDIT, lists,
+                                  context_instance=RequestContext(request))
 
-    return render_to_response(templates.RACK_NEWEDIT, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.RACK_NEWEDIT, lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -678,9 +711,11 @@ def remove_rack(request, fabric_id, rack_id):
     client = auth.get_clientFactory()
     try:
         client.create_apirack().delete_rack(rack_id)
-        messages.add_message(request, messages.SUCCESS, rack_messages.get("success_remove"))
+        messages.add_message(request, messages.SUCCESS,
+                             rack_messages.get("success_remove"))
     except NetworkAPIClientError as e:
-        messages.add_message(request, messages.ERROR, "Não foi possivel remover o rack. Erro: %s" % e)
+        messages.add_message(request, messages.ERROR,
+                             "Não foi possivel remover o rack. Erro: %s" % e)
     finally:
         return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
@@ -694,10 +729,12 @@ def remove_rack_env(request, fabric_id, rack_id):
     client = auth.get_clientFactory()
     try:
         client.create_apirack().remove_rack_environments(rack_id)
-        messages.add_message(request, messages.SUCCESS, "Os ambientes e vlans do rack foram removidos.")
+        messages.add_message(request, messages.SUCCESS,
+                             "Os ambientes e vlans do rack foram removidos.")
     except NetworkAPIClientError as e:
-        messages.add_message(request, messages.ERROR, "Não foi possivel remover os ambientes e vlans do rack. "
-                                                      "Erro: %s" % e)
+        messages.add_message(request, messages.ERROR,
+                             "Não foi possivel remover os ambientes e vlans "
+                             "do rack. Erro: %s" % e)
     finally:
         return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
@@ -711,9 +748,12 @@ def vlans_rack (request, fabric_id, rack_id):
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
         client.create_apirack().rackenvironments(rack_id)
-        messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_alocar_config"))
+        messages.add_message(request, messages.SUCCESS,
+                             rack_messages.get("sucess_alocar_config"))
     except NetworkAPIClientError as e:
-        messages.add_message(request, messages.ERROR, "Os ambientes do rack não foram alocados. Erro: %s" % e)
+        messages.add_message(request, messages.ERROR,
+                             "Os ambientes do rack não foram alocados. "
+                             "Erro: %s" % e)
 
     return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
@@ -727,11 +767,15 @@ def files_rack (request, fabric_id, rack_id):
     client = auth.get_clientFactory()
     try:
         client.create_apirack().rackfiles(rack_id)
-        messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_create_config"))
+        messages.add_message(request, messages.SUCCESS,
+                             rack_messages.get("sucess_create_config"))
     except NetworkAPIClientError as e:
-        messages.add_message(request, messages.ERROR, "Os arquivos de configuração não foram gerados. Erro: %s" % e)
+        messages.add_message(request, messages.ERROR,
+                             "Os arquivos de configuração não foram gerados. "
+                             "Erro: %s" % e)
 
-    return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
+    return HttpResponseRedirect(reverse('fabric',
+                                        args=[fabric_id]))
 
 
 @log
@@ -739,14 +783,16 @@ def files_rack (request, fabric_id, rack_id):
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def deploy_rack_new (request, fabric_id, rack_id):
 
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
+
     try:
         client.create_apirack().rack_deploy(rack_id)
-        messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_aplicar_config"))
+        messages.add_message(request, messages.SUCCESS,
+                             rack_messages.get("sucess_aplicar_config"))
     except NetworkAPIClientError as e:
-        messages.add_message(request, messages.ERROR, "Erro ao deployar. Erro: %s" % e)
+        messages.add_message(request, messages.ERROR,
+                             "Erro ao deployar. Erro: %s" % e)
 
     return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
@@ -756,14 +802,15 @@ def deploy_rack_new (request, fabric_id, rack_id):
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
 def rack_foreman (request, fabric_id, rack_id):
 
-
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
     try:
         client.create_apirack().rack_foreman(rack_id)
-        messages.add_message(request, messages.SUCCESS, rack_messages.get("sucess_aplicar_config"))
+        messages.add_message(request, messages.SUCCESS,
+                             rack_messages.get("sucess_aplicar_config"))
     except NetworkAPIClientError as e:
-        messages.add_message(request, messages.ERROR, "Erro ao registrar no Foremanr. Erro: %s" % e)
+        messages.add_message(request, messages.ERROR,
+                             "Erro ao registrar no Foremanr. Erro: %s" % e)
 
     return HttpResponseRedirect(reverse('fabric', args=[fabric_id]))
 
@@ -787,12 +834,14 @@ def datacenter(request):
     except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    return render_to_response(templates.LISTDC, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.LISTDC, lists,
+                              context_instance=RequestContext(request))
 
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}, ])
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT,
+            "write": True}, ])
 @csrf_protect
 def new_datacenter(request):
 
@@ -810,26 +859,32 @@ def new_datacenter(request):
             newdc = client.create_apirack().save_dc(dc)
             id = newdc.get('dc').get('id')
 
-            return HttpResponseRedirect(reverse('fabric.cadastro', args=[id]))
+            return HttpResponseRedirect(reverse(
+                'fabric.cadastro', args=[id]))
 
     except NetworkAPIClientError as e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, "Datacenter não foi cadastrado. Erro: %s" % e)
-    return render_to_response(templates.DC_FORM, {'form': {}}, context_instance=RequestContext(request))
+        messages.add_message(request, messages.ERROR,
+                             "Datacenter não foi cadastrado. Erro: %s" % e)
+    return render_to_response(templates.DC_FORM, {'form': {}},
+                              context_instance=RequestContext(request))
 
 
 @log
 @login_required
-@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "write": True}])
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT,
+            "write": True}])
 def remove_datacenter(request, dc_id):
 
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
     try:
         client.create_apirack().delete_datacenter(dc_id)
-        messages.add_message(request, messages.SUCCESS, "O datacenter foi removido com sucesso.")
+        messages.add_message(request, messages.SUCCESS,
+                             "O datacenter foi removido com sucesso.")
     except NetworkAPIClientError as e:
-        messages.add_message(request, messages.ERROR, "Não foi possivel remover o datacenter. Erro: %s" % e)
+        messages.add_message(request, messages.ERROR,
+                             "Não foi possivel remover o datacenter. Erro: %s" % e)
     finally:
         return HttpResponseRedirect(reverse("listdc"))
 
@@ -853,7 +908,8 @@ def fabric(request, fabric_id):
 
         if request.method =='GET':
 
-            fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
+            fabric = client.create_apirack().get_fabric(
+                fabric_id=fabric_id).get("fabric")[0]
             if fabric.get("config"):
                 fabric["config"] = json.dumps(fabric.get("config"))
             lists["fabric"] = fabric
@@ -876,9 +932,11 @@ def fabric(request, fabric_id):
 
     except NetworkAPIClientError as e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, "Erro cadastrando o Fabric. Erro: %s " % e)
+        messages.add_message(request, messages.ERROR,
+                             "Erro cadastrando o Fabric. Erro: %s " % e)
 
-    return render_to_response(templates.FABRIC, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.FABRIC, lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -909,12 +967,15 @@ def new_fabric(request, dc_id):
             dc_id = newfabric.get('dcroom').get('id')
             lists["dc_id"] = dc_id
 
-            return HttpResponseRedirect(reverse('fabric.ambiente', args=[dc_id]))
+            return HttpResponseRedirect(reverse('fabric.ambiente',
+                                                args=[dc_id]))
 
     except NetworkAPIClientError as e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, "Erro cadastrando o Fabric. Erro: %s " % e)
-    return render_to_response(templates.DCROOM_FORM, lists, context_instance=RequestContext(request))
+        messages.add_message(request, messages.ERROR,
+                             "Erro cadastrando o Fabric. Erro: %s " % e)
+    return render_to_response(templates.DCROOM_FORM, lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -930,10 +991,12 @@ def fabric_ambiente(request, fabric_id):
 
         lists = dict()
         lists['fabric_id'] = fabric_id
-        fabric = client.create_apirack().get_fabric(fabric_id=fabric_id).get("fabric")[0]
+        fabric = client.create_apirack().get_fabric(
+            fabric_id=fabric_id).get("fabric")[0]
         fabric_name = fabric.get("name")
         lists['fabric_name'] = fabric_name
-        lists["action"] = reverse('fabric.ambiente', args=[fabric_id])
+        lists["action"] = reverse('fabric.ambiente',
+                                  args=[fabric_id])
 
         if request.method == 'POST':
 
@@ -1116,8 +1179,6 @@ def fabric_ambiente(request, fabric_id):
                     'network_type': int(net_type_id),
                 }
                 configs_oob.append(v4_oob)
-
-
 
             try:
                 env_l3_id = client.create_grupo_l3().inserir(fabric_name).get(
@@ -1581,7 +1642,8 @@ def fabric_ambiente(request, fabric_id):
         logger.error(e)
         messages.add_message(request,
                              messages.ERROR,
-                             "Houve algum problema ao alocar os ambientes do Fabric. Erro: %s" % e)
+                             "Houve algum problema ao alocar os "
+                             "ambientes do Fabric. Erro: %s" % e)
         return HttpResponseRedirect(reverse('fabric.ambiente',
                                             args=[fabric_id]))
 
@@ -1655,10 +1717,15 @@ def fabric_bgp(request, fabric_id):
 
     except NetworkAPIClientError as e:
         logger.error(e)
-        messages.add_message(request, messages.ERROR, "Erro salvando a configuração do Fabric. Erro: %s" % e)
-        return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
+        messages.add_message(request, messages.ERROR,
+                             "Erro salvando a configuração do Fabric. Erro: %s" % e)
+        return render_to_response(templates.DCROOM_BGP_FORM,
+                                  lists,
+                                  context_instance=RequestContext(request))
 
-    return render_to_response(templates.DCROOM_BGP_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(templates.DCROOM_BGP_FORM,
+                              lists,
+                              context_instance=RequestContext(request))
 
 @log
 @login_required
@@ -1669,8 +1736,11 @@ def remove_fabric(request, fabric_id):
     client = auth.get_clientFactory()
     try:
         client.create_apirack().delete_fabric(fabric_id)
-        messages.add_message(request, messages.SUCCESS, "A sala do datacenter foi removida com sucesso.")
+        messages.add_message(request, messages.SUCCESS,
+                             "A sala do datacenter foi removida com sucesso.")
     except NetworkAPIClientError as e:
-        messages.add_message(request, messages.ERROR, "Não foi possivel remover a sala de datacenter. Erro: %s" % e)
+        messages.add_message(request, messages.ERROR,
+                             "Não foi possivel remover a sala de datacenter. "
+                             "Erro: %s" % e)
     finally:
         return HttpResponseRedirect(reverse("listdc"))
