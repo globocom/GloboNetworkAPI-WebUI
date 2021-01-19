@@ -15,22 +15,26 @@
 # limitations under the License.
 import logging
 import json
+from django.http import HttpResponseBadRequest
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render_to_response
 from django.template.context import RequestContext
-from networkapiclient.exception import AmbienteError, AmbienteNaoExisteError, DataBaseError, DetailedEnvironmentError
+from networkapiclient.exception import AmbienteError, AmbienteNaoExisteError, DataBaseError, \
+    DetailedEnvironmentError
 from networkapiclient.exception import InvalidParameterError, NetworkAPIClientError, XMLError
 from networkapiclient.Pagination import Pagination
 
 from CadVlan import templates
-from CadVlan.Acl.acl import get_templates, mkdir_divison_dc
+from CadVlan.Acl.acl import get_templates
 from CadVlan.Auth.AuthSession import AuthSession
-from CadVlan.Environment.forms import AmbienteForm, AmbienteLogicoForm, DivisaoDCForm, Grupol3Form, IpConfigForm
+from CadVlan.Environment.forms import AmbienteForm, AmbienteLogicoForm, DivisaoDCForm, \
+    Grupol3Form, IpConfigForm
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import environment_messages
 from CadVlan.permissions import ENVIRONMENT_MANAGEMENT
-from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, ENVIRONMENT_FORM, ENVIRONMENT_LIST, AJAX_CHILDREN_ENV
+from CadVlan.templates import AJAX_AUTOCOMPLETE_LIST, ENVIRONMENT_FORM, ENVIRONMENT_LIST, \
+    AJAX_CHILDREN_ENV
 from CadVlan.Util.Decorators import has_perm, log, login_required
 from CadVlan.Util.git import GITCommandError
 from CadVlan.Util.shortcuts import render_to_response_ajax
@@ -419,126 +423,127 @@ def remove_configuration(request, environment_id, configuration_id):
 @has_perm([{"permission": ENVIRONMENT_MANAGEMENT, "read": True, "write": True}])
 def insert_ambiente(request):
 
-    lists = dict()
-    config_forms = list()
-
-    try:
-
-        # Get User
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        # Get all needs from NetworkAPI
-        env_logic = client.create_ambiente_logico().listar()
-        division_dc = client.create_divisao_dc().listar()
-        group_l3 = client.create_grupo_l3().listar()
-        filters = client.create_filter().list_all()
-        try:
-            templates = get_templates(auth.get_user(), True)
-        except GITCommandError as e:
-            logger.error(e)
-            messages.add_message(request, messages.ERROR, e)
-            templates = {
-                'ipv4': list(),
-                'ipv6': list()
-            }
-
-        ipv4 = templates.get("ipv4")
-        ipv6 = templates.get("ipv6")
-        envs = client.create_ambiente().listar().get('ambiente')
-        vrfs = client.create_api_vrf().search()['vrfs']
-        # Forms
-        lists['ambiente'] = AmbienteForm(
-            env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs)
-        lists['divisaodc_form'] = DivisaoDCForm()
-        lists['grupol3_form'] = Grupol3Form()
-        lists['ambientelogico_form'] = AmbienteLogicoForm()
-
-        lists['action'] = reverse("environment.form")
-
-        # If form was submited
-        if request.method == 'POST':
-
-            # Set data in form
-            ambiente_form = AmbienteForm(
-                env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, request.POST)
-
-            # Return data to form in case of error
-            lists['ambiente'] = ambiente_form
-
-            # Validate
-            if ambiente_form.is_valid():
-
-                divisao_dc = ambiente_form.cleaned_data['divisao']
-                ambiente_logico = ambiente_form.cleaned_data['ambiente_logico']
-                grupo_l3 = ambiente_form.cleaned_data['grupol3']
-                filter_ = ambiente_form.cleaned_data['filter']
-                link = ambiente_form.cleaned_data['link']
-                acl_path = ambiente_form.cleaned_data['acl_path']
-                vrf = ambiente_form.cleaned_data['vrf']
-                if str(vrf) == str(None):
-                    vrf = None
-                father_environment = ambiente_form.cleaned_data['father_environment']
-
-                ipv4_template = ambiente_form.cleaned_data.get(
-                    'ipv4_template', None)
-                ipv6_template = ambiente_form.cleaned_data.get(
-                    'ipv6_template', None)
-
-                min_num_vlan_1 = ambiente_form.cleaned_data.get(
-                    'min_num_vlan_1', None)
-                max_num_vlan_1 = ambiente_form.cleaned_data.get(
-                    'max_num_vlan_1', None)
-                min_num_vlan_2 = ambiente_form.cleaned_data.get(
-                    'min_num_vlan_2', None)
-                max_num_vlan_2 = ambiente_form.cleaned_data.get(
-                    'max_num_vlan_2', None)
-
-                vrf_internal = dict(ambiente_form.fields['vrf'].choices)[int(vrf)]
-
-                # Business
-                dict_env = {
-                    "id": None,
-                    "grupo_l3": int(grupo_l3),
-                    "ambiente_logico": int(ambiente_logico),
-                    "divisao_dc": int(divisao_dc),
-                    "filter": int(filter_) if filter_ else None,
-                    "acl_path": acl_path,
-                    "ipv4_template": ipv4_template,
-                    "ipv6_template": ipv6_template,
-                    "link": link,
-                    "min_num_vlan_1": min_num_vlan_1,
-                    "max_num_vlan_1": max_num_vlan_1,
-                    "min_num_vlan_2": min_num_vlan_2,
-                    "max_num_vlan_2": max_num_vlan_2,
-                    "default_vrf": int(vrf),
-                    "father_environment": int(father_environment) if father_environment else None,
-                    'vrf': vrf_internal
-                }
-                client.create_api_environment().create_environment(dict_env)
-                messages.add_message(
-                    request, messages.SUCCESS, environment_messages.get("success_insert"))
-
-                return redirect('environment.list')
-
-            else:
-                # If invalid, send all error messages in fields
-                lists['ambiente'] = ambiente_form
-
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-        net_type_list = client.create_tipo_rede().listar()
-
-        config_forms.append(IpConfigForm(net_type_list))
-
-        lists['config_forms'] = config_forms
-
-    except NetworkAPIClientError as e:
-        logger.error(e)
-        messages.add_message(request, messages.ERROR, e)
-
-    return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
-
+    # lists = dict()
+    # config_forms = list()
+    #
+    # try:
+    #
+    #     # Get User
+    #     auth = AuthSession(request.session)
+    #     client = auth.get_clientFactory()
+    #
+    #     # Get all needs from NetworkAPI
+    #     env_logic = client.create_ambiente_logico().listar()
+    #     division_dc = client.create_divisao_dc().listar()
+    #     group_l3 = client.create_grupo_l3().listar()
+    #     filters = client.create_filter().list_all()
+    #     try:
+    #         templates = get_templates(auth.get_user(), True)
+    #     except GITCommandError as e:
+    #         logger.error(e)
+    #         messages.add_message(request, messages.ERROR, e)
+    #         templates = {
+    #             'ipv4': list(),
+    #             'ipv6': list()
+    #         }
+    #
+    #     ipv4 = templates.get("ipv4")
+    #     ipv6 = templates.get("ipv6")
+    #     envs = client.create_ambiente().listar().get('ambiente')
+    #     vrfs = client.create_api_vrf().search()['vrfs']
+    #     # Forms
+    #     lists['ambiente'] = AmbienteForm(
+    #         env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs)
+    #     lists['divisaodc_form'] = DivisaoDCForm()
+    #     lists['grupol3_form'] = Grupol3Form()
+    #     lists['ambientelogico_form'] = AmbienteLogicoForm()
+    #
+    #     lists['action'] = reverse("environment.form")
+    #
+    #     # If form was submited
+    #     if request.method == 'POST':
+    #
+    #         # Set data in form
+    #         ambiente_form = AmbienteForm(
+    #             env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, request.POST)
+    #
+    #         # Return data to form in case of error
+    #         lists['ambiente'] = ambiente_form
+    #
+    #         # Validate
+    #         if ambiente_form.is_valid():
+    #
+    #             divisao_dc = ambiente_form.cleaned_data['divisao']
+    #             ambiente_logico = ambiente_form.cleaned_data['ambiente_logico']
+    #             grupo_l3 = ambiente_form.cleaned_data['grupol3']
+    #             filter_ = ambiente_form.cleaned_data['filter']
+    #             link = ambiente_form.cleaned_data['link']
+    #             acl_path = ambiente_form.cleaned_data['acl_path']
+    #             vrf = ambiente_form.cleaned_data['vrf']
+    #             if str(vrf) == str(None):
+    #                 vrf = None
+    #             father_environment = ambiente_form.cleaned_data['father_environment']
+    #
+    #             ipv4_template = ambiente_form.cleaned_data.get(
+    #                 'ipv4_template', None)
+    #             ipv6_template = ambiente_form.cleaned_data.get(
+    #                 'ipv6_template', None)
+    #
+    #             min_num_vlan_1 = ambiente_form.cleaned_data.get(
+    #                 'min_num_vlan_1', None)
+    #             max_num_vlan_1 = ambiente_form.cleaned_data.get(
+    #                 'max_num_vlan_1', None)
+    #             min_num_vlan_2 = ambiente_form.cleaned_data.get(
+    #                 'min_num_vlan_2', None)
+    #             max_num_vlan_2 = ambiente_form.cleaned_data.get(
+    #                 'max_num_vlan_2', None)
+    #
+    #             vrf_internal = dict(ambiente_form.fields['vrf'].choices)[int(vrf)]
+    #
+    #             # Business
+    #             dict_env = {
+    #                 "id": None,
+    #                 "grupo_l3": int(grupo_l3),
+    #                 "ambiente_logico": int(ambiente_logico),
+    #                 "divisao_dc": int(divisao_dc),
+    #                 "filter": int(filter_) if filter_ else None,
+    #                 "acl_path": acl_path,
+    #                 "ipv4_template": ipv4_template,
+    #                 "ipv6_template": ipv6_template,
+    #                 "link": link,
+    #                 "min_num_vlan_1": min_num_vlan_1,
+    #                 "max_num_vlan_1": max_num_vlan_1,
+    #                 "min_num_vlan_2": min_num_vlan_2,
+    #                 "max_num_vlan_2": max_num_vlan_2,
+    #                 "default_vrf": int(vrf),
+    #                 "father_environment": int(father_environment) if father_environment else None,
+    #                 'vrf': vrf_internal
+    #             }
+    #             client.create_api_environment().create_environment(dict_env)
+    #             messages.add_message(
+    #                 request, messages.SUCCESS, environment_messages.get("success_insert"))
+    #
+    #             return redirect('environment.list')
+    #
+    #         else:
+    #             # If invalid, send all error messages in fields
+    #             lists['ambiente'] = ambiente_form
+    #
+    #     auth = AuthSession(request.session)
+    #     client = auth.get_clientFactory()
+    #     net_type_list = client.create_tipo_rede().listar()
+    #
+    #     config_forms.append(IpConfigForm(net_type_list))
+    #
+    #     lists['config_forms'] = config_forms
+    #
+    # except NetworkAPIClientError as e:
+    #     logger.error(e)
+    #     messages.add_message(request, messages.ERROR, e)
+    #
+    # return render_to_response(ENVIRONMENT_FORM, lists, context_instance=RequestContext(request))
+    return HttpResponseBadRequest("Bad request. Example: /environment/form/environment_id/.",
+                                  status=400)
 
 @log
 @login_required
@@ -756,9 +761,17 @@ def insert_grupo_l3(request):
             messages.add_message(request, messages.ERROR, e)
 
         try:
+            data = {
+                "start_record": 0,
+                "end_record": 1000,
+                "asorting_cols": ["nome"],
+                "searchable_columns": [],
+                "custom_search": "",
+                "extends_search": []
+            }
             # Get all needs from NetworkAPI
             env_logic = client.create_ambiente_logico().listar()
-            division_dc = client.create_divisao_dc().listar()
+            division_dc = client.create_api_environment_dc().search(search=data)
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
 
@@ -969,9 +982,17 @@ def insert_ambiente_logico(request):
             messages.add_message(request, messages.ERROR, e)
 
         try:
+            data = {
+                "start_record": 0,
+                "end_record": 1000,
+                "asorting_cols": ["nome"],
+                "searchable_columns": [],
+                "custom_search": "",
+                "extends_search": []
+            }
             # Get all needs from NetworkAPI
             env_logic = client.create_ambiente_logico().listar()
-            division_dc = client.create_divisao_dc().listar()
+            division_dc = client.create_api_environment_dc().search(search=data)
             group_l3 = client.create_grupo_l3().listar()
             filters = client.create_filter().list_all()
             try:
