@@ -638,7 +638,7 @@ def edit(request, id_environment):
             "custom_search": "",
             "extends_search": []
         }
-        env_logic = client.create_ambiente_logico().listar()
+        env_logic = client.create_api_environment_logic().search(search=data)
         division_dc = client.create_api_environment_dc().search(search=data)
         group_l3 = client.create_api_environment_l3().search(search=data)
         filters = client.create_filter().list_all()
@@ -838,8 +838,7 @@ def insert_grupo_l3(request):
                 "custom_search": "",
                 "extends_search": []
             }
-            # Get all needs from NetworkAPI
-            env_logic = client.create_ambiente_logico().listar()
+            env_logic = client.create_api_environment_logic().search(search=data)
             division_dc = client.create_api_environment_dc().search(search=data)
             group_l3 = client.create_api_environment_l3().search(search=data)
             filters = client.create_filter().list_all()
@@ -955,8 +954,7 @@ def insert_divisao_dc(request):
                 "custom_search": "",
                 "extends_search": []
             }
-            # Get all needs from NetworkAPI
-            env_logic = client.create_ambiente_logico().listar()
+            env_logic = client.create_api_environment_logic().search(search=data)
             division_dc = client.create_api_environment_dc().search(search=data)
             group_l3 = client.create_api_environment_l3().search(search=data)
             filters = client.create_filter().list_all()
@@ -1045,15 +1043,13 @@ def insert_ambiente_logico(request):
 
             if ambiente_logico_form.is_valid():
 
-                nome_ambiente_logico = ambiente_logico_form.cleaned_data[
-                    'nome']
+                nome_ambiente_logico = ambiente_logico_form.cleaned_data['nome']
+                env = dict(name=nome_ambiente_logico.upper())
+                client.create_api_environment_logic().create([env])
 
-                client.create_ambiente_logico().inserir(
-                    nome_ambiente_logico.upper())
                 messages.add_message(
                     request, messages.SUCCESS, environment_messages.get(
                         "ambiente_log_sucess"))
-
             else:
                 # If invalid, send all error messages in fields
                 lists['ambientelogico_form'] = ambiente_logico_form
@@ -1072,8 +1068,7 @@ def insert_ambiente_logico(request):
                 "custom_search": "",
                 "extends_search": []
             }
-            # Get all needs from NetworkAPI
-            env_logic = client.create_ambiente_logico().listar()
+            env_logic = client.create_api_environment_logic().search(search=data)
             division_dc = client.create_api_environment_dc().search(search=data)
             group_l3 = client.create_api_environment_l3().search(search=data)
             filters = client.create_filter().list_all()

@@ -88,7 +88,7 @@ class AmbienteForm(forms.Form):
         self.fields['divisao'].choices = [
             (div['id'], div['name']) for div in division_dc["environments_dc"]]
         self.fields['ambiente_logico'].choices = [
-            (amb_log['id'], amb_log['nome']) for amb_log in env_logic["logical_environment"]]
+            (amb_log['id'], amb_log['name']) for amb_log in env_logic["logic_environments"]]
         self.fields['grupol3'].choices = [
             (grupo['id'], grupo['name']) for grupo in group_l3["l3_environments"]]
         self.fields['filter'].choices = [

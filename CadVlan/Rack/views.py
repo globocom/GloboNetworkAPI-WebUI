@@ -984,6 +984,15 @@ def new_fabric(request, dc_id):
 @csrf_protect
 def fabric_ambiente(request, fabric_id):
 
+    data_search = {
+        "start_record": 0,
+        "end_record": 1000,
+        "asorting_cols": ["nome"],
+        "searchable_columns": [],
+        "custom_search": "",
+        "extends_search": []
+    }
+
     try:
 
         auth = AuthSession(request.session)
@@ -1181,46 +1190,47 @@ def fabric_ambiente(request, fabric_id):
                 configs_oob.append(v4_oob)
 
             try:
-                env_l3_id = client.create_grupo_l3().inserir(fabric_name).get(
-                    "logical_environment").get("id")
+                fabric_name = dict(name=fabric_name)
+                env_l3 = client.create_api_environment_l3().create([fabric_name])
+                env_l3_id = env_l3[0].get("id")
             except:
-                env_l3 = client.create_grupo_l3().listar().get("group_l3")
+                env_l3 = client.create_api_environment_l3().search(search=data_search)
                 for l3 in env_l3:
-                    if l3.get("nome")==fabric_name:
+                    if l3.get("name") == fabric_name:
                         env_l3_id = l3.get("id")
 
-            env_logic = client.create_ambiente_logico().listar().get(
-                "logical_environment")
+            env_logic = client.create_api_environment_logic().search(
+                search=data_search).get("logic_environments")
             for el in env_logic:
-                if el.get("nome")=="SPINES":
+                if el.get("nome") == "SPINES":
                     logic_id_spn = el.get("id")
-                elif el.get("nome")=="PRODUCAO":
+                elif el.get("nome") == "PRODUCAO":
                     logic_id_host = el.get("id")
-                elif el.get("nome")=="GERENCIA":
+                elif el.get("nome") == "GERENCIA":
                     logic_id_ger = el.get("id")
-                elif el.get("nome")=="INTERNO-RACK":
+                elif el.get("nome") == "INTERNO-RACK":
                     logic_id_int = el.get("id")
-                elif el.get("nome")=="LEAF-LEAF":
+                elif el.get("nome") == "LEAF-LEAF":
                     logic_id_lflf = el.get("id")
 
             vrfs = client.create_api_vrf().search()['vrfs']
             for vrf in vrfs:
-                if vrf.get("vrf")=="BEVrf":
+                if vrf.get("vrf") == "BEVrf":
                     vrf_id_be = vrf.get("id")
                     vrf_be = vrf.get("vrf")
-                elif vrf.get("vrf")=="FEVrf":
+                elif vrf.get("vrf") == "FEVrf":
                     vrf_id_fe = vrf.get("id")
                     vrf_fe = vrf.get("vrf")
-                elif vrf.get("vrf")=="BordaVrf":
+                elif vrf.get("vrf") == "BordaVrf":
                     vrf_id_bo = vrf.get("id")
                     vrf_bo = vrf.get("vrf")
-                elif vrf.get("vrf")=="BordaCachosVrf":
+                elif vrf.get("vrf") == "BordaCachosVrf":
                     vrf_id_boca = vrf.get("id")
                     vrf_boca = vrf.get("vrf")
-                elif vrf.get("vrf")=="BordaCachosBVrf":
+                elif vrf.get("vrf") == "BordaCachosBVrf":
                     vrf_id_bocab = vrf.get("id")
                     vrf_bocab = vrf.get("vrf")
-                elif vrf.get("vrf")=="Default":
+                elif vrf.get("vrf") == "Default":
                     vrf_id = vrf.get("id")
                     vrf_ = vrf.get("vrf")
 
