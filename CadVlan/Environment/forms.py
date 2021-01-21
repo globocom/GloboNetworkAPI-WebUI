@@ -101,10 +101,7 @@ class AmbienteForm(forms.Form):
             (template['name'], template['name']) for template in ipv6]
         self.fields['ipv6_template'].choices.insert(0, ('', '--------'))
         self.fields['father_environment'].choices = [
-            (env['id'], '%s - %s - %s' % (
-                env['nome_divisao'],
-                env['nome_ambiente_logico'],
-                env['nome_grupo_l3'])) for env in envs]
+            (env['id'], env['name']) for env in envs["environments"]]
         self.fields['father_environment'].choices.insert(0, ('', '--------'))
         self.fields['vrf'].choices = [(vrf['id'], '%s' % (vrf['internal_name'])) for vrf in vrfs]
         self.fields['vrf'].choices.insert(0, ('', '--------'))
@@ -115,19 +112,16 @@ class AmbienteForm(forms.Form):
         widget=forms.HiddenInput(),
         error_messages=error_messages
     )
-
     id_father_env = forms.IntegerField(
         label="",
         required=False,
         widget=forms.HiddenInput(),
         error_messages=error_messages
     )
-
     divisao = forms.ChoiceField(
 
         label="Divisão DC",
         choices=[(0, 'Selecione')],
-        required=True,
         widget=forms.Select(
             attrs={
                 "style": "width: 310px",
@@ -138,7 +132,6 @@ class AmbienteForm(forms.Form):
     )
     ambiente_logico = forms.ChoiceField(
         label="Ambiente Lógico",
-        required=True,
         choices=[(
             0, 'Selecione')],
         widget=forms.Select(
@@ -219,7 +212,6 @@ class AmbienteForm(forms.Form):
     vrf = forms.ChoiceField(
         label="VRF",
         choices=[(0, 'Selecione')],
-        required=True,
         widget=forms.Select(
             attrs={
                 "style": "width: 310px",
@@ -278,7 +270,8 @@ class AmbienteForm(forms.Form):
         max_num_vlan_1 = self.cleaned_data.get('max_num_vlan_1')
         min_num_vlan_1 = self.cleaned_data.get('min_num_vlan_1')
 
-        if (max_num_vlan_1 != '' and min_num_vlan_1 == '') or (min_num_vlan_1 != '' and max_num_vlan_1 == '') or (not max_num_vlan_1 and min_num_vlan_1) or (not min_num_vlan_1 and max_num_vlan_1):
+        if (max_num_vlan_1 != '' and min_num_vlan_1 == '') or (min_num_vlan_1 != '' and max_num_vlan_1 == '') \
+                or (not max_num_vlan_1 and min_num_vlan_1) or (not min_num_vlan_1 and max_num_vlan_1):
             raise forms.ValidationError(
                 'O valor máximo e mínimo devem ser preenchidos.')
 
@@ -299,7 +292,8 @@ class AmbienteForm(forms.Form):
         max_num_vlan_2 = self.cleaned_data.get('max_num_vlan_2')
         min_num_vlan_2 = self.cleaned_data.get('min_num_vlan_2')
 
-        if (max_num_vlan_2 != '' and min_num_vlan_2 == '') or (min_num_vlan_2 != '' and max_num_vlan_2 == '') or (not max_num_vlan_2 and min_num_vlan_2) or (not min_num_vlan_2 and max_num_vlan_2):
+        if (max_num_vlan_2 != '' and min_num_vlan_2 == '') or (min_num_vlan_2 != '' and max_num_vlan_2 == '') \
+                or (not max_num_vlan_2 and min_num_vlan_2) or (not min_num_vlan_2 and max_num_vlan_2):
             raise forms.ValidationError(
                 'O valor máximo e mínimo devem ser preenchidos.')
 
@@ -332,7 +326,6 @@ class AmbienteForm(forms.Form):
                     path = path[:-1]
             except IndexError:
                 raise forms.ValidationError('Path inválido')
-        # valida acl_path
 
         return self.cleaned_data['acl_path']
 
@@ -381,7 +374,6 @@ class IpConfigForm(forms.Form):
     ip_version = forms.ChoiceField(
 
         label="Rede IPv4/IPv6",
-        required=True,
         choices=NETWORK_IP_CHOICES,
         error_messages=error_messages,
         widget=forms.RadioSelect,
@@ -452,7 +444,6 @@ class IpConfigForm(forms.Form):
 
     net_type = forms.ChoiceField(
         label="Tipo de Rede",
-        required=True,
         error_messages=error_messages,
         widget=forms.Select(attrs={"style": "width: 180px"})
     )
@@ -484,7 +475,8 @@ class IpConfigForm(forms.Form):
 
                 try:
                     if int(v4oct5) > int(prefix):
-                        self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix')])
+                        self._errors['prefix'] = self.error_class([
+                            environment_messages.get('invalid_prefix')])
                 except Exception:
                     pass
 
@@ -493,7 +485,8 @@ class IpConfigForm(forms.Form):
 
             else:
                 if prefix not in range(129):
-                    self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix_ipv6')])
+                    self._errors['prefix'] = self.error_class([
+                        environment_messages.get('invalid_prefix_ipv6')])
 
                 v6oct1 = self.cleaned_data.get('v6oct1', '')
                 v6oct2 = self.cleaned_data.get('v6oct2', '')
@@ -507,12 +500,15 @@ class IpConfigForm(forms.Form):
 
                 try:
                     if int(v6oct9) > int(prefix):
-                        self._errors['prefix'] = self.error_class([environment_messages.get('invalid_prefix')])
+                        self._errors['prefix'] = self.error_class([
+                            environment_messages.get('invalid_prefix')])
                 except Exception:
                     pass
 
-                self.cleaned_data['network_validate'] = v6oct1 + ':' + v6oct2 + ':' + v6oct3 + ':' + \
-                    v6oct4 + ':' + v6oct5 + ':' + v6oct6 + ':' + \
-                    v6oct7 + ':' + v6oct8 + '/' + v6oct9
+                self.cleaned_data['network_validate'] = v6oct1 + ':' + v6oct2 + ':' \
+                                                        + v6oct3 + ':' + v6oct4 + ':' \
+                                                        + v6oct5 + ':' + v6oct6 + ':' \
+                                                        + v6oct7 + ':' + v6oct8 + '/' \
+                                                        + v6oct9
 
             return self.cleaned_data

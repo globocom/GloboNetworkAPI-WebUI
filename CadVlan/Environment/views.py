@@ -661,7 +661,9 @@ def edit(request, id_environment):
         ipv4 = templates.get("ipv4")
         ipv6 = templates.get("ipv6")
 
-        envs = client.create_ambiente().listar().get('ambiente')
+        data_env = data
+        data_env["asorting_cols"] = []
+        envs = client.create_api_environment().search(search=data_env)
         vrfs = client.create_api_vrf().search()['vrfs']
 
         try:
@@ -855,7 +857,9 @@ def insert_grupo_l3(request):
 
             ipv4 = templates.get("ipv4")
             ipv6 = templates.get("ipv6")
-            envs = client.create_ambiente().listar().get('ambiente')
+            data_env = data
+            data_env["asorting_cols"] = []
+            envs = client.create_api_environment().search(search=data_env)
             vrfs = client.create_api_vrf().search()['vrfs']
             # Forms
             env_form = AmbienteForm(
@@ -970,7 +974,9 @@ def insert_divisao_dc(request):
 
             ipv4 = templates.get("ipv4")
             ipv6 = templates.get("ipv6")
-            envs = client.create_ambiente().listar().get('ambiente')
+            data_env = data
+            data_env["asorting_cols"] = []
+            envs = client.create_api_environment().search(search=data_env)
             vrfs = client.create_api_vrf().search()['vrfs']
 
             # Forms
@@ -1084,7 +1090,9 @@ def insert_ambiente_logico(request):
 
             ipv4 = templates.get("ipv4")
             ipv6 = templates.get("ipv6")
-            envs = client.create_ambiente().listar().get('ambiente')
+            data_env = data
+            data_env["asorting_cols"] = []
+            envs = client.create_api_environment().search(search=data_env)
             vrfs = client.create_api_vrf().search()['vrfs']
 
             # Forms
