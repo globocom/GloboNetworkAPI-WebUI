@@ -26,7 +26,6 @@ from django.template.context import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from networkapiclient.exception import EquipamentoError
 from networkapiclient.exception import NetworkAPIClientError
-from networkapiclient.exception import UserNotAuthorizedError
 from networkapiclient.Pagination import Pagination
 
 from CadVlan.Auth.AuthSession import AuthSession
@@ -86,7 +85,7 @@ def ajax_check_real(request, id_vip):
 
         return HttpResponse(json.dumps(response_data), content_type='application/json')
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         return HttpResponse(json.dumps(e), content_type='application/json')
 
@@ -122,7 +121,7 @@ def ajax_view_real_shared(request, id_equip, lists):
         response.status_code = 200
         return response
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -174,7 +173,7 @@ def ajax_remove_real(request, id_vip):
 
         return ajax_view_real_shared(request, equip_id, lists)
 
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -212,7 +211,7 @@ def remove_reals_from_equip(client, id_vip, lists, ip='', port_vip='', port_real
         lists['message'] = request_vip_messages.get('real_remove')
         lists['msg_type'] = 'success'
 
-    except Exception, e:
+    except Exception as e:
         lists['msg_type'] = 'error'
         lists['message'] = e
 
@@ -234,10 +233,10 @@ def ajax_autocomplete_equips(request):
         # Get list of equipments from cache
         equip_list = cache_list_equipment(equipment)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -256,10 +255,10 @@ def ajax_autocomplete_equips_external(request, form_acess, client):
         # Get list of equipments from cache
         equip_list = cache_list_equipment(equipment)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -347,10 +346,10 @@ def ajax_list_equips(request):
                 response.status_code = 412
                 return response
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         return HttpResponseServerError(e, mimetype='application/javascript')
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         return HttpResponseServerError(e, mimetype='application/javascript')
 
@@ -382,7 +381,7 @@ def search_list(request):
 
         lists['search_form'] = search_form
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -486,7 +485,7 @@ def equip_form(request):
 
             lists['form'] = EquipForm(forms_aux)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         if equip is not None:
@@ -528,7 +527,7 @@ def ajax_modelo_equip(request, id_marca):
             response.status_code = 200
             return response
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -564,7 +563,7 @@ def ajax_marca_equip(request):
         response.status_code = 200
         return response
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -614,7 +613,7 @@ def equip_edit(request, id_equip):
                 'groups', 'model__details__brand']
         ).get('equipments')[0]
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return redirect('equipment.search.list')
@@ -723,16 +722,16 @@ def equip_edit(request, id_equip):
                     })
                 lists['roteadores'] = roteadores
 
-            except NetworkAPIClientError, e:
+            except NetworkAPIClientError as e:
                 logger.error(e)
                 messages.add_message(request, messages.ERROR, e)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         lists = list_ips_edit_equip(lists, id_equip, client)
 
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         lists = list_ips_edit_equip(lists, id_equip, client)
 
@@ -753,7 +752,7 @@ def list_ips_edit_equip(lists, id_equip, client):
             if ips6 is not None:
                 lists['ips6'] = ips6
 
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
 
     return lists
@@ -799,7 +798,7 @@ def marca_form(request):
             else:
                 lists['form_marca'] = form
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -845,7 +844,7 @@ def modelo_form(request):
             else:
                 lists['form_modelo'] = form
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -893,10 +892,10 @@ def delete_equipments_shared(request, client_equip, ids):
             # Execute in NetworkAPI
             client_equip.remover(id_equip)
 
-        except EquipamentoError, e:
+        except EquipamentoError as e:
             error_list.append(id_equip)
 
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             have_errors = True
@@ -959,5 +958,5 @@ def get_environments(client):
         # env_list = env_cli.search()
         return client.create_api_environment().search(search=search_env, kind='basic')
 
-    except Exception, e:
+    except Exception as e:
         raise e
