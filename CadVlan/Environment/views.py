@@ -697,7 +697,8 @@ def edit(request, id_environment):
         }
 
         env_form = AmbienteForm(
-            env_logic, division_dc, group_l3, filters, ipv4, ipv6, envs, vrfs, initial=initial)
+            env_logic, division_dc, group_l3, filters, ipv4, ipv6,
+            envs, vrfs, initial=initial)
 
         # Forms
         lists['ambiente'] = env_form

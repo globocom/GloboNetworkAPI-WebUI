@@ -20,10 +20,15 @@ from CadVlan.messages import error_messages
 
 class EnvironmentVipForm(forms.Form):
 
-    def __init__(self, script_type_list, environment_list={}, *args, **kwargs):
+    def __init__(self, script_type_list, environment_list=dict(), *args, **kwargs):
         super(EnvironmentVipForm, self).__init__(*args, **kwargs)
-        self.fields['option_vip'].choices = [(st['id'], st['tipo_opcao'] + " - " + st['nome_opcao_txt']) for st in script_type_list["option_vip"]]
-        self.fields['environment'].choices = [(environment['id'], environment['divisao_dc_name'] + " - " + environment['ambiente_logico_name'] + " - " + environment['grupo_l3_name']) for environment in environment_list["ambiente"]]
+        self.fields['option_vip'].choices = [
+            (st['id'], st['tipo_opcao'] + " - " + st['nome_opcao_txt'])
+            for st in script_type_list["option_vip"]]
+        self.fields['environment'].choices = [
+            (environment['id'],
+             environment['name'])
+            for environment in environment_list["environments"]]
 
     id = forms.IntegerField(
         label="",

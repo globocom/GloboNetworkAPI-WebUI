@@ -579,19 +579,17 @@ def ajax_marca_equip(request):
 
 @log
 @login_required
-@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'write': True}, {'permission': ENVIRONMENT_MANAGEMENT, 'read': True}, {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
+@has_perm([{'permission': EQUIPMENT_MANAGEMENT, 'write': True},
+           {'permission': ENVIRONMENT_MANAGEMENT, 'read': True},
+           {'permission': EQUIPMENT_GROUP_MANAGEMENT, 'read': True}])
 def equip_edit(request, id_equip):
 
     lists = dict()
     lists['equip_id'] = id_equip
-
     roteadores = []
 
-    # Get user
     auth = AuthSession(request.session)
     client = auth.get_clientFactory()
-
-    is_error = False
 
     forms_aux = dict()
     forms_aux['tipo_equipamento'] = client.create_tipo_equipamento().listar().get(
@@ -599,10 +597,19 @@ def equip_edit(request, id_equip):
     forms_aux['marcas'] = client.create_marca().listar().get('brand')
     forms_aux['grupos'] = client.create_grupo_equipamento(
     ).listar().get('grupo')
-    # List All - Ambientes
-    environments = client.create_ambiente().listar().get('ambiente')
+
+    data_env = {
+        "start_record": 0,
+        "end_record": 5000,
+        "asorting_cols": [],
+        "searchable_columns": [],
+        "custom_search": "",
+        "extends_search": []
+    }
+    envs = client.create_api_environment().search(search=data_env)
+    environments = envs.get('environments')
+
     forms_aux['ambientes'] = environments
-    # List All - Sdn Controller Environments
     forms_aux['sdn_controlled_environment'] = environments
 
     try:
@@ -678,13 +685,11 @@ def equip_edit(request, id_equip):
 
                 return redirect('equipment.search.list')
 
-            # form invalid
             else:
 
                 lists = list_ips_edit_equip(lists, id_equip, client)
                 lists['roteadores'] = roteadores_chosen
 
-        # GET REQUEST
         else:
             try:
 
@@ -703,7 +708,6 @@ def equip_edit(request, id_equip):
                     list_sdn_controlled_environments.append(
                         sdn_env['environment'])
 
-                # Set Form
                 modelos = client.create_modelo().listar_por_marca(
                     equip.get('model').get('brand').get('id'))
                 forms_aux['modelos'] = modelos.get('model')
@@ -735,7 +739,9 @@ def equip_edit(request, id_equip):
         logger.error(e)
         lists = list_ips_edit_equip(lists, id_equip, client)
 
-    return render_to_response(EQUIPMENT_EDIT, lists, context_instance=RequestContext(request))
+    return render_to_response(EQUIPMENT_EDIT,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 def list_ips_edit_equip(lists, id_equip, client):

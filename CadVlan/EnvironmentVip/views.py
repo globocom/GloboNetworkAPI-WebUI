@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import json
 import logging
 
@@ -46,14 +47,13 @@ logger = logging.getLogger(__name__)
 @has_perm([{"permission": ENVIRONMENT_VIP, "read": True}])
 def list_all(request):
 
+    environment_vip_list = dict()
+
+    # Get user
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
     try:
-
-        environment_vip_list = dict()
-
-        # Get user
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
         # Get all environment vips from NetworkAPI
         environment_vip_list = client.create_environment_vip().list_all()
 
@@ -78,11 +78,13 @@ def list_all(request):
 
         environment_vip_list['form'] = DeleteForm()
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ENVIRONMENTVIP_LIST, environment_vip_list, context_instance=RequestContext(request))
+    return render_to_response(ENVIRONMENTVIP_LIST,
+                              environment_vip_list,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -116,7 +118,7 @@ def delete_all(request):
                     # Execute in NetworkAPI
                     client_evip.remove(id_environment_vip)
 
-                except NetworkAPIClientError, e:
+                except NetworkAPIClientError as e:
                     logger.error(e)
                     messages.add_message(request, messages.ERROR, e)
                     have_errors = True
@@ -125,7 +127,8 @@ def delete_all(request):
             # If cant remove nothing
             if len(error_list) == len(ids):
                 messages.add_message(
-                    request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                    request, messages.ERROR,
+                    error_messages.get("can_not_remove_all"))
 
             # If cant remove someones
             elif len(error_list) > 0:
@@ -140,17 +143,22 @@ def delete_all(request):
             # If all has ben removed
             elif have_errors is False:
                 messages.add_message(
-                    request, messages.SUCCESS, environment_vip_messages.get("success_remove"))
+                    request,
+                    messages.SUCCESS,
+                    environment_vip_messages.get("success_remove"))
 
             else:
                 messages.add_message(
-                    request, messages.SUCCESS, error_messages.get("can_not_remove_error"))
+                    request,
+                    messages.SUCCESS,
+                    error_messages.get("can_not_remove_error"))
 
         else:
             messages.add_message(
-                request, messages.ERROR, error_messages.get("select_one"))
+                request,
+                messages.ERROR,
+                error_messages.get("select_one"))
 
-    # Redirect to list_all action
     return redirect('environment-vip.list')
 
 
@@ -159,20 +167,31 @@ def delete_all(request):
 @has_perm([{"permission": ENVIRONMENT_VIP, "write": True}])
 def add_form(request):
 
-    try:
+    lists = dict()
 
-        lists = dict()
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    try:
         lists['action'] = reverse("environment-vip.form")
-        # Get user
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
 
         options_vip = client.create_option_vip().get_all()
-        environmnet_list = client.create_ambiente().list_all()
+        data_env = {
+            "start_record": 0,
+            "end_record": 5000,
+            "asorting_cols": [],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        environmnet_list = client.create_api_environment().search(
+            search=data_env)
 
         if request.method == "POST":
 
-            form = EnvironmentVipForm(options_vip, environmnet_list, request.POST)
+            form = EnvironmentVipForm(options_vip,
+                                      environmnet_list,
+                                      request.POST)
             lists['form'] = form
 
             if form.is_valid():
@@ -201,7 +220,9 @@ def add_form(request):
                     )
 
                 messages.add_message(
-                    request, messages.SUCCESS, environment_vip_messages.get("success_insert"))
+                    request,
+                    messages.SUCCESS,
+                    environment_vip_messages.get("success_insert"))
 
                 return redirect('environment-vip.list')
 
@@ -209,11 +230,13 @@ def add_form(request):
 
             lists['form'] = EnvironmentVipForm(options_vip, environmnet_list)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ENVIRONMENTVIP_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(ENVIRONMENTVIP_FORM,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -221,13 +244,12 @@ def add_form(request):
 @has_perm([{"permission": ENVIRONMENT_VIP, "write": True}])
 def conf_form(request, id_environmentvip):
 
+    lists = dict()
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
     try:
-
-        lists = dict()
-        # Get user
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
         lists['id_vip'] = id_environmentvip
 
         environment_vip = client.create_api_environment_vip().get_environment_vip(
@@ -238,11 +260,13 @@ def conf_form(request, id_environmentvip):
 
         lists['forms'] = conf.get('conf')
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ENVIRONMENTVIP_CONF_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(ENVIRONMENTVIP_CONF_FORM,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -250,23 +274,33 @@ def conf_form(request, id_environmentvip):
 @has_perm([{"permission": ENVIRONMENT_VIP, "write": True}])
 def edit_form(request, id_environmentvip):
 
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    lists = dict()
+    lists['id_vip'] = id_environmentvip
+
     try:
-
-        lists = dict()
-        # Get user
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-
-        lists['id_vip'] = id_environmentvip
-
         options_vip = client.create_option_vip().get_all()
-        environmnet_list = client.create_ambiente().list_all()
+
+        data_env = {
+            "start_record": 0,
+            "end_record": 5000,
+            "asorting_cols": [],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        environmnet_list = client.create_api_environment().search(
+            search=data_env)
 
         options = client.create_option_vip().get_option_vip(id_environmentvip)
-        environment_related_list_dict = client.create_ambiente().get_related_environment_list(id_environmentvip)
+        environment_related_list_dict = client.create_ambiente().get_related_environment_list(
+            id_environmentvip)
 
         options = options.get("option_vip", [])
-        environment_related_list_dict = environment_related_list_dict.get('environment_related_list', [])
+        environment_related_list_dict = environment_related_list_dict.get(
+            'environment_related_list', [])
 
         if type(options) is dict:
             options = [options]
@@ -274,7 +308,8 @@ def edit_form(request, id_environmentvip):
         if type(environment_related_list_dict) is dict:
             environment_related_list_dict = [environment_related_list_dict]
 
-        environment_id_related_list = [env.get('environment_id') for env in environment_related_list_dict]
+        environment_id_related_list = [env.get('environment_id')
+                                       for env in environment_related_list_dict]
 
         if request.method == "POST":
 
@@ -298,23 +333,27 @@ def edit_form(request, id_environmentvip):
                     description)
 
                 for opt in options:
-                    client.create_option_vip().disassociate(opt.get('id'), id_environmentvip)
+                    client.create_option_vip().disassociate(opt.get('id'),
+                                                            id_environmentvip)
                 for opt_id in option_vip_ids:
                     client.create_option_vip().associate(opt_id, id_environmentvip)
 
                 for related_environment_id in environment_id_related_list:
-                    if _need_dissassociate_environment(related_environment_id, environment_ids_form):
-                        client.create_ambiente().disassociate(related_environment_id, id_environmentvip)
+                    if _need_dissassociate_environment(related_environment_id,
+                                                       environment_ids_form):
+                        client.create_ambiente().disassociate(related_environment_id,
+                                                              id_environmentvip)
 
                 for environment_form_id in environment_ids_form:
-                    if not _environment_already_associated(environment_form_id, environment_id_related_list):
-                        client.create_ambiente().associate(environment_form_id, id_environmentvip)
+                    if not _environment_already_associated(environment_form_id,
+                                                           environment_id_related_list):
+                        client.create_ambiente().associate(environment_form_id,
+                                                           id_environmentvip)
 
                 messages.add_message(
                     request, messages.SUCCESS, environment_vip_messages.get("sucess_edit"))
 
                 return redirect('environment-vip.list')
-        # GET
         else:
             # Build form with environment vip data for id_environmentvip
             environment_vip = client.create_environment_vip().search(id_environmentvip)
@@ -325,18 +364,27 @@ def edit_form(request, id_environmentvip):
             for opt in options:
                 opts.append(opt.get('id'))
 
-            lists['form'] = EnvironmentVipForm(options_vip, environmnet_list, initial={"id": environment_vip.get("id"),
-                                                                                       "finality": environment_vip.get("finalidade_txt"),
-                                                                                       "client": environment_vip.get("cliente_txt"),
-                                                                                       "environment_p44": environment_vip.get("ambiente_p44_txt"),
-                                                                                       "description": environment_vip.get("description"),
-                                                                                       "option_vip": opts,
-                                                                                       "environment": environment_id_related_list})
-    except NetworkAPIClientError, e:
+            lists['form'] = EnvironmentVipForm(options_vip,
+                                               environmnet_list,
+                                               initial={
+                                                   "id": environment_vip.get("id"),
+                                                   "finality": environment_vip.get(
+                                                       "finalidade_txt"),
+                                                   "client": environment_vip.get(
+                                                       "cliente_txt"),
+                                                   "environment_p44": environment_vip.get(
+                                                       "ambiente_p44_txt"),
+                                                   "description": environment_vip.get(
+                                                       "description"),
+                                                   "option_vip": opts,
+                                                   "environment": environment_id_related_list})
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ENVIRONMENTVIP_EDIT, lists, context_instance=RequestContext(request))
+    return render_to_response(ENVIRONMENTVIP_EDIT,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 def _need_dissassociate_environment(related_environment_id, form_ids_list):
