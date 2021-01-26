@@ -394,30 +394,30 @@ def search_list(request):
 def equip_form(request):
     try:
         equip = None
-
         roteadores = []
-
         lists = dict()
-        # Enviar listas para formar os Selects do formulário
         forms_aux = dict()
 
-        # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
-        # List All - Tipo Equipamento
         forms_aux['tipo_equipamento'] = client.create_tipo_equipamento().listar().get(
             'equipment_type')
-        # List All - Brands
         forms_aux['marcas'] = client.create_marca().listar().get('brand')
-        # List All - Grupos
         forms_aux['grupos'] = client.create_grupo_equipamento().listar().get(
             'grupo')
-        # List All - Ambientes
-        environments = client.create_ambiente().listar().get('ambiente')
-        forms_aux['ambientes'] = environments
-        # List All - Sdn Controller Environments
-        forms_aux['sdn_controlled_environment'] = environments
+
+        data_env = {
+            "start_record": 0,
+            "end_record": 5000,
+            "asorting_cols": [],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        environments = client.create_api_environment().search(search=data_env)
+        forms_aux['ambientes'] = environments.get('environments')
+        forms_aux['sdn_controlled_environment'] = environments.get('environments')
 
         if request.method == 'POST':
             roteadores = request.POST.getlist('roteadores')

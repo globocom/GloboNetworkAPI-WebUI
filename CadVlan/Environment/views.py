@@ -632,7 +632,7 @@ def edit(request, id_environment):
 
         data = {
             "start_record": 0,
-            "end_record": 1000,
+            "end_record": 5000,
             "asorting_cols": ["nome"],
             "searchable_columns": [],
             "custom_search": "",
@@ -834,7 +834,7 @@ def insert_grupo_l3(request):
         try:
             data = {
                 "start_record": 0,
-                "end_record": 1000,
+                "end_record": 5000,
                 "asorting_cols": ["nome"],
                 "searchable_columns": [],
                 "custom_search": "",
@@ -952,7 +952,7 @@ def insert_divisao_dc(request):
         try:
             data = {
                 "start_record": 0,
-                "end_record": 1000,
+                "end_record": 5000,
                 "asorting_cols": ["nome"],
                 "searchable_columns": [],
                 "custom_search": "",
@@ -1068,7 +1068,7 @@ def insert_ambiente_logico(request):
         try:
             data = {
                 "start_record": 0,
-                "end_record": 1000,
+                "end_record": 5000,
                 "asorting_cols": ["nome"],
                 "searchable_columns": [],
                 "custom_search": "",

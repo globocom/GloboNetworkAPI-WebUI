@@ -83,15 +83,12 @@ class EquipForm(forms.Form):
         self.fields['grupo'].choices = (
             [(m['id'], m['nome']) for m in forms_aux['grupos']])
 
-        environments = [(env['id'], env['nome_divisao'] + ' - ' + env[
-            'nome_ambiente_logico'] + ' - ' + env['nome_grupo_l3']) for env in forms_aux['ambientes']]
+        environments = [(env['id'], env['name']) for env in forms_aux['ambientes']]
 
-        self.fields['ambiente'].choices = (environments)
+        self.fields['ambiente'].choices = environments
 
         sdn_controlled_environment = [
-            (env['id'], env['nome_divisao'] + ' - ' +
-             env['nome_ambiente_logico'] + ' - ' + env['nome_grupo_l3'])
-            for env in forms_aux['sdn_controlled_environment']]
+            (env['id'], env['name']) for env in forms_aux['sdn_controlled_environment']]
 
         self.fields['sdn_controlled_environment'].choices = (
             sdn_controlled_environment)
@@ -100,39 +97,55 @@ class EquipForm(forms.Form):
             self.fields['modelo'].choices = (
                 [(m['id'], m['nome']) for m in forms_aux['modelos']])
 
-    nome = forms.CharField(label=u'Nome', min_length=3, max_length=50, required=True,
-                           error_messages=error_messages, widget=forms.TextInput(attrs={'style': 'width: 200px'}))
+    nome = forms.CharField(label=u'Nome',
+                           min_length=3,
+                           max_length=50,
+                           required=True,
+                           error_messages=error_messages,
+                           widget=forms.TextInput(
+                               attrs={'style': 'width: 200px'}))
     maintenance = forms.BooleanField(
         label='Em manutencao', required=False, error_messages=error_messages)
-    tipo_equipamento = forms.ChoiceField(label='Tipo equipamento', required=True, widget=forms.Select(
-        attrs={'style': 'width: 400px'}), error_messages=error_messages)
-    marca = forms.ChoiceField(label='Marca', required=True, widget=forms.Select(
-        attrs={'style': 'width: 400px'}), error_messages=error_messages)
-    modelo = forms.ChoiceField(label=u'Modelo', required=True, widget=forms.Select(
-        attrs={'style': 'width: 400px'}), error_messages=error_messages)
-    grupo = forms.MultipleChoiceField(label='Grupos Disponíveis', required=True, widget=forms.SelectMultiple(
-        attrs={'style': 'width: 400px'}), error_messages=error_messages)
-    ambiente = forms.MultipleChoiceField(label='Ambientes Disponíveis', required=False, widget=forms.SelectMultiple(
-        attrs={'style': 'width: 400px'}), error_messages=error_messages)
-    sdn_controlled_environment = forms.MultipleChoiceField(label='Ambientes SDN Disponíveis para Controlar', required=False, widget=forms.SelectMultiple(
-        attrs={'style': 'width: 400px'}), error_messages=error_messages)
+    tipo_equipamento = forms.ChoiceField(label='Tipo equipamento',
+                                         widget=forms.Select(
+                                             attrs={'style': 'width: 400px'}),
+                                         error_messages=error_messages)
+    marca = forms.ChoiceField(label='Marca',
+                              widget=forms.Select(
+                                  attrs={'style': 'width: 400px'}),
+                              error_messages=error_messages)
+    modelo = forms.ChoiceField(label=u'Modelo',
+                               widget=forms.Select(
+                                   attrs={'style': 'width: 400px'}),
+                               error_messages=error_messages)
+    grupo = forms.MultipleChoiceField(label='Grupos Disponíveis',
+                                      widget=forms.SelectMultiple(
+                                          attrs={'style': 'width: 400px'}),
+                                      error_messages=error_messages)
+    ambiente = forms.MultipleChoiceField(label='Ambientes Disponíveis',
+                                         required=False,
+                                         widget=forms.SelectMultiple(
+                                             attrs={'style': 'width: 400px'}),
+                                         error_messages=error_messages)
+    sdn_controlled_environment = forms.MultipleChoiceField(
+        label='Ambientes SDN Disponíveis para Controlar',
+        required=False,
+        widget=forms.SelectMultiple(attrs={'style': 'width: 400px'}),
+        error_messages=error_messages)
 
     def clean_tipo_equipamento(self):
         if int(self.cleaned_data['tipo_equipamento']) <= 0:
             raise forms.ValidationError('Este campo é obrigatório')
-
         return self.cleaned_data['tipo_equipamento']
 
     def clean_marca(self):
         if int(self.cleaned_data['marca']) <= 0:
             raise forms.ValidationError('Este campo é obrigatório')
-
         return self.cleaned_data['marca']
 
     def clean_modelo(self):
         if int(self.cleaned_data['modelo']) <= 0:
             raise forms.ValidationError('Este campo é obrigatório')
-
         return self.cleaned_data['modelo']
 
 
