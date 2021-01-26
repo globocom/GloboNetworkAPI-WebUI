@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.Decorators import log, login_required, has_perm
 import logging
@@ -56,12 +55,14 @@ def rules_list(request, id_env):
             lists['rules']) is list else [lists['rules'], ]
         lists['form'] = DeleteForm()
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return redirect('environment.list')
 
-    return render_to_response(TAB_RULES, lists, context_instance=RequestContext(request))
+    return render_to_response(TAB_RULES,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -108,9 +109,11 @@ def rule_add_form(request, id_env):
         else:
             lists['contents'].append(ContentRulesForm())
 
-        return render_to_response(TAB_RULES_FORM, lists, context_instance=RequestContext(request))
+        return render_to_response(TAB_RULES_FORM,
+                                  lists,
+                                  context_instance=RequestContext(request))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return redirect('block.rules.list', id_env)
@@ -165,9 +168,11 @@ def rule_edit_form(request, id_env, id_rule):
                 lists['contents'] = __mount_content_rules_form(
                     contents, rule_contents)
 
-        return render_to_response(TAB_RULES_FORM, lists, context_instance=RequestContext(request))
+        return render_to_response(TAB_RULES_FORM,
+                                  lists,
+                                  context_instance=RequestContext(request))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
         return redirect('block.rules.list', id_env)
@@ -204,7 +209,7 @@ def rule_remove(request, id_env):
                         # Execute in NetworkAPI
                         client.create_ambiente().delete_rule(id_rule)
 
-                    except NetworkAPIClientError, e:
+                    except NetworkAPIClientError as e:
                         logger.error(e)
                         have_errors = True
                         break
@@ -212,7 +217,8 @@ def rule_remove(request, id_env):
                 # If cant remove nothing
                 if len(error_list) == len(ids):
                     messages.add_message(
-                        request, messages.ERROR, error_messages.get("can_not_remove_all"))
+                        request, messages.ERROR, error_messages.get(
+                            "can_not_remove_all"))
 
                 # If cant remove someones
                 elif len(error_list) > 0:
@@ -227,17 +233,20 @@ def rule_remove(request, id_env):
                 # If all has ben removed
                 elif have_errors == False:
                     messages.add_message(
-                        request, messages.SUCCESS, rule_messages.get("success_remove"))
+                        request, messages.SUCCESS, rule_messages.get(
+                            "success_remove"))
 
                 else:
                     messages.add_message(
-                        request, messages.ERROR, error_messages.get("can_not_remove_error"))
+                        request, messages.ERROR, error_messages.get(
+                            "can_not_remove_error"))
 
             else:
                 messages.add_message(
-                    request, messages.ERROR, error_messages.get("select_one"))
+                    request, messages.ERROR, error_messages.get(
+                        "select_one"))
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -249,19 +258,19 @@ def rule_remove(request, id_env):
 @has_perm([{"permission": VIP_VALIDATION, "read": False, "write": True}])
 def edit_form(request, id_env):
 
-    try:
-        lists = dict()
-        lists['forms'] = list()
-        lists['action'] = reverse("block.edit.form", args=[id_env])
+    lists = dict()
+    lists['forms'] = list()
 
-        # Get User
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
+    try:
+        lists['action'] = reverse("block.edit.form", args=[id_env])
 
         try:
             lists['env'] = client.create_ambiente().buscar_por_id(
                 id_env).get('ambiente')
-        except NetworkAPIClientError, e:
+        except NetworkAPIClientError as e:
             logger.error(e)
             messages.add_message(request, messages.ERROR, e)
             return redirect('environment.list')
@@ -273,10 +282,11 @@ def edit_form(request, id_env):
                 client.create_ambiente().update_blocks(id_env, blocks)
 
                 messages.add_message(
-                    request, messages.SUCCESS, block_messages.get('success_edit'))
+                    request, messages.SUCCESS, block_messages.get(
+                        'success_edit'))
             else:
-                lists['error_message'] = block_messages.get('required')
-
+                lists['error_message'] = block_messages.get(
+                    'required')
         else:
             blocks = client.create_ambiente().get_blocks(id_env)
             blocks = blocks.get('blocks') if blocks else []
@@ -288,11 +298,13 @@ def edit_form(request, id_env):
         else:
             lists['forms'].append(BlockRulesForm())
 
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(TAB_BLOCK_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(TAB_BLOCK_FORM,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -351,7 +363,7 @@ def rule_form(request):
             lists['form_env'] = EnvironmentsBlockForm(env_list)
             lists['contents'].append(ContentRulesForm())
 
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
     return render_to_response(RULES_FORM, lists, context_instance=RequestContext(request))
@@ -393,10 +405,10 @@ def block_ajax(request):
             blocks = blocks.get('blocks') if blocks else []
             lists['blocks'] = blocks if type(blocks) is list else [blocks, ]
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
-    except BaseException, e:
+    except BaseException as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
@@ -445,7 +457,7 @@ def add_form(request):
             lists['form_env'] = EnvironmentsBlockForm(env_list)
             lists['forms'].append(BlockRulesForm())
 
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 

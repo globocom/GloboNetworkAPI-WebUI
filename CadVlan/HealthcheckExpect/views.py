@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from CadVlan.permissions import HEALTH_CHECK_EXPECT
 from CadVlan.messages import healthcheck_messages
 from CadVlan.templates import HEALTHCHECKEXPECT_FORM
@@ -42,7 +41,15 @@ def healthcheck_expect_form(request):
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-        ambientes = client.create_ambiente().list_all()
+        data_env = {
+            "start_record": 0,
+            "end_record": 5000,
+            "asorting_cols": [],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        ambientes = client.create_api_environment().search(search=data_env)
 
         if request.method == 'POST':
 
@@ -58,16 +65,18 @@ def healthcheck_expect_form(request):
                 client.create_ambiente().add_healthcheck_expect(
                     environment_id, expect_string, match_list)
                 messages.add_message(
-                    request, messages.SUCCESS, healthcheck_messages.get('success_create'))
+                    request,
+                    messages.SUCCESS,
+                    healthcheck_messages.get('success_create'))
 
                 lists['form'] = HealthckeckExpectForm(ambientes)
-
-        # GET METHOD
         else:
             lists['form'] = HealthckeckExpectForm(ambientes)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(HEALTHCHECKEXPECT_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(HEALTHCHECKEXPECT_FORM,
+                              lists,
+                              context_instance=RequestContext(request))
