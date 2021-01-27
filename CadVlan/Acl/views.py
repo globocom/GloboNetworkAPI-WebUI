@@ -534,7 +534,15 @@ def template_add(request):
         client = auth.get_clientFactory()
         user = AuthSession(request.session).get_user()
 
-        environment = client.create_ambiente().list_all()
+        data_env = {
+            "start_record": 0,
+            "end_record": 5000,
+            "asorting_cols": [],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        environment = client.create_api_environment().search(search=data_env)
 
         lists['form'] = TemplateAddForm(environment)
 
