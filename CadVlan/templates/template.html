@@ -267,15 +267,13 @@
                             <li><a href="{% url environment-vip.form %}">Ambiente VIP</a></li>
                             {% endif %}
 
-                            {% has_perm VIP_VALIDATION True None %}
-                            {% if has_perm %}
-                                {% has_perm ENVIRONMENT_MANAGEMENT None True %}
-                                {% if has_perm %}
-                            <li><a href="{% url block.form %}">Bloco de L7 </a></li>
-                                {% endif %}
-                            {% endif %}
-
-                            <li class="separator"></li>
+                            <!--{% has_perm VIP_VALIDATION True None %}-->
+                            <!--{% if has_perm %}-->
+                                <!--{% has_perm ENVIRONMENT_MANAGEMENT None True %}-->
+                                <!--{% if has_perm %}-->
+                            <!--<li><a href="{% url block.form %}">Bloco de L7 </a></li>-->
+                                <!--{% endif %}-->
+                            <!--{% endif %}-->
 
                             {% has_perm EQUIPMENT_MANAGEMENT True None %}
                             {% if has_perm %}
