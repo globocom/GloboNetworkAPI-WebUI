@@ -15,16 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from CadVlan.Acl.acl import alterAclGit, deleteAclGit, getAclGit, createAclGit, scriptAclGit, script_template, applyAcl,\
-    PATH_ACL_TEMPLATES, get_templates, get_template_edit, alter_template,\
+from CadVlan.Acl.acl import alterAclGit, deleteAclGit, getAclGit, \
+    createAclGit, scriptAclGit, script_template,\
+    get_templates, get_template_edit, alter_template,\
     create_template, check_template, delete_template
 from CadVlan.Acl.forms import AclForm, TemplateForm, TemplateAddForm
 from CadVlan.Auth.AuthSession import AuthSession
 from CadVlan.Util.Decorators import log, login_required, has_perm
 from CadVlan.Util.Enum import NETWORK_TYPES
 from CadVlan.Util.converters.util import split_to_array, replace_id_to_name
-from CadVlan.Util.git import GITError, Git
+from CadVlan.Util.git import GITError
 from CadVlan.Util.utility import validates_dict, clone, acl_key, IP_VERSION
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import acl_messages, error_messages
@@ -32,15 +32,17 @@ from CadVlan.permissions import VLAN_MANAGEMENT, ENVIRONMENT_MANAGEMENT
 from CadVlan.templates import ACL_FORM, ACL_APPLY_LIST, ACL_APPLY_RESULT,\
     ACL_TEMPLATE, ACL_TEMPLATE_EDIT_FORM,\
     ACL_TEMPLATE_ADD_FORM
+
+from networkapiclient.exception import NetworkAPIClientError
+
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
-from networkapiclient.exception import NetworkAPIClientError
 from django.views.decorators.http import require_http_methods
+
 import logging
-from CadVlan.settings import PATH_ACL
 import urllib
 
 logger = logging.getLogger(__name__)
@@ -68,11 +70,12 @@ def create(request, id_vlan, network):
         messages.add_message(
             request, messages.SUCCESS, acl_messages.get("success_create"))
 
-    except (NetworkAPIClientError, GITError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError) as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+    return HttpResponseRedirect(reverse('vlan.edit.by.id',
+                                        args=[id_vlan]))
 
 
 @log
@@ -81,7 +84,6 @@ def create(request, id_vlan, network):
 def remove(request, id_vlan, network):
     try:
 
-        # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
@@ -93,8 +95,11 @@ def remove(request, id_vlan, network):
 
         if vlan.get(key_acl) is None:
             messages.add_message(
-                request, messages.ERROR, acl_messages.get("error_acl_not_exist"))
-            return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+                request,
+                messages.ERROR,
+                acl_messages.get("error_acl_not_exist"))
+            return HttpResponseRedirect(reverse('vlan.edit.by.id',
+                                                args=[id_vlan]))
 
         if network == NETWORK_TYPES.v4:
             client.create_vlan().invalidate(id_vlan)
@@ -108,11 +113,12 @@ def remove(request, id_vlan, network):
         messages.add_message(
             request, messages.SUCCESS, acl_messages.get("success_remove"))
 
-    except (NetworkAPIClientError, GITError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError) as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+    return HttpResponseRedirect(reverse('vlan.edit.by.id',
+                                        args=[id_vlan]))
 
 
 @log
@@ -122,7 +128,6 @@ def script(request, id_vlan, network):
 
     try:
 
-        # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
@@ -134,22 +139,26 @@ def script(request, id_vlan, network):
 
         if vlan.get(key_acl) is None:
             messages.add_message(
-                request, messages.ERROR, acl_messages.get("error_acl_not_exist"))
-            return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+                request, messages.ERROR, acl_messages.get(
+                    "error_acl_not_exist"))
+            return HttpResponseRedirect(reverse('vlan.edit.by.id',
+                                                args=[id_vlan]))
 
         if network == NETWORK_TYPES.v4:
             template_name = environment['ipv4_template']
         else:
             template_name = environment['ipv6_template']
 
-        scriptAclGit(vlan.get(key_acl), vlan, environment, network, AuthSession(
-            request.session).get_user(), template_name)
+        scriptAclGit(vlan.get(key_acl), vlan, environment, network,
+                     AuthSession(request.session).get_user(),
+                     template_name)
 
-    except (NetworkAPIClientError, GITError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError) as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return HttpResponseRedirect(reverse('acl.edit', args=[id_vlan, network]))
+    return HttpResponseRedirect(reverse('acl.edit',
+                                        args=[id_vlan, network]))
 
 
 @log
@@ -159,18 +168,16 @@ def edit(request, id_vlan, network):
 
     lists = dict()
     lists['id_vlan'] = id_vlan
-
-    # Type Network
     lists['network'] = network
 
     try:
 
-        # Get user
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
 
         vlan = client.create_vlan().get(id_vlan).get("vlan")
-        environment = client.create_ambiente().buscar_por_id(vlan.get("ambiente")).get("ambiente")
+        environment = client.create_ambiente().buscar_por_id(
+            vlan.get("ambiente")).get("ambiente")
 
         if network == NETWORK_TYPES.v4:
             template_name = environment['ipv4_template']
@@ -181,12 +188,15 @@ def edit(request, id_vlan, network):
 
         if vlan.get(key_acl) is None:
             messages.add_message(
-                request, messages.ERROR, acl_messages.get("error_acl_not_exist"))
-            return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+                request, messages.ERROR, acl_messages.get(
+                    "error_acl_not_exist"))
+            return HttpResponseRedirect(reverse('vlan.edit.by.id',
+                                                args=[id_vlan]))
 
         lists['vlan'] = vlan
-        vlan['ambiente'] = "%s - %s - %s" % (environment.get("nome_divisao"), environment.get(
-            "nome_ambiente_logico"), environment.get("nome_grupo_l3"))
+        vlan['ambiente'] = "%s - %s - %s" % (environment.get("nome_divisao"),
+                                             environment.get("nome_ambiente_logico"),
+                                             environment.get("nome_grupo_l3"))
 
         if request.method == "POST":
 
@@ -199,10 +209,9 @@ def edit(request, id_vlan, network):
                 comments = form.cleaned_data['comments']
                 apply_acl = form.cleaned_data['apply_acl']
 
-                alterAclGit(vlan.get(key_acl), acl, environment, comments, network, AuthSession(
-                    request.session).get_user())
+                alterAclGit(vlan.get(key_acl), acl, environment, comments,
+                            network, AuthSession(request.session).get_user())
 
-                #Remove Draft
                 client.create_api_vlan().acl_remove_draft(id_vlan, network)
 
                 if network == NETWORK_TYPES.v4:
@@ -216,13 +225,14 @@ def edit(request, id_vlan, network):
                 messages.add_message(
                     request, messages.SUCCESS, acl_messages.get("success_edit"))
 
-                # If click apply ACL
-                if apply_acl == True:
-                    return HttpResponseRedirect(reverse('acl.apply', args=[id_vlan, network]))
+                if apply_acl:
+                    return HttpResponseRedirect(reverse('acl.apply',
+                                                        args=[id_vlan, network]))
 
         else:
 
-            content = getAclGit(vlan.get(key_acl), environment, network, AuthSession(request.session).get_user())
+            content = getAclGit(vlan.get(key_acl), environment, network,
+                                AuthSession(request.session).get_user())
             lists['form'] = AclForm(initial={'acl': content, 'comments': ''})
 
             if network == NETWORK_TYPES.v4:
@@ -233,18 +243,24 @@ def edit(request, id_vlan, network):
                     vlan["acl_draft_v6"] = None
 
             if content is None or content == "":
-                lists['script'] = script_template(environment.get("nome_ambiente_logico"), environment.get(
-                    "nome_divisao"), environment.get("nome_grupo_l3"), template_name)
+                lists['script'] = script_template(environment.get("nome_ambiente_logico"),
+                                                  environment.get("nome_divisao"),
+                                                  environment.get("nome_grupo_l3"),
+                                                  template_name)
 
         list_ips = []
         if len(vlan["redeipv4"]) > 0 and network == NETWORK_TYPES.v4:
 
             for net in vlan["redeipv4"]:
-                n = {}
-                n["ip"] = "%s.%s.%s.%s" % (
-                    net["oct1"], net["oct2"], net["oct3"], net["oct4"])
-                n["mask"] = "%s.%s.%s.%s" % (
-                    net["mask_oct1"], net["mask_oct2"], net["mask_oct3"], net["mask_oct4"])
+                n = dict()
+                n["ip"] = "%s.%s.%s.%s" % (net["oct1"],
+                                           net["oct2"],
+                                           net["oct3"],
+                                           net["oct4"])
+                n["mask"] = "%s.%s.%s.%s" % (net["mask_oct1"],
+                                             net["mask_oct2"],
+                                             net["mask_oct3"],
+                                             net["mask_oct4"])
                 n["network_type"] = net["network_type"]
                 list_ips.append(n)
 
@@ -252,10 +268,22 @@ def edit(request, id_vlan, network):
 
             for net in vlan["redeipv6"]:
                 n = {}
-                n["ip"] = "%s:%s:%s:%s:%s:%s:%s:%s" % (net["block1"], net["block2"], net[
-                                                       "block3"], net["block4"], net["block5"], net["block6"], net["block7"], net["block8"])
-                n["mask"] = "%s:%s:%s:%s:%s:%s:%s:%s" % (net["mask1"], net["mask2"], net[
-                                                         "mask3"], net["mask4"], net["mask5"], net["mask6"], net["mask7"], net["mask8"])
+                n["ip"] = "%s:%s:%s:%s:%s:%s:%s:%s" % (net["block1"],
+                                                       net["block2"],
+                                                       net["block3"],
+                                                       net["block4"],
+                                                       net["block5"],
+                                                       net["block6"],
+                                                       net["block7"],
+                                                       net["block8"])
+                n["mask"] = "%s:%s:%s:%s:%s:%s:%s:%s" % (net["mask1"],
+                                                         net["mask2"],
+                                                         net["mask3"],
+                                                         net["mask4"],
+                                                         net["mask5"],
+                                                         net["mask6"],
+                                                         net["mask7"],
+                                                         net["mask8"])
                 n["network_type"] = net["network_type"]
                 list_ips.append(n)
 
@@ -263,11 +291,13 @@ def edit(request, id_vlan, network):
         vlan['network'] = replace_id_to_name(list_ips, client.create_tipo_rede(
         ).listar().get('net_type'), "network_type", "id", "name")
 
-    except (NetworkAPIClientError, GITError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError) as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ACL_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(ACL_FORM,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -297,10 +327,10 @@ def apply_acl(request, id_vlan, network):
             return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
 
         lists['vlan'] = vlan
-        lists['environment'] = "%s - %s - %s" % (environment.get("nome_divisao"), environment.get(
-            "nome_ambiente_logico"), environment.get("nome_grupo_l3"))
+        lists['environment'] = "%s - %s - %s" % (environment.get("nome_divisao"),
+                                                 environment.get("nome_ambiente_logico"),
+                                                 environment.get("nome_grupo_l3"))
 
-        # Type Network
         lists['network'] = network
 
         if request.method == "POST":
@@ -311,7 +341,6 @@ def apply_acl(request, id_vlan, network):
 
                 client_equip = client.create_equipamento()
 
-                # All ids to be apply
                 ids = split_to_array(form.cleaned_data['ids'])
 
                 equipments = []
@@ -324,30 +353,34 @@ def apply_acl(request, id_vlan, network):
 
                         equipments.append(equip)
 
-                    except NetworkAPIClientError, e:
+                    except NetworkAPIClientError as e:
                         logger.error(e)
                         messages.add_message(request, messages.ERROR, e)
 
                 if equipments is not None and equipments != "":
 
-                    #is_apply, result = applyAcl(equipments, vlan, environment, network, AuthSession(request.session).get_user())
                     apply_result = client.create_vlan().apply_acl(
                         equipments, vlan, environment, network)
 
                     is_apply = apply_result.get('is_apply')
                     result = apply_result.get('result')
+
                     if is_apply == '0':
 
                         lists['result'] = result
 
-                        messages.add_message(
-                            request, messages.SUCCESS, acl_messages.get("success_apply"))
+                        messages.add_message(request,
+                                             messages.SUCCESS,
+                                             acl_messages.get("success_apply"))
 
-                        return render_to_response(ACL_APPLY_RESULT, lists, context_instance=RequestContext(request))
+                        return render_to_response(ACL_APPLY_RESULT,
+                                                  lists,
+                                                  context_instance=RequestContext(request))
 
                     else:
-                        messages.add_message(
-                            request, messages.ERROR, acl_messages.get("error_apply"))
+                        messages.add_message(request,
+                                             messages.ERROR,
+                                             acl_messages.get("error_apply"))
             else:
                 messages.add_message(
                     request, messages.ERROR, error_messages.get("select_one"))
@@ -363,7 +396,7 @@ def apply_acl(request, id_vlan, network):
                         net["id"]).get('ips')
 
                     for ip in ips:
-                        equipment = {}
+                        equipment = dict()
                         equipment["description"] = ip["descricao"]
                         equipment["ip"] = "%s.%s.%s.%s" % (
                             ip["oct1"], ip["oct2"], ip["oct3"], ip["oct4"])
@@ -375,7 +408,7 @@ def apply_acl(request, id_vlan, network):
                             equipment_base["name"] = equip["nome"]
                             list_equipments.append(equipment_base)
 
-                except (NetworkAPIClientError, Exception), e:
+                except (NetworkAPIClientError, Exception) as e:
                     pass
 
         elif len(vlan["redeipv6"]) > 0 and network == NETWORK_TYPES.v6:
@@ -388,10 +421,12 @@ def apply_acl(request, id_vlan, network):
                         net["id"]).get('ips')
 
                     for ip in ips:
-                        equipment = {}
+                        equipment = dict()
                         equipment["description"] = ip["descricao"]
-                        equipment["ip"] = "%s:%s:%s:%s:%s:%s:%s:%s" % (ip["block1"], ip["block2"], ip[
-                                                                       "block3"], ip["block4"], ip["block5"], ip["block6"], ip["block7"], ip["block8"])
+                        equipment["ip"] = "%s:%s:%s:%s:%s:%s:%s:%s" % (
+                            ip["block1"], ip["block2"], ip["block3"],
+                            ip["block4"], ip["block5"], ip["block6"],
+                            ip["block7"], ip["block8"])
                         equips = validates_dict(ip, "equipamento")
 
                         for equip in equips:
@@ -400,21 +435,24 @@ def apply_acl(request, id_vlan, network):
                             equipment_base["name"] = equip["nome"]
                             list_equipments.append(equipment_base)
 
-                except (NetworkAPIClientError), e:
+                except NetworkAPIClientError:
                     pass
 
         lists["equipments"] = list_equipments
 
-    except (NetworkAPIClientError, GITError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError) as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ACL_APPLY_LIST, lists, context_instance=RequestContext(request))
+    return render_to_response(ACL_APPLY_LIST,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True},
+           {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def validate(request, id_vlan, network):
     try:
 
@@ -430,13 +468,15 @@ def validate(request, id_vlan, network):
             client_vlan.validate_ipv6(id_vlan)
 
         messages.add_message(
-            request, messages.SUCCESS, acl_messages.get("success_validate") % network)
+            request, messages.SUCCESS, acl_messages.get(
+                "success_validate") % network)
 
-    except NetworkAPIClientError, e:
+    except NetworkAPIClientError as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
     return HttpResponseRedirect(reverse('vlan.edit.by.id', args=[id_vlan]))
+
 
 """ --- TEMPLATES --- """
 
@@ -445,12 +485,13 @@ def validate(request, id_vlan, network):
 @login_required
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}])
 def template_list(request):
+
+    lists = dict()
+
     try:
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-
-        lists = dict()
 
         # Get user
         user = AuthSession(request.session).get_user()
@@ -466,31 +507,34 @@ def template_list(request):
                 envs = envs['ambiente'] if not isinstance(
                     envs['ambiente'], unicode) else [envs['ambiente'], ]
             lists['templates'].append(
-                {'name': template['name'], 'network': template['network'], 'envs': envs})
+                {'name': template['name'],
+                 'network': template['network'],
+                 'envs': envs})
 
-    except (NetworkAPIClientError, GITError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError) as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ACL_TEMPLATE, lists, context_instance=RequestContext(request))
+    return render_to_response(ACL_TEMPLATE,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
 @login_required
-@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}, {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True},
+           {"permission": ENVIRONMENT_MANAGEMENT, "read": True}])
 def template_add(request):
+
+    lists = dict()
 
     try:
 
         auth = AuthSession(request.session)
         client = auth.get_clientFactory()
-
-        # Get user
         user = AuthSession(request.session).get_user()
 
         environment = client.create_ambiente().list_all()
-
-        lists = dict()
 
         lists['form'] = TemplateAddForm(environment)
 
@@ -506,7 +550,8 @@ def template_add(request):
             content_ipv6 = request.POST['content_ipv6']
             environment = request.POST['environment']
 
-            if form.is_valid() and __valid_add_form(request, name_ipv4, content_ipv4, name_ipv6, content_ipv6):
+            if form.is_valid() and __valid_add_form(request, name_ipv4, content_ipv4,
+                                                    name_ipv6, content_ipv6):
 
                 duplicate = False
 
@@ -514,7 +559,8 @@ def template_add(request):
                     if check_template(name_ipv4, IP_VERSION.IPv4[1], user):
                         duplicate = True
                         messages.add_message(
-                            request, messages.ERROR, acl_messages.get("field_duplicated") % name_ipv4)
+                            request, messages.ERROR, acl_messages.get(
+                                "field_duplicated") % name_ipv4)
                     else:
                         create_template(
                             name_ipv4, IP_VERSION.IPv4[1], content_ipv4, user)
@@ -527,7 +573,8 @@ def template_add(request):
                     if check_template(name_ipv6, IP_VERSION.IPv6[1], user):
                         duplicate = True
                         messages.add_message(
-                            request, messages.ERROR, acl_messages.get("field_duplicated") % name_ipv6)
+                            request, messages.ERROR, acl_messages.get(
+                                "field_duplicated") % name_ipv6)
                     else:
                         create_template(
                             name_ipv6, IP_VERSION.IPv6[1], content_ipv6, user)
@@ -538,14 +585,17 @@ def template_add(request):
 
                 if not duplicate:
                     messages.add_message(
-                        request, messages.SUCCESS, acl_messages.get("success_template_edit"))
+                        request, messages.SUCCESS, acl_messages.get(
+                            "success_template_edit"))
                     return redirect('acl.template.list')
 
-    except (NetworkAPIClientError, GITError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError) as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ACL_TEMPLATE_ADD_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(ACL_TEMPLATE_ADD_FORM,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 def __valid_add_form(request, name_ipv4, content_ipv4, name_ipv6, content_ipv6):
@@ -571,12 +621,11 @@ def __valid_add_form(request, name_ipv4, content_ipv4, name_ipv6, content_ipv6):
 @has_perm([{"permission": VLAN_MANAGEMENT, "write": True}])
 def template_edit(request, template_name, network):
 
+    lists = dict()
+
     try:
 
-        # Get user
         user = AuthSession(request.session).get_user()
-
-        lists = dict()
 
         lists['template_name'] = template_name
         lists['network'] = network
@@ -600,14 +649,17 @@ def template_edit(request, template_name, network):
                     template_name, network, form.cleaned_data['content'], user)
 
                 messages.add_message(
-                    request, messages.SUCCESS, acl_messages.get("success_template_edit"))
+                    request, messages.SUCCESS, acl_messages.get(
+                        "success_template_edit"))
 
                 return redirect('acl.template.list')
-    except (NetworkAPIClientError, GITError, ValueError), e:
+    except (NetworkAPIClientError, GITError, ValueError) as e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
 
-    return render_to_response(ACL_TEMPLATE_EDIT_FORM, lists, context_instance=RequestContext(request))
+    return render_to_response(ACL_TEMPLATE_EDIT_FORM,
+                              lists,
+                              context_instance=RequestContext(request))
 
 
 @log
@@ -624,7 +676,6 @@ def template_delete(request):
 
         if form.is_valid():
 
-            # Get user
             user = AuthSession(request.session).get_user()
 
             # All ids to be deleted
@@ -664,15 +715,17 @@ def save_draft(request):
         type_acl = request.POST.get('type_acl')
         content_draft = request.POST.get('content_draft')
 
-        client.create_api_vlan().acl_save_draft(id_vlan, type_acl, content_draft)
+        client.create_api_vlan().acl_save_draft(id_vlan,
+                                                type_acl,
+                                                content_draft)
 
         return HttpResponse()
 
-    except NetworkAPIClientError, exception:
+    except NetworkAPIClientError as exception:
         logger.error(exception)
         return HttpResponse(exception, status=203)
 
-    except Exception, exception:
+    except Exception as exception:
         logger.error(exception)
         return HttpResponse(exception, status=203)
 
@@ -694,10 +747,10 @@ def remove_draft(request):
 
         return HttpResponse()
 
-    except NetworkAPIClientError, exception:
+    except NetworkAPIClientError as exception:
         logger.error(exception)
         return HttpResponse(exception, status=203)
 
-    except Exception, exception:
+    except Exception as exception:
         logger.error(exception)
         return HttpResponse(exception, status=203)
