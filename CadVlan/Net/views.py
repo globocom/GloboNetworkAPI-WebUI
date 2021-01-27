@@ -55,8 +55,7 @@ logger = logging.getLogger(__name__)
            {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
 def add_network_form(request):
 
-    lists = dict()
-
+    # lists = dict()
     # try:
     #
     #     # Get User
@@ -133,7 +132,11 @@ def add_network_form(request):
     #         pass
     #
     # return render_to_response(NET_FORM, lists, context_instance=RequestContext(request))
-    return HttpResponseNotFound()
+
+    messages.add_message(request,
+                         messages.WARNING,
+                         "The new network must to be created within a vlan.")
+    return redirect('vlan.search.list')
 
 @log
 @login_required
