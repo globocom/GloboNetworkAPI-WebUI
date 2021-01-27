@@ -312,17 +312,27 @@ def edit_form(request, id_env):
 @has_perm([{"permission": VIP_VALIDATION, "read": False, "write": True}])
 def rule_form(request):
 
+    lists = dict()
+
+    auth = AuthSession(request.session)
+    client = auth.get_clientFactory()
+
     try:
-        lists = dict()
         lists['action'] = reverse("rule.form")
         lists['form'] = EnvironmentRules()
         lists['contents'] = list()
         lists['id_env'] = 0
 
-        # Get User
-        auth = AuthSession(request.session)
-        client = auth.get_clientFactory()
-        env_list = client.create_ambiente().list_all().get('ambiente')
+        data_env = {
+            "start_record": 0,
+            "end_record": 5000,
+            "asorting_cols": [],
+            "searchable_columns": [],
+            "custom_search": "",
+            "extends_search": []
+        }
+        envs = client.create_api_environment().search(search=data_env)
+        env_list = envs.get('environments')
 
         if request.method == 'POST':
 
