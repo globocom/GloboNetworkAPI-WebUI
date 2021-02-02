@@ -318,13 +318,13 @@
                             <li><a href="{% url network.form %}">Rede</a></li>
                             {% endif %}
 
-                            {% has_perm VIP_VALIDATION True None %}
-                            {% if has_perm %}
-                                {% has_perm ENVIRONMENT_MANAGEMENT None True %}
-                                {% if has_perm %}
-                                <li><a href="{% url rule.form %}">Regra de L7 </a></li>
-                                {% endif %}
-                            {% endif %}
+                            <!--{% has_perm VIP_VALIDATION True None %}-->
+                            <!--{% if has_perm %}-->
+                                <!--{% has_perm ENVIRONMENT_MANAGEMENT None True %}-->
+                                <!--{% if has_perm %}-->
+                                <!--<li><a href="{% url rule.form %}">Regra de L7 </a></li>-->
+                                <!--{% endif %}-->
+                            <!--{% endif %}-->
 
                             {% has_perm VIPS_REQUEST True True %}
                             {% if has_perm %}
