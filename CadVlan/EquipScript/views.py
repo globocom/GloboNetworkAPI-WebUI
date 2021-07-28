@@ -55,7 +55,6 @@ def search_list(request):
             # Get all script_types from NetworkAPI
             script_list = client.create_roteiro().listar()
             script_list['script'] = sorted(script_list['script'], key=lambda k: k['roteiro'].lower())
-            messages.add_message(request, messages.ERROR, script_list)
 
             lists['add_form'] = AssociateScriptForm(script_list)
 
