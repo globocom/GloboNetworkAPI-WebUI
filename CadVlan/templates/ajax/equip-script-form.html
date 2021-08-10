@@ -15,10 +15,11 @@
   limitations under the License.
 -->
 <p>Selecione o roteiro que deseja associar:</p>
+<small><b><i>(Roteiro - Descrição - ID)</i></b></small>
 <form id="add_form" method="post" action="{% url equip.script.add.ajax %}">
 {% csrf_token %}
 {% for field in add_form %}
-	{{ field }}
+{{ field }}
 	<p id="error">
 		{% for error in field.errors %}
 			{{ error|escape }}
