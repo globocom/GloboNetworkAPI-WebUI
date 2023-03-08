@@ -322,6 +322,7 @@ class DataTablePaginator():
         response_dict["iTotalDisplayRecords"] = total
         response_dict["sColumns"] = self.sColumns
         response_dict["requestVar"] = request_var
+        response_dict["jsonData"] = data
 
         response = HttpResponse(loader.render_to_string(
             json_template, response_dict, context_instance=RequestContext(request)), mimetype='application/javascript')

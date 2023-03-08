@@ -29,7 +29,7 @@ build: Dockerfile
 
 
 start: docker-compose.yml
-	@docker-compose up -d
+	@docker-compose up
 
 
 stop: docker-compose.yml

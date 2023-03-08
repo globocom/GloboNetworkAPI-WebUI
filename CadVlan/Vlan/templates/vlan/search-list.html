@@ -21,6 +21,7 @@
 {% block title %}[Vlan - Listagem]{% endblock %}
 
 {% block header %}
+<script type="text/javascript" src="{{ STATIC_URL }}/static/js/exportToCSV.js"></script>
 <style>
 #search_form label {
 	vertical-align: middle;
@@ -36,11 +37,11 @@ function setupAjaxForm() {
 	$("#search_form input[type='checkbox']").each(function() {
 		form[$(this).attr("name")] = $(this).is(":checked");
 	});
-	
+
 	$.ajaxSetup({
 		data: form
 	});
-	
+
 }
 
 function more_than_three(id){
@@ -54,7 +55,7 @@ function more_than_three(id){
 
 $(document).ready(function() {
 	setupAjaxForm();
-	
+
 	$(".expand").live("click", function() {
 		id = $(this).attr("lang");
 		lenght_equipment = $("#expandir_rede_" + id).attr('lenght')
@@ -62,29 +63,29 @@ $(document).ready(function() {
 		if ($(".expandable_" + id).css("max-height") != "9999px") {
 			$(".expandable_" + id).css("max-height", "9999px");
 			$("div[lang=" + id + "]").css("background", "url(/media/img/min.png) transparent bottom center no-repeat");
-			
+
 			if(lenght_redes > 3 || (lenght_redes > 1 && more_than_three(id))){
 				$("#rede_" + id).css("background", "url(/media/img/min_red.png) transparent bottom center no-repeat");
 			}
-			
+
 			$("#expandir_tipo_" + id).attr('rowspan', $("#expandir_tipo_" + id).attr('lenght') );
 			$("#expandir_rede_" + id).attr('rowspan', $("#expandir_rede_" + id).attr('lenght') );
-			
+
 		} else {
 			$(".expandable_" + id).css("max-height", "52px");
 			$("div[lang=" + id + "]").css("background", "url(/media/img/max.png) transparent bottom center no-repeat");
-			
+
 			if(lenght_redes > 3 || (lenght_redes > 1 && more_than_three(id))){
 				$("#rede_" + id).css("background", "url(/media/img/max_red.png) transparent bottom center no-repeat");
 			}
-			
+
 			if(lenght_equipment > 3){
 				$("#expandir_tipo_" + id).attr('rowspan', 4);
 				$("#expandir_rede_" + id).attr('rowspan', 4);
 			}
 		}
 	});
-	
+
 	$("#ip_all").click(function() {
 		$("input.ipv4").val("");
 		$("input.ipv6").val("");
@@ -92,21 +93,21 @@ $(document).ready(function() {
 		$(".ipv6").hide();
 		$("#subnet").hide();
 	});
-	
+
 	$("#ip_v4").click(function() {
 		$("input.ipv6").val("");
 		$(".ipv6").hide();
 		$(".ipv4").show();
 		$("#subnet").show();
 	});
-	
+
 	$("#ip_v6").click(function() {
 		$("input.ipv4").val("");
 		$(".ipv4").hide();
 		$(".ipv6").show();
 		$("#subnet").show();
 	});
-	
+
 	oTable = $("#vlan_list").dataTable({
 		"bServerSide": true,
 		"aaSorting": [],
@@ -119,9 +120,9 @@ $(document).ready(function() {
 		                 { "bSortable": false, "aTargets": [ 0, 1, 7 ] }
 		     			]
 	});
-	
+
 	$("#vlan_list_wrapper").hide();
-	
+
 	$("#checkAll").click( function() {
 		if ($(this).attr('checked')) {
 			$("[name='selection']").attr("checked", true);
@@ -129,17 +130,17 @@ $(document).ready(function() {
 			$("[name='selection']").attr("checked", false);
 		}
 	});
-	
+
 	$(".fg-button").live("click", function(){
 		$("name['selection']").attr("checked", false);
 		$(":checkbox", oTable.fnGetHiddenNodes()).attr("checked", false);
 		$("#checkAll").attr("checked", false);
 	});
-	
+
 	$("#page_tab").tabs();
-	
+
 	$("#accordion").accordion({ autoHeight: false });
-	
+
 	$("#btn_search").button({ icons: {primary: "ui-icon-search"} }).live("click", function(event){
 		event.preventDefault();
 		version = $("#search_form input[name='ip_version']:checked").val();
@@ -152,7 +153,7 @@ $(document).ready(function() {
 		} else if (version != 2) {
 			return false;
 		}
-		
+
 		value = ""
 		$("input." + version).each(function(index) {
 			value = value + $(this).val();
@@ -164,10 +165,10 @@ $(document).ready(function() {
 				}
 			}
 		});
-		
+
 		$("#search_form input[name='networkv6']").val("");
 		$("#search_form input[name='networkv4']").val("");
-		
+
 		if (version == "ipv4") {
 			if (value.length > 4) {
 				$("#search_form input[name='networkv4']").val(value);
@@ -179,37 +180,38 @@ $(document).ready(function() {
 				$("#search_form input[name='networkv4']").val("");
 			}
 		}
-	        
+
 		oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '0' %}";
 		oTable.fnSettings().bServerSide = true;
-		
+
 		$("#vlan_list_wrapper").show();
-		
+
 		setupAjaxForm();
 		oTable.fnAjaxUpdate();
-		
+
 	});
-	
+
 	$("#btn_clear").button({ icons: {primary: "ui-icon-close"}, text: false }).click(function() {
 		$("#ip_v4").click();
 	});
-	
+
 	$(".tool").buttonset();
-	
+
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
 		location.href = "{% url vlan.form %}";
 	});
-	
+
 	{% has_perm VLAN_MANAGEMENT True None %}
 	{% if has_perm %}
 	$("#btn_del").button({ icons: {primary: "ui-icon-trash"} }).click(function(){
-		if (confirm('Deseja realmente excluir a(s) Vlan(s) selecionada(s)?')){ 
+		if (confirm('Deseja realmente excluir a(s) Vlan(s) selecionada(s)?')){
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent().submit();
 		}
 	});
+	$("#exportCSV").button({icons: {primary: "ui-icon-print"}});
 	{% endif %}
-	
+
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
 
             oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
@@ -220,7 +222,7 @@ $(document).ready(function() {
             setupAjaxForm();
             oTable.fnAjaxUpdate();
 	});
-	
+
 	$("#vlan_list tbody tr").live("click", function(e) {
 		if (!(e.target.nodeName == 'A' || e.target.nodeName == 'SPAN' || e.target.nodeName == 'INPUT' || (e.target.nodeName == 'DIV' && e.target.className == 'expand'))) {
 			location.href = $(this).find(".table_id").attr("lang");
@@ -228,15 +230,15 @@ $(document).ready(function() {
 	});
 
         if({{search_var}}=='1'){
-        
+
             oTable.fnSettings().sAjaxSource = "{% url vlan.list.ajax '1' sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
             oTable.fnSettings().bServerSide = true;
-                
+
             $("#vlan_list_wrapper").show();
-                
+
             setupAjaxForm();
             oTable.fnAjaxUpdate();
-        };	
+        };
 })
 </script>
 <style>
@@ -351,6 +353,7 @@ input {
 			{% if has_perm %}
 			<button id="btn_del">Excluir Registro</button>
 			{% endif %}
+			<button id="exportCSV" onclick="exportToCSV('GET', '/vlan/find/0', 'CadVlan_export')">Exportar CSV</button>
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
