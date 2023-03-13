@@ -80,22 +80,6 @@ function objectToCSV(data) {
     return rows.join('\n')
 }
 
-function enableExportButton() {
-    console.log("executando")
-    let tableBody = document.getElementById("table_body")
-    let tableBodyLength = 0
-    if (tableBody === null) {
-        tableBodyLength = 0
-    } else {
-        tableBodyLength = tableBody.childNodes.length
-    }
-    if (tableBodyLength === 0) {
-        document.getElementById("exportCSV").setAttribute("disabled", "true")
-    } else {
-        document.getElementById("exportCSV").removeAttribute("disabled")
-    }
-}
-
 window.onload = function () {
 
     var targetNode = document.getElementById('table_body');
@@ -125,7 +109,6 @@ var callback = function (mutationsList) {
                 btnExport.classList.add("ui-state-disabled", "ui-button-disabled")
                 return
             }
-            console.log(tableBody)
             let tableBodyLength = 0
             if (tableBody === null) {
                 tableBodyLength = 0
@@ -145,14 +128,9 @@ var callback = function (mutationsList) {
                 btnExport.removeAttribute("disabled")
                 return
             }
-            // console.log(tableBodyLength)
-            // enableExportButton()
+
         } else if (mutation.type == 'attributes') {
             console.log('The ' + mutation.attributeName + ' attribute was modified.');
         }
     }
 };
-
-function classAdd(item, className){
-    item.classList.add(className)
-}
