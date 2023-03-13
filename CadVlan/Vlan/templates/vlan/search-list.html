@@ -189,6 +189,7 @@ $(document).ready(function() {
 		setupAjaxForm();
 		oTable.fnAjaxUpdate();
 
+
 	});
 
 	$("#btn_clear").button({ icons: {primary: "ui-icon-close"}, text: false }).click(function() {
@@ -197,7 +198,7 @@ $(document).ready(function() {
 
 	$(".tool").buttonset();
 
-	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
+	$("#btn_new").button({ icons: {primary: "ui-icon-document"}}).click(function(){
 		location.href = "{% url vlan.form %}";
 	});
 
@@ -210,6 +211,10 @@ $(document).ready(function() {
 		}
 	});
 	$("#exportCSV").button({icons: {primary: "ui-icon-print"}});
+	$("#exportCSV").hover(
+		function(){ $(this).addClass("ui-state-hover")},
+		function(){ $(this).removeClass("ui-state-hover")}
+	)
 	{% endif %}
 
 	$("#btn_ref").button({ icons: {primary: "ui-icon-refresh"} }).click(function(){
@@ -264,6 +269,7 @@ input {
 .ui-tabs-nav.ui-helper-reset.ui-helper-clearfix.ui-widget-header.ui-corner-all {
 	background: #F6F6F6;
 }
+
 </style>
 {% endblock %}
 
@@ -353,7 +359,7 @@ input {
 			{% if has_perm %}
 			<button id="btn_del">Excluir Registro</button>
 			{% endif %}
-			<button id="exportCSV" onclick="exportToCSV('GET', '/vlan/find/0', 'CadVlan_export')">Exportar CSV</button>
+			<button id="exportCSV" onclick="exportToCSV('GET', '/vlan/find/0', 'CadVlan_export')" disabled="true">Exportar CSV</button>
 		</div>
 		{% has_perm VLAN_MANAGEMENT True None %}
 		{% if has_perm %}
@@ -385,7 +391,7 @@ input {
 					<th>Roteamento Em</th>
 				</tr>
 			</thead>
-			<tbody></tbody>
+			<tbody id="table_body"></tbody>
 		</table>
 	</div>
 </div>

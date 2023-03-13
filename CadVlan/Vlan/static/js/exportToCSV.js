@@ -11,12 +11,12 @@ const download = function (text, fileName) {
     document.body.removeChild(link);
 };
 
-function exportToCSV(method, url, fileName){
+function exportToCSV(method, url, fileName) {
     let request = new XMLHttpRequest()
     let cookies = `;${document.cookie}`;
     let cookiesSplited = cookies.split(`; csrftoken=`)
     let token = null
-    if (cookiesSplited.length ==2) {
+    if (cookiesSplited.length == 2) {
         token = cookiesSplited.pop().split(';').shift()
     }
 
@@ -25,7 +25,7 @@ function exportToCSV(method, url, fileName){
     request.send()
     request.responseType = "json"
     request.onload = () => {
-        if (request.readyState == 4 && request.status == 200){
+        if (request.readyState == 4 && request.status == 200) {
             const response = request.response
             let jsonData = response.jsonData
             let csvData = objectToCSV(jsonData)
@@ -36,36 +36,36 @@ function exportToCSV(method, url, fileName){
     }
 }
 
-function objectToCSV(data){
+function objectToCSV(data) {
     var rows = []
 
     var headers = Object.keys(data[0])
 
     rows.push(headers.join(','))
 
-    for (var row of data){
+    for (var row of data) {
         var values = headers.map(header => {
             let val = row[header]
-            if (header === "network4"){
-                if (val.length === 0){
+            if (header === "network4") {
+                if (val.length === 0) {
                     return "-"
                 }
-                if (Array.isArray(val)){
+                if (Array.isArray(val)) {
                     let redesv4 = ""
-                    for (var arrObject of val){
+                    for (var arrObject of val) {
                         redeV4 = arrObject['Rede_IPV4']
                         redesv4 += `${redeV4} | `
                     }
                     return `"${redesv4.slice(0, -2)}"`
                 }
             }
-            if (header === "network6"){
-                if (val.length === 0){
+            if (header === "network6") {
+                if (val.length === 0) {
                     return "-"
                 }
-                if (Array.isArray(val)){
+                if (Array.isArray(val)) {
                     let redesv6 = ""
-                    for (var arrObject of val){
+                    for (var arrObject of val) {
                         redeV6 = arrObject['Rede_IPV6']
                         redesv6 += `${redeV6} | `
                     }
@@ -78,4 +78,81 @@ function objectToCSV(data){
     }
 
     return rows.join('\n')
+}
+
+function enableExportButton() {
+    console.log("executando")
+    let tableBody = document.getElementById("table_body")
+    let tableBodyLength = 0
+    if (tableBody === null) {
+        tableBodyLength = 0
+    } else {
+        tableBodyLength = tableBody.childNodes.length
+    }
+    if (tableBodyLength === 0) {
+        document.getElementById("exportCSV").setAttribute("disabled", "true")
+    } else {
+        document.getElementById("exportCSV").removeAttribute("disabled")
+    }
+}
+
+window.onload = function () {
+
+    var targetNode = document.getElementById('table_body');
+
+
+    var config = {
+        attributes: true,
+        childList: true,
+        subtree: true
+    };
+
+    var observer = new MutationObserver(callback);
+
+
+    observer.observe(targetNode, config);
+}
+
+// Callback function to execute when mutations are observed
+var callback = function (mutationsList) {
+    let btnExport = document.getElementById("exportCSV")
+    for (var mutation of mutationsList) {
+        if (mutation.type == 'childList') {
+            let tableBody = document.getElementById("table_body")
+            if (tableBody.childNodes[0].childNodes[0].textContent == "Nenhum registro encontrado.") {
+                btnExport.setAttribute("disabled", "true")
+                btnExport.setAttribute("aria-disabled", "true")
+                btnExport.classList.add("ui-state-disabled", "ui-button-disabled")
+                return
+            }
+            console.log(tableBody)
+            let tableBodyLength = 0
+            if (tableBody === null) {
+                tableBodyLength = 0
+            } else {
+                tableBodyLength = tableBody.childNodes.length
+            }
+            if (tableBodyLength === 0) {
+                btnExport.setAttribute("disabled", "true")
+                btnExport.setAttribute("aria-disabled", "true")
+                btnExport.classList.add("ui-state-disabled", "ui-button-disabled")
+
+                return
+            } else {
+                btnExport.classList.remove("ui-state-disabled", "ui-button-disabled")
+                btnExport.setAttribute("aria-disabled", "false")
+                btnExport.setAttribute("onclick", "exportToCSV('GET', '/vlan/find/0', 'CadVlan_export')")
+                btnExport.removeAttribute("disabled")
+                return
+            }
+            // console.log(tableBodyLength)
+            // enableExportButton()
+        } else if (mutation.type == 'attributes') {
+            console.log('The ' + mutation.attributeName + ' attribute was modified.');
+        }
+    }
+};
+
+function classAdd(item, className){
+    item.classList.add(className)
 }
