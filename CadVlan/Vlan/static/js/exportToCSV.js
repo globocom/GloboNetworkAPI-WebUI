@@ -61,6 +61,7 @@ function exportToCSV(method, url, fileName) {
             let jsonData = response.jsonData
             if (jsonData.length === 0){
                 window.alert("Houve um erro ao exportar os dados. Refaça a busca.")
+                window.location.reload()
                 return
             }
             let csvData = objectToCSV(jsonData)
