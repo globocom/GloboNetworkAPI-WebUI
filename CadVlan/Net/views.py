@@ -1629,6 +1629,7 @@ def edit_network6_form(request, id_net='0', id_vlan='0', sf_number='0',
         lists['block7'] = network.get("block7")
         lists['block8'] = network.get("block8")
         lists['block_net'] = network.get("block")
+        cluster_unit = network.get("cluster_unit")
 
         if request.method == 'POST':
 
@@ -1658,9 +1659,10 @@ def edit_network6_form(request, id_net='0', id_vlan='0', sf_number='0',
 
                 dhcp_to_remove = list()
                 dhcp_to_add = list()
-                for id_ip in id_ips:
-                    if id_ip not in dhcp_id_ip_list:
-                        dhcp_to_add.append(id_ip)
+                if id_ips:
+                    for id_ip in id_ips:
+                        if id_ip not in dhcp_id_ip_list:
+                            dhcp_to_add.append(id_ip)
                 for id_ip in dhcp_id_ip_list:
                     if id_ip not in id_ips:
                         dhcp_to_remove.append(id_ip)
@@ -1701,7 +1703,8 @@ def edit_network6_form(request, id_net='0', id_vlan='0', sf_number='0',
                                                             initial={'vlan_name': vlan_nome,
                                                                      'net_type': net_type,
                                                                      'env_vip': env_vip,
-                                                                     'ip_version': ip_version})
+                                                                     'ip_version': ip_version,
+                                                                     'cluster_unit': cluster_unit})
 
     except NetworkAPIClientError as e:
 
