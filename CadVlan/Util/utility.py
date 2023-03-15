@@ -272,7 +272,7 @@ class DataTablePaginator():
         # Datatable params
         cols = int(self.request.GET.get('iColumns', 0))
         iDisplayLength = min(
-            int(self.request.GET.get('iDisplayLength', 10)), 100)
+            int(self.request.GET.get('iDisplayLength', 10)), 99999)
         self.start_record = int(self.request.GET.get('iDisplayStart', 0))
         self.end_record = self.start_record + iDisplayLength
 
