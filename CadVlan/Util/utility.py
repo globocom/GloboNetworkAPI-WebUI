@@ -272,7 +272,7 @@ class DataTablePaginator():
         # Datatable params
         cols = int(self.request.GET.get('iColumns', 0))
         iDisplayLength = min(
-            int(self.request.GET.get('iDisplayLength', 10)), 100)
+            int(self.request.GET.get('iDisplayLength', 10)), 99999)
         self.start_record = int(self.request.GET.get('iDisplayStart', 0))
         self.end_record = self.start_record + iDisplayLength
 
@@ -322,6 +322,7 @@ class DataTablePaginator():
         response_dict["iTotalDisplayRecords"] = total
         response_dict["sColumns"] = self.sColumns
         response_dict["requestVar"] = request_var
+        response_dict["jsonData"] = data
 
         response = HttpResponse(loader.render_to_string(
             json_template, response_dict, context_instance=RequestContext(request)), mimetype='application/javascript')
