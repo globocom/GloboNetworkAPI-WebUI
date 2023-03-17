@@ -1,7 +1,7 @@
-version: '3'
+version: '3.3'
 services:
 
-    cache:
+    netapi_webui_cache:
         container_name: netapi_webui_cache
         image: memcached:1.4.33
         ports:
@@ -11,9 +11,9 @@ services:
 
     netapi_webui:
         container_name: netapi_webui_app
-        build: .
+        image: docker.artifactory.globoi.com/suptel/cadvlan:latest
         ports:
-            - "8080:8080"
+            - "8083:8080"
             - "8081:8081"
         command: sh scripts/docker/docker-start-debug.sh
         env_file:
@@ -23,7 +23,7 @@ services:
         networks:
             - globonetworkapi_netapi_net
         depends_on:
-            - cache
+            - netapi_webui_cache
         external_links:
             - netapi_app
             - cache:netapi_webui_cache

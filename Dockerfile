@@ -20,5 +20,9 @@ RUN apt-get update && \
                        dnsutils
 
 RUN pip install --upgrade pip
-RUN pip install virtualenv && virtualenv venv && . ./venv/bin/activate
-RUN pip install -r requirements.txt
+#RUN pip install virtualenv && virtualenv venv && . ./venv/bin/activate
+RUN pip install -r requirements.txt \
+    && pip install GloboNetworkAPI \
+    && pip install -r requirements_debug.txt \
+    && pip install -r requirements_test.txt
+
