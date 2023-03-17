@@ -2,4 +2,3 @@ hooks:
   build:
     # networkapi
     - pip install GloboNetworkAPI==0.9.6 --no-dependencies
-    - gunicorn -c gunicorn.conf.py wsgi:application --reload
