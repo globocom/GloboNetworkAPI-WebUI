@@ -14,9 +14,5 @@ echo -e '#!/bin/bash\n/usr/local/bin/gunicorn -c /vagrant/gunicorn.conf.py wsgi:
 chmod 777 /etc/init.d/gunicorn_cadvlan
 update-rc.d gunicorn_cadvlan defaults
 export PYTHONPATH="/vagrant:$PYTHONPATH"
-<<<<<<< HEAD:scripts/vagrant_provision.sh
-/usr/local/bin/gunicorn  -c /vagrant/gunicorn.conf.py wsgi:application
-=======
 /usr/local/bin/gunicorn  -c /vagrant/gunicorn.conf.py wsgi:application
 
->>>>>>> a2b02a7e6b86e10d0c33ddbfb602c23d3e1cfd7e:scripts/vagrant_provision.sh

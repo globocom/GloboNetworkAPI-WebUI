@@ -147,6 +147,9 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT_PATH, 'templates')
 )
 
+#Teste tsuru
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -421,5 +424,6 @@ LOGGING = {
         },
     }
 }
+
 reload(sys)
 sys.setdefaultencoding('utf-8')

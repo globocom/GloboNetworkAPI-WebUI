@@ -2,6 +2,8 @@ FROM python:2.7
 
 SHELL ["/bin/bash", "-c"]
 
+ENV DJANGO_SETTINGS_MODULE='CadVlan.settings'
+
 RUN mkdir -p /netapi_webui
 WORKDIR /netapi_webui
 
@@ -20,5 +22,5 @@ RUN apt-get update && \
                        dnsutils
 
 RUN pip install --upgrade pip
-RUN pip install virtualenv && virtualenv venv && . ./venv/bin/activate
+# RUN pip install virtualenv && virtualenv venv && . ./venv/bin/activate
 RUN pip install -r requirements.txt

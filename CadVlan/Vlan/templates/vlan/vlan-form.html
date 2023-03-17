@@ -42,13 +42,13 @@
 					{{ field }}
 
 					<p id="error">
-					{% if field.errors %} 
+					{% if field.errors %}
 						{% for error in field.errors %}
 							{{ error|escape }}
 						{% endfor %}
 					{% endif %}
 					</p>
-					
+
 				</div>
 			{% endfor %}
 			<div class="buttons-l ui-widget-header" style="margin-top:5%;">

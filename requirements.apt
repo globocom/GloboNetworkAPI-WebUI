@@ -1,0 +1,7 @@
+libldap2-dev
+libsasl2-dev
+libssl-dev
+python-ldap
+net-tools
+dnsutils
+git
