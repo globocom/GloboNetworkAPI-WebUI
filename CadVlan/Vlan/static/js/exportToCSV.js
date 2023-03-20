@@ -40,6 +40,16 @@ function exportToCSV(method, url, fileName) {
     let oct9 = document.getElementsByName("oct9")[0].value
     let subnet = ""
 
+    if (ipVersion == environment == netType == number.length == name.length == oct1.length == oct2.length == oct3.length == oct4.length == oct5.length == oct6.length == oct7.length == oct8.length == 0){
+        window.confirm("Por favor faça uma busca mais específica. Buscas com todos os filtros em branco não são elegíveis para uma exportação de arquivos CSV.")
+        let btnExport = document.getElementById("exportCSV")
+
+        btnExport.setAttribute("disabled", "true")
+        btnExport.setAttribute("aria-disabled", "true")
+        btnExport.classList.add("ui-state-disabled", "ui-button-disabled")
+        return
+    }
+
     let subnet_1 = document.getElementById("id_subnet_1")
     let subnet_0 = document.getElementById("id_subnet_0")
     if (subnet_1.checked){
