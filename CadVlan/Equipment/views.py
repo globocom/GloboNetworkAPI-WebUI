@@ -232,7 +232,8 @@ def ajax_autocomplete_equips(request):
         equipment = auth.get_clientFactory().create_equipamento()
 
         # Get list of equipments from cache
-        equip_list = cache_list_equipment(equipment)
+        #equip_list = cache_list_equipment(equipment)
+        equip_list = []
 
     except NetworkAPIClientError, e:
         logger.error(e)
@@ -254,7 +255,9 @@ def ajax_autocomplete_equips_external(request, form_acess, client):
         equipment = client.create_equipamento()
 
         # Get list of equipments from cache
-        equip_list = cache_list_equipment(equipment)
+        # equip_list = cache_list_equipment(equipment)
+        equip_list = []
+
 
     except NetworkAPIClientError, e:
         logger.error(e)
