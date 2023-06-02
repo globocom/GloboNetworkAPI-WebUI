@@ -324,12 +324,11 @@ function getEquipmentByName(fieldId, type_equip){
             localStorage.setItem(`${type_equip}_list`, JSON.stringify(equipList))
             let equipment = document.querySelector(`#${fieldId}`)
 
-            let lastChar = equipment.value.substring(equipment.length -1)
-            let fakeDigit = new KeyboardEvent('keydown', {'key': lastChar})
-
-
             fillInterfaceField(`#${fieldId}`, `${type_equip}_list`, `form_${type_equip}_interface`)
 
+            // Here we simmulate the users input to force the autocomplete execution
+            let lastChar = equipment.value.substring(equipment.length -1)
+            let fakeDigit = new KeyboardEvent('keydown', {'key': lastChar})
             equipment.focus
             equipment.dispatchEvent(fakeDigit)
 
