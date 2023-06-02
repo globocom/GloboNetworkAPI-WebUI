@@ -225,10 +225,6 @@ function fillInterfaceField(equipmentFieldId, storageName, interfaceFieldId) {
                 dropdown[0].innerHTML = 'Selecione'
                 dropdown.removeAttribute('disabled')
 
-
-
-
-
             } catch (error) {
                 return
             }
@@ -285,6 +281,13 @@ function fillEnvironmentField(envFieldId, storageName, vlanFieldId) {
 }
 
 function getEquipmentByName(fieldId, type_equip){
+    let campo = document.getElementById(fieldId)
+
+    if (campo.value.length < 3){
+        campo.focus()
+        alert(`Aumente o texto para 3 caracteres ou mais, no momento você está usando ${campo.value.length}.`)
+        return
+    }
 
     let name = document.getElementById(fieldId).value
     console.log(`Buscando equipamento com o nome ${name}`)
@@ -319,12 +322,16 @@ function getEquipmentByName(fieldId, type_equip){
             }
 
             localStorage.setItem(`${type_equip}_list`, JSON.stringify(equipList))
+            let equipment = document.querySelector(`#${fieldId}`)
 
-            if (type_equip == 'server'){
-                fillInterfaceField(`#${fieldId}`, `${type_equip}_list`, "form_server_interface")
-            }else{
-                fillInterfaceField(`#${fieldId}`, `${type_equip}_list`, "form_switch_interface")
-            }
+            let lastChar = equipment.value.substring(equipment.length -1)
+            let fakeDigit = new KeyboardEvent('keydown', {'key': lastChar})
+
+
+            fillInterfaceField(`#${fieldId}`, `${type_equip}_list`, `form_${type_equip}_interface`)
+
+            equipment.focus
+            equipment.dispatchEvent(fakeDigit)
 
         } else {
             $(".loading").hide()
