@@ -32,7 +32,7 @@ div.form-group {
 
 .form-control,
 .input.form-control.bs-autocomplete {
-    background-color : #FFFFFF; 
+    background-color : #FFFFFF;
 }
 
 input:required {

@@ -1,5 +1,16 @@
 {% load util %}
 {
+    "jsonData": [
+        {% for equips in aaData %}
+            {
+                "id": "{{ equips.id|escapejs }}",
+                "name": "{{ equips.nome|escapejs }}"
+            }
+        {% if not forloop.last %}
+        ,
+        {% endif %}
+        {% endfor %}
+      ],
     "sEcho": {{ sEcho|escapejs }},
     "iTotalRecords": {{ iTotalRecords|escapejs }},
     "iTotalDisplayRecords": {{ iTotalDisplayRecords|escapejs }},
