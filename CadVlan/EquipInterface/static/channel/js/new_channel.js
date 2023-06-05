@@ -6,16 +6,17 @@ $(document).ready(function() {
 
     $('[data-toggle="tooltip"]').tooltip();
 
-    $.ajax({
-        url: "/autocomplete/equipment/",
-        dataType: "json",
-        success: function(data) {
-            if (data.errors.length > 0) {
-                alert(data.errors);
-            } else {
-                localStorage.setItem("equipment_list", JSON.stringify(data.list));
-            }
-	}});
+    // $.ajax({
+    //     url: "/autocomplete/equipment/",
+    //     dataType: "json",
+    //     success: function(data) {
+    //         if (data.errors.length > 0) {
+    //             alert(data.errors);
+    //         } else {
+    //             localStorage.setItem("equipment_list", JSON.stringify(data.list));
+
+    //         }
+	// }});
 
     $.ajax({
         url: "/autocomplete/environment/vlan/",
@@ -28,8 +29,8 @@ $(document).ready(function() {
             }
 	}});
 
-    fillInterfaceField("#id_equip_name", "equipment_list", "form_server_interface");
-    fillInterfaceField("#form_switch_name", "equipment_list", "form_switch_interface");
+    // fillInterfaceField("#id_equip_name", "equipment_list", "form_server_interface");
+    // fillInterfaceField("#form_switch_name", "equipment_list", "form_switch_interface");
     fillEnvironmentField("#envs", "environment_list", "rangevlans");
 
     $('#btn_channel_sw').click(function() {
@@ -215,25 +216,45 @@ function interfaceAccess() {
 function fillInterfaceField(equipmentFieldId, storageName, interfaceFieldId) {
     $(equipmentFieldId).autocomplete({
         source: JSON.parse(localStorage.getItem(storageName)),
-        minLength: 1,
+        minLength: 0,
         select: function(event, ui) {
             $(equipmentFieldId).val(ui.item.label);
             let url = "interface/connect/1/front/".concat(ui.item.label);
+            try {
+                let dropdown = document.getElementById(interfaceFieldId);
+                dropdown[0].innerHTML = 'Selecione'
+                dropdown.removeAttribute('disabled')
+
+            } catch (error) {
+                return
+            }
+
             $.ajax({
                 url: url,
                 type: "GET",
                 success: function(data) {
-                    data_list = JSON.parse(data).list;
-                    var dropdown = document.getElementById(interfaceFieldId);
-                    while (dropdown.length > 1) {
-                        dropdown.remove(dropdown.length-1);
-                    }
-                    let option;
-                    for (let i = 0; i < data_list.length; i++) {
-                        option = document.createElement('option');
-                        option.text = data_list[i].interface;
-                        option.value = data_list[i].id;
-                        dropdown.add(option);
+                    try {
+                        data_list = JSON.parse(data).list;
+                        var dropdown = document.getElementById(interfaceFieldId);
+                        while (dropdown.length > 1) {
+                            dropdown.remove(dropdown.length-1);
+                        }
+                        let option;
+                        for (let i = 0; i < data_list.length; i++) {
+                            option = document.createElement('option');
+                            option.text = data_list[i].interface;
+                            option.value = data_list[i].id;
+                            dropdown.add(option);
+                        }
+                    } catch (error) {
+                        console.error('Sem interfaces disponíveis.')
+                        var dropdown = document.getElementById(interfaceFieldId);
+                        while (dropdown.length > 1) {
+                            dropdown.remove(dropdown.length-1);
+                        }
+                        dropdown[0].innerHTML = 'Sem interfaces disponíveis.'
+                        dropdown.setAttribute('disabled', 'disabled')
+                        document.getElementById('btnSubmit').setAttribute('disabled', 'disabled')
                     }
                 },
                 error: function (xhr, error, thrown) {
@@ -257,4 +278,63 @@ function fillEnvironmentField(envFieldId, storageName, vlanFieldId) {
             $(vlanField).val(name);
         }
     });
+}
+
+function getEquipmentByName(fieldId, type_equip){
+    let campo = document.getElementById(fieldId)
+
+    if (campo.value.length < 3){
+        campo.focus()
+        alert(`Aumente o texto para 3 caracteres ou mais, no momento você está usando ${campo.value.length}.`)
+        return
+    }
+
+    let name = document.getElementById(fieldId).value
+    console.log(`Buscando equipamento com o nome ${name}`)
+
+    let cookies = `;${document.cookie}`;
+    let cookiesSplited = cookies.split(`; csrftoken=`)
+    let token = null
+    if (cookiesSplited.length == 2) {
+        token = cookiesSplited.pop().split(';').shift()
+    }
+
+    let url = `/equipment/find?csrfmiddlewaretoken=${token}&ipv4=&ipv6=&name=${name}&oct1=&oct2=&oct3=&oct4=&oct5=&oct6=&oct7=&oct8=&environment=0&type_equip=0&group=0&iexact=false&sEcho=2&iColumns=8&sColumns=&iDisplayStart=0&iDisplayLength=99999`
+
+    let request = new XMLHttpRequest()
+
+    request.open('GET', url)
+    request.send()
+    request.responseType = "json"
+    request.onload = () => {
+        if (request.readyState == 4 && request.status == 200) {
+            const response = request.response
+            let jsonData = response.jsonData
+            if (jsonData.length === 0){
+                $(".loading").hide()
+                window.alert("Não foi encontrado equipamento com o nome digitado. Refaça a busca.")
+                window.location.reload()
+                return
+            }
+            var equipList = []
+            for(let i =0; i < jsonData.length; i++){
+                equipList.push(jsonData[i].name)
+            }
+
+            localStorage.setItem(`${type_equip}_list`, JSON.stringify(equipList))
+            let equipment = document.querySelector(`#${fieldId}`)
+
+            fillInterfaceField(`#${fieldId}`, `${type_equip}_list`, `form_${type_equip}_interface`)
+
+            // Here we simmulate the users input to force the autocomplete execution
+            let lastChar = equipment.value.substring(equipment.length -1)
+            let fakeDigit = new KeyboardEvent('keydown', {'key': lastChar})
+            equipment.focus
+            equipment.dispatchEvent(fakeDigit)
+
+        } else {
+            $(".loading").hide()
+            console.log(`Error: ${request.status}`)
+        }
+    }
 }
