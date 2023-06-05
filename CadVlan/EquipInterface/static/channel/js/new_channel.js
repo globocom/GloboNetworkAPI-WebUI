@@ -312,7 +312,7 @@ function getEquipmentByName(fieldId, type_equip){
             let jsonData = response.jsonData
             if (jsonData.length === 0){
                 $(".loading").hide()
-                window.alert("Houve um erro ao exportar os dados. Refaça a busca.")
+                window.alert("Não foi encontrado equipamento com o nome digitado. Refaça a busca.")
                 window.location.reload()
                 return
             }
