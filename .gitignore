@@ -16,3 +16,4 @@ GloboNetworkAPI-client-python/*
 .settings/
 .project/
 venv/
+config/*.env
