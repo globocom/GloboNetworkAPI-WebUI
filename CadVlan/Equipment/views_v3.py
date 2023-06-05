@@ -43,7 +43,7 @@ def ajax_autocomplete_equipment(request):
     try:
         data = {
             "start_record": 0,
-            "end_record": 30000,
+            "end_record": 300000,
             "asorting_cols": [],
             "searchable_columns": [],
             "custom_search": "",

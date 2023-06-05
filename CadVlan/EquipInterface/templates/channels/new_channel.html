@@ -31,15 +31,18 @@
         <section id="menu-8">
             {% include "modulo/menubar.html" %}
         </section>
+
         {% if messages %}
             {% include "modulo/errormessages.html" with messages=messages %}
         {% endif %}
         <section class="container-cadvlan">
+
             <div>
                 <h3 class="mbr-section-title display-3"> Channel </h3>
             </div>
             <div>
                 <form action="{% url add.channel %}" method="post" id="channel_form_basic">
+
                     {% csrf_token %}
                     <div class="form-group-cadvlan">
                         <div class="form-row-cadvlan">
@@ -90,17 +93,25 @@
                         <div class="form-row-cadvlan">
                             <div class="form-group">
                                 <label class="form-control-label"
-                                       for="id_equip_name">
+                                    for="id_equip_name">
                                     Nome do Servidor
                                 </label>
                                 <input required
-                                       type="text"
-                                       autocomplete="off"
-                                       placeholder="Busque pelo nome..."
-                                       class="form-control bs-autocomplete"
-                                       name="search_equipment"
-                                       data-form-field="servername"
-                                       id="id_equip_name">
+                                    type="text"
+                                    autocomplete="off"
+                                    placeholder="Busque pelo nome..."
+                                    class="form-control bs-autocomplete"
+                                    name="search_equipment"
+                                    data-form-field="servername"
+                                    minlength="3"
+                                    id="id_equip_name"/>
+                            </div>
+                            <div class="form-group pt-3">
+                                <button type="button" class="btn btn-social-bottom btn-responsive channel" id="findServer" onclick='getEquipmentByName("id_equip_name", "server")'>
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                        search
+                                    </i>
+                                </button>
                             </div>
                         </div>
                         <div class="form-row-cadvlan">
@@ -116,7 +127,15 @@
                                        class="form-control bs-autocomplete"
                                        name="switchname"
                                        data-form-field="switchname"
+                                       minlength="3"
                                        id="form_switch_name">
+                            </div>
+                            <div class="form-group pt-3">
+                                <button type="button" class="btn btn-social-bottom btn-responsive channel" id="findSwitch" onclick='getEquipmentByName("form_switch_name", "switch")'>
+                                    <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                                        search
+                                    </i>
+                                </button>
                             </div>
                             <div class="form-group">
                                 <label class="form-control-label"
@@ -236,7 +255,7 @@
                             </a>
                         </div>
                         <div>
-                            <button class="btn-sm btn-success-outline btn-success" >
+                            <button id="btnSubmit" class="btn-sm btn-success-outline btn-success" >
                                 Salvar
                             </button>
                         </div>
