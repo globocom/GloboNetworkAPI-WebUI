@@ -47,7 +47,7 @@ $(document).ready(function() {
 
         let labelEquip = document.createElement('Label');
         $(labelEquip).addClass('form-control-label');
-        $(labelEquip).attr('for', 'id_equip_name_' + addBlockId);
+        $(labelEquip).attr('for', 'form_switch_name' + addBlockId);
         labelEquip.innerHTML = "Nome do Switch";
         $(labelEquip).appendTo($(addBlockElemSw));
 
@@ -56,10 +56,28 @@ $(document).ready(function() {
         $(inputEquip).attr('autocomplete', 'off');
         $(inputEquip).attr('required', 'required');
         $(inputEquip).attr('type','text');
-        $(inputEquip).attr('name','switchname');
-        $(inputEquip).attr('id','id_equip_name_' + addBlockId);
+        $(inputEquip).attr('name','switchname_'+ addBlockId);
+        $(inputEquip).attr('id','form_switch_name_' + addBlockId);
         $(inputEquip).attr('placeholder','Busque pelo nome...');
         $(inputEquip).appendTo($(addBlockElemSw));
+
+        let searchBtnDiv = document.createElement('div');
+        $(searchBtnDiv).addClass('form-group pt-3')
+        $(searchBtnDiv).appendTo($(addBlockRow));
+
+
+        let searchBtn = document.createElement('button');
+        $(searchBtn).addClass('btn btn-social-bottom btn-responsive channel')
+        $(searchBtn).attr('type', 'button')
+        $(searchBtn).attr('id', 'findSwitch'+ addBlockId)
+        $(searchBtn).attr('onclick', `getEquipmentByName("form_switch_name_${addBlockId}", "switch_${addBlockId}")`)
+        $(searchBtn).appendTo($(searchBtnDiv))
+
+        let iconSearch = document.createElement('i');
+        $(iconSearch).addClass('material-icons');
+        $(iconSearch).attr('style', 'color:#FFD17C;font-size:15px;left:50%;')
+        iconSearch.innerHTML = "search"
+        $(iconSearch).appendTo($(searchBtn))
 
         let addBlockElemInt = document.createElement('div');
         $(addBlockElemInt).addClass('form-group');
@@ -76,8 +94,12 @@ $(document).ready(function() {
         $(inputInt).attr('required', 'required');
         $(inputInt).attr('type','text');
         $(inputInt).attr('name','switchInt');
-        $(inputInt).attr('id','id_form_switch_interface_' + addBlockId);
+        $(inputInt).attr('id','form_switch_' + addBlockId + '_interface');
         $(inputInt).appendTo($(addBlockElemInt));
+
+        let selOption = document.createElement('option');
+        selOption.innerHTML = "Selecione"
+        $(selOption).appendTo($(inputInt))
 
         let addBlockButton = document.createElement('button');
         $(addBlockButton).addClass('btn btn-social-bottom btn-responsive channel');
@@ -111,7 +133,7 @@ $(document).ready(function() {
 
         let autocompleteId = '#id_equip_name_'.concat(addBlockId);
         let interfaceFieldId = 'id_form_switch_interface_'.concat(addBlockId);
-        fillInterfaceField( autocompleteId, "equipment_list", interfaceFieldId);
+        // fillInterfaceField( autocompleteId, `switch_${addBlockId}_list`, interfaceFieldId);
 
     });
 
