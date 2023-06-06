@@ -4,8 +4,6 @@ services:
     cache:
         container_name: netapi_webui_cache
         image: memcached:1.4.33
-        ports:
-            - "11211"
         networks:
             - globonetworkapi_netapi_net
 
