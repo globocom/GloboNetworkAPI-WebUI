@@ -34,4 +34,4 @@ não possui funcionalidades de CMDB (gerenciamento de configuração de base de 
 ## Autores
 [Autores](./AUTHORS.md)
 
-*This article can also be read in [Brazilian Portuguese](README-ptBR.md).*
+*This article can also be read in [English](README.md).*
