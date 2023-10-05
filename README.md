@@ -34,3 +34,5 @@ have CMDB functionalities.
 
 ## Authors
 [Authors](./AUTHORS.md)
+
+*This article can also be read in [Brazilian Portuguese](README-ptBR.md).*
