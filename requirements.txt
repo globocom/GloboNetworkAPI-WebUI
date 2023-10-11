@@ -2,7 +2,7 @@ Django==1.4.15
 GloboNetworkAPI==0.9.3
 py2-ipaddress==3.4.1
 pycrypto==2.6
-python-ldap==2.3.13
+python-ldap==3.4.0
 python-memcached==1.48
 gunicorn==19.8.1
 PyYAML
