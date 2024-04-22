@@ -582,7 +582,7 @@ def edit(request, id_environment):
                 'start_record': 0,
                 'end_record': 50
             }
-        vrfs = client.create_api_vrf().search()['vrfs']
+        vrfs = client.create_api_vrf().search(search=vrf_search)['vrfs']
 
         try:
             env = client.create_api_environment().get_environment(id_environment)
