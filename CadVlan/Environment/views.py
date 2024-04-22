@@ -578,6 +578,10 @@ def edit(request, id_environment):
         ipv6 = templates.get("ipv6")
 
         envs = client.create_ambiente().listar().get('ambiente')
+        vrf_search = {
+                'start_record': 0,
+                'end_record': 50
+            }
         vrfs = client.create_api_vrf().search()['vrfs']
 
         try:
