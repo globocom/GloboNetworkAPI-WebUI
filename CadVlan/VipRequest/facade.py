@@ -180,6 +180,9 @@ def popular_client_shared(request, client_api):
 
         lists['clients'] = client_evip.environmentvip_step(finality)
 
+        for item in lists['clients']:
+            item['disabled'] = True if finality  == 'Producao' and item['cliente_txt'] == 'VPN' else False
+
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
