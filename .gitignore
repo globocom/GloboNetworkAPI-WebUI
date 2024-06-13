@@ -18,3 +18,4 @@ GloboNetworkAPI-client-python/*
 venv/
 config/*.env
 CadVlan/static
+*.env

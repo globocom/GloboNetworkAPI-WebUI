@@ -15,5 +15,9 @@
   limitations under the License.
 -->
 {% for client in clients %}
-  <option value="{{client.cliente_txt}}">{{client.cliente_txt}}</option>
+  {% if client.disabled %}
+    <option disabled value="{{client.cliente_txt}}">{{client.cliente_txt}} - (A criação de novos VIPs nos ambientes de publicação estão temporariamente bloqueados. Por favor, entre em contato com a equipe de SecOps para solicitação de novos VIPs.)</option>
+  {% else %}
+    <option value="{{client.cliente_txt}}">{{client.cliente_txt}}</option>
+  {% endif %}
 {% endfor %}
