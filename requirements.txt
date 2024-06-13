@@ -6,3 +6,4 @@ python-ldap==2.3.13
 python-memcached==1.48
 gunicorn==19.8.1
 PyYAML
+#pyyaml==5.3.1 #If you have problem with PyYaml, try this

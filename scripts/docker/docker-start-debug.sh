@@ -43,4 +43,4 @@ echo "starting runserver 0.0.0.0:8080"
 
 rm -rf CadVlan/static
 python manage.py collectstatic --settings=CadVlan.settings --noinput
-python manage.py runserver 0.0.0.0:8080 > /tmp/cadvlan.log 2>&1
+python manage.py runserver 0.0.0.0:8080
