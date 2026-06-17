@@ -374,6 +374,7 @@ def list_netip4_by_id(request, id_net='0', id_vlan='0', sf_number='0',
 
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
         lists['vlan_id'] = vlan['vlan']['id']
+        lists['ativada'] = net.get('network').get('active')
 
         dhcp_relays = client.create_dhcprelay_ipv4().list(networkipv4=id_net)
         for dhcp in dhcp_relays:
@@ -465,7 +466,6 @@ def list_netip4_by_id(request, id_net='0', id_vlan='0', sf_number='0',
 
         lists['ips'] = ips_to_screen
         lists['id'] = id_net
-        lists['ativada'] = net.get('network').get('active')
         lists['delete_form'] = DeleteForm()
         return render_to_response(NETIPV4, lists, context_instance=RequestContext(request))
 
@@ -516,6 +516,7 @@ def list_netip6_by_id(request, id_net='0', id_vlan='0', sf_number='0',
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
         lists['vlan_id'] = vlan.get('vlan')['id']
         lists['vxlan'] = vlan.get('vlan').get('vxlan')
+        lists['ativada'] = net.get('network').get('active')
 
         dhcp_relays = client.create_dhcprelay_ipv4().list(networkipv4=id_net)
         for dhcp in dhcp_relays:
@@ -613,7 +614,6 @@ def list_netip6_by_id(request, id_net='0', id_vlan='0', sf_number='0',
 
         lists['ips'] = ips_to_screen
         lists['id'] = id_net
-        lists['ativada'] = net.get('network').get('active')
         lists['delete_form'] = DeleteForm()
 
         return render_to_response(NETIPV6, lists, context_instance=RequestContext(request))
