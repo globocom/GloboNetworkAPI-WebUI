@@ -335,6 +335,8 @@ urlpatterns += patterns(
         'remove_network', name='vlan.remove.network'),
     url('^vlan/form/get/available/environment/configuration/by/environment/id[/]?$',
         'ajax_get_available_ip_config_by_environment_id', name='vlan.get.available.environment.configuration'),
+    url('^vlan/toggle-active/(?P<id_vlan>\d+)[/]?$',
+        'toggle_active_vlan', name='vlan.toggle.active'),
 )
 
 
@@ -405,6 +407,10 @@ urlpatterns += patterns(
         'assoc_ip6', name='network.assoc.ip6',),
     url('^network/get-available-vip-environment[/]?$',
         'available_evip', name='network.available.evips'),
+    url('^network/toggle-active/ipv4/(?P<id_ip4>\d+)[/]?$',
+        'toggle_active_ip4', name='network.toggle.active.ip4'),
+    url('^network/toggle-active/ipv6/(?P<id_ip6>\d+)[/]?$',
+        'toggle_active_ip6', name='network.toggle.active.ip6'),
 )
 
 
