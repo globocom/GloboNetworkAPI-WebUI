@@ -72,6 +72,10 @@ from CadVlan.Vlan.forms import SearchVlanForm
 from CadVlan.Vlan.forms import VlanForm
 from CadVlan.Vlan.forms import VlanEditForm
 
+import requests
+from requests.auth import HTTPBasicAuth
+from CadVlan.settings import NETWORK_API_URL
+
 logger = logging.getLogger(__name__)
 
 
@@ -1323,3 +1327,56 @@ def ajax_get_available_ip_config_by_environment_id(request):
     context['maskv6'] = maskv6
 
     return render_json(json.dumps(context))
+
+
+@log
+@login_required
+@has_perm([{"permission": VLAN_MANAGEMENT, "write": True}])
+def toggle_active_vlan(request, id_vlan):
+    if request.method == 'POST':
+        try:
+            active_str = request.POST.get('active')
+            auth = AuthSession(request.session)
+            user = auth.get_user()
+
+            data = {
+                'vlans': [
+                    {
+                        'id': int(id_vlan),
+                        'active': active_str.lower() == 'true'
+                    }
+                ]
+            }
+
+            response = requests.patch(
+                '%sapi/v3/vlan/' % NETWORK_API_URL,
+                json=data,
+                auth=HTTPBasicAuth(user.get_username(), user.get_password()),
+                headers={'content-type': 'application/json'}
+            )
+
+            response.raise_for_status()
+
+            if data['vlans'][0]['active']:
+                messages.add_message(request, messages.SUCCESS, 'VLAN ativada com sucesso.')
+            else:
+                messages.add_message(request, messages.SUCCESS, 'VLAN desativada com sucesso.')
+
+        except requests.exceptions.HTTPError as e:
+            logger.error(e)
+            if e.response.status_code == 403:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Você não tem permissão para ativar/desativar VLANs.'
+                )
+            elif e.response.status_code == 404:
+                messages.add_message(request, messages.ERROR, 'VLAN não encontrada.')
+            else:
+                messages.add_message(request, messages.ERROR, 'Ocorreu um erro ao tentar atualizar a VLAN: {}'.format(e))
+
+        except Exception as e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, 'Ocorreu um erro ao tentar atualizar a VLAN: {}'.format(e))
+
+    return HttpResponseRedirect(reverse('vlan.list.by.id', args=[id_vlan]))

@@ -53,7 +53,7 @@ $(document).ready(function() {
 	});
 
 	$("#btn_can").button({ icons: {primary: "ui-icon-arrowthick-1-w"} }).click(function(){
-              location.href = "{% url vlan.list.by.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+              location.href = "{% url vlan.list.by.id vlan_id sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
 	});
 
 	{% has_perm VLAN_MANAGEMENT True None %}
@@ -63,6 +63,30 @@ $(document).ready(function() {
 			var data = getSelectionData(oTable);
 			$("#id_ids").val(data).parent()[0].submit();
                         //location.href = "{% url network.ip6.list.by.id id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}";
+		}
+	});
+	{% endif %}
+
+	{% has_perm NETWORK_FORCE True None %}
+	{% if has_perm %}
+	$("#btn_toggle_active").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+		var active = $(this).data("active");
+		var msg_status = active ? 'ativar' : 'desativar';
+		var msg = [
+		"Deseja realmente " + msg_status + " essa rede?",
+		"",
+		"Esta operação alterará apenas o status da configuração na base de dados da NetworkAPI e nenhuma alteração será realizada no equipamento de rede.",
+		"",
+		"Impactos:",
+		"- Sistemas integrados poderão interpretar a configuração como existente ou inexistente.",
+		"- Operações automatizadas, como deploy, undeploy e ACLs, podem ser afetadas.",
+		"- O uso incorreto pode gerar inconsistências entre a NetworkAPI e o equipamento.",
+		"",
+		"Utilize esta funcionalidade apenas quando necessário."
+		].join("\n");
+		if (confirm(msg)) {
+			$("#id_active_toggle").val(active);
+			$("#id_active_toggle").parent().submit();
 		}
 	});
 	{% endif %}
@@ -89,6 +113,14 @@ $(document).ready(function() {
 		<div class="buttons">
 			<button id="btn_can" >Voltar</button>
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
+			{% has_perm NETWORK_FORCE True None %}
+			{% if has_perm %}
+				{% if ativada == 'False' %}
+				<button id="btn_toggle_active" data-network-id="{{ id }}" data-active="true">Ativar Rede</button>
+				{% else %}
+				<button id="btn_toggle_active" data-network-id="{{ id }}" data-active="false">Desativar Rede</button>
+				{% endif %}
+			{% endif %}
 			<button id="btn_new">Novo Registro</button>
 			{% has_perm EQUIPMENT_MANAGEMENT True None %}
 			{% if has_perm %}
@@ -104,6 +136,15 @@ $(document).ready(function() {
 			{% endfor %}
 		</form>
 		{% endif %}
+
+		{% has_perm NETWORK_FORCE True None %}
+		{% if has_perm %}
+		<form id="toggle_active_form" method="post" action="{% url network.toggle.active.ip6 id %}" style="visibility: hidden;">
+			{% csrf_token %}
+			<input type="hidden" id="id_active_toggle" name="active" value="" />
+		</form>
+		{% endif %}
+
 		<table id="script_list">
 			<thead>
 				<tr>

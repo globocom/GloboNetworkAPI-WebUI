@@ -45,6 +45,7 @@ AUTHENTICATE = 'authenticate'
 ACCESS_TYPE_MANAGEMENT = 'cadastro_de_tipo_acesso'
 AUDIT_LOG = 'audit_logs'
 ACL_APPLY = 'aplicar_acl'
+NETWORK_FORCE = 'network_force'
 
 """
 Pool Permissions
@@ -88,4 +89,5 @@ PERMISSIONS = {
     'AUDIT_LOG': AUDIT_LOG,
     'VIP_REMOVE_SCRIPT': VIP_REMOVE_SCRIPT,
     'ACL_APPLY': ACL_APPLY,
+    'NETWORK_FORCE': NETWORK_FORCE,
 }
