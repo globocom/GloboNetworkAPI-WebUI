@@ -26,7 +26,7 @@ from networkapiclient.exception import NetworkAPIClientError, VipIpError, \
     IpEquipCantDissociateFromVip
 from django.contrib import messages
 from CadVlan.permissions import VLAN_MANAGEMENT, EQUIPMENT_MANAGEMENT, \
-    NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP, IPS
+    NETWORK_TYPE_MANAGEMENT, ENVIRONMENT_VIP, IPS, NETWORK_FORCE
 from CadVlan.templates import NETIPV4, NETIPV6, IP4, IP6, IP4EDIT, IP6EDIT, \
     IP4ASSOC, IP6ASSOC, NET_FORM, NET6_EDIT, \
     NET4_EDIT, NET_EVIP_OPTIONS, AJAX_IPLIST_EQUIPMENT_DHCP_SERVER_HTML
@@ -43,6 +43,10 @@ from CadVlan.OptionVip.forms import OptionVipNetForm
 from django.http import HttpResponse
 from django.template import loader
 from CadVlan.Util.utility import get_param_in_request
+
+import requests
+from requests.auth import HTTPBasicAuth
+from CadVlan.settings import NETWORK_API_URL
 
 
 logger = logging.getLogger(__name__)
@@ -370,6 +374,7 @@ def list_netip4_by_id(request, id_net='0', id_vlan='0', sf_number='0',
 
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
         lists['vlan_id'] = vlan['vlan']['id']
+        lists['ativada'] = net.get('network').get('active')
 
         dhcp_relays = client.create_dhcprelay_ipv4().list(networkipv4=id_net)
         for dhcp in dhcp_relays:
@@ -511,6 +516,7 @@ def list_netip6_by_id(request, id_net='0', id_vlan='0', sf_number='0',
         vlan = client.create_vlan().get(net.get('network').get('vlan'))
         lists['vlan_id'] = vlan.get('vlan')['id']
         lists['vxlan'] = vlan.get('vlan').get('vxlan')
+        lists['ativada'] = net.get('network').get('active')
 
         dhcp_relays = client.create_dhcprelay_ipv4().list(networkipv4=id_net)
         for dhcp in dhcp_relays:
@@ -2218,3 +2224,104 @@ def assoc_ip6(request, id_net, id_ip6, id_vlan='0', sf_number='0', sf_name='0',
                                               sf_nettype, sf_subnet,
                                               sf_ipversion, sf_network,
                                               sf_iexact, sf_acl]))
+
+
+@log
+@login_required
+@has_perm([{"permission": NETWORK_FORCE, "write": True}])
+def toggle_active_ip6(request, id_ip6):
+    if request.method == 'POST':
+        try:
+            active_str = request.POST.get('active')
+            auth = AuthSession(request.session)
+            user = auth.get_user()
+
+            data = {
+                'networks': [
+                    {
+                        'id': int(id_ip6),
+                        'active': active_str.lower() == 'true'
+                    }
+                ]
+            }
+
+            response = requests.patch(
+                '%sapi/v3/networkv6/force/' % NETWORK_API_URL,
+                json=data,
+                auth=HTTPBasicAuth(user.get_username(), user.get_password()),
+                headers={'content-type': 'application/json'}
+            )
+
+            response.raise_for_status()
+
+            if data['networks'][0]['active']:
+                messages.add_message(request, messages.SUCCESS, 'Rede ativada com sucesso.')
+            else:
+                messages.add_message(request, messages.SUCCESS, 'Rede desativada com sucesso.')
+
+        except requests.exceptions.HTTPError as e:
+            logger.error(e)
+            if e.response.status_code == 403:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Você não tem permissão para ativar/desativar redes.'
+                )
+            elif e.response.status_code == 404:
+                messages.add_message(request, messages.ERROR, 'Rede não encontrada.')
+
+        except Exception as e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, str(e))
+
+    return HttpResponseRedirect(reverse('network.ip6.list.by.id', args=[id_ip6]))
+
+@log
+@login_required
+@has_perm([{"permission": NETWORK_FORCE, "write": True}])
+def toggle_active_ip4(request, id_ip4):
+    if request.method == 'POST':
+        try:
+            active_str = request.POST.get('active')
+            auth = AuthSession(request.session)
+            user = auth.get_user()
+
+            data = {
+                'networks': [
+                    {
+                        'id': int(id_ip4),
+                        'active': active_str.lower() == 'true'
+                    }
+                ]
+            }
+
+            response = requests.patch(
+                '%sapi/v3/networkv4/force/' % NETWORK_API_URL,
+                json=data,
+                auth=HTTPBasicAuth(user.get_username(), user.get_password()),
+                headers={'content-type': 'application/json'}
+            )
+
+            response.raise_for_status()
+
+            if data['networks'][0]['active']:
+                messages.add_message(request, messages.SUCCESS, 'Rede ativada com sucesso.')
+            else:
+                messages.add_message(request, messages.SUCCESS, 'Rede desativada com sucesso.')
+
+        except requests.exceptions.HTTPError as e:
+            logger.error(e)
+            if e.response.status_code == 403:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Você não tem permissão para ativar/desativar redes.'
+                )
+            elif e.response.status_code == 404:
+                messages.add_message(request, messages.ERROR, 'Rede não encontrada.')
+
+        except Exception as e:
+            logger.error(e)
+            messages.add_message(request, messages.ERROR, str(e))
+
+    return HttpResponseRedirect(reverse('network.ip4.list.by.id', args=[id_ip4]))

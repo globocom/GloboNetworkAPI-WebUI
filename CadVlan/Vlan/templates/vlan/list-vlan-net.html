@@ -63,9 +63,30 @@ $(document).ready(function() {
 			$("#id_ids_remove").val(data_net).parent().submit();
 		}
 	});
-	
-	//////////
-	
+	{% has_perm VLAN_MANAGEMENT True None %}
+	{% if has_perm %}
+	$("#btn_toggle_active").button({ icons: {primary: "ui-icon-power"} }).click(function(){
+		var active = $(this).data("active");
+		var msg_status = active ? 'ativar' : 'desativar';
+		var msg = [
+		"Deseja realmente " + msg_status + " essa VLAN?",
+		"",
+		"Esta operação alterará apenas o status da configuração na base de dados da NetworkAPI e nenhuma alteração será realizada no equipamento de rede.",
+		"",
+		"Impactos:",
+		"- Sistemas integrados poderão interpretar a configuração como existente ou inexistente.",
+		"- Operações automatizadas, como deploy, undeploy e ACLs, podem ser afetadas.",
+		"- O uso incorreto pode gerar inconsistências entre a NetworkAPI e o equipamento.",
+		"",
+		"Utilize esta funcionalidade apenas quando necessário."
+		].join("\n");
+		if (confirm(msg)) {
+			$("#id_active_toggle").val(active);
+			$("#id_active_toggle").parent().submit();
+		}
+	});
+	{% endif %}
+
 	$("#tool").buttonset();
 	
 	$("#btn_new").button({ icons: {primary: "ui-icon-document"} }).click(function(){
@@ -111,7 +132,7 @@ $(document).ready(function() {
 	</div>
 	<div id="tabs-2">
 		<div class="buttons">
-			<button id="btn_can" >Voltar</button>
+			<button id="btn_can">Voltar</button>
 
 			<button id="btn_ref" title="Atualizar dados da listagem">Atualizar</button>
 			
@@ -126,6 +147,15 @@ $(document).ready(function() {
 			{% if exists_active_network == 1 %}
 			<button id="btn_remove_networks" >Undeploy Rede</button>
 			{% endif%}
+
+			{% has_perm VLAN_MANAGEMENT True None %}
+			{% if has_perm %}
+				{% if vlan.ativada == 'False' %}
+				<button id="btn_toggle_active" data-vlan-id="{{ vlan.id }}" data-active="true">Ativar VLan</button>
+				{% else %}
+				<button id="btn_toggle_active" data-vlan-id="{{ vlan.id }}" data-active="false">Desativar VLan</button>
+				{% endif %}
+			{% endif %}
 			
 			<button id="btn_new" type="button"> Nova Rede</button>
 			{% has_perm VLAN_MANAGEMENT True None %}
@@ -153,6 +183,10 @@ $(document).ready(function() {
 			{% for field in remove_form %}
 				{{ field }}
 			{% endfor %}
+		</form>
+		<form id="toggle_active_form" method="post" action="{% url vlan.toggle.active vlan.id %}" style="visibility: hidden;">
+			{% csrf_token %}
+			<input type="hidden" id="id_active_toggle" name="active" value="" />
 		</form>
 		{% endif %}
 		<table id="network_list">
