@@ -32,6 +32,20 @@ logger = logging.getLogger(__name__)
 
 
 class File():
+    
+    BASE_PATH = os.path.abspath("./") # Define a base path
+    
+    @staticmethod
+    def _sanitize_path(file_name):
+        '''
+        Create an absolute path and ensure it's within the BASE_PATH.
+        '''
+        abs_path = os.path.abspath(os.path.join(File.BASE_PATH, file_name))
+        
+        if not abs_path.startswith(File.BASE_PATH):
+            raise FileError("Invalid file path")
+
+        return abs_path
 
     @classmethod
     def read(cls, file_name):
@@ -42,16 +56,10 @@ class File():
         :raise FileError: Failed to reading file
         '''
         try:
-
-            file_name = "./%s" % file_name
-
-            file_acl = open(file_name, "r")
-            content = file_acl.read()
-            file_acl.close()
-
-            return content
-
-        except Exception, e:
+            file_path = cls._sanitize_path(file_name)
+            with open(file_path, "r") as file_acl:
+                return file_acl.read()
+        except Exception as e:
             logger.error(e)
             raise FileError(e)
 
@@ -65,14 +73,10 @@ class File():
         :raise FileError: Failed to writing file
         '''
         try:
-
-            file_name = "./%s" % file_name
-
-            file_acl = open(file_name, "w")
-            file_acl.write(content)
-            file_acl.close()
-
-        except Exception, e:
+            file_path = cls._sanitize_path(file_name)
+            with open(file_path, "w") as file_acl:
+                file_acl.write(content)
+        except Exception as e:
             logger.error(e)
             raise FileError(e)
 
@@ -85,13 +89,10 @@ class File():
         :raise FileError: Failed to creating file
         '''
         try:
-
-            file_name = "./%s" % file_name
-
-            file_acl = open(file_name, "w")
-            file_acl.close()
-
-        except Exception, e:
+            file_path = cls._sanitize_path(file_name)
+            with open(file_path, "w") as file_acl:
+                pass
+        except Exception as e:
             logger.error(e)
             raise FileError(e)
 
@@ -104,11 +105,8 @@ class File():
         :raise FileError: Failed to removing file
         '''
         try:
-
-            file_name = "./%s" % file_name
-
-            erro = os.system("rm %s" % file_name)
-
-        except Exception, e:
+            file_path = cls._sanitize_path(file_name)
+            os.remove(file_path)  # Use os.remove() instead of unsafe os.system()
+        except Exception as e:
             logger.error(e)
             raise FileError(e)
