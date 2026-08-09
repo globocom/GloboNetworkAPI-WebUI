@@ -11,14 +11,16 @@ CMD cd /netapi_webui
 
 EXPOSE 8080
 
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+
 RUN apt-get update && \
-    apt-get install -y libldap2-dev \
+    apt-get install -y --no-install-recommends libldap2-dev \
                        libsasl2-dev \
                        libssl-dev \
                        python-ldap \
                        net-tools \
-                       dnsutils
+                       dnsutils && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip
-RUN pip install virtualenv && virtualenv venv && . ./venv/bin/activate
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
