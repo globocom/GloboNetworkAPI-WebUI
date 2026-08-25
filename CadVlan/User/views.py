@@ -199,6 +199,9 @@ def list_all(request, id_user, status):
     except NetworkAPIClientError, e:
         logger.error(e)
         messages.add_message(request, messages.ERROR, e)
+    except Exception, e:
+        logger.error(e)
+        messages.add_message(request, messages.ERROR, e)
 
     return render_to_response(USER_LIST, lists, context_instance=RequestContext(request))
 
