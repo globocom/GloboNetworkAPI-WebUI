@@ -126,6 +126,25 @@
 
             cursor: pointer;
         }
+
+        /* Itens de menu que apontam para paginas externas no Omni */
+        #menu ul.dropdown ul li a.ext-omni {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 0 8px;
+        }
+        #menu ul.dropdown ul li a.ext-omni .badge-omni {
+            background-color: royalblue;
+            color: #FFFFFF;
+            border-radius: 8px;
+            font-size: 10px;
+            line-height: 14px;
+            padding: 0 6px;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
     </style>
         {% block header %}{% endblock %}
     </head>
@@ -210,6 +229,9 @@
                             {% if has_perm %}
                             <li><a href="{% url pool.list.new %} ">Pool </a></li>
                             {% endif %}
+
+                            <!-- PortChannel: pagina externa no Omni -->
+                            <li><a class="ext-omni" href="https://platform.omnicloud.i.globo/networkapi-portchannel" target="_blank" rel="noopener noreferrer">PortChannel<span class="badge-omni">Omni</span></a></li>
 
                             {% has_perm VIPS_REQUEST None True %}
                             {% if has_perm %}
@@ -309,6 +331,9 @@
                             {% if has_perm %}
                             <li><a href="{% url pool.add.form %} ">Pool</a></li>
                             {% endif %}
+
+                            <!-- PortChannel: pagina externa no Omni -->
+                            <li><a class="ext-omni" href="https://platform.omnicloud.i.globo/networkapi-portchannel/criar" target="_blank" rel="noopener noreferrer">PortChannel<span class="badge-omni">Omni</span></a></li>
 
                             {% has_perm EQUIPMENT_MANAGEMENT True None %}
                             {% if has_perm %}
