@@ -16,6 +16,12 @@ services:
         command: sh scripts/docker/docker-start-debug.sh
         env_file:
             - config/netapi_webui.env
+        environment:
+            - MEMCACHED_HOST=netapi_webui_cache:11211
+            - ALLOWED_HOSTS=localhost,127.0.0.1
+            - LOG_TO_STDOUT=1
+            # Keep default until you wire to your backend
+            # - NETWORK_API_URL=http://netapi_app:8000/
         volumes:
             - .:/netapi_webui
         networks:

@@ -17,6 +17,13 @@
 import logging
 import os
 import sys
+try:
+    from importlib import reload  # Python 3 linters
+except ImportError:
+    try:
+        from __builtin__ import reload  # Python 2 runtime
+    except ImportError:
+        reload = None
 
 PROJECT_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -64,6 +71,14 @@ USE_I18N = True
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale
 USE_L10N = True
+
+# Hosts and security (env-configurable, safe defaults)
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', '0') == '1'
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', '0') == '1'
+SESSION_COOKIE_HTTPONLY = True
+if os.getenv('BEHIND_PROXY', '0') == '1':
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -198,9 +213,7 @@ PROJECT_APPS = (
 
 INSTALLED_APPS += PROJECT_APPS
 
-SESSION_ENGINE = (
-    'django.contrib.sessions.backends.file'
-)
+SESSION_ENGINE = os.getenv('SESSION_ENGINE', 'django.contrib.sessions.backends.file')
 
 SESSION_COOKIE_NAME = 'cadvlan.globo.com'
 SESSION_COOKIE_AGE = 0
@@ -211,7 +224,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': [
-            '127.0.0.1:11211'
+            os.getenv('MEMCACHED_HOST', '127.0.0.1:11211')
         ]
     }
 }
@@ -421,5 +434,19 @@ LOGGING = {
         },
     }
 }
-reload(sys)
-sys.setdefaultencoding('utf-8')
+LOG_TO_STDOUT = os.getenv('LOG_TO_STDOUT', '0') == '1'
+if LOG_TO_STDOUT and isinstance(LOGGING, dict) and 'handlers' in LOGGING:
+    # Redirect file handlers to stdout/stderr when running in containers
+    for _handler in ('handlers-request', 'handlers-view'):
+        if _handler in LOGGING['handlers']:
+            LOGGING['handlers'][_handler]['class'] = 'logging.StreamHandler'
+            LOGGING['handlers'][_handler].pop('filename', None)
+            LOGGING['handlers'][_handler].pop('mode', None)
+try:
+    reload
+except NameError:
+    pass
+else:
+    reload(sys)
+    if hasattr(sys, 'setdefaultencoding'):
+        sys.setdefaultencoding('utf-8')
