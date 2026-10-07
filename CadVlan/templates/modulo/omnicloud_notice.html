@@ -1,0 +1,39 @@
+{% comment %}
+Aviso de migração do port-channel para a Omnicloud.
+Uso:
+  {% include "modulo/omnicloud_notice.html" with omnicloud=omnicloud %}
+  {% include "modulo/omnicloud_notice.html" with omnicloud=omnicloud channel=default.channel channel_saved=channel_saved %}
+Quando "channel" é informado, o link aponta direto para o channel (deep link).
+{% endcomment %}
+{% if omnicloud.enabled %}
+<div class="omnicloud-notice"
+     role="alert"
+     style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+            padding:12px 16px;border-left:4px solid #FFD17C;
+            background-color:#fff9ea;border-radius:3px;color:#5c5648;">
+    <i class="material-icons" style="color:#FFD17C;font-size:22px;">info</i>
+    <div style="flex:1 1 300px;line-height:1.4;">
+        {% if channel %}
+            <b>O deploy e a exclusão do port-channel agora são feitos na Omnicloud.</b><br>
+            {% if channel_saved %}
+                Alterações salvas. Para fazer o deploy do port-channel, abra-o na Omnicloud e clique em <i>Deploy</i>.
+            {% else %}
+                Salve as alterações aqui e depois abra o port-channel na Omnicloud para fazer o deploy.
+            {% endif %}
+        {% else %}
+            <b>A criação e a exclusão de port-channel agora são feitas na Omnicloud.</b><br>
+            A edição de channels e interfaces continua aqui. Os ícones
+            <i class="material-icons" style="font-size:14px;vertical-align:middle;color:#FFD17C;">open_in_new</i>
+            abrem a Omnicloud em uma nova aba.
+        {% endif %}
+    </div>
+    <a class="btn-sm btn-warning-outline btn-warning"
+       style="white-space:nowrap;"
+       target="_blank"
+       rel="noopener"
+       href="{{ omnicloud.url }}{% if channel %}/{{ channel.id }}{% endif %}">
+        {% if channel %}Abrir channel {{ channel.name }} na Omnicloud{% else %}Abrir a Omnicloud{% endif %}
+        <i class="material-icons" style="font-size:14px;vertical-align:middle;">open_in_new</i>
+    </a>
+</div>
+{% endif %}

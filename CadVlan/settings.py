@@ -227,6 +227,15 @@ NETWORK_API_URL = os.getenv('NETWORK_API_URL', 'http://10.0.0.2:8000/')
 NETWORK_API_USERNAME = os.getenv('NETWORK_API_USERNAME', '')
 NETWORK_API_PASSWORD = os.getenv('NETWORK_API_PASSWORD', '')
 
+# Omnicloud: port-channel creation, deploy (apply) and deletion moved there.
+# With OMNICLOUD_PORTCHANNEL_ENABLED=1 CadVlan hides those actions and links
+# to Omnicloud instead. Disabled by default; set it to 1 per environment.
+# Channel editing stays in CadVlan either way.
+OMNICLOUD_PORTCHANNEL_URL = os.getenv(
+    'OMNICLOUD_PORTCHANNEL_URL',
+    'https://platform.omnicloud.g.globo/networkapi-portchannel').rstrip('/')
+OMNICLOUD_PORTCHANNEL_ENABLED = os.getenv('OMNICLOUD_PORTCHANNEL_ENABLED', '0') == '1'
+
 # Configurações de Email
 EMAIL_FROM = 'globo@s2it.com.br'
 EMAIL_HOST = 'pod51028.outlook.com'
