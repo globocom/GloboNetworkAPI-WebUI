@@ -12,6 +12,20 @@
         <div id="line2"></div>
     </div>
     <div class="div-button">
+        {% if omnicloud.enabled and default|length == 1 %}
+        {# Remover a última interface exclui o channel, e a exclusão é feita na Omnicloud. #}
+        <a class="btn btn-social-bottom btn-responsive channel"
+           data-toggle="tooltip"
+           style="margin-bottom: 0px;"
+           target="_blank"
+           rel="noopener"
+           title="Remover a última interface exclui o channel. Exclua o channel na Omnicloud (abre em nova aba)."
+           href="{{ omnicloud.url }}/{{ channel }}">
+            <i class="material-icons" style="color:#FFD17C;font-size:15px;left:50%;">
+                open_in_new
+            </i>
+        </a>
+        {% else %}
         <a class="btn btn-social-bottom btn-responsive channel"
            id="btn_remove_int"
            data-toggle="tooltip"
@@ -22,6 +36,7 @@
                 X
             </i>
         </a>
+        {% endif %}
     </div>
     <div class="div-sw">
         <div class="sw-int">

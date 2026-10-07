@@ -39,6 +39,12 @@
             <br><br><br>
             {% include "modulo/errormessages.html" with messages=messages %}
         {% endif %}
+        {% if omnicloud.enabled %}
+            {% if not messages %}<br><br><br>{% endif %}
+            <div style="margin: 0 5%;">
+                {% include "modulo/omnicloud_notice.html" with omnicloud=omnicloud channel=sw_int_map.channel channel_saved=channel_saved %}
+            </div>
+        {% endif %}
         <section id="container">
             <div class="channel-connection">
                 {% include "channels/channel_connection_map.html" with default=channel_map channel=channel_id %}

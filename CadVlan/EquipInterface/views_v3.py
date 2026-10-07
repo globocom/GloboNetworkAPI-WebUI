@@ -145,6 +145,7 @@ def add_interface(request, equipment=None):
 @has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True}])
 def list_equipment_interfaces(request):
     lists = dict()
+    lists['omnicloud'] = facade.get_omnicloud_context()
     interface_list = list()
 
     try:
@@ -848,6 +849,8 @@ def edit_channel_(request, channel_id=None):
 
     lists = dict()
     lists['channel_id'] = channel_id
+    lists['omnicloud'] = facade.get_omnicloud_context()
+    lists['channel_saved'] = False
 
     fields = ['id', 'front_interface__id']
 
@@ -942,6 +945,7 @@ def edit_channel_(request, channel_id=None):
 
         try:
             client.create_api_interface_request().update_channel([channel_obj])
+            lists['channel_saved'] = True
             messages.add_message(request, messages.SUCCESS,
                                  "O channel foi editado com sucesso!")
         except NetworkAPIClientError as e:
