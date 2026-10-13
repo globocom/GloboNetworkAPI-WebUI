@@ -234,7 +234,7 @@ NETWORK_API_PASSWORD = os.getenv('NETWORK_API_PASSWORD', '')
 OMNICLOUD_PORTCHANNEL_URL = os.getenv(
     'OMNICLOUD_PORTCHANNEL_URL',
     'https://platform.omnicloud.g.globo/networkapi-portchannel').rstrip('/')
-OMNICLOUD_PORTCHANNEL_ENABLED = os.getenv('OMNICLOUD_PORTCHANNEL_ENABLED', '0') == '1'
+OMNICLOUD_PORTCHANNEL_ENABLED = os.getenv('OMNICLOUD_PORTCHANNEL_ENABLED', '0') == '0'
 
 # Configurações de Email
 EMAIL_FROM = 'globo@s2it.com.br'
