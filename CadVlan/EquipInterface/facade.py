@@ -20,6 +20,9 @@ import logging
 
 from django.contrib import messages
 
+from CadVlan.settings import OMNICLOUD_PORTCHANNEL_ENABLED
+from CadVlan.settings import OMNICLOUD_PORTCHANNEL_URL
+
 logger = logging.getLogger(__name__)
 
 
@@ -203,3 +206,15 @@ def get_environments(client, interfaces):
         i['environments'] = environments.get('interface_environments')
 
     return interfaces
+
+
+def get_omnicloud_context():
+    """Flag e URL base da Omnicloud para os templates de port-channel.
+
+    Quando habilitado, criação, deploy e exclusão de channel apontam para a
+    Omnicloud (deep link: <url>/<channel_id>). A edição continua aqui.
+    """
+    return dict(
+        enabled=OMNICLOUD_PORTCHANNEL_ENABLED,
+        url=OMNICLOUD_PORTCHANNEL_URL
+    )

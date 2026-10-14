@@ -277,11 +277,23 @@
                    href="{% url interface.list %}?search_equipment={{ default.equipment.name|urlencode }}" >
                     Voltar
                 </a>
+                {% if omnicloud.enabled %}
+                <a class="btn-sm btn-warning-outline btn-warning"
+                   target="_blank"
+                   rel="noopener"
+                   data-toggle="tooltip"
+                   title="O deploy do port-channel é feito na Omnicloud. Abre em nova aba."
+                   href="{{ omnicloud.url }}/{{ default.channel.id }}" >
+                    Abrir na Omnicloud
+                    <i class="material-icons" style="font-size:13px;vertical-align:middle;">open_in_new</i>
+                </a>
+                {% else %}
                 <a class="btn-sm btn-warning-outline btn-warning"
                    onclick="javascript:if(!confirm('Aplicar a configuração do channel no equipamento??')){return false;}"
                    href="{% url equip.interface.config.sync default.equipment.name 1 default.channel.id %}" >
                     Aplicar
                 </a>
+                {% endif %}
                 <button class="btn-sm btn-success-outline btn-success" >
                     Salvar
                 </button>
