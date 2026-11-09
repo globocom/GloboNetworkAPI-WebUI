@@ -8,7 +8,7 @@
 - [Alejandra Klachquin](https://github.com/alejandraklachquin)
 - Avner Gonçalves
 - [Laura Panzariello](https://github.com/laurapanzariello)
-- Lucas Borges
+- [Lucas Borges](https://github.com/barizonlucas)
 - Mauricio Leoncio dos Santos
 - Mateus Constanzo
 - [Silvano Buback](https://github.com/snbuback)
