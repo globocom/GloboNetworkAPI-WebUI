@@ -101,6 +101,8 @@ $(document).ready(function() {
 	
 	$("#btn_assoc").button({ icons: {primary: "ui-icon-plus"} });
 	$(".btn_assoc").button({ icons: {primary: "ui-icon-plus"}, text: false });
+	$(".btn_validate_ip").button({ icons: {primary: "ui-icon-search"}, text: false });
+	$(".btn_validate_ip", oTable.fnGetHiddenNodes()).button({ icons: {primary: "ui-icon-search"}, text: false });
 })
 </script>
 {% endblock %}
@@ -165,13 +167,130 @@ $(document).ready(function() {
 						{{ ip.equip_name }}
 					</td>
 					<td>{% ifnotequal ip.descricao None %}{{ ip.descricao }}{% endifnotequal %}</td>
-					<td class="text_center" style="width: 50px;"><a href="{% url network.edit.ip4 id ip.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a><a href="{% url network.assoc.ip4 id ip.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="width: 20px; height: 20px;" class="btn_assoc">Associar novo equipamento ao IP</a></td>
+					<td class="text_center" style="width: 90px;"><a href="{% url network.edit.ip4 id ip.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="width: 20px; height: 20px;" class="btn_edit">Editar</a><a href="{% url network.assoc.ip4 id ip.id id_vlan sf_number sf_name sf_environment sf_nettype sf_subnet sf_ipversion sf_network sf_iexact sf_acl %}" style="width: 20px; height: 20px;" class="btn_assoc">Associar novo equipamento ao IP</a><a href="javascript:void(0);" data-ip="{{ip.oct1}}.{{ip.oct2}}.{{ip.oct3}}.{{ip.oct4}}" title="Validar informações de uso do IP" style="width: 20px; height: 20px;" class="btn_validate_ip">Validar IP</a></td>
 				</tr>
 				{% endfor %}
 			</tbody>
 		</table>
 	</div>
 </div>
+
+<div id="dialog_validate_ip" title="Validação do IP" style="display: none;">
+	<div id="validate_ip_loading" style="text-align: center; padding: 30px 0;">
+		<span class="validate_ip_spinner"></span>
+		<p>Consultando informações, aguarde...</p>
+	</div>
+	<div id="validate_ip_result"></div>
+</div>
+
+<style type="text/css">
+.validate_ip_spinner { display: inline-block; width: 32px; height: 32px; border: 4px solid #ccc; border-top-color: #0D84A5; border-radius: 50%; animation: validate_ip_spin 1s linear infinite; }
+@keyframes validate_ip_spin { to { transform: rotate(360deg); } }
+#validate_ip_result table { border-collapse: collapse; width: 100%; margin-bottom: 15px; }
+#validate_ip_result td, #validate_ip_result th { border: 1px solid #ddd; padding: 4px 8px; font-size: 12px; text-align: left; }
+#validate_ip_result thead th { background-color: #0D84A5; color: #ffffff; }
+.validate-ip-dialog .ui-dialog-title { color: #0D84A5; }
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#dialog_validate_ip").dialog({
+		modal: true,
+		autoOpen: false,
+		width: 1000,
+		dialogClass: "validate-ip-dialog",
+		resizable: false,
+		draggable: false,
+		buttons: {
+			"Fechar": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	$(".btn_validate_ip").live("click", function() {
+		validateIp($(this).data("ip"));
+	});
+});
+
+function validateIp(ip) {
+	$("#validate_ip_result").empty();
+	$("#validate_ip_loading").show();
+	$("#dialog_validate_ip").dialog("option", "title", "Validação do IP " + ip);
+	$("#dialog_validate_ip").dialog("open");
+
+	$.ajax({
+		global: false,
+		url: "{% url network.ip4.validate.sentinel %}",
+		data: {ip: ip},
+		dataType: "json",
+		success: function(data) {
+			$("#validate_ip_result").html(renderValidation(data));
+		},
+		error: function(xhr) {
+			var message = 'Erro ao validar o IP.';
+			try {
+				message = JSON.parse(xhr.responseText).message || message;
+			} catch (e) {}
+			$("#validate_ip_result").html('<p class="ui-state-error">' + escapeHtml(message) + '</p>');
+		},
+		complete: function() {
+			$("#validate_ip_loading").hide();
+		}
+	});
+}
+
+function renderValidation(data) {
+	var html = '<table>' +
+		'<tr><td><b>IP</b></td><td>' + escapeHtml(data.identifier) + '</td></tr>' +
+		'<tr><td><b>Data de checagem</b></td><td>' + escapeHtml(formatDate(data.checked_at)) + '</td></tr>' +
+		'</table>';
+
+	html += '<table><thead><tr><th>Provider</th><th>Papel</th><th>Status do Provider</th><th>IP Existe</th>' +
+		'<th>MAC</th><th>Nome do Equipamento</th><th>Interface</th><th>DNS</th></tr></thead><tbody>';
+	$.each(data.evidence || [], function(i, ev) {
+		var d = ev.details || {};
+		var status = escapeHtml(ev.status) + (ev.reason ? ' (' + escapeHtml(ev.reason) + ')' : '');
+		html += '<tr>' +
+			'<td>' + escapeHtml(ev.provider) + '</td>' +
+			'<td>' + escapeHtml(ev.role) + '</td>' +
+			'<td>' + status + '</td>' +
+			'<td>' + yesNo(ev.exists) + '</td>' +
+			'<td>' + escapeHtml(d.mac) + '</td>' +
+			'<td>' + escapeHtml(d.devName) + '</td>' +
+			'<td>' + escapeHtml(d.interfaceName) + '</td>' +
+			'<td>' + escapeHtml(d.dns) + '</td>' +
+		'</tr>';
+	});
+	html += '</tbody></table>';
+	return html;
+}
+
+function escapeHtml(value) {
+	if (value === null || value === undefined || value === '') {
+		return '-';
+	}
+	return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function yesNo(value) {
+	if (value === true) {
+		return 'Sim';
+	}
+	if (value === false) {
+		return 'Não';
+	}
+	return '-';
+}
+
+function formatDate(value) {
+	if (!value) {
+		return value;
+	}
+	var date = new Date(value);
+	return isNaN(date.getTime()) ? value : date.toLocaleString();
+}
+</script>
 
 
 

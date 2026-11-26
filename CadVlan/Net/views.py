@@ -34,6 +34,7 @@ from CadVlan.Util.converters.util import replace_id_to_name, split_to_array
 from CadVlan.Net.forms import IPForm, IPEditForm, IPAssocForm, NetworkForm, \
     NetworkEditForm
 from CadVlan.Net.business import is_valid_ipv4, is_valid_ipv6
+from CadVlan.Net.sentinel import validate_ip, SentinelError
 from CadVlan.messages import network_ip_messages
 from CadVlan.forms import DeleteForm
 from CadVlan.messages import error_messages
@@ -337,6 +338,27 @@ def available_evip(request):
         NET_EVIP_OPTIONS, lists, context_instance=RequestContext(request)))
     response.status_code = 200
     return response
+
+
+@log
+@login_required
+@has_perm([{"permission": EQUIPMENT_MANAGEMENT, "read": True},
+           {"permission": VLAN_MANAGEMENT, "read": True},
+           {"permission": NETWORK_TYPE_MANAGEMENT, "read": True}])
+def validate_ip_sentinel(request):
+    ip = get_param_in_request(request, 'ip')
+
+    if not ip or not is_valid_ipv4(ip):
+        return HttpResponse(json.dumps({'message': u'IP inválido.', 'status': 'error'}),
+                            status=400, content_type='application/json')
+
+    try:
+        result = validate_ip(ip)
+    except SentinelError as e:
+        return HttpResponse(json.dumps({'message': unicode(e), 'status': 'error'}),
+                            status=502, content_type='application/json')
+
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 @log

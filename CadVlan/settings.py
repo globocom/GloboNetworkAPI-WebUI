@@ -236,6 +236,21 @@ OMNICLOUD_PORTCHANNEL_URL = os.getenv(
     'https://platform.omnicloud.g.globo/networkapi-portchannel').rstrip('/')
 OMNICLOUD_PORTCHANNEL_ENABLED = os.getenv('OMNICLOUD_PORTCHANNEL_ENABLED', '0') == '1'
 
+# Omnicloud API base.
+OMNICLOUD_API_URL = os.getenv('OMNICLOUD_API_URL', '').rstrip('/')
+OMNICLOUD_TENANT_ID = os.getenv('OMNICLOUD_TENANT_ID', '')
+OMNICLOUD_TIMEOUT = int(os.getenv('SENTINEL_TIMEOUT', '60'))
+
+# Sentinel Omniauth client credentials.
+SENTINEL_OMNIAUTH_CLIENT_ID = os.getenv('SENTINEL_OMNIAUTH_CLIENT_ID', '')
+SENTINEL_OMNIAUTH_CLIENT_SECRET = os.getenv('SENTINEL_OMNIAUTH_CLIENT_SECRET', '')
+
+# Python 2.7: o cacert.pem embutido no requests é anterior à ISRG Root X1
+# (Let's Encrypt), então a Omnicloud, cuja cadeia termina na X1, não valida
+# com o bundle padrão. Este PEM é a raiz oficial ISRG Root X1 (2015-2035),
+# usada como âncora de confiança apenas para as chamadas à Omnicloud.
+SSL_PEM = os.getenv('SSL_PEM', True)
+
 # Configurações de Email
 EMAIL_FROM = 'globo@s2it.com.br'
 EMAIL_HOST = 'pod51028.outlook.com'
@@ -424,6 +439,11 @@ LOGGING = {
             'propagate': True,
         },
         'CadVlan.Pool': {
+            'handlers': ['handlers-view'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'CadVlan.User': {
             'handlers': ['handlers-view'],
             'level': 'DEBUG',
             'propagate': True,
