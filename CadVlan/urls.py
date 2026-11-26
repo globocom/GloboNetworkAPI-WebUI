@@ -359,6 +359,8 @@ urlpatterns += patterns(
         'vlan_add_network_form', name='network.form.vlan',),
     url('^network/ajax_modal_ips[/]?$', 'ajax_modal_ip_dhcp_server',
         name='network.modal.ips.ajax',),
+    url('^network/ip4/validate[/]?$', 'validate_ip_sentinel',
+        name='network.ip4.validate.sentinel',),
     url('^network/get/ip4/(?P<id_net>\d+)[/]?$',
         'list_netip4_by_id', name='network.ip4.list.by.id',),
     url('^network/get/ip4/(?P<id_net>\d+)/(?P<id_vlan>\d+)/(?P<sf_number>\d+)/(?P<sf_name>[\w\-\s]+)/(?P<sf_environment>\d+)/(?P<sf_nettype>\d+)/(?P<sf_subnet>\d+)/(?P<sf_ipversion>\d+)/(?P<sf_network>\w+)/(?P<sf_iexact>\d+)/(?P<sf_acl>\d+)[/]?$',
