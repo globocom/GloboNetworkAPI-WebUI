@@ -21,7 +21,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from CadVlan.settings import OMNICLOUD_API_URL, SENTINEL_OMNIAUTH_CLIENT_ID, \
-    SENTINEL_OMNIAUTH_CLIENT_SECRET, OMNICLOUD_TIMEOUT, SSL_PEM, OMNICLOUD_TENANT_ID
+    SENTINEL_OMNIAUTH_CLIENT_SECRET, OMNICLOUD_TIMEOUT, OMNICLOUD_TENANT_ID
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,8 @@ def _get_access_token():
             auth=HTTPBasicAuth(SENTINEL_OMNIAUTH_CLIENT_ID,
                                SENTINEL_OMNIAUTH_CLIENT_SECRET),
             data={'grant_type': 'client_credentials', 'tenant_id': OMNICLOUD_TENANT_ID},
-            timeout=OMNICLOUD_TIMEOUT,
-            verify=SSL_PEM)
+            timeout=OMNICLOUD_TIMEOUT)
+            # verify=SSL_PEM)
         response.raise_for_status()
         token = response.json().get('access_token')
     except (requests.RequestException, ValueError, AttributeError) as e:
@@ -57,8 +57,8 @@ def validate_ip(ip):
         response = requests.get(
             OMNICLOUD_API_URL + IP_VALIDATION_PATH % ip,
             headers={'Authorization': 'Bearer %s' % token},
-            timeout=OMNICLOUD_TIMEOUT,
-            verify=SSL_PEM)
+            timeout=OMNICLOUD_TIMEOUT)
+            # verify=SSL_PEM)
         response.raise_for_status()
         return response.json()
     except (requests.RequestException, ValueError) as e:

@@ -249,7 +249,7 @@ SENTINEL_OMNIAUTH_CLIENT_SECRET = os.getenv('SENTINEL_OMNIAUTH_CLIENT_SECRET', '
 # (Let's Encrypt), então a Omnicloud, cuja cadeia termina na X1, não valida
 # com o bundle padrão. Este PEM é a raiz oficial ISRG Root X1 (2015-2035),
 # usada como âncora de confiança apenas para as chamadas à Omnicloud.
-SSL_PEM = os.getenv('SSL_PEM', True)
+# SSL_PEM = os.getenv('SSL_PEM', True)
 
 # Configurações de Email
 EMAIL_FROM = 'globo@s2it.com.br'
