@@ -190,6 +190,7 @@ $(document).ready(function() {
 #validate_ip_result td, #validate_ip_result th { border: 1px solid #ddd; padding: 4px 8px; font-size: 12px; text-align: left; }
 #validate_ip_result thead th { background-color: #0D84A5; color: #ffffff; }
 .validate-ip-dialog .ui-dialog-title { color: #0D84A5; }
+.validate-ip-dialog .ui-state-focus, .validate-ip-dialog .ui-state-hover { background: #0D84A5; border-color: #0D84A5; color: #ffffff; }
 </style>
 
 <script type="text/javascript">
@@ -246,14 +247,16 @@ function renderValidation(data) {
 		'<tr><td><b>Data de checagem</b></td><td>' + escapeHtml(formatDate(data.checked_at)) + '</td></tr>' +
 		'</table>';
 
-	html += '<table><thead><tr><th>Provider</th><th>Papel</th><th>Status do Provider</th><th>IP Existe</th>' +
+	html += '<table><thead><tr><th>Provider</th><th>Status do Provider</th><th>IP existe pelo provider?</th>' +
 		'<th>MAC</th><th>Nome do Equipamento</th><th>Interface</th><th>DNS</th></tr></thead><tbody>';
 	$.each(data.evidence || [], function(i, ev) {
+		if (ev.provider === 'networkapi') {
+			return;
+		}
 		var d = ev.details || {};
 		var status = escapeHtml(ev.status) + (ev.reason ? ' (' + escapeHtml(ev.reason) + ')' : '');
 		html += '<tr>' +
 			'<td>' + escapeHtml(ev.provider) + '</td>' +
-			'<td>' + escapeHtml(ev.role) + '</td>' +
 			'<td>' + status + '</td>' +
 			'<td>' + yesNo(ev.exists) + '</td>' +
 			'<td>' + escapeHtml(d.mac) + '</td>' +
