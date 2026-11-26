@@ -437,17 +437,7 @@ LOGGING = {
             'handlers': ['handlers-view'],
             'level': 'DEBUG',
             'propagate': True,
-        },
-        'CadVlan.Pool': {
-            'handlers': ['handlers-view'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'CadVlan.User': {
-            'handlers': ['handlers-view'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+        }
     }
 }
 reload(sys)
